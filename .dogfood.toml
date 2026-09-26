@@ -1,3 +1,15 @@
-# The acceptance report and runtime values are populated by later Core tasks.
+# [portal], [tiers] and [routes] are populated by later Core tasks (FX-004,
+# C-B33) once the routes they describe actually exist.
 [conflux]
 version = 1
+
+[auth]
+# Whatever header proves you are this role; the checker never logs in, it
+# just attaches these. Values must match the fixed tokens issued by
+# `manage.py seed_acceptance_identities` (src/api/accounts) — see
+# tests/acceptance/test_acceptance_auth_config.py for the regression that
+# keeps this file and that command from drifting apart.
+organizer = "Cookie: session=acceptance-organizer"
+judge_a = "Cookie: session=acceptance-judge-a"
+judge_b = "Cookie: session=acceptance-judge-b"
+participant = "Cookie: session=acceptance-participant"

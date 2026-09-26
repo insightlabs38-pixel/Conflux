@@ -165,9 +165,7 @@ def advance_stage(stage: Stage, to_stage: Stage, strategy_slug: str, candidates,
                 continue
             entry.exited_at = now
             entry.save(update_fields=["exited_at"])
-            StageEntry.objects.create(
-                stage=to_stage, subject_type=subject_type, subject_id=subject_id
-            )
+            StageEntry.objects.enter(to_stage, subject_type, subject_id)
             advanced.append({"subject_type": subject_type, "subject_id": subject_id})
 
         record_mutation(

@@ -1,0 +1,8 @@
+# Overlay for the cold-offline boot smoke test (RT-004): cuts all egress from
+# the compose network while keeping container-to-container traffic, so `make
+# cold-boot-smoke` proves the built stack needs zero external dependency at
+# runtime — the actual claim behind "docker compose up ... zero external
+# dependencies", not just that it built successfully.
+networks:
+  default:
+    internal: true

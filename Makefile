@@ -1,4 +1,4 @@
-.PHONY: format format-check lint test build verify-fast verify up dev dev-build down dev-down logs seed
+.PHONY: format format-check lint test build verify-fast verify up dev dev-build down dev-down logs seed cold-boot-smoke
 
 # Local checks use a disposable key; runtime deployments must supply their own.
 export DJANGO_SECRET_KEY ?= bootstrap-checks-only
@@ -52,3 +52,9 @@ dev-down:
 
 seed:
 	docker compose exec app python manage.py seed_acceptance_identities
+
+# Proves the built images boot and serve with zero external dependency:
+# reuses existing images and runs the compose network with no egress.
+# Build first with `make up` if images don't exist yet.
+cold-boot-smoke:
+	./scripts/cold-offline-smoke

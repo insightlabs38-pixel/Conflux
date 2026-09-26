@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# RT-004: prove the already-built stack boots and serves with zero external
+# dependency. Reuses existing images (no --build) and runs the compose
+# network as `internal: true`, so any accidental hosted dependency would
+# fail closed instead of silently succeeding through the sandbox's network.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+compose() {
+  docker compose -f docker-compose.yml -f docker-compose.offline-smoke.yml "$@"
+}
+
+cleanup() {
+  compose down
+}
+trap cleanup EXIT
+
+compose up -d
+compose up -d --wait --wait-timeout 120
+
+echo "== container health =="
+compose ps
+
+echo "== end-to-end health check through Caddy =="
+# Curl from inside the caddy container, not the published host port: an
+# `internal: true` network still lets containers reach each other (the real
+# claim under test), but some sandboxed Docker setups don't NAT published
+# ports onto an internal network, which would be a host-networking artifact
+# unrelated to whether the app itself needs a hosted dependency.
+compose exec -T caddy curl -fsS http://localhost/api/v1/health/
+echo
+echo "cold-offline boot smoke: PASS"

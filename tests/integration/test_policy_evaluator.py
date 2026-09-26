@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
 import pytest
-from policies.evaluator import MAX_DEPTH, PolicyError, evaluate, is_allowed
+from policies.evaluator import MAX_DEPTH, PolicyError, evaluate, is_allowed, validate_structure
 
 
 def test_true_and_false_constants():
@@ -84,6 +84,26 @@ def test_incomparable_types_raise():
 def test_is_allowed_fails_closed_on_any_policy_error():
     assert is_allowed({"op": "eq", "fact": "missing", "value": 1}, {}) is False
     assert is_allowed({"op": "bogus"}, {}) is False
+
+
+def test_validate_structure_accepts_a_well_formed_policy_without_needing_facts():
+    node = {
+        "op": "and",
+        "args": [
+            {"op": "eq", "fact": "role", "value": "organizer"},
+            {"op": "gte", "fact": "now", "value": "2026-01-01T00:00:00Z"},
+        ],
+    }
+    validate_structure(node)  # must not raise, even though no facts are given
+
+
+def test_validate_structure_rejects_the_same_shapes_evaluate_would():
+    with pytest.raises(PolicyError, match="Unknown policy operator"):
+        validate_structure({"op": "shell_exec"})
+    with pytest.raises(PolicyError, match="needs a string 'fact'"):
+        validate_structure({"op": "eq", "value": 1})
+    with pytest.raises(PolicyError, match="needs a list 'value'"):
+        validate_structure({"op": "in", "fact": "role", "value": "organizer"})
 
 
 def test_is_allowed_returns_the_real_result_when_the_policy_is_valid():

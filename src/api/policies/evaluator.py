@@ -119,6 +119,50 @@ def evaluate(node, facts, *, _depth=0, _budget=None):
     return (fact_value in options) if op == "in" else (fact_value not in options)
 
 
+def validate_structure(node, *, _depth=0, _budget=None):
+    """Check a policy AST is well-formed (operators, shapes, depth/size)
+    without evaluating it — an author saving a Policy (POL-002) hasn't
+    supplied real facts yet, so the "unknown fact" check in `evaluate`
+    doesn't apply here; everything else does. Raises PolicyError, returns
+    nothing on success.
+    """
+    if _budget is None:
+        _budget = [MAX_NODES]
+    _budget[0] -= 1
+    if _budget[0] < 0:
+        raise PolicyError(f"Policy AST exceeds the maximum of {MAX_NODES} nodes.")
+    if _depth > MAX_DEPTH:
+        raise PolicyError(f"Policy AST exceeds the maximum depth of {MAX_DEPTH}.")
+    if not isinstance(node, dict):
+        raise PolicyError(f"Malformed policy node (expected an object): {node!r}")
+
+    op = node.get("op")
+    if op not in OPERATORS:
+        raise PolicyError(f"Unknown policy operator: {op!r}")
+    if op in ("true", "false"):
+        return
+
+    if op == "not":
+        args = node.get("args")
+        if not isinstance(args, list) or len(args) != 1:
+            raise PolicyError("'not' takes exactly one argument.")
+        validate_structure(args[0], _depth=_depth + 1, _budget=_budget)
+        return
+
+    if op in _BOOLEAN_OPS:
+        args = node.get("args")
+        if not isinstance(args, list) or not args:
+            raise PolicyError(f"'{op}' needs a nonempty list of arguments.")
+        for arg in args:
+            validate_structure(arg, _depth=_depth + 1, _budget=_budget)
+        return
+
+    if not isinstance(node.get("fact"), str):
+        raise PolicyError("A comparison node needs a string 'fact'.")
+    if op in _MEMBERSHIP_OPS and not isinstance(node.get("value"), list):
+        raise PolicyError(f"'{op}' needs a list 'value'.")
+
+
 def is_allowed(node, facts):
     """Fail-closed entrypoint for gating a protected action: any malformed
     or unresolvable policy denies rather than raising.

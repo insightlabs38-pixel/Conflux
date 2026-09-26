@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "events",
     "integrations",
     "stages",
+    "policies",
 ]
 
 MIDDLEWARE = ["django.middleware.common.CommonMiddleware"]

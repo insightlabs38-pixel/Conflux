@@ -48,6 +48,12 @@ def patch(client, path, data):
     return client.patch(path, data=json.dumps(data), content_type="application/json")
 
 
+def test_nonexistent_workspace_id_is_not_found():
+    _, client, _ = setup_clients()
+    response = client.get("/workspaces/00000000-0000-0000-0000-000000000000/events/")
+    assert response.status_code == 404
+
+
 def test_event_lifecycle_and_audit():
     workspace, client, judge = setup_clients()
     base = url(workspace)

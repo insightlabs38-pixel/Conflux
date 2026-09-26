@@ -47,6 +47,14 @@ def test_valid_session_cookie_authenticates():
     assert response.json()["username"] == "alice"
 
 
+def test_me_endpoint_reports_workspace_name_for_navigation():
+    workspace, organizer = make_workspace_with_organizer()
+    response = cookie_client(issue(organizer)).get("/api/v1/accounts/me/")
+    membership = response.json()["memberships"][0]
+    assert membership["workspace"] == str(workspace.public_id)
+    assert membership["workspace_name"] == "Dogfood"
+
+
 def test_unknown_session_token_is_rejected():
     response = cookie_client("not-a-real-token").get("/api/v1/accounts/me/")
     assert response.status_code in (401, 403)

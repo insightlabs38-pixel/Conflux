@@ -19,7 +19,13 @@ def _serialize_user(user):
         "public_id": str(user.public_id),
         "username": user.username,
         "memberships": [
-            {"workspace": str(m.workspace.public_id), "role": m.role} for m in memberships
+            {
+                "workspace": str(m.workspace.public_id),
+                "workspace_name": m.workspace.name,
+                "workspace_slug": m.workspace.slug,
+                "role": m.role,
+            }
+            for m in memberships
         ],
     }
 

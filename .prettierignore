@@ -4,3 +4,6 @@ uv.lock
 node_modules
 dist
 coverage
+# Vendored verbatim from the official challenge spec — kept byte-identical
+# to https://dogfoodhack.com/spec/fixtures.json, not reformatted.
+fixtures/fixtures.json

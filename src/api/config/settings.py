@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     "workspaces",
     "audit",
     "events",
+    "integrations",
 ]
 
 MIDDLEWARE = ["django.middleware.common.CommonMiddleware"]

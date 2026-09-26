@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { PolicyBuilder } from "../policy-builder/PolicyBuilder";
 import { StageBuilder } from "../stage-builder/StageBuilder";
 
 type Event = {
@@ -428,6 +429,10 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
             </form>
           </section>
           <StageBuilder
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+          />
+          <PolicyBuilder
             workspaceId={workspaceId}
             eventId={selected.public_id}
           />

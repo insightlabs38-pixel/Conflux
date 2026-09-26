@@ -1,7 +1,15 @@
-# [portal] and [tiers] are populated by FX-004 (the acceptance wrapper) once
-# a portal is actually running for it to point at.
 [conflux]
 version = 1
+
+[portal]
+base_url = "http://localhost:8080"
+
+[tiers]
+# Honest, not aspirational: only what `scripts/run-acceptance` currently
+# verifies end-to-end. Raise this only alongside the batch that earns it —
+# see BATCHES.yaml/ATTENTION.md for what's actually built so far.
+claimed = ["T1", "T2"]
+pitch = "A staged hackathon competition platform: event/track setup, fixture-backed judging with peer-score isolation, and a public gallery — built incrementally, tier claims kept honest as each is verified."
 
 [routes]
 gallery = "/api/v1/gallery/"

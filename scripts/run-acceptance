@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# FX-004: produce a verbatim acceptance-report.txt from the exact official
+# checker (scripts/vendor/dogfood_run.py, a byte-identical copy of the spec's
+# run.py — never edit it; it's supposed to be untampered).
+#
+# Requires the stack already running (`make up`).
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+docker compose exec -T app python manage.py import_fixture fixtures/fixtures.json
+docker compose exec -T app python manage.py seed_acceptance_identities
+docker compose exec -T app python manage.py link_judge_identities
+
+python3 scripts/vendor/dogfood_run.py .dogfood.toml --fixtures fixtures/fixtures.json \
+  | tee acceptance-report.txt

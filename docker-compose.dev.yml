@@ -1,0 +1,51 @@
+# Development overlay for fast edit -> reload iteration. Layers on top of
+# docker-compose.yml (which stays the authoritative clean/offline build):
+#
+#   make dev        # docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+#
+# - `app`/`worker` bind-mount source over the image, so Django edits don't
+#   need a rebuild; uvicorn runs with --reload for the app.
+# - `web` runs the Vite dev server (HMR) instead of a built, baked-in bundle.
+# Rebuilds are still required only for Dockerfile or dependency/lockfile
+# changes (`make dev-build`).
+
+name: conflux
+
+services:
+  app:
+    environment:
+      DJANGO_DEBUG: "1"
+    volumes:
+      - ./src/api:/app
+    entrypoint:
+      [
+        "/bin/sh",
+        "-c",
+        "python manage.py migrate --noinput && exec uvicorn config.asgi:application --host 0.0.0.0 --port 8000 --reload --reload-dir /app",
+      ]
+
+  worker:
+    volumes:
+      - ./src/api:/app
+
+  web:
+    image: node:24-slim
+    working_dir: /repo
+    environment:
+      VITE_API_PROXY_TARGET: http://app:8000
+    command: >
+      sh -c "corepack enable && pnpm install --frozen-lockfile && exec pnpm --filter @conflux/web dev --host 0.0.0.0 --port 5173"
+    volumes:
+      - .:/repo
+      - web-root-node-modules:/repo/node_modules
+      - web-app-node-modules:/repo/src/web/node_modules
+    ports:
+      - "${VITE_PORT:-5173}:5173"
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  web-root-node-modules:
+  web-app-node-modules:

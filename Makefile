@@ -1,4 +1,4 @@
-.PHONY: format format-check lint test build verify-fast verify
+.PHONY: format format-check lint test build verify-fast verify up dev dev-build down dev-down logs seed
 
 # Local checks use a disposable key; runtime deployments must supply their own.
 export DJANGO_SECRET_KEY ?= bootstrap-checks-only
@@ -27,3 +27,28 @@ build:
 verify-fast: format-check lint test build
 
 verify: verify-fast
+
+# Authoritative clean/offline build+boot — full image rebuild every time.
+up:
+	docker compose up -d --build
+
+down:
+	docker compose down
+
+logs:
+	docker compose logs -f
+
+# Fast iteration: source is bind-mounted, Django reloads in place, and the
+# frontend runs through Vite's dev server (HMR). Only rebuilds the image if
+# none exists yet; run `make dev-build` after a Dockerfile/dependency change.
+dev:
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+dev-build:
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+
+dev-down:
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml down
+
+seed:
+	docker compose exec app python manage.py seed_acceptance_identities

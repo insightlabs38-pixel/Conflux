@@ -1,7 +1,7 @@
 from django.utils import timezone
 
 from .evaluator import is_allowed
-from .models import PolicyBinding, TemporalGate
+from .models import ExceptionGrant, PolicyBinding, TemporalGate
 
 
 def base_facts(event, *, at=None):
@@ -18,7 +18,7 @@ def base_facts(event, *, at=None):
     return facts
 
 
-def check_action(event, action, facts):
+def check_action(event, action, facts, *, subject_type=None, subject_id=None):
     """Is `action` allowed for `event` given `facts`?
 
     No binding for this (event, action) means the action isn't gated by a
@@ -27,6 +27,11 @@ def check_action(event, action, facts):
     organizer opts an action into policy gating by creating a binding
     (POL-006 gives them a UI for that); there is no implicit "everything
     is denied until configured" for actions nobody asked to gate.
+
+    A denial can be overridden by an active ExceptionGrant (POL-004) for
+    the exact (event, action, subject) — never checked when the policy
+    would already allow, and never able to affect a different action for
+    the same subject, since a grant only ever names one action.
 
     Returns (allowed: bool, reason: str | None). `reason` is the seed for
     POL-005's decision-evidence contract, not currently used to render
@@ -39,4 +44,12 @@ def check_action(event, action, facts):
         return True, None
     if is_allowed(binding.policy.ast, facts):
         return True, None
+
+    if subject_type and subject_id:
+        grant = ExceptionGrant.objects.filter(
+            event=event, action=action, subject_type=subject_type, subject_id=subject_id
+        ).first()
+        if grant and grant.is_active():
+            return True, f"Allowed via exception grant ({grant.reason or 'no reason given'})."
+
     return False, f"Denied by policy {binding.policy.name!r} on action {action!r}."

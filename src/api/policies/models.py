@@ -1,4 +1,5 @@
 from core.models import PublicIdModel
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -111,3 +112,39 @@ class PolicyBinding(PublicIdModel):
     def clean(self):
         if self.policy_id and self.policy.event_id != self.event_id:
             raise ValidationError("A policy can only be bound within its own event.")
+
+
+class ExceptionGrant(PublicIdModel):
+    """A one-off, named override for exactly one subject on exactly one
+    action — "no widening unrelated actions/permissions" is enforced by
+    construction here, not by convention: `action` is a single value from
+    the same closed `Action` enum a PolicyBinding gates, so a grant simply
+    has no field capable of expressing "everything" or "any action". A
+    grant for `submit` cannot be checked against `vote`.
+
+    `scope` is optional further narrowing a caller may choose to match
+    (e.g. a specific gate name); this model doesn't interpret it itself.
+    """
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="exception_grants")
+    action = models.CharField(max_length=20, choices=Action.choices)
+    subject_type = models.CharField(max_length=100)
+    subject_id = models.CharField(max_length=64)
+    scope = models.CharField(max_length=120, blank=True, default="")
+    reason = models.TextField(blank=True, default="")
+    granted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="granted_exceptions",
+    )
+    granted_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.action}:{self.subject_type}:{self.subject_id}"
+
+    def is_active(self, at=None):
+        now = at or timezone.now()
+        return self.expires_at is None or now < self.expires_at

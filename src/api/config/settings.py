@@ -13,8 +13,13 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "rest_framework",
     "core",
+    "accounts",
+    "workspaces",
+    "audit",
 ]
 MIDDLEWARE = ["django.middleware.common.CommonMiddleware"]
 DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}}
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 USE_TZ = True
+# Identity/authorization spine (C-B02): custom User carries a stable public ID.
+AUTH_USER_MODEL = "accounts.User"

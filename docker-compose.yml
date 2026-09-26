@@ -1,3 +1,175 @@
-# Runtime services are implemented in RT-001 after bootstrap.
+# Offline runtime topology for Conflux (RT-001).
+#
+# `docker compose up --build` starts the full local stack with zero external
+# dependencies: Caddy fronts the Django/ASGI application, PostgreSQL holds the
+# authoritative state, Valkey provides disposable cache/broker data, and RustFS
+# is the local S3-compatible object store. The stack runs offline after a
+# one-time build/pull; safe local defaults live in `.env.example`.
+#
+# SeaweedFS is a compatibility-test profile only (see plan decision D008/D023):
+#   docker compose --profile compat up seaweedfs
+
 name: conflux
-services: {}
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: infra/api.Dockerfile
+    image: conflux-api:latest
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-conflux-compose-dev-secret}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-0}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,app}
+      DATABASE_URL: postgres://${POSTGRES_USER:-conflux}:${POSTGRES_PASSWORD:-conflux}@db:5432/${POSTGRES_DB:-conflux}
+      VALKEY_URL: redis://cache:6379/0
+      S3_ENDPOINT_URL: http://objectstore:9000
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-conflux}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-conflux-secret}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-conflux-artifacts}
+      UVICORN_WORKERS: ${UVICORN_WORKERS:-2}
+    volumes:
+      - app-static:/app/static
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+      objectstore:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: .
+      dockerfile: infra/api.Dockerfile
+    image: conflux-api:latest
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-conflux-compose-dev-secret}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-0}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,app}
+      DATABASE_URL: postgres://${POSTGRES_USER:-conflux}:${POSTGRES_PASSWORD:-conflux}@db:5432/${POSTGRES_DB:-conflux}
+      VALKEY_URL: redis://cache:6379/0
+      S3_ENDPOINT_URL: http://objectstore:9000
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-conflux}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-conflux-secret}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-conflux-artifacts}
+    entrypoint: ["celery", "-A", "config", "worker", "--loglevel=INFO"]
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+      objectstore:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-conflux}
+      POSTGRES_USER: ${POSTGRES_USER:-conflux}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-conflux}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-conflux} -d ${POSTGRES_DB:-conflux}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  cache:
+    image: valkey/valkey:8
+    command: ["valkey-server", "--appendonly", "no"]
+    volumes:
+      - cache-data:/data
+    ports:
+      - "${VALKEY_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  objectstore:
+    image: ghcr.io/rustfs/rustfs:latest
+    command:
+      [
+        "rustfs",
+        "server",
+        "/data",
+        "--address",
+        ":9000",
+        "--console-enable",
+        "--console-address",
+        ":9001",
+      ]
+    environment:
+      RUSTFS_ACCESS_KEY: ${S3_ACCESS_KEY:-conflux}
+      RUSTFS_SECRET_KEY: ${S3_SECRET_KEY:-conflux-secret}
+    volumes:
+      - objectstore-data:/data
+    ports:
+      - "${S3_PORT:-9000}:9000"
+      - "${S3_CONSOLE_PORT:-9001}:9001"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-fsS",
+          "-o",
+          "/dev/null",
+          "http://localhost:9000/minio/health/live",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2
+    ports:
+      - "${CONFLUX_PORT:-8080}:80"
+    volumes:
+      - ./infra/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    profiles: ["compat"]
+    command:
+      [
+        "server",
+        "-dir=/data",
+        "-s3",
+        "-s3.port=8333",
+        "-master.volumeSizeLimitMB=1024",
+      ]
+    volumes:
+      - seaweedfs-data:/data
+    ports:
+      - "${SEAWEEDFS_S3_PORT:-8333}:8333"
+      - "${SEAWEEDFS_MASTER_PORT:-9333}:9333"
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  cache-data:
+  objectstore-data:
+  seaweedfs-data:
+  caddy-data:
+  caddy-config:
+  app-static:

@@ -1,0 +1,4 @@
+:80 {
+	# API and static assets are served by the Django/ASGI application.
+	reverse_proxy app:8000
+}

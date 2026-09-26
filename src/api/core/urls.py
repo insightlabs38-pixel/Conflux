@@ -8,4 +8,5 @@ urlpatterns = [
     path("workspaces/", include("workspaces.urls")),
     path("audit/", include("audit.urls")),
     path("", include("events.urls")),
+    path("", include("integrations.urls")),
 ]

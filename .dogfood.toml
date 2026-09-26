@@ -1,7 +1,16 @@
-# [portal], [tiers] and [routes] are populated by later Core tasks (FX-004,
-# C-B33) once the routes they describe actually exist.
+# [portal] and [tiers] are populated by FX-004 (the acceptance wrapper) once
+# a portal is actually running for it to point at.
 [conflux]
 version = 1
+
+[routes]
+gallery = "/api/v1/gallery/"
+submit = "/api/v1/submit/"
+judge_scores = "/api/v1/judge/scores/"
+# judge_a is linked (by `link_judge_identities`) to fixture judge jdg_01;
+# this is the url that, in this portal, returns judge_a's scores.
+peer_scores = "/api/v1/judge/scores/?judge=jdg_01"
+csv_export = "/api/v1/export.csv"
 
 [auth]
 # Whatever header proves you are this role; the checker never logs in, it

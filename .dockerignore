@@ -14,7 +14,6 @@ docs
 tests
 loadtests
 examples
-fixtures
 src/web
 src/embed
 src/packages

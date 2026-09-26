@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -28,6 +29,17 @@ class FixtureJudge(models.Model):
     name = models.CharField(max_length=200)
     email = models.EmailField()
     tracks = models.ManyToManyField(FixtureTrack, related_name="judges")
+    # Set by `link_judge_identities` (FX-003), not by the import itself: it
+    # ties one fixture judge to a real seeded acceptance User so
+    # judge-scoped routes have a session to authenticate against. Cleared on
+    # every re-import along with everything else on ImportedFixture.
+    linked_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="linked_fixture_judge",
+    )
 
 
 class FixtureTeam(models.Model):

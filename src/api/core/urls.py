@@ -9,4 +9,5 @@ urlpatterns = [
     path("audit/", include("audit.urls")),
     path("", include("events.urls")),
     path("", include("integrations.urls")),
+    path("", include("stages.urls")),
 ]

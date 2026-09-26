@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { StageBuilder } from "../stage-builder/StageBuilder";
 
 type Event = {
   public_id: string;
@@ -426,6 +427,10 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
               <button disabled={busy}>Add prize</button>
             </form>
           </section>
+          <StageBuilder
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+          />
         </article>
       )}
     </section>

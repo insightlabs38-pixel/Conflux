@@ -1,7 +1,8 @@
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.utils import timezone
 
-from .models import MAX_TEAM_SIZE, Team, TeamMembership, TeamMembershipRole
+from .models import MAX_TEAM_SIZE, Team, TeamInvite, TeamMembership, TeamMembershipRole
 
 
 @transaction.atomic
@@ -73,3 +74,50 @@ def transfer_captaincy(team, current_captain, new_captain_user):
     new_membership.role = TeamMembershipRole.CAPTAIN
     new_membership.save(update_fields=["role"])
     return new_membership
+
+
+def _require_captain(team, user, action):
+    if not team.memberships.filter(user=user, role=TeamMembershipRole.CAPTAIN).exists():
+        raise ValidationError(f"Only the team captain can {action}.")
+
+
+@transaction.atomic
+def create_invite(team, creator, *, max_uses=1, ttl=None):
+    _require_captain(team, creator, "create invite links")
+    invite = TeamInvite(
+        team=team,
+        created_by=creator,
+        max_uses=max_uses,
+        expires_at=(timezone.now() + ttl) if ttl else None,
+    )
+    invite.full_clean()
+    invite.save()
+    return invite
+
+
+@transaction.atomic
+def revoke_invite(invite, actor):
+    _require_captain(invite.team, actor, "revoke invite links")
+    invite.revoked_at = timezone.now()
+    invite.save(update_fields=["revoked_at"])
+    return invite
+
+
+@transaction.atomic
+def redeem_invite(token, user):
+    """Joins `user` onto the invite's team. Row-locked for its whole
+    duration: two requests racing to redeem the last remaining use of the
+    same token must serialize, not both read "still valid" and both
+    succeed (a `max_uses=1` invite letting in two people).
+    """
+    try:
+        invite = TeamInvite.objects.select_for_update().get(token=token)
+    except TeamInvite.DoesNotExist as exc:
+        raise ValidationError("Invalid invite link.") from exc
+    if not invite.is_valid():
+        raise ValidationError("This invite link has expired or already been used.")
+
+    membership = join_team(invite.team, user)
+    invite.use_count += 1
+    invite.save(update_fields=["use_count"])
+    return membership

@@ -1,10 +1,17 @@
+import secrets
+
 from core.models import PublicIdModel
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 from events.models import Event
 
 MAX_TEAM_SIZE = 4  # "Team size one to four" — official rule, not a house choice.
+
+
+def _generate_invite_token():
+    return secrets.token_urlsafe(24)
 
 
 class Team(PublicIdModel):
@@ -60,3 +67,40 @@ class TeamMembership(PublicIdModel):
         )
         if conflicting:
             raise ValidationError("Already a member of a team in this event.")
+
+
+class TeamInvite(PublicIdModel):
+    """A redeemable link a captain hands out for T1 "team formation by
+    invite link". `max_uses`/`use_count` are the replay control: once a
+    token has been redeemed `max_uses` times, redeeming it again is a
+    replay of an already-spent invite, not a new join, and is rejected —
+    checked and incremented under a row lock (services.redeem_invite) so
+    two concurrent redemptions of the last remaining use can't both
+    succeed.
+    """
+
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="invites")
+    token = models.CharField(max_length=64, unique=True, default=_generate_invite_token)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="created_team_invites",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    max_uses = models.PositiveIntegerField(default=1)
+    use_count = models.PositiveIntegerField(default=0)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"invite:{self.team_id}:{self.token[:8]}"
+
+    def is_valid(self, at=None):
+        now = at or timezone.now()
+        if self.revoked_at is not None:
+            return False
+        if self.expires_at and now >= self.expires_at:
+            return False
+        return self.use_count < self.max_uses

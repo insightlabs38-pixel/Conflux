@@ -1,5 +1,21 @@
+from django.utils import timezone
+
 from .evaluator import is_allowed
-from .models import PolicyBinding
+from .models import PolicyBinding, TemporalGate
+
+
+def base_facts(event, *, at=None):
+    """Facts every action-gating call gets for free: the authoritative
+    server clock, and each of the event's temporal gates' current status
+    as a `gate_open:<name>` boolean. A policy references
+    `{"op": "eq", "fact": "gate_open:submissions", "value": true}` rather
+    than reimplementing window logic in the AST.
+    """
+    now = at or timezone.now()
+    facts = {"now": now}
+    for gate in TemporalGate.objects.filter(event=event):
+        facts[f"gate_open:{gate.name}"] = gate.is_open(now)
+    return facts
 
 
 def check_action(event, action, facts):

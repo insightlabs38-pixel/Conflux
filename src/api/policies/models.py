@@ -1,6 +1,7 @@
 from core.models import PublicIdModel
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 from events.models import Event
 
 from .evaluator import PolicyError, validate_structure
@@ -46,6 +47,46 @@ class Policy(PublicIdModel):
             validate_structure(self.ast)
         except PolicyError as exc:
             raise ValidationError({"ast": str(exc)}) from exc
+
+
+class TemporalGate(PublicIdModel):
+    """A named open/close window, independent of the stage graph (a stage
+    is "where you are"; a gate is "is this window open right now"). Server
+    time is authoritative: `is_open`/`status` default to `timezone.now()`
+    and never take a client-supplied clock. `opens_at`/`closes_at` persist
+    as UTC (Django's USE_TZ=True guarantees this regardless of the input's
+    timezone); any DST/local-time handling belongs entirely in the
+    presentation layer, never here.
+    """
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="temporal_gates")
+    name = models.CharField(max_length=120)
+    opens_at = models.DateTimeField(null=True, blank=True)
+    closes_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["event", "name"], name="unique_gate_name_event")
+        ]
+
+    def __str__(self):
+        return self.name
+
+    def clean(self):
+        if self.opens_at and self.closes_at and self.opens_at >= self.closes_at:
+            raise ValidationError({"closes_at": "A gate must close after it opens."})
+
+    def status(self, at=None):
+        now = at or timezone.now()
+        if self.opens_at and now < self.opens_at:
+            return "not_yet_open"
+        if self.closes_at and now >= self.closes_at:
+            return "closed"
+        return "open"
+
+    def is_open(self, at=None):
+        return self.status(at) == "open"
 
 
 class PolicyBinding(PublicIdModel):

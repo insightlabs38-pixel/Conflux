@@ -1,8 +1,51 @@
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
+from policies.models import Action
+from policies.services import base_facts, check_action
+from stages.models import ParticipationMode, StageEntry
 
 from .models import MAX_TEAM_SIZE, Team, TeamInvite, TeamMembership, TeamMembershipRole
+
+
+def _team_subject_id(team):
+    return str(team.public_id)
+
+
+def _is_roster_locked(team):
+    """True if this team currently holds an active entry in a
+    TEAM_LOCKED-mode stage (ST-004) — composition is frozen there, per the
+    stage/policy plan doc's "team-locked" stage kind.
+    """
+    return StageEntry.objects.filter(
+        subject_type="team",
+        subject_id=_team_subject_id(team),
+        exited_at__isnull=True,
+        stage__participation_mode=ParticipationMode.TEAM_LOCKED,
+    ).exists()
+
+
+def _ensure_roster_not_locked(team, action_description):
+    if _is_roster_locked(team):
+        raise ValidationError(f"This team's roster is locked and cannot {action_description}.")
+
+
+def _ensure_join_is_policy_allowed(team):
+    """Server-side, not advisory: an organizer-configured policy (POL-002)
+    bound to Action.JOIN can restrict who/when a team may grow, and this
+    is checked here — inside join_team itself — so every join path
+    (direct or via invite redemption) goes through it identically.
+    """
+    event = team.event
+    allowed, reason = check_action(
+        event,
+        Action.JOIN,
+        base_facts(event),
+        subject_type="team",
+        subject_id=_team_subject_id(team),
+    )
+    if not allowed:
+        raise ValidationError(reason or "Joining is not currently allowed.")
 
 
 @transaction.atomic
@@ -19,6 +62,8 @@ def create_team(event, name, creator):
 
 @transaction.atomic
 def join_team(team, user):
+    _ensure_roster_not_locked(team, "accept new members")
+    _ensure_join_is_policy_allowed(team)
     if team.memberships.count() >= MAX_TEAM_SIZE:
         raise ValidationError(f"Team is full (maximum {MAX_TEAM_SIZE} members).")
     membership = TeamMembership(team=team, user=user, role=TeamMembershipRole.MEMBER)
@@ -34,7 +79,11 @@ def leave_team(team, user):
     departing member was captain and the team isn't empty, captaincy
     passes automatically to whoever joined earliest: no team is ever left
     without a captain waiting on a manual reassignment.
+
+    Blocked entirely once the roster is locked (ST-004's team_locked
+    stages) — leaving changes composition exactly as joining does.
     """
+    _ensure_roster_not_locked(team, "lose members")
     try:
         membership = team.memberships.get(user=user)
     except TeamMembership.DoesNotExist as exc:

@@ -7,11 +7,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 COPY uv.lock pyproject.toml /tmp/deps/
 
-# System deps: postgres client libs for psycopg, curl for runtime debugging.
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates curl postgresql-client \
-    && rm -rf /var/lib/apt/lists/* \
-    && python -m pip install --no-cache-dir "uv==0.12.18" \
+# No apt packages: psycopg[binary] vendors libpq, and health checks use
+# Python (below) instead of curl, so the build needs no Debian mirror access
+# — consistent with the offline runtime this image serves.
+RUN python -m pip install --no-cache-dir "uv==0.12.18" \
     && uv sync --frozen --directory /tmp/deps --no-dev --compile-bytecode
 
 COPY src/api /app

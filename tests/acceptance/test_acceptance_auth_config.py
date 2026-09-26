@@ -4,9 +4,6 @@ verbatim — so a header that stops matching a seeded token would fail silently
 in `.dogfood.toml` and loudly in every T1/T2 check at once.
 """
 
-import tomllib
-from pathlib import Path
-
 import pytest
 from django.core.management import call_command
 from django.test import Client
@@ -14,19 +11,12 @@ from workspaces.models import Role
 
 pytestmark = pytest.mark.django_db
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-
 EXPECTED_ROLES = {
     "organizer": Role.ORGANIZER,
     "judge_a": Role.JUDGE,
     "judge_b": Role.JUDGE,
     "participant": Role.PARTICIPANT,
 }
-
-
-def load_auth_config():
-    with open(REPO_ROOT / ".dogfood.toml", "rb") as f:
-        return tomllib.load(f)["auth"]
 
 
 def request_with_header(header):
@@ -38,17 +28,15 @@ def request_with_header(header):
     return client.get("/api/v1/accounts/me/")
 
 
-def test_dogfood_toml_declares_all_four_acceptance_roles():
-    auth = load_auth_config()
-    assert set(auth) == set(EXPECTED_ROLES)
+def test_dogfood_toml_declares_all_four_acceptance_roles(dogfood_config):
+    assert set(dogfood_config["auth"]) == set(EXPECTED_ROLES)
 
 
 @pytest.mark.parametrize("identity", ["organizer", "judge_a", "judge_b", "participant"])
-def test_configured_header_authenticates_as_the_expected_role(identity):
+def test_configured_header_authenticates_as_the_expected_role(identity, db, dogfood_config):
     call_command("seed_acceptance_identities")
-    auth = load_auth_config()
 
-    response = request_with_header(auth[identity])
+    response = request_with_header(dogfood_config["auth"][identity])
 
     assert response.status_code == 200
     body = response.json()

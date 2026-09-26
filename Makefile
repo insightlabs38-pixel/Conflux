@@ -17,7 +17,7 @@ lint:
 	pnpm lint
 
 test:
-	uv run --frozen pytest
+	uv run --frozen pytest -n auto
 	pnpm test
 
 build:

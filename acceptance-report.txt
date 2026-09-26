@@ -1,0 +1,2 @@
+BOOT-B00 establishes only the repository and verification baseline.
+Product acceptance evidence will be added as Core milestones are implemented.

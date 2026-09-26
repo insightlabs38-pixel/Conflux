@@ -1,0 +1,15 @@
+{
+  "name": "conflux-workspace",
+  "private": true,
+  "packageManager": "pnpm@12.6.0",
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "pnpm --filter @conflux/web lint",
+    "test": "pnpm --filter @conflux/web test",
+    "build": "pnpm --filter @conflux/web build"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
+  }
+}

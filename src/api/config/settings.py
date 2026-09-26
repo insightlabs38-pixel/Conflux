@@ -37,7 +37,9 @@ if "DATABASE_URL" in os.environ:
 
     DATABASES = {"default": dj_database_url.parse(os.environ["DATABASE_URL"], conn_max_age=0)}
 else:
-    DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}}
+    DATABASES = {
+        "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "db.sqlite3"}
+    }
 
 # Valkey is disposable cache/broker state only; never authoritative.
 VALKEY_URL = os.environ.get("VALKEY_URL", "redis://localhost:6379/0")

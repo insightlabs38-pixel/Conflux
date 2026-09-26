@@ -1,3 +1,5 @@
+from dataclasses import dataclass, field
+
 from django.utils import timezone
 
 from .evaluator import is_allowed
@@ -18,6 +20,75 @@ def base_facts(event, *, at=None):
     return facts
 
 
+@dataclass(frozen=True)
+class Decision:
+    """Evidence for one action-gating decision (POL-005): enough for a
+    simple organizer/user-facing explanation, computed fresh on every
+    call rather than persisted anywhere — a full trace/debugger UI is a
+    stretch goal (see the stage/policy plan doc), not this contract.
+    """
+
+    action: str
+    allowed: bool
+    reason: str | None
+    policy_name: str | None = None
+    exception_grant_reason: str | None = None
+    gate_facts: dict = field(default_factory=dict)
+
+    def explain(self):
+        """One human-readable sentence, safe to show an organizer or the
+        subject the decision was about.
+        """
+        if self.reason:
+            return self.reason
+        return f"{self.action!r} is allowed (no policy configured for it)."
+
+
+def explain_action(event, action, facts, *, subject_type=None, subject_id=None):
+    """The full evidence behind an action-gating decision. `check_action`
+    is this with only (allowed, reason) kept — most call sites only need
+    the bool, this is for anywhere that needs to show its work.
+    """
+    gate_facts = {k: v for k, v in facts.items() if k.startswith("gate_open:")}
+    binding = (
+        PolicyBinding.objects.filter(event=event, action=action).select_related("policy").first()
+    )
+    if binding is None:
+        return Decision(action=action, allowed=True, reason=None, gate_facts=gate_facts)
+
+    if is_allowed(binding.policy.ast, facts):
+        return Decision(
+            action=action,
+            allowed=True,
+            reason=None,
+            policy_name=binding.policy.name,
+            gate_facts=gate_facts,
+        )
+
+    if subject_type and subject_id:
+        grant = ExceptionGrant.objects.filter(
+            event=event, action=action, subject_type=subject_type, subject_id=subject_id
+        ).first()
+        if grant and grant.is_active():
+            grant_reason = grant.reason or "no reason given"
+            return Decision(
+                action=action,
+                allowed=True,
+                reason=f"Allowed via exception grant ({grant_reason}).",
+                policy_name=binding.policy.name,
+                exception_grant_reason=grant_reason,
+                gate_facts=gate_facts,
+            )
+
+    return Decision(
+        action=action,
+        allowed=False,
+        reason=f"Denied by policy {binding.policy.name!r} on action {action!r}.",
+        policy_name=binding.policy.name,
+        gate_facts=gate_facts,
+    )
+
+
 def check_action(event, action, facts, *, subject_type=None, subject_id=None):
     """Is `action` allowed for `event` given `facts`?
 
@@ -33,23 +104,10 @@ def check_action(event, action, facts, *, subject_type=None, subject_id=None):
     would already allow, and never able to affect a different action for
     the same subject, since a grant only ever names one action.
 
-    Returns (allowed: bool, reason: str | None). `reason` is the seed for
-    POL-005's decision-evidence contract, not currently used to render
-    anything.
+    Returns (allowed: bool, reason: str | None). For the full evidence
+    behind this decision, see `explain_action`.
     """
-    binding = (
-        PolicyBinding.objects.filter(event=event, action=action).select_related("policy").first()
+    decision = explain_action(
+        event, action, facts, subject_type=subject_type, subject_id=subject_id
     )
-    if binding is None:
-        return True, None
-    if is_allowed(binding.policy.ast, facts):
-        return True, None
-
-    if subject_type and subject_id:
-        grant = ExceptionGrant.objects.filter(
-            event=event, action=action, subject_type=subject_type, subject_id=subject_id
-        ).first()
-        if grant and grant.is_active():
-            return True, f"Allowed via exception grant ({grant.reason or 'no reason given'})."
-
-    return False, f"Denied by policy {binding.policy.name!r} on action {action!r}."
+    return decision.allowed, decision.reason

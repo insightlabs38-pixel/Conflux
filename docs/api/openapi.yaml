@@ -4898,6 +4898,63 @@ paths:
                 items:
                   $ref: '#/components/schemas/AssignmentCoveragePreviewSchema'
           description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/rebalance/
+  : post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_rebalance
+      description: |-
+        S05: recover an assigned-subset plan's active assignment after judge
+        dropout/backlog -- keeps every already-submitted ballot's pairing,
+        reassigns each dropped judge's pending load to the remaining pool, and
+        re-repairs connectivity. Freezes a new AssignmentVersion; the previous
+        one is untouched.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignmentRebalanceInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AssignmentRebalanceInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssignmentRebalanceInputSchema'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentVersion'
+          description: ''
   ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/ballots/
   : get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_ballots
@@ -7946,6 +8003,17 @@ components:
           items:
             type: integer
             minimum: 1
+    AssignmentRebalanceInputSchema:
+      type: object
+      properties:
+        drop_judges:
+          type: array
+          items:
+            type: string
+            format: uuid
+        coverage:
+          type: integer
+          minimum: 1
     AssignmentVersion:
       type: object
       properties:

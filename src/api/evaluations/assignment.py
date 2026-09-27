@@ -139,3 +139,108 @@ def activate(plan, *, coverage: int = 3):
     plan.active_assignment_version = version
     plan.save(update_fields=["active_assignment_version", "updated_at"])
     return version
+
+
+def rebalance(plan, *, drop_judge_ids: set[int] | None = None, coverage: int | None = None):
+    """Recover an ASSIGNED_SUBSET plan's active assignment after judge
+    dropout/backlog (S05).
+
+    Every already-submitted Ballot's pairing is kept forever -- real
+    judging work is never orphaned or silently discarded, regardless of
+    whether that judge is being dropped. Every *pending* (not yet
+    ballotted) pairing for a judge in `drop_judge_ids` is dropped instead,
+    and any project left under `coverage` is topped back up from the
+    remaining pool using the same least-loaded, track-fit-preferred,
+    id-tie-broken rule as `compute_assignment`. The overlap graph is then
+    repaired for connectivity exactly like a fresh activation. Freezes a
+    new AssignmentVersion and makes it active; the previous one is never
+    mutated.
+    """
+    from .models import Assignment, AssignmentVersion, Ballot
+
+    if plan.pool_strategy != EvaluationPoolStrategy.ASSIGNED_SUBSET:
+        raise ValueError("Rebalancing only applies to the assigned-subset strategy.")
+    current = plan.active_assignment_version
+    if current is None:
+        raise ValueError("This plan has no active assignment to rebalance.")
+
+    drop_judge_ids = set(drop_judge_ids or ())
+    coverage = current.coverage if coverage is None else coverage
+
+    submitted = set(
+        Ballot.objects.filter(rubric_version__plan=plan, is_calibration=False).values_list(
+            "judge_id", "project_id"
+        )
+    )
+    current_pairs = [Pairing(a.judge_id, a.project_id) for a in current.assignments.all()]
+
+    memberships = list(
+        PoolMembership.objects.filter(pool_id=plan.pool_id)
+        .prefetch_related("track_expertise")
+        .order_by("judge_id")
+    )
+    judge_tracks = {m.judge_id: {t.id for t in m.track_expertise.all()} for m in memberships}
+    active_judge_ids = [m.judge_id for m in memberships if m.judge_id not in drop_judge_ids]
+    conflicts = set(
+        ConflictOfInterest.objects.filter(event_id=plan.stage.event_id).values_list(
+            "judge_id", "project_id"
+        )
+    )
+    candidates = list(
+        Project.objects.filter(event_id=plan.stage.event_id, submissions__stage=plan.stage)
+        .distinct()
+        .order_by("id")
+    )
+
+    load = dict.fromkeys(active_judge_ids, 0)
+    kept_pairs: list[Pairing] = []
+    kept_by_project: dict[int, set[int]] = {}
+    for pairing in current_pairs:
+        key = (pairing.judge_id, pairing.project_id)
+        if pairing.judge_id in drop_judge_ids and key not in submitted:
+            continue  # pending work for a dropped judge -- reassigned below
+        kept_pairs.append(pairing)
+        kept_by_project.setdefault(pairing.project_id, set()).add(pairing.judge_id)
+        if pairing.judge_id in load:
+            load[pairing.judge_id] += 1
+
+    new_pairs = list(kept_pairs)
+    for project in candidates:
+        already = kept_by_project.get(project.id, set())
+        needed = coverage - len(already)
+        if needed <= 0:
+            continue
+        project_track_id = getattr(project, "track_id", None)
+        eligible = [
+            j for j in active_judge_ids if j not in already and (j, project.id) not in conflicts
+        ]
+        eligible.sort(
+            key=lambda j: (-_track_fit(judge_tracks.get(j, set()), project_track_id), load[j], j)
+        )
+        for judge_id in eligible[:needed]:
+            load[judge_id] += 1
+            new_pairs.append(Pairing(judge_id, project.id))
+
+    if len(active_judge_ids) > 1 and len(candidates) > 1:
+        new_pairs, _ = repair_connectivity(
+            new_pairs, judge_ids=active_judge_ids, load=load, conflicts=conflicts
+        )
+
+    next_number = (
+        plan.assignment_versions.order_by("-number").values_list("number", flat=True).first() or 0
+    ) + 1
+    evidence = _build_evidence(plan, new_pairs, coverage=coverage)
+    evidence["rebalanced_from"] = current.number
+    evidence["dropped_judges"] = sorted(drop_judge_ids)
+    version = AssignmentVersion.objects.create(
+        plan=plan, number=next_number, coverage=coverage, evidence=evidence
+    )
+    Assignment.objects.bulk_create(
+        [
+            Assignment(version=version, judge_id=p.judge_id, project_id=p.project_id)
+            for p in new_pairs
+        ]
+    )
+    plan.active_assignment_version = version
+    plan.save(update_fields=["active_assignment_version", "updated_at"])
+    return version

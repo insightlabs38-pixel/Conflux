@@ -20,7 +20,7 @@ from stages.views import StageEventMixin
 from workspaces.models import Role
 
 from . import agreement, normalization, pairwise
-from .assignment import activate
+from .assignment import activate, rebalance
 from .assignment import preview as preview_assignment
 from .models import (
     Assignment,
@@ -45,6 +45,7 @@ from .schema import (
     AssignmentActivateInputSchema,
     AssignmentCoveragePreviewSchema,
     AssignmentPreviewInputSchema,
+    AssignmentRebalanceInputSchema,
     BallotDraftInputSchema,
     BallotSubmitInputSchema,
     CalibrationProjectItemSchema,
@@ -570,6 +571,50 @@ class AssignmentPreviewView(PlanMixin):
         except ValueError as exc:
             raise ValidationError({"detail": str(exc)}) from exc
         return Response(previews)
+
+
+class AssignmentRebalanceView(PlanMixin):
+    """S05: recover an assigned-subset plan's active assignment after judge
+    dropout/backlog -- keeps every already-submitted ballot's pairing,
+    reassigns each dropped judge's pending load to the remaining pool, and
+    re-repairs connectivity. Freezes a new AssignmentVersion; the previous
+    one is untouched.
+    """
+
+    @extend_schema(
+        request=AssignmentRebalanceInputSchema, responses={201: AssignmentVersionSerializer}
+    )
+    @transaction.atomic
+    def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        drop_judge_public_ids = request.data.get("drop_judges", [])
+        if not isinstance(drop_judge_public_ids, list):
+            raise ValidationError({"drop_judges": "Must be a list of judge ids."})
+        drop_judges = User.objects.filter(public_id__in=drop_judge_public_ids)
+        if drop_judges.count() != len(set(drop_judge_public_ids)):
+            raise ValidationError({"drop_judges": "All ids must be known users."})
+        coverage = request.data.get("coverage")
+        if coverage is not None and (
+            not isinstance(coverage, int) or isinstance(coverage, bool) or coverage < 1
+        ):
+            raise ValidationError({"coverage": "Must be a positive integer."})
+        try:
+            with transaction.atomic():
+                version = rebalance(
+                    plan,
+                    drop_judge_ids=set(drop_judges.values_list("id", flat=True)),
+                    coverage=coverage,
+                )
+        except ValueError as exc:
+            raise ValidationError({"detail": str(exc)}) from exc
+        record_mutation(
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="assignment.rebalanced",
+            target=version,
+            metadata=version.evidence,
+        )
+        return Response(AssignmentVersionSerializer(version).data, status=201)
 
 
 class AssignmentDetailView(PlanMixin):

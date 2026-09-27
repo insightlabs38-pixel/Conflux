@@ -94,6 +94,11 @@ class PairwiseResultsPublishInputSchema(serializers.Serializer):
     tie_breaks = serializers.DictField(child=serializers.IntegerField(), required=False)
 
 
+class AssignmentRebalanceInputSchema(serializers.Serializer):
+    drop_judges = serializers.ListField(child=serializers.UUIDField(), required=False)
+    coverage = serializers.IntegerField(min_value=1, required=False)
+
+
 class AssignmentPreviewInputSchema(serializers.Serializer):
     coverage_options = serializers.ListField(
         child=serializers.IntegerField(min_value=1), required=False

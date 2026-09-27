@@ -9,7 +9,7 @@ from evaluations.models import (
     EvaluationPoolStrategy,
     PoolMembership,
 )
-from events.models import Event
+from events.models import Event, Track
 from projects.models import Project, Submission
 from stages.models import Stage
 from workspaces.models import Membership, Role, Workspace
@@ -192,3 +192,35 @@ def test_pool_membership_requires_the_judge_role():
         content_type="application/json",
     )
     assert response.status_code == 400
+
+
+def test_track_fit_now_discriminates_using_the_real_project_track_association():
+    # Corrective fix ahead of C-B15: Project previously had no Track at all,
+    # so this factor always tied at 0 regardless of expertise. Two judges,
+    # one candidate on Track "AI" -- only the AI-expert judge should fit.
+    workspace, event, stage, pool, plan, organizer, judges, projects = make_fixture(
+        judge_count=2, project_count=1
+    )
+    ai_track = Track.objects.create(event=event, name="AI")
+    projects[0].track = ai_track
+    projects[0].save()
+    expert, non_expert = judges
+    PoolMembership.objects.filter(pool=pool, judge=expert).first().track_expertise.set([ai_track])
+
+    pairs = compute_assignment(plan, coverage=1)
+    assert [p.judge_id for p in pairs] == [expert.id]
+
+
+def test_track_fit_is_a_harmless_no_op_for_a_project_with_no_track():
+    workspace, event, stage, pool, plan, organizer, judges, projects = make_fixture(
+        judge_count=2, project_count=1
+    )
+    ai_track = Track.objects.create(event=event, name="AI")
+    PoolMembership.objects.filter(pool=pool, judge=judges[0]).first().track_expertise.set(
+        [ai_track]
+    )
+    assert projects[0].track is None
+
+    pairs = compute_assignment(plan, coverage=1)
+    # No track on the candidate -> falls back to load/id tie-break, not fit.
+    assert [p.judge_id for p in pairs] == [judges[0].id]

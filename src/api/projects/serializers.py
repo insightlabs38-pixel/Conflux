@@ -14,8 +14,18 @@ class ProjectMembershipSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     public_id = serializers.UUIDField(read_only=True)
     team = serializers.UUIDField(source="team.public_id", read_only=True, allow_null=True)
+    track = serializers.UUIDField(source="track.public_id", read_only=True, allow_null=True)
     members = ProjectMembershipSerializer(source="memberships", many=True, read_only=True)
 
     class Meta:
         model = Project
-        fields = ["public_id", "name", "description", "team", "created_at", "updated_at", "members"]
+        fields = [
+            "public_id",
+            "name",
+            "description",
+            "team",
+            "track",
+            "created_at",
+            "updated_at",
+            "members",
+        ]

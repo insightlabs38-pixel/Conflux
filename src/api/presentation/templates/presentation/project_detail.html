@@ -4,6 +4,7 @@
 <article aria-label="{{ project.name }} project page">
   <p><a href="{% url 'site-gallery' event.public_id %}">&larr; Back to gallery</a></p>
   <h1>{{ project.name }}</h1>
+  {% if project.track %}<p><span class="cx-badge cx-badge--info">{{ project.track.name }}</span></p>{% endif %}
   {% if project.team %}<p>{{ project.team.name }}</p>{% endif %}
   {% if project.description %}<p>{{ project.description }}</p>{% endif %}
 

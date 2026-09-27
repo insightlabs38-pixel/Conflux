@@ -1,10 +1,9 @@
 """Deterministic, explainable baseline assignment (JDG-007).
 
-Track-fit is scored but never currently discriminates: nothing upstream
-(Project/Team) records which Track a candidate belongs to, so every
-judge/candidate pair ties on that factor today. Coverage (judges per
-candidate) and load (assignments per judge) still balance correctly on
-their own -- see the C-B14 batch report for the honest limitation.
+Track-fit prefers a judge whose PoolMembership.track_expertise includes the
+candidate Project's `track` (added as a corrective fix ahead of C-B15 --
+Project previously had no Track association at all, silently degrading
+this to a permanent tie; see DECISIONS.md).
 """
 
 from dataclasses import dataclass
@@ -21,9 +20,7 @@ class Pairing:
 
 
 def _track_fit(judge_track_ids: set[int], project_track_id: int | None) -> int:
-    """1 if the judge's declared expertise covers the candidate's track, else
-    0. Always 0 today: no candidate has a track_id (see module docstring).
-    """
+    """1 if the judge's declared expertise covers the candidate's track, else 0."""
     return 1 if project_track_id is not None and project_track_id in judge_track_ids else 0
 
 

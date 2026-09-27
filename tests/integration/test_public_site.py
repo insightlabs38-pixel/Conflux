@@ -11,7 +11,7 @@ from workspaces.models import Membership, Role, Workspace
 pytestmark = pytest.mark.django_db
 
 
-def make_public_event_with_finalized_project():
+def make_public_event_with_finalized_project(*, with_track=True):
     workspace = Workspace.objects.create(name="W", slug="w")
     event = Event.objects.create(
         workspace=workspace,
@@ -22,12 +22,16 @@ def make_public_event_with_finalized_project():
         starts_at="2026-01-01T00:00:00Z",
         ends_at="2026-01-02T00:00:00Z",
     )
-    Track.objects.create(event=event, name="AI", position=0)
+    track = Track.objects.create(event=event, name="AI", position=0)
     stage = Stage.objects.create(event=event, name="Build", position=0)
     user = User.objects.create_user(username="member", password="unused")
     Membership.objects.create(workspace=workspace, user=user, role=Role.PARTICIPANT)
     project = Project.objects.create(
-        event=event, name="Autograder", description="Grades things.", created_by=user
+        event=event,
+        name="Autograder",
+        description="Grades things.",
+        created_by=user,
+        track=track if with_track else None,
     )
     submission = Submission.objects.create(project=project, stage=stage, updated_by=user)
     version = SubmissionVersion.objects.create(
@@ -54,11 +58,11 @@ def make_public_event_with_finalized_project():
         external_url="https://example.com/private",
         created_by=user,
     )
-    return event, project
+    return event, project, track
 
 
 def test_event_landing_renders_hero_and_live_tracks_block_without_js():
-    event, _ = make_public_event_with_finalized_project()
+    event, _, _ = make_public_event_with_finalized_project()
     page = Page.objects.create(event=event)
     PageBlock.objects.create(
         page=page, kind="hero", position=0, config={"title": "Welcome to Regionals"}
@@ -79,7 +83,7 @@ def test_event_landing_404s_for_non_public_events():
 
 
 def test_gallery_lists_finalized_projects_and_search_filters_by_name():
-    event, project = make_public_event_with_finalized_project()
+    event, project, _ = make_public_event_with_finalized_project()
 
     body = Client().get(f"/e/{event.public_id}/gallery/").content.decode()
     assert "Autograder" in body
@@ -91,8 +95,54 @@ def test_gallery_lists_finalized_projects_and_search_filters_by_name():
     assert "Autograder" not in miss
 
 
+def test_gallery_filters_by_the_real_track_association():
+    event, project, ai_track = make_public_event_with_finalized_project()
+    user = User.objects.get(username="member")
+    other_track = Track.objects.create(event=event, name="Fintech", position=1)
+    other_stage = Stage.objects.create(event=event, name="Finals", position=1)
+    other_project = Project.objects.create(
+        event=event, name="Ledger", track=other_track, created_by=user
+    )
+    other_submission = Submission.objects.create(
+        project=other_project, stage=other_stage, updated_by=user
+    )
+    other_version = SubmissionVersion.objects.create(
+        submission=other_submission, number=1, snapshot={}, digest="b" * 64, finalized_by=user
+    )
+    other_submission.status = SubmissionStatus.FINALIZED
+    other_submission.current_version = other_version
+    other_submission.save()
+
+    ai_only = (
+        Client()
+        .get(f"/e/{event.public_id}/gallery/", {"track": str(ai_track.public_id)})
+        .content.decode()
+    )
+    assert "Autograder" in ai_only
+    assert "Ledger" not in ai_only
+
+    fintech_only = (
+        Client()
+        .get(f"/e/{event.public_id}/gallery/", {"track": str(other_track.public_id)})
+        .content.decode()
+    )
+    assert "Ledger" in fintech_only
+    assert "Autograder" not in fintech_only
+
+
+def test_gallery_and_project_page_handle_a_project_with_no_track():
+    event, project, _ = make_public_event_with_finalized_project(with_track=False)
+    assert project.track is None
+
+    gallery_body = Client().get(f"/e/{event.public_id}/gallery/").content.decode()
+    assert "Autograder" in gallery_body
+
+    detail = Client().get(f"/e/{event.public_id}/projects/{project.public_id}/")
+    assert detail.status_code == 200
+
+
 def test_project_detail_shows_only_public_artifacts():
-    event, project = make_public_event_with_finalized_project()
+    event, project, _ = make_public_event_with_finalized_project()
     response = Client().get(f"/e/{event.public_id}/projects/{project.public_id}/")
     assert response.status_code == 200
     body = response.content.decode()
@@ -101,7 +151,7 @@ def test_project_detail_shows_only_public_artifacts():
 
 
 def test_project_detail_404s_for_a_project_without_a_finalized_submission():
-    event, _ = make_public_event_with_finalized_project()
+    event, _, _ = make_public_event_with_finalized_project()
     user = User.objects.create_user(username="other", password="unused")
     draft_project = Project.objects.create(event=event, name="Unfinished", created_by=user)
     response = Client().get(f"/e/{event.public_id}/projects/{draft_project.public_id}/")

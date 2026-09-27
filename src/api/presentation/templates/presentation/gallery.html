@@ -18,6 +18,17 @@
       </select>
     </label>
   {% endif %}
+  {% if tracks %}
+    <label>
+      Track
+      <select name="track">
+        <option value="">All tracks</option>
+        {% for track in tracks %}
+          <option value="{{ track.public_id }}" {% if selected_track == track.public_id|stringformat:"s" %}selected{% endif %}>{{ track.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  {% endif %}
   <button class="cx-button cx-button--primary" type="submit">Search</button>
 </form>
 {% if projects %}
@@ -26,6 +37,7 @@
       <li class="cx-card">
         <h2 class="cx-card__title"><a href="{% url 'site-project' event.public_id project.public_id %}">{{ project.name }}</a></h2>
         {% if project.description %}<p>{{ project.description|truncatewords:24 }}</p>{% endif %}
+        {% if project.track %}<p><span class="cx-badge cx-badge--info">{{ project.track.name }}</span></p>{% endif %}
         {% if project.team %}<p>{{ project.team.name }}</p>{% endif %}
       </li>
     {% endfor %}

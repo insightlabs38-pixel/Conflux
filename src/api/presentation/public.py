@@ -18,11 +18,11 @@ def get_public_event(event_public_id):
     )
 
 
-def public_projects(event, *, q=None, stage_public_id=None):
+def public_projects(event, *, q=None, stage_public_id=None, track_public_id=None):
     """Projects with at least one finalized submission for this event."""
     projects = (
         Project.objects.filter(event=event, submissions__status=SubmissionStatus.FINALIZED)
-        .select_related("team")
+        .select_related("team", "track")
         .distinct()
         .order_by("name")
     )
@@ -30,6 +30,8 @@ def public_projects(event, *, q=None, stage_public_id=None):
         projects = projects.filter(name__icontains=q)
     if stage_public_id:
         projects = projects.filter(submissions__stage__public_id=stage_public_id)
+    if track_public_id:
+        projects = projects.filter(track__public_id=track_public_id)
     return projects
 
 

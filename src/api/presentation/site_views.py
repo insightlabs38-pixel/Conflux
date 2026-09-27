@@ -46,7 +46,10 @@ def gallery(request, event_public_id):
     event = get_public_event(event_public_id)
     q = request.GET.get("q", "").strip()
     stage_id = request.GET.get("stage", "").strip()
-    projects = public_projects(event, q=q or None, stage_public_id=stage_id or None)
+    track_id = request.GET.get("track", "").strip()
+    projects = public_projects(
+        event, q=q or None, stage_public_id=stage_id or None, track_public_id=track_id or None
+    )
     page = Page.objects.filter(event=event).first()
     return render(
         request,
@@ -56,8 +59,10 @@ def gallery(request, event_public_id):
             "theme": page.theme if page else "default",
             "projects": projects,
             "stages": event.stages.order_by("position"),
+            "tracks": event.tracks.order_by("position"),
             "q": q,
             "selected_stage": stage_id,
+            "selected_track": track_id,
         },
     )
 

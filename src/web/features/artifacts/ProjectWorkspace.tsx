@@ -2,8 +2,14 @@ import { useEffect, useState, type FormEvent } from "react";
 import { ArtifactPanel } from "./ArtifactPanel";
 import { SubmissionPanel } from "../submissions/SubmissionPanel";
 
-type Project = { public_id: string; name: string; team: string | null };
+type Project = {
+  public_id: string;
+  name: string;
+  team: string | null;
+  track: string | null;
+};
 type TeamStatus = { team: { public_id: string } | null };
+type Track = { public_id: string; name: string };
 
 function message(value: unknown): string {
   if (typeof value === "string") return value;
@@ -48,16 +54,21 @@ export function ProjectWorkspace({
 }) {
   const base = `/api/v1/workspaces/${workspaceId}/events/${eventId}/`;
   const [projects, setProjects] = useState<Project[]>([]);
+  const [tracks, setTracks] = useState<Track[]>([]);
   const [selectedId, setSelectedId] = useState("");
   const [name, setName] = useState("");
+  const [trackId, setTrackId] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     let active = true;
-    request<Project[]>(base + "projects/")
-      .then((items) => {
-        if (active) setProjects(items);
+    Promise.all([request<Project[]>(base + "projects/"), request<Track[]>(base + "tracks/")])
+      .then(([nextProjects, nextTracks]) => {
+        if (active) {
+          setProjects(nextProjects);
+          setTracks(nextTracks);
+        }
       })
       .catch((cause: unknown) => {
         if (active) setError(message(cause));
@@ -76,12 +87,14 @@ export function ProjectWorkspace({
         request<Project>(base + "projects/", "POST", {
           name: name.trim(),
           ...(status.team ? { team: status.team.public_id } : {}),
+          ...(trackId ? { track: trackId } : {}),
         }),
       )
       .then((project) => {
         setProjects([...projects, project]);
         setSelectedId(project.public_id);
         setName("");
+        setTrackId("");
       })
       .catch((cause: unknown) => setError(message(cause)))
       .finally(() => setBusy(false));
@@ -100,6 +113,19 @@ export function ProjectWorkspace({
             required
           />
         </label>
+        {tracks.length > 0 && (
+          <label>
+            Track{" "}
+            <select value={trackId} onChange={(event) => setTrackId(event.target.value)}>
+              <option value="">No track</option>
+              {tracks.map((track) => (
+                <option key={track.public_id} value={track.public_id}>
+                  {track.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <button disabled={busy}>Create project</button>
       </form>
       {projects.length === 0 ? (

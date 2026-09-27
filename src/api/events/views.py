@@ -1,6 +1,6 @@
 from accounts.authentication import CookieSessionAuthentication
 from audit.services import record_mutation
-from core.permissions import require_roles
+from core.permissions import IsWorkspaceMember, require_roles
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
@@ -168,6 +168,13 @@ class EventDashboardView(OrganizerView):
 
 
 class TrackListView(OrganizerView):
+    def get_permissions(self):
+        # Any workspace member may read the track list (e.g. a participant
+        # choosing their project's track); only organizers may create one.
+        if self.request.method == "GET":
+            return [IsWorkspaceMember()]
+        return super().get_permissions()
+
     def get(self, request, workspace_public_id, event_public_id):
         return Response(TrackSerializer(self.get_event().tracks.all(), many=True).data)
 

@@ -2,7 +2,7 @@ from core.models import PublicIdModel
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from events.models import Event
+from events.models import Event, Track
 from participation.models import Team
 from stages.models import Stage
 
@@ -11,6 +11,9 @@ class Project(PublicIdModel):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="projects")
     team = models.ForeignKey(
         Team, null=True, blank=True, on_delete=models.SET_NULL, related_name="projects"
+    )
+    track = models.ForeignKey(
+        Track, null=True, blank=True, on_delete=models.SET_NULL, related_name="projects"
     )
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
@@ -23,6 +26,8 @@ class Project(PublicIdModel):
     def clean(self):
         if self.team_id and self.team.event_id != self.event_id:
             raise ValidationError({"team": "Team must belong to the project's event."})
+        if self.track_id and self.track.event_id != self.event_id:
+            raise ValidationError({"track": "Track must belong to the project's event."})
 
 
 class ProjectMembershipRole(models.TextChoices):

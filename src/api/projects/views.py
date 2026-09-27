@@ -3,7 +3,7 @@ from accounts.models import User
 from core.permissions import IsWorkspaceMember
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.shortcuts import get_object_or_404
-from events.models import Event
+from events.models import Event, Track
 from participation.models import Team
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -13,7 +13,7 @@ from workspaces.models import Workspace
 
 from .models import Project, ProjectMembershipRole, Submission
 from .serializers import ProjectMembershipSerializer, ProjectSerializer
-from .services import add_project_member, create_project
+from .services import add_project_member, create_project, update_project
 from .submissions import finalize_submission, save_draft
 
 
@@ -49,12 +49,15 @@ class ProjectListView(ProjectView):
             raise ValidationError({"name": "Project name is required."})
         team_id = request.data.get("team")
         team = get_object_or_404(Team, event=event, public_id=team_id) if team_id else None
+        track_id = request.data.get("track")
+        track = get_object_or_404(Track, event=event, public_id=track_id) if track_id else None
         try:
             project = create_project(
                 event,
                 request.user,
                 name,
                 team=team,
+                track=track,
                 description=str(request.data.get("description", "")),
             )
         except ModelValidationError as exc:
@@ -69,6 +72,29 @@ class ProjectDetailView(ProjectView):
         project = self.get_project()
         if not project.memberships.filter(user=request.user).exists():
             return Response(status=404)
+        return Response(ProjectSerializer(project).data)
+
+    def patch(self, request, workspace_public_id, event_public_id, project_public_id):
+        project = self.get_project()
+        if not project.memberships.filter(user=request.user).exists():
+            return Response(status=404)
+        event = self.get_event()
+        track_set = "track" in request.data
+        track_id = request.data.get("track")
+        track = get_object_or_404(Track, event=event, public_id=track_id) if track_id else None
+        try:
+            project = update_project(
+                project,
+                request.user,
+                name=request.data.get("name"),
+                description=request.data.get("description"),
+                track=track,
+                track_set=track_set,
+            )
+        except ModelValidationError as exc:
+            raise ValidationError(
+                exc.message_dict if hasattr(exc, "message_dict") else exc.messages
+            ) from exc
         return Response(ProjectSerializer(project).data)
 
 

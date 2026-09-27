@@ -2,10 +2,10 @@ import pytest
 from accounts.models import User
 from django.core.exceptions import ValidationError
 from django.test import Client
-from events.models import Event
+from events.models import Event, Track
 from participation.models import Team, TeamMembership, TeamMembershipRole
 from projects.models import Project, ProjectMembership, ProjectMembershipRole
-from projects.services import create_project
+from projects.services import create_project, update_project
 from workspaces.models import Membership, Role, Workspace
 
 pytestmark = pytest.mark.django_db
@@ -45,6 +45,38 @@ def test_project_rejects_creator_outside_workspace_or_team():
     team = Team.objects.create(event=event, name="A")
     with pytest.raises(ValidationError, match="project team"):
         create_project(event, creator, "No team membership", team=team)
+
+
+def test_project_can_be_created_with_a_track_from_the_same_event():
+    _, event, creator = setup_event()
+    track = Track.objects.create(event=event, name="AI")
+    project = create_project(event, creator, "Prototype", track=track)
+    assert project.track == track
+
+
+def test_project_rejects_track_from_another_event():
+    workspace, event, creator = setup_event()
+    other = Event.objects.create(workspace=workspace, name="Other", slug="other")
+    other_track = Track.objects.create(event=other, name="Other track")
+    with pytest.raises(ValidationError, match="Track must belong"):
+        create_project(event, creator, "Wrong event track", track=other_track)
+    assert not Project.objects.exists()
+
+
+def test_project_without_a_track_is_still_valid():
+    _, event, creator = setup_event()
+    project = create_project(event, creator, "No track yet")
+    assert project.track is None
+
+
+def test_update_project_can_set_and_clear_the_track():
+    _, event, creator = setup_event()
+    track = Track.objects.create(event=event, name="AI")
+    project = create_project(event, creator, "Prototype")
+    updated = update_project(project, creator, track=track, track_set=True)
+    assert updated.track == track
+    cleared = update_project(project, creator, track=None, track_set=True)
+    assert cleared.track is None
 
 
 def test_project_membership_is_unique_and_scoped_to_workspace():
@@ -97,6 +129,32 @@ def test_project_api_scopes_listing_and_member_addition():
     assert added.status_code == 201
     assert added.json()["role"] == "contributor"
     assert len(client_for(contributor).get(base).json()) == 1
+
+
+def test_project_api_creates_with_track_and_supports_patching_it():
+    workspace, event, owner = setup_event()
+    track = Track.objects.create(event=event, name="AI")
+    other_event = Event.objects.create(workspace=workspace, name="Other", slug="other")
+    other_track = Track.objects.create(event=other_event, name="Cross-event")
+    base = f"/api/v1/workspaces/{workspace.public_id}/events/{event.public_id}/projects/"
+
+    created = client_for(owner).post(
+        base,
+        {"name": "Prototype", "track": str(track.public_id)},
+        content_type="application/json",
+    )
+    assert created.status_code == 201
+    assert created.json()["track"] == str(track.public_id)
+    project_url = base + created.json()["public_id"] + "/"
+
+    cross_event = client_for(owner).patch(
+        project_url, {"track": str(other_track.public_id)}, content_type="application/json"
+    )
+    assert cross_event.status_code == 404  # other_track isn't found scoped to this event
+
+    cleared = client_for(owner).patch(project_url, {"track": None}, content_type="application/json")
+    assert cleared.status_code == 200
+    assert cleared.json()["track"] is None
 
 
 def test_project_api_rejects_nonmember_and_missing_name():

@@ -19,7 +19,7 @@ async function waitFor(check: () => boolean) {
 }
 
 describe("participant project entry", () => {
-  it("reaches project creation after choosing an event", async () => {
+  it("reaches project creation after choosing an event, offering a track when the event has one", async () => {
     window.history.pushState({}, "", "/?workspace=w");
     vi.stubGlobal(
       "fetch",
@@ -29,7 +29,9 @@ describe("participant project entry", () => {
           ? [{ public_id: "e", name: "Hack" }]
           : path.endsWith("my-team/")
             ? { team: null, my_role: null }
-            : [];
+            : path.endsWith("tracks/")
+              ? [{ public_id: "t1", name: "AI" }]
+              : [];
         return { ok: true, status: 200, json: async () => body };
       }),
     );
@@ -49,6 +51,8 @@ describe("participant project entry", () => {
       () => container.querySelector('[aria-label="My projects"]') !== null,
     );
     expect(container.textContent).toContain("Create project");
+    await waitFor(() => container.textContent?.includes("AI") ?? false);
+    expect(container.textContent).toContain("Track");
     await act(async () => root.unmount());
     container.remove();
     vi.unstubAllGlobals();

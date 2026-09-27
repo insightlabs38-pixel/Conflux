@@ -114,3 +114,20 @@ class ArtifactUploadIntent(PublicIdModel):
     @property
     def is_active(self):
         return self.completed_at is None and timezone.now() < self.expires_at
+
+
+class ArtifactValidation(PublicIdModel):
+    class Outcome(models.TextChoices):
+        OK = "ok", "OK"
+        WARNING = "warning", "Warning"
+        BLOCKED = "blocked", "Blocked"
+        RETRY = "retry", "Retry"
+
+    artifact = models.ForeignKey(Artifact, on_delete=models.CASCADE, related_name="validations")
+    validator = models.CharField(max_length=80)
+    outcome = models.CharField(max_length=12, choices=Outcome.choices)
+    detail = models.CharField(max_length=500)
+    checked_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-checked_at", "-id"]

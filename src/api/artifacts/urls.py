@@ -18,6 +18,11 @@ urlpatterns = [
         name="artifact-detail",
     ),
     path(
+        _prefix + "<uuid:artifact_public_id>/validate/",
+        views.ArtifactValidateView.as_view(),
+        name="artifact-validate",
+    ),
+    path(
         _prefix + "<uuid:artifact_public_id>/upload-intents/<uuid:intent_public_id>/complete/",
         views.UploadCompleteView.as_view(),
         name="artifact-upload-complete",

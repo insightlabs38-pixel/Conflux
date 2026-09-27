@@ -12,9 +12,11 @@ from workspaces.models import Membership, Workspace
 from .models import Artifact, ArtifactStatus, ArtifactUploadIntent, can_view_artifact
 from .services import begin_upload, complete_upload, create_external_artifact
 from .storage import S3Storage
+from .validators import validate_artifact
 
 
 def artifact_payload(artifact):
+    latest = artifact.validations.first()
     return {
         "public_id": str(artifact.public_id),
         "kind": artifact.kind,
@@ -24,6 +26,7 @@ def artifact_payload(artifact):
         "content_type": artifact.content_type,
         "byte_size": artifact.byte_size,
         "status": artifact.status,
+        "validation": {"outcome": latest.outcome, "detail": latest.detail} if latest else None,
     }
 
 
@@ -149,3 +152,20 @@ class ArtifactDetailView(ProjectArtifactView):
         if artifact.status == ArtifactStatus.READY and artifact.object_key:
             payload["download_url"] = S3Storage().presign_get(artifact.object_key)
         return Response(payload)
+
+
+class ArtifactValidateView(ProjectArtifactView):
+    def post(
+        self, request, workspace_public_id, event_public_id, project_public_id, artifact_public_id
+    ):
+        artifact = self.get_artifact()
+        if not self.can_view(artifact) and artifact.created_by_id != request.user.id:
+            return Response(status=404)
+        evidence = validate_artifact(artifact)
+        artifact.refresh_from_db()
+        return Response(
+            {
+                **artifact_payload(artifact),
+                "validation": {"outcome": evidence.outcome, "detail": evidence.detail},
+            }
+        )

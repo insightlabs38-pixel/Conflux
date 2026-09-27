@@ -44,6 +44,7 @@ def setup_api():
 def test_upload_api_completes_and_filters_private_evidence(monkeypatch):
     storage = FakeStorage()
     monkeypatch.setattr("artifacts.services.S3Storage", lambda: storage)
+    monkeypatch.setattr("artifacts.validators.S3Storage", lambda: storage)
     client, base = setup_api()
     issued = client.post(
         base + "upload-intents/",
@@ -67,6 +68,10 @@ def test_upload_api_completes_and_filters_private_evidence(monkeypatch):
     )
     assert complete.status_code == 200
     assert complete.json()["status"] == "uploaded"
+    validated = client.post(base + artifact_id + "/validate/")
+    assert validated.status_code == 200
+    assert validated.json()["status"] == "ready"
+    assert validated.json()["validation"]["outcome"] == "ok"
     secret = client.post(
         base + "upload-intents/",
         {

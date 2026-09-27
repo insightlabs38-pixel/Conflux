@@ -272,3 +272,37 @@ class Assignment(PublicIdModel):
                 fields=["version", "judge", "project"], name="unique_assignment"
             )
         ]
+
+
+class NormalizationRun(PublicIdModel):
+    """One immutable, computed judge-effect estimation (NORM-004): the
+    raw->adjusted->final trace lives entirely in `evidence`, computed once
+    and frozen -- rerunning normalization creates a new numbered run rather
+    than mutating this one, the same pattern as RubricVersion/
+    AssignmentVersion.
+    """
+
+    plan = models.ForeignKey(
+        EvaluationPlan, on_delete=models.PROTECT, related_name="normalization_runs"
+    )
+    number = models.PositiveIntegerField()
+    ridge_lambda = models.FloatField()
+    iterations = models.PositiveIntegerField()
+    converged = models.BooleanField()
+    grand_mean = models.FloatField()
+    evidence = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["plan", "number"], name="unique_normalization_run")
+        ]
+        ordering = ["number"]
+
+    def save(self, *args, **kwargs):
+        if self.pk and type(self).objects.filter(pk=self.pk).exists():
+            raise ValidationError("Normalization runs are immutable once computed.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("Normalization runs are immutable once computed.")

@@ -9,6 +9,7 @@ from .models import (
     ConflictOfInterest,
     EvaluationPlan,
     EvaluationPool,
+    NormalizationRun,
     PoolMembership,
     RubricVersion,
 )
@@ -133,3 +134,20 @@ class AssignmentVersionSerializer(serializers.ModelSerializer):
     class Meta:
         model = AssignmentVersion
         fields = ["public_id", "number", "coverage", "evidence", "assignments", "created_at"]
+
+
+class NormalizationRunSerializer(serializers.ModelSerializer):
+    public_id = serializers.UUIDField(read_only=True)
+
+    class Meta:
+        model = NormalizationRun
+        fields = [
+            "public_id",
+            "number",
+            "ridge_lambda",
+            "iterations",
+            "converged",
+            "grand_mean",
+            "evidence",
+            "created_at",
+        ]

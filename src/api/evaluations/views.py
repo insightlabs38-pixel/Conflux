@@ -13,6 +13,7 @@ from rest_framework.response import Response
 from stages.views import StageEventMixin
 from workspaces.models import Role
 
+from . import normalization
 from .assignment import activate
 from .models import (
     Assignment,
@@ -31,6 +32,7 @@ from .serializers import (
     ConflictOfInterestSerializer,
     EvaluationPlanSerializer,
     EvaluationPoolSerializer,
+    NormalizationRunSerializer,
     PoolMembershipSerializer,
     RubricVersionSerializer,
 )
@@ -342,3 +344,34 @@ class AssignmentDetailView(PlanMixin):
                 a for a in data["assignments"] if a["judge"] == str(request.user.public_id)
             ]
         return Response(data)
+
+
+class NormalizationRunListView(PlanMixin):
+    """Organizer-only: normalization touches every judge's estimated bias
+    at once, which is not something a single judge should be able to
+    trigger or needs to see the internals of.
+    """
+
+    def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        runs = self.get_plan().normalization_runs.all()
+        return Response(NormalizationRunSerializer(runs, many=True).data)
+
+    def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        ridge_lambda = request.data.get("ridge_lambda", 1.0)
+        if (
+            not isinstance(ridge_lambda, (int, float))
+            or isinstance(ridge_lambda, bool)
+            or ridge_lambda < 0
+        ):
+            raise ValidationError({"ridge_lambda": "Must be a nonnegative number."})
+        with transaction.atomic():
+            normalization_run = normalization.run(plan, ridge_lambda=ridge_lambda)
+        record_mutation(
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="normalization.run",
+            target=normalization_run,
+            metadata={"converged": normalization_run.converged, "number": normalization_run.number},
+        )
+        return Response(NormalizationRunSerializer(normalization_run).data, status=201)

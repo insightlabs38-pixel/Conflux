@@ -50,4 +50,9 @@ urlpatterns = [
         views.ConflictOfInterestListCreateView.as_view(),
         name="judge-conflict-list",
     ),
+    path(
+        f"{_PLAN}/normalization-runs/",
+        views.NormalizationRunListView.as_view(),
+        name="evaluation-plan-normalization-runs",
+    ),
 ]

@@ -1,0 +1,67 @@
+{
+  "date_utc": "2026-09-27",
+  "source_commit": "7e57aac",
+  "topology": "Isolated Docker Compose project conflux-cb31; PostgreSQL 17, Valkey, RustFS, app (2 Uvicorn workers), Celery worker",
+  "host": "Ubuntu 24.04.5 LTS aarch64; 8 CPUs; 31 GiB RAM",
+  "seed": "60 finalized gallery projects, 40 independent deadline projects (20 finalizations and 20 draft saves), 20 independent judges, 20 independent voters",
+  "runner": "k6 shared-iterations; one run per scenario; distinct write identities; direct app port, no Caddy",
+  "scenarios": {
+    "baseline": {
+      "vus": 10,
+      "methods": {
+        "GET": 100
+      },
+      "requests": 100,
+      "p95_ms": 104.99,
+      "max_ms": 257.49,
+      "http_failures": 0,
+      "status_check_failures": 0
+    },
+    "deadline_storm": {
+      "vus": 10,
+      "methods": {
+        "POST": 20,
+        "PUT": 20
+      },
+      "requests": 40,
+      "p95_ms": 145.91,
+      "max_ms": 150.76,
+      "http_failures": 0,
+      "status_check_failures": 0
+    },
+    "judging_open": {
+      "vus": 10,
+      "methods": {
+        "POST": 20
+      },
+      "requests": 20,
+      "p95_ms": 199.6,
+      "max_ms": 199.97,
+      "http_failures": 0,
+      "status_check_failures": 0
+    },
+    "voting_spike": {
+      "vus": 10,
+      "methods": {
+        "POST": 20
+      },
+      "requests": 20,
+      "p95_ms": 108.39,
+      "max_ms": 108.96,
+      "http_failures": 0,
+      "status_check_failures": 0
+    },
+    "gallery_spike": {
+      "vus": 20,
+      "methods": {
+        "GET": 200
+      },
+      "requests": 200,
+      "p95_ms": 139.06,
+      "max_ms": 163.26,
+      "http_failures": 0,
+      "status_check_failures": 0
+    }
+  },
+  "restart_smoke": "Worker stopped: one new authenticated vote returned 201. After app and worker restart: 21 votes, 20 ballots, 80 finalized submissions; gallery returned 200 with 80 projects."
+}

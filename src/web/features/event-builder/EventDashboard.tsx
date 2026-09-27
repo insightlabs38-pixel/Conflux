@@ -7,6 +7,7 @@ import { PageBuilder } from "../page-builder/PageBuilder";
 import { EvaluationBuilder } from "../judging/EvaluationBuilder";
 import { CommunityVotingBuilder } from "../community-voting/CommunityVotingBuilder";
 import { WebhooksPanel } from "../integrations/WebhooksPanel";
+import { AwardsPanel } from "../awards/AwardsPanel";
 
 type Event = {
   public_id: string;
@@ -448,7 +449,8 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
           <PageBuilder workspaceId={workspaceId} eventId={selected.public_id} />
           <EvaluationBuilder workspaceId={workspaceId} eventId={selected.public_id} />
           <CommunityVotingBuilder workspaceId={workspaceId} eventId={selected.public_id} />
-          <WebhooksPanel key={selected.public_id} workspaceId={workspaceId} eventId={selected.public_id} />
+          <WebhooksPanel key={`webhooks-${selected.public_id}`} workspaceId={workspaceId} eventId={selected.public_id} />
+          <AwardsPanel key={`awards-${selected.public_id}`} workspaceId={workspaceId} eventId={selected.public_id} />
         </article>
       )}
     </section>

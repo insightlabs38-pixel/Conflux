@@ -109,3 +109,42 @@ class AwardWinner(PublicIdModel):
         constraints = [
             models.UniqueConstraint(fields=["award", "project"], name="unique_award_project_winner")
         ]
+
+
+class FulfillmentState(models.TextChoices):
+    PENDING = "pending", "Pending"
+    CONTACTED = "contacted", "Contacted"
+    VERIFIED = "verified", "Verified"
+    SENT = "sent", "Sent"
+    CLAIMED = "claimed", "Claimed"
+    FAILED = "failed", "Failed"
+
+
+class PrizeFulfillment(PublicIdModel):
+    winner = models.ForeignKey(AwardWinner, on_delete=models.CASCADE, related_name="fulfillments")
+    component = models.ForeignKey(
+        PrizeComponent, on_delete=models.PROTECT, related_name="fulfillments"
+    )
+    state = models.CharField(
+        max_length=12, choices=FulfillmentState.choices, default=FulfillmentState.PENDING
+    )
+    note = models.TextField(blank=True)
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["winner", "component"], name="unique_winner_component_fulfillment"
+            )
+        ]
+
+    def clean(self):
+        if (
+            self.component_id
+            and self.winner_id
+            and self.component.package.award_id != self.winner.award_id
+        ):
+            raise ValidationError({"component": "Component must belong to the winner's award."})

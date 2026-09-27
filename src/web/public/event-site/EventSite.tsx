@@ -6,6 +6,7 @@ import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 import { CommunityVoting } from "../../features/community-voting/CommunityVoting";
+import { PublicAwards } from "../../features/awards/PublicAwards";
 
 type Track = { public_id: string; name: string; description: string };
 type BasePrize = {
@@ -85,6 +86,7 @@ export function EventSite({ eventId }: { eventId: string }) {
           <Badge tone="info">{event.status}</Badge>
           {schedule && <p>{schedule}</p>}
           {event.description && <p>{event.description}</p>}
+          <PublicAwards eventId={eventId} />
 
           <section aria-label="Tracks">
             <h2>Tracks</h2>

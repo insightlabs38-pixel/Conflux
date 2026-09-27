@@ -109,6 +109,7 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "EventStatus": "events.models.EventStatus",
         "CandidateQueueStatus": ["pending", "drafted", "submitted"],
+        "BasePrizeKind": "events.models.BasePrize.Kind",
     },
 }
 

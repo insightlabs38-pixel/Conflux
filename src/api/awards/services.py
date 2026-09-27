@@ -6,7 +6,7 @@ from django.db import transaction
 from evaluations.results import ranked_results
 from projects.models import Project, SubmissionStatus
 
-from .models import Award, AwardWinner, SelectionSource
+from .models import Award, AwardWinner, FulfillmentState, PrizeFulfillment, SelectionSource
 
 
 def _source_evidence(award, project):
@@ -87,6 +87,14 @@ def select_winner(*, award, project, actor, override_reason=""):
             evidence=evidence,
             override_reason=reason,
         )
+        package = getattr(award, "prize_package", None)
+        if package:
+            PrizeFulfillment.objects.bulk_create(
+                [
+                    PrizeFulfillment(winner=winner, component=component)
+                    for component in package.components.all()
+                ]
+            )
         record_mutation(
             actor=actor,
             workspace=award.event.workspace,
@@ -105,3 +113,47 @@ def select_winner(*, award, project, actor, override_reason=""):
             },
         )
         return winner
+
+
+NEXT_STATES = {
+    FulfillmentState.PENDING: FulfillmentState.CONTACTED,
+    FulfillmentState.CONTACTED: FulfillmentState.VERIFIED,
+    FulfillmentState.VERIFIED: FulfillmentState.SENT,
+}
+
+
+def advance_fulfillment(*, fulfillment, target, actor, note=""):
+    with transaction.atomic():
+        fulfillment = (
+            PrizeFulfillment.objects.select_for_update()
+            .select_related("winner__award__event", "component")
+            .get(pk=fulfillment.pk)
+        )
+        current = fulfillment.state
+        allowed = target == NEXT_STATES.get(current) or (
+            current == FulfillmentState.SENT
+            and target in (FulfillmentState.CLAIMED, FulfillmentState.FAILED)
+        )
+        if not allowed:
+            raise ValidationError("Invalid fulfillment transition.")
+        if target == FulfillmentState.FAILED and not note.strip():
+            raise ValidationError("Failure requires a note.")
+        fulfillment.state = target
+        fulfillment.note = note.strip()
+        fulfillment.updated_by = actor
+        fulfillment.save(update_fields=["state", "note", "updated_by", "updated_at"])
+        award = fulfillment.winner.award
+        record_mutation(
+            actor=actor,
+            workspace=award.event.workspace,
+            action="prize.fulfillment_advanced",
+            target=fulfillment,
+            metadata={"state": target, "note": fulfillment.note},
+            event_type="prize.fulfillment_advanced",
+            payload={
+                "event": str(award.event.public_id),
+                "award": str(award.public_id),
+                "state": target,
+            },
+        )
+        return fulfillment

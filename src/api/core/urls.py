@@ -31,4 +31,5 @@ urlpatterns = [
     path("", include("presentation.urls")),
     path("", include("evaluations.urls")),
     path("", include("community.urls")),
+    path("", include("awards.urls")),
 ]

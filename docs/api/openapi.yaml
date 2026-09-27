@@ -106,6 +106,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/PublicEventSchema'
           description: ''
+  /api/v1/events/{event_public_id}/awards/:
+    get:
+      operationId: get_api_v1_events_event_public_id_awards
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - events
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicAwardOutput'
+          description: ''
   /api/v1/export.csv:
     get:
       operationId: get_api_v1_export_csv
@@ -816,6 +839,282 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AwardOutput'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AwardInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AwardInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AwardInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AwardOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/components/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_components
+      parameters:
+      - in: path
+        name: award_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComponentInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ComponentInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ComponentInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComponentOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/fulfillments/{fulfillment_public_id}/:
+    patch:
+      operationId: patch_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_fulfillments_fulfillment_public_id
+      parameters:
+      - in: path
+        name: award_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: fulfillment_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFulfillmentInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedFulfillmentInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedFulfillmentInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FulfillmentOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/publish/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_publish
+      parameters:
+      - in: path
+        name: award_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AwardOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/winners/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_winners
+      parameters:
+      - in: path
+        name: award_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WinnerInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WinnerInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WinnerInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WinnerOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/candidates/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_candidates
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CandidateOutput'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/base-prizes/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_base_prizes
@@ -5888,6 +6187,93 @@ components:
       - public_id
       - target_id
       - target_type
+    AwardInput:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 160
+        description:
+          type: string
+        eligibility_track:
+          type: string
+          format: uuid
+          nullable: true
+        require_finalized_submission:
+          type: boolean
+        selection_source:
+          $ref: '#/components/schemas/SelectionSourceEnum'
+        evaluation_plan:
+          type: string
+          format: uuid
+          nullable: true
+        winner_count:
+          type: integer
+          maximum: 100
+          minimum: 1
+        allow_stacking:
+          type: boolean
+        conflict_group:
+          type: string
+          maxLength: 80
+      required:
+      - name
+      - selection_source
+      - winner_count
+    AwardOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        eligibility_track:
+          type: string
+          format: uuid
+          nullable: true
+        require_finalized_submission:
+          type: boolean
+        selection_source:
+          type: string
+        evaluation_plan:
+          type: string
+          format: uuid
+          nullable: true
+        winner_count:
+          type: integer
+        allow_stacking:
+          type: boolean
+        conflict_group:
+          type: string
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComponentOutput'
+        winners:
+          type: array
+          items:
+            $ref: '#/components/schemas/WinnerOutput'
+      required:
+      - allow_stacking
+      - components
+      - conflict_group
+      - description
+      - eligibility_track
+      - evaluation_plan
+      - name
+      - public_id
+      - published_at
+      - require_finalized_submission
+      - selection_source
+      - winner_count
+      - winners
     Ballot:
       type: object
       properties:
@@ -5982,7 +6368,7 @@ components:
         description:
           type: string
         kind:
-          $ref: '#/components/schemas/BasePrizeKindEnum'
+          $ref: '#/components/schemas/BasePrizeKind'
         amount:
           type: string
           format: decimal
@@ -6004,7 +6390,7 @@ components:
       - kind
       - name
       - public_id
-    BasePrizeKindEnum:
+    BasePrizeKind:
       enum:
       - cash
       - credit
@@ -6028,6 +6414,25 @@ components:
         * `mentorship` - Mentorship
         * `swag` - Swag
         * `other` - Other
+    CandidateOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        track:
+          type: string
+          format: uuid
+          nullable: true
+        has_finalized_submission:
+          type: boolean
+      required:
+      - has_finalized_submission
+      - name
+      - public_id
+      - track
     CandidateQueueItemSchema:
       type: object
       properties:
@@ -6128,6 +6533,61 @@ components:
       - created_at
       - detail
       - public_id
+    ComponentInput:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/BasePrizeKind'
+        name:
+          type: string
+          maxLength: 160
+        description:
+          type: string
+        quantity:
+          type: integer
+          maximum: 1000
+          minimum: 1
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        currency:
+          type: string
+          maxLength: 3
+      required:
+      - kind
+      - name
+      - quantity
+    ComponentOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        quantity:
+          type: integer
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+        currency:
+          type: string
+      required:
+      - amount
+      - currency
+      - description
+      - kind
+      - name
+      - public_id
+      - quantity
     ConflictOfInterest:
       type: object
       properties:
@@ -6643,6 +7103,31 @@ components:
       - public_id
       - published_at
       - schema
+    FulfillmentOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        component:
+          type: string
+          format: uuid
+        component_name:
+          type: string
+        state:
+          type: string
+        note:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - component
+      - component_name
+      - note
+      - public_id
+      - state
+      - updated_at
     GalleryProjectSchema:
       type: object
       properties:
@@ -6964,7 +7449,7 @@ components:
         description:
           type: string
         kind:
-          $ref: '#/components/schemas/BasePrizeKindEnum'
+          $ref: '#/components/schemas/BasePrizeKind'
         amount:
           type: string
           format: decimal
@@ -7064,6 +7549,13 @@ components:
           type: string
           format: date-time
           readOnly: true
+    PatchedFulfillmentInput:
+      type: object
+      properties:
+        state:
+          $ref: '#/components/schemas/StateEnum'
+        note:
+          type: string
     PatchedPage:
       type: object
       properties:
@@ -7423,6 +7915,60 @@ components:
       description: |-
         * `owner` - Owner
         * `contributor` - Contributor
+    PublicAwardOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        eligibility_track:
+          type: string
+          format: uuid
+          nullable: true
+        require_finalized_submission:
+          type: boolean
+        selection_source:
+          type: string
+        evaluation_plan:
+          type: string
+          format: uuid
+          nullable: true
+        winner_count:
+          type: integer
+        allow_stacking:
+          type: boolean
+        conflict_group:
+          type: string
+        published_at:
+          type: string
+          format: date-time
+          nullable: true
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComponentOutput'
+        winners:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicWinnerOutput'
+      required:
+      - allow_stacking
+      - components
+      - conflict_group
+      - description
+      - eligibility_track
+      - evaluation_plan
+      - name
+      - public_id
+      - published_at
+      - require_finalized_submission
+      - selection_source
+      - winner_count
+      - winners
     PublicEventSchema:
       type: object
       properties:
@@ -7467,6 +8013,17 @@ components:
       - status
       - timezone
       - tracks
+    PublicWinnerOutput:
+      type: object
+      properties:
+        project:
+          type: string
+          format: uuid
+        project_name:
+          type: string
+      required:
+      - project
+      - project_name
     RankedResultSchema:
       type: object
       properties:
@@ -7546,6 +8103,16 @@ components:
       - number
       - public_id
       - published_at
+    SelectionSourceEnum:
+      enum:
+      - manual
+      - evaluation
+      - community
+      type: string
+      description: |-
+        * `manual` - Manual
+        * `evaluation` - Evaluation results
+        * `community` - Community vote
     Stage:
       type: object
       properties:
@@ -7595,6 +8162,22 @@ components:
       - from_stage
       - public_id
       - to_stage
+    StateEnum:
+      enum:
+      - pending
+      - contacted
+      - verified
+      - sent
+      - claimed
+      - failed
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `contacted` - Contacted
+        * `verified` - Verified
+        * `sent` - Sent
+        * `claimed` - Claimed
+        * `failed` - Failed
     SubmissionDraftInputSchema:
       type: object
       properties:
@@ -8111,6 +8694,49 @@ components:
       - identity_mode
       - is_open
       - opens_at
+    WinnerInput:
+      type: object
+      properties:
+        project:
+          type: string
+          format: uuid
+        override_reason:
+          type: string
+      required:
+      - project
+    WinnerOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        project:
+          type: string
+          format: uuid
+        project_name:
+          type: string
+        source:
+          type: string
+        evidence: {}
+        override_reason:
+          type: string
+        selected_at:
+          type: string
+          format: date-time
+        fulfillments:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+      required:
+      - evidence
+      - fulfillments
+      - override_reason
+      - project
+      - project_name
+      - public_id
+      - selected_at
+      - source
     WorkspaceInputSchema:
       type: object
       properties:

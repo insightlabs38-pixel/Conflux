@@ -54,6 +54,8 @@ from .optimization import activate_optimized
 from .optimization import compare as compare_assignments
 from .progress import compute_progress
 from .results import pairwise_ranked_results, ranked_results
+from .rubric_lab import DEFAULT_FACTORS, version_samples
+from .rubric_lab import analyze as analyze_rubric
 from .schema import (
     AgreementSummarySchema,
     AssignmentActivateInputSchema,
@@ -90,6 +92,8 @@ from .schema import (
     ProvenanceSchema,
     RankedResultSchema,
     ResultsPublishInputSchema,
+    RubricLabInputSchema,
+    RubricLabSchema,
     SensitivityInputSchema,
 )
 from .sensitivity import (
@@ -1268,7 +1272,7 @@ def _translate_sensitivity_dimension(block, projects_by_id, *, key_names=None):
     }
 
 
-def _valid_ridge_lambda(value):
+def _finite_nonnegative_number(value):
     if not isinstance(value, (int, float)) or isinstance(value, bool) or value < 0:
         return False
     try:
@@ -1302,7 +1306,7 @@ class SensitivityExplorerView(PlanMixin):
         if (
             not isinstance(ridge_lambdas, list)
             or len(ridge_lambdas) > 10
-            or any(not _valid_ridge_lambda(v) for v in ridge_lambdas)
+            or any(not _finite_nonnegative_number(v) for v in ridge_lambdas)
         ):
             raise ValidationError({"ridge_lambdas": "Must be 0-10 nonnegative numbers."})
         if (
@@ -1342,6 +1346,51 @@ class SensitivityExplorerView(PlanMixin):
                 ),
             }
         )
+
+
+class RubricLabView(PlanMixin):
+    """Read-only diagnostics for one published rubric version's ballots."""
+
+    @extend_schema(request=RubricLabInputSchema, responses=RubricLabSchema)
+    def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        if plan.mode != EvaluationMode.RUBRIC:
+            raise ValidationError({"detail": "Rubric laboratory applies to a rubric-mode plan."})
+        schema = RubricLabInputSchema(data=request.data)
+        schema.is_valid(raise_exception=True)
+        data = schema.validated_data
+        version = (
+            get_object_or_404(RubricVersion, plan=plan, public_id=data["rubric_version"])
+            if data.get("rubric_version")
+            else plan.current_rubric_version
+        )
+        if version is None:
+            raise ValidationError({"detail": "Publish a rubric before analyzing it."})
+        factors = request.data.get("factors", list(DEFAULT_FACTORS))
+        if (
+            not isinstance(factors, list)
+            or not 1 <= len(factors) <= 4
+            or any(
+                not _finite_nonnegative_number(value) or value <= 0 or value > 10
+                for value in factors
+            )
+        ):
+            raise ValidationError(
+                {"factors": "Use 1-4 finite numbers greater than 0 and at most 10."}
+            )
+
+        result = analyze_rubric(version.criteria, version_samples(version), factors=factors)
+        project_ids = set(result["baseline"])
+        projects = Project.objects.in_bulk(project_ids)
+        result["baseline"] = [
+            str(projects[project_id].public_id) for project_id in result["baseline"]
+        ]
+        for criterion in result["criteria"]:
+            for scenario in criterion["weight_scenarios"]:
+                scenario["order"] = [
+                    str(projects[project_id].public_id) for project_id in scenario["order"]
+                ]
+        return Response({"rubric_version": str(version.public_id), **result})
 
 
 def _serialize_ranked(result, projects_by_id):

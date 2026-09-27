@@ -151,6 +151,11 @@ urlpatterns = [
         views.SensitivityExplorerView.as_view(),
         name="evaluation-plan-sensitivity",
     ),
+    path(
+        f"{_PLAN}/rubric-lab/",
+        views.RubricLabView.as_view(),
+        name="evaluation-plan-rubric-lab",
+    ),
     path(f"{_PLAN}/results/", views.ResultsView.as_view(), name="evaluation-plan-results"),
     path(
         f"{_PLAN}/provenance/<uuid:project_public_id>/",

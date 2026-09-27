@@ -2465,6 +2465,76 @@ export type InputOfResultsPublishInputSchema = {
   tie_breaks?: Record<string, number>;
 };
 
+export type RubricLabCriterionSchema = {
+  criterion_id: string;
+  name: string;
+  weight_share: number;
+  response_count: number;
+  missing_count: number;
+  mean: number | null;
+  variance: number | null;
+  scale_use: number | null;
+  at_min_count: number;
+  at_max_count: number;
+  spread_share: number | null;
+  dominates: boolean;
+  weight_scenarios: RubricLabScenarioSchema[];
+};
+
+export type InputOfRubricLabCriterionSchema = {
+  criterion_id: string;
+  name: string;
+  weight_share: number;
+  response_count: number;
+  missing_count: number;
+  mean: number | null;
+  variance: number | null;
+  scale_use: number | null;
+  at_min_count: number;
+  at_max_count: number;
+  spread_share: number | null;
+  dominates: boolean;
+  weight_scenarios: InputOfRubricLabScenarioSchema[];
+};
+
+export type RubricLabInputSchema = {
+  rubric_version?: string;
+  factors?: number[];
+};
+
+export type InputOfRubricLabInputSchema = {
+  rubric_version?: string;
+  factors?: number[];
+};
+
+export type RubricLabScenarioSchema = {
+  factor: number;
+  order: string[];
+  rank_changed_count: number;
+  top_changed: boolean;
+};
+
+export type InputOfRubricLabScenarioSchema = {
+  factor: number;
+  order: string[];
+  rank_changed_count: number;
+  top_changed: boolean;
+};
+
+export type RubricLabSchema = {
+  rubric_version: string;
+  ballot_count: number;
+  baseline: string[];
+  criteria: RubricLabCriterionSchema[];
+};
+
+export type InputOfRubricLabSchema = {
+  rubric_version: string;
+  ballot_count: number;
+  baseline: string[];
+  criteria: InputOfRubricLabCriterionSchema[];
+};
+
 export type RubricVersion = {
   public_id: string;
   number: number;
@@ -4634,6 +4704,18 @@ export interface Operations {
       };
     };
     response: string;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_rubric_lab: {
+    request: {
+      path: {
+        event_public_id: string;
+        plan_public_id: string;
+        stage_public_id: string;
+        workspace_public_id: string;
+      };
+      body?: InputOfRubricLabInputSchema;
+    };
+    response: RubricLabSchema;
   };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_sensitivity: {
     request: {
@@ -7073,6 +7155,20 @@ export const operations = {
       query_params: [],
       request_body: false,
       response_kind: "text",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_rubric_lab:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/rubric-lab/",
+      path_params: [
+        "event_public_id",
+        "plan_public_id",
+        "stage_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
     },
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_sensitivity:
     {

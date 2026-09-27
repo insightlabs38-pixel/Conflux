@@ -189,6 +189,47 @@ class SensitivityInputSchema(serializers.Serializer):
     )
 
 
+class RubricLabInputSchema(serializers.Serializer):
+    rubric_version = serializers.UUIDField(required=False)
+    factors = serializers.ListField(
+        child=serializers.FloatField(),
+        required=False,
+        min_length=1,
+        max_length=4,
+        help_text="One to four finite multipliers greater than zero and at most ten.",
+    )
+
+
+class RubricLabScenarioSchema(serializers.Serializer):
+    factor = serializers.FloatField()
+    order = serializers.ListField(child=serializers.UUIDField())
+    rank_changed_count = serializers.IntegerField()
+    top_changed = serializers.BooleanField()
+
+
+class RubricLabCriterionSchema(serializers.Serializer):
+    criterion_id = serializers.CharField()
+    name = serializers.CharField()
+    weight_share = serializers.FloatField()
+    response_count = serializers.IntegerField()
+    missing_count = serializers.IntegerField()
+    mean = serializers.FloatField(allow_null=True)
+    variance = serializers.FloatField(allow_null=True)
+    scale_use = serializers.FloatField(allow_null=True)
+    at_min_count = serializers.IntegerField()
+    at_max_count = serializers.IntegerField()
+    spread_share = serializers.FloatField(allow_null=True)
+    dominates = serializers.BooleanField()
+    weight_scenarios = RubricLabScenarioSchema(many=True)
+
+
+class RubricLabSchema(serializers.Serializer):
+    rubric_version = serializers.UUIDField()
+    ballot_count = serializers.IntegerField()
+    baseline = serializers.ListField(child=serializers.UUIDField())
+    criteria = RubricLabCriterionSchema(many=True)
+
+
 class PairwiseComparisonInputSchema(serializers.Serializer):
     project_a = serializers.UUIDField()
     project_b = serializers.UUIDField()

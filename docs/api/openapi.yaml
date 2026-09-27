@@ -7672,6 +7672,58 @@ paths:
                 type: string
                 format: binary
           description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/rubric-lab/
+  : post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_rubric_lab
+      description: Read-only diagnostics for one published rubric version's ballots.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RubricLabInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RubricLabInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RubricLabInputSchema'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RubricLabSchema'
+          description: ''
   ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/sensitivity/
   : post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_sensitivity
@@ -13056,6 +13108,117 @@ components:
             type: integer
       required:
       - normalization_run
+    RubricLabCriterionSchema:
+      type: object
+      properties:
+        criterion_id:
+          type: string
+        name:
+          type: string
+        weight_share:
+          type: number
+          format: double
+        response_count:
+          type: integer
+        missing_count:
+          type: integer
+        mean:
+          type: number
+          format: double
+          nullable: true
+        variance:
+          type: number
+          format: double
+          nullable: true
+        scale_use:
+          type: number
+          format: double
+          nullable: true
+        at_min_count:
+          type: integer
+        at_max_count:
+          type: integer
+        spread_share:
+          type: number
+          format: double
+          nullable: true
+        dominates:
+          type: boolean
+        weight_scenarios:
+          type: array
+          items:
+            $ref: '#/components/schemas/RubricLabScenarioSchema'
+      required:
+      - at_max_count
+      - at_min_count
+      - criterion_id
+      - dominates
+      - mean
+      - missing_count
+      - name
+      - response_count
+      - scale_use
+      - spread_share
+      - variance
+      - weight_scenarios
+      - weight_share
+    RubricLabInputSchema:
+      type: object
+      properties:
+        rubric_version:
+          type: string
+          format: uuid
+        factors:
+          type: array
+          items:
+            type: number
+            format: double
+          description: One to four finite multipliers greater than zero and at most
+            ten.
+          maxItems: 4
+          minItems: 1
+    RubricLabScenarioSchema:
+      type: object
+      properties:
+        factor:
+          type: number
+          format: double
+        order:
+          type: array
+          items:
+            type: string
+            format: uuid
+        rank_changed_count:
+          type: integer
+        top_changed:
+          type: boolean
+      required:
+      - factor
+      - order
+      - rank_changed_count
+      - top_changed
+    RubricLabSchema:
+      type: object
+      properties:
+        rubric_version:
+          type: string
+          format: uuid
+        ballot_count:
+          type: integer
+        baseline:
+          type: array
+          items:
+            type: string
+            format: uuid
+        criteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/RubricLabCriterionSchema'
+      required:
+      - ballot_count
+      - baseline
+      - criteria
+      - rubric_version
     RubricVersion:
       type: object
       properties:

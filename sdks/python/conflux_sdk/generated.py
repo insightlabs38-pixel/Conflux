@@ -2270,6 +2270,68 @@ class InputOfResultsPublishInputSchema(TypedDict):
     normalization_run: str
     tie_breaks: NotRequired[dict[str, int]]
 
+class RubricLabCriterionSchema(TypedDict):
+    criterion_id: str
+    name: str
+    weight_share: float
+    response_count: int
+    missing_count: int
+    mean: float | None
+    variance: float | None
+    scale_use: float | None
+    at_min_count: int
+    at_max_count: int
+    spread_share: float | None
+    dominates: bool
+    weight_scenarios: list[RubricLabScenarioSchema]
+
+class InputOfRubricLabCriterionSchema(TypedDict):
+    criterion_id: str
+    name: str
+    weight_share: float
+    response_count: int
+    missing_count: int
+    mean: float | None
+    variance: float | None
+    scale_use: float | None
+    at_min_count: int
+    at_max_count: int
+    spread_share: float | None
+    dominates: bool
+    weight_scenarios: list[InputOfRubricLabScenarioSchema]
+
+class RubricLabInputSchema(TypedDict):
+    rubric_version: NotRequired[str]
+    factors: NotRequired[list[float]]
+
+class InputOfRubricLabInputSchema(TypedDict):
+    rubric_version: NotRequired[str]
+    factors: NotRequired[list[float]]
+
+class RubricLabScenarioSchema(TypedDict):
+    factor: float
+    order: list[str]
+    rank_changed_count: int
+    top_changed: bool
+
+class InputOfRubricLabScenarioSchema(TypedDict):
+    factor: float
+    order: list[str]
+    rank_changed_count: int
+    top_changed: bool
+
+class RubricLabSchema(TypedDict):
+    rubric_version: str
+    ballot_count: int
+    baseline: list[str]
+    criteria: list[RubricLabCriterionSchema]
+
+class InputOfRubricLabSchema(TypedDict):
+    rubric_version: str
+    ballot_count: int
+    baseline: list[str]
+    criteria: list[InputOfRubricLabCriterionSchema]
+
 class RubricVersion(TypedDict):
     public_id: str
     number: int
@@ -4391,6 +4453,15 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                              'query_params': [],
                                                                                                                                              'request_body': False,
                                                                                                                                              'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_rubric_lab': {'method': 'POST',
+                                                                                                                                         'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/rubric-lab/',
+                                                                                                                                         'path_params': ['event_public_id',
+                                                                                                                                                         'plan_public_id',
+                                                                                                                                                         'stage_public_id',
+                                                                                                                                                         'workspace_public_id'],
+                                                                                                                                         'query_params': [],
+                                                                                                                                         'request_body': True,
+                                                                                                                                         'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_sensitivity': {'method': 'POST',
                                                                                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/sensitivity/',
                                                                                                                                           'path_params': ['event_public_id',

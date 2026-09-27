@@ -14,6 +14,7 @@ RUN python -m pip install --no-cache-dir "uv==0.12.18" \
     && uv sync --frozen --directory /tmp/deps --no-dev --compile-bytecode
 
 COPY src/api /app
+COPY src/web/styles /web/styles
 COPY fixtures /app/fixtures
 
 WORKDIR /app

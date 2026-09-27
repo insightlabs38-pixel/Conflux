@@ -1,8 +1,12 @@
 :80 {
-	# API and static assets are served by the Django/ASGI application.
+	# Collected public styles are served from the volume shared with Django.
 	@objects path /{$S3_BUCKET_NAME}/*
 	handle @objects {
 		reverse_proxy objectstore:9000
+	}
+	handle_path /static/* {
+		root * /srv/static
+		file_server
 	}
 	handle {
 		reverse_proxy app:8000

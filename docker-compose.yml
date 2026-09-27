@@ -31,7 +31,7 @@ services:
       S3_BUCKET_NAME: ${S3_BUCKET_NAME:-conflux-artifacts}
       UVICORN_WORKERS: ${UVICORN_WORKERS:-2}
     volumes:
-      - app-static:/app/static
+      - app-static:/app/staticfiles
     depends_on:
       db:
         condition: service_healthy
@@ -180,6 +180,7 @@ services:
       - "${CONFLUX_PORT:-8080}:80"
     volumes:
       - ./infra/Caddyfile:/etc/caddy/Caddyfile:ro
+      - app-static:/srv/static:ro
       - caddy-data:/data
       - caddy-config:/config
     depends_on:

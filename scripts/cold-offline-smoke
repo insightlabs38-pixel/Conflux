@@ -29,4 +29,5 @@ echo "== end-to-end health check through Caddy =="
 # unrelated to whether the app itself needs a hosted dependency.
 compose exec -T caddy curl -fsS http://localhost/api/v1/health/
 echo
+compose exec -T caddy curl -fsS http://localhost/static/tokens.css | grep -q -- '--color-bg'
 echo "cold-offline boot smoke: PASS"

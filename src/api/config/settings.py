@@ -60,6 +60,7 @@ CELERY_RESULT_BACKEND = VALKEY_URL
 
 # Generic S3 adapter settings; RustFS is the default local object store.
 S3_ENDPOINT_URL = os.environ.get("S3_ENDPOINT_URL", "http://localhost:9000")
+S3_PUBLIC_ENDPOINT_URL = os.environ.get("S3_PUBLIC_ENDPOINT_URL", "http://localhost:9000")
 S3_ACCESS_KEY = os.environ.get("S3_ACCESS_KEY", "")
 S3_SECRET_KEY = os.environ.get("S3_SECRET_KEY", "")
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME", "conflux-artifacts")

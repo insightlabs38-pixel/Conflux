@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.db import models
+from django.utils import timezone
 from projects.models import Project
 
 
@@ -97,3 +98,19 @@ def can_view_artifact(artifact, *, user=None, role=None):
     if artifact.visibility == ArtifactVisibility.PARTICIPANT:
         return artifact.project.memberships.filter(user=user).exists()
     return False
+
+
+class ArtifactUploadIntent(PublicIdModel):
+    artifact = models.ForeignKey(Artifact, on_delete=models.CASCADE, related_name="upload_intents")
+    object_key = models.CharField(max_length=500)
+    expected_size = models.PositiveBigIntegerField()
+    expected_type = models.CharField(max_length=200)
+    upload_id = models.CharField(max_length=300, blank=True)
+    part_count = models.PositiveIntegerField(default=0)
+    expires_at = models.DateTimeField()
+    completed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def is_active(self):
+        return self.completed_at is None and timezone.now() < self.expires_at

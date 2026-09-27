@@ -24,6 +24,7 @@ services:
       DATABASE_URL: postgres://${POSTGRES_USER:-conflux}:${POSTGRES_PASSWORD:-conflux}@db:5432/${POSTGRES_DB:-conflux}
       VALKEY_URL: redis://cache:6379/0
       S3_ENDPOINT_URL: http://objectstore:9000
+      S3_PUBLIC_ENDPOINT_URL: http://localhost:${CONFLUX_PORT:-8080}
       S3_ACCESS_KEY: ${S3_ACCESS_KEY:-conflux}
       S3_SECRET_KEY: ${S3_SECRET_KEY:-conflux-secret}
       S3_BUCKET_NAME: ${S3_BUCKET_NAME:-conflux-artifacts}
@@ -63,6 +64,7 @@ services:
       DATABASE_URL: postgres://${POSTGRES_USER:-conflux}:${POSTGRES_PASSWORD:-conflux}@db:5432/${POSTGRES_DB:-conflux}
       VALKEY_URL: redis://cache:6379/0
       S3_ENDPOINT_URL: http://objectstore:9000
+      S3_PUBLIC_ENDPOINT_URL: http://localhost:${CONFLUX_PORT:-8080}
       S3_ACCESS_KEY: ${S3_ACCESS_KEY:-conflux}
       S3_SECRET_KEY: ${S3_SECRET_KEY:-conflux-secret}
       S3_BUCKET_NAME: ${S3_BUCKET_NAME:-conflux-artifacts}
@@ -155,6 +157,8 @@ services:
 
   caddy:
     image: caddy:2
+    environment:
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME:-conflux-artifacts}
     ports:
       - "${CONFLUX_PORT:-8080}:80"
     volumes:

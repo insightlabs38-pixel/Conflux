@@ -1,4 +1,10 @@
 :80 {
 	# API and static assets are served by the Django/ASGI application.
-	reverse_proxy app:8000
+	@objects path /{$S3_BUCKET_NAME}/*
+	handle @objects {
+		reverse_proxy objectstore:9000
+	}
+	handle {
+		reverse_proxy app:8000
+	}
 }

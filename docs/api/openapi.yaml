@@ -979,6 +979,81 @@ paths:
               schema:
                 $ref: '#/components/schemas/ImportedEventOutput'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/event-templates/library/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_event_templates_library
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LibraryTemplateOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/event-templates/library/{template_slug}/instantiate/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_event_templates_library_template_slug_instantiate
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: template_slug
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstantiateInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InstantiateInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InstantiateInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportedEventOutput'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events
@@ -11480,6 +11555,30 @@ components:
       required:
       - items
       - status
+    LibraryTemplateOutput:
+      type: object
+      properties:
+        slug:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+        description:
+          type: string
+        tracks:
+          type: array
+          items:
+            type: string
+        stages:
+          type: array
+          items:
+            type: string
+      required:
+      - description
+      - label
+      - slug
+      - stages
+      - tracks
     LoginInputSchema:
       type: object
       properties:

@@ -1326,6 +1326,20 @@ class InputOfLaunchChecklistSchema(TypedDict):
     status: str
     items: list[InputOfChecklistItemSchema]
 
+class LibraryTemplateOutput(TypedDict):
+    slug: str
+    label: str
+    description: str
+    tracks: list[str]
+    stages: list[str]
+
+class InputOfLibraryTemplateOutput(TypedDict):
+    slug: str
+    label: str
+    description: str
+    tracks: list[str]
+    stages: list[str]
+
 class LoginInputSchema(TypedDict):
     username: str
     password: str
@@ -3062,6 +3076,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                'query_params': [],
                                                                'request_body': False,
                                                                'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_event_templates_library': {'method': 'GET',
+                                                                       'path': '/api/v1/workspaces/{workspace_public_id}/event-templates/library/',
+                                                                       'path_params': ['workspace_public_id'],
+                                                                       'query_params': [],
+                                                                       'request_body': False,
+                                                                       'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events': {'method': 'GET',
                                                       'path': '/api/v1/workspaces/{workspace_public_id}/events/',
                                                       'path_params': ['workspace_public_id'],
@@ -3967,6 +3987,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                 'query_params': [],
                                                                 'request_body': True,
                                                                 'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_event_templates_library_template_slug_instantiate': {'method': 'POST',
+                                                                                                  'path': '/api/v1/workspaces/{workspace_public_id}/event-templates/library/{template_slug}/instantiate/',
+                                                                                                  'path_params': ['template_slug',
+                                                                                                                  'workspace_public_id'],
+                                                                                                  'query_params': [],
+                                                                                                  'request_body': True,
+                                                                                                  'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_event_templates_template_public_id_instantiate': {'method': 'POST',
                                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/event-templates/{template_public_id}/instantiate/',
                                                                                                'path_params': ['template_public_id',

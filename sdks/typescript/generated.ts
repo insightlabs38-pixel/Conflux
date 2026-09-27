@@ -1427,6 +1427,22 @@ export type InputOfLaunchChecklistSchema = {
   items: InputOfChecklistItemSchema[];
 };
 
+export type LibraryTemplateOutput = {
+  slug: string;
+  label: string;
+  description: string;
+  tracks: string[];
+  stages: string[];
+};
+
+export type InputOfLibraryTemplateOutput = {
+  slug: string;
+  label: string;
+  description: string;
+  tracks: string[];
+  stages: string[];
+};
+
 export type LoginInputSchema = { username: string; password: string };
 
 export type InputOfLoginInputSchema = { username: string; password: string };
@@ -3266,6 +3282,17 @@ export interface Operations {
   post_api_v1_workspaces_workspace_public_id_event_templates_template_public_id_instantiate: {
     request: {
       path: { template_public_id: string; workspace_public_id: string };
+      body: InputOfInstantiateInput;
+    };
+    response: ImportedEventOutput;
+  };
+  get_api_v1_workspaces_workspace_public_id_event_templates_library: {
+    request: { path: { workspace_public_id: string } };
+    response: LibraryTemplateOutput[];
+  };
+  post_api_v1_workspaces_workspace_public_id_event_templates_library_template_slug_instantiate: {
+    request: {
+      path: { template_slug: string; workspace_public_id: string };
       body: InputOfInstantiateInput;
     };
     response: ImportedEventOutput;
@@ -5237,6 +5264,23 @@ export const operations = {
       method: "POST",
       path: "/api/v1/workspaces/{workspace_public_id}/event-templates/{template_public_id}/instantiate/",
       path_params: ["template_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_event_templates_library: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/event-templates/library/",
+    path_params: ["workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  post_api_v1_workspaces_workspace_public_id_event_templates_library_template_slug_instantiate:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/event-templates/library/{template_slug}/instantiate/",
+      path_params: ["template_slug", "workspace_public_id"],
       query_params: [],
       request_body: true,
       response_kind: "json",

@@ -19,6 +19,16 @@ urlpatterns = [
         name="event-template-list",
     ),
     path(
+        "workspaces/<uuid:workspace_public_id>/event-templates/library/",
+        template_views.TemplateLibraryListView.as_view(),
+        name="event-template-library",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/event-templates/library/<slug:template_slug>/instantiate/",
+        template_views.TemplateLibraryInstantiateView.as_view(),
+        name="event-template-library-instantiate",
+    ),
+    path(
         "workspaces/<uuid:workspace_public_id>/event-templates/<uuid:template_public_id>/",
         template_views.EventTemplateDetailView.as_view(),
         name="event-template-detail",

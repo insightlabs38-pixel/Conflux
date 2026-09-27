@@ -50,6 +50,8 @@ describe("EventTemplatesPanel", () => {
         const method = init?.method ?? "GET";
         if (url.endsWith("/events/") && method === "GET")
           return { ok: true, json: async () => events };
+        if (url.endsWith("event-templates/library/") && method === "GET")
+          return { ok: true, json: async () => [] };
         if (url.endsWith("event-templates/") && method === "GET") {
           return { ok: true, json: async () => [] };
         }
@@ -105,6 +107,8 @@ describe("EventTemplatesPanel", () => {
         }
         if (url.endsWith("event-templates/"))
           return { ok: true, json: async () => [] };
+        if (url.endsWith("event-templates/library/"))
+          return { ok: true, json: async () => [] };
         if (url.endsWith("/events/e1/clone/")) {
           return {
             ok: true,
@@ -155,5 +159,69 @@ describe("EventTemplatesPanel", () => {
     expect(onCreated).toHaveBeenCalledWith("e2");
     expect(container.textContent).toContain('Created event "Clone"');
     expect(container.textContent).not.toContain("Reload to see it");
+  });
+
+  it("creates a draft event from a local starter template", async () => {
+    const onCreated = vi.fn();
+    const fetchMock = vi.fn(async (input: unknown, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith("/events/")) return { ok: true, json: async () => [] };
+      if (url.endsWith("event-templates/"))
+        return { ok: true, json: async () => [] };
+      if (url.endsWith("event-templates/library/"))
+        return {
+          ok: true,
+          json: async () => [
+            {
+              slug: "science_fair",
+              label: "Science fair",
+              description: "Evaluate research projects.",
+              tracks: ["Research"],
+              stages: ["Submission", "Judging"],
+            },
+          ],
+        };
+      if (url.endsWith("event-templates/library/science_fair/instantiate/"))
+        return {
+          ok: true,
+          json: async () => ({
+            public_id: "new-1",
+            name: "County Fair",
+            slug: "county-fair",
+          }),
+        };
+      throw new Error(`Unexpected request: ${url} ${init?.method}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    act(() =>
+      root.render(
+        <EventTemplatesPanel workspaceId="w1" onCreated={onCreated} />,
+      ),
+    );
+    await until(() => container.textContent?.includes("Science fair") ?? false);
+    for (const [selector, value] of [
+      ["#library-name-science_fair", "County Fair"],
+      ["#library-slug-science_fair", "county-fair"],
+    ]) {
+      await act(async () => {
+        const input = container.querySelector<HTMLInputElement>(selector)!;
+        Object.getOwnPropertyDescriptor(
+          HTMLInputElement.prototype,
+          "value",
+        )?.set?.call(input, value);
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+    }
+    await act(async () => {
+      [...container.querySelectorAll("button")]
+        .find((button) => button.textContent === "Create science fair event")
+        ?.click();
+    });
+    await until(() => onCreated.mock.calls.length > 0);
+    expect(onCreated).toHaveBeenCalledWith("new-1");
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining("library/science_fair/instantiate/"),
+      expect.objectContaining({ method: "POST" }),
+    );
   });
 });

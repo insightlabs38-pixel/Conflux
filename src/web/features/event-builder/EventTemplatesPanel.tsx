@@ -10,6 +10,13 @@ type Template = {
   sections: string[];
   created_at: string;
 };
+type LibraryTemplate = {
+  slug: string;
+  label: string;
+  description: string;
+  tracks: string[];
+  stages: string[];
+};
 type Preview = Record<string, unknown[] | undefined>;
 
 const SECTION_KEYS = [
@@ -72,6 +79,7 @@ export function EventTemplatesPanel({
   const base = `/api/v1/workspaces/${workspaceId}/`;
   const [events, setEvents] = useState<EventSummary[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
+  const [library, setLibrary] = useState<LibraryTemplate[]>([]);
   const [sourceEvent, setSourceEvent] = useState("");
   const [sections, setSections] = useState<string[]>([...SECTION_KEYS]);
   const [preview, setPreview] = useState<Preview | null>(null);
@@ -90,10 +98,12 @@ export function EventTemplatesPanel({
     void Promise.all([
       request<EventSummary[]>(base + "events/"),
       request<Template[]>(base + "event-templates/"),
+      request<LibraryTemplate[]>(base + "event-templates/library/"),
     ])
-      .then(([nextEvents, nextTemplates]) => {
+      .then(([nextEvents, nextTemplates, nextLibrary]) => {
         setEvents(nextEvents);
         setTemplates(nextTemplates);
+        setLibrary(nextLibrary);
       })
       .catch((cause: unknown) => setError(message(cause)));
   }
@@ -196,6 +206,28 @@ export function EventTemplatesPanel({
     });
   }
 
+  async function instantiateLibrary(
+    template: LibraryTemplate,
+    instantiateName: string,
+    instantiateSlug: string,
+  ) {
+    await run(async () => {
+      if (!instantiateName.trim() || !instantiateSlug.trim())
+        throw new Error("Name and slug are required.");
+      const result = await request<{
+        public_id: string;
+        name: string;
+        slug: string;
+      }>(
+        base + `event-templates/library/${template.slug}/instantiate/`,
+        "POST",
+        { name: instantiateName.trim(), slug: instantiateSlug.trim() },
+      );
+      setCreated(result);
+      onCreated?.(result.public_id);
+    });
+  }
+
   return (
     <Card title="Event templates &amp; cloning">
       {error && <p role="alert">{error}</p>}
@@ -273,6 +305,21 @@ export function EventTemplatesPanel({
           Clone directly to a new event now
         </Button>
       </form>
+      <h4>Local starter templates</h4>
+      <p>
+        Choose a starting structure, then review its draft stages and judging
+        rubric.
+      </p>
+      <ul>
+        {library.map((template) => (
+          <LibraryTemplateRow
+            key={template.slug}
+            template={template}
+            busy={busy}
+            onInstantiate={instantiateLibrary}
+          />
+        ))}
+      </ul>
       <h4>Saved templates</h4>
       {templates.length === 0 ? (
         <p>No templates saved yet.</p>
@@ -289,6 +336,51 @@ export function EventTemplatesPanel({
         </ul>
       )}
     </Card>
+  );
+}
+
+function LibraryTemplateRow({
+  template,
+  busy,
+  onInstantiate,
+}: {
+  template: LibraryTemplate;
+  busy: boolean;
+  onInstantiate: (
+    template: LibraryTemplate,
+    name: string,
+    slug: string,
+  ) => Promise<void>;
+}) {
+  const [name, setName] = useState("");
+  const [slug, setSlug] = useState("");
+  return (
+    <li>
+      <strong>{template.label}</strong> — {template.description}
+      <p>
+        Stages: {template.stages.join(" → ")}. Tracks:{" "}
+        {template.tracks.join(", ")}.
+      </p>
+      <label htmlFor={`library-name-${template.slug}`}>Event name</label>
+      <input
+        id={`library-name-${template.slug}`}
+        value={name}
+        onChange={(event) => setName(event.target.value)}
+      />
+      <label htmlFor={`library-slug-${template.slug}`}>Event slug</label>
+      <input
+        id={`library-slug-${template.slug}`}
+        value={slug}
+        onChange={(event) => setSlug(event.target.value)}
+      />
+      <Button
+        type="button"
+        disabled={busy || !name.trim() || !slug.trim()}
+        onClick={() => void onInstantiate(template, name, slug)}
+      >
+        Create {template.label.toLowerCase()} event
+      </Button>
+    </li>
   );
 }
 

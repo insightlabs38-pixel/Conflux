@@ -15,6 +15,7 @@ from workspaces.models import Role
 
 from .archive_views import ImportedEventOutput
 from .models import EventTemplate
+from .template_library import instantiate_library_template, list_library
 from .templates import clone_event, instantiate_template, save_template
 
 
@@ -30,6 +31,14 @@ class EventTemplateCreateInput(serializers.Serializer):
     event = serializers.UUIDField()
     name = serializers.CharField(max_length=160)
     sections = serializers.ListField(child=serializers.CharField(), required=False)
+
+
+class LibraryTemplateOutput(serializers.Serializer):
+    slug = serializers.SlugField()
+    label = serializers.CharField()
+    description = serializers.CharField()
+    tracks = serializers.ListField(child=serializers.CharField())
+    stages = serializers.ListField(child=serializers.CharField())
 
 
 class InstantiateInput(serializers.Serializer):
@@ -94,6 +103,42 @@ class EventTemplateListView(_WorkspaceRoleView):
                 exc.message_dict if hasattr(exc, "message_dict") else exc.messages
             ) from exc
         return Response(_template_data(template), status=201)
+
+
+class TemplateLibraryListView(_WorkspaceRoleView):
+    @extend_schema(responses=LibraryTemplateOutput(many=True))
+    def get(self, request, workspace_public_id):
+        return Response(list_library())
+
+
+class TemplateLibraryInstantiateView(_WorkspaceRoleView):
+    @extend_schema(request=InstantiateInput, responses={201: ImportedEventOutput})
+    def post(self, request, workspace_public_id, template_slug):
+        data = InstantiateInput(data=request.data)
+        data.is_valid(raise_exception=True)
+        try:
+            with transaction.atomic():
+                event = instantiate_library_template(
+                    workspace=self.get_workspace(),
+                    template_slug=template_slug,
+                    name=data.validated_data["name"],
+                    slug=data.validated_data["slug"],
+                )
+                record_mutation(
+                    actor=request.user,
+                    workspace=self.get_workspace(),
+                    action="event_template.library_instantiated",
+                    target=event,
+                    event_type="event_template.library_instantiated",
+                    payload={"template": template_slug, "event": str(event.public_id)},
+                )
+        except ModelValidationError as exc:
+            raise ValidationError(
+                exc.message_dict if hasattr(exc, "message_dict") else exc.messages
+            ) from exc
+        return Response(
+            {"public_id": event.public_id, "name": event.name, "slug": event.slug}, status=201
+        )
 
 
 class EventTemplateDetailView(_WorkspaceRoleView):

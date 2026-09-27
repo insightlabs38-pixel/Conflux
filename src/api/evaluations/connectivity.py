@@ -130,19 +130,34 @@ def repair_connectivity(pairs, *, judge_ids, load, conflicts, max_extra_per_judg
         if len(components) <= 1 or pairing_cls is None:
             break
         components.sort(key=lambda c: (len(c), min(c)))
-        first, second = components[0], components[1]
-        bridgeable_a = [j for j in first if repairs_by_judge.get(j, 0) < max_extra_per_judge]
-        if not bridgeable_a:
+        bridge = None
+        for index, first in enumerate(components):
+            for second in components[index + 1 :]:
+                for source, target in ((first, second), (second, first)):
+                    for judge_a in sorted(source, key=lambda j: (load.get(j, 0), j)):
+                        if repairs_by_judge.get(judge_a, 0) >= max_extra_per_judge:
+                            continue
+                        for judge_b in sorted(target, key=lambda j: (load.get(j, 0), j)):
+                            candidate_projects = sorted(
+                                p
+                                for p in projects_by_judge.get(judge_b, set())
+                                - projects_by_judge.get(judge_a, set())
+                                if (judge_a, p) not in conflicts
+                            )
+                            if candidate_projects:
+                                bridge = (judge_a, candidate_projects[0])
+                                break
+                        if bridge:
+                            break
+                    if bridge:
+                        break
+                if bridge:
+                    break
+            if bridge:
+                break
+        if bridge is None:
             break
-        judge_a = min(bridgeable_a, key=lambda j: (load.get(j, 0), j))
-        judge_b = min(second, key=lambda j: (load.get(j, 0), j))
-        candidate_projects = projects_by_judge.get(judge_b, set()) - projects_by_judge.get(
-            judge_a, set()
-        )
-        candidate_projects = {p for p in candidate_projects if (judge_a, p) not in conflicts}
-        if not candidate_projects:
-            break
-        project_id = min(candidate_projects)
+        judge_a, project_id = bridge
         pairs.append(pairing_cls(judge_id=judge_a, project_id=project_id))
         projects_by_judge.setdefault(judge_a, set()).add(project_id)
         load[judge_a] = load.get(judge_a, 0) + 1

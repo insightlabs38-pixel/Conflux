@@ -81,7 +81,9 @@ def compute_assignment(plan, *, coverage: int = 3) -> list[Pairing]:
     # above can leave the judge-overlap graph disconnected (e.g. coverage=1
     # never creates any overlap at all). Stitch it back together where
     # feasible -- see connectivity.repair_connectivity for the bound.
-    if len(judge_ids) > 1:
+    # One candidate has no cross-project ranking to calibrate; keep its
+    # coverage/track-fit choice instead of assigning extra judges for overlap.
+    if len(judge_ids) > 1 and len(candidates) > 1:
         pairs, _ = repair_connectivity(pairs, judge_ids=judge_ids, load=load, conflicts=conflicts)
     return pairs
 

@@ -15,7 +15,10 @@ least-loaded eligible judges per candidate, then a repair pass
 (`evaluations/connectivity.py`) tries to stitch the resulting judge-overlap
 graph into one connected component -- normalization below is only
 meaningful across judges who share at least an indirect chain of common
-candidates. `ConflictOfInterest` is a hard constraint throughout: excluded
+candidates. Repair tries alternate components and both bridge directions
+when a conflict blocks its first choice. For a single candidate, it keeps
+the coverage/track-fit assignment because there is no cross-project ranking
+to calibrate. `ConflictOfInterest` is a hard constraint throughout: excluded
 from assignment, and rejected outright if a ballot is attempted anyway.
 
 ## Normalization method

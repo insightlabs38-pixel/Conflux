@@ -1,8 +1,8 @@
 import pytest
 from accounts.models import Session, User
 from django.test import Client
-from evaluations.assignment import compute_assignment
-from evaluations.connectivity import connectivity_report
+from evaluations.assignment import Pairing, compute_assignment
+from evaluations.connectivity import connectivity_report, repair_connectivity
 from evaluations.models import (
     ConflictOfInterest,
     EvaluationPlan,
@@ -18,6 +18,19 @@ from workspaces.models import Membership, Role, Workspace
 pytestmark = pytest.mark.django_db
 
 CRITERIA = [{"id": "impact", "name": "Impact", "weight": 1, "min_score": 0, "max_score": 10}]
+
+
+def test_connectivity_repair_tries_other_components_when_first_bridge_is_conflicted():
+    pairs = [Pairing(1, 1), Pairing(2, 2), Pairing(3, 3)]
+    repaired, extra = repair_connectivity(
+        pairs,
+        judge_ids=[1, 2, 3],
+        load={1: 1, 2: 1, 3: 1},
+        conflicts={(1, 2)},
+    )
+    assert extra == 2
+    assert connectivity_report(repaired, [1, 2, 3]).connected
+    assert (1, 2) not in {(pair.judge_id, pair.project_id) for pair in repaired}
 
 
 def cookie_client(token):

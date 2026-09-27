@@ -98,6 +98,19 @@ def test_normalization_endpoint_is_organizer_only():
     assert judge_client.post(runs_url, data={}, content_type="application/json").status_code == 403
 
 
+@pytest.mark.parametrize("value", [float("nan"), float("inf"), float("-inf")])
+def test_nonfinite_ridge_lambda_cannot_create_a_run(value):
+    workspace, event, stage, plan, organizer, _, _, _ = make_fixture()
+    client = cookie_client(Session.issue(organizer).token)
+    response = client.post(
+        plan_url(workspace, event, stage, plan, "normalization-runs/"),
+        data={"ridge_lambda": value},
+        content_type="application/json",
+    )
+    assert response.status_code == 400
+    assert plan.normalization_runs.count() == 0
+
+
 def test_ballot_observations_use_each_ballots_own_frozen_rubric_weights():
     # NORM-002: republishing the rubric with different weights must never
     # change what an already-cast ballot's aggregate score means.

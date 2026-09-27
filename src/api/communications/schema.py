@@ -22,6 +22,39 @@ class LaunchChecklistSchema(serializers.Serializer):
     items = ChecklistItemSchema(many=True)
 
 
+class OperatorEventSchema(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    name = serializers.CharField()
+    status = serializers.CharField()
+    is_public = serializers.BooleanField()
+    updated_at = serializers.DateTimeField()
+    health = serializers.CharField()
+    blocker_count = serializers.IntegerField()
+    warning_count = serializers.IntegerField()
+
+
+class OperatorTemplateSchema(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    name = serializers.CharField()
+    source_event_name = serializers.CharField()
+
+
+class OperatorActivitySchema(serializers.Serializer):
+    action = serializers.CharField()
+    actor = serializers.CharField(allow_null=True)
+    target_type = serializers.CharField()
+    target_id = serializers.CharField()
+    created_at = serializers.DateTimeField()
+
+
+class OperatorConsoleSchema(serializers.Serializer):
+    event_total = serializers.IntegerField()
+    events = OperatorEventSchema(many=True)
+    template_total = serializers.IntegerField()
+    templates = OperatorTemplateSchema(many=True)
+    activity = OperatorActivitySchema(many=True)
+
+
 class AudienceKindSchema(serializers.Serializer):
     key = serializers.CharField()
     label = serializers.CharField()

@@ -9216,6 +9216,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/MembershipSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/operator-console/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_operator_console
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperatorConsoleSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/participant-events/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_participant_events
@@ -12008,6 +12030,96 @@ components:
       - publication
       - stages
       - submissions
+    OperatorActivitySchema:
+      type: object
+      properties:
+        action:
+          type: string
+        actor:
+          type: string
+          nullable: true
+        target_type:
+          type: string
+        target_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - action
+      - actor
+      - created_at
+      - target_id
+      - target_type
+    OperatorConsoleSchema:
+      type: object
+      properties:
+        event_total:
+          type: integer
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperatorEventSchema'
+        template_total:
+          type: integer
+        templates:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperatorTemplateSchema'
+        activity:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperatorActivitySchema'
+      required:
+      - activity
+      - event_total
+      - events
+      - template_total
+      - templates
+    OperatorEventSchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        status:
+          type: string
+        is_public:
+          type: boolean
+        updated_at:
+          type: string
+          format: date-time
+        health:
+          type: string
+        blocker_count:
+          type: integer
+        warning_count:
+          type: integer
+      required:
+      - blocker_count
+      - health
+      - is_public
+      - name
+      - public_id
+      - status
+      - updated_at
+      - warning_count
+    OperatorTemplateSchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        source_event_name:
+          type: string
+      required:
+      - name
+      - public_id
+      - source_event_name
     Page:
       type: object
       properties:

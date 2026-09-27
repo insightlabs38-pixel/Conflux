@@ -16,6 +16,7 @@ from .audiences import AUDIENCE_KINDS, resolve_audience
 from .checklist import compute_launch_checklist
 from .models import MessageRecipient, Reminder
 from .operations import compute_operations_summary
+from .operator_console import compute_operator_console
 from .schema import (
     AudienceKindSchema,
     AudiencePreviewInputSchema,
@@ -25,6 +26,7 @@ from .schema import (
     MessageInputSchema,
     MessageSchema,
     OperationsSummarySchema,
+    OperatorConsoleSchema,
     ReminderInputSchema,
     ReminderSchema,
 )
@@ -77,6 +79,12 @@ class OperationsSummaryView(OrganizerView):
     @extend_schema(responses=OperationsSummarySchema)
     def get(self, request, workspace_public_id, event_public_id):
         return Response(compute_operations_summary(self.get_event()))
+
+
+class OperatorConsoleView(OrganizerView):
+    @extend_schema(responses=OperatorConsoleSchema)
+    def get(self, request, workspace_public_id):
+        return Response(compute_operator_console(self.get_workspace()))
 
 
 class LaunchChecklistView(OrganizerView):

@@ -1666,6 +1666,72 @@ export type InputOfOperationsSummarySchema = {
   moderation: unknown;
 };
 
+export type OperatorActivitySchema = {
+  action: string;
+  actor: string | null;
+  target_type: string;
+  target_id: string;
+  created_at: string;
+};
+
+export type InputOfOperatorActivitySchema = {
+  action: string;
+  actor: string | null;
+  target_type: string;
+  target_id: string;
+  created_at: string;
+};
+
+export type OperatorConsoleSchema = {
+  event_total: number;
+  events: OperatorEventSchema[];
+  template_total: number;
+  templates: OperatorTemplateSchema[];
+  activity: OperatorActivitySchema[];
+};
+
+export type InputOfOperatorConsoleSchema = {
+  event_total: number;
+  events: InputOfOperatorEventSchema[];
+  template_total: number;
+  templates: InputOfOperatorTemplateSchema[];
+  activity: InputOfOperatorActivitySchema[];
+};
+
+export type OperatorEventSchema = {
+  public_id: string;
+  name: string;
+  status: string;
+  is_public: boolean;
+  updated_at: string;
+  health: string;
+  blocker_count: number;
+  warning_count: number;
+};
+
+export type InputOfOperatorEventSchema = {
+  public_id: string;
+  name: string;
+  status: string;
+  is_public: boolean;
+  updated_at: string;
+  health: string;
+  blocker_count: number;
+  warning_count: number;
+};
+
+export type OperatorTemplateSchema = {
+  public_id: string;
+  name: string;
+  source_event_name: string;
+};
+
+export type InputOfOperatorTemplateSchema = {
+  public_id: string;
+  name: string;
+  source_event_name: string;
+};
+
 export type Page = {
   public_id: string;
   theme?: ThemeEnum;
@@ -5072,6 +5138,10 @@ export interface Operations {
     };
     response: MembershipSchema;
   };
+  get_api_v1_workspaces_workspace_public_id_operator_console: {
+    request: { path: { workspace_public_id: string } };
+    response: OperatorConsoleSchema;
+  };
   get_api_v1_workspaces_workspace_public_id_participant_events: {
     request: { path: { workspace_public_id: string } };
     response: ParticipantEventSummary[];
@@ -7639,6 +7709,14 @@ export const operations = {
     path_params: ["workspace_public_id"],
     query_params: [],
     request_body: true,
+    response_kind: "json",
+  },
+  get_api_v1_workspaces_workspace_public_id_operator_console: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/operator-console/",
+    path_params: ["workspace_public_id"],
+    query_params: [],
+    request_body: false,
     response_kind: "json",
   },
   get_api_v1_workspaces_workspace_public_id_participant_events: {

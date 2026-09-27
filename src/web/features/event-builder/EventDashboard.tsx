@@ -10,6 +10,7 @@ import { CommunityVotingBuilder } from "../community-voting/CommunityVotingBuild
 import { WebhooksPanel } from "../integrations/WebhooksPanel";
 import { AwardsPanel } from "../awards/AwardsPanel";
 import { OperationsCenter } from "../operations/OperationsCenter";
+import { OperatorConsole } from "../operations/OperatorConsole";
 import { CommunicationsPanel } from "../communications/CommunicationsPanel";
 import { ConfigHistoryPanel } from "../audit/ConfigHistoryPanel";
 import { EventTemplatesPanel } from "./EventTemplatesPanel";
@@ -294,6 +295,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
       {!loadingEvents && !loadError && events.length === 0 && (
         <p>No events yet. Create one to get started.</p>
       )}
+      <OperatorConsole workspaceId={workspaceId} onChooseEvent={choose} />
       <EventTemplatesPanel workspaceId={workspaceId} onCreated={choose} />
       {selected && (
         <article>

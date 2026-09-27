@@ -1550,6 +1550,64 @@ class InputOfOperationsSummarySchema(TypedDict):
     publication: Any
     moderation: Any
 
+class OperatorActivitySchema(TypedDict):
+    action: str
+    actor: str | None
+    target_type: str
+    target_id: str
+    created_at: str
+
+class InputOfOperatorActivitySchema(TypedDict):
+    action: str
+    actor: str | None
+    target_type: str
+    target_id: str
+    created_at: str
+
+class OperatorConsoleSchema(TypedDict):
+    event_total: int
+    events: list[OperatorEventSchema]
+    template_total: int
+    templates: list[OperatorTemplateSchema]
+    activity: list[OperatorActivitySchema]
+
+class InputOfOperatorConsoleSchema(TypedDict):
+    event_total: int
+    events: list[InputOfOperatorEventSchema]
+    template_total: int
+    templates: list[InputOfOperatorTemplateSchema]
+    activity: list[InputOfOperatorActivitySchema]
+
+class OperatorEventSchema(TypedDict):
+    public_id: str
+    name: str
+    status: str
+    is_public: bool
+    updated_at: str
+    health: str
+    blocker_count: int
+    warning_count: int
+
+class InputOfOperatorEventSchema(TypedDict):
+    public_id: str
+    name: str
+    status: str
+    is_public: bool
+    updated_at: str
+    health: str
+    blocker_count: int
+    warning_count: int
+
+class OperatorTemplateSchema(TypedDict):
+    public_id: str
+    name: str
+    source_event_name: str
+
+class InputOfOperatorTemplateSchema(TypedDict):
+    public_id: str
+    name: str
+    source_event_name: str
+
 class Page(TypedDict):
     public_id: str
     theme: NotRequired[ThemeEnum]
@@ -3866,6 +3924,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                        'query_params': [],
                                                        'request_body': False,
                                                        'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_operator_console': {'method': 'GET',
+                                                                'path': '/api/v1/workspaces/{workspace_public_id}/operator-console/',
+                                                                'path_params': ['workspace_public_id'],
+                                                                'query_params': [],
+                                                                'request_body': False,
+                                                                'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_participant_events': {'method': 'GET',
                                                                   'path': '/api/v1/workspaces/{workspace_public_id}/participant-events/',
                                                                   'path_params': ['workspace_public_id'],

@@ -6,6 +6,11 @@ _prefix = "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/"
 
 urlpatterns = [
     path(
+        "workspaces/<uuid:workspace_public_id>/operator-console/",
+        views.OperatorConsoleView.as_view(),
+        name="operator-console",
+    ),
+    path(
         _prefix + "operations/summary/",
         views.OperationsSummaryView.as_view(),
         name="operations-summary",

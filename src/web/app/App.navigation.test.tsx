@@ -11,6 +11,13 @@ import { App } from "./App";
 
 let container: HTMLDivElement;
 let root: Root;
+const emptyConsole = {
+  event_total: 0,
+  events: [],
+  template_total: 0,
+  templates: [],
+  activity: [],
+};
 
 beforeEach(() => {
   container = document.createElement("div");
@@ -36,7 +43,7 @@ async function waitFor(check: () => boolean, timeoutMs = 1000) {
   }
 }
 
-// Routes the two endpoints App's tree actually calls: accounts/me and the events list.
+// Routes the endpoints App's organizer tree calls.
 function mockApi(
   meStatus: number,
   meBody: unknown,
@@ -52,6 +59,13 @@ function mockApi(
           ok: meStatus >= 200 && meStatus < 300,
           status: meStatus,
           json: async () => meBody,
+        };
+      }
+      if (url.endsWith("/operator-console/")) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => emptyConsole,
         };
       }
       return {
@@ -220,6 +234,13 @@ describe("App navigation", () => {
         if (String(input).includes("/accounts/me/")) {
           return new Promise((resolve) => {
             resolveMe = resolve;
+          });
+        }
+        if (String(input).endsWith("/operator-console/")) {
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: async () => emptyConsole,
           });
         }
         return Promise.resolve({ ok: true, status: 200, json: async () => [] });

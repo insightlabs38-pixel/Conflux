@@ -211,20 +211,26 @@ describe("App navigation", () => {
     window.history.pushState({}, "", "/?event=e1");
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: async () => ({
-          public_id: "e1",
-          name: "Regionals",
-          description: "",
-          timezone: "UTC",
-          starts_at: null,
-          ends_at: null,
-          status: "open",
-          tracks: [],
-          base_prizes: [],
-        }),
+      vi.fn().mockImplementation(async (input: unknown) => {
+        const url = String(input);
+        if (url.includes("/voting/")) {
+          return { ok: false, status: 404, json: async () => ({}) };
+        }
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            public_id: "e1",
+            name: "Regionals",
+            description: "",
+            timezone: "UTC",
+            starts_at: null,
+            ends_at: null,
+            status: "open",
+            tracks: [],
+            base_prizes: [],
+          }),
+        };
       }),
     );
     act(() => {

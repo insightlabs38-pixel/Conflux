@@ -37,30 +37,36 @@ describe("EventSite", () => {
   it("renders the event name, schedule, tracks and prizes once loaded", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: async () => ({
-          public_id: "e1",
-          name: "Regionals",
-          description: "A great event.",
-          timezone: "UTC",
-          starts_at: "2026-01-01T00:00:00Z",
-          ends_at: "2026-01-02T00:00:00Z",
-          status: "open",
-          tracks: [{ public_id: "t1", name: "AI", description: "" }],
-          base_prizes: [
-            {
-              public_id: "p1",
-              name: "Best AI",
-              description: "",
-              kind: "swag",
-              amount: null,
-              currency: "",
-              track: "t1",
-            },
-          ],
-        }),
+      vi.fn().mockImplementation(async (input: unknown) => {
+        const url = String(input);
+        if (url.includes("/voting/")) {
+          return { ok: false, status: 404, json: async () => ({}) };
+        }
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({
+            public_id: "e1",
+            name: "Regionals",
+            description: "A great event.",
+            timezone: "UTC",
+            starts_at: "2026-01-01T00:00:00Z",
+            ends_at: "2026-01-02T00:00:00Z",
+            status: "open",
+            tracks: [{ public_id: "t1", name: "AI", description: "" }],
+            base_prizes: [
+              {
+                public_id: "p1",
+                name: "Best AI",
+                description: "",
+                kind: "swag",
+                amount: null,
+                currency: "",
+                track: "t1",
+              },
+            ],
+          }),
+        };
       }),
     );
     act(() => {

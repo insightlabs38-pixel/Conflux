@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "artifacts",
     "presentation",
     "evaluations",
+    "community",
 ]
 
 MIDDLEWARE = ["django.middleware.common.CommonMiddleware"]

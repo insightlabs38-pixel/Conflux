@@ -5,6 +5,7 @@ import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
+import { CommunityVoting } from "../../features/community-voting/CommunityVoting";
 
 type Track = { public_id: string; name: string; description: string };
 type BasePrize = {
@@ -119,6 +120,8 @@ export function EventSite({ eventId }: { eventId: string }) {
               </ul>
             )}
           </section>
+
+          <CommunityVoting eventId={event.public_id} />
         </article>
       )}
     </AppShell>

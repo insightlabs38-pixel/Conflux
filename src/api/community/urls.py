@@ -19,6 +19,17 @@ urlpatterns = [
         name="voting-plan-publish-results",
     ),
     path(
+        f"{_EVENT}/voting-plan/abuse-signals/",
+        views.AbuseSignalListView.as_view(),
+        name="voting-abuse-signals",
+    ),
+    path(
+        f"{_EVENT}/voting-plan/abuse-signals/<uuid:signal_public_id>/resolve/",
+        views.AbuseSignalResolveView.as_view(),
+        name="voting-abuse-signal-resolve",
+    ),
+    path(f"{_EVENT}/voting-plan/audit/", views.CommunityAuditView.as_view(), name="voting-audit"),
+    path(
         f"{_EVENT}/voting/candidates/",
         views.CandidateOrderView.as_view(),
         name="voting-candidates",

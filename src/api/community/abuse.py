@@ -10,6 +10,7 @@ working if a cache is unavailable is worse than a slightly heavier table.
 import hashlib
 from datetime import timedelta
 
+from audit.services import record_mutation
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -50,11 +51,11 @@ def enforce_rate_limit(plan, scope: str, identifier: str, *, limit: int, window:
         if count < limit:
             RateLimitEvent.objects.create(scope=scope, key_hash=key_hash)
             return
-    AbuseSignal.objects.create(
-        plan=plan,
-        signal_type=AbuseSignalType.RATE_LIMIT_EXCEEDED,
-        detail=f"{scope}: {count + 1} attempts within {window}, limit is {limit}.",
-        evidence={
+    record_signal(
+        plan,
+        AbuseSignalType.RATE_LIMIT_EXCEEDED,
+        f"{scope}: {count + 1} attempts within {window}, limit is {limit}.",
+        {
             "scope": scope,
             "count": count + 1,
             "limit": limit,
@@ -65,6 +66,15 @@ def enforce_rate_limit(plan, scope: str, identifier: str, *, limit: int, window:
 
 
 def record_signal(plan, signal_type: str, detail: str, evidence: dict | None = None):
-    return AbuseSignal.objects.create(
-        plan=plan, signal_type=signal_type, detail=detail, evidence=evidence or {}
-    )
+    with transaction.atomic():
+        signal = AbuseSignal.objects.create(
+            plan=plan, signal_type=signal_type, detail=detail, evidence=evidence or {}
+        )
+        record_mutation(
+            actor=None,
+            workspace=plan.event.workspace,
+            action="community_abuse.detected",
+            target=signal,
+            metadata={"event_id": str(plan.event.public_id), "signal_type": signal_type},
+        )
+    return signal

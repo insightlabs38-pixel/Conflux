@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Badge } from "../../components/Badge";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
+import { FraudReview } from "./FraudReview";
 
 type IdentityMode = "authenticated" | "email_link" | "token";
 type CommentVisibility = "organizer" | "organizer_judge" | "everyone";
@@ -110,6 +111,7 @@ export function CommunityVotingBuilder({
   if (!plan) return null;
 
   return (
+    <>
     <Card title="Community voting">
       {error && <p role="alert">{error}</p>}
       <label>
@@ -199,5 +201,7 @@ export function CommunityVotingBuilder({
         </ul>
       )}
     </Card>
+    <FraudReview workspaceId={workspaceId} eventId={eventId} />
+    </>
   );
 }

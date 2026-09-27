@@ -72,6 +72,7 @@ def cast_authenticated_vote(plan, user, project, *, client_ip=None):
             plan,
             AbuseSignalType.DUPLICATE_VOTE_ATTEMPT,
             "A voter who already cast a ballot attempted to vote again.",
+            {"identity_mode": VoteIdentityMode.AUTHENTICATED},
         )
         raise ValidationError("You have already voted in this event.") from exc
     return vote
@@ -144,6 +145,7 @@ def cast_email_vote(plan, token_value, project, *, client_ip=None):
             plan,
             AbuseSignalType.INVALID_TOKEN_ATTEMPT,
             "An unrecognized email vote token was used.",
+            {"token_kind": "email_link", "state": "unrecognized"},
         )
         raise ValidationError("This voting link is invalid or has expired.") from None
     except _TokenReplay:
@@ -151,6 +153,7 @@ def cast_email_vote(plan, token_value, project, *, client_ip=None):
             plan,
             AbuseSignalType.TOKEN_REPLAY_ATTEMPT,
             "An already-used or expired email vote token was used again.",
+            {"token_kind": "email_link", "state": "used_or_expired"},
         )
         raise ValidationError("This voting link is invalid or has expired.") from None
     except IntegrityError as exc:
@@ -158,6 +161,7 @@ def cast_email_vote(plan, token_value, project, *, client_ip=None):
             plan,
             AbuseSignalType.DUPLICATE_VOTE_ATTEMPT,
             "A voter who already cast a ballot attempted to vote again.",
+            {"identity_mode": VoteIdentityMode.EMAIL_LINK},
         )
         raise ValidationError("You have already voted in this event.") from exc
     return vote
@@ -186,7 +190,10 @@ def cast_token_vote(plan, token_value, project, *, client_ip=None):
             token.save(update_fields=["redeemed_at"])
     except _InvalidToken:
         abuse.record_signal(
-            plan, AbuseSignalType.INVALID_TOKEN_ATTEMPT, "An unrecognized voting token was used."
+            plan,
+            AbuseSignalType.INVALID_TOKEN_ATTEMPT,
+            "An unrecognized voting token was used.",
+            {"token_kind": "pre_issued", "state": "unrecognized"},
         )
         raise ValidationError("Invalid voting token.") from None
     except _TokenReplay:
@@ -194,6 +201,7 @@ def cast_token_vote(plan, token_value, project, *, client_ip=None):
             plan,
             AbuseSignalType.TOKEN_REPLAY_ATTEMPT,
             "An already-redeemed voting token was used again.",
+            {"token_kind": "pre_issued", "state": "redeemed"},
         )
         raise ValidationError("This voting token has already been used.") from None
     except IntegrityError as exc:
@@ -201,6 +209,7 @@ def cast_token_vote(plan, token_value, project, *, client_ip=None):
             plan,
             AbuseSignalType.DUPLICATE_VOTE_ATTEMPT,
             "A voter who already cast a ballot attempted to vote again.",
+            {"identity_mode": VoteIdentityMode.TOKEN},
         )
         raise ValidationError("You have already voted in this event.") from exc
     return vote

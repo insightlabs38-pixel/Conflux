@@ -64,6 +64,47 @@ function mockApi(
 }
 
 describe("App navigation", () => {
+  it("opens the participant team picker from workspace selection", async () => {
+    window.history.pushState({}, "", "/");
+    mockApi(
+      200,
+      {
+        public_id: "u1",
+        username: "member",
+        memberships: [
+          {
+            workspace: "w1",
+            workspace_name: "Regionals",
+            workspace_slug: "regionals",
+            role: "participant",
+          },
+        ],
+      },
+      200,
+      [],
+    );
+    act(() => {
+      root.render(<App />);
+    });
+    await waitFor(() => container.querySelector("button") !== null);
+    act(() => {
+      container.querySelector("button")?.click();
+    });
+    await waitFor(
+      () =>
+        container.querySelector('[aria-label="Participant events"]') !== null,
+    );
+    await waitFor(
+      () =>
+        container.textContent?.includes(
+          "No events are open for participation.",
+        ) ?? false,
+    );
+    expect(container.textContent).toContain(
+      "No events are open for participation.",
+    );
+  });
+
   it("reaches the event dashboard for an authorized workspace through normal selection", async () => {
     window.history.pushState({}, "", "/");
     mockApi(

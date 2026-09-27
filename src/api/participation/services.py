@@ -153,7 +153,7 @@ def revoke_invite(invite, actor):
 
 
 @transaction.atomic
-def redeem_invite(token, user):
+def redeem_invite(token, user, *, event=None):
     """Joins `user` onto the invite's team. Row-locked for its whole
     duration: two requests racing to redeem the last remaining use of the
     same token must serialize, not both read "still valid" and both
@@ -163,6 +163,8 @@ def redeem_invite(token, user):
         invite = TeamInvite.objects.select_for_update().get(token=token)
     except TeamInvite.DoesNotExist as exc:
         raise ValidationError("Invalid invite link.") from exc
+    if event is not None and invite.team.event_id != event.id:
+        raise ValidationError("Invalid invite link for this event.")
     if not invite.is_valid():
         raise ValidationError("This invite link has expired or already been used.")
 

@@ -85,7 +85,7 @@ describe("WorkspaceSelector", () => {
     expect(container.textContent).toContain("Finals");
 
     (buttons[0] as HTMLButtonElement).click();
-    expect(onSelect).toHaveBeenCalledWith("w1");
+    expect(onSelect).toHaveBeenCalledWith("w1", "organizer");
   });
 
   it("shows an empty state when the user has no workspaces", async () => {

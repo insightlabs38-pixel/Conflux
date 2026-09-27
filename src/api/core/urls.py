@@ -11,4 +11,5 @@ urlpatterns = [
     path("", include("integrations.urls")),
     path("", include("stages.urls")),
     path("", include("policies.urls")),
+    path("", include("participation.urls")),
 ]

@@ -38,7 +38,7 @@ async function fetchMe(): Promise<MeResponse | null> {
 export function WorkspaceSelector({
   onSelect,
 }: {
-  onSelect: (workspaceId: string) => void;
+  onSelect: (workspaceId: string, role: string) => void;
 }) {
   const [state, setState] = useState<LoadState>("loading");
   const [workspaces, setWorkspaces] = useState<Membership[]>([]);
@@ -83,7 +83,7 @@ export function WorkspaceSelector({
           <li key={membership.workspace}>
             <button
               type="button"
-              onClick={() => onSelect(membership.workspace)}
+              onClick={() => onSelect(membership.workspace, membership.role)}
             >
               {membership.workspace_name} ({membership.role})
             </button>

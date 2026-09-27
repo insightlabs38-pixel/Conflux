@@ -1,5 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { EventDashboard } from "../features/event-builder/EventDashboard";
+import { TeamWorkspace } from "../features/teams/TeamWorkspace";
 import { WorkspaceSelector } from "./WorkspaceSelector";
 
 // Guarded for non-browser rendering (tests, SSR) where `window` is unavailable.
@@ -20,15 +21,41 @@ export function App() {
   const [workspaceId, setWorkspaceId] = useState<string | null>(
     workspaceFromLocation,
   );
+  const [workspaceRole, setWorkspaceRole] = useState<string | null>(null);
 
-  const selectWorkspace = useCallback((id: string) => {
+  useEffect(() => {
+    if (!workspaceId || workspaceRole) return;
+    let active = true;
+    fetch("/api/v1/accounts/me/", { credentials: "include" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then(
+        (
+          me: { memberships?: { workspace: string; role: string }[] } | null,
+        ) => {
+          if (active)
+            setWorkspaceRole(
+              me?.memberships?.find(
+                (membership) => membership.workspace === workspaceId,
+              )?.role ?? null,
+            );
+        },
+      )
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [workspaceId, workspaceRole]);
+
+  const selectWorkspace = useCallback((id: string, role: string) => {
     setWorkspaceParam(id);
     setWorkspaceId(id);
+    setWorkspaceRole(role);
   }, []);
 
   const backToWorkspaces = useCallback(() => {
     setWorkspaceParam(null);
     setWorkspaceId(null);
+    setWorkspaceRole(null);
   }, []);
 
   return (
@@ -39,7 +66,11 @@ export function App() {
           <button type="button" onClick={backToWorkspaces}>
             Back to workspaces
           </button>
-          <EventDashboard workspaceId={workspaceId} />
+          {workspaceRole === "participant" ? (
+            <TeamWorkspace workspaceId={workspaceId} />
+          ) : (
+            <EventDashboard workspaceId={workspaceId} />
+          )}
         </>
       ) : (
         <WorkspaceSelector onSelect={selectWorkspace} />

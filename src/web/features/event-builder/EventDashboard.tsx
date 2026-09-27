@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { PolicyBuilder } from "../policy-builder/PolicyBuilder";
 import { StageBuilder } from "../stage-builder/StageBuilder";
+import { TeamPanel } from "../teams/TeamPanel";
 
 type Event = {
   public_id: string;
@@ -436,6 +437,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
             workspaceId={workspaceId}
             eventId={selected.public_id}
           />
+          <TeamPanel workspaceId={workspaceId} eventId={selected.public_id} />
         </article>
       )}
     </section>

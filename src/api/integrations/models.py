@@ -38,6 +38,89 @@ class WebhookDelivery(PublicIdModel):
         ]
 
 
+class EventTemplate(PublicIdModel):
+    """A named, reusable configuration snapshot (TPL-001): the same
+    organizer-authored-config shape `archive.build_archive` produces, saved
+    independent of the source event's own lifecycle -- editing, archiving
+    or deleting the event it was saved from never touches a template
+    already saved from it, since the snapshot is a frozen copy, not a
+    live reference.
+    """
+
+    workspace = models.ForeignKey(
+        "workspaces.Workspace", on_delete=models.CASCADE, related_name="event_templates"
+    )
+    name = models.CharField(max_length=160)
+    source_event_name = models.CharField(max_length=200, blank=True)
+    sections = models.JSONField(default=list)
+    archive = models.JSONField()
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="event_templates_created"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["workspace", "name"], name="unique_event_template_name")
+        ]
+        ordering = ["name", "pk"]
+
+    def __str__(self):
+        return self.name
+
+
+class ExternalQualifierBinding(PublicIdModel):
+    """Ties one external system's own opaque `external_ref` to one real,
+    already-existing `Project` in this event, for good (EXTQ-001/002):
+    every later import call for the same `external_ref` resolves to the
+    same Project without the caller ever needing to learn our internal
+    `public_id`. This is a lookup aid, not a new identity -- the Project
+    remains the one and only canonical record, exactly like
+    `FixtureJudge.linked_user` binds a fixture identity to a real User
+    rather than inventing a shadow account.
+    """
+
+    event = models.ForeignKey(
+        "events.Event", on_delete=models.CASCADE, related_name="external_qualifier_bindings"
+    )
+    external_ref = models.CharField(max_length=120)
+    project = models.ForeignKey(
+        "projects.Project", on_delete=models.PROTECT, related_name="external_qualifier_bindings"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event", "external_ref"], name="unique_external_qualifier_ref"
+            )
+        ]
+
+
+class ExternalQualifierImport(PublicIdModel):
+    """One received import call: a receipt of what was asked for and what
+    actually happened, for organizer visibility and replay evidence.
+    """
+
+    event = models.ForeignKey(
+        "events.Event", on_delete=models.CASCADE, related_name="external_qualifier_imports"
+    )
+    stage = models.ForeignKey(
+        "stages.Stage", on_delete=models.PROTECT, related_name="external_qualifier_imports"
+    )
+    imported_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="external_qualifier_imports",
+    )
+    entries = models.JSONField(default=list)
+    advanced_count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+
+
 class ImportedFixture(models.Model):
     """One run of the `import_fixture` command against fixtures/fixtures.json.
 

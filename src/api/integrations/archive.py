@@ -15,14 +15,45 @@ from accounts.models import User
 from awards.models import Award, PrizeComponent, PrizePackage
 from django.core.exceptions import ValidationError
 from django.utils.dateparse import parse_datetime
+from evaluations.models import EvaluationPlan, RubricVersion
 from events.models import BasePrize, Event, EventStatus, Track
 from forms.models import FormDefinition, FormVersion
 from policies.models import Policy, PolicyBinding, TemporalGate
+from presentation.models import Page, PageBlock
 from projects.models import Project
 from stages.models import Stage, StageTransition
 
 FORMAT_VERSION = 1
 MODES = ("config", "full")
+
+# Optional top-level sections a caller may select a subset of (event-template
+# cloning, TPL-002/003) -- "event" itself is never optional. Two sections
+# (stage_transitions, evaluation_plans) hard-require "stages" to make any
+# sense at all and are dropped outright if it's excluded; a handful of
+# individual fields hold an optional cross-reference into another optional
+# section and are nulled out (never left dangling) if that section is
+# excluded. See `_filter_sections`.
+SECTION_KEYS = (
+    "tracks",
+    "base_prizes",
+    "stages",
+    "stage_transitions",
+    "forms",
+    "policies",
+    "temporal_gates",
+    "policy_bindings",
+    "awards",
+    "evaluation_plans",
+    "pages",
+)
+_REQUIRES_STAGES = {"stage_transitions", "evaluation_plans"}
+_REQUIRES_POLICIES = {"policy_bindings"}
+_OPTIONAL_TRACK_REF: dict[str, str] = {
+    "base_prizes": "track_ref",
+    "awards": "eligibility_track_ref",
+    "projects": "track_ref",
+}
+_OPTIONAL_STAGE_REF: dict[str, str] = {"forms": "stage_ref"}
 
 
 def _iso(value):
@@ -42,7 +73,7 @@ def _decimal(value):
     return None if value is None else Decimal(value)
 
 
-def build_archive(event, mode="config"):
+def build_archive(event, mode="config", sections=None):
     if mode not in MODES:
         raise ValueError(f"Unknown archive mode: {mode!r}")
 
@@ -163,23 +194,60 @@ def build_archive(event, mode="config"):
             .select_related("eligibility_track", "evaluation_plan")
             .order_by("name", "pk")
         ],
+        "evaluation_plans": [
+            {
+                "ref": str(p.public_id),
+                "stage_ref": stage_ref[p.stage_id],
+                "name": p.name,
+                "candidate_type": p.candidate_type,
+                "pool_strategy": p.pool_strategy,
+                "results_visible_to_participants": p.results_visible_to_participants,
+                "rubric_versions": [
+                    {"number": rv.number, "criteria": rv.criteria}
+                    for rv in p.rubric_versions.order_by("number")
+                ],
+            }
+            for p in EvaluationPlan.objects.filter(stage__event=event)
+            .select_related("stage")
+            .order_by("stage__position", "name", "pk")
+        ],
+        "pages": (
+            [
+                {
+                    "theme": event.page.theme,
+                    "blocks": [
+                        {"kind": b.kind, "position": b.position, "config": b.config}
+                        for b in event.page.blocks.order_by("position", "id")
+                    ],
+                }
+            ]
+            if hasattr(event, "page")
+            else []
+        ),
     }
 
     if mode == "full":
-        archive["projects"] = [
-            {
-                "ref": str(proj.public_id),
-                "name": proj.name,
-                "description": proj.description,
-                "track_ref": track_ref.get(proj.track_id),
-                "created_by_username": proj.created_by.username,
-            }
-            for proj in Project.objects.filter(event=event)
-            .select_related("track", "created_by")
-            .order_by("name", "pk")
-        ]
+        archive["projects"] = _full_mode_projects(event, track_ref)
+
+    if sections is not None:
+        archive = _filter_sections(archive, sections)
 
     return archive
+
+
+def _full_mode_projects(event, track_ref):
+    return [
+        {
+            "ref": str(proj.public_id),
+            "name": proj.name,
+            "description": proj.description,
+            "track_ref": track_ref.get(proj.track_id),
+            "created_by_username": proj.created_by.username,
+        }
+        for proj in Project.objects.filter(event=event)
+        .select_related("track", "created_by")
+        .order_by("name", "pk")
+    ]
 
 
 def _resolve(refs, ref, field):
@@ -323,8 +391,6 @@ def import_archive(*, workspace, archive, name, slug):
         evaluation_plan = None
         plan_name = a.get("evaluation_plan_name")
         if plan_name:
-            from evaluations.models import EvaluationPlan
-
             matches = list(EvaluationPlan.objects.filter(stage__event=event, name=plan_name))
             if not matches:
                 raise ValidationError(
@@ -380,6 +446,35 @@ def import_archive(*, workspace, archive, name, slug):
                 component.full_clean()
                 component.save()
 
+    for p in archive.get("evaluation_plans", []):
+        plan = EvaluationPlan(
+            stage=_resolve(refs, p["stage_ref"], "evaluation_plans.stage_ref"),
+            name=p["name"],
+            candidate_type=p["candidate_type"],
+            pool_strategy=p["pool_strategy"],
+            results_visible_to_participants=p.get("results_visible_to_participants", False),
+        )
+        plan.full_clean()
+        plan.save()
+        for rv in p.get("rubric_versions", []):
+            rubric_version = RubricVersion(plan=plan, number=rv["number"], criteria=rv["criteria"])
+            rubric_version.full_clean()
+            rubric_version.save()
+
+    for page_data in archive.get("pages", []):
+        page = Page(event=event, theme=page_data.get("theme", "default"))
+        page.full_clean()
+        page.save()
+        for block in page_data.get("blocks", []):
+            page_block = PageBlock(
+                page=page,
+                kind=block["kind"],
+                position=block.get("position", 0),
+                config=block.get("config", {}),
+            )
+            page_block.full_clean()
+            page_block.save()
+
     if mode == "full":
         for proj in archive.get("projects", []):
             username = proj["created_by_username"]
@@ -405,3 +500,42 @@ def import_archive(*, workspace, archive, name, slug):
             project.save()
 
     return event
+
+
+def _filter_sections(archive, sections):
+    unknown = set(sections) - set(SECTION_KEYS)
+    if unknown:
+        raise ValidationError({"sections": f"Unknown section(s): {', '.join(sorted(unknown))}."})
+    selected = set(sections)
+    filtered = {
+        "format_version": archive["format_version"],
+        "mode": archive["mode"],
+        "event": archive["event"],
+    }
+    for key, rows in archive.items():
+        if key in ("format_version", "mode", "event"):
+            continue
+        if key == "projects":
+            filtered[key] = rows  # `sections` never governs full mode's participant data
+            continue
+        if key not in selected:
+            continue
+        if key in _REQUIRES_STAGES and "stages" not in selected:
+            continue  # meaningless without the stages they point at
+        if key in _REQUIRES_POLICIES and "policies" not in selected:
+            continue
+        track_field = _OPTIONAL_TRACK_REF.get(key)
+        stage_field = _OPTIONAL_STAGE_REF.get(key)
+        null_track = track_field and "tracks" not in selected
+        null_stage = stage_field and "stages" not in selected
+        if null_track or null_stage:
+            rows = [
+                {
+                    **row,
+                    **({track_field: None} if null_track else {}),
+                    **({stage_field: None} if null_stage else {}),
+                }
+                for row in rows
+            ]
+        filtered[key] = rows
+    return filtered

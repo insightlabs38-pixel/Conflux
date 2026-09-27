@@ -798,6 +798,151 @@ paths:
               schema:
                 $ref: '#/components/schemas/ImportedEventOutput'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/event-templates/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_event_templates
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventTemplateOutput'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_event_templates
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventTemplateCreateInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EventTemplateCreateInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EventTemplateCreateInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventTemplateOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/event-templates/{template_public_id}/:
+    delete:
+      operationId: delete_api_v1_workspaces_workspace_public_id_event_templates_template_public_id
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: template_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/event-templates/{template_public_id}/instantiate/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_event_templates_template_public_id_instantiate
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: template_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InstantiateInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InstantiateInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InstantiateInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportedEventOutput'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events
@@ -1393,6 +1538,52 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/clone/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_clone
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloneInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CloneInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CloneInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportedEventOutput'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/audiences/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_audiences
@@ -5231,6 +5422,95 @@ paths:
                 type: string
                 format: binary
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/external-qualifiers/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_external_qualifiers
+      description: |-
+        Reachable by an organizer's session or a scoped API credential
+        (`CookieSessionAuthentication` supports both) -- the "API/webhook"
+        surface for EXTQ-001.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QualifierImportOutput'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_external_qualifiers
+      description: |-
+        Reachable by an organizer's session or a scoped API credential
+        (`CookieSessionAuthentication` supports both) -- the "API/webhook"
+        surface for EXTQ-001.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QualifierImportInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/QualifierImportInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/QualifierImportInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QualifierImportOutput'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/status/:
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_status
@@ -7125,6 +7405,23 @@ components:
       - id
       - passed
       - severity
+    CloneInput:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+          maxLength: 200
+          pattern: ^[-a-zA-Z0-9_]+$
+        sections:
+          type: array
+          items:
+            type: string
+      required:
+      - name
+      - slug
     Comment:
       type: object
       properties:
@@ -7641,6 +7938,45 @@ components:
           $ref: '#/components/schemas/EventStatus'
       required:
       - status
+    EventTemplateCreateInput:
+      type: object
+      properties:
+        event:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 160
+        sections:
+          type: array
+          items:
+            type: string
+      required:
+      - event
+      - name
+    EventTemplateOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        source_event_name:
+          type: string
+        sections:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - created_at
+      - name
+      - public_id
+      - sections
+      - source_event_name
     ExceptionGrant:
       type: object
       properties:
@@ -7905,6 +8241,19 @@ components:
       - public_id
       - read_at
       - subject
+    InstantiateInput:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+          maxLength: 200
+          pattern: ^[-a-zA-Z0-9_]+$
+      required:
+      - name
+      - slug
     JudgeRecordInput:
       type: object
       properties:
@@ -8833,6 +9182,65 @@ components:
       required:
       - project
       - project_name
+    QualifierEntryInput:
+      type: object
+      properties:
+        external_ref:
+          type: string
+          maxLength: 120
+        project:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - external_ref
+    QualifierEntryOutput:
+      type: object
+      properties:
+        external_ref:
+          type: string
+        project:
+          type: string
+          format: uuid
+        advanced:
+          type: boolean
+      required:
+      - advanced
+      - external_ref
+      - project
+    QualifierImportInput:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/QualifierEntryInput'
+      required:
+      - entries
+    QualifierImportOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        stage:
+          type: string
+          format: uuid
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/QualifierEntryOutput'
+        advanced_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - advanced_count
+      - created_at
+      - entries
+      - public_id
+      - stage
     RankedResultSchema:
       type: object
       properties:

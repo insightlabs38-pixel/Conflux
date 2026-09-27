@@ -10,6 +10,7 @@ import { WebhooksPanel } from "../integrations/WebhooksPanel";
 import { AwardsPanel } from "../awards/AwardsPanel";
 import { OperationsCenter } from "../operations/OperationsCenter";
 import { CommunicationsPanel } from "../communications/CommunicationsPanel";
+import { EventTemplatesPanel } from "./EventTemplatesPanel";
 
 type Event = {
   public_id: string;
@@ -266,6 +267,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
           </button>
         ))}
       </nav>
+      <EventTemplatesPanel workspaceId={workspaceId} />
       {selected && (
         <article>
           <h2>{selected.name}</h2>

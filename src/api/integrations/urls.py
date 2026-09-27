@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import archive_views, views, webhook_views
+from . import archive_views, external_qualifier_views, template_views, views, webhook_views
 
 urlpatterns = [
     path(
@@ -12,6 +12,34 @@ urlpatterns = [
         "workspaces/<uuid:workspace_public_id>/archive/import/",
         archive_views.WorkspaceArchiveImportView.as_view(),
         name="workspace-archive-import",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/event-templates/",
+        template_views.EventTemplateListView.as_view(),
+        name="event-template-list",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/event-templates/<uuid:template_public_id>/",
+        template_views.EventTemplateDetailView.as_view(),
+        name="event-template-detail",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/event-templates/<uuid:template_public_id>/instantiate/",
+        template_views.EventTemplateInstantiateView.as_view(),
+        name="event-template-instantiate",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/clone/",
+        template_views.EventCloneView.as_view(),
+        name="event-clone",
+    ),
+    path(
+        (
+            "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/stages/"
+            "<uuid:stage_public_id>/external-qualifiers/"
+        ),
+        external_qualifier_views.ExternalQualifierImportView.as_view(),
+        name="external-qualifier-import",
     ),
     path(
         "workspaces/<uuid:workspace_public_id>/webhooks/",

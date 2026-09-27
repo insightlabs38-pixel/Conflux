@@ -42,11 +42,14 @@ Two modes, `config` (default) and `full`:
 - `config`: `event`, `tracks`, `base_prizes`, `stages`, `stage_transitions`,
   `forms` (definitions and their published versions), `policies`,
   `temporal_gates`, `policy_bindings`, `awards` (with their prize
-  components). An award using evaluation-sourced selection is exported by
-  its evaluation plan's *name*, not a portable definition of the plan
-  itself — importing such an award requires a plan with that exact name to
-  already exist in the target event, and fails explicitly (ambiguous or
-  missing) otherwise.
+  components), `evaluation_plans` (candidate type, pool strategy, and their
+  published rubric versions — never pool membership, assignments or
+  normalization runs, which are activity, not configuration), and `pages`
+  (an event's page theme and content blocks, if it has one). An award using
+  evaluation-sourced selection is exported by its evaluation plan's *name*,
+  not a portable definition of the plan itself — importing such an award
+  requires a plan with that exact name to already exist in the target
+  event, and fails explicitly (ambiguous or missing) otherwise.
 - `full`: everything in `config`, plus `projects` (name, description, track,
   and the creating user's *username*). Import resolves that username against
   users that already exist in the target deployment and fails explicitly if
@@ -82,3 +85,36 @@ honest rather than a shaky partial attempt at deeper fidelity:
 A future version that adds any of these does so as an explicit, documented
 `format_version` bump (or a clearly-labeled optional section, if additive),
 not a silent change to what `config`/`full` already mean.
+
+## Selecting a subset of sections (`sections`)
+
+`build_archive(event, mode="config", sections=[...])` (TPL-002/003, behind
+`EventTemplate`s and direct event cloning — see below) restricts the export
+to a caller-chosen subset of the optional top-level keys above. Omitting an
+optional cross-reference's target section never leaves a dangling `ref`: a
+field that points at an excluded section is set to `null` (`base_prizes`/
+`awards`/`projects`' `*track_ref`, `forms`' `stage_ref`), and a section that
+cannot mean anything without another one is dropped outright rather than
+importing a broken shell (`stage_transitions` and `evaluation_plans` both
+require `stages`; `policy_bindings` requires `policies`). `import_archive`
+already treats any key it doesn't find as simply absent, so a filtered
+archive imports through the exact same path as a full one.
+
+## Event templates and direct cloning (`integrations.templates`)
+
+`EventTemplate` (TPL-001) is a config-mode archive saved under a name,
+independent of the event it was built from — editing or archiving that
+event later never touches a template already saved from it. `save_template`
+builds and persists one; `instantiate_template` imports it as a new event,
+any number of times. `clone_event` does both steps for one event in a
+single call without ever persisting the intermediate archive. All three
+are the exact same `build_archive`/`import_archive` this document
+describes; nothing about the archive format itself changes because it
+went through a template.
+
+`POST /api/v1/workspaces/<workspace>/event-templates/` — body
+`{event, name, sections?}`
+`POST /api/v1/workspaces/<workspace>/event-templates/<template>/instantiate/`
+— body `{name, slug}`
+`POST /api/v1/workspaces/<workspace>/events/<event>/clone/` — body
+`{name, slug, sections?}`

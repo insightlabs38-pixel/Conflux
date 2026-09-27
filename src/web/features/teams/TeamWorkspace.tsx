@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { TeamPanel } from "./TeamPanel";
+import { ProjectWorkspace } from "../artifacts/ProjectWorkspace";
 
 type Event = { public_id: string; name: string };
 
@@ -77,11 +78,18 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
         </label>
       )}
       {selectedId && events.some((event) => event.public_id === selectedId) && (
-        <TeamPanel
-          key={selectedId}
-          workspaceId={workspaceId}
-          eventId={selectedId}
-        />
+        <>
+          <TeamPanel
+            key={selectedId}
+            workspaceId={workspaceId}
+            eventId={selectedId}
+          />
+          <ProjectWorkspace
+            key={`projects-${selectedId}`}
+            workspaceId={workspaceId}
+            eventId={selectedId}
+          />
+        </>
       )}
     </section>
   );

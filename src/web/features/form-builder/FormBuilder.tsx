@@ -37,6 +37,7 @@ const SCOPES = ["public", "participant", "judge", "organizer"];
 
 function message(value: unknown): string {
   if (typeof value === "string") return value;
+  if (value instanceof Error) return value.message;
   if (Array.isArray(value)) return value.map(message).join(" ");
   if (value && typeof value === "object")
     return Object.entries(value)

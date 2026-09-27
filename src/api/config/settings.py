@@ -91,7 +91,11 @@ CELERY_BEAT_SCHEDULE = {
     "process-webhooks": {
         "task": "integrations.tasks.process_webhooks",
         "schedule": 30.0,
-    }
+    },
+    "dispatch-reminders": {
+        "task": "communications.tasks.dispatch_due_reminders",
+        "schedule": 30.0,
+    },
 }
 
 # Generic S3 adapter settings; RustFS is the default local object store.

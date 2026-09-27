@@ -16,30 +16,14 @@ def send_message(*, event, actor, subject, body, audience_kind, audience_params=
     transport, still gets the in-app copy -- see `emailing.deliver_email`.
     """
     audience_params = audience_params or {}
-    recipients = list(resolve_audience(event, audience_kind, audience_params))
     with transaction.atomic():
-        message = Message(
+        message = create_inbox_message(
             event=event,
-            sent_by=actor,
+            actor=actor,
             subject=subject,
             body=body,
             audience_kind=audience_kind,
             audience_params=audience_params,
-            recipient_count=len(recipients),
-        )
-        message.full_clean()
-        message.save()
-        MessageRecipient.objects.bulk_create(
-            [MessageRecipient(message=message, user=user) for user in recipients]
-        )
-        record_mutation(
-            actor=actor,
-            workspace=event.workspace,
-            action="message.sent",
-            target=message,
-            metadata={"audience_kind": audience_kind, "recipient_count": len(recipients)},
-            event_type="message.sent",
-            payload={"event": str(event.public_id), "message": str(message.public_id)},
         )
 
     now = timezone.now()
@@ -57,6 +41,35 @@ def send_message(*, event, actor, subject, body, audience_kind, audience_params=
         if failures:
             message.email_failure_count = failures
             message.save(update_fields=["email_failure_count"])
+    return message
+
+
+def create_inbox_message(*, event, actor, subject, body, audience_kind, audience_params):
+    """Persist the message, recipients, and audit in the caller's transaction."""
+    recipients = list(resolve_audience(event, audience_kind, audience_params))
+    message = Message(
+        event=event,
+        sent_by=actor,
+        subject=subject,
+        body=body,
+        audience_kind=audience_kind,
+        audience_params=audience_params,
+        recipient_count=len(recipients),
+    )
+    message.full_clean()
+    message.save()
+    MessageRecipient.objects.bulk_create(
+        [MessageRecipient(message=message, user=user) for user in recipients]
+    )
+    record_mutation(
+        actor=actor,
+        workspace=event.workspace,
+        action="message.sent",
+        target=message,
+        metadata={"audience_kind": audience_kind, "recipient_count": len(recipients)},
+        event_type="message.sent",
+        payload={"event": str(event.public_id), "message": str(message.public_id)},
+    )
     return message
 
 

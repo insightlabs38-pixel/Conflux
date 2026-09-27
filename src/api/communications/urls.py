@@ -31,6 +31,16 @@ urlpatterns = [
         name="message-list-create",
     ),
     path(
+        _prefix + "communications/reminders/",
+        views.ReminderListCreateView.as_view(),
+        name="reminder-list-create",
+    ),
+    path(
+        _prefix + "communications/reminders/<uuid:reminder_public_id>/cancel/",
+        views.ReminderCancelView.as_view(),
+        name="reminder-cancel",
+    ),
+    path(
         "workspaces/<uuid:workspace_public_id>/inbox/",
         views.InboxListView.as_view(),
         name="inbox-list",

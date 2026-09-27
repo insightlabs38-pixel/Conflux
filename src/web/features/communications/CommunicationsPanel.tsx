@@ -19,6 +19,15 @@ type Message = {
   created_at: string;
 };
 
+type Reminder = {
+  public_id: string;
+  kind: string;
+  due_at: string;
+  subject: string;
+  status: string;
+  last_error: string;
+};
+
 async function readJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, { credentials: "include", ...init });
   if (!response.ok)
@@ -36,6 +45,7 @@ export function CommunicationsPanel({
   const base = `/api/v1/workspaces/${workspaceId}/events/${eventId}/communications/`;
   const [kinds, setKinds] = useState<AudienceKind[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
   const [audienceKind, setAudienceKind] = useState("");
   const [param, setParam] = useState("");
   const [subject, setSubject] = useState("");
@@ -46,17 +56,23 @@ export function CommunicationsPanel({
   } | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [reminderKind, setReminderKind] = useState("deadline");
+  const [reminderDue, setReminderDue] = useState("");
+  const [reminderSubject, setReminderSubject] = useState("");
+  const [reminderBody, setReminderBody] = useState("");
 
   useEffect(() => {
     let active = true;
     Promise.all([
       readJson<AudienceKind[]>(base + "audiences/"),
       readJson<Message[]>(base + "messages/"),
+      readJson<Reminder[]>(base + "reminders/"),
     ])
-      .then(([nextKinds, nextMessages]) => {
+      .then(([nextKinds, nextMessages, nextReminders]) => {
         if (active) {
           setKinds(nextKinds);
           setMessages(nextMessages);
+          setReminders(nextReminders);
           if (nextKinds.length > 0) setAudienceKind(nextKinds[0].key);
         }
       })
@@ -120,6 +136,59 @@ export function CommunicationsPanel({
       );
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function scheduleReminder(event: FormEvent) {
+    event.preventDefault();
+    setError("");
+    setBusy(true);
+    try {
+      const reminder = await readJson<Reminder>(base + "reminders/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind: reminderKind,
+          due_at: new Date(reminderDue).toISOString(),
+          audience_kind: audienceKind,
+          audience_params: audienceParams,
+          subject: reminderSubject,
+          body: reminderBody,
+        }),
+      });
+      setReminders((current) =>
+        [...current, reminder].sort((a, b) => a.due_at.localeCompare(b.due_at)),
+      );
+      setReminderDue("");
+      setReminderSubject("");
+      setReminderBody("");
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "Reminder could not be scheduled.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function cancelReminder(id: string) {
+    setError("");
+    try {
+      const updated = await readJson<Reminder>(
+        base + `reminders/${id}/cancel/`,
+        { method: "POST" },
+      );
+      setReminders((current) =>
+        current.map((item) => (item.public_id === id ? updated : item)),
+      );
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "Reminder could not be cancelled.",
+      );
     }
   }
 
@@ -197,6 +266,74 @@ export function CommunicationsPanel({
           Send message
         </Button>
       </form>
+      <h4>Scheduled reminders</h4>
+      <p>
+        Uses the audience selected above. Recipients are checked when the
+        reminder is sent to the in-app inbox.
+      </p>
+      <form onSubmit={(event) => void scheduleReminder(event)}>
+        <label htmlFor="reminder-kind">Reminder type</label>
+        <select
+          id="reminder-kind"
+          value={reminderKind}
+          onChange={(event) => setReminderKind(event.target.value)}
+        >
+          <option value="deadline">Submission deadline</option>
+          <option value="judging">Judging</option>
+          <option value="voting">Voting</option>
+        </select>
+        <label htmlFor="reminder-due">Send at</label>
+        <input
+          id="reminder-due"
+          type="datetime-local"
+          value={reminderDue}
+          onChange={(event) => setReminderDue(event.target.value)}
+          required
+        />
+        <label htmlFor="reminder-subject">Subject</label>
+        <input
+          id="reminder-subject"
+          value={reminderSubject}
+          onChange={(event) => setReminderSubject(event.target.value)}
+          required
+          maxLength={200}
+        />
+        <label htmlFor="reminder-body">Message</label>
+        <textarea
+          id="reminder-body"
+          value={reminderBody}
+          onChange={(event) => setReminderBody(event.target.value)}
+          required
+        />
+        <Button type="submit" disabled={busy}>
+          Schedule reminder
+        </Button>
+      </form>
+      {reminders.length === 0 ? (
+        <p>No reminders scheduled.</p>
+      ) : (
+        <ul aria-label="Reminders">
+          {reminders.map((reminder) => (
+            <li key={reminder.public_id}>
+              <strong>{reminder.subject}</strong> · {reminder.kind} ·{" "}
+              {reminder.status} ·{" "}
+              <time dateTime={reminder.due_at}>
+                {new Date(reminder.due_at).toLocaleString()}
+              </time>
+              {reminder.last_error && ` · ${reminder.last_error}`}
+              {reminder.status === "pending" && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => void cancelReminder(reminder.public_id)}
+                >
+                  Cancel
+                </Button>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
       <h4>Sent messages</h4>
       {messages.length === 0 ? (
         <p>No messages sent yet.</p>

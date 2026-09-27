@@ -1723,6 +1723,109 @@ paths:
               schema:
                 $ref: '#/components/schemas/MessageSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/reminders/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_reminders
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReminderSchema'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_reminders
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReminderInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReminderInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReminderInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReminderSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/reminders/{reminder_public_id}/cancel/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_reminders_reminder_public_id_cancel
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: reminder_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReminderSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/dashboard/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_dashboard
@@ -10880,6 +10983,84 @@ components:
           type: string
       required:
       - token
+    ReminderInputSchema:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/ReminderInputSchemaKindEnum'
+        due_at:
+          type: string
+          format: date-time
+        audience_kind:
+          type: string
+          maxLength: 40
+        audience_params:
+          type: object
+          additionalProperties:
+            type: string
+        subject:
+          type: string
+          maxLength: 200
+        body:
+          type: string
+      required:
+      - audience_kind
+      - body
+      - due_at
+      - kind
+      - subject
+    ReminderInputSchemaKindEnum:
+      enum:
+      - deadline
+      - judging
+      - voting
+      type: string
+      description: |-
+        * `deadline` - deadline
+        * `judging` - judging
+        * `voting` - voting
+    ReminderSchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+        due_at:
+          type: string
+          format: date-time
+        audience_kind:
+          type: string
+        audience_params: {}
+        subject:
+          type: string
+        body:
+          type: string
+        status:
+          type: string
+        sent_message:
+          type: string
+          format: uuid
+          nullable: true
+        cancelled_at:
+          type: string
+          format: date-time
+          nullable: true
+        last_error:
+          type: string
+      required:
+      - audience_kind
+      - audience_params
+      - body
+      - cancelled_at
+      - due_at
+      - kind
+      - last_error
+      - public_id
+      - sent_message
+      - status
+      - subject
     ResolutionInputSchema:
       type: object
       properties:

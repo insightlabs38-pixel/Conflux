@@ -57,3 +57,38 @@ class MessageRecipient(PublicIdModel):
             models.UniqueConstraint(fields=["message", "user"], name="unique_message_recipient")
         ]
         ordering = ["-message__created_at", "-id"]
+
+
+class ReminderKind(models.TextChoices):
+    DEADLINE = "deadline", "Submission deadline"
+    JUDGING = "judging", "Judging"
+    VOTING = "voting", "Voting"
+
+
+class Reminder(PublicIdModel):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="reminders")
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="created_reminders"
+    )
+    kind = models.CharField(max_length=12, choices=ReminderKind.choices)
+    due_at = models.DateTimeField()
+    audience_kind = models.CharField(max_length=40)
+    audience_params = models.JSONField(default=dict, blank=True)
+    subject = models.CharField(max_length=200)
+    body = models.TextField()
+    sent_message = models.OneToOneField(
+        Message, null=True, blank=True, on_delete=models.PROTECT, related_name="reminder"
+    )
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+    retry_after = models.DateTimeField(null=True, blank=True)
+    last_error = models.CharField(max_length=300, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["due_at", "id"]
+
+    def clean(self):
+        if not self.subject.strip():
+            raise ValidationError({"subject": "Subject cannot be empty."})
+        if not self.body.strip():
+            raise ValidationError({"body": "Body cannot be empty."})

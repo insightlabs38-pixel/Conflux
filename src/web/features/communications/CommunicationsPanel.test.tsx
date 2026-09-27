@@ -52,6 +52,14 @@ describe("CommunicationsPanel", () => {
       email_failure_count: 0,
       created_at: "2026-09-27T00:00:00Z",
     };
+    const scheduledReminder = {
+      public_id: "r1",
+      kind: "deadline",
+      due_at: "2099-01-01T12:00:00Z",
+      subject: "Deadline soon",
+      status: "pending",
+      last_error: "",
+    };
     const fetchMock = vi
       .fn()
       .mockImplementation(async (input: unknown, init?: RequestInit) => {
@@ -61,6 +69,10 @@ describe("CommunicationsPanel", () => {
           return { ok: true, json: async () => kinds };
         if (url.endsWith("messages/") && method === "GET")
           return { ok: true, json: async () => [] };
+        if (url.endsWith("reminders/") && method === "GET")
+          return { ok: true, json: async () => [] };
+        if (url.endsWith("reminders/") && method === "POST")
+          return { ok: true, json: async () => scheduledReminder };
         if (url.endsWith("audiences/preview/"))
           return {
             ok: true,
@@ -113,6 +125,37 @@ describe("CommunicationsPanel", () => {
     );
     expect(fetchMock).toHaveBeenCalledWith(
       expect.stringContaining("communications/messages/"),
+      expect.objectContaining({ method: "POST" }),
+    );
+
+    await act(async () => {
+      for (const [selector, value] of [
+        ["#reminder-due", "2099-01-01T12:00"],
+        ["#reminder-subject", "Deadline soon"],
+        ["#reminder-body", "Please submit"],
+      ]) {
+        const input = container.querySelector(selector) as HTMLInputElement;
+        const prototype =
+          input instanceof HTMLTextAreaElement
+            ? HTMLTextAreaElement.prototype
+            : HTMLInputElement.prototype;
+        Object.getOwnPropertyDescriptor(prototype, "value")?.set?.call(
+          input,
+          value,
+        );
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    });
+    await act(async () => {
+      [...container.querySelectorAll("button")]
+        .find((button) => button.textContent === "Schedule reminder")
+        ?.click();
+    });
+    await until(
+      () => container.textContent?.includes("Deadline soon") ?? false,
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining("communications/reminders/"),
       expect.objectContaining({ method: "POST" }),
     );
   });

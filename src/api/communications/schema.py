@@ -62,6 +62,29 @@ class MessageSchema(serializers.Serializer):
     created_at = serializers.DateTimeField()
 
 
+class ReminderInputSchema(serializers.Serializer):
+    kind = serializers.ChoiceField(choices=["deadline", "judging", "voting"])
+    due_at = serializers.DateTimeField()
+    audience_kind = serializers.CharField(max_length=40)
+    audience_params = serializers.DictField(child=serializers.CharField(), required=False)
+    subject = serializers.CharField(max_length=200)
+    body = serializers.CharField()
+
+
+class ReminderSchema(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    kind = serializers.CharField()
+    due_at = serializers.DateTimeField()
+    audience_kind = serializers.CharField()
+    audience_params = serializers.JSONField()
+    subject = serializers.CharField()
+    body = serializers.CharField()
+    status = serializers.CharField()
+    sent_message = serializers.UUIDField(allow_null=True)
+    cancelled_at = serializers.DateTimeField(allow_null=True)
+    last_error = serializers.CharField()
+
+
 class InboxMessageSchema(serializers.Serializer):
     public_id = serializers.UUIDField()
     subject = serializers.CharField()

@@ -56,7 +56,7 @@ async function request<T>(path: string, method = "GET", body?: object): Promise<
   return response.status === 204 ? (undefined as T) : (response.json() as Promise<T>);
 }
 
-export function EventTemplatesPanel({ workspaceId }: { workspaceId: string }) {
+export function EventTemplatesPanel({ workspaceId, onCreated }: { workspaceId: string; onCreated?: (eventId: string) => void }) {
   const base = `/api/v1/workspaces/${workspaceId}/`;
   const [events, setEvents] = useState<EventSummary[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -66,7 +66,7 @@ export function EventTemplatesPanel({ workspaceId }: { workspaceId: string }) {
   const [templateName, setTemplateName] = useState("");
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
-  const [created, setCreated] = useState<{ name: string; slug: string } | null>(null);
+  const [created, setCreated] = useState<{ public_id: string; name: string; slug: string } | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -131,12 +131,13 @@ export function EventTemplatesPanel({ workspaceId }: { workspaceId: string }) {
     void run(async () => {
       if (!sourceEvent) throw new Error("Choose a source event first.");
       if (!name.trim() || !slug.trim()) throw new Error("Name and slug are required.");
-      const result = await request<{ name: string; slug: string }>(
+      const result = await request<{ public_id: string; name: string; slug: string }>(
         base + `events/${sourceEvent}/clone/`,
         "POST",
         { name: name.trim(), slug: slug.trim(), sections },
       );
       setCreated(result);
+      onCreated?.(result.public_id);
       setName("");
       setSlug("");
     });
@@ -146,12 +147,13 @@ export function EventTemplatesPanel({ workspaceId }: { workspaceId: string }) {
     await run(async () => {
       if (!instantiateName.trim() || !instantiateSlug.trim())
         throw new Error("Name and slug are required.");
-      const result = await request<{ name: string; slug: string }>(
+      const result = await request<{ public_id: string; name: string; slug: string }>(
         base + `event-templates/${template.public_id}/instantiate/`,
         "POST",
         { name: instantiateName.trim(), slug: instantiateSlug.trim() },
       );
       setCreated(result);
+      onCreated?.(result.public_id);
     });
   }
 
@@ -167,10 +169,7 @@ export function EventTemplatesPanel({ workspaceId }: { workspaceId: string }) {
       {error && <p role="alert">{error}</p>}
       {created && (
         <p role="status">
-          Created event "{created.name}" ({created.slug}).{" "}
-          <button type="button" onClick={() => window.location.reload()}>
-            Reload to see it in your event list
-          </button>
+          Created event "{created.name}" ({created.slug}).
         </p>
       )}
       <label htmlFor="tpl-source">Source event</label>

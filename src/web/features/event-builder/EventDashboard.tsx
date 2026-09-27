@@ -267,7 +267,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
           </button>
         ))}
       </nav>
-      <EventTemplatesPanel workspaceId={workspaceId} />
+      <EventTemplatesPanel workspaceId={workspaceId} onCreated={choose} />
       {selected && (
         <article>
           <h2>{selected.name}</h2>

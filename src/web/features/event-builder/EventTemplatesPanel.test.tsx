@@ -81,4 +81,36 @@ describe("EventTemplatesPanel", () => {
       expect.objectContaining({ method: "POST" }),
     );
   });
+
+  it("selects a cloned event without reloading the page", async () => {
+    const onCreated = vi.fn();
+    vi.stubGlobal("fetch", vi.fn().mockImplementation(async (input: unknown, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith("/events/") && (!init?.method || init.method === "GET")) {
+        return { ok: true, json: async () => [{ public_id: "e1", name: "Regionals" }] };
+      }
+      if (url.endsWith("event-templates/")) return { ok: true, json: async () => [] };
+      if (url.endsWith("/events/e1/clone/")) {
+        return { ok: true, json: async () => ({ public_id: "e2", name: "Clone", slug: "clone" }) };
+      }
+      throw new Error(`Unexpected request: ${url}`);
+    }));
+    act(() => root.render(<EventTemplatesPanel workspaceId="w1" onCreated={onCreated} />));
+    await until(() => container.querySelector('option[value="e1"]') !== null);
+    const change = async (selector: string, value: string, eventName: string) => {
+      await act(async () => {
+        const element = container.querySelector<HTMLInputElement | HTMLSelectElement>(selector)!;
+        Object.getOwnPropertyDescriptor(Object.getPrototypeOf(element), "value")?.set?.call(element, value);
+        element.dispatchEvent(new Event(eventName, { bubbles: true }));
+      });
+    };
+    await change("#tpl-source", "e1", "change");
+    await change("#clone-name", "Clone", "input");
+    await change("#clone-slug", "clone", "input");
+    await act(async () => container.querySelectorAll("form")[1].requestSubmit());
+    await until(() => onCreated.mock.calls.length > 0);
+    expect(onCreated).toHaveBeenCalledWith("e2");
+    expect(container.textContent).toContain('Created event "Clone"');
+    expect(container.textContent).not.toContain("Reload to see it");
+  });
 });

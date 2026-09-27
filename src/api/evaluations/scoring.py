@@ -19,9 +19,9 @@ def ballot_observations(plan):
     """
     from .models import Ballot
 
-    ballots = Ballot.objects.filter(rubric_version__plan=plan).prefetch_related(
-        "responses", "rubric_version"
-    )
+    ballots = Ballot.objects.filter(
+        rubric_version__plan=plan, is_calibration=False
+    ).prefetch_related("responses", "rubric_version")
     observations = []
     for ballot in ballots:
         scores = {response.criterion_id: response.score for response in ballot.responses.all()}

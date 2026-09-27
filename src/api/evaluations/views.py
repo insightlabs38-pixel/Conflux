@@ -43,6 +43,10 @@ from .schema import (
     AssignmentActivateInputSchema,
     BallotDraftInputSchema,
     BallotSubmitInputSchema,
+    CalibrationProjectItemSchema,
+    CalibrationProjectsInputSchema,
+    CalibrationProjectSummarySchema,
+    CalibrationStatusSchema,
     CandidateQueueItemSchema,
     EvaluationProgressSchema,
     NormalizationInputSchema,
@@ -96,6 +100,16 @@ def _eligible_candidates(plan, judge):
         )
     )
     return candidates.exclude(id__in=conflicted)
+
+
+def _calibration_remaining(plan, judge):
+    """S02: the plan's calibration projects `judge` has not yet scored.
+    An empty queryset means calibration is complete (or none is required).
+    """
+    completed = Ballot.objects.filter(
+        rubric_version__plan=plan, judge=judge, is_calibration=True
+    ).values_list("project_id", flat=True)
+    return plan.calibration_projects.exclude(id__in=completed)
 
 
 class PlanMixin(StageEventMixin):
@@ -250,6 +264,8 @@ class BallotListCreateView(PlanMixin):
         plan = self.get_plan()
         if plan.mode != EvaluationMode.RUBRIC:
             raise ValidationError({"detail": "This plan is configured for pairwise judging."})
+        if plan.calibration_required and _calibration_remaining(plan, request.user).exists():
+            raise ValidationError({"detail": "Complete calibration before live judging."})
         version = plan.current_rubric_version
         if version is None:
             raise ValidationError({"detail": "This plan has no published rubric yet."})
@@ -1016,3 +1032,204 @@ class PairwiseResultsCsvExportView(PlanMixin):
                 ]
             )
         return response
+
+
+class CalibrationProjectsView(PlanMixin):
+    """S02: the plan's shared calibration project set -- every judge scores
+    these against the rubric's anchors before live judging (when
+    `calibration_required` is set). A judge needs the list to know what to
+    score; only an organizer may change it.
+    """
+
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [require_roles(Role.JUDGE, Role.ORGANIZER, Role.ADMIN)()]
+        return super().get_permissions()
+
+    @extend_schema(responses=CalibrationProjectItemSchema(many=True))
+    def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        projects = self.get_plan().calibration_projects.all()
+        return Response([{"project": str(p.public_id), "name": p.name} for p in projects])
+
+    @extend_schema(
+        request=CalibrationProjectsInputSchema, responses=CalibrationProjectItemSchema(many=True)
+    )
+    def put(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        event = self.get_event()
+        project_ids = request.data.get("projects", [])
+        if not isinstance(project_ids, list):
+            raise ValidationError({"projects": "Must be a list of project ids."})
+        projects = list(Project.objects.filter(event=event, public_id__in=project_ids))
+        if len(projects) != len(set(project_ids)):
+            raise ValidationError({"projects": "All projects must belong to this event."})
+        plan.calibration_projects.set(projects)
+        record_mutation(
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="calibration_projects.set",
+            target=plan,
+            metadata={"count": len(projects)},
+        )
+        return Response([{"project": str(p.public_id), "name": p.name} for p in projects])
+
+
+class CalibrationBallotListCreateView(PlanMixin):
+    """S02: a judge's calibration ballot on one of the plan's shared
+    calibration projects -- separate evidence from live Ballots (see
+    Ballot.is_calibration and scoring.ballot_observations), same isolation
+    shape as BallotListCreateView.
+    """
+
+    serializer_class = BallotSerializer
+
+    def get_permissions(self):
+        return [require_roles(Role.JUDGE, Role.ORGANIZER, Role.ADMIN)()]
+
+    def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        ballots = Ballot.objects.filter(
+            rubric_version__plan=plan, is_calibration=True
+        ).select_related("project")
+        is_organizer = has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
+        requested_judge_id = request.GET.get("judge")
+        if requested_judge_id:
+            judge = get_object_or_404(User, public_id=requested_judge_id)
+            if judge.id != request.user.id and not is_organizer:
+                raise PermissionDenied("You cannot view another judge's calibration ballots.")
+            ballots = ballots.filter(judge=judge)
+        elif not is_organizer:
+            ballots = ballots.filter(judge=request.user)
+        return Response(BallotSerializer(ballots.prefetch_related("responses"), many=True).data)
+
+    @extend_schema(request=BallotSubmitInputSchema, responses={201: BallotSerializer})
+    @transaction.atomic
+    def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        if not has_any_role(request.user, self.get_workspace(), Role.JUDGE):
+            raise ValidationError({"detail": "Only a judge may submit a calibration ballot."})
+        plan = self.get_plan()
+        version = plan.current_rubric_version
+        if version is None:
+            raise ValidationError({"detail": "This plan has no published rubric yet."})
+        project = get_object_or_404(
+            Project, event=self.get_event(), public_id=request.data.get("project")
+        )
+        if not plan.calibration_projects.filter(id=project.id).exists():
+            raise ValidationError({"detail": "Not one of this plan's calibration projects."})
+        serializer = BallotSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        responses = serializer.validated_data.pop("responses")
+        try:
+            with transaction.atomic():
+                ballot = Ballot(
+                    rubric_version=version,
+                    judge=request.user,
+                    project=project,
+                    comment=serializer.validated_data.get("comment", ""),
+                    is_calibration=True,
+                )
+                ballot.full_clean()
+                ballot.save()
+                for response in responses:
+                    entry = BallotResponse(ballot=ballot, **response)
+                    entry.full_clean()
+                    entry.save()
+        except ModelValidationError as exc:
+            raise _as_drf_validation_error(exc) from exc
+        except IntegrityError as exc:
+            raise ValidationError(
+                {"detail": "You have already submitted a calibration ballot for this project."}
+            ) from exc
+        record_mutation(
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="calibration_ballot.submitted",
+            target=ballot,
+        )
+        return Response(BallotSerializer(ballot).data, status=201)
+
+
+class CalibrationStatusView(PlanMixin):
+    """S02: a judge's own calibration completion status; an organizer may
+    check any specific judge via `?judge=`, same pattern as the ballot and
+    pairwise-comparison list views.
+    """
+
+    def get_permissions(self):
+        return [require_roles(Role.JUDGE, Role.ORGANIZER, Role.ADMIN)()]
+
+    @extend_schema(responses=CalibrationStatusSchema)
+    def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        is_organizer = has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
+        requested_judge_id = request.GET.get("judge")
+        if requested_judge_id:
+            judge = get_object_or_404(User, public_id=requested_judge_id)
+            if judge.id != request.user.id and not is_organizer:
+                raise PermissionDenied("You cannot view another judge's calibration status.")
+        elif has_any_role(request.user, self.get_workspace(), Role.JUDGE):
+            judge = request.user
+        else:
+            raise ValidationError({"detail": "Specify ?judge= or use a judge session."})
+
+        remaining_ids = set(_calibration_remaining(plan, judge).values_list("id", flat=True))
+        all_projects = list(plan.calibration_projects.values_list("id", "public_id"))
+        completed = [str(public_id) for pk, public_id in all_projects if pk not in remaining_ids]
+        remaining = [str(public_id) for pk, public_id in all_projects if pk in remaining_ids]
+        return Response(
+            {
+                "required": plan.calibration_required,
+                "total": len(all_projects),
+                "completed": completed,
+                "remaining": remaining,
+                "is_complete": not remaining,
+            }
+        )
+
+
+class CalibrationSummaryView(PlanMixin):
+    """S02: organizer-only raw per-criterion calibration scores across
+    judges for each calibration project -- evidence to review rubric
+    anchors before opening live judging. Deliberately just raw scores plus
+    min/max/mean/spread, not a formal inter-rater agreement statistic (see
+    JUDGING.md; S03 covers proper agreement analytics).
+    """
+
+    @extend_schema(responses=CalibrationProjectSummarySchema(many=True))
+    def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        ballots = (
+            Ballot.objects.filter(rubric_version__plan=plan, is_calibration=True)
+            .select_related("judge")
+            .prefetch_related("responses")
+        )
+        by_project = defaultdict(list)
+        for ballot in ballots:
+            by_project[ballot.project_id].append(ballot)
+
+        summaries = []
+        for project in plan.calibration_projects.all():
+            by_criterion = defaultdict(dict)
+            for ballot in by_project.get(project.id, []):
+                judge_label = str(ballot.judge.public_id)
+                for response in ballot.responses.all():
+                    by_criterion[response.criterion_id][judge_label] = response.score
+            criteria = [
+                {
+                    "criterion_id": criterion_id,
+                    "scores": scores,
+                    "min": min(scores.values()),
+                    "max": max(scores.values()),
+                    "mean": sum(scores.values()) / len(scores),
+                    "spread": max(scores.values()) - min(scores.values()),
+                }
+                for criterion_id, scores in sorted(by_criterion.items())
+            ]
+            summaries.append(
+                {
+                    "project": str(project.public_id),
+                    "project_name": project.name,
+                    "criteria": criteria,
+                }
+            )
+        return Response(summaries)

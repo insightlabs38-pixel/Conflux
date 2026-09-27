@@ -31,6 +31,7 @@ class EvaluationPlanSerializer(serializers.ModelSerializer):
     active_assignment_version = serializers.SerializerMethodField()
     published_normalization_run = serializers.SerializerMethodField()
     published_pairwise_run = serializers.SerializerMethodField()
+    calibration_projects = serializers.SerializerMethodField()
 
     class Meta:
         model = EvaluationPlan
@@ -47,10 +48,18 @@ class EvaluationPlanSerializer(serializers.ModelSerializer):
             "active_assignment_version",
             "published_normalization_run",
             "published_pairwise_run",
+            "calibration_projects",
+            "calibration_required",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["created_at", "updated_at"]
+        read_only_fields = ["created_at", "updated_at", "calibration_projects"]
+
+    def get_calibration_projects(self, plan) -> list[str]:
+        return [
+            str(public_id)
+            for public_id in plan.calibration_projects.values_list("public_id", flat=True)
+        ]
 
     def get_current_rubric_version(self, plan) -> int | None:
         version = plan.current_rubric_version

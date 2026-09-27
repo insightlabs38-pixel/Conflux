@@ -5050,6 +5050,304 @@ paths:
       responses:
         '204':
           description: No response body
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/calibration-projects/
+  : get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_calibration_projects
+      description: |-
+        S02: the plan's shared calibration project set -- every judge scores
+        these against the rubric's anchors before live judging (when
+        `calibration_required` is set). A judge needs the list to know what to
+        score; only an organizer may change it.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CalibrationProjectItemSchema'
+          description: ''
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_calibration_projects
+      description: |-
+        S02: the plan's shared calibration project set -- every judge scores
+        these against the rubric's anchors before live judging (when
+        `calibration_required` is set). A judge needs the list to know what to
+        score; only an organizer may change it.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CalibrationProjectsInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CalibrationProjectsInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CalibrationProjectsInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CalibrationProjectItemSchema'
+          description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/calibration/ballots/
+  : get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_calibration_ballots
+      description: |-
+        S02: a judge's calibration ballot on one of the plan's shared
+        calibration projects -- separate evidence from live Ballots (see
+        Ballot.is_calibration and scoring.ballot_observations), same isolation
+        shape as BallotListCreateView.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ballot'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_calibration_ballots
+      description: |-
+        S02: a judge's calibration ballot on one of the plan's shared
+        calibration projects -- separate evidence from live Ballots (see
+        Ballot.is_calibration and scoring.ballot_observations), same isolation
+        shape as BallotListCreateView.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BallotSubmitInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BallotSubmitInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BallotSubmitInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ballot'
+          description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/calibration/status/
+  : get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_calibration_status
+      description: |-
+        S02: a judge's own calibration completion status; an organizer may
+        check any specific judge via `?judge=`, same pattern as the ballot and
+        pairwise-comparison list views.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalibrationStatusSchema'
+          description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/calibration/summary/
+  : get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_calibration_summary
+      description: |-
+        S02: organizer-only raw per-criterion calibration scores across
+        judges for each calibration project -- evidence to review rubric
+        anchors before opening live judging. Deliberately just raw scores plus
+        min/max/mean/spread, not a formal inter-rater agreement statistic (see
+        JUDGING.md; S03 covers proper agreement analytics).
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CalibrationProjectSummarySchema'
+          description: ''
   ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/candidates/
   : get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_candidates
@@ -7775,6 +8073,113 @@ components:
         * `mentorship` - Mentorship
         * `swag` - Swag
         * `other` - Other
+    CalibrationCriterionSummarySchema:
+      type: object
+      properties:
+        criterion_id:
+          type: string
+        scores:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+        min:
+          type: number
+          format: double
+        max:
+          type: number
+          format: double
+        mean:
+          type: number
+          format: double
+        spread:
+          type: number
+          format: double
+      required:
+      - criterion_id
+      - max
+      - mean
+      - min
+      - scores
+      - spread
+    CalibrationOverviewSchema:
+      type: object
+      properties:
+        required:
+          type: boolean
+        project_count:
+          type: integer
+        judges_total:
+          type: integer
+        judges_complete:
+          type: integer
+      required:
+      - judges_complete
+      - judges_total
+      - project_count
+      - required
+    CalibrationProjectItemSchema:
+      type: object
+      properties:
+        project:
+          type: string
+          format: uuid
+        name:
+          type: string
+      required:
+      - name
+      - project
+    CalibrationProjectSummarySchema:
+      type: object
+      properties:
+        project:
+          type: string
+          format: uuid
+        project_name:
+          type: string
+        criteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/CalibrationCriterionSummarySchema'
+      required:
+      - criteria
+      - project
+      - project_name
+    CalibrationProjectsInputSchema:
+      type: object
+      properties:
+        projects:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+      - projects
+    CalibrationStatusSchema:
+      type: object
+      properties:
+        required:
+          type: boolean
+        total:
+          type: integer
+        completed:
+          type: array
+          items:
+            type: string
+            format: uuid
+        remaining:
+          type: array
+          items:
+            type: string
+            format: uuid
+        is_complete:
+          type: boolean
+      required:
+      - completed
+      - is_complete
+      - remaining
+      - required
+      - total
     CandidateOutput:
       type: object
       properties:
@@ -8231,6 +8636,13 @@ components:
           type: integer
           nullable: true
           readOnly: true
+        calibration_projects:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        calibration_required:
+          type: boolean
         created_at:
           type: string
           format: date-time
@@ -8241,6 +8653,7 @@ components:
           readOnly: true
       required:
       - active_assignment_version
+      - calibration_projects
       - created_at
       - current_rubric_version
       - name
@@ -8294,8 +8707,13 @@ components:
           nullable: true
         results_published:
           type: boolean
+        calibration:
+          allOf:
+          - $ref: '#/components/schemas/CalibrationOverviewSchema'
+          nullable: true
       required:
       - assignment_active
+      - calibration
       - candidate_count
       - completion_ratio
       - conflict_count
@@ -9296,6 +9714,13 @@ components:
           type: integer
           nullable: true
           readOnly: true
+        calibration_projects:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        calibration_required:
+          type: boolean
         created_at:
           type: string
           format: date-time

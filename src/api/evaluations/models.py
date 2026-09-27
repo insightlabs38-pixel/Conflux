@@ -80,6 +80,15 @@ class EvaluationPlan(PublicIdModel):
     )
     # {project_public_id: integer} manual override, lower wins ties (JUX-005).
     tie_breaks = models.JSONField(default=dict, blank=True)
+    # S02: a shared set of practice candidates every judge scores against
+    # the rubric's anchors before live judging -- see Ballot.is_calibration
+    # and evaluations/views.py::CalibrationBallotListCreateView. Mutually
+    # exclusive with the real candidate pool (Ballot.clean enforces this),
+    # so a calibration project is never also a live one for this plan.
+    calibration_projects = models.ManyToManyField(
+        Project, blank=True, related_name="calibration_plans"
+    )
+    calibration_required = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -153,6 +162,10 @@ class Ballot(PublicIdModel):
     )
     project = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="ballots")
     comment = models.TextField(blank=True)
+    # S02: a calibration ballot scores a shared practice candidate before
+    # live judging opens; it is never a live evidence ballot and is always
+    # excluded from normalization (see scoring.ballot_observations).
+    is_calibration = models.BooleanField(default=False)
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -163,8 +176,16 @@ class Ballot(PublicIdModel):
         ]
 
     def clean(self):
-        if self.project.event_id != self.rubric_version.plan.stage.event_id:
+        plan = self.rubric_version.plan
+        if self.project.event_id != plan.stage.event_id:
             raise ValidationError({"project": "Project must belong to the plan's event."})
+        is_calibration_project = plan.calibration_projects.filter(id=self.project_id).exists()
+        if self.is_calibration and not is_calibration_project:
+            raise ValidationError({"project": "Not one of this plan's calibration projects."})
+        if not self.is_calibration and is_calibration_project:
+            raise ValidationError(
+                {"project": "This project is reserved for calibration, not live judging."}
+            )
 
 
 class BallotDraft(PublicIdModel):

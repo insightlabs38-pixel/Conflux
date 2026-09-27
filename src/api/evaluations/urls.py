@@ -111,4 +111,24 @@ urlpatterns = [
         views.PairwiseResultsCsvExportView.as_view(),
         name="evaluation-plan-pairwise-results-csv",
     ),
+    path(
+        f"{_PLAN}/calibration-projects/",
+        views.CalibrationProjectsView.as_view(),
+        name="evaluation-plan-calibration-projects",
+    ),
+    path(
+        f"{_PLAN}/calibration/ballots/",
+        views.CalibrationBallotListCreateView.as_view(),
+        name="evaluation-plan-calibration-ballots",
+    ),
+    path(
+        f"{_PLAN}/calibration/status/",
+        views.CalibrationStatusView.as_view(),
+        name="evaluation-plan-calibration-status",
+    ),
+    path(
+        f"{_PLAN}/calibration/summary/",
+        views.CalibrationSummaryView.as_view(),
+        name="evaluation-plan-calibration-summary",
+    ),
 ]

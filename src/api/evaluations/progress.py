@@ -4,6 +4,7 @@ whether judging is actually on track without cross-referencing four
 different endpoints by hand.
 """
 
+from django.db.models import Count
 from projects.models import Project
 
 from .models import Ballot, ConflictOfInterest, EvaluationPoolStrategy
@@ -28,10 +29,30 @@ def compute_progress(plan) -> dict:
     else:
         expected_ballots = None
 
-    submitted = Ballot.objects.filter(rubric_version__plan=plan).count()
+    # Calibration ballots (S02) are practice evidence, never live judging
+    # evidence -- excluded here the same way scoring.ballot_observations
+    # excludes them from normalization.
+    submitted = Ballot.objects.filter(rubric_version__plan=plan, is_calibration=False).count()
     ratio = (submitted / expected_ballots) if expected_ballots else None
 
     latest_run = plan.normalization_runs.order_by("-number").first()
+
+    calibration_project_count = plan.calibration_projects.count()
+    calibration_overview = None
+    if calibration_project_count:
+        judges_complete = (
+            Ballot.objects.filter(rubric_version__plan=plan, is_calibration=True)
+            .values("judge_id")
+            .annotate(completed=Count("project_id", distinct=True))
+            .filter(completed__gte=calibration_project_count)
+            .count()
+        )
+        calibration_overview = {
+            "required": plan.calibration_required,
+            "project_count": calibration_project_count,
+            "judges_total": pool_judge_count,
+            "judges_complete": judges_complete,
+        }
 
     return {
         "candidate_count": candidate_count,
@@ -54,4 +75,5 @@ def compute_progress(plan) -> dict:
             else None
         ),
         "results_published": plan.published_normalization_run_id is not None,
+        "calibration": calibration_overview,
     }

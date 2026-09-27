@@ -140,7 +140,7 @@ export function CommunicationsPanel({ workspaceId, eventId }: { workspaceId: str
         <input id="comms-subject" value={subject} onChange={(event) => setSubject(event.target.value)} required maxLength={200} />
         <label htmlFor="comms-body">Message</label>
         <textarea id="comms-body" value={body} onChange={(event) => setBody(event.target.value)} required />
-        <Button disabled={busy}>Send message</Button>
+        <Button type="submit" disabled={busy}>Send message</Button>
       </form>
       <h4>Sent messages</h4>
       {messages.length === 0 ? <p>No messages sent yet.</p> : (

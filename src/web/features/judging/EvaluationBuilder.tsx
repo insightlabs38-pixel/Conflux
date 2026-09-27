@@ -73,6 +73,7 @@ function CriteriaEditor({
   onChange: (criteria: Criterion[]) => void;
 }) {
   return (
+    <div className="cx-scroll-region" role="region" aria-label="Rubric criteria table" tabIndex={0}>
     <table>
       <thead>
         <tr>
@@ -158,6 +159,7 @@ function CriteriaEditor({
         </tr>
       </tfoot>
     </table>
+    </div>
   );
 }
 

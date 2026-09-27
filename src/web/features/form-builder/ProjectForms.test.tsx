@@ -158,4 +158,113 @@ describe("participant project forms", () => {
     );
     expect(container.textContent).toContain("Unsaved answers");
   });
+
+  it("does not allow editing until existing answers load successfully", async () => {
+    let reads = 0;
+    const fetchMock = vi.fn().mockImplementation(async (url: unknown) => {
+      const path = String(url);
+      if (path.endsWith("/forms/"))
+        return {
+          ok: true,
+          json: async () => [
+            {
+              public_id: "v1",
+              name: "Submission",
+              number: 1,
+              schema: {
+                fields: [{ id: "pitch", type: "text", label: "Pitch" }],
+              },
+            },
+          ],
+        };
+      if (path.endsWith("/artifacts/"))
+        return { ok: true, json: async () => [] };
+      reads += 1;
+      return reads === 1
+        ? {
+            ok: false,
+            status: 503,
+            json: async () => ({ detail: "Unavailable" }),
+          }
+        : { ok: true, json: async () => ({ answers: { pitch: "Saved" } }) };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    act(() =>
+      root.render(<ProjectForms workspaceId="w" eventId="e" projectId="p" />),
+    );
+    await waitFor(
+      () => container.textContent?.includes("Unavailable") ?? false,
+    );
+    expect(container.querySelector("form input")).toBeNull();
+    await act(async () =>
+      [...container.querySelectorAll("button")]
+        .find((button) => button.textContent === "Try again")
+        ?.click(),
+    );
+    await waitFor(
+      () =>
+        container.querySelector<HTMLInputElement>("form input")?.value ===
+        "Saved",
+    );
+    expect(reads).toBe(2);
+  });
+
+  it("requires one choice in a required multi-select field", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockImplementation(async (url: unknown, options?: RequestInit) => {
+        const path = String(url);
+        if (path.endsWith("/forms/"))
+          return {
+            ok: true,
+            json: async () => [
+              {
+                public_id: "v1",
+                name: "Submission",
+                number: 1,
+                schema: {
+                  fields: [
+                    {
+                      id: "tags",
+                      type: "multi_select",
+                      label: "Tags",
+                      required: true,
+                      options: ["AI"],
+                    },
+                  ],
+                },
+              },
+            ],
+          };
+        if (path.endsWith("/artifacts/"))
+          return { ok: true, json: async () => [] };
+        if (options?.method === "PUT")
+          return {
+            ok: true,
+            json: async () => ({
+              answers: JSON.parse(String(options.body)).answers,
+            }),
+          };
+        return { ok: true, json: async () => ({ answers: {} }) };
+      });
+    vi.stubGlobal("fetch", fetchMock);
+    act(() =>
+      root.render(<ProjectForms workspaceId="w" eventId="e" projectId="p" />),
+    );
+    await waitFor(() => container.querySelector("form input") !== null);
+    await act(async () => container.querySelector("form")!.requestSubmit());
+    expect(container.textContent).toContain(
+      "Select at least one option for Tags",
+    );
+    expect(
+      fetchMock.mock.calls.some(([, options]) => options?.method === "PUT"),
+    ).toBe(false);
+    await act(async () =>
+      container.querySelector<HTMLInputElement>("form input")!.click(),
+    );
+    await act(async () => container.querySelector("form")!.requestSubmit());
+    await waitFor(
+      () => container.textContent?.includes("Answers saved") ?? false,
+    );
+  });
 });

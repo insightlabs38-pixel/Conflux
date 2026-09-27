@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Badge } from "../../components/Badge";
 import { Button } from "../../components/Button";
+import { ErrorState } from "../../components/ErrorState";
+import { LoadingState } from "../../components/LoadingState";
 
 type IdentityMode = "authenticated" | "email_link" | "token";
 type Status = { identity_mode: IdentityMode; is_open: boolean } | null;
@@ -18,7 +20,11 @@ function message(value: unknown): string {
   return "Request failed.";
 }
 
-async function request<T>(url: string, method = "GET", body?: object): Promise<T> {
+async function request<T>(
+  url: string,
+  method = "GET",
+  body?: object,
+): Promise<T> {
   const response = await fetch(url, {
     method,
     credentials: "include",
@@ -34,7 +40,9 @@ async function request<T>(url: string, method = "GET", body?: object): Promise<T
     }
     throw new Error(message(detail));
   }
-  return response.status === 204 ? (undefined as T) : (response.json() as Promise<T>);
+  return response.status === 204
+    ? (undefined as T)
+    : (response.json() as Promise<T>);
 }
 
 /** Public audience-choice voting (COM-*), embedded on the public event page.
@@ -49,19 +57,61 @@ export function CommunityVoting({ eventId }: { eventId: string }) {
   const [votedFor, setVotedFor] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [statusState, setStatusState] = useState<
+    "loading" | "absent" | "ready" | "error"
+  >("loading");
+  const [retry, setRetry] = useState(0);
+  const [voting, setVoting] = useState(false);
+  const [resultsError, setResultsError] = useState("");
 
   useEffect(() => {
-    request<Status>(base + "/status/")
-      .then(setStatus)
-      .catch(() => undefined);
-    request<Result[]>(base + "/results/")
-      .then(setResults)
-      .catch(() => undefined);
-  }, [base]);
+    let active = true;
+    setStatusState("loading");
+    setError("");
+    setResultsError("");
+    fetch(base + "/status/", { credentials: "include" })
+      .then(async (response) => {
+        if (response.status === 404) return null;
+        if (!response.ok)
+          throw new Error(`Could not load voting (${response.status}).`);
+        return response.json() as Promise<Status>;
+      })
+      .then((nextStatus) => {
+        if (!active) return;
+        setStatus(nextStatus);
+        setStatusState(nextStatus ? "ready" : "absent");
+      })
+      .catch((cause: unknown) => {
+        if (active) {
+          setError(message(cause));
+          setStatusState("error");
+        }
+      });
+    fetch(base + "/results/", { credentials: "include" })
+      .then(async (response) => {
+        if (response.status === 403 || response.status === 404) return null;
+        if (!response.ok)
+          throw new Error(
+            `Could not load voting results (${response.status}).`,
+          );
+        return response.json() as Promise<Result[]>;
+      })
+      .then((items) => {
+        if (active) setResults(items);
+      })
+      .catch((cause: unknown) => {
+        if (active) setResultsError(message(cause));
+      });
+    return () => {
+      active = false;
+    };
+  }, [base, retry]);
 
   useEffect(() => {
     if (!status) return;
-    request<Candidate[]>(base + `/candidates/${voteToken ? `?token=${voteToken}` : ""}`)
+    request<Candidate[]>(
+      base + `/candidates/${voteToken ? `?token=${voteToken}` : ""}`,
+    )
       .then(setCandidates)
       .catch((cause: unknown) => setError(message(cause)));
   }, [base, status, voteToken]);
@@ -70,17 +120,25 @@ export function CommunityVoting({ eventId }: { eventId: string }) {
     event.preventDefault();
     setError("");
     try {
-      const response = await request<{ token: string }>(base + "/request-email-token/", "POST", {
-        email,
-      });
+      const response = await request<{ token: string }>(
+        base + "/request-email-token/",
+        "POST",
+        {
+          email,
+        },
+      );
       setVoteToken(response.token);
-      setNotice("A voting link would normally be emailed to you; using it here directly.");
+      setNotice(
+        "A voting link would normally be emailed to you; using it here directly.",
+      );
     } catch (cause) {
       setError(message(cause));
     }
   }
 
   async function vote(project: string) {
+    if (voting || votedFor) return;
+    setVoting(true);
     setError("");
     try {
       await request(base + "/votes/", "POST", {
@@ -90,9 +148,20 @@ export function CommunityVoting({ eventId }: { eventId: string }) {
       setVotedFor(project);
     } catch (cause) {
       setError(message(cause));
+    } finally {
+      setVoting(false);
     }
   }
 
+  if (statusState === "loading")
+    return <LoadingState label="Loading voting…" />;
+  if (statusState === "error")
+    return (
+      <ErrorState
+        message={error}
+        onRetry={() => setRetry((count) => count + 1)}
+      />
+    );
   if (!status) return null;
 
   return (
@@ -100,25 +169,31 @@ export function CommunityVoting({ eventId }: { eventId: string }) {
       <h2>Audience choice</h2>
       {error && <p role="alert">{error}</p>}
       {notice && <p role="status">{notice}</p>}
+      {resultsError && <p role="alert">{resultsError}</p>}
       {!status.is_open && <p>Voting is not currently open.</p>}
-      {status.is_open && status.identity_mode === "email_link" && !voteToken && (
-        <form onSubmit={(event) => void requestEmailToken(event)}>
-          <label>
-            Email{" "}
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-            />
-          </label>
-          <Button>Request a voting link</Button>
-        </form>
-      )}
+      {status.is_open &&
+        status.identity_mode === "email_link" &&
+        !voteToken && (
+          <form onSubmit={(event) => void requestEmailToken(event)}>
+            <label>
+              Email{" "}
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+            </label>
+            <Button type="submit">Request a voting link</Button>
+          </form>
+        )}
       {status.is_open && status.identity_mode === "token" && !voteToken && (
         <label>
           Voting token{" "}
-          <input value={voteToken} onChange={(event) => setVoteToken(event.target.value)} />
+          <input
+            value={voteToken}
+            onChange={(event) => setVoteToken(event.target.value)}
+          />
         </label>
       )}
       {status.is_open && (voteToken || status.identity_mode !== "token") && (
@@ -131,7 +206,7 @@ export function CommunityVoting({ eventId }: { eventId: string }) {
               ) : (
                 <Button
                   variant="secondary"
-                  disabled={!!votedFor}
+                  disabled={!!votedFor || voting}
                   onClick={() => void vote(candidate.project)}
                 >
                   Vote

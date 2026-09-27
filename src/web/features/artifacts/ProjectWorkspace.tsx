@@ -2,6 +2,8 @@ import { useEffect, useState, type FormEvent } from "react";
 import { ArtifactPanel } from "./ArtifactPanel";
 import { SubmissionPanel } from "../submissions/SubmissionPanel";
 import { ProjectForms } from "../form-builder/ProjectForms";
+import { ErrorState } from "../../components/ErrorState";
+import { LoadingState } from "../../components/LoadingState";
 
 type Project = {
   public_id: string;
@@ -61,9 +63,14 @@ export function ProjectWorkspace({
   const [trackId, setTrackId] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loaded, setLoaded] = useState(false);
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
     let active = true;
+    setLoading(true);
+    setError("");
     Promise.all([
       request<Project[]>(base + "projects/"),
       request<Track[]>(base + "tracks/"),
@@ -72,15 +79,22 @@ export function ProjectWorkspace({
         if (active) {
           setProjects(nextProjects);
           setTracks(nextTracks);
+          setLoaded(true);
         }
       })
       .catch((cause: unknown) => {
-        if (active) setError(message(cause));
+        if (active) {
+          setLoaded(false);
+          setError(message(cause));
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
       });
     return () => {
       active = false;
     };
-  }, [base]);
+  }, [base, retry]);
 
   function create(event: FormEvent) {
     event.preventDefault();
@@ -95,7 +109,7 @@ export function ProjectWorkspace({
         }),
       )
       .then((project) => {
-        setProjects([...projects, project]);
+        setProjects((current) => [...current, project]);
         setSelectedId(project.public_id);
         setName("");
         setTrackId("");
@@ -103,6 +117,24 @@ export function ProjectWorkspace({
       .catch((cause: unknown) => setError(message(cause)))
       .finally(() => setBusy(false));
   }
+
+  if (loading)
+    return (
+      <section aria-label="My projects">
+        <h2>My projects</h2>
+        <LoadingState label="Loading projects…" />
+      </section>
+    );
+  if (!loaded)
+    return (
+      <section aria-label="My projects">
+        <h2>My projects</h2>
+        <ErrorState
+          message={error}
+          onRetry={() => setRetry((count) => count + 1)}
+        />
+      </section>
+    );
 
   return (
     <section aria-label="My projects">

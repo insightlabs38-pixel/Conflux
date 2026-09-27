@@ -214,14 +214,14 @@ export function EventTemplatesPanel({ workspaceId, onCreated }: { workspaceId: s
           onChange={(e) => setTemplateName(e.target.value)}
           required
         />
-        <Button disabled={busy}>Save as template</Button>
+        <Button type="submit" disabled={busy}>Save as template</Button>
       </form>
       <form onSubmit={cloneDirectly}>
         <label htmlFor="clone-name">New event name</label>
         <input id="clone-name" value={name} onChange={(e) => setName(e.target.value)} required />
         <label htmlFor="clone-slug">New event slug</label>
         <input id="clone-slug" value={slug} onChange={(e) => setSlug(e.target.value)} required />
-        <Button disabled={busy}>Clone directly to a new event now</Button>
+        <Button type="submit" disabled={busy}>Clone directly to a new event now</Button>
       </form>
       <h4>Saved templates</h4>
       {templates.length === 0 ? (

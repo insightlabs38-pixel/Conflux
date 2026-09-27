@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { TeamPanel } from "./TeamPanel";
 import { ProjectWorkspace } from "../artifacts/ProjectWorkspace";
 import { Inbox } from "../communications/Inbox";
+import { ErrorState } from "../../components/ErrorState";
+import { LoadingState } from "../../components/LoadingState";
 
 type Event = { public_id: string; name: string };
 
@@ -16,6 +18,7 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
   const [selectedId, setSelectedId] = useState(eventFromLocation);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [retry, setRetry] = useState(0);
 
   function selectEvent(id: string) {
     setSelectedId(id);
@@ -29,6 +32,8 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
 
   useEffect(() => {
     let active = true;
+    setLoading(true);
+    setError("");
     fetch(`/api/v1/workspaces/${workspaceId}/participant-events/`, {
       credentials: "include",
     })
@@ -52,14 +57,19 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
     return () => {
       active = false;
     };
-  }, [workspaceId]);
+  }, [workspaceId, retry]);
 
   return (
     <section aria-label="Participant events">
       <h2>Join an event team</h2>
       <Inbox workspaceId={workspaceId} />
-      {loading && <p>Loading events…</p>}
-      {error && <p role="alert">{error}</p>}
+      {loading && <LoadingState label="Loading events…" />}
+      {error && (
+        <ErrorState
+          message={error}
+          onRetry={() => setRetry((count) => count + 1)}
+        />
+      )}
       {!loading && !error && events.length === 0 && (
         <p>No events are open for participation.</p>
       )}
@@ -72,7 +82,7 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
             or return to workspaces.
           </p>
         )}
-      {events.length > 0 && (
+      {!loading && !error && events.length > 0 && (
         <label>
           Event{" "}
           <select
@@ -88,20 +98,23 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
           </select>
         </label>
       )}
-      {selectedId && events.some((event) => event.public_id === selectedId) && (
-        <>
-          <TeamPanel
-            key={selectedId}
-            workspaceId={workspaceId}
-            eventId={selectedId}
-          />
-          <ProjectWorkspace
-            key={`projects-${selectedId}`}
-            workspaceId={workspaceId}
-            eventId={selectedId}
-          />
-        </>
-      )}
+      {!loading &&
+        !error &&
+        selectedId &&
+        events.some((event) => event.public_id === selectedId) && (
+          <>
+            <TeamPanel
+              key={selectedId}
+              workspaceId={workspaceId}
+              eventId={selectedId}
+            />
+            <ProjectWorkspace
+              key={`projects-${selectedId}`}
+              workspaceId={workspaceId}
+              eventId={selectedId}
+            />
+          </>
+        )}
     </section>
   );
 }

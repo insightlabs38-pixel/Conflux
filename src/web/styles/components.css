@@ -41,8 +41,9 @@
   color: var(--color-text);
 }
 .cx-shell__header {
-  height: var(--header-height);
+  min-height: var(--header-height);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
@@ -64,10 +65,32 @@
 .cx-shell__main {
   flex: 1;
   width: 100%;
+  min-width: 0;
   max-width: 64rem;
   margin: 0 auto;
   padding: var(--space-6) var(--space-4);
   box-sizing: border-box;
+  overflow-wrap: anywhere;
+}
+
+.cx-shell__main :where(input, select, textarea) {
+  box-sizing: border-box;
+  max-width: 100%;
+  font: inherit;
+}
+
+.cx-shell__main
+  :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  min-height: 2.5rem;
+}
+
+.cx-shell__main fieldset {
+  min-width: 0;
+}
+
+.cx-scroll-region {
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .cx-button {
@@ -82,6 +105,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  min-height: 2.75rem;
 }
 .cx-button:disabled {
   cursor: not-allowed;
@@ -176,4 +200,16 @@
   font-size: var(--font-size-md);
   font-weight: 600;
   color: inherit;
+}
+
+@media (max-width: 40rem) {
+  .cx-shell__header {
+    padding: var(--space-3) var(--space-4);
+  }
+  .cx-shell__nav {
+    flex-wrap: wrap;
+  }
+  .cx-shell__main {
+    padding: var(--space-4) var(--space-3);
+  }
 }

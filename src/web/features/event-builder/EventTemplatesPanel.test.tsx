@@ -70,9 +70,8 @@ describe("EventTemplatesPanel", () => {
       );
       nameInput.dispatchEvent(new Event("input", { bubbles: true }));
     });
-    const forms = container.querySelectorAll("form");
     await act(async () => {
-      (forms[0] as HTMLFormElement).requestSubmit();
+      [...container.querySelectorAll("button")].find((button) => button.textContent === "Save as template")?.click();
     });
 
     await until(() => container.textContent?.includes("Starter kit") ?? false);
@@ -107,7 +106,7 @@ describe("EventTemplatesPanel", () => {
     await change("#tpl-source", "e1", "change");
     await change("#clone-name", "Clone", "input");
     await change("#clone-slug", "clone", "input");
-    await act(async () => container.querySelectorAll("form")[1].requestSubmit());
+    await act(async () => [...container.querySelectorAll("button")].find((button) => button.textContent === "Clone directly to a new event now")?.click());
     await until(() => onCreated.mock.calls.length > 0);
     expect(onCreated).toHaveBeenCalledWith("e2");
     expect(container.textContent).toContain('Created event "Clone"');

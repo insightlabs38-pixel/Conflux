@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { PolicyBuilder } from "../policy-builder/PolicyBuilder";
 import { StageBuilder } from "../stage-builder/StageBuilder";
 import { TeamPanel } from "../teams/TeamPanel";
@@ -11,6 +11,8 @@ import { AwardsPanel } from "../awards/AwardsPanel";
 import { OperationsCenter } from "../operations/OperationsCenter";
 import { CommunicationsPanel } from "../communications/CommunicationsPanel";
 import { EventTemplatesPanel } from "./EventTemplatesPanel";
+import { ErrorState } from "../../components/ErrorState";
+import { LoadingState } from "../../components/LoadingState";
 
 type Event = {
   public_id: string;
@@ -86,11 +88,15 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
   const base = `/api/v1/workspaces/${workspaceId}/events/`;
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedId, setSelectedId] = useState("");
+  const selectedRef = useRef("");
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
   const [prizes, setPrizes] = useState<Prize[]>([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [loadingEvents, setLoadingEvents] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [retry, setRetry] = useState(0);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [trackName, setTrackName] = useState("");
@@ -104,6 +110,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
   async function refresh(id = selectedId) {
     const list = await request<Event[]>(base);
     setEvents(list);
+    setLoadError("");
     if (!id) return;
     const detailBase = `${base}${id}/`;
     const [health, nextTracks, nextPrizes] = await Promise.all([
@@ -111,23 +118,29 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
       request<Track[]>(detailBase + "tracks/"),
       request<Prize[]>(detailBase + "base-prizes/"),
     ]);
+    if (selectedRef.current !== id) return;
     setDashboard(health);
     setTracks(nextTracks);
     setPrizes(nextPrizes);
   }
   useEffect(() => {
     let active = true;
+    setLoadingEvents(true);
+    setLoadError("");
     request<Event[]>(base)
       .then((list) => {
         if (active) setEvents(list);
       })
       .catch((cause: unknown) => {
-        if (active) setError(message(cause));
+        if (active) setLoadError(message(cause));
+      })
+      .finally(() => {
+        if (active) setLoadingEvents(false);
       });
     return () => {
       active = false;
     };
-  }, [base]);
+  }, [base, retry]);
 
   async function run(action: () => Promise<void>) {
     setBusy(true);
@@ -141,6 +154,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
     }
   }
   function choose(id: string) {
+    selectedRef.current = id;
     setSelectedId(id);
     setDashboard(null);
     void run(() => refresh(id));
@@ -156,6 +170,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
       });
       setName("");
       setSlug("");
+      selectedRef.current = created.public_id;
       setSelectedId(created.public_id);
       await refresh(created.public_id);
     });
@@ -235,6 +250,13 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
     <section aria-label="Event dashboard">
       <h1>Events</h1>
       {error && <p role="alert">{error}</p>}
+      {loadingEvents && <LoadingState label="Loading events…" />}
+      {loadError && (
+        <ErrorState
+          message={loadError}
+          onRetry={() => setRetry((count) => count + 1)}
+        />
+      )}
       <form onSubmit={createEvent}>
         <h2>Create event</h2>
         <label>
@@ -267,6 +289,9 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
           </button>
         ))}
       </nav>
+      {!loadingEvents && !loadError && events.length === 0 && (
+        <p>No events yet. Create one to get started.</p>
+      )}
       <EventTemplatesPanel workspaceId={workspaceId} onCreated={choose} />
       {selected && (
         <article>
@@ -451,12 +476,34 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
           <TeamPanel workspaceId={workspaceId} eventId={selected.public_id} />
           <FormBuilder workspaceId={workspaceId} eventId={selected.public_id} />
           <PageBuilder workspaceId={workspaceId} eventId={selected.public_id} />
-          <EvaluationBuilder workspaceId={workspaceId} eventId={selected.public_id} />
-          <CommunityVotingBuilder workspaceId={workspaceId} eventId={selected.public_id} />
-          <WebhooksPanel key={`webhooks-${selected.public_id}`} workspaceId={workspaceId} eventId={selected.public_id} />
-          <AwardsPanel key={`awards-${selected.public_id}`} workspaceId={workspaceId} eventId={selected.public_id} />
-          <OperationsCenter key={`operations-${selected.public_id}`} workspaceId={workspaceId} eventId={selected.public_id} />
-          <CommunicationsPanel key={`communications-${selected.public_id}`} workspaceId={workspaceId} eventId={selected.public_id} />
+          <EvaluationBuilder
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+          />
+          <CommunityVotingBuilder
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+          />
+          <WebhooksPanel
+            key={`webhooks-${selected.public_id}`}
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+          />
+          <AwardsPanel
+            key={`awards-${selected.public_id}`}
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+          />
+          <OperationsCenter
+            key={`operations-${selected.public_id}`}
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+          />
+          <CommunicationsPanel
+            key={`communications-${selected.public_id}`}
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+          />
         </article>
       )}
     </section>

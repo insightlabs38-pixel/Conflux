@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { ErrorState } from "../../components/ErrorState";
 
 type Answer = string | number | boolean | string[];
 type Field = {
@@ -136,19 +137,29 @@ function ProjectForm({
 }) {
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
   const [loading, setLoading] = useState(true);
+  const [loaded, setLoaded] = useState(false);
   const [busy, setBusy] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
+  const [retry, setRetry] = useState(0);
 
   useEffect(() => {
     let active = true;
+    setLoading(true);
+    setError("");
     request<{ answers: Record<string, Answer> }>(url)
       .then((response) => {
-        if (active) setAnswers(response.answers);
+        if (active) {
+          setAnswers(response.answers);
+          setLoaded(true);
+        }
       })
       .catch((cause: unknown) => {
-        if (active) setError(errorMessage(cause));
+        if (active) {
+          setLoaded(false);
+          setError(errorMessage(cause));
+        }
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -156,18 +167,38 @@ function ProjectForm({
     return () => {
       active = false;
     };
-  }, [url]);
+  }, [url, retry]);
 
-  function update(id: string, value: Answer) {
-    setAnswers((current) => ({ ...current, [id]: value }));
+  function update(id: string, value: Answer | null) {
+    setAnswers((current) => {
+      if (value !== null) return { ...current, [id]: value };
+      const next = { ...current };
+      delete next[id];
+      return next;
+    });
     setDirty(true);
     setSaved(false);
   }
 
   async function save(event: FormEvent) {
     event.preventDefault();
-    setBusy(true);
+    if (!loaded) return;
     setError("");
+    const missingChoice = form.schema.fields.find(
+      (field) =>
+        field.type === "multi_select" &&
+        visible(field, answers) &&
+        (field.required ||
+          (field.required_if &&
+            answers[field.required_if.field] === field.required_if.equals)) &&
+        (!Array.isArray(answers[field.id]) ||
+          (answers[field.id] as string[]).length === 0),
+    );
+    if (missingChoice) {
+      setError(`Select at least one option for ${missingChoice.label}.`);
+      return;
+    }
+    setBusy(true);
     const included = Object.fromEntries(
       form.schema.fields
         .filter((field) => visible(field, answers) && field.id in answers)
@@ -196,6 +227,11 @@ function ProjectForm({
       </h4>
       {loading ? (
         <p role="status">Loading answers…</p>
+      ) : !loaded ? (
+        <ErrorState
+          message={error}
+          onRetry={() => setRetry((count) => count + 1)}
+        />
       ) : (
         <>
           {error && <p role="alert">{error}</p>}
@@ -218,7 +254,12 @@ function ProjectForm({
                       }
                       required={required}
                       onChange={(event) =>
-                        update(field.id, event.target.value === "true")
+                        update(
+                          field.id,
+                          event.target.value === ""
+                            ? null
+                            : event.target.value === "true",
+                        )
                       }
                     >
                       <option value="">Choose an answer</option>
@@ -229,7 +270,7 @@ function ProjectForm({
                 );
               if (field.type === "multi_select")
                 return (
-                  <fieldset key={field.id}>
+                  <fieldset key={field.id} aria-required={required}>
                     <legend>
                       {field.label}
                       {required ? " *" : ""}

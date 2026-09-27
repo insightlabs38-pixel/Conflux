@@ -263,7 +263,7 @@ function BallotForm({
                 Retry draft save
               </Button>
             )}
-            <Button disabled={!loaded || submitting || saving}>
+            <Button type="submit" disabled={!loaded || submitting || saving}>
               {submitting ? "Submitting…" : "Submit ballot"}
             </Button>
           </>
@@ -283,6 +283,7 @@ function PlanQueue({ base }: { base: string }) {
 
   function refresh() {
     setLoading(true);
+    setError("");
     Promise.all([
       request<Candidate[]>(base + "candidates/"),
       request<RubricVersion | null>(base + "publish-rubric/"),
@@ -354,6 +355,9 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [planId, setPlanId] = useState("");
   const [error, setError] = useState("");
+  const [loadingEvents, setLoadingEvents] = useState(true);
+  const [loadingStages, setLoadingStages] = useState(false);
+  const [loadingPlans, setLoadingPlans] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -363,6 +367,9 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
       })
       .catch((cause: unknown) => {
         if (active) setError(message(cause));
+      })
+      .finally(() => {
+        if (active) setLoadingEvents(false);
       });
     return () => {
       active = false;
@@ -380,6 +387,9 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
       })
       .catch((cause: unknown) => {
         if (active) setError(message(cause));
+      })
+      .finally(() => {
+        if (active) setLoadingStages(false);
       });
     return () => {
       active = false;
@@ -399,6 +409,9 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
       })
       .catch((cause: unknown) => {
         if (active) setError(message(cause));
+      })
+      .finally(() => {
+        if (active) setLoadingPlans(false);
       });
     return () => {
       active = false;
@@ -409,13 +422,16 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
     setEventId(id);
     setStages([]);
     setStageId("");
+    setLoadingStages(!!id);
     setPlans([]);
     setPlanId("");
+    setLoadingPlans(false);
     setError("");
   }
 
   function chooseStage(id: string) {
     setStageId(id);
+    setLoadingPlans(!!id);
     setPlans([]);
     setPlanId("");
     setError("");
@@ -430,6 +446,10 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
       <h2>Judging</h2>
       <Inbox workspaceId={workspaceId} />
       {error && <p role="alert">{error}</p>}
+      {loadingEvents && <LoadingState label="Loading judging events…" />}
+      {!loadingEvents && !error && events.length === 0 && (
+        <EmptyState title="No events are available for judging." />
+      )}
       <label>
         Event{" "}
         <select value={eventId} onChange={(e) => chooseEvent(e.target.value)}>
@@ -441,6 +461,10 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
           ))}
         </select>
       </label>
+      {eventId && loadingStages && <LoadingState label="Loading stages…" />}
+      {eventId && !loadingStages && !error && stages.length === 0 && (
+        <EmptyState title="This event has no stages yet." />
+      )}
       {stages.length > 0 && (
         <label>
           Stage{" "}
@@ -453,6 +477,12 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
             ))}
           </select>
         </label>
+      )}
+      {stageId && loadingPlans && (
+        <LoadingState label="Loading evaluation plans…" />
+      )}
+      {stageId && !loadingPlans && !error && plans.length === 0 && (
+        <EmptyState title="This stage has no evaluation plans yet." />
       )}
       {plans.length > 1 && (
         <label>

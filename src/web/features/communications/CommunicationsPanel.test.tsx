@@ -71,7 +71,7 @@ describe("CommunicationsPanel", () => {
       body.dispatchEvent(new Event("input", { bubbles: true }));
     });
     await act(async () => {
-      container.querySelector("form")!.requestSubmit();
+      [...container.querySelectorAll("button")].find((button) => button.textContent === "Send message")?.click();
     });
     await until(() => container.textContent?.includes("Sent messages") && container.textContent?.includes("Welcome"));
     expect(fetchMock).toHaveBeenCalledWith(

@@ -2618,6 +2618,32 @@ export type InputOfSensitivityInputSchema = {
   holdout_counts?: number[];
 };
 
+export type SignedArchiveImportInput = {
+  name: string;
+  slug: string;
+  envelope: unknown;
+};
+
+export type InputOfSignedArchiveImportInput = {
+  name: string;
+  slug: string;
+  envelope: unknown;
+};
+
+export type SignedArchiveOutput = {
+  manifest: Record<string, unknown>;
+  archive: Record<string, unknown>;
+  public_key_pem: string;
+  signature: string;
+};
+
+export type InputOfSignedArchiveOutput = {
+  manifest: Record<string, unknown>;
+  archive: Record<string, unknown>;
+  public_key_pem: string;
+  signature: string;
+};
+
 export type Stage = {
   public_id: string;
   name: string;
@@ -3313,6 +3339,13 @@ export interface Operations {
     };
     response: ArchivePreviewOutput;
   };
+  post_api_v1_workspaces_workspace_public_id_archive_signed_import: {
+    request: {
+      path: { workspace_public_id: string };
+      body: InputOfSignedArchiveImportInput;
+    };
+    response: ImportedEventOutput;
+  };
   get_api_v1_workspaces_workspace_public_id_event_templates: {
     request: { path: { workspace_public_id: string } };
     response: EventTemplateOutput[];
@@ -3374,6 +3407,10 @@ export interface Operations {
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: ArchiveOutput;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_signed: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: SignedArchiveOutput;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -5293,6 +5330,14 @@ export const operations = {
     request_body: true,
     response_kind: "json",
   },
+  post_api_v1_workspaces_workspace_public_id_archive_signed_import: {
+    method: "POST",
+    path: "/api/v1/workspaces/{workspace_public_id}/archive/signed/import/",
+    path_params: ["workspace_public_id"],
+    query_params: [],
+    request_body: true,
+    response_kind: "json",
+  },
   get_api_v1_workspaces_workspace_public_id_event_templates: {
     method: "GET",
     path: "/api/v1/workspaces/{workspace_public_id}/event-templates/",
@@ -5392,6 +5437,15 @@ export const operations = {
     request_body: false,
     response_kind: "json",
   },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_signed:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/archive/signed/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards: {
     method: "GET",
     path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/",

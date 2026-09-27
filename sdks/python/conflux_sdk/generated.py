@@ -2406,6 +2406,28 @@ class InputOfSensitivityInputSchema(TypedDict):
     ridge_lambdas: NotRequired[list[float]]
     holdout_counts: NotRequired[list[int]]
 
+class SignedArchiveImportInput(TypedDict):
+    name: str
+    slug: str
+    envelope: Any
+
+class InputOfSignedArchiveImportInput(TypedDict):
+    name: str
+    slug: str
+    envelope: Any
+
+class SignedArchiveOutput(TypedDict):
+    manifest: dict[str, Any]
+    archive: dict[str, Any]
+    public_key_pem: str
+    signature: str
+
+class InputOfSignedArchiveOutput(TypedDict):
+    manifest: dict[str, Any]
+    archive: dict[str, Any]
+    public_key_pem: str
+    signature: str
+
 class Stage(TypedDict):
     public_id: str
     name: str
@@ -3140,6 +3162,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                               'query_params': [],
                                                                               'request_body': False,
                                                                               'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_signed': {'method': 'GET',
+                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/archive/signed/',
+                                                                                     'path_params': ['event_public_id',
+                                                                                                     'workspace_public_id'],
+                                                                                     'query_params': [],
+                                                                                     'request_body': False,
+                                                                                     'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards': {'method': 'GET',
                                                                              'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/',
                                                                              'path_params': ['event_public_id',
@@ -4025,6 +4054,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                 'query_params': [],
                                                                 'request_body': True,
                                                                 'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_archive_signed_import': {'method': 'POST',
+                                                                      'path': '/api/v1/workspaces/{workspace_public_id}/archive/signed/import/',
+                                                                      'path_params': ['workspace_public_id'],
+                                                                      'query_params': [],
+                                                                      'request_body': True,
+                                                                      'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_event_templates': {'method': 'POST',
                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/event-templates/',
                                                                 'path_params': ['workspace_public_id'],

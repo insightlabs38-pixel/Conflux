@@ -8,6 +8,8 @@ keep an offline backup of it.
 `GET  /api/v1/workspaces/<workspace>/events/<event>/archive/?mode=config|full`
 `POST /api/v1/workspaces/<workspace>/archive/import/` — body `{name, slug, archive}`
 `POST /api/v1/workspaces/<workspace>/archive/preview/` — same body, import preflight
+`GET  /api/v1/workspaces/<workspace>/events/<event>/archive/signed/?mode=config|full`
+`POST /api/v1/workspaces/<workspace>/archive/signed/import/` — body `{name, slug, envelope}`
 
 Both require the organizer/admin role on the workspace. Import always creates
 a **new** event — it never overwrites an existing one — starting as an
@@ -21,6 +23,27 @@ does not reserve the requested slug: another import can create that slug
 between preview and import. Only v1 is supported; the preview returns a
 named error for another `format_version` rather than claiming an undefined
 migration or deprecation path.
+
+## Signed portable envelope
+
+The signed export wraps the same canonical archive in `{manifest, archive,
+public_key_pem, signature}`. Manifest version 1 holds a SHA-256 checksum of
+the whole archive, a SHA-256 checksum for every top-level archive key, and a
+SHA-256 fingerprint of the Ed25519 public key's raw bytes. Checksums use UTF-8
+JSON with sorted keys, no extra whitespace, and no ASCII escaping. The
+Ed25519 signature covers the canonical JSON bytes of the complete manifest.
+The embedded public key verifies the signature; the verifier also checks the
+key fingerprint and every checksum before signed import creates an event.
+
+For source authentication, compare the embedded public key to a key obtained
+from the source deployment through a trusted channel. A self-contained
+envelope alone proves that its contents match its signature, not who signed
+it. `integrations.signed_archive.verify_signed_archive` accepts a pinned
+`trusted_public_key_pem` for this check. Signed import accepts a verified
+envelope from an authorized organizer and still applies all canonical v1
+validation and fresh-event rules. Existing plain archive endpoints remain
+available. The signing key is the same deployment key used by verifiable
+records; version 1 has no key rotation or revocation support.
 
 ## `format_version`
 

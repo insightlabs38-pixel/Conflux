@@ -874,6 +874,46 @@ paths:
               schema:
                 $ref: '#/components/schemas/ArchivePreviewOutput'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/archive/signed/import/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_archive_signed_import
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignedArchiveImportInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SignedArchiveImportInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SignedArchiveImportInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportedEventOutput'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/event-templates/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_event_templates
@@ -1271,6 +1311,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ArchiveOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/archive/signed/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_signed
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignedArchiveOutput'
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/:
     get:
@@ -13467,6 +13541,39 @@ components:
             type: integer
             minimum: 1
           maxItems: 10
+    SignedArchiveImportInput:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+          maxLength: 200
+          pattern: ^[-a-zA-Z0-9_]+$
+        envelope: {}
+      required:
+      - envelope
+      - name
+      - slug
+    SignedArchiveOutput:
+      type: object
+      properties:
+        manifest:
+          type: object
+          additionalProperties: {}
+        archive:
+          type: object
+          additionalProperties: {}
+        public_key_pem:
+          type: string
+        signature:
+          type: string
+      required:
+      - archive
+      - manifest
+      - public_key_pem
+      - signature
     Stage:
       type: object
       properties:

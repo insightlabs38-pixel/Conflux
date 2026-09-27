@@ -9,9 +9,19 @@ urlpatterns = [
         name="event-archive-export",
     ),
     path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/archive/signed/",
+        archive_views.EventSignedArchiveExportView.as_view(),
+        name="event-signed-archive-export",
+    ),
+    path(
         "workspaces/<uuid:workspace_public_id>/archive/import/",
         archive_views.WorkspaceArchiveImportView.as_view(),
         name="workspace-archive-import",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/archive/signed/import/",
+        archive_views.WorkspaceSignedArchiveImportView.as_view(),
+        name="workspace-signed-archive-import",
     ),
     path(
         "workspaces/<uuid:workspace_public_id>/archive/preview/",

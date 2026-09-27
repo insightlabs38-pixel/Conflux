@@ -133,3 +133,52 @@ def test_credential_creation_rejects_invalid_scope_and_wrong_event():
         == 404
     )
     assert ApiCredential.objects.count() == 0
+
+
+def test_participant_cannot_issue_credentials_and_event_token_cannot_list_workspace_events():
+    _, workspace, first, _, session = fixture()
+    participant = User.objects.create_user(username="participant", password="unused")
+    Membership.objects.create(user=participant, workspace=workspace, role=Role.PARTICIPANT)
+    participant_client = Client()
+    participant_client.cookies["session"] = Session.issue(participant).token
+    create = {
+        "name": "Read only",
+        "event": str(first.public_id),
+        "allowed_actions": ["GET:event-detail", "GET:event-list"],
+    }
+    assert (
+        participant_client.post(
+            credential_url(workspace), create, content_type="application/json"
+        ).status_code
+        == 403
+    )
+    issued = session.post(credential_url(workspace), create, content_type="application/json")
+    assert issued.status_code == 201
+    token = issued.json()["token"]
+    assert (
+        bearer(token)
+        .get(f"/api/v1/workspaces/{workspace.public_id}/events/{first.public_id}/")
+        .status_code
+        == 200
+    )
+    assert bearer(token).get(f"/api/v1/workspaces/{workspace.public_id}/events/").status_code == 401
+
+
+def test_disabled_credential_owner_and_wrong_action_are_rejected():
+    organizer, workspace, first, _, session = fixture()
+    issued = session.post(
+        credential_url(workspace),
+        {"name": "Event reader", "allowed_actions": ["GET:event-detail"]},
+        content_type="application/json",
+    )
+    token = issued.json()["token"]
+    event_url = f"/api/v1/workspaces/{workspace.public_id}/events/{first.public_id}/"
+    assert (
+        bearer(token)
+        .patch(event_url, {"name": "Changed"}, content_type="application/json")
+        .status_code
+        == 401
+    )
+    organizer.is_active = False
+    organizer.save(update_fields=["is_active"])
+    assert bearer(token).get(event_url).status_code == 401

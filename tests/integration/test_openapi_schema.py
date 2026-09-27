@@ -24,6 +24,14 @@ def test_live_schema_contains_workspace_routes_and_auth_schemes():
     schemes = schema["components"]["securitySchemes"]
     assert schemes["sessionCookie"]["in"] == "cookie"
     assert schemes["scopedBearer"]["scheme"] == "bearer"
+    credential_security = schema["paths"][
+        "/api/v1/workspaces/{workspace_public_id}/api-credentials/"
+    ]["post"]["security"]
+    assert credential_security == [{"humanSessionCookie": []}]
+    event_security = schema["paths"][
+        "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/"
+    ]["get"]["security"]
+    assert {"scopedBearer": []} in event_security
     assert set(schema["paths"]) == set(_api_paths(get_resolver().url_patterns))
     operation_ids = [
         operation["operationId"]

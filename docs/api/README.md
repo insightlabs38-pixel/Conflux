@@ -1,0 +1,29 @@
+# Conflux API v1
+
+The live OpenAPI schema is available at `GET /api/v1/schema/`. The [checked schema](openapi.yaml) is generated from the same Django routes and verified with `make openapi-check`. Paths are versioned under `/api/v1/`; JSON routes end in `/`, and CSV exports end in `.csv`.
+
+## Authenticate
+
+Browser UI calls use the `session` cookie. External clients can ask a workspace organizer to issue a scoped bearer credential. The organizer creates it with a human session:
+
+```sh
+curl -X POST "$API_BASE/api/v1/workspaces/$WORKSPACE_ID/api-credentials/" \
+  -H 'Content-Type: application/json' \
+  -H "Cookie: session=$SESSION_TOKEN" \
+  -d '{"name":"Event reader","event":"EVENT_PUBLIC_ID","allowed_actions":["GET:event-detail"],"expires_in_days":30}'
+```
+
+Replace `EVENT_PUBLIC_ID` with the actual event UUID. The response contains `token` once; keep it secret. The token is bound to the workspace, this event, and `GET:event-detail`. It cannot list all workspace events, perform a write, or manage credentials. See [credential scopes](CREDENTIALS.md) for expiry and revocation.
+
+## Read an event
+
+```sh
+curl "$API_BASE/api/v1/workspaces/$WORKSPACE_ID/events/$EVENT_ID/" \
+  -H "Authorization: Bearer $API_TOKEN"
+```
+
+The route returns an event JSON object. The bearer credential's owner must retain the organizer role; removing that role removes access immediately. A wrong workspace, event, action, expired token, or revoked token fails closed. Invalid input returns JSON errors; missing scoped resources return 404. See [route conventions](CONVENTIONS.md) and the checked schema for request and response fields.
+
+## Revoke
+
+With an organizer session, call `POST /api/v1/workspaces/{workspace}/api-credentials/{credential}/revoke/`. Bearer credentials cannot call the management route. Issuance and revocation appear in the workspace audit log without the token value.

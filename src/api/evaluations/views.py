@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from accounts.authentication import CookieSessionAuthentication
 from accounts.models import User
-from audit.services import record_mutation
+from audit.services import diff_snapshots, record_mutation
 from core.authz import has_any_role
 from core.permissions import IsWorkspaceMember, require_roles
 from django.core.exceptions import ValidationError as ModelValidationError
@@ -218,7 +218,8 @@ class RubricPublishView(PlanMixin):
     @transaction.atomic
     def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         plan = self.get_plan()
-        next_number = (plan.current_rubric_version.number + 1) if plan.current_rubric_version else 1
+        previous = plan.current_rubric_version
+        next_number = (previous.number + 1) if previous else 1
         try:
             with transaction.atomic():
                 version = RubricVersion.objects.create(
@@ -226,11 +227,18 @@ class RubricPublishView(PlanMixin):
                 )
         except ModelValidationError as exc:
             raise _as_drf_validation_error(exc) from exc
+        changes = diff_snapshots(
+            {"criteria": previous.criteria if previous else None},
+            {"criteria": version.criteria},
+        )
         record_mutation(
             actor=request.user,
             workspace=self.get_workspace(),
             action="rubric.published",
             target=version,
+            metadata={"event_id": str(self.get_event().public_id), "changes": changes}
+            if changes
+            else {"event_id": str(self.get_event().public_id)},
         )
         return Response(RubricVersionSerializer(version).data, status=201)
 

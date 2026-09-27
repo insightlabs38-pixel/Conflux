@@ -85,6 +85,42 @@ paths:
                 items:
                   $ref: '#/components/schemas/AuditEventSchema'
           description: ''
+  /api/v1/audit/{workspace_public_id}/events/{event_public_id}/config-history/:
+    get:
+      operationId: get_api_v1_audit_workspace_public_id_events_event_public_id_config_history
+      description: |-
+        Readable event/stage/policy/rubric configuration history (S18):
+        only audit rows that actually captured a field-level diff, newest
+        first. Rows written before this batch have an action name but no
+        `changes` in their metadata -- those are omitted rather than shown
+        with an invented or missing diff.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - audit
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ConfigHistoryEntrySchema'
+          description: ''
   /api/v1/events/{event_public_id}/:
     get:
       operationId: get_api_v1_events_event_public_id
@@ -9353,6 +9389,33 @@ components:
       - name
       - public_id
       - quantity
+    ConfigHistoryEntrySchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        actor:
+          type: string
+          nullable: true
+        action:
+          type: string
+        resource_type:
+          type: string
+        resource_id:
+          type: string
+        changes: {}
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - action
+      - actor
+      - changes
+      - created_at
+      - public_id
+      - resource_id
+      - resource_type
     ConflictOfInterest:
       type: object
       properties:

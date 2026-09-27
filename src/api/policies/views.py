@@ -1,4 +1,4 @@
-from audit.services import record_mutation
+from audit.services import diff_snapshots, record_mutation, snapshot_fields
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
@@ -253,12 +253,18 @@ class TemporalGateDetailView(OrganizerView):
         gate = self.get_gate(gate_public_id)
         serializer = TemporalGateSerializer(gate, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
+        changed_fields = list(serializer.validated_data.keys())
+        before = snapshot_fields(gate, changed_fields)
         try:
             with transaction.atomic():
                 for field, value in serializer.validated_data.items():
                     setattr(gate, field, value)
                 gate.full_clean()
                 gate.save()
+                changes = diff_snapshots(before, snapshot_fields(gate, changed_fields))
+                metadata = {"event_id": str(gate.event.public_id)}
+                if changes:
+                    metadata["changes"] = changes
                 record_mutation(
                     actor=request.user,
                     workspace=self.get_workspace(),
@@ -266,6 +272,7 @@ class TemporalGateDetailView(OrganizerView):
                     target=gate,
                     event_type="temporal_gate.updated",
                     payload={"event": str(gate.event.public_id)},
+                    metadata=metadata,
                 )
         except ModelValidationError as exc:
             raise _as_drf_validation_error(exc) from exc

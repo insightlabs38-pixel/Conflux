@@ -1,5 +1,5 @@
 from accounts.authentication import CookieSessionAuthentication
-from audit.services import record_mutation
+from audit.services import diff_snapshots, record_mutation, snapshot_fields
 from core.permissions import IsWorkspaceMember, require_roles
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError, transaction
@@ -18,12 +18,24 @@ from .schema import EventDashboardSchema, PublicEventSchema
 from .serializers import BasePrizeSerializer, EventSerializer, TrackSerializer
 
 
-def _save(serializer, *, actor, workspace, action, event=None, **save_kwargs):
+def _save(serializer, *, actor, workspace, action, event=None, diff_fields=None, **save_kwargs):
+    # `diff_fields` is only meaningful for an update (serializer.instance
+    # already set) -- a create has no "before" to diff against.
+    before = (
+        snapshot_fields(serializer.instance, diff_fields)
+        if diff_fields and serializer.instance is not None
+        else None
+    )
     try:
         with transaction.atomic():
             instance = serializer.save(**save_kwargs)
             instance.full_clean()
             instance.save()
+            metadata = {"event_id": str((event or instance).public_id)}
+            if before is not None:
+                changes = diff_snapshots(before, snapshot_fields(instance, diff_fields))
+                if changes:
+                    metadata["changes"] = changes
             record_mutation(
                 actor=actor,
                 workspace=workspace,
@@ -31,6 +43,7 @@ def _save(serializer, *, actor, workspace, action, event=None, **save_kwargs):
                 target=instance,
                 event_type=action,
                 payload={"event": str((event or instance).public_id)},
+                metadata=metadata,
             )
     except ModelValidationError as exc:
         raise ValidationError(
@@ -98,7 +111,11 @@ class EventDetailView(OrganizerView):
         serializer = EventSerializer(event, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         event = _save(
-            serializer, actor=request.user, workspace=self.get_workspace(), action="event.updated"
+            serializer,
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="event.updated",
+            diff_fields=list(serializer.validated_data.keys()),
         )
         return Response(EventSerializer(event).data)
 

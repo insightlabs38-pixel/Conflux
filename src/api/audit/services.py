@@ -1,6 +1,36 @@
+import json
+
 from django.db import transaction
+from rest_framework.utils.encoders import JSONEncoder
 
 from .models import AuditEvent, DomainEvent
+
+
+def snapshot_fields(instance, fields):
+    """JSON-safe {field: current value} for the given model field names,
+    read directly off the in-memory instance so it can be called both
+    before and after a save. Feeds `diff_snapshots` for config-history
+    (S18): callers snapshot before mutating, mutate, snapshot again.
+    """
+    values = {}
+    for name in fields:
+        raw = instance._meta.get_field(name).value_from_object(instance)
+        # Round-trip through DRF's encoder so datetimes/Decimals/UUIDs match
+        # what the audit API itself will later serialize, not raw Python types.
+        values[name] = json.loads(json.dumps(raw, cls=JSONEncoder))
+    return values
+
+
+def diff_snapshots(before, after):
+    """{field: {"before": ..., "after": ...}} for fields that actually
+    changed between two `snapshot_fields` results. Never invents a value
+    for a field neither snapshot captured.
+    """
+    return {
+        field: {"before": before[field], "after": after[field]}
+        for field in before
+        if field in after and before[field] != after[field]
+    }
 
 
 def record_mutation(

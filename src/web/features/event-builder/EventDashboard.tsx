@@ -10,6 +10,7 @@ import { WebhooksPanel } from "../integrations/WebhooksPanel";
 import { AwardsPanel } from "../awards/AwardsPanel";
 import { OperationsCenter } from "../operations/OperationsCenter";
 import { CommunicationsPanel } from "../communications/CommunicationsPanel";
+import { ConfigHistoryPanel } from "../audit/ConfigHistoryPanel";
 import { EventTemplatesPanel } from "./EventTemplatesPanel";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
@@ -501,6 +502,11 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
           />
           <CommunicationsPanel
             key={`communications-${selected.public_id}`}
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+          />
+          <ConfigHistoryPanel
+            key={`config-history-${selected.public_id}`}
             workspaceId={workspaceId}
             eventId={selected.public_id}
           />

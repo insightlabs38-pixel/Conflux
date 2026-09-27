@@ -1,5 +1,5 @@
 from audit.models import AuditEvent
-from audit.services import record_mutation
+from audit.services import diff_snapshots, record_mutation, snapshot_fields
 from core.permissions import IsWorkspaceMember
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError, transaction
@@ -89,12 +89,18 @@ class StageDetailView(StageEventMixin):
         stage = self.get_stage()
         serializer = StageSerializer(stage, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
+        changed_fields = list(serializer.validated_data.keys())
+        before = snapshot_fields(stage, changed_fields)
         try:
             with transaction.atomic():
                 for field, value in serializer.validated_data.items():
                     setattr(stage, field, value)
                 stage.full_clean()
                 stage.save()
+                changes = diff_snapshots(before, snapshot_fields(stage, changed_fields))
+                metadata = {"event_id": str(stage.event.public_id)}
+                if changes:
+                    metadata["changes"] = changes
                 record_mutation(
                     actor=request.user,
                     workspace=self.get_workspace(),
@@ -102,6 +108,7 @@ class StageDetailView(StageEventMixin):
                     target=stage,
                     event_type="stage.updated",
                     payload={"event": str(stage.event.public_id)},
+                    metadata=metadata,
                 )
         except ModelValidationError as exc:
             raise _as_drf_validation_error(exc) from exc

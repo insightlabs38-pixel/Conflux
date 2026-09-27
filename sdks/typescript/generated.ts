@@ -705,6 +705,26 @@ export type InputOfComponentOutput = {
   currency: string;
 };
 
+export type ConfigHistoryEntrySchema = {
+  public_id: string;
+  actor: string | null;
+  action: string;
+  resource_type: string;
+  resource_id: string;
+  changes: unknown;
+  created_at: string;
+};
+
+export type InputOfConfigHistoryEntrySchema = {
+  public_id: string;
+  actor: string | null;
+  action: string;
+  resource_type: string;
+  resource_id: string;
+  changes: unknown;
+  created_at: string;
+};
+
 export type ConflictOfInterest = {
   public_id: string;
   judge: string;
@@ -2592,6 +2612,10 @@ export interface Operations {
     request: { path: { workspace_public_id: string } };
     response: AuditEventSchema[];
   };
+  get_api_v1_audit_workspace_public_id_events_event_public_id_config_history: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: ConfigHistoryEntrySchema[];
+  };
   get_api_v1_events_event_public_id: {
     request: { path: { event_public_id: string } };
     response: PublicEventSchema;
@@ -4366,6 +4390,14 @@ export const operations = {
     method: "GET",
     path: "/api/v1/audit/{workspace_public_id}/",
     path_params: ["workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  get_api_v1_audit_workspace_public_id_events_event_public_id_config_history: {
+    method: "GET",
+    path: "/api/v1/audit/{workspace_public_id}/events/{event_public_id}/config-history/",
+    path_params: ["event_public_id", "workspace_public_id"],
     query_params: [],
     request_body: false,
     response_kind: "json",

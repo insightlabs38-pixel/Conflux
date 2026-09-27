@@ -641,6 +641,24 @@ class InputOfComponentOutput(TypedDict):
     amount: str | None
     currency: str
 
+class ConfigHistoryEntrySchema(TypedDict):
+    public_id: str
+    actor: str | None
+    action: str
+    resource_type: str
+    resource_id: str
+    changes: Any
+    created_at: str
+
+class InputOfConfigHistoryEntrySchema(TypedDict):
+    public_id: str
+    actor: str | None
+    action: str
+    resource_type: str
+    resource_id: str
+    changes: Any
+    created_at: str
+
 class ConflictOfInterest(TypedDict):
     public_id: str
     judge: str
@@ -2537,6 +2555,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                           'query_params': [],
                                           'request_body': False,
                                           'response_kind': 'json'},
+ 'get_api_v1_audit_workspace_public_id_events_event_public_id_config_history': {'method': 'GET',
+                                                                                'path': '/api/v1/audit/{workspace_public_id}/events/{event_public_id}/config-history/',
+                                                                                'path_params': ['event_public_id',
+                                                                                                'workspace_public_id'],
+                                                                                'query_params': [],
+                                                                                'request_body': False,
+                                                                                'response_kind': 'json'},
  'get_api_v1_events_event_public_id': {'method': 'GET',
                                        'path': '/api/v1/events/{event_public_id}/',
                                        'path_params': ['event_public_id'],

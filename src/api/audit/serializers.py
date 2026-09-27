@@ -9,3 +9,13 @@ class AuditEventSchema(serializers.Serializer):
     target_id = serializers.CharField(allow_blank=True)
     metadata = serializers.JSONField()
     created_at = serializers.DateTimeField()
+
+
+class ConfigHistoryEntrySchema(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    actor = serializers.CharField(allow_null=True)
+    action = serializers.CharField()
+    resource_type = serializers.CharField(allow_blank=True)
+    resource_id = serializers.CharField(allow_blank=True)
+    changes = serializers.JSONField()
+    created_at = serializers.DateTimeField()

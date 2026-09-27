@@ -9,6 +9,28 @@ from projects.models import Project, SubmissionStatus
 from .models import Award, AwardWinner, FulfillmentState, PrizeFulfillment, SelectionSource
 
 
+def published_awards_for_public_display(event):
+    """Award name + winning project names, for unauthenticated public
+    surfaces (the site's "results" page block, S19). Deliberately a
+    narrower shape than the admin `_award_data` in awards.views -- no
+    selection mechanics, evidence, or fulfillment state.
+    """
+    return [
+        {
+            "public_id": str(award.public_id),
+            "name": award.name,
+            "winners": [
+                {
+                    "project_public_id": str(winner.project.public_id),
+                    "project_name": winner.project.name,
+                }
+                for winner in award.winners.select_related("project").order_by("selected_at")
+            ],
+        }
+        for award in Award.objects.filter(event=event, published_at__isnull=False).order_by("pk")
+    ]
+
+
 def _source_evidence(award, project):
     if award.selection_source == SelectionSource.MANUAL:
         return {}, True

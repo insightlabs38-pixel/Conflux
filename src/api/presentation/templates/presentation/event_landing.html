@@ -99,7 +99,22 @@
     {% elif block.kind == "results" %}
       <section class="cx-block" aria-label="Results">
         <h2>Results</h2>
-        <p>Results will be announced after judging.</p>
+        {% if block.live %}
+          <ul class="cx-grid">
+            {% for award in block.live %}
+              <li class="cx-card">
+                <h3 class="cx-card__title">{{ award.name }}</h3>
+                <ul>
+                  {% for winner in award.winners %}
+                    <li><a href="{% url 'site-project' event.public_id winner.project_public_id %}">{{ winner.project_name }}</a></li>
+                  {% endfor %}
+                </ul>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>Results will be announced after judging.</p>
+        {% endif %}
       </section>
     {% elif block.kind == "rich_text" %}
       <section class="cx-block" aria-label="Content">{{ block.config.html|sanitize_html }}</section>

@@ -2,6 +2,7 @@
 a raw HTTP GET (no JS) already contains real content -- see DECISIONS.md.
 """
 
+from awards.services import published_awards_for_public_display
 from django.shortcuts import get_object_or_404, render
 
 from .models import Page, PageBlockKind
@@ -37,6 +38,8 @@ def _blocks_with_live_data(event, page):
             block.live = list(event.stages.order_by("position"))
         elif block.kind == PageBlockKind.GALLERY:
             block.live = list(public_projects(event)[: block.config.get("limit", 6)])
+        elif block.kind == PageBlockKind.RESULTS:
+            block.live = published_awards_for_public_display(event)
     return blocks
 
 

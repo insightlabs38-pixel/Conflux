@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from workspaces.models import Role, Workspace
 
-from .models import BasePrize, Event, EventStatus, Track
+from .models import PUBLICLY_VISIBLE_STATUSES, BasePrize, Event, EventStatus, Track
 from .schema import EventDashboardSchema, PublicEventSchema
 from .serializers import BasePrizeSerializer, EventSerializer, TrackSerializer
 
@@ -350,7 +350,10 @@ class PublicEventView(APIView):
     @extend_schema(responses=PublicEventSchema)
     def get(self, request, event_public_id):
         event = get_object_or_404(
-            Event, public_id=event_public_id, is_public=True, status=EventStatus.OPEN
+            Event,
+            public_id=event_public_id,
+            is_public=True,
+            status__in=PUBLICLY_VISIBLE_STATUSES,
         )
         data = EventSerializer(event).data
         return Response(

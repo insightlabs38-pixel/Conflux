@@ -50,3 +50,23 @@ def test_public_event_view_hides_non_public_or_unopened_events():
     client = Client()
     assert client.get(f"/api/v1/events/{draft.public_id}/").status_code == 404
     assert client.get(f"/api/v1/events/{private.public_id}/").status_code == 404
+
+
+def test_public_event_view_stays_readable_after_the_event_closes_and_is_archived():
+    """S19: the public event page is a stable post-event archive, not
+    something that 404s the moment an organizer closes or archives it.
+    """
+    event = _open_public_event()
+    client = Client()
+
+    event.status = EventStatus.CLOSED
+    event.save(update_fields=["status"])
+    closed = client.get(f"/api/v1/events/{event.public_id}/")
+    assert closed.status_code == 200
+    assert closed.json()["status"] == "closed"
+
+    event.status = EventStatus.ARCHIVED
+    event.save(update_fields=["status"])
+    archived = client.get(f"/api/v1/events/{event.public_id}/")
+    assert archived.status_code == 200
+    assert archived.json()["status"] == "archived"

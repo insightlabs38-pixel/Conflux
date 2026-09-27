@@ -12,6 +12,13 @@ class EventStatus(models.TextChoices):
     ARCHIVED = "archived", "Archived"
 
 
+# Every status an unauthenticated visitor may ever reach (S19): once an
+# organizer opens an event it stays publicly readable through closing and
+# archiving, so the public site becomes a stable post-event archive instead
+# of 404ing the moment judging ends. Only DRAFT (never announced) is hidden.
+PUBLICLY_VISIBLE_STATUSES = [EventStatus.OPEN, EventStatus.CLOSED, EventStatus.ARCHIVED]
+
+
 class Event(PublicIdModel):
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name="events")
     name = models.CharField(max_length=200)

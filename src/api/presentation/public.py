@@ -8,13 +8,13 @@ Django template renders directly -- no client-side fetch involved.
 from artifacts.models import Artifact, ArtifactStatus, ArtifactVisibility
 from artifacts.storage import S3Storage
 from django.shortcuts import get_object_or_404
-from events.models import Event, EventStatus
+from events.models import PUBLICLY_VISIBLE_STATUSES, Event
 from projects.models import Project, SubmissionStatus
 
 
 def get_public_event(event_public_id):
     return get_object_or_404(
-        Event, public_id=event_public_id, is_public=True, status=EventStatus.OPEN
+        Event, public_id=event_public_id, is_public=True, status__in=PUBLICLY_VISIBLE_STATUSES
     )
 
 

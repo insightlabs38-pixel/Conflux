@@ -28,6 +28,6 @@ if [ -z "$objectstore_id" ]; then
   exit 1
 fi
 docker run --rm --entrypoint tar --volumes-from "$objectstore_id" conflux-api:latest \
-  tar czf - -C /data . > "$destination/objectstore.tar.gz"
+  czf - -C /data . > "$destination/objectstore.tar.gz"
 
 echo "backup written to $destination"

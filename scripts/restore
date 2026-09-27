@@ -30,7 +30,7 @@ if [ -z "$objectstore_id" ]; then
   exit 1
 fi
 docker run --rm -i --entrypoint sh --volumes-from "$objectstore_id" conflux-api:latest \
-  sh -c 'find /data -mindepth 1 -delete && tar xzf - -C /data' < "$source_dir/objectstore.tar.gz"
+  -c 'find /data -mindepth 1 -delete && tar xzf - -C /data' < "$source_dir/objectstore.tar.gz"
 
 echo "== restarting application services =="
 docker compose start app worker beat

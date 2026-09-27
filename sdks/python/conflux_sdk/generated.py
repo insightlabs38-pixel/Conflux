@@ -451,6 +451,36 @@ class InputOfAuditEventSchema(TypedDict):
     metadata: Any
     created_at: str
 
+class AuthzDryRunInputSchema(TypedDict):
+    path: str
+    method: MethodEnum
+    subject_kind: SubjectKindEnum
+    subject: str
+
+class InputOfAuthzDryRunInputSchema(TypedDict):
+    path: str
+    method: InputOfMethodEnum
+    subject_kind: InputOfSubjectKindEnum
+    subject: str
+
+class AuthzDryRunOutputSchema(TypedDict):
+    allowed: bool
+    mode: AuthzDryRunOutputSchemaModeEnum
+    access: NotRequired[str]
+    roles: NotRequired[list[str]]
+    actual_roles: NotRequired[list[str]]
+
+class InputOfAuthzDryRunOutputSchema(TypedDict):
+    allowed: bool
+    mode: InputOfAuthzDryRunOutputSchemaModeEnum
+    access: NotRequired[str]
+    roles: NotRequired[list[str]]
+    actual_roles: NotRequired[list[str]]
+
+AuthzDryRunOutputSchemaModeEnum = Literal['live', 'hypothetical']
+
+InputOfAuthzDryRunOutputSchemaModeEnum = Literal['live', 'hypothetical']
+
 class AwardInput(TypedDict):
     name: str
     description: NotRequired[str]
@@ -1727,6 +1757,10 @@ class InputOfMessageSchema(TypedDict):
     email_failure_count: int
     created_at: str
 
+MethodEnum = Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+
+InputOfMethodEnum = Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+
 class MyEventApplicationResponse(TypedDict):
     application: EventApplication | None
 
@@ -2825,6 +2859,10 @@ class InputOfStageTransition(TypedDict):
 StateEnum = Literal['pending', 'contacted', 'verified', 'sent', 'claimed', 'failed']
 
 InputOfStateEnum = Literal['pending', 'contacted', 'verified', 'sent', 'claimed', 'failed']
+
+SubjectKindEnum = Literal['role', 'user']
+
+InputOfSubjectKindEnum = Literal['role', 'user']
 
 SubjectTypeEnum = Literal['project', 'team']
 
@@ -4681,6 +4719,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                  'query_params': [],
                                                                                                                  'request_body': True,
                                                                                                                  'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_authz_dry_run': {'method': 'POST',
+                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/authz-dry-run/',
+                                                                                     'path_params': ['event_public_id',
+                                                                                                     'workspace_public_id'],
+                                                                                     'query_params': [],
+                                                                                     'request_body': True,
+                                                                                     'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards': {'method': 'POST',
                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/',
                                                                               'path_params': ['event_public_id',

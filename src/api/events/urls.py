@@ -95,4 +95,9 @@ urlpatterns = [
         permission_matrix_views.PermissionMatrixView.as_view(),
         name="permission-matrix",
     ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/authz-dry-run/",
+        permission_matrix_views.AuthzDryRunView.as_view(),
+        name="authz-dry-run",
+    ),
 ]

@@ -11,6 +11,7 @@ from django.urls import get_resolver
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from workspaces.models import Role
 
+from .authz import roles_for
 from .permissions import HasWorkspaceRole, IsWorkspaceMember
 
 _HTTP_METHODS = ("get", "post", "put", "patch", "delete")
@@ -105,3 +106,63 @@ def build_permission_matrix():
             )
     entries.sort(key=lambda e: (e["resource"], e["path"], e["method"]))
     return entries
+
+
+def _find_view_class(path, method):
+    for candidate_path, url_pattern in _walk(get_resolver().url_patterns):
+        if candidate_path != path:
+            continue
+        view_class = getattr(url_pattern.callback, "view_class", None)
+        if view_class is not None and hasattr(view_class, method.lower()):
+            return view_class
+    return None
+
+
+def dry_run(*, path, method, workspace, subject_kind, subject):
+    """VS26: evaluate whether `method` on `path` would be allowed, without
+    ever calling the endpoint's actual handler.
+
+    `subject_kind="role"` answers a purely hypothetical question -- no
+    Membership row is fabricated to back it -- by reclassifying the same
+    static matrix `build_permission_matrix()` computes; the result is
+    labeled "hypothetical" accordingly. `subject_kind="user"` (`subject` a
+    real `User`) is a genuine dry run: it calls the view's real
+    `get_permissions()`/`has_permission()` against that user's actual
+    current roles in `workspace`, so it reflects live behavior exactly
+    (superuser bypass, an unusual role combination, etc.), labeled "live".
+    """
+    method = method.upper()
+    if subject_kind == "role":
+        entry = next(
+            (e for e in build_permission_matrix() if e["path"] == path and e["method"] == method),
+            None,
+        )
+        if entry is None:
+            return {"error": "No such endpoint."}
+        if entry["access"] == "roles":
+            allowed = subject in entry["roles"]
+        else:
+            allowed = entry["access"] in ("any_authenticated", "public")
+        return {
+            "allowed": allowed,
+            "mode": "hypothetical",
+            "access": entry["access"],
+            "roles": entry["roles"],
+        }
+
+    view_class = _find_view_class(path, method)
+    if view_class is None:
+        return {"error": "No such endpoint."}
+    view = view_class()
+    view.kwargs = {"workspace_public_id": str(workspace.public_id)}
+    view.request = SimpleNamespace(method=method, user=subject)
+    try:
+        permissions = view.get_permissions()
+        allowed = all(perm.has_permission(view.request, view) for perm in permissions)
+    except Exception:
+        return {"error": "Could not evaluate this endpoint."}
+    return {
+        "allowed": allowed,
+        "mode": "live",
+        "actual_roles": sorted(roles_for(subject, workspace)),
+    }

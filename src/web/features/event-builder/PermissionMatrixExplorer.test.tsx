@@ -85,4 +85,57 @@ describe("permission matrix explorer", () => {
     await act(async () => root.unmount());
     container.remove();
   });
+
+  it("runs a dry run against the chosen endpoint and subject", async () => {
+    let requestBody: unknown = null;
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockImplementation(async (path: string, options?: RequestInit) => {
+          if (path.endsWith("authz-dry-run/") && options?.method === "POST") {
+            requestBody = JSON.parse(String(options.body));
+            return {
+              ok: true,
+              json: async () => ({ allowed: false, mode: "hypothetical" }),
+            };
+          }
+          return { ok: true, json: async () => MATRIX };
+        }),
+    );
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    await act(async () =>
+      root.render(<PermissionMatrixExplorer workspaceId="w" eventId="e" />),
+    );
+    await waitFor(
+      () => container.textContent?.includes("TrackListView") ?? false,
+    );
+
+    const selects = [...container.querySelectorAll("select")];
+    const endpointSelect = selects.find((select) =>
+      [...select.options].some((option) => option.value.includes("|")),
+    )!;
+    await act(async () => {
+      endpointSelect.value = "POST|api/v1/.../tracks/";
+      endpointSelect.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await act(async () => {
+      const testButton = [...container.querySelectorAll("button")].find(
+        (button) => button.textContent === "Test",
+      );
+      testButton?.click();
+    });
+    await waitFor(() => container.textContent?.includes("Denied") ?? false);
+    expect(requestBody).toEqual({
+      path: "api/v1/.../tracks/",
+      method: "POST",
+      subject_kind: "role",
+      subject: "participant",
+    });
+
+    await act(async () => root.unmount());
+    container.remove();
+  });
 });

@@ -1422,6 +1422,50 @@ paths:
               schema:
                 $ref: '#/components/schemas/SignedArchiveOutput'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/authz-dry-run/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_authz_dry_run
+      description: |-
+        Never calls the target endpoint's real handler -- only its
+        `get_permissions()`/`has_permission()` gate. See `core.permission_
+        matrix.dry_run` for exactly what "live" vs. "hypothetical" means.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthzDryRunInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AuthzDryRunInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AuthzDryRunInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthzDryRunOutputSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards
@@ -11439,6 +11483,50 @@ components:
       - public_id
       - target_id
       - target_type
+    AuthzDryRunInputSchema:
+      type: object
+      properties:
+        path:
+          type: string
+        method:
+          $ref: '#/components/schemas/MethodEnum'
+        subject_kind:
+          $ref: '#/components/schemas/SubjectKindEnum'
+        subject:
+          type: string
+      required:
+      - method
+      - path
+      - subject
+      - subject_kind
+    AuthzDryRunOutputSchema:
+      type: object
+      properties:
+        allowed:
+          type: boolean
+        mode:
+          $ref: '#/components/schemas/AuthzDryRunOutputSchemaModeEnum'
+        access:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+        actual_roles:
+          type: array
+          items:
+            type: string
+      required:
+      - allowed
+      - mode
+    AuthzDryRunOutputSchemaModeEnum:
+      enum:
+      - live
+      - hypothetical
+      type: string
+      description: |-
+        * `live` - live
+        * `hypothetical` - hypothetical
     AwardInput:
       type: object
       properties:
@@ -13650,6 +13738,20 @@ components:
       - public_id
       - recipient_count
       - subject
+    MethodEnum:
+      enum:
+      - GET
+      - POST
+      - PUT
+      - PATCH
+      - DELETE
+      type: string
+      description: |-
+        * `GET` - GET
+        * `POST` - POST
+        * `PUT` - PUT
+        * `PATCH` - PATCH
+        * `DELETE` - DELETE
     MyEventApplicationResponse:
       type: object
       properties:
@@ -15614,6 +15716,14 @@ components:
         * `sent` - Sent
         * `claimed` - Claimed
         * `failed` - Failed
+    SubjectKindEnum:
+      enum:
+      - role
+      - user
+      type: string
+      description: |-
+        * `role` - role
+        * `user` - user
     SubjectTypeEnum:
       enum:
       - project

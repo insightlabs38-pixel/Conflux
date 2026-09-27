@@ -484,6 +484,40 @@ export type InputOfAuditEventSchema = {
   created_at: string;
 };
 
+export type AuthzDryRunInputSchema = {
+  path: string;
+  method: MethodEnum;
+  subject_kind: SubjectKindEnum;
+  subject: string;
+};
+
+export type InputOfAuthzDryRunInputSchema = {
+  path: string;
+  method: InputOfMethodEnum;
+  subject_kind: InputOfSubjectKindEnum;
+  subject: string;
+};
+
+export type AuthzDryRunOutputSchema = {
+  allowed: boolean;
+  mode: AuthzDryRunOutputSchemaModeEnum;
+  access?: string;
+  roles?: string[];
+  actual_roles?: string[];
+};
+
+export type InputOfAuthzDryRunOutputSchema = {
+  allowed: boolean;
+  mode: InputOfAuthzDryRunOutputSchemaModeEnum;
+  access?: string;
+  roles?: string[];
+  actual_roles?: string[];
+};
+
+export type AuthzDryRunOutputSchemaModeEnum = "live" | "hypothetical";
+
+export type InputOfAuthzDryRunOutputSchemaModeEnum = "live" | "hypothetical";
+
 export type AwardInput = {
   name: string;
   description?: string;
@@ -1839,6 +1873,10 @@ export type InputOfMessageSchema = {
   created_at: string;
 };
 
+export type MethodEnum = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+export type InputOfMethodEnum = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
 export type MyEventApplicationResponse = {
   application: EventApplication | null;
 };
@@ -3066,6 +3104,10 @@ export type StateEnum =
 export type InputOfStateEnum =
   "pending" | "contacted" | "verified" | "sent" | "claimed" | "failed";
 
+export type SubjectKindEnum = "role" | "user";
+
+export type InputOfSubjectKindEnum = "role" | "user";
+
 export type SubjectTypeEnum = "project" | "team";
 
 export type InputOfSubjectTypeEnum = "project" | "team";
@@ -3773,6 +3815,13 @@ export interface Operations {
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_signed: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: SignedArchiveOutput;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_authz_dry_run: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfAuthzDryRunInputSchema;
+    };
+    response: AuthzDryRunOutputSchema;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -6085,6 +6134,15 @@ export const operations = {
       path_params: ["event_public_id", "workspace_public_id"],
       query_params: [],
       request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_authz_dry_run:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/authz-dry-run/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
       response_kind: "json",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards: {

@@ -12,6 +12,7 @@ from .public import (
     public_projects,
 )
 from .records import RecordVerificationError, verify_record
+from .technical import render_technical_description
 
 
 def verify(request):
@@ -90,6 +91,7 @@ def project_detail(request, event_public_id, project_public_id):
             "event": event,
             "theme": page.theme if page else "default",
             "project": project,
+            "description_html": render_technical_description(project.description),
             "artifacts": project_public_artifacts(project),
             "submissions": project_finalized_submissions(project),
         },

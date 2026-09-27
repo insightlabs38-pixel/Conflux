@@ -150,6 +150,19 @@ def test_project_detail_shows_only_public_artifacts():
     assert "Private notes" not in body
 
 
+def test_project_detail_renders_description_as_safe_technical_content():
+    event, project, _ = make_public_event_with_finalized_project()
+    project.description = "# How it works\n\n```python\nprint('ok')\n```\n\n<script>bad()</script>"
+    project.save(update_fields=["description"])
+
+    response = Client().get(f"/e/{event.public_id}/projects/{project.public_id}/")
+    body = response.content.decode()
+    assert '<div class="cx-technical-description"><h2>How it works</h2>' in body
+    assert '<code class="language-python">' in body
+    assert "<script>bad()" not in body
+    assert "&lt;script&gt;bad()&lt;/script&gt;" in body
+
+
 def test_project_detail_404s_for_a_project_without_a_finalized_submission():
     event, _, _ = make_public_event_with_finalized_project()
     user = User.objects.create_user(username="other", password="unused")

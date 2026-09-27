@@ -6,7 +6,7 @@
   <h1>{{ project.name }}</h1>
   {% if project.track %}<p><span class="cx-badge cx-badge--info">{{ project.track.name }}</span></p>{% endif %}
   {% if project.team %}<p>{{ project.team.name }}</p>{% endif %}
-  {% if project.description %}<p>{{ project.description }}</p>{% endif %}
+  {% if project.description %}<div class="cx-technical-description">{{ description_html|safe }}</div>{% endif %}
 
   <section aria-label="Artifacts">
     <h2>Artifacts</h2>

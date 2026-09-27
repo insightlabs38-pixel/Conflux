@@ -14,6 +14,8 @@ dependencies = [
   "drf-spectacular>=0.28,<0.30",
   "cryptography>=50.0.1",
   "pyjwt>=2.15.0",
+  "markdown-it-py>=4,<5",
+  "pygments>=2.21,<3",
 ]
 
 [dependency-groups]

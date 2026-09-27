@@ -51,3 +51,35 @@
   padding: var(--space-2) 0;
   border-bottom: 1px solid var(--color-border);
 }
+
+.cx-technical-description {
+  overflow-wrap: anywhere;
+}
+
+.cx-technical-description pre {
+  overflow-x: auto;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  overflow-wrap: normal;
+}
+
+.cx-technical-description :not(pre) > code {
+  padding: 0.1em 0.3em;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.cx-technical-description table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+
+.cx-technical-description th,
+.cx-technical-description td {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+}

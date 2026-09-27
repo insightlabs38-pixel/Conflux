@@ -219,7 +219,22 @@ class AssignmentActivateInputSchema(TypedDict):
 class InputOfAssignmentActivateInputSchema(TypedDict):
     coverage: NotRequired[int]
 
+class AssignmentCompareInputSchema(TypedDict):
+    coverage: NotRequired[int]
+
+class InputOfAssignmentCompareInputSchema(TypedDict):
+    coverage: NotRequired[int]
+
+class AssignmentCompareSchema(TypedDict):
+    heuristic: AssignmentCoveragePreviewSchema
+    optimized: AssignmentCoveragePreviewSchema
+
+class InputOfAssignmentCompareSchema(TypedDict):
+    heuristic: InputOfAssignmentCoveragePreviewSchema
+    optimized: InputOfAssignmentCoveragePreviewSchema
+
 class AssignmentCoveragePreviewSchema(TypedDict):
+    solver: str
     coverage: int
     candidate_count: int
     judge_count: int
@@ -229,6 +244,7 @@ class AssignmentCoveragePreviewSchema(TypedDict):
     connectivity: dict[str, Any]
 
 class InputOfAssignmentCoveragePreviewSchema(TypedDict):
+    solver: str
     coverage: int
     candidate_count: int
     judge_count: int
@@ -3978,6 +3994,24 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                                    'query_params': [],
                                                                                                                                                    'request_body': True,
                                                                                                                                                    'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_activate_optimized': {'method': 'POST',
+                                                                                                                                                             'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/activate-optimized/',
+                                                                                                                                                             'path_params': ['event_public_id',
+                                                                                                                                                                             'plan_public_id',
+                                                                                                                                                                             'stage_public_id',
+                                                                                                                                                                             'workspace_public_id'],
+                                                                                                                                                             'query_params': [],
+                                                                                                                                                             'request_body': True,
+                                                                                                                                                             'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_compare': {'method': 'POST',
+                                                                                                                                                  'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/compare/',
+                                                                                                                                                  'path_params': ['event_public_id',
+                                                                                                                                                                  'plan_public_id',
+                                                                                                                                                                  'stage_public_id',
+                                                                                                                                                                  'workspace_public_id'],
+                                                                                                                                                  'query_params': [],
+                                                                                                                                                  'request_body': True,
+                                                                                                                                                  'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_preview': {'method': 'POST',
                                                                                                                                                   'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/preview/',
                                                                                                                                                   'path_params': ['event_public_id',

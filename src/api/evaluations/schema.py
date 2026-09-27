@@ -141,6 +141,7 @@ class AssignmentPreviewInputSchema(serializers.Serializer):
 
 
 class AssignmentCoveragePreviewSchema(serializers.Serializer):
+    solver = serializers.CharField()
     coverage = serializers.IntegerField()
     candidate_count = serializers.IntegerField()
     judge_count = serializers.IntegerField()
@@ -148,6 +149,15 @@ class AssignmentCoveragePreviewSchema(serializers.Serializer):
     load_by_judge = serializers.DictField(child=serializers.IntegerField())
     conflict_count = serializers.IntegerField()
     connectivity = serializers.DictField()
+
+
+class AssignmentCompareInputSchema(serializers.Serializer):
+    coverage = serializers.IntegerField(min_value=1, required=False)
+
+
+class AssignmentCompareSchema(serializers.Serializer):
+    heuristic = AssignmentCoveragePreviewSchema()
+    optimized = AssignmentCoveragePreviewSchema()
 
 
 class AgreementCriterionSchema(serializers.Serializer):

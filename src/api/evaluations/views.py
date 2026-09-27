@@ -41,11 +41,15 @@ from .models import (
     PoolMembership,
     RubricVersion,
 )
+from .optimization import activate_optimized
+from .optimization import compare as compare_assignments
 from .progress import compute_progress
 from .results import pairwise_ranked_results, ranked_results
 from .schema import (
     AgreementSummarySchema,
     AssignmentActivateInputSchema,
+    AssignmentCompareInputSchema,
+    AssignmentCompareSchema,
     AssignmentCoveragePreviewSchema,
     AssignmentPreviewInputSchema,
     AssignmentRebalanceInputSchema,
@@ -762,6 +766,57 @@ class AssignmentPreviewView(PlanMixin):
         except ValueError as exc:
             raise ValidationError({"detail": str(exc)}) from exc
         return Response(previews)
+
+
+class AssignmentCompareView(PlanMixin):
+    """VS01: side-by-side evidence for the existing greedy heuristic and
+    the explicit min-cost-flow optimization solver, read-only like
+    AssignmentPreviewView. Only meaningful for the assigned-subset
+    strategy (see evaluations.optimization).
+    """
+
+    @extend_schema(request=AssignmentCompareInputSchema, responses=AssignmentCompareSchema)
+    def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        coverage = request.data.get("coverage", 3)
+        if not isinstance(coverage, int) or isinstance(coverage, bool) or coverage < 1:
+            raise ValidationError({"coverage": "Must be a positive integer."})
+        try:
+            result = compare_assignments(plan, coverage=coverage)
+        except ValueError as exc:
+            raise ValidationError({"detail": str(exc)}) from exc
+        return Response(result)
+
+
+class AssignmentActivateOptimizedView(PlanMixin):
+    """VS01: freezes a new AssignmentVersion from the optimization solver
+    and makes it active -- same model, same immutability, same audit
+    trail as AssignmentActivateView; only `evidence["solver"]` and which
+    pure function computed the pairing differ.
+    """
+
+    @extend_schema(
+        request=AssignmentActivateInputSchema, responses={201: AssignmentVersionSerializer}
+    )
+    @transaction.atomic
+    def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        coverage = request.data.get("coverage", 3)
+        if not isinstance(coverage, int) or isinstance(coverage, bool) or coverage < 1:
+            raise ValidationError({"coverage": "Must be a positive integer."})
+        try:
+            with transaction.atomic():
+                version = activate_optimized(plan, coverage=coverage)
+        except ValueError as exc:
+            raise ValidationError({"detail": str(exc)}) from exc
+        record_mutation(
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="assignment.activated",
+            target=version,
+            metadata=version.evidence,
+        )
+        return Response(AssignmentVersionSerializer(version).data, status=201)
 
 
 class AssignmentRebalanceView(PlanMixin):

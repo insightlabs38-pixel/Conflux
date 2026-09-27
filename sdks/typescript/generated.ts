@@ -231,7 +231,22 @@ export type AssignmentActivateInputSchema = { coverage?: number };
 
 export type InputOfAssignmentActivateInputSchema = { coverage?: number };
 
+export type AssignmentCompareInputSchema = { coverage?: number };
+
+export type InputOfAssignmentCompareInputSchema = { coverage?: number };
+
+export type AssignmentCompareSchema = {
+  heuristic: AssignmentCoveragePreviewSchema;
+  optimized: AssignmentCoveragePreviewSchema;
+};
+
+export type InputOfAssignmentCompareSchema = {
+  heuristic: InputOfAssignmentCoveragePreviewSchema;
+  optimized: InputOfAssignmentCoveragePreviewSchema;
+};
+
 export type AssignmentCoveragePreviewSchema = {
+  solver: string;
   coverage: number;
   candidate_count: number;
   judge_count: number;
@@ -242,6 +257,7 @@ export type AssignmentCoveragePreviewSchema = {
 };
 
 export type InputOfAssignmentCoveragePreviewSchema = {
+  solver: string;
   coverage: number;
   candidate_count: number;
   judge_count: number;
@@ -3918,6 +3934,30 @@ export interface Operations {
     };
     response: AssignmentVersion;
   };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_activate_optimized: {
+    request: {
+      path: {
+        event_public_id: string;
+        plan_public_id: string;
+        stage_public_id: string;
+        workspace_public_id: string;
+      };
+      body?: InputOfAssignmentActivateInputSchema;
+    };
+    response: AssignmentVersion;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_compare: {
+    request: {
+      path: {
+        event_public_id: string;
+        plan_public_id: string;
+        stage_public_id: string;
+        workspace_public_id: string;
+      };
+      body?: InputOfAssignmentCompareInputSchema;
+    };
+    response: AssignmentCompareSchema;
+  };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_preview: {
     request: {
       path: {
@@ -6082,6 +6122,34 @@ export const operations = {
     {
       method: "POST",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/activate/",
+      path_params: [
+        "event_public_id",
+        "plan_public_id",
+        "stage_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_activate_optimized:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/activate-optimized/",
+      path_params: [
+        "event_public_id",
+        "plan_public_id",
+        "stage_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_compare:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/compare/",
       path_params: [
         "event_public_id",
         "plan_public_id",

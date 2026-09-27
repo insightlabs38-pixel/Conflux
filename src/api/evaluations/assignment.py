@@ -20,7 +20,7 @@ class Pairing:
     project_id: int
 
 
-def _track_fit(judge_track_ids: set[int], project_track_id: int | None) -> int:
+def track_fit(judge_track_ids: set[int], project_track_id: int | None) -> int:
     """1 if the judge's declared expertise covers the candidate's track, else 0."""
     return 1 if project_track_id is not None and project_track_id in judge_track_ids else 0
 
@@ -67,7 +67,7 @@ def compute_assignment(plan, *, coverage: int = 3) -> list[Pairing]:
     for project in candidates:
         project_track_id = getattr(project, "track_id", None)
         eligible = [j for j in judge_ids if (j, project.id) not in conflicts]
-        eligible.sort(key=lambda j: (-_track_fit(judge_tracks[j], project_track_id), load[j], j))
+        eligible.sort(key=lambda j: (-track_fit(judge_tracks[j], project_track_id), load[j], j))
         for judge_id in eligible[: min(coverage, len(eligible))]:
             load[judge_id] += 1
             pairs.append(Pairing(judge_id, project.id))
@@ -83,12 +83,13 @@ def compute_assignment(plan, *, coverage: int = 3) -> list[Pairing]:
     return pairs
 
 
-def _build_evidence(plan, pairs: list[Pairing], *, coverage: int) -> dict:
+def build_evidence(plan, pairs: list[Pairing], *, coverage: int, solver: str = "heuristic") -> dict:
     per_judge = {}
     for pairing in pairs:
         per_judge[pairing.judge_id] = per_judge.get(pairing.judge_id, 0) + 1
     conflict_count = ConflictOfInterest.objects.filter(event_id=plan.stage.event_id).count()
     return {
+        "solver": solver,
         "coverage": coverage,
         "candidate_count": len({p.project_id for p in pairs}),
         "judge_count": len(per_judge),
@@ -108,7 +109,7 @@ def preview(plan, *, coverage: int = 3) -> dict:
     created.
     """
     pairs = compute_assignment(plan, coverage=coverage)
-    return _build_evidence(plan, pairs, coverage=coverage)
+    return build_evidence(plan, pairs, coverage=coverage)
 
 
 def activate(plan, *, coverage: int = 3):
@@ -126,7 +127,7 @@ def activate(plan, *, coverage: int = 3):
         plan=plan,
         number=next_number,
         coverage=coverage,
-        evidence=_build_evidence(plan, pairs, coverage=coverage),
+        evidence=build_evidence(plan, pairs, coverage=coverage),
     )
     Assignment.objects.bulk_create(
         [Assignment(version=version, judge_id=p.judge_id, project_id=p.project_id) for p in pairs]
@@ -206,7 +207,7 @@ def rebalance(plan, *, drop_judge_ids: set[int] | None = None, coverage: int | N
             j for j in active_judge_ids if j not in already and (j, project.id) not in conflicts
         ]
         eligible.sort(
-            key=lambda j: (-_track_fit(judge_tracks.get(j, set()), project_track_id), load[j], j)
+            key=lambda j: (-track_fit(judge_tracks.get(j, set()), project_track_id), load[j], j)
         )
         for judge_id in eligible[:needed]:
             load[judge_id] += 1
@@ -220,7 +221,7 @@ def rebalance(plan, *, drop_judge_ids: set[int] | None = None, coverage: int | N
     next_number = (
         plan.assignment_versions.order_by("-number").values_list("number", flat=True).first() or 0
     ) + 1
-    evidence = _build_evidence(plan, new_pairs, coverage=coverage)
+    evidence = build_evidence(plan, new_pairs, coverage=coverage)
     evidence["rebalanced_from"] = current.number
     evidence["dropped_judges"] = sorted(drop_judge_ids)
     version = AssignmentVersion.objects.create(

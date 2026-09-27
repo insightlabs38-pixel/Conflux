@@ -5626,6 +5626,118 @@ paths:
               schema:
                 $ref: '#/components/schemas/AssignmentVersion'
           description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/activate-optimized/
+  : post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_activate_optimized
+      description: |-
+        VS01: freezes a new AssignmentVersion from the optimization solver
+        and makes it active -- same model, same immutability, same audit
+        trail as AssignmentActivateView; only `evidence["solver"]` and which
+        pure function computed the pairing differ.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignmentActivateInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AssignmentActivateInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssignmentActivateInputSchema'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentVersion'
+          description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/compare/
+  : post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_compare
+      description: |-
+        VS01: side-by-side evidence for the existing greedy heuristic and
+        the explicit min-cost-flow optimization solver, read-only like
+        AssignmentPreviewView. Only meaningful for the assigned-subset
+        strategy (see evaluations.optimization).
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignmentCompareInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AssignmentCompareInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssignmentCompareInputSchema'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignmentCompareSchema'
+          description: ''
   ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/preview/
   : post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_preview
@@ -8915,9 +9027,27 @@ components:
         coverage:
           type: integer
           minimum: 1
+    AssignmentCompareInputSchema:
+      type: object
+      properties:
+        coverage:
+          type: integer
+          minimum: 1
+    AssignmentCompareSchema:
+      type: object
+      properties:
+        heuristic:
+          $ref: '#/components/schemas/AssignmentCoveragePreviewSchema'
+        optimized:
+          $ref: '#/components/schemas/AssignmentCoveragePreviewSchema'
+      required:
+      - heuristic
+      - optimized
     AssignmentCoveragePreviewSchema:
       type: object
       properties:
+        solver:
+          type: string
         coverage:
           type: integer
         candidate_count:
@@ -8943,6 +9073,7 @@ components:
       - coverage
       - judge_count
       - load_by_judge
+      - solver
     AssignmentPreviewInputSchema:
       type: object
       properties:

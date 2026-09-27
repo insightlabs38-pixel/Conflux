@@ -61,6 +61,16 @@ urlpatterns = [
         name="evaluation-plan-assignments-rebalance",
     ),
     path(
+        f"{_PLAN}/assignments/compare/",
+        views.AssignmentCompareView.as_view(),
+        name="evaluation-plan-assignments-compare",
+    ),
+    path(
+        f"{_PLAN}/assignments/activate-optimized/",
+        views.AssignmentActivateOptimizedView.as_view(),
+        name="evaluation-plan-assignments-activate-optimized",
+    ),
+    path(
         f"{_PLAN}/assignments/",
         views.AssignmentDetailView.as_view(),
         name="evaluation-plan-assignments",

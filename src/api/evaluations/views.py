@@ -22,6 +22,7 @@ from workspaces.models import Role
 from . import agreement, anonymize, normalization, pairwise
 from .assignment import activate, rebalance
 from .assignment import preview as preview_assignment
+from .eligibility import eligible_projects
 from .models import (
     Assignment,
     Ballot,
@@ -89,9 +90,12 @@ def _eligible_candidates(plan, judge):
     Shared by the rubric candidate queue and the pairwise next-pair picker
     (S01) so both judging modes draw from exactly the same eligibility rule.
     """
-    candidates = Project.objects.filter(
-        event_id=plan.stage.event_id, submissions__stage=plan.stage
-    ).distinct()
+    candidates = eligible_projects(plan)
+    if (
+        plan.prize_judging
+        and not PoolMembership.objects.filter(pool_id=plan.pool_id, judge=judge).exists()
+    ):
+        return candidates.none()
     if plan.pool_strategy == EvaluationPoolStrategy.ASSIGNED_SUBSET:
         if plan.active_assignment_version_id is None:
             return candidates.none()
@@ -281,6 +285,11 @@ class BallotListCreateView(PlanMixin):
             event=self.get_event(), judge=request.user, project=project
         ).exists():
             raise ValidationError({"detail": "You have a declared conflict of interest here."})
+        if (
+            plan.prize_judging
+            and not _eligible_candidates(plan, request.user).filter(id=project.id).exists()
+        ):
+            raise ValidationError({"detail": "You are not eligible to judge this prize candidate."})
         if plan.pool_strategy == EvaluationPoolStrategy.ASSIGNED_SUBSET:
             if (
                 plan.active_assignment_version_id is None
@@ -374,6 +383,11 @@ class BallotDraftView(PlanMixin):
     ):
         plan = self.get_plan()
         project = self.get_project()
+        if (
+            plan.prize_judging
+            and not _eligible_candidates(plan, request.user).filter(id=project.id).exists()
+        ):
+            raise ValidationError({"detail": "You are not eligible to judge this prize candidate."})
         responses = request.data.get("responses", {})
         if not isinstance(responses, dict):
             raise ValidationError({"responses": "Must be an object of criterion_id -> score."})
@@ -1133,7 +1147,14 @@ class CalibrationProjectsView(PlanMixin):
 
     @extend_schema(responses=CalibrationProjectItemSchema(many=True))
     def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
-        projects = self.get_plan().calibration_projects.all()
+        plan = self.get_plan()
+        if (
+            plan.prize_judging
+            and not has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
+            and not PoolMembership.objects.filter(pool_id=plan.pool_id, judge=request.user).exists()
+        ):
+            raise PermissionDenied("You are not in this prize judging pool.")
+        projects = plan.calibration_projects.all()
         return Response([{"project": str(p.public_id), "name": p.name} for p in projects])
 
     @extend_schema(
@@ -1193,6 +1214,11 @@ class CalibrationBallotListCreateView(PlanMixin):
         if not has_any_role(request.user, self.get_workspace(), Role.JUDGE):
             raise ValidationError({"detail": "Only a judge may submit a calibration ballot."})
         plan = self.get_plan()
+        if (
+            plan.prize_judging
+            and not PoolMembership.objects.filter(pool_id=plan.pool_id, judge=request.user).exists()
+        ):
+            raise ValidationError({"detail": "You are not in this prize judging pool."})
         version = plan.current_rubric_version
         if version is None:
             raise ValidationError({"detail": "This plan has no published rubric yet."})

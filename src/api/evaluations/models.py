@@ -95,6 +95,7 @@ class EvaluationPlan(PublicIdModel):
     # Project/Team to redact -- this scopes to the one identity signal the
     # product actually exposes to a judge during live judging.
     blind_judging = models.BooleanField(default=False)
+    prize_judging = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -110,6 +111,8 @@ class EvaluationPlan(PublicIdModel):
     def clean(self):
         if self.pool_id and self.pool.event_id != self.stage.event_id:
             raise ValidationError({"pool": "Pool must belong to the plan's event."})
+        if self.prize_judging and not self.pool_id:
+            raise ValidationError({"pool": "Prize judging requires a judge pool."})
         if (
             self.published_normalization_run_id
             and self.published_normalization_run.plan_id != self.pk
@@ -192,6 +195,18 @@ class Ballot(PublicIdModel):
             raise ValidationError(
                 {"project": "This project is reserved for calibration, not live judging."}
             )
+        if plan.prize_judging:
+            from .eligibility import eligible_projects
+
+            if not PoolMembership.objects.filter(
+                pool_id=plan.pool_id, judge_id=self.judge_id
+            ).exists():
+                raise ValidationError({"judge": "Judge is not in this prize judging pool."})
+            if (
+                not self.is_calibration
+                and not eligible_projects(plan).filter(id=self.project_id).exists()
+            ):
+                raise ValidationError({"project": "Project is not eligible for this prize."})
 
 
 class BallotDraft(PublicIdModel):
@@ -434,6 +449,22 @@ class PairwiseComparison(PublicIdModel):
     def clean(self):
         if self.plan.mode != EvaluationMode.PAIRWISE:
             raise ValidationError({"plan": "Plan is not configured for pairwise judging."})
+        if self.plan.prize_judging:
+            from .eligibility import eligible_projects
+
+            if not PoolMembership.objects.filter(
+                pool_id=self.plan.pool_id, judge_id=self.judge_id
+            ).exists():
+                raise ValidationError({"judge": "Judge is not in this prize judging pool."})
+            eligible = set(
+                eligible_projects(self.plan)
+                .filter(id__in=(self.project_a_id, self.project_b_id))
+                .values_list("id", flat=True)
+            )
+            if eligible != {self.project_a_id, self.project_b_id}:
+                raise ValidationError(
+                    {"project_a": "Both projects must be eligible for this prize."}
+                )
         if self.project_a_id == self.project_b_id:
             raise ValidationError({"project_b": "A comparison needs two distinct candidates."})
         if self.project_a_id > self.project_b_id:

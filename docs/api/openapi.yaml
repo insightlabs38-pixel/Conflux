@@ -9541,6 +9541,8 @@ components:
           type: boolean
         blind_judging:
           type: boolean
+        prize_judging:
+          type: boolean
         created_at:
           type: string
           format: date-time
@@ -10675,6 +10677,8 @@ components:
         calibration_required:
           type: boolean
         blind_judging:
+          type: boolean
+        prize_judging:
           type: boolean
         created_at:
           type: string

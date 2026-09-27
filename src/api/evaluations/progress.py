@@ -5,15 +5,13 @@ different endpoints by hand.
 """
 
 from django.db.models import Count
-from projects.models import Project
 
+from .eligibility import eligible_projects
 from .models import Ballot, ConflictOfInterest, EvaluationPoolStrategy
 
 
 def compute_progress(plan) -> dict:
-    candidates = Project.objects.filter(
-        event_id=plan.stage.event_id, submissions__stage=plan.stage
-    ).distinct()
+    candidates = eligible_projects(plan)
     candidate_count = candidates.count()
 
     pool_judge_count = plan.pool.memberships.count() if plan.pool_id else 0

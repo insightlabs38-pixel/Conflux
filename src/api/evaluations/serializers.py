@@ -51,10 +51,23 @@ class EvaluationPlanSerializer(serializers.ModelSerializer):
             "calibration_projects",
             "calibration_required",
             "blind_judging",
+            "prize_judging",
             "created_at",
             "updated_at",
         ]
         read_only_fields = ["created_at", "updated_at", "calibration_projects"]
+
+    def validate(self, attrs):
+        plan = self.instance
+        if plan and plan.prize_judging != attrs.get("prize_judging", plan.prize_judging):
+            raise serializers.ValidationError(
+                {"prize_judging": "Judging scope cannot be changed after plan creation."}
+            )
+        if plan and plan.prize_judging and "pool" in attrs and attrs["pool"] != plan.pool:
+            raise serializers.ValidationError(
+                {"pool": "A prize judging pool cannot be changed after plan creation."}
+            )
+        return attrs
 
     def get_calibration_projects(self, plan) -> list[str]:
         return [

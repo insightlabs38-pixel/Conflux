@@ -221,7 +221,7 @@ export function AwardsPanel({
         </label>
         {source === "evaluation" && (
           <label>
-            Published evaluation plan ID{" "}
+            Evaluation plan ID{" "}
             <input
               value={plan}
               onChange={(event) => setPlan(event.target.value)}

@@ -48,6 +48,19 @@ class Award(PublicIdModel):
                 errors["evaluation_plan"] = "Evaluation selection requires a plan."
             elif self.evaluation_plan.stage.event_id != self.event_id:
                 errors["evaluation_plan"] = "Plan must belong to the award event."
+            elif self.evaluation_plan.prize_judging:
+                if (
+                    Award.objects.filter(evaluation_plan_id=self.evaluation_plan_id)
+                    .exclude(pk=self.pk)
+                    .exists()
+                ):
+                    errors["evaluation_plan"] = "A prize judging plan can serve only one award."
+                elif (
+                    self.evaluation_plan.assignment_versions.exists()
+                    or self.evaluation_plan.rubric_versions.filter(ballots__isnull=False).exists()
+                    or self.evaluation_plan.pairwise_comparisons.exists()
+                ):
+                    errors["evaluation_plan"] = "Link the award before judging begins."
         elif self.evaluation_plan_id:
             errors["evaluation_plan"] = "Only evaluation selection can reference a plan."
         if self.winner_count < 1:

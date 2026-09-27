@@ -213,6 +213,8 @@ class AwardListView(AwardBase):
             )
         try:
             with transaction.atomic():
+                if plan_id and values["evaluation_plan"].prize_judging:
+                    EvaluationPlan.objects.select_for_update().get(pk=values["evaluation_plan"].pk)
                 award = Award(event=event, **values)
                 award.full_clean()
                 award.save()

@@ -9,9 +9,8 @@ this to a permanent tie; see DECISIONS.md).
 
 from dataclasses import dataclass
 
-from projects.models import Project
-
 from .connectivity import connectivity_report, repair_connectivity
+from .eligibility import eligible_projects
 from .models import Assignment, ConflictOfInterest, EvaluationPoolStrategy, PoolMembership
 
 
@@ -41,11 +40,7 @@ def compute_assignment(plan, *, coverage: int = 3) -> list[Pairing]:
     judge_tracks = {m.judge_id: {t.id for t in m.track_expertise.all()} for m in memberships}
     judge_ids = [m.judge_id for m in memberships]
 
-    candidates = list(
-        Project.objects.filter(event_id=plan.stage.event_id, submissions__stage=plan.stage)
-        .distinct()
-        .order_by("id")
-    )
+    candidates = list(eligible_projects(plan).order_by("id"))
     conflicts = set(
         ConflictOfInterest.objects.filter(event_id=plan.stage.event_id).values_list(
             "judge_id", "project_id"
@@ -186,11 +181,7 @@ def rebalance(plan, *, drop_judge_ids: set[int] | None = None, coverage: int | N
             "judge_id", "project_id"
         )
     )
-    candidates = list(
-        Project.objects.filter(event_id=plan.stage.event_id, submissions__stage=plan.stage)
-        .distinct()
-        .order_by("id")
-    )
+    candidates = list(eligible_projects(plan).order_by("id"))
 
     load = dict.fromkeys(active_judge_ids, 0)
     kept_pairs: list[Pairing] = []

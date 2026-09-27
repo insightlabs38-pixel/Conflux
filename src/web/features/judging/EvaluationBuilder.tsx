@@ -5,6 +5,7 @@ import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 
 type Stage = { public_id: string; name: string };
+type Pool = { public_id: string; name: string };
 type Criterion = {
   id: string;
   name: string;
@@ -17,6 +18,8 @@ type Plan = {
   name: string;
   candidate_type: "project";
   pool_strategy: "all_judges" | "assigned_subset";
+  pool: string | null;
+  prize_judging: boolean;
   results_visible_to_participants: boolean;
   draft_criteria: Criterion[];
   current_rubric_version: number | null;
@@ -297,6 +300,12 @@ function PlanEditor({
           {plan.current_rubric_version ?? "none yet"}
         </Badge>
       </p>
+      {plan.prize_judging && (
+        <p>
+          Prize judging · Plan ID: <code>{plan.public_id}</code>. Link this plan
+          to one evaluation award before judging begins.
+        </p>
+      )}
       <label>
         Pool strategy{" "}
         <select
@@ -344,14 +353,25 @@ export function EvaluationBuilder({
 }) {
   const eventBase = `/api/v1/workspaces/${workspaceId}/events/${eventId}/`;
   const [stages, setStages] = useState<Stage[]>([]);
+  const [pools, setPools] = useState<Pool[]>([]);
   const [stageId, setStageId] = useState("");
   const [plans, setPlans] = useState<Plan[]>([]);
   const [name, setName] = useState("");
+  const [poolName, setPoolName] = useState("");
+  const [judgeId, setJudgeId] = useState("");
+  const [selectedPool, setSelectedPool] = useState("");
+  const [prizeJudging, setPrizeJudging] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    request<Stage[]>(eventBase + "stages/")
-      .then(setStages)
+    Promise.all([
+      request<Stage[]>(eventBase + "stages/"),
+      request<Pool[]>(eventBase + "evaluation-pools/"),
+    ])
+      .then(([nextStages, nextPools]) => {
+        setStages(nextStages);
+        setPools(nextPools);
+      })
       .catch((cause: unknown) => setError(message(cause)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspaceId, eventId]);
@@ -367,15 +387,50 @@ export function EvaluationBuilder({
       .catch((cause: unknown) => setError(message(cause)));
   }, [plansBase]);
 
+  async function createPool() {
+    setError("");
+    try {
+      const pool = await request<Pool>(
+        eventBase + "evaluation-pools/",
+        "POST",
+        {
+          name: poolName.trim(),
+        },
+      );
+      setPools((items) => [...items, pool]);
+      setSelectedPool(pool.public_id);
+      setPoolName("");
+    } catch (cause) {
+      setError(message(cause));
+    }
+  }
+
+  async function addJudge() {
+    setError("");
+    try {
+      await request(
+        `${eventBase}evaluation-pools/${selectedPool}/memberships/`,
+        "POST",
+        { judge: judgeId.trim() },
+      );
+      setJudgeId("");
+    } catch (cause) {
+      setError(message(cause));
+    }
+  }
+
   async function createPlan() {
     setError("");
     try {
       const plan = await request<Plan>(plansBase, "POST", {
         name,
+        pool: selectedPool || null,
+        prize_judging: prizeJudging,
         draft_criteria: [newCriterion(1)],
       });
       setPlans((items) => [...items, plan]);
       setName("");
+      setPrizeJudging(false);
     } catch (cause) {
       setError(message(cause));
     }
@@ -401,6 +456,48 @@ export function EvaluationBuilder({
       )}
       {stageId && (
         <>
+          <h3>Judge pool</h3>
+          <label>
+            Pool{" "}
+            <select
+              value={selectedPool}
+              onChange={(event) => setSelectedPool(event.target.value)}
+            >
+              <option value="">No pool</option>
+              {pools.map((pool) => (
+                <option key={pool.public_id} value={pool.public_id}>
+                  {pool.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            New pool name{" "}
+            <input
+              value={poolName}
+              onChange={(event) => setPoolName(event.target.value)}
+            />
+          </label>
+          <Button disabled={!poolName.trim()} onClick={() => void createPool()}>
+            Create pool
+          </Button>
+          {selectedPool && (
+            <>
+              <label>
+                Judge user ID{" "}
+                <input
+                  value={judgeId}
+                  onChange={(event) => setJudgeId(event.target.value)}
+                />
+              </label>
+              <Button
+                disabled={!judgeId.trim()}
+                onClick={() => void addJudge()}
+              >
+                Add judge to pool
+              </Button>
+            </>
+          )}
           {plans.map((plan) => (
             <PlanEditor
               key={plan.public_id}
@@ -419,7 +516,18 @@ export function EvaluationBuilder({
             New plan name{" "}
             <input value={name} onChange={(e) => setName(e.target.value)} />
           </label>
-          <Button disabled={!name} onClick={() => void createPlan()}>
+          <label>
+            <input
+              type="checkbox"
+              checked={prizeJudging}
+              onChange={(event) => setPrizeJudging(event.target.checked)}
+            />{" "}
+            Prize judging plan
+          </label>
+          <Button
+            disabled={!name.trim() || (prizeJudging && !selectedPool)}
+            onClick={() => void createPlan()}
+          >
             Create evaluation plan
           </Button>
         </>

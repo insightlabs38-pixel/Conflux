@@ -27,7 +27,7 @@ if [ -z "$objectstore_id" ]; then
   echo "objectstore service is not running (make up first)." >&2
   exit 1
 fi
-docker run --rm --volumes-from "$objectstore_id" conflux-api:latest \
+docker run --rm --entrypoint tar --volumes-from "$objectstore_id" conflux-api:latest \
   tar czf - -C /data . > "$destination/objectstore.tar.gz"
 
 echo "backup written to $destination"

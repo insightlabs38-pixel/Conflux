@@ -29,7 +29,7 @@ if [ -z "$objectstore_id" ]; then
   echo "objectstore service is not running (make up first)." >&2
   exit 1
 fi
-docker run --rm -i --volumes-from "$objectstore_id" conflux-api:latest \
+docker run --rm -i --entrypoint sh --volumes-from "$objectstore_id" conflux-api:latest \
   sh -c 'find /data -mindepth 1 -delete && tar xzf - -C /data' < "$source_dir/objectstore.tar.gz"
 
 echo "== restarting application services =="

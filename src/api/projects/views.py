@@ -3,8 +3,10 @@ from accounts.models import User
 from core.permissions import IsWorkspaceMember
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema, inline_serializer
 from events.models import Event, Track
 from participation.models import Team
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -12,6 +14,15 @@ from stages.models import Stage
 from workspaces.models import Workspace
 
 from .models import Project, ProjectMembershipRole, Submission
+from .schema import (
+    ProjectCreateInputSchema,
+    ProjectPatchInputSchema,
+    SubmissionDraftInputSchema,
+    SubmissionFinalizeInputSchema,
+    SubmissionReceiptSchema,
+    SubmissionSchema,
+    SubmissionStageSchema,
+)
 from .serializers import ProjectMembershipSerializer, ProjectSerializer
 from .services import add_project_member, create_project, update_project
 from .submissions import finalize_submission, save_draft
@@ -44,6 +55,7 @@ class ProjectListView(ProjectView):
         ).distinct()
         return Response(ProjectSerializer(projects, many=True).data)
 
+    @extend_schema(request=ProjectCreateInputSchema, responses={201: ProjectSerializer})
     def post(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
         name = str(request.data.get("name", "")).strip()
@@ -78,6 +90,7 @@ class ProjectDetailView(ProjectView):
             return Response(status=404)
         return Response(ProjectSerializer(project).data)
 
+    @extend_schema(request=ProjectPatchInputSchema, responses=ProjectSerializer)
     def patch(self, request, workspace_public_id, event_public_id, project_public_id):
         project = self.get_project()
         if not project.memberships.filter(user=request.user).exists():
@@ -105,6 +118,12 @@ class ProjectDetailView(ProjectView):
 class ProjectMemberView(ProjectView):
     serializer_class = ProjectMembershipSerializer
 
+    @extend_schema(
+        request=inline_serializer(
+            "AddProjectMemberInput", fields={"user": serializers.UUIDField()}
+        ),
+        responses={201: ProjectMembershipSerializer},
+    )
     def post(self, request, workspace_public_id, event_public_id, project_public_id):
         project = self.get_project()
         if not project.memberships.filter(
@@ -159,6 +178,7 @@ class ProjectSubmissionView(ProjectView):
 
 
 class SubmissionStageListView(ProjectSubmissionView):
+    @extend_schema(responses=SubmissionStageSchema(many=True))
     def get(self, request, workspace_public_id, event_public_id, project_public_id):
         project = self.get_project()
         submissions = {
@@ -182,6 +202,7 @@ class SubmissionStageListView(ProjectSubmissionView):
 
 
 class SubmissionDetailView(ProjectSubmissionView):
+    @extend_schema(responses=SubmissionSchema)
     def get(
         self, request, workspace_public_id, event_public_id, project_public_id, stage_public_id
     ):
@@ -190,6 +211,7 @@ class SubmissionDetailView(ProjectSubmissionView):
         )
         return Response(submission_payload(submission))
 
+    @extend_schema(request=SubmissionDraftInputSchema, responses=SubmissionSchema)
     def put(
         self, request, workspace_public_id, event_public_id, project_public_id, stage_public_id
     ):
@@ -209,6 +231,10 @@ class SubmissionDetailView(ProjectSubmissionView):
 
 
 class SubmissionFinalizeView(ProjectSubmissionView):
+    @extend_schema(
+        request=SubmissionFinalizeInputSchema,
+        responses={200: SubmissionReceiptSchema, 201: SubmissionReceiptSchema},
+    )
     def post(
         self, request, workspace_public_id, event_public_id, project_public_id, stage_public_id
     ):

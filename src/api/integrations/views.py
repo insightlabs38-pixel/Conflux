@@ -5,12 +5,15 @@ from core.authz import has_any_role
 from core.permissions import require_roles
 from django.http import HttpResponse
 from django.utils import timezone
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from workspaces.models import Role, Workspace
 
 from .models import FixtureScore, ImportedFixture
+from .schema import ErrorSchema, GalleryProjectSchema, JudgeScoreSchema
 
 
 def _current_fixture():
@@ -32,6 +35,7 @@ class GalleryView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
 
+    @extend_schema(responses=GalleryProjectSchema(many=True))
     def get(self, request):
         fixture = _current_fixture()
         projects = [] if fixture is None else fixture.projects.select_related("team", "track")
@@ -58,6 +62,7 @@ class SubmitView(APIView):
     authentication_classes = [CookieSessionAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=None, responses={403: ErrorSchema, 501: ErrorSchema})
     def post(self, request):
         fixture = _current_fixture()
         if fixture is None or timezone.now() >= fixture.event_submissions_close:
@@ -78,6 +83,7 @@ class JudgeScoresView(APIView):
     authentication_classes = [CookieSessionAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(responses=JudgeScoreSchema(many=True))
     def get(self, request):
         fixture = _current_fixture()
         if fixture is None:
@@ -120,6 +126,7 @@ class CsvExportView(APIView):
     def get_workspace(self):
         return _acceptance_workspace()
 
+    @extend_schema(responses={(200, "text/csv"): OpenApiTypes.BINARY})
     def get(self, request):
         fixture = _current_fixture()
         scores = (

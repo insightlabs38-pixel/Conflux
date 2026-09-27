@@ -9,6 +9,8 @@ from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError, transaction
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema
 from events.views import OrganizerView
 from projects.models import Project
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -33,6 +35,17 @@ from .models import (
 )
 from .progress import compute_progress
 from .results import ranked_results
+from .schema import (
+    AssignmentActivateInputSchema,
+    BallotDraftInputSchema,
+    BallotSubmitInputSchema,
+    CandidateQueueItemSchema,
+    EvaluationProgressSchema,
+    NormalizationInputSchema,
+    PoolMembershipInputSchema,
+    RankedResultSchema,
+    ResultsPublishInputSchema,
+)
 from .serializers import (
     AssignmentVersionSerializer,
     BallotDraftSerializer,
@@ -71,6 +84,7 @@ class EvaluationPlanListView(StageEventMixin):
         plans = self.get_stage().evaluation_plans.all()
         return Response(EvaluationPlanSerializer(plans, many=True).data)
 
+    @extend_schema(responses={201: EvaluationPlanSerializer})
     def post(self, request, workspace_public_id, event_public_id, stage_public_id):
         serializer = EvaluationPlanSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -134,12 +148,14 @@ class RubricPublishView(PlanMixin):
             return [IsWorkspaceMember()]
         return super().get_permissions()
 
+    @extend_schema(responses=RubricVersionSerializer(allow_null=True))
     def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         version = self.get_plan().current_rubric_version
         if version is None:
             return JsonResponse(None, safe=False)
         return Response(RubricVersionSerializer(version).data)
 
+    @extend_schema(request=None, responses={201: RubricVersionSerializer})
     def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         plan = self.get_plan()
         next_number = (plan.current_rubric_version.number + 1) if plan.current_rubric_version else 1
@@ -189,6 +205,7 @@ class BallotListCreateView(PlanMixin):
             ballots = ballots.filter(judge=request.user)
         return Response(BallotSerializer(ballots.prefetch_related("responses"), many=True).data)
 
+    @extend_schema(request=BallotSubmitInputSchema, responses={201: BallotSerializer})
     def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         if not has_any_role(request.user, self.get_workspace(), Role.JUDGE):
             raise ValidationError({"detail": "Only a judge may submit a ballot."})
@@ -263,6 +280,7 @@ class BallotDraftView(PlanMixin):
             Project, event=self.get_event(), public_id=self.kwargs["project_public_id"]
         )
 
+    @extend_schema(responses=BallotDraftSerializer(allow_null=True))
     def get(
         self,
         request,
@@ -283,6 +301,7 @@ class BallotDraftView(PlanMixin):
             return JsonResponse(None, safe=False)
         return Response(BallotDraftSerializer(draft).data)
 
+    @extend_schema(request=BallotDraftInputSchema, responses=BallotDraftSerializer)
     def put(
         self,
         request,
@@ -327,6 +346,7 @@ class EvaluationPoolListView(OrganizerView):
         pools = self.get_event().evaluation_pools.all()
         return Response(EvaluationPoolSerializer(pools, many=True).data)
 
+    @extend_schema(responses={201: EvaluationPoolSerializer})
     def post(self, request, workspace_public_id, event_public_id):
         serializer = EvaluationPoolSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -353,6 +373,7 @@ class PoolMembershipListView(PoolMixin):
         memberships = self.get_pool().memberships.prefetch_related("track_expertise")
         return Response(PoolMembershipSerializer(memberships, many=True).data)
 
+    @extend_schema(request=PoolMembershipInputSchema, responses={201: PoolMembershipSerializer})
     def post(self, request, workspace_public_id, event_public_id, pool_public_id):
         pool = self.get_pool()
         judge = get_object_or_404(User, public_id=request.data.get("judge"))
@@ -375,6 +396,7 @@ class PoolMembershipListView(PoolMixin):
 
 
 class PoolMembershipDetailView(PoolMixin):
+    @extend_schema(responses={204: None})
     def delete(
         self, request, workspace_public_id, event_public_id, pool_public_id, membership_public_id
     ):
@@ -402,6 +424,7 @@ class ConflictOfInterestListCreateView(OrganizerView):
             conflicts = conflicts.filter(judge=request.user)
         return Response(ConflictOfInterestSerializer(conflicts, many=True).data)
 
+    @extend_schema(responses={201: ConflictOfInterestSerializer})
     def post(self, request, workspace_public_id, event_public_id):
         is_organizer = has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
         judge_id = request.data.get("judge")
@@ -437,6 +460,9 @@ class ConflictOfInterestListCreateView(OrganizerView):
 
 
 class AssignmentActivateView(PlanMixin):
+    @extend_schema(
+        request=AssignmentActivateInputSchema, responses={201: AssignmentVersionSerializer}
+    )
     def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         plan = self.get_plan()
         coverage = request.data.get("coverage", 3)
@@ -493,6 +519,7 @@ class NormalizationRunListView(PlanMixin):
         runs = self.get_plan().normalization_runs.all()
         return Response(NormalizationRunSerializer(runs, many=True).data)
 
+    @extend_schema(request=NormalizationInputSchema, responses={201: NormalizationRunSerializer})
     def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         plan = self.get_plan()
         ridge_lambda = request.data.get("ridge_lambda", 1.0)
@@ -517,6 +544,7 @@ class NormalizationRunListView(PlanMixin):
 class EvaluationProgressView(PlanMixin):
     """JUX-004: coverage/load/completion/normalization state in one call."""
 
+    @extend_schema(responses=EvaluationProgressSchema)
     def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         return Response(compute_progress(self.get_plan()))
 
@@ -527,6 +555,7 @@ class ResultsPublishView(PlanMixin):
     results reachable at all (ResultsView 404s until this has run once).
     """
 
+    @extend_schema(request=ResultsPublishInputSchema, responses=EvaluationPlanSerializer)
     def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         plan = self.get_plan()
         run = get_object_or_404(
@@ -578,6 +607,7 @@ class ResultsView(PlanMixin):
     authentication_classes = [CookieSessionAuthentication]
     permission_classes = [require_roles(Role.PARTICIPANT, Role.JUDGE, Role.ORGANIZER, Role.ADMIN)]
 
+    @extend_schema(responses=RankedResultSchema(many=True))
     def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         plan = self.get_plan()
         is_organizer = has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
@@ -595,6 +625,7 @@ class ResultsView(PlanMixin):
 class ResultsCsvExportView(PlanMixin):
     """JUX-006: organizer CSV export of a plan's published results."""
 
+    @extend_schema(responses={(200, "text/csv"): OpenApiTypes.BINARY})
     def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         plan = self.get_plan()
         if plan.published_normalization_run_id is None:
@@ -631,6 +662,7 @@ class CandidateListView(PlanMixin):
     authentication_classes = [CookieSessionAuthentication]
     permission_classes = [require_roles(Role.JUDGE, Role.ORGANIZER, Role.ADMIN)]
 
+    @extend_schema(responses=CandidateQueueItemSchema(many=True))
     def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         plan = self.get_plan()
         if not has_any_role(request.user, self.get_workspace(), Role.JUDGE):

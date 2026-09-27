@@ -4,7 +4,9 @@ from core.permissions import IsWorkspaceMember
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema, inline_serializer
 from events.models import Event, EventStatus
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -51,6 +53,13 @@ class ParticipantView(APIView):
 
 
 class ParticipantEventListView(ParticipantView):
+    @extend_schema(
+        responses=inline_serializer(
+            "ParticipantEventSummary",
+            fields={"public_id": serializers.UUIDField(), "name": serializers.CharField()},
+            many=True,
+        )
+    )
     def get(self, request, workspace_public_id):
         events = Event.objects.filter(workspace=self.get_workspace(), is_public=True).exclude(
             status__in=[EventStatus.DRAFT, EventStatus.ARCHIVED]
@@ -67,6 +76,15 @@ class MyTeamView(ParticipantView):
 
     serializer_class = TeamSerializer
 
+    @extend_schema(
+        responses=inline_serializer(
+            "MyTeamResponse",
+            fields={
+                "team": TeamSerializer(allow_null=True),
+                "my_role": serializers.CharField(allow_null=True),
+            },
+        )
+    )
     def get(self, request, workspace_public_id, event_public_id):
         # {"team": null} on purpose, not a bare `Response(None)`: DRF
         # renders `None` data as an empty body with no Content-Type at
@@ -77,6 +95,10 @@ class MyTeamView(ParticipantView):
             return Response({"team": None, "my_role": None})
         return Response({"team": TeamSerializer(membership.team).data, "my_role": membership.role})
 
+    @extend_schema(
+        request=inline_serializer("CreateTeamInput", fields={"name": serializers.CharField()}),
+        responses={201: TeamSerializer},
+    )
     def post(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
         if self.my_membership(event) is not None:
@@ -94,6 +116,7 @@ class MyTeamView(ParticipantView):
 
 
 class LeaveTeamView(ParticipantView):
+    @extend_schema(request=None, responses={204: None})
     def post(self, request, workspace_public_id, event_public_id):
         membership = self.my_membership(self.get_event())
         if membership is None:
@@ -106,6 +129,10 @@ class LeaveTeamView(ParticipantView):
 
 
 class TransferCaptainView(ParticipantView):
+    @extend_schema(
+        request=inline_serializer("TransferCaptainInput", fields={"user": serializers.UUIDField()}),
+        responses=TeamSerializer,
+    )
     def post(self, request, workspace_public_id, event_public_id):
         membership = self.my_membership(self.get_event())
         if membership is None:
@@ -129,6 +156,13 @@ class TeamInviteListView(ParticipantView):
         invites = TeamInvite.objects.filter(team=membership.team, revoked_at__isnull=True)
         return Response(TeamInviteSerializer(invites, many=True).data)
 
+    @extend_schema(
+        request=inline_serializer(
+            "CreateTeamInviteInput",
+            fields={"max_uses": serializers.IntegerField(min_value=1, required=False)},
+        ),
+        responses={201: TeamInviteSerializer},
+    )
     def post(self, request, workspace_public_id, event_public_id):
         membership = self.my_membership(self.get_event())
         if membership is None:
@@ -145,6 +179,7 @@ class TeamInviteListView(ParticipantView):
 
 
 class TeamInviteDetailView(ParticipantView):
+    @extend_schema(responses={204: None})
     def delete(self, request, workspace_public_id, event_public_id, invite_public_id):
         membership = self.my_membership(self.get_event())
         if membership is None:
@@ -158,6 +193,10 @@ class TeamInviteDetailView(ParticipantView):
 
 
 class RedeemInviteView(ParticipantView):
+    @extend_schema(
+        request=inline_serializer("RedeemInviteInput", fields={"token": serializers.CharField()}),
+        responses={201: TeamSerializer},
+    )
     def post(self, request, workspace_public_id, event_public_id):
         token = str(request.data.get("token", ""))
         try:

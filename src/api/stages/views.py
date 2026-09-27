@@ -4,6 +4,7 @@ from core.permissions import IsWorkspaceMember
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema
 from events.views import OrganizerView
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -11,6 +12,13 @@ from rest_framework.response import Response
 from .advancement import REGISTRY, Candidate, advance_stage
 from .graph import StageGraphError, topological_order, validate_event_graph
 from .models import Stage, StageTransition
+from .schema import (
+    AdvancementEvidenceSchema,
+    AdvancementInputSchema,
+    AdvancementResultSchema,
+    AdvancementStrategiesSchema,
+    GraphValidationSchema,
+)
 from .serializers import StageSerializer, StageTransitionSerializer
 
 
@@ -47,6 +55,7 @@ class StageListView(StageEventMixin):
             ordered = list(event.stages.all())
         return Response(StageSerializer(ordered, many=True).data)
 
+    @extend_schema(responses={201: StageSerializer})
     def post(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
         serializer = StageSerializer(data=request.data)
@@ -128,6 +137,7 @@ class StageTransitionListView(StageEventMixin):
         transitions = StageTransition.objects.filter(from_stage__event=self.get_event())
         return Response(StageTransitionSerializer(transitions, many=True).data)
 
+    @extend_schema(responses={201: StageTransitionSerializer})
     def post(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
         serializer = StageTransitionSerializer(data=request.data)
@@ -159,6 +169,7 @@ class StageTransitionListView(StageEventMixin):
 
 
 class StageTransitionDetailView(StageEventMixin):
+    @extend_schema(responses={204: None})
     def delete(self, request, workspace_public_id, event_public_id, transition_public_id):
         transition = get_object_or_404(
             StageTransition, from_stage__event=self.get_event(), public_id=transition_public_id
@@ -183,6 +194,7 @@ class GraphValidationView(StageEventMixin):
     client-side.
     """
 
+    @extend_schema(responses=GraphValidationSchema)
     def get(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
         try:
@@ -201,9 +213,11 @@ class StageAdvancementView(StageEventMixin):
     from `advance_stage` itself.
     """
 
+    @extend_schema(responses=AdvancementStrategiesSchema)
     def get(self, request, workspace_public_id, event_public_id, stage_public_id):
         return Response({"strategies": sorted(REGISTRY)})
 
+    @extend_schema(request=AdvancementInputSchema, responses=AdvancementResultSchema)
     def post(self, request, workspace_public_id, event_public_id, stage_public_id):
         stage = self.get_stage()
         to_stage = get_object_or_404(
@@ -234,6 +248,7 @@ class StageEvidenceView(StageEventMixin):
     the organizer-facing evidence trail for "why did this happen".
     """
 
+    @extend_schema(responses=AdvancementEvidenceSchema(many=True))
     def get(self, request, workspace_public_id, event_public_id):
         rows = AuditEvent.objects.filter(
             workspace=self.get_workspace(), action="stage.advanced"

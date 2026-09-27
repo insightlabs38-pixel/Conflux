@@ -1,7 +1,9 @@
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema, inline_serializer
 from events.views import OrganizerView
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
@@ -39,6 +41,7 @@ class PageBlockListView(PageMixin):
     def get(self, request, workspace_public_id, event_public_id):
         return Response(PageBlockSerializer(self.get_page().blocks.all(), many=True).data)
 
+    @extend_schema(responses={201: PageBlockSerializer})
     def post(self, request, workspace_public_id, event_public_id):
         page = self.get_page()
         serializer = PageBlockSerializer(data=request.data)
@@ -83,6 +86,13 @@ class PageBlockDetailView(PageMixin):
 class PageBlockReorderView(PageMixin):
     serializer_class = PageBlockSerializer
 
+    @extend_schema(
+        request=inline_serializer(
+            "PageBlockOrderInput",
+            fields={"block_ids": serializers.ListField(child=serializers.UUIDField())},
+        ),
+        responses=PageBlockSerializer(many=True),
+    )
     def post(self, request, workspace_public_id, event_public_id):
         page = self.get_page()
         order = request.data.get("block_ids")

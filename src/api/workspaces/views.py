@@ -7,11 +7,18 @@ from core.permissions import require_roles
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
 from django.utils.text import slugify
+from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Membership, Role, Workspace
+from .serializers import (
+    MembershipInputSchema,
+    MembershipSchema,
+    WorkspaceInputSchema,
+    WorkspaceSchema,
+)
 
 
 def _serialize_workspace(workspace):
@@ -30,6 +37,7 @@ class WorkspaceCreateView(IdempotentMixin, APIView):
     authentication_classes = [CookieSessionAuthentication]
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(request=WorkspaceInputSchema, responses={201: WorkspaceSchema})
     def post(self, request):
         name = (request.data.get("name") or "").strip()
         if not name:
@@ -60,10 +68,14 @@ class WorkspaceMembersView(WorkspaceLookupMixin, APIView):
     authentication_classes = [CookieSessionAuthentication]
     permission_classes = [require_roles(Role.ORGANIZER, Role.ADMIN)]
 
+    @extend_schema(responses=MembershipSchema(many=True))
     def get(self, request, workspace_public_id):
         members = Membership.objects.filter(workspace=self.get_workspace()).select_related("user")
         return Response([_serialize_membership(m) for m in members])
 
+    @extend_schema(
+        request=MembershipInputSchema, responses={200: MembershipSchema, 201: MembershipSchema}
+    )
     def post(self, request, workspace_public_id):
         workspace = self.get_workspace()
         username = request.data.get("username")

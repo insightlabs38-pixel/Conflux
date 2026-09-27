@@ -77,6 +77,10 @@ class VoteReceiptSchema(serializers.Serializer):
     public_id = serializers.UUIDField()
 
 
+class VoteTokenBatchInputSchema(serializers.Serializer):
+    count = serializers.IntegerField(min_value=1, max_value=500, required=False)
+
+
 class EmailTokenInputSchema(serializers.Serializer):
     email = serializers.EmailField()
 

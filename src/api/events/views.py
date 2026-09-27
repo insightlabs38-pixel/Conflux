@@ -5,6 +5,8 @@ from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -12,6 +14,7 @@ from rest_framework.views import APIView
 from workspaces.models import Role, Workspace
 
 from .models import BasePrize, Event, EventStatus, Track
+from .schema import EventDashboardSchema, PublicEventSchema
 from .serializers import BasePrizeSerializer, EventSerializer, TrackSerializer
 
 
@@ -68,6 +71,7 @@ class EventListView(OrganizerView):
         events = Event.objects.filter(workspace=self.get_workspace())
         return Response(EventSerializer(events, many=True).data)
 
+    @extend_schema(responses={201: EventSerializer})
     def post(self, request, workspace_public_id):
         serializer = EventSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -123,6 +127,12 @@ class EventStatusView(OrganizerView):
         EventStatus.CLOSED: EventStatus.ARCHIVED,
     }
 
+    @extend_schema(
+        request=inline_serializer(
+            "EventStatusInput", fields={"status": serializers.ChoiceField(EventStatus.choices)}
+        ),
+        responses=EventSerializer,
+    )
     def post(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
         target = request.data.get("status")
@@ -153,6 +163,7 @@ class EventStatusView(OrganizerView):
 
 
 class EventDashboardView(OrganizerView):
+    @extend_schema(responses=EventDashboardSchema)
     def get(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
         blockers = []
@@ -185,6 +196,7 @@ class TrackListView(OrganizerView):
     def get(self, request, workspace_public_id, event_public_id):
         return Response(TrackSerializer(self.get_event().tracks.all(), many=True).data)
 
+    @extend_schema(responses={201: TrackSerializer})
     def post(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
         self.ensure_mutable(event)
@@ -245,6 +257,7 @@ class BasePrizeListView(OrganizerView):
     def get(self, request, workspace_public_id, event_public_id):
         return Response(BasePrizeSerializer(self.get_event().base_prizes.all(), many=True).data)
 
+    @extend_schema(responses={201: BasePrizeSerializer})
     def post(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
         self.ensure_mutable(event)
@@ -317,6 +330,7 @@ class PublicEventView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
 
+    @extend_schema(responses=PublicEventSchema)
     def get(self, request, event_public_id):
         event = get_object_or_404(
             Event, public_id=event_public_id, is_public=True, status=EventStatus.OPEN

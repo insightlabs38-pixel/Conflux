@@ -36,6 +36,7 @@ from .serializers import (
     ResolutionInputSchema,
     VoteInputSchema,
     VoteReceiptSchema,
+    VoteTokenBatchInputSchema,
     VoteTokenSerializer,
     VotingPlanSerializer,
     VotingResultSchema,
@@ -92,6 +93,9 @@ class VoteTokenBatchView(VotingPlanMixin):
         tokens = self.get_plan().vote_tokens.all()
         return Response(VoteTokenSerializer(tokens, many=True).data)
 
+    @extend_schema(
+        request=VoteTokenBatchInputSchema, responses={201: VoteTokenSerializer(many=True)}
+    )
     def post(self, request, workspace_public_id, event_public_id):
         plan = self.get_plan()
         count = request.data.get("count", 1)
@@ -256,6 +260,7 @@ class ResultsView(PublicVotingMixin):
 class ResultsPublishView(VotingPlanMixin):
     serializer_class = VotingPlanSerializer
 
+    @extend_schema(request=None, responses=VotingPlanSerializer)
     def post(self, request, workspace_public_id, event_public_id):
         plan = self.get_plan()
         with transaction.atomic():
@@ -423,6 +428,7 @@ class CommentListCreateView(APIView):
         comments = project.comments.filter(hidden_at__isnull=True).select_related("author")
         return Response(CommentSerializer(comments, many=True).data)
 
+    @extend_schema(responses={201: CommentSerializer})
     def post(self, request, workspace_public_id, event_public_id, project_public_id):
         project = self.get_project()
         plan = VotingPlan.objects.filter(event=project.event).first()
@@ -459,6 +465,7 @@ class CommentHideView(APIView):
     def get_workspace(self):
         return get_object_or_404(Workspace, public_id=self.kwargs["workspace_public_id"])
 
+    @extend_schema(request=None, responses=CommentSerializer)
     def post(
         self, request, workspace_public_id, event_public_id, project_public_id, comment_public_id
     ):

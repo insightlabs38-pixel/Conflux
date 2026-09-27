@@ -29,7 +29,7 @@ verify-fast: format-check lint test build
 verify: verify-fast
 
 openapi-check:
-	uv run --frozen python src/api/manage.py spectacular --validate --fail-on-warn --file /dev/null
+	uv run --frozen python scripts/check_openapi_artifact.py
 
 # Authoritative clean/offline build+boot — full image rebuild every time.
 up:

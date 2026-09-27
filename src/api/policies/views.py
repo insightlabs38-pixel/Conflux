@@ -2,6 +2,7 @@ from audit.services import record_mutation
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema
 from events.views import OrganizerView
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -22,6 +23,21 @@ def _as_drf_validation_error(exc):
 
 
 class PresetListView(OrganizerView):
+    @extend_schema(
+        responses={
+            200: {
+                "type": "object",
+                "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                        "label": {"type": "string"},
+                        "params": {"type": "array", "items": {"type": "string"}},
+                    },
+                    "required": ["label", "params"],
+                },
+            }
+        }
+    )
     def get(self, request, workspace_public_id, event_public_id):
         return Response(
             {slug: {"label": p["label"], "params": p["params"]} for slug, p in PRESETS.items()}
@@ -34,6 +50,7 @@ class PolicyListView(OrganizerView):
     def get(self, request, workspace_public_id, event_public_id):
         return Response(PolicySerializer(self.get_event().policies.all(), many=True).data)
 
+    @extend_schema(responses={201: PolicySerializer})
     def post(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
         serializer = PolicySerializer(data=request.data)
@@ -66,6 +83,7 @@ class PolicyListView(OrganizerView):
 
 
 class PolicyDetailView(OrganizerView):
+    @extend_schema(responses={204: None})
     def delete(self, request, workspace_public_id, event_public_id, policy_public_id):
         policy = get_object_or_404(Policy, event=self.get_event(), public_id=policy_public_id)
         with transaction.atomic():
@@ -88,6 +106,7 @@ class PolicyBindingListView(OrganizerView):
         bindings = PolicyBinding.objects.filter(event=self.get_event())
         return Response(PolicyBindingSerializer(bindings, many=True).data)
 
+    @extend_schema(responses={201: PolicyBindingSerializer})
     def post(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
         serializer = PolicyBindingSerializer(data=request.data)
@@ -118,6 +137,7 @@ class PolicyBindingListView(OrganizerView):
 
 
 class PolicyBindingDetailView(OrganizerView):
+    @extend_schema(responses={204: None})
     def delete(self, request, workspace_public_id, event_public_id, binding_public_id):
         binding = get_object_or_404(
             PolicyBinding, event=self.get_event(), public_id=binding_public_id
@@ -143,6 +163,7 @@ class TemporalGateListView(OrganizerView):
             TemporalGateSerializer(self.get_event().temporal_gates.all(), many=True).data
         )
 
+    @extend_schema(responses={201: TemporalGateSerializer})
     def post(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
         serializer = TemporalGateSerializer(data=request.data)
@@ -217,6 +238,7 @@ class ExceptionGrantListView(OrganizerView):
         grants = ExceptionGrant.objects.filter(event=self.get_event())
         return Response(ExceptionGrantSerializer(grants, many=True).data)
 
+    @extend_schema(responses={201: ExceptionGrantSerializer})
     def post(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
         serializer = ExceptionGrantSerializer(data=request.data)

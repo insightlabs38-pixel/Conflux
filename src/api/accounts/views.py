@@ -1,12 +1,14 @@
 from datetime import timedelta
 
 from django.contrib.auth import authenticate
+from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .authentication import COOKIE_NAME, CookieSessionAuthentication
 from .models import Session
+from .serializers import LoginInputSchema, LoginResponseSchema, UserSummarySchema
 
 SESSION_TTL = timedelta(hours=12)
 
@@ -30,6 +32,7 @@ def _serialize_user(user):
     }
 
 
+@extend_schema(request=LoginInputSchema, responses={200: LoginResponseSchema})
 @api_view(["POST"])
 @authentication_classes([])
 @permission_classes([AllowAny])
@@ -45,6 +48,7 @@ def login(request):
     return response
 
 
+@extend_schema(request=None, responses={204: None})
 @api_view(["POST"])
 @authentication_classes([CookieSessionAuthentication])
 @permission_classes([IsAuthenticated])
@@ -57,6 +61,7 @@ def logout(request):
     return response
 
 
+@extend_schema(responses=UserSummarySchema)
 @api_view(["GET"])
 @authentication_classes([CookieSessionAuthentication])
 @permission_classes([IsAuthenticated])

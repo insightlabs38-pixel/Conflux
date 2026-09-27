@@ -99,6 +99,10 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "Conflux API",
     "VERSION": "1.0.0",
     "SCHEMA_PATH_PREFIX": r"/api/v1",
+    "ENUM_NAME_OVERRIDES": {
+        "EventStatus": "events.models.EventStatus",
+        "CandidateQueueStatus": ["pending", "drafted", "submitted"],
+    },
 }
 
 STATIC_ROOT = BASE_DIR / "staticfiles"

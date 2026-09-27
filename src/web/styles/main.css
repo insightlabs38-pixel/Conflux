@@ -1,13 +1,11 @@
+@import "./tokens.css";
+@import "./components.css";
+
 :root {
-  font-family: system-ui, sans-serif;
-  color: #192638;
-  background: #fff;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-bg);
 }
 body {
   margin: 0;
-}
-main {
-  max-width: 48rem;
-  margin: 4rem auto;
-  padding: 1rem;
 }

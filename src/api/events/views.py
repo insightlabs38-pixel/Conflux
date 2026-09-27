@@ -304,16 +304,22 @@ class PublicEventView(APIView):
         data = EventSerializer(event).data
         return Response(
             {
-                key: data[key]
-                for key in (
-                    "public_id",
-                    "name",
-                    "slug",
-                    "description",
-                    "timezone",
-                    "starts_at",
-                    "ends_at",
-                    "status",
-                )
+                **{
+                    key: data[key]
+                    for key in (
+                        "public_id",
+                        "name",
+                        "slug",
+                        "description",
+                        "timezone",
+                        "starts_at",
+                        "ends_at",
+                        "status",
+                    )
+                },
+                "tracks": TrackSerializer(event.tracks.all(), many=True).data,
+                "base_prizes": BasePrizeSerializer(
+                    event.base_prizes.select_related("track"), many=True
+                ).data,
             }
         )

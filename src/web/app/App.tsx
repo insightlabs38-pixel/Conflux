@@ -1,12 +1,23 @@
 import { useCallback, useEffect, useState } from "react";
+import { AppShell } from "../components/AppShell";
+import { Button } from "../components/Button";
 import { EventDashboard } from "../features/event-builder/EventDashboard";
 import { TeamWorkspace } from "../features/teams/TeamWorkspace";
+import { EventSite } from "../public/event-site/EventSite";
 import { WorkspaceSelector } from "./WorkspaceSelector";
 
 // Guarded for non-browser rendering (tests, SSR) where `window` is unavailable.
 function workspaceFromLocation(): string | null {
   if (typeof window === "undefined") return null;
   return new URLSearchParams(window.location.search).get("workspace");
+}
+
+// A bare `?event=<id>` link (no `workspace`) is the public, unauthenticated
+// event site; it never requires a session.
+function publicEventFromLocation(): string | null {
+  if (typeof window === "undefined") return null;
+  const params = new URLSearchParams(window.location.search);
+  return params.get("workspace") ? null : params.get("event");
 }
 
 function setWorkspaceParam(id: string | null) {
@@ -22,6 +33,7 @@ export function App() {
     workspaceFromLocation,
   );
   const [workspaceRole, setWorkspaceRole] = useState<string | null>(null);
+  const publicEventId = publicEventFromLocation();
 
   useEffect(() => {
     if (!workspaceId || workspaceRole) return;
@@ -58,23 +70,29 @@ export function App() {
     setWorkspaceRole(null);
   }, []);
 
+  if (publicEventId) {
+    return <EventSite eventId={publicEventId} />;
+  }
+
   return (
-    <main>
-      <h1>Conflux</h1>
-      {workspaceId ? (
-        <>
-          <button type="button" onClick={backToWorkspaces}>
+    <AppShell
+      nav={
+        workspaceId && (
+          <Button variant="secondary" onClick={backToWorkspaces}>
             Back to workspaces
-          </button>
-          {workspaceRole === "participant" ? (
-            <TeamWorkspace workspaceId={workspaceId} />
-          ) : (
-            <EventDashboard workspaceId={workspaceId} />
-          )}
-        </>
+          </Button>
+        )
+      }
+    >
+      {workspaceId ? (
+        workspaceRole === "participant" ? (
+          <TeamWorkspace workspaceId={workspaceId} />
+        ) : (
+          <EventDashboard workspaceId={workspaceId} />
+        )
       ) : (
         <WorkspaceSelector onSelect={selectWorkspace} />
       )}
-    </main>
+    </AppShell>
   );
 }

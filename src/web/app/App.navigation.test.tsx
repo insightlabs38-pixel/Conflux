@@ -176,4 +176,33 @@ describe("App navigation", () => {
       container.querySelector('[aria-label="Event dashboard"]'),
     ).toBeNull();
   });
+
+  it("routes a bare ?event= link to the public event site without requiring auth", async () => {
+    window.history.pushState({}, "", "/?event=e1");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({
+          public_id: "e1",
+          name: "Regionals",
+          description: "",
+          timezone: "UTC",
+          starts_at: null,
+          ends_at: null,
+          status: "open",
+          tracks: [],
+          base_prizes: [],
+        }),
+      }),
+    );
+    act(() => {
+      root.render(<App />);
+    });
+    await waitFor(
+      () => container.querySelector('[aria-label="Regionals event page"]') !== null,
+    );
+    expect(container.textContent).not.toContain("Back to workspaces");
+  });
 });

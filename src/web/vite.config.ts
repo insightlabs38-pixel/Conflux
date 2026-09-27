@@ -7,6 +7,10 @@ import react from "@vitejs/plugin-react";
 // reaches the app by its Compose service name instead of localhost.
 export default defineConfig({
   plugins: [react()],
+  // The post-spec plan uses `src/web/public/**` for source (event-site,
+  // project-gallery, project-page), not Vite's copy-verbatim static dir.
+  // No static assets are served today, so free the path instead of aliasing.
+  publicDir: false,
   server: {
     host: true,
     proxy: {

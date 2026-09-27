@@ -4,6 +4,7 @@ import { App } from "./App";
 
 describe("bootstrap shell", () => {
   it("renders a stable heading", () => {
-    expect(renderToStaticMarkup(<App />)).toContain("<h1>Conflux</h1>");
+    const html = renderToStaticMarkup(<App />);
+    expect(html).toMatch(/<h1[^>]*>Conflux<\/h1>/);
   });
 });

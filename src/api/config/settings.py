@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "presentation",
     "evaluations",
     "community",
+    "communications",
 ]
 
 MIDDLEWARE = ["django.middleware.common.CommonMiddleware"]
@@ -99,6 +100,22 @@ S3_PUBLIC_ENDPOINT_URL = os.environ.get("S3_PUBLIC_ENDPOINT_URL", "http://localh
 S3_ACCESS_KEY = os.environ.get("S3_ACCESS_KEY", "")
 S3_SECRET_KEY = os.environ.get("S3_SECRET_KEY", "")
 S3_BUCKET_NAME = os.environ.get("S3_BUCKET_NAME", "conflux-artifacts")
+
+# Communications (OPS-003): console output is the offline-safe default --
+# organizer/participant messages always land in the in-app inbox regardless
+# of this setting, and outbound email is a convenience on top, never the
+# only copy. A real deployment sets DJANGO_EMAIL_BACKEND to the SMTP
+# backend plus EMAIL_HOST/EMAIL_PORT/EMAIL_HOST_USER/EMAIL_HOST_PASSWORD/
+# EMAIL_USE_TLS to relay through a local or hosted SMTP server.
+EMAIL_BACKEND = os.environ.get(
+    "DJANGO_EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
+)
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "localhost")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "25"))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "0") == "1"
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Conflux <no-reply@conflux.local>")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 USE_TZ = True

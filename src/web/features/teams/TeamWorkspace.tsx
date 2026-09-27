@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { TeamPanel } from "./TeamPanel";
 import { ProjectWorkspace } from "../artifacts/ProjectWorkspace";
+import { Inbox } from "../communications/Inbox";
 
 type Event = { public_id: string; name: string };
 
@@ -56,6 +57,7 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
   return (
     <section aria-label="Participant events">
       <h2>Join an event team</h2>
+      <Inbox workspaceId={workspaceId} />
       {loading && <p>Loading events…</p>}
       {error && <p role="alert">{error}</p>}
       {!loading && !error && events.length === 0 && (

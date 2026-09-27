@@ -1,0 +1,59 @@
+from core.models import PublicIdModel
+from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.db import models
+from events.models import Event
+
+
+class Message(PublicIdModel):
+    """One organizer broadcast to a dynamically-resolved audience (OPS-002/
+    OPS-003). The audience is never stored as a frozen recipient list at
+    compose time -- `audience_kind`/`audience_params` are kept so the
+    message's *intent* stays legible, but who actually received it is the
+    `MessageRecipient` rows created at send time, which is the one
+    trustworthy record of "who got this".
+    """
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="messages")
+    sent_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="sent_messages"
+    )
+    subject = models.CharField(max_length=200)
+    body = models.TextField()
+    audience_kind = models.CharField(max_length=40)
+    audience_params = models.JSONField(default=dict, blank=True)
+    recipient_count = models.PositiveIntegerField(default=0)
+    email_failure_count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+
+    def clean(self):
+        if not self.subject.strip():
+            raise ValidationError({"subject": "Subject cannot be empty."})
+        if not self.body.strip():
+            raise ValidationError({"body": "Body cannot be empty."})
+
+
+class MessageRecipient(PublicIdModel):
+    """One resolved recipient of a Message: the durable in-app inbox entry.
+    Email delivery is a best-effort side channel recorded per-row
+    (`email_sent_at`/`email_error`) -- a failed or unconfigured email
+    transport never prevents the in-app copy from existing, which is what
+    makes in-app delivery the offline-compatible baseline (OPS-003).
+    """
+
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name="recipients")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="received_messages"
+    )
+    email_sent_at = models.DateTimeField(null=True, blank=True)
+    email_error = models.CharField(max_length=300, blank=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["message", "user"], name="unique_message_recipient")
+        ]
+        ordering = ["-message__created_at", "-id"]

@@ -1393,6 +1393,145 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/audiences/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_audiences
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AudienceKindSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/audiences/preview/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_audiences_preview
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AudiencePreviewInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AudiencePreviewInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AudiencePreviewInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AudiencePreviewSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/messages/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_messages
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessageSchema'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_messages
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MessageInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MessageInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/dashboard/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_dashboard
@@ -2205,6 +2344,62 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Team'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/checklist/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_checklist
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LaunchChecklistSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/summary/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_summary
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperationsSummarySchema'
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/page/:
     get:
@@ -5890,6 +6085,66 @@ paths:
               schema:
                 $ref: '#/components/schemas/VoteReceiptSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/inbox/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_inbox
+      description: |-
+        Any workspace member may read their own inbox -- not organizer-only,
+        the same split events.views.OrganizerView/participation.ParticipantView
+        already draw.
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InboxMessageSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/inbox/{recipient_public_id}/read/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_inbox_recipient_public_id_read
+      description: |-
+        Any workspace member may read their own inbox -- not organizer-only,
+        the same split events.views.OrganizerView/participation.ParticipantView
+        already draw.
+      parameters:
+      - in: path
+        name: recipient_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboxMessageSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/members/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_members
@@ -6493,6 +6748,54 @@ components:
       - created_at
       - number
       - public_id
+    AudienceKindSchema:
+      type: object
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        param_names:
+          type: array
+          items:
+            type: string
+        options: {}
+      required:
+      - key
+      - label
+      - options
+      - param_names
+    AudienceMemberSchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        username:
+          type: string
+      required:
+      - public_id
+      - username
+    AudiencePreviewInputSchema:
+      type: object
+      properties:
+        audience_kind:
+          type: string
+        audience_params: {}
+      required:
+      - audience_kind
+    AudiencePreviewSchema:
+      type: object
+      properties:
+        count:
+          type: integer
+        sample:
+          type: array
+          items:
+            $ref: '#/components/schemas/AudienceMemberSchema'
+      required:
+      - count
+      - sample
     AuditEventSchema:
       type: object
       properties:
@@ -6806,6 +7109,22 @@ components:
       - project
       type: string
       description: '* `project` - Project'
+    ChecklistItemSchema:
+      type: object
+      properties:
+        id:
+          type: string
+        severity:
+          type: string
+        passed:
+          type: boolean
+        detail:
+          type: string
+      required:
+      - detail
+      - id
+      - passed
+      - severity
     Comment:
       type: object
       properties:
@@ -7556,6 +7875,36 @@ components:
       - name
       - public_id
       - slug
+    InboxMessageSchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        subject:
+          type: string
+        body:
+          type: string
+        event:
+          type: string
+          format: uuid
+        event_name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        read_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - body
+      - created_at
+      - event
+      - event_name
+      - public_id
+      - read_at
+      - subject
     JudgeRecordInput:
       type: object
       properties:
@@ -7579,6 +7928,18 @@ components:
       - comment
       - criteria
       - project
+    LaunchChecklistSchema:
+      type: object
+      properties:
+        status:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChecklistItemSchema'
+      required:
+      - items
+      - status
     LoginInputSchema:
       type: object
       properties:
@@ -7638,6 +7999,50 @@ components:
       - workspace
       - workspace_name
       - workspace_slug
+    MessageInputSchema:
+      type: object
+      properties:
+        subject:
+          type: string
+          maxLength: 200
+        body:
+          type: string
+        audience_kind:
+          type: string
+        audience_params: {}
+      required:
+      - audience_kind
+      - body
+      - subject
+    MessageSchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        subject:
+          type: string
+        body:
+          type: string
+        audience_kind:
+          type: string
+        audience_params: {}
+        recipient_count:
+          type: integer
+        email_failure_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - audience_kind
+      - audience_params
+      - body
+      - created_at
+      - email_failure_count
+      - public_id
+      - recipient_count
+      - subject
     MyTeamResponse:
       type: object
       properties:
@@ -7710,6 +8115,22 @@ components:
       - number
       - public_id
       - ridge_lambda
+    OperationsSummarySchema:
+      type: object
+      properties:
+        participants: {}
+        submissions: {}
+        judging: {}
+        stages: {}
+        publication: {}
+        moderation: {}
+      required:
+      - judging
+      - moderation
+      - participants
+      - publication
+      - stages
+      - submissions
     Page:
       type: object
       properties:

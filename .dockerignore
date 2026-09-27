@@ -14,7 +14,8 @@ docs
 tests
 loadtests
 examples
-src/web
+src/web/**
+!src/web/styles/**
 src/embed
 src/packages
 acceptance-report.txt

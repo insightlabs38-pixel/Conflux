@@ -116,7 +116,7 @@ def begin_upload(project, actor, *, kind, visibility, title, byte_size, content_
 @transaction.atomic
 def complete_upload(intent, actor, *, parts=None, storage=None):
     intent = (
-        ArtifactUploadIntent.objects.select_for_update()
+        ArtifactUploadIntent.objects.select_for_update(of=("self",))
         .select_related("artifact__project")
         .get(pk=intent.pk)
     )

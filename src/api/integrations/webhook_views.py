@@ -182,7 +182,9 @@ class WebhookReplayView(WebhookBase):
             raise ValidationError({"detail": "Enable the subscription before replay."})
         with transaction.atomic():
             delivery = get_object_or_404(
-                WebhookDelivery.objects.select_for_update().select_related("domain_event"),
+                WebhookDelivery.objects.select_for_update(of=("self",)).select_related(
+                    "domain_event"
+                ),
                 public_id=delivery_public_id,
                 subscription=item,
             )

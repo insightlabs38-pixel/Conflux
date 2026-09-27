@@ -43,7 +43,7 @@ def select_winner(*, award, project, actor, override_reason=""):
     with transaction.atomic():
         project = Project.objects.select_for_update().get(pk=project.pk)
         award = (
-            Award.objects.select_for_update()
+            Award.objects.select_for_update(of=("self",))
             .select_related("event", "eligibility_track", "evaluation_plan")
             .get(pk=award.pk)
         )
@@ -125,7 +125,7 @@ NEXT_STATES = {
 def advance_fulfillment(*, fulfillment, target, actor, note=""):
     with transaction.atomic():
         fulfillment = (
-            PrizeFulfillment.objects.select_for_update()
+            PrizeFulfillment.objects.select_for_update(of=("self",))
             .select_related("winner__award__event", "component")
             .get(pk=fulfillment.pk)
         )

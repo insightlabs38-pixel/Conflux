@@ -101,7 +101,7 @@ def stage_deliveries(limit=100):
     staged = 0
     with transaction.atomic():
         events = (
-            DomainEvent.objects.select_for_update(skip_locked=True)
+            DomainEvent.objects.select_for_update(skip_locked=True, of=("self",))
             .filter(status=DomainEvent.Status.PENDING, workspace__isnull=False)
             .select_related("workspace")
             .order_by("created_at")[:limit]
@@ -139,7 +139,7 @@ def deliver_pending(limit=100):
     for pk in ids:
         with transaction.atomic():
             delivery = (
-                WebhookDelivery.objects.select_for_update()
+                WebhookDelivery.objects.select_for_update(of=("self",))
                 .select_related("subscription", "domain_event", "domain_event__workspace")
                 .get(pk=pk)
             )

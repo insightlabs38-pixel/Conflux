@@ -131,7 +131,9 @@ class CredentialRevokeView(WorkspaceLookupMixin, APIView):
     def post(self, request, workspace_public_id, credential_public_id):
         with transaction.atomic():
             credential = get_object_or_404(
-                ApiCredential.objects.select_for_update().select_related("workspace", "event"),
+                ApiCredential.objects.select_for_update(of=("self",)).select_related(
+                    "workspace", "event"
+                ),
                 workspace=self.get_workspace(),
                 public_id=credential_public_id,
             )

@@ -62,6 +62,11 @@ def create_team(event, name, creator):
 
 @transaction.atomic
 def join_team(team, user):
+    # Locks the team row first (GCON-001): the size cap below is a plain
+    # COUNT, which can't be a DB constraint, so it's only race-safe if a
+    # concurrent join is forced to wait here rather than reading the same
+    # stale count and both proceeding to insert past the cap.
+    team = Team.objects.select_for_update().get(pk=team.pk)
     _ensure_roster_not_locked(team, "accept new members")
     _ensure_join_is_policy_allowed(team)
     if team.memberships.count() >= MAX_TEAM_SIZE:

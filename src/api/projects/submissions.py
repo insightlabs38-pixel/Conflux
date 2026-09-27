@@ -54,7 +54,9 @@ def _validate_payload(payload):
 
 
 def _locked_submission(project, stage, actor):
-    project = Project.objects.select_for_update().select_related("event").get(pk=project.pk)
+    project = (
+        Project.objects.select_for_update(of=("self",)).select_related("event").get(pk=project.pk)
+    )
     if not project.memberships.filter(user=actor).exists():
         raise ValidationError("Only project members can submit.")
     if stage.event_id != project.event_id:

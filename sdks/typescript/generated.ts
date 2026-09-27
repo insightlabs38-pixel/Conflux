@@ -22,6 +22,11 @@ export type InputOfAbuseSignalSchema = {
   resolution_note: string;
 };
 
+export type AccessEnum = "roles" | "any_authenticated" | "public" | "unknown";
+
+export type InputOfAccessEnum =
+  "roles" | "any_authenticated" | "public" | "unknown";
+
 export type AccessibilityWarning = {
   category: CategoryEnum;
   severity: string;
@@ -2364,6 +2369,26 @@ export type InputOfPatchedVotingPlan = {
   comment_visibility?: InputOfCommentVisibilityEnum;
 };
 
+export type PermissionMatrixEntrySchema = {
+  resource: string;
+  view: string;
+  path: string;
+  method: string;
+  access: AccessEnum;
+  roles: string[];
+  unrecognized: boolean;
+};
+
+export type InputOfPermissionMatrixEntrySchema = {
+  resource: string;
+  view: string;
+  path: string;
+  method: string;
+  access: InputOfAccessEnum;
+  roles: string[];
+  unrecognized: boolean;
+};
+
 export type PlatformEnum = "generic" | "discord" | "slack";
 
 export type InputOfPlatformEnum = "generic" | "discord" | "slack";
@@ -4310,6 +4335,10 @@ export interface Operations {
       body: InputOfPageBlockOrderInput;
     };
     response: PageBlock[];
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_permission_matrix: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: PermissionMatrixEntrySchema[];
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_policies: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -6856,6 +6885,15 @@ export const operations = {
       path_params: ["event_public_id", "workspace_public_id"],
       query_params: [],
       request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_permission_matrix:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/permission-matrix/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
       response_kind: "json",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_policies: {

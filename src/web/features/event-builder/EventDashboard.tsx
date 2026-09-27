@@ -14,6 +14,7 @@ import { OperatorConsole } from "../operations/OperatorConsole";
 import { CommunicationsPanel } from "../communications/CommunicationsPanel";
 import { ConfigHistoryPanel } from "../audit/ConfigHistoryPanel";
 import { EventTemplatesPanel } from "./EventTemplatesPanel";
+import { PermissionMatrixExplorer } from "./PermissionMatrixExplorer";
 import { RegistrationPanel } from "./RegistrationPanel";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
@@ -521,6 +522,11 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
           />
           <ConfigHistoryPanel
             key={`config-history-${selected.public_id}`}
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+          />
+          <PermissionMatrixExplorer
+            key={`permission-matrix-${selected.public_id}`}
             workspaceId={workspaceId}
             eventId={selected.public_id}
           />

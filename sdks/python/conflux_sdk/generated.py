@@ -24,6 +24,10 @@ class InputOfAbuseSignalSchema(TypedDict):
     resolved_by: str | None
     resolution_note: str
 
+AccessEnum = Literal['roles', 'any_authenticated', 'public', 'unknown']
+
+InputOfAccessEnum = Literal['roles', 'any_authenticated', 'public', 'unknown']
+
 class AccessibilityWarning(TypedDict):
     category: CategoryEnum
     severity: str
@@ -2189,6 +2193,24 @@ class InputOfPatchedVotingPlan(TypedDict):
     allow_comments: NotRequired[bool]
     comment_visibility: NotRequired[InputOfCommentVisibilityEnum]
 
+class PermissionMatrixEntrySchema(TypedDict):
+    resource: str
+    view: str
+    path: str
+    method: str
+    access: AccessEnum
+    roles: list[str]
+    unrecognized: bool
+
+class InputOfPermissionMatrixEntrySchema(TypedDict):
+    resource: str
+    view: str
+    path: str
+    method: str
+    access: InputOfAccessEnum
+    roles: list[str]
+    unrecognized: bool
+
 PlatformEnum = Literal['generic', 'discord', 'slack']
 
 InputOfPlatformEnum = Literal['generic', 'discord', 'slack']
@@ -3864,6 +3886,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                   'query_params': [],
                                                                                   'request_body': False,
                                                                                   'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_permission_matrix': {'method': 'GET',
+                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/permission-matrix/',
+                                                                                        'path_params': ['event_public_id',
+                                                                                                        'workspace_public_id'],
+                                                                                        'query_params': [],
+                                                                                        'request_body': False,
+                                                                                        'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_policies': {'method': 'GET',
                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/policies/',
                                                                                'path_params': ['event_public_id',

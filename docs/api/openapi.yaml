@@ -4335,6 +4335,36 @@ paths:
                 items:
                   $ref: '#/components/schemas/PageBlock'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/permission-matrix/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_permission_matrix
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PermissionMatrixEntrySchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/policies/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_policies
@@ -10699,6 +10729,18 @@ components:
       - resolved_at
       - resolved_by
       - signal_type
+    AccessEnum:
+      enum:
+      - roles
+      - any_authenticated
+      - public
+      - unknown
+      type: string
+      description: |-
+        * `roles` - roles
+        * `any_authenticated` - any_authenticated
+        * `public` - public
+        * `unknown` - unknown
     AccessibilityWarning:
       type: object
       properties:
@@ -14423,6 +14465,33 @@ components:
           type: string
           format: date-time
           readOnly: true
+    PermissionMatrixEntrySchema:
+      type: object
+      properties:
+        resource:
+          type: string
+        view:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+        access:
+          $ref: '#/components/schemas/AccessEnum'
+        roles:
+          type: array
+          items:
+            type: string
+        unrecognized:
+          type: boolean
+      required:
+      - access
+      - method
+      - path
+      - resource
+      - roles
+      - unrecognized
+      - view
     PlatformEnum:
       enum:
       - generic

@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import checkin_views, registration_views, views
+from . import checkin_views, permission_matrix_views, registration_views, views
 
 urlpatterns = [
     path("events/<uuid:event_public_id>/", views.PublicEventView.as_view(), name="event-public"),
@@ -89,5 +89,10 @@ urlpatterns = [
         "/announcements/<uuid:announcement_public_id>/",
         views.AnnouncementDetailView.as_view(),
         name="announcement-detail",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/permission-matrix/",
+        permission_matrix_views.PermissionMatrixView.as_view(),
+        name="permission-matrix",
     ),
 ]

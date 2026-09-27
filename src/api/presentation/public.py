@@ -39,7 +39,7 @@ def public_artifact_view(artifact):
     """A safe, presentational view of one PUBLIC artifact (never raw model)."""
     url = artifact.external_url
     if not url and artifact.object_key:
-        url = S3Storage().presign_get(artifact.object_key)
+        url = S3Storage().presign_get(artifact.object_key, download_filename=artifact.title)
     return {"title": artifact.title, "kind": artifact.kind, "url": url}
 
 

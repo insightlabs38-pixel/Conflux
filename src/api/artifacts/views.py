@@ -167,7 +167,9 @@ class ArtifactDetailView(ProjectArtifactView):
             return Response(status=404)
         payload = artifact_payload(artifact)
         if artifact.status == ArtifactStatus.READY and artifact.object_key:
-            payload["download_url"] = S3Storage().presign_get(artifact.object_key)
+            payload["download_url"] = S3Storage().presign_get(
+                artifact.object_key, download_filename=artifact.title
+            )
         return Response(payload)
 
 

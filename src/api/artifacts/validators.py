@@ -13,6 +13,19 @@ from .models import (
 )
 from .storage import S3Storage
 
+# Content types a browser will execute or actively render if ever served
+# inline (GSEC-002): never acceptable for a stored artifact regardless of
+# `kind`, `image/svg+xml` included -- SVG passes a naive "image/*" prefix
+# check but can embed and run <script>. `storage.presign_get` already
+# forces `Content-Disposition: attachment` for every download as the
+# primary defense; this is the second, independent layer -- content this
+# dangerous is rejected outright rather than trusted to stay undisplayed.
+_ACTIVE_CONTENT_TYPES = {
+    "text/html",
+    "application/xhtml+xml",
+    "image/svg+xml",
+}
+
 
 @dataclass(frozen=True)
 class ValidationResult:
@@ -38,6 +51,12 @@ def _stored_result(artifact, storage):
     ):
         return ValidationResult(
             "stored_object", "blocked", "Stored object metadata does not match the artifact."
+        )
+    if artifact.content_type.split(";", 1)[0].strip().lower() in _ACTIVE_CONTENT_TYPES:
+        return ValidationResult(
+            "active_content_type",
+            "blocked",
+            "This media type can execute in a browser and is never accepted for evidence.",
         )
     if artifact.kind == ArtifactKind.IMAGE and not artifact.content_type.startswith("image/"):
         return ValidationResult(

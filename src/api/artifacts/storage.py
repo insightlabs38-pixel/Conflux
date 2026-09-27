@@ -1,4 +1,5 @@
 import math
+import re
 
 import boto3
 from botocore.config import Config
@@ -7,6 +8,13 @@ from django.conf import settings
 PART_SIZE = 8 * 1024 * 1024
 MULTIPART_THRESHOLD = 16 * 1024 * 1024
 MAX_PARTS = 100
+
+_UNSAFE_DISPOSITION_CHARS = re.compile(r'[\r\n"\\]')
+
+
+def _safe_disposition_filename(name, *, fallback="artifact"):
+    cleaned = _UNSAFE_DISPOSITION_CHARS.sub("", name).strip()
+    return (cleaned or fallback)[:150]
 
 
 class S3Storage:
@@ -53,9 +61,22 @@ class S3Storage:
             ExpiresIn=expires,
         )
 
-    def presign_get(self, key, expires=300):
+    def presign_get(self, key, expires=300, *, download_filename=None):
+        """Presign a GET. `download_filename`, when given, forces
+        `Content-Disposition: attachment` on the response (GSEC-002): an
+        uploader's claimed `Content-Type` is never trustworthy enough to
+        serve inline from this app's own origin (see
+        docs/architecture/ARTIFACT_SERVING.md) -- a browser must always
+        offer the object as a download, never render it, regardless of
+        what content-type it claims to be.
+        """
+        params = {"Bucket": self.bucket, "Key": key}
+        if download_filename is not None:
+            params["ResponseContentDisposition"] = (
+                f'attachment; filename="{_safe_disposition_filename(download_filename)}"'
+            )
         return self._client(self.public_endpoint).generate_presigned_url(
-            "get_object", Params={"Bucket": self.bucket, "Key": key}, ExpiresIn=expires
+            "get_object", Params=params, ExpiresIn=expires
         )
 
     def start_multipart(self, key, content_type, artifact_id, size, expires):

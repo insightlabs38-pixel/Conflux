@@ -9,6 +9,7 @@ _prefix = (
 
 urlpatterns = [
     path(_prefix, views.ArtifactListView.as_view(), name="artifact-list"),
+    path(_prefix + "preflight/", views.ProjectPreflightView.as_view(), name="project-preflight"),
     path(
         _prefix + "upload-intents/", views.UploadIntentView.as_view(), name="artifact-upload-intent"
     ),

@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from workspaces.models import Membership, Workspace
 
 from .models import Artifact, ArtifactStatus, ArtifactUploadIntent, can_view_artifact
+from .preflight import run_preflight
 from .services import begin_upload, complete_upload, create_external_artifact
 from .storage import S3Storage
 from .validators import validate_artifact
@@ -169,3 +170,8 @@ class ArtifactValidateView(ProjectArtifactView):
                 "validation": {"outcome": evidence.outcome, "detail": evidence.detail},
             }
         )
+
+
+class ProjectPreflightView(ProjectArtifactView):
+    def get(self, request, workspace_public_id, event_public_id, project_public_id):
+        return Response(run_preflight(self.get_project()).as_dict())

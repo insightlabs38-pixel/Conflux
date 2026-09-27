@@ -4698,6 +4698,54 @@ paths:
       responses:
         '204':
           description: No response body
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/agreement/
+  : get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_agreement
+      description: |-
+        S03: organizer-only, honest inter-rater agreement diagnostics -- real
+        per-criterion score dispersion and judge-pair ranking correlation
+        computed live from current ballots, never persisted or "run" (this is
+        an exploratory diagnostic, not evidence a published result is drawn
+        from). A statistic backed by too little data is reported as such
+        (`tau: null`) rather than a misleadingly confident number -- see
+        evaluations/agreement.py.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgreementSummarySchema'
+          description: ''
   ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/
   : get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments
@@ -7591,6 +7639,72 @@ components:
             type: string
       required:
       - strategies
+    AgreementCriterionSchema:
+      type: object
+      properties:
+        project:
+          type: string
+          format: uuid
+        project_name:
+          type: string
+        criterion_id:
+          type: string
+        scores:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+        mean:
+          type: number
+          format: double
+        range:
+          type: number
+          format: double
+        stdev:
+          type: number
+          format: double
+      required:
+      - criterion_id
+      - mean
+      - project
+      - project_name
+      - range
+      - scores
+      - stdev
+    AgreementRankingSchema:
+      type: object
+      properties:
+        judge_a:
+          type: string
+          format: uuid
+        judge_b:
+          type: string
+          format: uuid
+        shared_candidates:
+          type: integer
+        tau:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - judge_a
+      - judge_b
+      - shared_candidates
+      - tau
+    AgreementSummarySchema:
+      type: object
+      properties:
+        criteria:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgreementCriterionSchema'
+        rankings:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgreementRankingSchema'
+      required:
+      - criteria
+      - rankings
     ArchiveImportInput:
       type: object
       properties:

@@ -94,6 +94,28 @@ class PairwiseResultsPublishInputSchema(serializers.Serializer):
     tie_breaks = serializers.DictField(child=serializers.IntegerField(), required=False)
 
 
+class AgreementCriterionSchema(serializers.Serializer):
+    project = serializers.UUIDField()
+    project_name = serializers.CharField()
+    criterion_id = serializers.CharField()
+    scores = serializers.DictField(child=serializers.FloatField())
+    mean = serializers.FloatField()
+    range = serializers.FloatField()
+    stdev = serializers.FloatField()
+
+
+class AgreementRankingSchema(serializers.Serializer):
+    judge_a = serializers.UUIDField()
+    judge_b = serializers.UUIDField()
+    shared_candidates = serializers.IntegerField()
+    tau = serializers.FloatField(allow_null=True)
+
+
+class AgreementSummarySchema(serializers.Serializer):
+    criteria = AgreementCriterionSchema(many=True)
+    rankings = AgreementRankingSchema(many=True)
+
+
 class CalibrationProjectsInputSchema(serializers.Serializer):
     projects = serializers.ListField(child=serializers.UUIDField())
 

@@ -131,4 +131,9 @@ urlpatterns = [
         views.CalibrationSummaryView.as_view(),
         name="evaluation-plan-calibration-summary",
     ),
+    path(
+        f"{_PLAN}/agreement/",
+        views.AgreementSummaryView.as_view(),
+        name="evaluation-plan-agreement",
+    ),
 ]

@@ -19,7 +19,7 @@ from rest_framework.response import Response
 from stages.views import StageEventMixin
 from workspaces.models import Role
 
-from . import normalization, pairwise
+from . import agreement, normalization, pairwise
 from .assignment import activate
 from .models import (
     Assignment,
@@ -40,6 +40,7 @@ from .models import (
 from .progress import compute_progress
 from .results import pairwise_ranked_results, ranked_results
 from .schema import (
+    AgreementSummarySchema,
     AssignmentActivateInputSchema,
     BallotDraftInputSchema,
     BallotSubmitInputSchema,
@@ -1233,3 +1234,59 @@ class CalibrationSummaryView(PlanMixin):
                 }
             )
         return Response(summaries)
+
+
+class AgreementSummaryView(PlanMixin):
+    """S03: organizer-only, honest inter-rater agreement diagnostics -- real
+    per-criterion score dispersion and judge-pair ranking correlation
+    computed live from current ballots, never persisted or "run" (this is
+    an exploratory diagnostic, not evidence a published result is drawn
+    from). A statistic backed by too little data is reported as such
+    (`tau: null`) rather than a misleadingly confident number -- see
+    evaluations/agreement.py.
+    """
+
+    @extend_schema(responses=AgreementSummarySchema)
+    def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        if plan.mode != EvaluationMode.RUBRIC:
+            raise ValidationError({"detail": "Agreement analytics apply to rubric-mode plans."})
+
+        criterion_results = agreement.criterion_disagreement(agreement.criterion_responses(plan))
+        judge_scores = agreement.judge_weighted_scores(plan)
+        rank_results = agreement.pairwise_rank_agreement(judge_scores)
+
+        project_ids = {r.project_id for r in criterion_results} | {
+            pid for scores in judge_scores.values() for pid in scores
+        }
+        judge_ids = {j for r in rank_results for j in (r.judge_a, r.judge_b)} | set(judge_scores)
+        projects_by_id = {p.id: p for p in Project.objects.filter(id__in=project_ids)}
+        judges_by_id = {u.id: u for u in User.objects.filter(id__in=judge_ids)}
+
+        return Response(
+            {
+                "criteria": [
+                    {
+                        "project": str(projects_by_id[r.project_id].public_id),
+                        "project_name": projects_by_id[r.project_id].name,
+                        "criterion_id": r.criterion_id,
+                        "scores": {
+                            str(judges_by_id[j].public_id): score for j, score in r.scores.items()
+                        },
+                        "mean": r.mean,
+                        "range": r.range,
+                        "stdev": r.stdev,
+                    }
+                    for r in criterion_results
+                ],
+                "rankings": [
+                    {
+                        "judge_a": str(judges_by_id[r.judge_a].public_id),
+                        "judge_b": str(judges_by_id[r.judge_b].public_id),
+                        "shared_candidates": r.shared_candidates,
+                        "tau": r.tau,
+                    }
+                    for r in rank_results
+                ],
+            }
+        )

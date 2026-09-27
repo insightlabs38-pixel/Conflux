@@ -1,3 +1,4 @@
+from accounts.models import User
 from audit.services import record_mutation
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import transaction
@@ -13,6 +14,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from workspaces.models import Role
 
 from .models import (
     Award,
@@ -110,6 +112,7 @@ class AwardOutput(serializers.Serializer):
     published_at = serializers.DateTimeField(allow_null=True)
     components = ComponentOutput(many=True)
     winners = WinnerOutput(many=True)
+    sponsor_contacts = serializers.ListField(child=serializers.CharField())
 
 
 class PublicWinnerOutput(serializers.Serializer):
@@ -117,7 +120,19 @@ class PublicWinnerOutput(serializers.Serializer):
     project_name = serializers.CharField()
 
 
-class PublicAwardOutput(AwardOutput):
+class PublicAwardOutput(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    name = serializers.CharField()
+    description = serializers.CharField()
+    eligibility_track = serializers.UUIDField(allow_null=True)
+    require_finalized_submission = serializers.BooleanField()
+    selection_source = serializers.CharField()
+    evaluation_plan = serializers.UUIDField(allow_null=True)
+    winner_count = serializers.IntegerField()
+    allow_stacking = serializers.BooleanField()
+    conflict_group = serializers.CharField()
+    published_at = serializers.DateTimeField(allow_null=True)
+    components = ComponentOutput(many=True)
     winners = PublicWinnerOutput(many=True)
 
 
@@ -145,12 +160,12 @@ def _winner_data(winner):
         "override_reason": winner.override_reason,
         "selected_at": winner.selected_at,
         "fulfillments": [
-            _fulfillment_data(item) for item in winner.fulfillments.select_related("component")
+            fulfillment_data(item) for item in winner.fulfillments.select_related("component")
         ],
     }
 
 
-def _fulfillment_data(item):
+def fulfillment_data(item):
     return {
         "public_id": str(item.public_id),
         "component": str(item.component.public_id),
@@ -173,7 +188,7 @@ def _component_data(component):
     }
 
 
-def _award_data(award):
+def award_data(award):
     package = PrizePackage.objects.filter(award=award).first()
     return {
         "public_id": str(award.public_id),
@@ -193,6 +208,9 @@ def _award_data(award):
         if package
         else [],
         "winners": [_winner_data(item) for item in award.winners.select_related("project")],
+        "sponsor_contacts": [
+            contact.username for contact in award.sponsor_contacts.all().order_by("username")
+        ],
     }
 
 
@@ -212,7 +230,7 @@ class AwardListView(AwardBase):
     def get(self, request, workspace_public_id, event_public_id):
         return Response(
             [
-                _award_data(item)
+                award_data(item)
                 for item in Award.objects.filter(event=self.get_event()).order_by("pk")
             ]
         )
@@ -251,7 +269,7 @@ class AwardListView(AwardBase):
             raise ValidationError(
                 exc.message_dict if hasattr(exc, "message_dict") else exc.messages
             ) from exc
-        return Response(_award_data(award), status=201)
+        return Response(award_data(award), status=201)
 
 
 class AwardCandidateView(AwardBase):
@@ -323,7 +341,7 @@ class AwardPublishView(AwardBase):
                 event_type="award.published",
                 payload={"event": str(award.event.public_id), "award": str(award.public_id)},
             )
-        return Response(_award_data(award))
+        return Response(award_data(award))
 
 
 class AwardComponentView(AwardBase):
@@ -365,6 +383,45 @@ class AwardComponentView(AwardBase):
         return Response(_component_data(component), status=201)
 
 
+class AwardSponsorView(AwardBase):
+    @extend_schema(request=None, responses={201: AwardOutput})
+    def put(self, request, workspace_public_id, event_public_id, award_public_id, user_public_id):
+        award = self.get_award(award_public_id)
+        sponsor = get_object_or_404(
+            User,
+            memberships__workspace=self.get_workspace(),
+            memberships__role=Role.SPONSOR,
+            public_id=user_public_id,
+        )
+        award.sponsor_contacts.add(sponsor)
+        record_mutation(
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="award.sponsor_added",
+            target=award,
+            event_type="award.sponsor_added",
+            payload={"award": str(award.public_id), "sponsor": str(sponsor.public_id)},
+        )
+        return Response(award_data(award), status=201)
+
+    @extend_schema(responses=AwardOutput)
+    def delete(
+        self, request, workspace_public_id, event_public_id, award_public_id, user_public_id
+    ):
+        award = self.get_award(award_public_id)
+        sponsor = get_object_or_404(User, public_id=user_public_id)
+        award.sponsor_contacts.remove(sponsor)
+        record_mutation(
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="award.sponsor_removed",
+            target=award,
+            event_type="award.sponsor_removed",
+            payload={"award": str(award.public_id), "sponsor": str(sponsor.public_id)},
+        )
+        return Response(award_data(award))
+
+
 class FulfillmentView(AwardBase):
     @extend_schema(request=FulfillmentInput, responses=FulfillmentOutput)
     def patch(
@@ -388,7 +445,7 @@ class FulfillmentView(AwardBase):
             raise ValidationError(
                 exc.message_dict if hasattr(exc, "message_dict") else exc.messages
             ) from exc
-        return Response(_fulfillment_data(updated))
+        return Response(fulfillment_data(updated))
 
 
 class PublicAwardsView(APIView):
@@ -400,10 +457,11 @@ class PublicAwardsView(APIView):
         event = get_object_or_404(Event, public_id=event_public_id, is_public=True)
         awards = []
         for award in Award.objects.filter(event=event, published_at__isnull=False).order_by("pk"):
-            row = _award_data(award)
+            row = award_data(award)
             row["winners"] = [
                 {"project": winner["project"], "project_name": winner["project_name"]}
                 for winner in row["winners"]
             ]
+            del row["sponsor_contacts"]
             awards.append(row)
         return Response(awards)

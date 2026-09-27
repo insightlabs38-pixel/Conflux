@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import sponsor_portal, views
 
 _prefix = "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/awards/"
 
@@ -32,5 +32,21 @@ urlpatterns = [
         _prefix + "<uuid:award_public_id>/fulfillments/<uuid:fulfillment_public_id>/",
         views.FulfillmentView.as_view(),
         name="award-fulfillment",
+    ),
+    path(
+        _prefix + "<uuid:award_public_id>/sponsors/<uuid:user_public_id>/",
+        views.AwardSponsorView.as_view(),
+        name="award-sponsor",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/sponsor-portal/awards/",
+        sponsor_portal.SponsorPortalAwardListView.as_view(),
+        name="sponsor-portal-award-list",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>"
+        "/sponsor-portal/fulfillments/<uuid:fulfillment_public_id>/",
+        sponsor_portal.SponsorPortalFulfillmentView.as_view(),
+        name="sponsor-portal-fulfillment",
     ),
 ]

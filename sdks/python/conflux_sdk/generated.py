@@ -426,6 +426,7 @@ class AwardOutput(TypedDict):
     published_at: str | None
     components: list[ComponentOutput]
     winners: list[WinnerOutput]
+    sponsor_contacts: list[str]
 
 class InputOfAwardOutput(TypedDict):
     public_id: str
@@ -441,6 +442,7 @@ class InputOfAwardOutput(TypedDict):
     published_at: str | None
     components: list[InputOfComponentOutput]
     winners: list[InputOfWinnerOutput]
+    sponsor_contacts: list[str]
 
 class AwardProposalItem(TypedDict):
     award: str
@@ -3221,6 +3223,15 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                          'query_params': [],
                                                                          'request_body': False,
                                                                          'response_kind': 'none'},
+ 'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_sponsors_user_public_id': {'method': 'DELETE',
+                                                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/sponsors/{user_public_id}/',
+                                                                                                                        'path_params': ['award_public_id',
+                                                                                                                                        'event_public_id',
+                                                                                                                                        'user_public_id',
+                                                                                                                                        'workspace_public_id'],
+                                                                                                                        'query_params': [],
+                                                                                                                        'request_body': False,
+                                                                                                                        'response_kind': 'none'},
  'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_base_prizes_prize_public_id': {'method': 'DELETE',
                                                                                                      'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/base-prizes/{prize_public_id}/',
                                                                                                      'path_params': ['event_public_id',
@@ -3894,6 +3905,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                             'query_params': [],
                                                                                             'request_body': False,
                                                                                             'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards': {'method': 'GET',
+                                                                                            'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-portal/awards/',
+                                                                                            'path_params': ['event_public_id',
+                                                                                                            'workspace_public_id'],
+                                                                                            'query_params': [],
+                                                                                            'request_body': False,
+                                                                                            'response_kind': 'none'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_projects': {'method': 'GET',
                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-projects/',
                                                                                        'path_params': ['event_public_id',
@@ -4356,6 +4374,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                    'query_params': [],
                                                                                                    'request_body': True,
                                                                                                    'response_kind': 'json'},
+ 'patch_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_fulfillments_fulfillment_public_id': {'method': 'PATCH',
+                                                                                                                          'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-portal/fulfillments/{fulfillment_public_id}/',
+                                                                                                                          'path_params': ['event_public_id',
+                                                                                                                                          'fulfillment_public_id',
+                                                                                                                                          'workspace_public_id'],
+                                                                                                                          'query_params': [],
+                                                                                                                          'request_body': True,
+                                                                                                                          'response_kind': 'json'},
  'patch_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id': {'method': 'PATCH',
                                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/',
                                                                                                'path_params': ['event_public_id',
@@ -5146,6 +5172,15 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                      'path': '/api/v1/workspaces/{workspace_public_id}/webhooks/{subscription_public_id}/deliveries/{delivery_public_id}/replay/',
                                                                                                                      'path_params': ['delivery_public_id',
                                                                                                                                      'subscription_public_id',
+                                                                                                                                     'workspace_public_id'],
+                                                                                                                     'query_params': [],
+                                                                                                                     'request_body': False,
+                                                                                                                     'response_kind': 'json'},
+ 'put_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_sponsors_user_public_id': {'method': 'PUT',
+                                                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/sponsors/{user_public_id}/',
+                                                                                                                     'path_params': ['award_public_id',
+                                                                                                                                     'event_public_id',
+                                                                                                                                     'user_public_id',
                                                                                                                                      'workspace_public_id'],
                                                                                                                      'query_params': [],
                                                                                                                      'request_body': False,

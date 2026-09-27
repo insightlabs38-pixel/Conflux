@@ -30,6 +30,12 @@ class Award(PublicIdModel):
     conflict_group = models.CharField(max_length=80, blank=True)
     published_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    # VS19: which sponsor(s) can see this award's eligible projects/judges
+    # and advance its fulfillments through the sponsor portal -- organizer-
+    # managed, additive to (never a substitute for) organizer/admin access.
+    sponsor_contacts = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, blank=True, related_name="sponsored_awards"
+    )
 
     class Meta:
         constraints = [

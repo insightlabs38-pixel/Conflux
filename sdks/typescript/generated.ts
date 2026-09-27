@@ -459,6 +459,7 @@ export type AwardOutput = {
   published_at: string | null;
   components: ComponentOutput[];
   winners: WinnerOutput[];
+  sponsor_contacts: string[];
 };
 
 export type InputOfAwardOutput = {
@@ -475,6 +476,7 @@ export type InputOfAwardOutput = {
   published_at: string | null;
   components: InputOfComponentOutput[];
   winners: InputOfWinnerOutput[];
+  sponsor_contacts: string[];
 };
 
 export type AwardProposalItem = {
@@ -3790,6 +3792,28 @@ export interface Operations {
     };
     response: AwardOutput;
   };
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_sponsors_user_public_id: {
+    request: {
+      path: {
+        award_public_id: string;
+        event_public_id: string;
+        user_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: AwardOutput;
+  };
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_sponsors_user_public_id: {
+    request: {
+      path: {
+        award_public_id: string;
+        event_public_id: string;
+        user_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: null;
+  };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_winners: {
     request: {
       path: {
@@ -4673,6 +4697,21 @@ export interface Operations {
       body?: InputOfRegistrationSettings;
     };
     response: RegistrationSettings;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: null;
+  };
+  patch_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_fulfillments_fulfillment_public_id: {
+    request: {
+      path: {
+        event_public_id: string;
+        fulfillment_public_id: string;
+        workspace_public_id: string;
+      };
+      body?: InputOfPatchedFulfillmentInput;
+    };
+    response: FulfillmentOutput;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_projects: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -6009,6 +6048,34 @@ export const operations = {
       request_body: false,
       response_kind: "json",
     },
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_sponsors_user_public_id:
+    {
+      method: "PUT",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/sponsors/{user_public_id}/",
+      path_params: [
+        "award_public_id",
+        "event_public_id",
+        "user_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_sponsors_user_public_id:
+    {
+      method: "DELETE",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/sponsors/{user_public_id}/",
+      path_params: [
+        "award_public_id",
+        "event_public_id",
+        "user_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_winners:
     {
       method: "POST",
@@ -7225,6 +7292,28 @@ export const operations = {
       method: "PUT",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/registration-settings/",
       path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-portal/awards/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
+  patch_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_fulfillments_fulfillment_public_id:
+    {
+      method: "PATCH",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-portal/fulfillments/{fulfillment_public_id}/",
+      path_params: [
+        "event_public_id",
+        "fulfillment_public_id",
+        "workspace_public_id",
+      ],
       query_params: [],
       request_body: true,
       response_kind: "json",

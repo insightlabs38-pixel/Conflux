@@ -39,6 +39,23 @@ sdk-check: openapi-check
 	uv run --frozen python scripts/generate_sdks.py --check
 	pnpm --filter @conflux/sdk build
 
+# Translation catalogs (VS23): compiles locale/<lang>/LC_MESSAGES/django.po
+# to .mo via Django's own management command (shells out to msgfmt).
+# `make messages` re-extracts msgids from templates into the .po (merges,
+# never discards existing translations) after adding/changing a
+# {% trans %}/{% blocktrans %} string.
+messages:
+	cd src/api && uv run --frozen python manage.py makemessages -l es
+
+compile-messages:
+	cd src/api && uv run --frozen python manage.py compilemessages
+
+i18n-check:
+	@tmp=$$(mktemp) && \
+	msgfmt src/api/locale/es/LC_MESSAGES/django.po -o "$$tmp" && \
+	cmp "$$tmp" src/api/locale/es/LC_MESSAGES/django.mo && \
+	rm "$$tmp"
+
 # Authoritative clean/offline build+boot — full image rebuild every time.
 up:
 	docker compose up -d --build

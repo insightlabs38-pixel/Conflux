@@ -53,7 +53,10 @@ INSTALLED_APPS = [
     "communications",
 ]
 
-MIDDLEWARE = ["django.middleware.common.CommonMiddleware"]
+MIDDLEWARE = [
+    "django.middleware.locale.LocaleMiddleware",
+    "django.middleware.common.CommonMiddleware",
+]
 
 # Presentation (C-B12): the public gallery/event/project pages must show real
 # content in the raw HTTP response with no JS execution (the acceptance
@@ -64,7 +67,10 @@ TEMPLATES = [
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [],
         "APP_DIRS": True,
-        "OPTIONS": {"context_processors": []},
+        # VS23: the language-switcher form needs `request.path` to redirect
+        # back to the current page after `set_language`; still deliberately
+        # minimal otherwise (no messages/auth/debug processors).
+        "OPTIONS": {"context_processors": ["django.template.context_processors.request"]},
     }
 ]
 
@@ -123,6 +129,18 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Conflux <no-reply@con
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 USE_TZ = True
+
+# Presentation i18n (VS23): only the public site's own template chrome is
+# translated (organizer-authored content -- project names, block config
+# text -- is user data, not app UI, and stays as entered). LocaleMiddleware
+# picks a language from `Accept-Language` or the `django_language` cookie
+# `set_language` sets; templates render {% trans %} strings from
+# LOCALE_PATHS, and Django localizes {{ event.starts_at }}-style output to
+# the active locale automatically once USE_I18N is on.
+USE_I18N = True
+LANGUAGE_CODE = "en-us"
+LANGUAGES = [("en", "English"), ("es", "Español")]
+LOCALE_PATHS = [BASE_DIR / "locale"]
 
 # Identity/authorization spine (C-B02): custom User carries a stable public ID.
 AUTH_USER_MODEL = "accounts.User"

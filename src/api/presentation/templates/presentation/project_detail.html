@@ -1,15 +1,16 @@
 {% extends "presentation/base.html" %}
+{% load i18n %}
 {% block title %}{{ project.name }} &middot; {{ event.name }}{% endblock %}
 {% block content %}
 <article aria-label="{{ project.name }} project page">
-  <p><a href="{% url 'site-gallery' event.public_id %}">&larr; Back to gallery</a></p>
+  <p><a href="{% url 'site-gallery' event.public_id %}">&larr; {% trans "Back to gallery" %}</a></p>
   <h1>{{ project.name }}</h1>
   {% if project.track %}<p><span class="cx-badge cx-badge--info">{{ project.track.name }}</span></p>{% endif %}
   {% if project.team %}<p>{{ project.team.name }}</p>{% endif %}
   {% if project.description %}<div class="cx-technical-description">{{ description_html|safe }}</div>{% endif %}
 
   <section aria-label="Artifacts">
-    <h2>Artifacts</h2>
+    <h2>{% trans "Artifacts" %}</h2>
     {% if artifacts %}
       <ul class="cx-artifact-list">
         {% for artifact in artifacts %}
@@ -17,15 +18,15 @@
         {% endfor %}
       </ul>
     {% else %}
-      <p>No public artifacts.</p>
+      <p>{% trans "No public artifacts." %}</p>
     {% endif %}
   </section>
 
   <section aria-label="Submissions">
-    <h2>Submissions</h2>
+    <h2>{% trans "Submissions" %}</h2>
     <ul>
       {% for submission in submissions %}
-        <li>{{ submission.stage.name }} &mdash; finalized {{ submission.current_version.finalized_at }} (receipt {{ submission.current_version.public_id }})</li>
+        <li>{{ submission.stage.name }} &mdash; {% blocktrans with finalized_at=submission.current_version.finalized_at receipt=submission.current_version.public_id %}finalized {{ finalized_at }} (receipt {{ receipt }}){% endblocktrans %}</li>
       {% endfor %}
     </ul>
   </section>

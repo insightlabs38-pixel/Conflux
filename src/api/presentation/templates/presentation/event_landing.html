@@ -1,5 +1,5 @@
 {% extends "presentation/base.html" %}
-{% load presentation_tags %}
+{% load presentation_tags i18n %}
 {% block title %}{{ event.name }}{% endblock %}
 {% block content %}
 <article aria-label="{{ event.name }} event page">
@@ -18,7 +18,7 @@
       </section>
     {% elif block.kind == "tracks" %}
       <section class="cx-block" aria-label="Tracks">
-        <h2>Tracks</h2>
+        <h2>{% trans "Tracks" %}</h2>
         {% if block.live %}
           <ul class="cx-grid">
             {% for track in block.live %}
@@ -29,12 +29,12 @@
             {% endfor %}
           </ul>
         {% else %}
-          <p>Tracks will be announced soon.</p>
+          <p>{% trans "Tracks will be announced soon." %}</p>
         {% endif %}
       </section>
     {% elif block.kind == "prizes" %}
       <section class="cx-block" aria-label="Prizes">
-        <h2>Prizes</h2>
+        <h2>{% trans "Prizes" %}</h2>
         {% if block.live %}
           <ul class="cx-grid">
             {% for prize in block.live %}
@@ -45,12 +45,12 @@
             {% endfor %}
           </ul>
         {% else %}
-          <p>Prizes will be announced soon.</p>
+          <p>{% trans "Prizes will be announced soon." %}</p>
         {% endif %}
       </section>
     {% elif block.kind == "schedule" %}
       <section class="cx-block" aria-label="Schedule">
-        <h2>Schedule</h2>
+        <h2>{% trans "Schedule" %}</h2>
         <p>{{ event.starts_at }} &ndash; {{ event.ends_at }} ({{ event.timezone }})</p>
         {% if block.live %}
           <ol>
@@ -60,7 +60,7 @@
       </section>
     {% elif block.kind == "sponsors" %}
       <section class="cx-block" aria-label="Sponsors">
-        <h2>Sponsors</h2>
+        <h2>{% trans "Sponsors" %}</h2>
         <ul class="cx-grid">
           {% for item in block.config.items %}
             <li class="cx-card">{% if item.url %}<a href="{{ item.url }}">{{ item.name }}</a>{% else %}{{ item.name }}{% endif %}</li>
@@ -69,7 +69,7 @@
       </section>
     {% elif block.kind == "faq" %}
       <section class="cx-block" aria-label="FAQ">
-        <h2>FAQ</h2>
+        <h2>{% trans "FAQ" %}</h2>
         {% for item in block.config.items %}
           <h3>{{ item.question }}</h3>
           <p>{{ item.answer }}</p>
@@ -77,14 +77,14 @@
       </section>
     {% elif block.kind == "resources" %}
       <section class="cx-block" aria-label="Resources">
-        <h2>Resources</h2>
+        <h2>{% trans "Resources" %}</h2>
         <ul>
           {% for item in block.config.items %}<li><a href="{{ item.url }}">{{ item.label }}</a></li>{% endfor %}
         </ul>
       </section>
     {% elif block.kind == "gallery" %}
       <section class="cx-block" aria-label="Gallery preview">
-        <h2>Projects</h2>
+        <h2>{% trans "Projects" %}</h2>
         {% if block.live %}
           <ul class="cx-grid">
             {% for project in block.live %}
@@ -92,13 +92,13 @@
             {% endfor %}
           </ul>
         {% else %}
-          <p>No projects have been submitted yet.</p>
+          <p>{% trans "No projects have been submitted yet." %}</p>
         {% endif %}
-        <p><a href="{% url 'site-gallery' event.public_id %}">View the full gallery</a></p>
+        <p><a href="{% url 'site-gallery' event.public_id %}">{% trans "View the full gallery" %}</a></p>
       </section>
     {% elif block.kind == "announcements" %}
       <section class="cx-block" aria-label="Announcements">
-        <h2>Announcements</h2>
+        <h2>{% trans "Announcements" %}</h2>
         {% if block.live %}
           <ul>
             {% for item in block.live %}
@@ -109,12 +109,12 @@
             {% endfor %}
           </ul>
         {% else %}
-          <p>No announcements yet.</p>
+          <p>{% trans "No announcements yet." %}</p>
         {% endif %}
       </section>
     {% elif block.kind == "results" %}
       <section class="cx-block" aria-label="Results">
-        <h2>Results</h2>
+        <h2>{% trans "Results" %}</h2>
         {% if block.live %}
           <ul class="cx-grid">
             {% for award in block.live %}
@@ -129,7 +129,7 @@
             {% endfor %}
           </ul>
         {% else %}
-          <p>Results will be announced after judging.</p>
+          <p>{% trans "Results will be announced after judging." %}</p>
         {% endif %}
       </section>
     {% elif block.kind == "rich_text" %}

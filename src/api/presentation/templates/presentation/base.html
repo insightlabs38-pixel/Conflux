@@ -1,5 +1,5 @@
-{% load static %}<!doctype html>
-<html lang="en"{% if theme == "dark" %} data-theme="dark"{% endif %}>
+{% load static i18n %}{% get_current_language as LANGUAGE_CODE %}<!doctype html>
+<html lang="{{ LANGUAGE_CODE }}"{% if theme == "dark" %} data-theme="dark"{% endif %}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,14 +13,29 @@
   <meta name="theme-color" content="#2952cc">
 </head>
 <body class="cx-shell{% if theme == "minimal" %} theme-minimal{% endif %}">
-  <a class="cx-skip-link" href="#main-content">Skip to main content</a>
+  <a class="cx-skip-link" href="#main-content">{% trans "Skip to main content" %}</a>
   {% if event %}
   <header class="cx-shell__header">
     <a class="cx-shell__brand" href="{% url 'site-event' event.public_id %}">{{ event.name }}</a>
     <nav class="cx-shell__nav" aria-label="Primary">
-      <a href="{% url 'site-event' event.public_id %}">Overview</a>
-      <a href="{% url 'site-gallery' event.public_id %}">Gallery</a>
+      <a href="{% url 'site-event' event.public_id %}">{% trans "Overview" %}</a>
+      <a href="{% url 'site-gallery' event.public_id %}">{% trans "Gallery" %}</a>
     </nav>
+    <form action="{% url 'set_language' %}" method="post" class="cx-shell__language">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ request.path }}">
+      <label>
+        {% trans "Language" %}
+        <select name="language" onchange="this.form.submit()">
+          {% get_current_language as CURRENT_LANGUAGE %}
+          {% get_available_languages as LANGUAGES %}
+          {% for code, name in LANGUAGES %}
+            <option value="{{ code }}" {% if code == CURRENT_LANGUAGE %}selected{% endif %}>{{ name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <noscript><button type="submit">{% trans "Go" %}</button></noscript>
+    </form>
   </header>
   {% endif %}
   <main id="main-content" class="cx-shell__main" tabindex="-1">

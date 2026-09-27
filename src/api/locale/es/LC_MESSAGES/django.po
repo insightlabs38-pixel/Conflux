@@ -1,0 +1,152 @@
+# Spanish translations for the Conflux public event site (VS23).
+# Only the site's own template chrome is translated here -- organizer-
+# authored content (project names, page-builder block text) is user data
+# and is never machine-translated.
+msgid ""
+msgstr ""
+"Project-Id-Version: conflux\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-27 18:09-0500\n"
+"PO-Revision-Date: 2026-09-27 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: es\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: presentation/templates/presentation/base.html:16
+msgid "Skip to main content"
+msgstr "Saltar al contenido principal"
+
+#: presentation/templates/presentation/base.html:21
+msgid "Overview"
+msgstr "Resumen"
+
+#: presentation/templates/presentation/base.html:22
+#: presentation/templates/presentation/gallery.html:3
+msgid "Gallery"
+msgstr "Galería"
+
+#: presentation/templates/presentation/base.html:28
+msgid "Language"
+msgstr "Idioma"
+
+#: presentation/templates/presentation/base.html:37
+msgid "Go"
+msgstr "Ir"
+
+#: presentation/templates/presentation/event_landing.html:21
+msgid "Tracks"
+msgstr "Categorías"
+
+#: presentation/templates/presentation/event_landing.html:32
+msgid "Tracks will be announced soon."
+msgstr "Las categorías se anunciarán pronto."
+
+#: presentation/templates/presentation/event_landing.html:37
+msgid "Prizes"
+msgstr "Premios"
+
+#: presentation/templates/presentation/event_landing.html:48
+msgid "Prizes will be announced soon."
+msgstr "Los premios se anunciarán pronto."
+
+#: presentation/templates/presentation/event_landing.html:53
+msgid "Schedule"
+msgstr "Horario"
+
+#: presentation/templates/presentation/event_landing.html:63
+msgid "Sponsors"
+msgstr "Patrocinadores"
+
+#: presentation/templates/presentation/event_landing.html:72
+msgid "FAQ"
+msgstr "Preguntas frecuentes"
+
+#: presentation/templates/presentation/event_landing.html:80
+msgid "Resources"
+msgstr "Recursos"
+
+#: presentation/templates/presentation/event_landing.html:87
+msgid "Projects"
+msgstr "Proyectos"
+
+#: presentation/templates/presentation/event_landing.html:95
+msgid "No projects have been submitted yet."
+msgstr "Todavía no se ha enviado ningún proyecto."
+
+#: presentation/templates/presentation/event_landing.html:97
+msgid "View the full gallery"
+msgstr "Ver la galería completa"
+
+#: presentation/templates/presentation/event_landing.html:101
+msgid "Announcements"
+msgstr "Anuncios"
+
+#: presentation/templates/presentation/event_landing.html:112
+msgid "No announcements yet."
+msgstr "Todavía no hay anuncios."
+
+#: presentation/templates/presentation/event_landing.html:117
+msgid "Results"
+msgstr "Resultados"
+
+#: presentation/templates/presentation/event_landing.html:132
+msgid "Results will be announced after judging."
+msgstr "Los resultados se anunciarán después de la evaluación."
+
+#: presentation/templates/presentation/gallery.html:5
+msgid "Project gallery"
+msgstr "Galería de proyectos"
+
+#: presentation/templates/presentation/gallery.html:8
+#: presentation/templates/presentation/gallery.html:33
+msgid "Search"
+msgstr "Buscar"
+
+#: presentation/templates/presentation/gallery.html:9
+msgid "Project name"
+msgstr "Nombre del proyecto"
+
+#: presentation/templates/presentation/gallery.html:13
+msgid "Stage"
+msgstr "Etapa"
+
+#: presentation/templates/presentation/gallery.html:15
+msgid "All stages"
+msgstr "Todas las etapas"
+
+#: presentation/templates/presentation/gallery.html:24
+msgid "Track"
+msgstr "Categoría"
+
+#: presentation/templates/presentation/gallery.html:26
+msgid "All tracks"
+msgstr "Todas las categorías"
+
+#: presentation/templates/presentation/gallery.html:47
+msgid "No projects match yet."
+msgstr "Ningún proyecto coincide todavía."
+
+#: presentation/templates/presentation/project_detail.html:6
+msgid "Back to gallery"
+msgstr "Volver a la galería"
+
+#: presentation/templates/presentation/project_detail.html:13
+msgid "Artifacts"
+msgstr "Artefactos"
+
+#: presentation/templates/presentation/project_detail.html:21
+msgid "No public artifacts."
+msgstr "No hay artefactos públicos."
+
+#: presentation/templates/presentation/project_detail.html:26
+msgid "Submissions"
+msgstr "Entregas"
+
+#: presentation/templates/presentation/project_detail.html:29
+#, python-format
+msgid "finalized %(finalized_at)s (receipt %(receipt)s)"
+msgstr "finalizado %(finalized_at)s (recibo %(receipt)s)"

@@ -1,17 +1,18 @@
 {% extends "presentation/base.html" %}
-{% block title %}Gallery &middot; {{ event.name }}{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "Gallery" %} &middot; {{ event.name }}{% endblock %}
 {% block content %}
-<h1>Project gallery</h1>
+<h1>{% trans "Project gallery" %}</h1>
 <form class="cx-search-form" method="get" role="search" aria-label="Search projects">
   <label>
-    Search
-    <input type="search" name="q" value="{{ q }}" placeholder="Project name">
+    {% trans "Search" %}
+    <input type="search" name="q" value="{{ q }}" placeholder="{% trans 'Project name' %}">
   </label>
   {% if stages %}
     <label>
-      Stage
+      {% trans "Stage" %}
       <select name="stage">
-        <option value="">All stages</option>
+        <option value="">{% trans "All stages" %}</option>
         {% for stage in stages %}
           <option value="{{ stage.public_id }}" {% if selected_stage == stage.public_id|stringformat:"s" %}selected{% endif %}>{{ stage.name }}</option>
         {% endfor %}
@@ -20,16 +21,16 @@
   {% endif %}
   {% if tracks %}
     <label>
-      Track
+      {% trans "Track" %}
       <select name="track">
-        <option value="">All tracks</option>
+        <option value="">{% trans "All tracks" %}</option>
         {% for track in tracks %}
           <option value="{{ track.public_id }}" {% if selected_track == track.public_id|stringformat:"s" %}selected{% endif %}>{{ track.name }}</option>
         {% endfor %}
       </select>
     </label>
   {% endif %}
-  <button class="cx-button cx-button--primary" type="submit">Search</button>
+  <button class="cx-button cx-button--primary" type="submit">{% trans "Search" %}</button>
 </form>
 {% if projects %}
   <ul class="cx-grid">
@@ -43,6 +44,6 @@
     {% endfor %}
   </ul>
 {% else %}
-  <p>No projects match yet.</p>
+  <p>{% trans "No projects match yet." %}</p>
 {% endif %}
 {% endblock %}

@@ -3035,6 +3035,46 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/policy-debug/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_policy_debug
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyDebugInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PolicyDebugInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PolicyDebugInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyDebugResponse'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/policy-presets/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_policy_presets
@@ -10402,6 +10442,64 @@ components:
       - created_at
       - policy
       - public_id
+    PolicyDebugInput:
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/ActionEnum'
+        subject_type:
+          $ref: '#/components/schemas/SubjectTypeEnum'
+        subject_id:
+          type: string
+          format: uuid
+      required:
+      - action
+    PolicyDebugResponse:
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/ActionEnum'
+        subject_type:
+          type: string
+          nullable: true
+        subject_id:
+          type: string
+          format: uuid
+          nullable: true
+        checked_at:
+          type: string
+          format: date-time
+        facts: {}
+        policy:
+          nullable: true
+        policy_allowed:
+          type: boolean
+          nullable: true
+        allowed:
+          type: boolean
+        reason:
+          type: string
+        exception_grant_reason:
+          type: string
+          nullable: true
+        error:
+          type: string
+          nullable: true
+        trace:
+          nullable: true
+      required:
+      - action
+      - allowed
+      - checked_at
+      - error
+      - exception_grant_reason
+      - facts
+      - policy
+      - policy_allowed
+      - reason
+      - subject_id
+      - subject_type
+      - trace
     PoolMembership:
       type: object
       properties:
@@ -10900,6 +10998,14 @@ components:
         * `sent` - Sent
         * `claimed` - Claimed
         * `failed` - Failed
+    SubjectTypeEnum:
+      enum:
+      - project
+      - team
+      type: string
+      description: |-
+        * `project` - project
+        * `team` - team
     SubmissionDiffSchema:
       type: object
       properties:

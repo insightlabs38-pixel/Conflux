@@ -56,10 +56,58 @@ def _fact(node, facts):
     return facts[name]
 
 
-def evaluate(node, facts, *, _depth=0, _budget=None):
+def _trace_value(value):
+    return value.isoformat() if isinstance(value, datetime) else value
+
+
+def _mark_skipped(entry, node, path):
+    args = node.get("args") if isinstance(node, dict) else None
+    if not isinstance(args, list):
+        return
+    seen = {child["path"][-1] for child in entry["children"]}
+    for index, child in enumerate(args):
+        if index not in seen:
+            entry["children"].append(
+                {
+                    "path": [*path, index],
+                    "op": child.get("op") if isinstance(child, dict) else None,
+                    "status": "skipped",
+                }
+            )
+
+
+def evaluate(node, facts, *, _depth=0, _budget=None, _trace=None, _path=()):
     """Evaluate a policy AST node to a bool. Raises PolicyError on any
     malformed node, unknown operator/fact, or depth/size overrun.
     """
+    entry = None
+    if _trace is not None:
+        entry = {"path": list(_path), "op": node.get("op") if isinstance(node, dict) else None}
+        if isinstance(node, dict) and isinstance(node.get("fact"), str):
+            entry["fact"] = node["fact"]
+            entry["expected"] = node.get("value")
+            if node["fact"] in facts:
+                entry["actual"] = _trace_value(facts[node["fact"]])
+        entry["children"] = []
+        _trace.append(entry)
+    try:
+        result = _evaluate_node(
+            node, facts, _depth=_depth, _budget=_budget, _trace=entry, _path=_path
+        )
+    except PolicyError as exc:
+        if entry is not None:
+            entry["status"] = "error"
+            entry["error"] = str(exc)
+            _mark_skipped(entry, node, _path)
+        raise
+    if entry is not None:
+        entry["status"] = "evaluated"
+        entry["result"] = result
+        _mark_skipped(entry, node, _path)
+    return result
+
+
+def _evaluate_node(node, facts, *, _depth, _budget, _trace, _path):
     if _budget is None:
         _budget = [MAX_NODES]
     _budget[0] -= 1
@@ -83,13 +131,30 @@ def evaluate(node, facts, *, _depth=0, _budget=None):
         args = node.get("args")
         if not isinstance(args, list) or len(args) != 1:
             raise PolicyError("'not' takes exactly one argument.")
-        return not evaluate(args[0], facts, _depth=_depth + 1, _budget=_budget)
+        return not evaluate(
+            args[0],
+            facts,
+            _depth=_depth + 1,
+            _budget=_budget,
+            _trace=_trace["children"] if _trace is not None else None,
+            _path=(*_path, 0),
+        )
 
     if op in _BOOLEAN_OPS:
         args = node.get("args")
         if not isinstance(args, list) or not args:
             raise PolicyError(f"'{op}' needs a nonempty list of arguments.")
-        results = (evaluate(a, facts, _depth=_depth + 1, _budget=_budget) for a in args)
+        results = (
+            evaluate(
+                arg,
+                facts,
+                _depth=_depth + 1,
+                _budget=_budget,
+                _trace=_trace["children"] if _trace is not None else None,
+                _path=(*_path, index),
+            )
+            for index, arg in enumerate(args)
+        )
         return any(results) if op == "or" else all(results)
 
     if op in _COMPARISON_OPS:
@@ -171,3 +236,13 @@ def is_allowed(node, facts):
         return bool(evaluate(node, facts))
     except PolicyError:
         return False
+
+
+def trace_evaluate(node, facts):
+    """Return the same fail-closed result as is_allowed with visited-node evidence."""
+    trace = []
+    try:
+        allowed = bool(evaluate(node, facts, _trace=trace))
+    except PolicyError as exc:
+        return False, str(exc), trace[0]
+    return allowed, None, trace[0]

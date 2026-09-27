@@ -4,11 +4,15 @@ from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from events.views import OrganizerView
+from participation.models import Team
+from projects.models import Project
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
+from .debugger import debug_action
 from .evaluator import PolicyError
-from .models import ExceptionGrant, Policy, PolicyBinding, TemporalGate
+from .models import Action, ExceptionGrant, Policy, PolicyBinding, TemporalGate
 from .presets import PRESETS, build_preset_ast
 from .serializers import (
     ExceptionGrantSerializer,
@@ -20,6 +24,57 @@ from .serializers import (
 
 def _as_drf_validation_error(exc):
     return ValidationError(exc.message_dict if hasattr(exc, "message_dict") else exc.messages)
+
+
+class PolicyDebugInput(serializers.Serializer):
+    action = serializers.ChoiceField(choices=Action.choices)
+    subject_type = serializers.ChoiceField(choices=["project", "team"], required=False)
+    subject_id = serializers.UUIDField(required=False)
+
+    def validate(self, attrs):
+        if ("subject_type" in attrs) != ("subject_id" in attrs):
+            raise serializers.ValidationError("Supply subject_type and subject_id together.")
+        expected = {Action.SUBMIT: "project", Action.JOIN: "team"}.get(attrs["action"])
+        if "subject_type" in attrs and attrs["subject_type"] != expected:
+            raise serializers.ValidationError("This action does not use that subject type.")
+        return attrs
+
+
+class PolicyDebugResponse(serializers.Serializer):
+    action = serializers.ChoiceField(choices=Action.choices)
+    subject_type = serializers.CharField(allow_null=True)
+    subject_id = serializers.UUIDField(allow_null=True)
+    checked_at = serializers.DateTimeField()
+    facts = serializers.JSONField()
+    policy = serializers.JSONField(allow_null=True)
+    policy_allowed = serializers.BooleanField(allow_null=True)
+    allowed = serializers.BooleanField()
+    reason = serializers.CharField()
+    exception_grant_reason = serializers.CharField(allow_null=True)
+    error = serializers.CharField(allow_null=True)
+    trace = serializers.JSONField(allow_null=True)
+
+
+class PolicyDebugView(OrganizerView):
+    @extend_schema(request=PolicyDebugInput, responses=PolicyDebugResponse)
+    def post(self, request, workspace_public_id, event_public_id):
+        serializer = PolicyDebugInput(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        event = self.get_event()
+        subject_type = data.get("subject_type")
+        subject_id = data.get("subject_id")
+        if subject_id is not None:
+            model = Project if subject_type == "project" else Team
+            get_object_or_404(model, event=event, public_id=subject_id)
+        return Response(
+            debug_action(
+                event,
+                data["action"],
+                subject_type=subject_type,
+                subject_id=str(subject_id) if subject_id else None,
+            )
+        )
 
 
 class PresetListView(OrganizerView):

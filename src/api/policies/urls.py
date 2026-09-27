@@ -5,6 +5,7 @@ from . import views
 _prefix = "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/"
 
 urlpatterns = [
+    path(_prefix + "policy-debug/", views.PolicyDebugView.as_view(), name="policy-debug"),
     path(_prefix + "policy-presets/", views.PresetListView.as_view(), name="policy-preset-list"),
     path(_prefix + "policies/", views.PolicyListView.as_view(), name="policy-list"),
     path(

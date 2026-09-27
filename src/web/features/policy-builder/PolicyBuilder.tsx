@@ -9,8 +9,52 @@ type Gate = {
   closes_at: string | null;
 };
 type Preset = { label: string; params: string[] };
+type TraceNode = {
+  path: number[];
+  op: string | null;
+  status: string;
+  result?: boolean;
+  fact?: string;
+  expected?: unknown;
+  actual?: unknown;
+  error?: string;
+  children?: TraceNode[];
+};
+type DebugResult = {
+  allowed: boolean;
+  policy_allowed: boolean | null;
+  policy: { name: string } | null;
+  reason: string;
+  exception_grant_reason: string | null;
+  error: string | null;
+  trace: TraceNode | null;
+};
 
 const ACTIONS = ["submit", "join", "advance", "vote", "award"];
+
+function Trace({ node }: { node: TraceNode }) {
+  return (
+    <li>
+      <span>
+        {node.op ?? "invalid node"}: {node.status}
+        {node.result !== undefined
+          ? ` (${node.result ? "true" : "false"})`
+          : ""}
+        {node.fact
+          ? ` — ${node.fact} = ${JSON.stringify(node.actual)}; expected ${JSON.stringify(node.expected)}`
+          : ""}
+        {node.error ? ` — ${node.error}` : ""}
+      </span>
+      {node.children?.length ? (
+        <ul>
+          {node.children.map((child) => (
+            <Trace key={child.path.join(".")} node={child} />
+          ))}
+        </ul>
+      ) : null}
+    </li>
+  );
+}
 
 function message(error: unknown): string {
   if (typeof error === "string") return error;
@@ -70,6 +114,9 @@ export function PolicyBuilder({
   const [bindPolicy, setBindPolicy] = useState("");
   const [bindAction, setBindAction] = useState(ACTIONS[0]);
   const [gateName, setGateName] = useState("");
+  const [debugAction, setDebugAction] = useState(ACTIONS[0]);
+  const [debugSubjectId, setDebugSubjectId] = useState("");
+  const [debugResult, setDebugResult] = useState<DebugResult | null>(null);
 
   async function refresh() {
     const [nextPresets, nextPolicies, nextBindings, nextGates] =
@@ -151,6 +198,28 @@ export function PolicyBuilder({
 
   const policyName_ = (id: string) =>
     policies.find((p) => p.public_id === id)?.name ?? id;
+
+  function debugPolicy(event: FormEvent) {
+    event.preventDefault();
+    setDebugResult(null);
+    void run(async () => {
+      const subject_type =
+        debugAction === "submit"
+          ? "project"
+          : debugAction === "join"
+            ? "team"
+            : null;
+      const body = {
+        action: debugAction,
+        ...(subject_type && debugSubjectId.trim()
+          ? { subject_type, subject_id: debugSubjectId.trim() }
+          : {}),
+      };
+      setDebugResult(
+        await request<DebugResult>(base + "policy-debug/", "POST", body),
+      );
+    });
+  }
 
   return (
     <section aria-label="Policy builder">
@@ -259,6 +328,60 @@ export function PolicyBuilder({
         </label>
         <button disabled={busy}>Add gate</button>
       </form>
+
+      <h3>Policy debugger</h3>
+      <p>
+        Shows the policy decision at the current server time. Other action rules
+        may still block the operation.
+      </p>
+      <form onSubmit={debugPolicy}>
+        <label>
+          Debug action{" "}
+          <select
+            value={debugAction}
+            onChange={(e) => {
+              setDebugAction(e.target.value);
+              setDebugSubjectId("");
+              setDebugResult(null);
+            }}
+          >
+            {ACTIONS.map((action) => (
+              <option key={action} value={action}>
+                {action}
+              </option>
+            ))}
+          </select>
+        </label>
+        {(debugAction === "submit" || debugAction === "join") && (
+          <label>
+            {debugAction === "submit" ? "Project ID" : "Team ID"} for grant
+            check{" "}
+            <input
+              value={debugSubjectId}
+              onChange={(e) => setDebugSubjectId(e.target.value)}
+            />
+          </label>
+        )}
+        <button disabled={busy}>Check policy</button>
+      </form>
+      {debugResult && (
+        <div aria-label="Policy debug result">
+          <p>
+            {debugResult.allowed ? "Allowed by policy" : "Denied by policy"}:{" "}
+            {debugResult.reason}
+          </p>
+          <p>Bound policy: {debugResult.policy?.name ?? "none"}</p>
+          {debugResult.exception_grant_reason && (
+            <p>Exception grant: {debugResult.exception_grant_reason}</p>
+          )}
+          {debugResult.error && <p>Evaluation error: {debugResult.error}</p>}
+          {debugResult.trace && (
+            <ul aria-label="Policy trace">
+              <Trace node={debugResult.trace} />
+            </ul>
+          )}
+        </div>
+      )}
     </section>
   );
 }

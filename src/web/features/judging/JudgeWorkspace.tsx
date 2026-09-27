@@ -20,7 +20,7 @@ type Plan = {
 type Candidate = {
   project: string;
   name: string;
-  status: "pending" | "drafted" | "submitted";
+  status: "pending" | "drafted" | "submitted" | "queued";
 };
 type Criterion = {
   id: string;
@@ -69,16 +69,99 @@ async function request<T>(
     : (response.json() as Promise<T>);
 }
 
+// Offline support (VS21): a judge's assignments/rubric are cached on every
+// successful load, and a ballot submission that fails because the request
+// never reached the server (not because the server rejected it) queues
+// locally instead of erroring -- the queue flushes automatically once the
+// browser reports connectivity again.
+type BallotPayload = {
+  project: string;
+  comment: string;
+  responses: { criterion_id: string; score: number }[];
+};
+type CachedQueue = { candidates: Candidate[]; rubric: RubricVersion | null };
+
+function isNetworkFailure(cause: unknown): boolean {
+  return (
+    (typeof navigator !== "undefined" && !navigator.onLine) ||
+    cause instanceof TypeError
+  );
+}
+
+function readJSON<T>(key: string): T | null {
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeJSON(key: string, value: unknown): void {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* Storage unavailable (private browsing, quota) -- offline support
+       degrades to "try again once online" rather than failing loudly. */
+  }
+}
+
+function cacheKey(base: string): string {
+  return `conflux.judge-cache.${base}`;
+}
+
+function outboxKey(base: string): string {
+  return `conflux.judge-outbox.${base}`;
+}
+
+function readOutbox(base: string): BallotPayload[] {
+  return readJSON<BallotPayload[]>(outboxKey(base)) ?? [];
+}
+
+function queueBallot(base: string, ballot: BallotPayload): void {
+  const queue = readOutbox(base).filter(
+    (item) => item.project !== ballot.project,
+  );
+  queue.push(ballot);
+  writeJSON(outboxKey(base), queue);
+}
+
+/** Replays queued ballots in order; stops at the first network failure
+ * (still offline) but drops an entry the server actually rejects (e.g. a
+ * peer already submitted one first) since re-sending it can never help.
+ * Returns how many entries are left in the queue.
+ */
+async function flushOutbox(base: string): Promise<number> {
+  const queue = readOutbox(base);
+  const remaining: BallotPayload[] = [];
+  for (const [index, ballot] of queue.entries()) {
+    try {
+      await request(`${base}ballots/`, "POST", ballot);
+    } catch (cause) {
+      if (isNetworkFailure(cause)) {
+        remaining.push(...queue.slice(index));
+        break;
+      }
+      // A real rejection (validation error, duplicate submission): drop it,
+      // there is nothing further offline retry can do about it.
+    }
+  }
+  writeJSON(outboxKey(base), remaining);
+  return remaining.length;
+}
+
 function BallotForm({
   base,
   candidate,
   rubric,
   onSubmitted,
+  onQueued,
 }: {
   base: string;
   candidate: Candidate;
   rubric: RubricVersion;
   onSubmitted: () => void;
+  onQueued: () => void;
 }) {
   const [scores, setScores] = useState<Record<string, string>>({});
   const [comment, setComment] = useState("");
@@ -187,8 +270,15 @@ function BallotForm({
     }
     try {
       if (!loaded) throw new Error("Draft has not loaded.");
-      if (dirty) await saveDraft();
-      else await pending.current;
+      try {
+        if (dirty) await saveDraft();
+        else await pending.current;
+      } catch (draftCause) {
+        // Offline: the draft PUT can't reach the server either, but the
+        // ballot POST below carries the same responses/comment, so the
+        // draft step is skippable rather than fatal here.
+        if (!isNetworkFailure(draftCause)) throw draftCause;
+      }
       await request(`${base}ballots/`, "POST", {
         project: candidate.project,
         comment,
@@ -196,20 +286,30 @@ function BallotForm({
       });
       onSubmitted();
     } catch (cause) {
-      setError(message(cause));
+      if (isNetworkFailure(cause)) {
+        queueBallot(base, { project: candidate.project, comment, responses });
+        setError("");
+        onQueued();
+      } else {
+        setError(message(cause));
+      }
     } finally {
       setSubmitting(false);
     }
   }
 
   const finalized = candidate.status === "submitted";
+  const queued = candidate.status === "queued";
 
   return (
     <Card title={candidate.name}>
       {error && <p role="alert">{error}</p>}
       <form onSubmit={submit}>
         {rubric.criteria.map((criterion) => (
-          <fieldset key={criterion.id} disabled={!loaded || finalized}>
+          <fieldset
+            key={criterion.id}
+            disabled={!loaded || finalized || queued}
+          >
             <legend>
               {criterion.name} ({criterion.min_score}–{criterion.max_score})
             </legend>
@@ -234,7 +334,7 @@ function BallotForm({
         <label>
           Comment{" "}
           <textarea
-            disabled={!loaded || finalized}
+            disabled={!loaded || finalized || queued}
             value={comment}
             onChange={(event) => {
               setComment(event.target.value);
@@ -246,7 +346,7 @@ function BallotForm({
             }}
           />
         </label>
-        {!finalized && (
+        {!finalized && !queued && (
           <>
             <p role="status">
               {!loaded
@@ -272,6 +372,11 @@ function BallotForm({
           </>
         )}
         {finalized && <p role="status">Ballot submitted.</p>}
+        {queued && (
+          <p role="status">
+            Queued offline — will submit automatically once you're back online.
+          </p>
+        )}
       </form>
     </Card>
   );
@@ -283,6 +388,8 @@ function PlanQueue({ base }: { base: string }) {
   const [selected, setSelected] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [offline, setOffline] = useState(false);
+  const [queuedCount, setQueuedCount] = useState(() => readOutbox(base).length);
 
   function refresh() {
     setLoading(true);
@@ -291,15 +398,44 @@ function PlanQueue({ base }: { base: string }) {
       request<Candidate[]>(base + "candidates/"),
       request<RubricVersion | null>(base + "publish-rubric/"),
     ])
-      .then(([nextCandidates, nextRubric]) => {
+      .then(async ([nextCandidates, nextRubric]) => {
         setCandidates(nextCandidates);
         setRubric(nextRubric);
+        setOffline(false);
+        writeJSON(cacheKey(base), {
+          candidates: nextCandidates,
+          rubric: nextRubric,
+        } satisfies CachedQueue);
+        const before = readOutbox(base).length;
+        if (before > 0) {
+          const left = await flushOutbox(base);
+          setQueuedCount(left);
+          if (left < before) refresh(); // progress was made: re-fetch statuses
+        } else {
+          setQueuedCount(0);
+        }
       })
-      .catch((cause: unknown) => setError(message(cause)))
+      .catch((cause: unknown) => {
+        const cached = readJSON<CachedQueue>(cacheKey(base));
+        if (isNetworkFailure(cause) && cached) {
+          setCandidates(cached.candidates);
+          setRubric(cached.rubric);
+          setOffline(true);
+          setQueuedCount(readOutbox(base).length);
+        } else {
+          setError(message(cause));
+        }
+      })
       .finally(() => setLoading(false));
   }
 
   useEffect(refresh, [base]);
+
+  useEffect(() => {
+    window.addEventListener("online", refresh);
+    return () => window.removeEventListener("online", refresh);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [base]);
 
   if (loading) return <LoadingState label="Loading your review queue…" />;
   if (error) return <ErrorState message={error} onRetry={refresh} />;
@@ -310,12 +446,29 @@ function PlanQueue({ base }: { base: string }) {
       <EmptyState title="You have no projects assigned to review right now." />
     );
 
-  const current = candidates.find((c) => c.project === selected);
+  const outboxProjects = new Set(readOutbox(base).map((item) => item.project));
+  const displayCandidates = candidates.map((candidate) =>
+    outboxProjects.has(candidate.project)
+      ? { ...candidate, status: "queued" as const }
+      : candidate,
+  );
+  const current = displayCandidates.find((c) => c.project === selected);
 
   return (
     <section aria-label="Review queue">
+      {offline && (
+        <p role="status">
+          You're offline — showing your last cached assignments and rubric.
+        </p>
+      )}
+      {queuedCount > 0 && (
+        <p role="status">
+          {queuedCount} ballot{queuedCount === 1 ? "" : "s"} queued, waiting to
+          sync.
+        </p>
+      )}
       <ul>
-        {candidates.map((candidate) => (
+        {displayCandidates.map((candidate) => (
           <li key={candidate.project}>
             <button
               type="button"
@@ -327,9 +480,11 @@ function PlanQueue({ base }: { base: string }) {
               tone={
                 candidate.status === "submitted"
                   ? "success"
-                  : candidate.status === "drafted"
-                    ? "info"
-                    : "neutral"
+                  : candidate.status === "queued"
+                    ? "warning"
+                    : candidate.status === "drafted"
+                      ? "info"
+                      : "neutral"
               }
             >
               {candidate.status}
@@ -344,6 +499,7 @@ function PlanQueue({ base }: { base: string }) {
           candidate={current}
           rubric={rubric}
           onSubmitted={refresh}
+          onQueued={() => setQueuedCount(readOutbox(base).length)}
         />
       )}
     </section>

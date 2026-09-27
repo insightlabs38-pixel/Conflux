@@ -16,4 +16,5 @@ urlpatterns = [
     path("", include("forms.urls")),
     path("", include("artifacts.urls")),
     path("", include("presentation.urls")),
+    path("", include("evaluations.urls")),
 ]

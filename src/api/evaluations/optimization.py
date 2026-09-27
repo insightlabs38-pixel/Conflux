@@ -38,9 +38,10 @@ from collections import deque
 from dataclasses import dataclass
 
 from .assignment import Pairing, build_evidence, track_fit
+from .coi import conflict_pairs
 from .connectivity import repair_connectivity
 from .eligibility import eligible_projects
-from .models import ConflictOfInterest, EvaluationPoolStrategy, PoolMembership
+from .models import EvaluationPoolStrategy, PoolMembership
 
 TRACK_MISMATCH_COST = 1
 
@@ -141,10 +142,10 @@ def compute_assignment_optimized(plan, *, coverage: int = 3) -> list[Pairing]:
     judge_tracks = {m.judge_id: {t.id for t in m.track_expertise.all()} for m in memberships}
     judge_ids = [m.judge_id for m in memberships]
     candidates = list(eligible_projects(plan).order_by("id"))
-    conflicts = set(
-        ConflictOfInterest.objects.filter(event_id=plan.stage.event_id).values_list(
-            "judge_id", "project_id"
-        )
+    conflicts = conflict_pairs(
+        plan.stage.event_id,
+        judge_ids=set(judge_ids),
+        project_ids={project.id for project in candidates},
     )
     if not judge_ids or not candidates:
         return []

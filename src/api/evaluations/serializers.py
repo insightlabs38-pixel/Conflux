@@ -10,10 +10,12 @@ from .models import (
     ConflictOfInterest,
     EvaluationPlan,
     EvaluationPool,
+    JudgeCOIRelationship,
     NormalizationRun,
     PairwiseComparison,
     PairwiseRun,
     PoolMembership,
+    ProjectCOIAttribute,
     RubricVersion,
 )
 from .rubric import clean_criteria
@@ -174,6 +176,24 @@ class ConflictOfInterestSerializer(serializers.ModelSerializer):
         model = ConflictOfInterest
         fields = ["public_id", "judge", "project", "reason", "created_at"]
         read_only_fields = ["created_at"]
+
+
+class JudgeCOIRelationshipSerializer(serializers.ModelSerializer):
+    judge = serializers.UUIDField(source="judge.public_id", read_only=True)
+    team = serializers.UUIDField(source="team.public_id", read_only=True, allow_null=True)
+    declared_by = serializers.UUIDField(source="declared_by.public_id", read_only=True)
+
+    class Meta:
+        model = JudgeCOIRelationship
+        fields = ["public_id", "judge", "kind", "team", "value", "declared_by", "created_at"]
+
+
+class ProjectCOIAttributeSerializer(serializers.ModelSerializer):
+    project = serializers.UUIDField(source="project.public_id", read_only=True)
+
+    class Meta:
+        model = ProjectCOIAttribute
+        fields = ["public_id", "project", "kind", "value", "created_at"]
 
 
 class AssignmentSerializer(serializers.ModelSerializer):

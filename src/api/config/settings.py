@@ -138,6 +138,9 @@ SPECTACULAR_SETTINGS = {
         "EventStatus": "events.models.EventStatus",
         "CandidateQueueStatus": ["pending", "drafted", "submitted"],
         "BasePrizeKind": "events.models.BasePrize.Kind",
+        "COIRelationshipKind": "evaluations.models.COIRelationshipKind",
+        "COIRuleKind": "evaluations.models.COIRuleKind",
+        "ProjectCOIAttributeKind": ["institution", "domain"],
     },
 }
 

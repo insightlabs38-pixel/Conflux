@@ -101,6 +101,27 @@ urlpatterns = [
         name="judge-conflict-list",
     ),
     path(
+        f"{_EVENT}/coi-relationships/",
+        views.JudgeCOIRelationshipView.as_view(),
+        name="coi-relationships",
+    ),
+    path(
+        f"{_EVENT}/coi-relationships/<uuid:relationship_public_id>/",
+        views.JudgeCOIRelationshipDetailView.as_view(),
+        name="coi-relationship-detail",
+    ),
+    path(
+        f"{_EVENT}/coi-project-attributes/",
+        views.ProjectCOIAttributeView.as_view(),
+        name="coi-project-attributes",
+    ),
+    path(
+        f"{_EVENT}/coi-project-attributes/<uuid:attribute_public_id>/",
+        views.ProjectCOIAttributeDetailView.as_view(),
+        name="coi-project-attribute-detail",
+    ),
+    path(f"{_EVENT}/coi-rules/", views.COIRuleView.as_view(), name="coi-rules"),
+    path(
         f"{_PLAN}/normalization-runs/",
         views.NormalizationRunListView.as_view(),
         name="evaluation-plan-normalization-runs",

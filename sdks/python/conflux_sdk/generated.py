@@ -481,6 +481,30 @@ BasePrizeKind = Literal['cash', 'credit', 'discount', 'subscription', 'hardware'
 
 InputOfBasePrizeKind = Literal['cash', 'credit', 'discount', 'subscription', 'hardware', 'travel', 'service', 'mentorship', 'swag', 'other']
 
+COIRelationshipKind = Literal['team', 'institution', 'domain']
+
+InputOfCOIRelationshipKind = Literal['team', 'institution', 'domain']
+
+class COIRuleInputSchema(TypedDict):
+    kind: COIRuleKind
+    enabled: bool
+
+class InputOfCOIRuleInputSchema(TypedDict):
+    kind: InputOfCOIRuleKind
+    enabled: bool
+
+COIRuleKind = Literal['team_membership', 'project_membership', 'project_creator']
+
+InputOfCOIRuleKind = Literal['team_membership', 'project_membership', 'project_creator']
+
+class COIRuleOutputSchema(TypedDict):
+    kind: COIRuleKind
+    enabled: bool
+
+class InputOfCOIRuleOutputSchema(TypedDict):
+    kind: InputOfCOIRuleKind
+    enabled: bool
+
 class CalendarAssignmentSchema(TypedDict):
     stage_name: str
     plan: str
@@ -1225,6 +1249,31 @@ class InputOfInstantiateInput(TypedDict):
     name: str
     slug: str
 
+class JudgeCOIRelationship(TypedDict):
+    public_id: str
+    judge: str
+    kind: COIRelationshipKind
+    team: str | None
+    value: NotRequired[str]
+    declared_by: str
+    created_at: str
+
+class InputOfJudgeCOIRelationship(TypedDict):
+    kind: InputOfCOIRelationshipKind
+    value: NotRequired[str]
+
+class JudgeCOIRelationshipInputSchema(TypedDict):
+    judge: NotRequired[str]
+    kind: COIRelationshipKind
+    team: NotRequired[str]
+    value: NotRequired[str]
+
+class InputOfJudgeCOIRelationshipInputSchema(TypedDict):
+    judge: NotRequired[str]
+    kind: InputOfCOIRelationshipKind
+    team: NotRequired[str]
+    value: NotRequired[str]
+
 class JudgeCalendarSchema(TypedDict):
     windows: list[CalendarWindowSchema]
     assignments: list[CalendarAssignmentSchema]
@@ -1897,6 +1946,31 @@ class Project(TypedDict):
 class InputOfProject(TypedDict):
     name: str
     description: NotRequired[str]
+
+class ProjectCOIAttribute(TypedDict):
+    public_id: str
+    project: str
+    kind: COIRelationshipKind
+    value: str
+    created_at: str
+
+class InputOfProjectCOIAttribute(TypedDict):
+    kind: InputOfCOIRelationshipKind
+    value: str
+
+class ProjectCOIAttributeInputSchema(TypedDict):
+    project: str
+    kind: ProjectCOIAttributeKind
+    value: str
+
+class InputOfProjectCOIAttributeInputSchema(TypedDict):
+    project: str
+    kind: InputOfProjectCOIAttributeKind
+    value: str
+
+ProjectCOIAttributeKind = Literal['institution', 'domain']
+
+InputOfProjectCOIAttributeKind = Literal['institution', 'domain']
 
 class ProjectCreateInputSchema(TypedDict):
     name: str
@@ -2715,6 +2789,22 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                      'query_params': [],
                                                                                                      'request_body': False,
                                                                                                      'response_kind': 'none'},
+ 'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_project_attributes_attribute_public_id': {'method': 'DELETE',
+                                                                                                                    'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-project-attributes/{attribute_public_id}/',
+                                                                                                                    'path_params': ['attribute_public_id',
+                                                                                                                                    'event_public_id',
+                                                                                                                                    'workspace_public_id'],
+                                                                                                                    'query_params': [],
+                                                                                                                    'request_body': False,
+                                                                                                                    'response_kind': 'none'},
+ 'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_relationships_relationship_public_id': {'method': 'DELETE',
+                                                                                                                  'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-relationships/{relationship_public_id}/',
+                                                                                                                  'path_params': ['event_public_id',
+                                                                                                                                  'relationship_public_id',
+                                                                                                                                  'workspace_public_id'],
+                                                                                                                  'query_params': [],
+                                                                                                                  'request_body': False,
+                                                                                                                  'response_kind': 'none'},
  'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_evaluation_pools_pool_public_id_memberships_membership_public_id': {'method': 'DELETE',
                                                                                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/evaluation-pools/{pool_public_id}/memberships/{membership_public_id}/',
                                                                                                                                           'path_params': ['event_public_id',
@@ -2958,6 +3048,27 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                   'query_params': [],
                                                                                   'request_body': False,
                                                                                   'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_project_attributes': {'method': 'GET',
+                                                                                             'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-project-attributes/',
+                                                                                             'path_params': ['event_public_id',
+                                                                                                             'workspace_public_id'],
+                                                                                             'query_params': [],
+                                                                                             'request_body': False,
+                                                                                             'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_relationships': {'method': 'GET',
+                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-relationships/',
+                                                                                        'path_params': ['event_public_id',
+                                                                                                        'workspace_public_id'],
+                                                                                        'query_params': [],
+                                                                                        'request_body': False,
+                                                                                        'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_rules': {'method': 'GET',
+                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-rules/',
+                                                                                'path_params': ['event_public_id',
+                                                                                                'workspace_public_id'],
+                                                                                'query_params': [],
+                                                                                'request_body': False,
+                                                                                'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_audiences': {'method': 'GET',
                                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/audiences/',
                                                                                                'path_params': ['event_public_id',
@@ -3852,6 +3963,20 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                              'query_params': [],
                                                                              'request_body': True,
                                                                              'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_project_attributes': {'method': 'POST',
+                                                                                              'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-project-attributes/',
+                                                                                              'path_params': ['event_public_id',
+                                                                                                              'workspace_public_id'],
+                                                                                              'query_params': [],
+                                                                                              'request_body': True,
+                                                                                              'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_relationships': {'method': 'POST',
+                                                                                         'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-relationships/',
+                                                                                         'path_params': ['event_public_id',
+                                                                                                         'workspace_public_id'],
+                                                                                         'query_params': [],
+                                                                                         'request_body': True,
+                                                                                         'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_audiences_preview': {'method': 'POST',
                                                                                                         'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/audiences/preview/',
                                                                                                         'path_params': ['event_public_id',
@@ -4381,6 +4506,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                      'query_params': [],
                                                                                                                      'request_body': False,
                                                                                                                      'response_kind': 'json'},
+ 'put_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_rules': {'method': 'PUT',
+                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-rules/',
+                                                                                'path_params': ['event_public_id',
+                                                                                                'workspace_public_id'],
+                                                                                'query_params': [],
+                                                                                'request_body': True,
+                                                                                'response_kind': 'json'},
  'put_api_v1_workspaces_workspace_public_id_events_event_public_id_forms_form_public_id': {'method': 'PUT',
                                                                                            'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/forms/{form_public_id}/',
                                                                                            'path_params': ['event_public_id',

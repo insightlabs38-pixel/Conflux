@@ -6,16 +6,26 @@ different endpoints by hand.
 
 from django.db.models import Count
 
+from .coi import conflict_pairs
 from .eligibility import eligible_projects
-from .models import Ballot, ConflictOfInterest, EvaluationPoolStrategy
+from .models import Ballot, EvaluationPoolStrategy
 
 
 def compute_progress(plan) -> dict:
     candidates = eligible_projects(plan)
     candidate_count = candidates.count()
 
-    pool_judge_count = plan.pool.memberships.count() if plan.pool_id else 0
-    conflict_count = ConflictOfInterest.objects.filter(event_id=plan.stage.event_id).count()
+    pool_judge_ids = (
+        set(plan.pool.memberships.values_list("judge_id", flat=True)) if plan.pool_id else set()
+    )
+    pool_judge_count = len(pool_judge_ids)
+    conflict_count = len(
+        conflict_pairs(
+            plan.stage.event_id,
+            judge_ids=pool_judge_ids,
+            project_ids=set(candidates.values_list("id", flat=True)),
+        )
+    )
 
     if (
         plan.pool_strategy == EvaluationPoolStrategy.ASSIGNED_SUBSET

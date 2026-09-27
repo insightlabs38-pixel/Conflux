@@ -1648,6 +1648,273 @@ paths:
               schema:
                 $ref: '#/components/schemas/ImportedEventOutput'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-project-attributes/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_project_attributes
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectCOIAttribute'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_project_attributes
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectCOIAttributeInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProjectCOIAttributeInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectCOIAttributeInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectCOIAttribute'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-project-attributes/{attribute_public_id}/:
+    delete:
+      operationId: delete_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_project_attributes_attribute_public_id
+      parameters:
+      - in: path
+        name: attribute_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-relationships/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_relationships
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JudgeCOIRelationship'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_relationships
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JudgeCOIRelationshipInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JudgeCOIRelationshipInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JudgeCOIRelationshipInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JudgeCOIRelationship'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-relationships/{relationship_public_id}/:
+    delete:
+      operationId: delete_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_relationships_relationship_public_id
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: relationship_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-rules/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_rules
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/COIRuleOutputSchema'
+          description: ''
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_rules
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/COIRuleInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/COIRuleInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/COIRuleInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/COIRuleOutputSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/audiences/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_audiences
@@ -9734,6 +10001,46 @@ components:
         * `mentorship` - Mentorship
         * `swag` - Swag
         * `other` - Other
+    COIRelationshipKind:
+      enum:
+      - team
+      - institution
+      - domain
+      type: string
+      description: |-
+        * `team` - Team
+        * `institution` - Institution
+        * `domain` - Domain
+    COIRuleInputSchema:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/COIRuleKind'
+        enabled:
+          type: boolean
+      required:
+      - enabled
+      - kind
+    COIRuleKind:
+      enum:
+      - team_membership
+      - project_membership
+      - project_creator
+      type: string
+      description: |-
+        * `team_membership` - Shared team
+        * `project_membership` - Project member
+        * `project_creator` - Project creator
+    COIRuleOutputSchema:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/COIRuleKind'
+        enabled:
+          type: boolean
+      required:
+      - enabled
+      - kind
     CalendarAssignmentSchema:
       type: object
       properties:
@@ -10992,6 +11299,58 @@ components:
       required:
       - name
       - slug
+    JudgeCOIRelationship:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+          readOnly: true
+        judge:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          $ref: '#/components/schemas/COIRelationshipKind'
+        team:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        value:
+          type: string
+          maxLength: 255
+        declared_by:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - declared_by
+      - judge
+      - kind
+      - public_id
+      - team
+    JudgeCOIRelationshipInputSchema:
+      type: object
+      properties:
+        judge:
+          type: string
+          format: uuid
+        kind:
+          $ref: '#/components/schemas/COIRelationshipKind'
+        team:
+          type: string
+          format: uuid
+        value:
+          type: string
+          maxLength: 255
+      required:
+      - kind
     JudgeCalendarSchema:
       type: object
       properties:
@@ -12148,6 +12507,55 @@ components:
       - team
       - track
       - updated_at
+    ProjectCOIAttribute:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+          readOnly: true
+        project:
+          type: string
+          format: uuid
+          readOnly: true
+        kind:
+          $ref: '#/components/schemas/COIRelationshipKind'
+        value:
+          type: string
+          maxLength: 255
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - kind
+      - project
+      - public_id
+      - value
+    ProjectCOIAttributeInputSchema:
+      type: object
+      properties:
+        project:
+          type: string
+          format: uuid
+        kind:
+          $ref: '#/components/schemas/ProjectCOIAttributeKind'
+        value:
+          type: string
+          maxLength: 255
+      required:
+      - kind
+      - project
+      - value
+    ProjectCOIAttributeKind:
+      enum:
+      - institution
+      - domain
+      type: string
+      description: |-
+        * `institution` - institution
+        * `domain` - domain
     ProjectCreateInputSchema:
       type: object
       properties:

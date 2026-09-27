@@ -534,6 +534,30 @@ export type InputOfBasePrizeKind =
   | "swag"
   | "other";
 
+export type COIRelationshipKind = "team" | "institution" | "domain";
+
+export type InputOfCOIRelationshipKind = "team" | "institution" | "domain";
+
+export type COIRuleInputSchema = { kind: COIRuleKind; enabled: boolean };
+
+export type InputOfCOIRuleInputSchema = {
+  kind: InputOfCOIRuleKind;
+  enabled: boolean;
+};
+
+export type COIRuleKind =
+  "team_membership" | "project_membership" | "project_creator";
+
+export type InputOfCOIRuleKind =
+  "team_membership" | "project_membership" | "project_creator";
+
+export type COIRuleOutputSchema = { kind: COIRuleKind; enabled: boolean };
+
+export type InputOfCOIRuleOutputSchema = {
+  kind: InputOfCOIRuleKind;
+  enabled: boolean;
+};
+
 export type CalendarAssignmentSchema = {
   stage_name: string;
   plan: string;
@@ -1320,6 +1344,35 @@ export type InstantiateInput = { name: string; slug: string };
 
 export type InputOfInstantiateInput = { name: string; slug: string };
 
+export type JudgeCOIRelationship = {
+  public_id: string;
+  judge: string;
+  kind: COIRelationshipKind;
+  team: string | null;
+  value?: string;
+  declared_by: string;
+  created_at: string;
+};
+
+export type InputOfJudgeCOIRelationship = {
+  kind: InputOfCOIRelationshipKind;
+  value?: string;
+};
+
+export type JudgeCOIRelationshipInputSchema = {
+  judge?: string;
+  kind: COIRelationshipKind;
+  team?: string;
+  value?: string;
+};
+
+export type InputOfJudgeCOIRelationshipInputSchema = {
+  judge?: string;
+  kind: InputOfCOIRelationshipKind;
+  team?: string;
+  value?: string;
+};
+
 export type JudgeCalendarSchema = {
   windows: CalendarWindowSchema[];
   assignments: CalendarAssignmentSchema[];
@@ -2061,6 +2114,35 @@ export type Project = {
 };
 
 export type InputOfProject = { name: string; description?: string };
+
+export type ProjectCOIAttribute = {
+  public_id: string;
+  project: string;
+  kind: COIRelationshipKind;
+  value: string;
+  created_at: string;
+};
+
+export type InputOfProjectCOIAttribute = {
+  kind: InputOfCOIRelationshipKind;
+  value: string;
+};
+
+export type ProjectCOIAttributeInputSchema = {
+  project: string;
+  kind: ProjectCOIAttributeKind;
+  value: string;
+};
+
+export type InputOfProjectCOIAttributeInputSchema = {
+  project: string;
+  kind: InputOfProjectCOIAttributeKind;
+  value: string;
+};
+
+export type ProjectCOIAttributeKind = "institution" | "domain";
+
+export type InputOfProjectCOIAttributeKind = "institution" | "domain";
 
 export type ProjectCreateInputSchema = {
   name: string;
@@ -3246,6 +3328,59 @@ export interface Operations {
       body: InputOfCloneInput;
     };
     response: ImportedEventOutput;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_project_attributes: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: ProjectCOIAttribute[];
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_project_attributes: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfProjectCOIAttributeInputSchema;
+    };
+    response: ProjectCOIAttribute;
+  };
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_project_attributes_attribute_public_id: {
+    request: {
+      path: {
+        attribute_public_id: string;
+        event_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: null;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_relationships: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: JudgeCOIRelationship[];
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_relationships: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfJudgeCOIRelationshipInputSchema;
+    };
+    response: JudgeCOIRelationship;
+  };
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_relationships_relationship_public_id: {
+    request: {
+      path: {
+        event_public_id: string;
+        relationship_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: null;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_rules: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: COIRuleOutputSchema[];
+  };
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_rules: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfCOIRuleInputSchema;
+    };
+    response: COIRuleOutputSchema;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_audiences: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -5206,6 +5341,84 @@ export const operations = {
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_clone: {
     method: "POST",
     path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/clone/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: true,
+    response_kind: "json",
+  },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_project_attributes:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-project-attributes/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_project_attributes:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-project-attributes/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_project_attributes_attribute_public_id:
+    {
+      method: "DELETE",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-project-attributes/{attribute_public_id}/",
+      path_params: [
+        "attribute_public_id",
+        "event_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_relationships:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-relationships/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_relationships:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-relationships/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_relationships_relationship_public_id:
+    {
+      method: "DELETE",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-relationships/{relationship_public_id}/",
+      path_params: [
+        "event_public_id",
+        "relationship_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_rules: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-rules/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_rules: {
+    method: "PUT",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-rules/",
     path_params: ["event_public_id", "workspace_public_id"],
     query_params: [],
     request_body: true,

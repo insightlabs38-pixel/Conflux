@@ -15,6 +15,7 @@ from django.shortcuts import get_object_or_404
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, inline_serializer
 from events.views import OrganizerView
+from participation.models import Team
 from projects.models import Project
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -26,6 +27,7 @@ from workspaces.models import Role
 from . import agreement, anonymize, normalization, pairwise
 from .assignment import activate, rebalance, simulate_dropout
 from .assignment import preview as preview_assignment
+from .coi import conflict_pairs, is_conflicted
 from .eligibility import eligible_projects
 from .hybrid import close_call_project_ids
 from .models import (
@@ -33,15 +35,19 @@ from .models import (
     Ballot,
     BallotDraft,
     BallotResponse,
+    COIRule,
+    COIRuleKind,
     ConflictOfInterest,
     EvaluationMode,
     EvaluationPlan,
     EvaluationPool,
     EvaluationPoolStrategy,
+    JudgeCOIRelationship,
     NormalizationRun,
     PairwiseComparison,
     PairwiseRun,
     PoolMembership,
+    ProjectCOIAttribute,
     RubricVersion,
 )
 from .optimization import activate_optimized
@@ -64,11 +70,14 @@ from .schema import (
     CalibrationStatusSchema,
     CandidateQueueItemSchema,
     CloseCallsSchema,
+    COIRuleInputSchema,
+    COIRuleOutputSchema,
     DropoutSimulationInputSchema,
     DropoutSimulationSchema,
     EvaluationProgressSchema,
     FeedbackEntrySchema,
     JudgeCalendarSchema,
+    JudgeCOIRelationshipInputSchema,
     JudgeWorkloadRowSchema,
     NormalizationInputSchema,
     PairwiseComparisonInputSchema,
@@ -77,6 +86,7 @@ from .schema import (
     PairwiseResultsPublishInputSchema,
     PairwiseRunInputSchema,
     PoolMembershipInputSchema,
+    ProjectCOIAttributeInputSchema,
     ProvenanceSchema,
     RankedResultSchema,
     ResultsPublishInputSchema,
@@ -97,10 +107,12 @@ from .serializers import (
     ConflictOfInterestSerializer,
     EvaluationPlanSerializer,
     EvaluationPoolSerializer,
+    JudgeCOIRelationshipSerializer,
     NormalizationRunSerializer,
     PairwiseComparisonSerializer,
     PairwiseRunSerializer,
     PoolMembershipSerializer,
+    ProjectCOIAttributeSerializer,
     RubricVersionSerializer,
 )
 from .workflow_presets import PRESETS as WORKFLOW_PRESETS
@@ -130,11 +142,9 @@ def _eligible_candidates(plan, judge):
             assignments__version_id=plan.active_assignment_version_id,
             assignments__judge=judge,
         )
-    conflicted = set(
-        ConflictOfInterest.objects.filter(event_id=plan.stage.event_id, judge=judge).values_list(
-            "project_id", flat=True
-        )
-    )
+    conflicted = {
+        project_id for _, project_id in conflict_pairs(plan.stage.event_id, judge_ids={judge.id})
+    }
     return candidates.exclude(id__in=conflicted)
 
 
@@ -478,9 +488,7 @@ class BallotListCreateView(PlanMixin):
         project = get_object_or_404(
             Project, event=self.get_event(), public_id=request.data.get("project")
         )
-        if ConflictOfInterest.objects.filter(
-            event=self.get_event(), judge=request.user, project=project
-        ).exists():
+        if is_conflicted(self.get_event().id, request.user.id, project.id):
             raise ValidationError({"detail": "You have a declared conflict of interest here."})
         if (
             plan.prize_judging
@@ -730,6 +738,169 @@ class ConflictOfInterestListCreateView(OrganizerView):
             target=conflict,
         )
         return Response(ConflictOfInterestSerializer(conflict).data, status=201)
+
+
+class JudgeCOIRelationshipView(OrganizerView):
+    authentication_classes = [CookieSessionAuthentication]
+    permission_classes = [require_roles(Role.JUDGE, Role.ORGANIZER, Role.ADMIN)]
+
+    @extend_schema(responses=JudgeCOIRelationshipSerializer(many=True))
+    def get(self, request, workspace_public_id, event_public_id):
+        rows = JudgeCOIRelationship.objects.filter(event=self.get_event())
+        if not has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN):
+            rows = rows.filter(judge=request.user)
+        return Response(
+            JudgeCOIRelationshipSerializer(
+                rows.select_related("judge", "team", "declared_by"), many=True
+            ).data
+        )
+
+    @extend_schema(
+        request=JudgeCOIRelationshipInputSchema,
+        responses={201: JudgeCOIRelationshipSerializer},
+    )
+    @transaction.atomic
+    def post(self, request, workspace_public_id, event_public_id):
+        schema = JudgeCOIRelationshipInputSchema(data=request.data)
+        schema.is_valid(raise_exception=True)
+        data = schema.validated_data
+        organizer = has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
+        if not organizer and data.get("judge") not in (None, request.user.public_id):
+            raise PermissionDenied("Judges can declare only their own relationships.")
+        judge = (
+            get_object_or_404(User, public_id=data["judge"])
+            if organizer and data.get("judge")
+            else request.user
+        )
+        if not has_any_role(judge, self.get_workspace(), Role.JUDGE):
+            raise ValidationError({"judge": "User must judge in this workspace."})
+        team = (
+            get_object_or_404(Team, event=self.get_event(), public_id=data["team"])
+            if data.get("team")
+            else None
+        )
+        row = JudgeCOIRelationship(
+            event=self.get_event(),
+            judge=judge,
+            kind=data["kind"],
+            team=team,
+            value=data.get("value", ""),
+            declared_by=request.user,
+        )
+        try:
+            row.full_clean()
+            row.save()
+        except ModelValidationError as exc:
+            raise _as_drf_validation_error(exc) from exc
+        except IntegrityError as exc:
+            raise ValidationError({"detail": "Relationship is already declared."}) from exc
+        record_mutation(
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="conflict_relationship.declared",
+            target=row,
+        )
+        return Response(JudgeCOIRelationshipSerializer(row).data, status=201)
+
+
+class JudgeCOIRelationshipDetailView(OrganizerView):
+    @extend_schema(responses={204: None})
+    @transaction.atomic
+    def delete(self, request, workspace_public_id, event_public_id, relationship_public_id):
+        row = get_object_or_404(
+            JudgeCOIRelationship, event=self.get_event(), public_id=relationship_public_id
+        )
+        record_mutation(
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="conflict_relationship.removed",
+            target=row,
+            metadata={"judge_id": row.judge_id, "kind": row.kind},
+        )
+        row.delete()
+        return Response(status=204)
+
+
+class ProjectCOIAttributeView(OrganizerView):
+    @extend_schema(responses=ProjectCOIAttributeSerializer(many=True))
+    def get(self, request, workspace_public_id, event_public_id):
+        rows = ProjectCOIAttribute.objects.filter(project__event=self.get_event())
+        return Response(
+            ProjectCOIAttributeSerializer(rows.select_related("project"), many=True).data
+        )
+
+    @extend_schema(
+        request=ProjectCOIAttributeInputSchema,
+        responses={201: ProjectCOIAttributeSerializer},
+    )
+    @transaction.atomic
+    def post(self, request, workspace_public_id, event_public_id):
+        schema = ProjectCOIAttributeInputSchema(data=request.data)
+        schema.is_valid(raise_exception=True)
+        data = schema.validated_data
+        project = get_object_or_404(Project, event=self.get_event(), public_id=data["project"])
+        row = ProjectCOIAttribute(project=project, kind=data["kind"], value=data["value"])
+        try:
+            row.full_clean()
+            row.save()
+        except ModelValidationError as exc:
+            raise _as_drf_validation_error(exc) from exc
+        except IntegrityError as exc:
+            raise ValidationError({"detail": "Attribute is already recorded."}) from exc
+        record_mutation(
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="conflict_project_attribute.recorded",
+            target=row,
+        )
+        return Response(ProjectCOIAttributeSerializer(row).data, status=201)
+
+
+class ProjectCOIAttributeDetailView(OrganizerView):
+    @extend_schema(responses={204: None})
+    @transaction.atomic
+    def delete(self, request, workspace_public_id, event_public_id, attribute_public_id):
+        row = get_object_or_404(
+            ProjectCOIAttribute,
+            project__event=self.get_event(),
+            public_id=attribute_public_id,
+        )
+        record_mutation(
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="conflict_project_attribute.removed",
+            target=row,
+            metadata={"project_id": row.project_id, "kind": row.kind},
+        )
+        row.delete()
+        return Response(status=204)
+
+
+class COIRuleView(OrganizerView):
+    @extend_schema(responses=COIRuleOutputSchema(many=True))
+    def get(self, request, workspace_public_id, event_public_id):
+        stored = dict(COIRule.objects.filter(event=self.get_event()).values_list("kind", "enabled"))
+        return Response(
+            [{"kind": kind, "enabled": stored.get(kind, True)} for kind in COIRuleKind.values]
+        )
+
+    @extend_schema(request=COIRuleInputSchema, responses=COIRuleOutputSchema)
+    @transaction.atomic
+    def put(self, request, workspace_public_id, event_public_id):
+        schema = COIRuleInputSchema(data=request.data)
+        schema.is_valid(raise_exception=True)
+        data = schema.validated_data
+        rule, _ = COIRule.objects.update_or_create(
+            event=self.get_event(), kind=data["kind"], defaults={"enabled": data["enabled"]}
+        )
+        record_mutation(
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="conflict_rule.updated",
+            target=rule,
+            metadata={"kind": rule.kind, "enabled": rule.enabled},
+        )
+        return Response({"kind": rule.kind, "enabled": rule.enabled})
 
 
 class AssignmentActivateView(PlanMixin):
@@ -1525,9 +1696,10 @@ class PairwiseComparisonListCreateView(PlanMixin):
         if winner_public_id:
             winner = get_object_or_404(Project, event=event, public_id=winner_public_id)
 
-        if ConflictOfInterest.objects.filter(
-            event=event, judge=request.user, project__in=[project_a, project_b]
-        ).exists():
+        if any(
+            is_conflicted(event.id, request.user.id, project.id)
+            for project in (project_a, project_b)
+        ):
             raise ValidationError({"detail": "You have a declared conflict of interest here."})
         eligible_ids = set(_eligible_candidates(plan, request.user).values_list("id", flat=True))
         if project_a.id not in eligible_ids or project_b.id not in eligible_ids:

@@ -1,3 +1,5 @@
+import re
+
 from core.authz import has_any_role
 from core.models import PublicIdModel
 from django.conf import settings
@@ -360,6 +362,103 @@ class ConflictOfInterest(PublicIdModel):
     def clean(self):
         if self.project.event_id != self.event_id:
             raise ValidationError({"project": "Project must belong to the declared event."})
+
+
+class COIRelationshipKind(models.TextChoices):
+    TEAM = "team", "Team"
+    INSTITUTION = "institution", "Institution"
+    DOMAIN = "domain", "Domain"
+
+
+def _clean_coi_value(kind, value):
+    cleaned = value.strip().casefold()
+    if not cleaned:
+        raise ValidationError({"value": "Value is required."})
+    if kind == COIRelationshipKind.DOMAIN and not re.fullmatch(
+        r"[a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?)+",
+        cleaned,
+    ):
+        raise ValidationError({"value": "Enter an exact domain name."})
+    return cleaned
+
+
+class JudgeCOIRelationship(PublicIdModel):
+    event = models.ForeignKey("events.Event", on_delete=models.CASCADE)
+    judge = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    kind = models.CharField(max_length=20, choices=COIRelationshipKind.choices)
+    team = models.ForeignKey("participation.Team", null=True, blank=True, on_delete=models.CASCADE)
+    value = models.CharField(max_length=255, blank=True)
+    declared_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="coi_relationships_declared",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event", "judge", "team"],
+                condition=models.Q(kind=COIRelationshipKind.TEAM),
+                name="unique_judge_team_coi",
+            ),
+            models.UniqueConstraint(
+                fields=["event", "judge", "kind", "value"],
+                condition=models.Q(
+                    kind__in=[COIRelationshipKind.INSTITUTION, COIRelationshipKind.DOMAIN]
+                ),
+                name="unique_judge_value_coi",
+            ),
+        ]
+
+    def clean(self):
+        if self.kind == COIRelationshipKind.TEAM:
+            if self.team_id is None or self.value:
+                raise ValidationError("A team relationship needs a team and no value.")
+            if self.team.event_id != self.event_id:
+                raise ValidationError({"team": "Team must belong to this event."})
+        elif self.kind in (COIRelationshipKind.INSTITUTION, COIRelationshipKind.DOMAIN):
+            if self.team_id is not None or not self.value.strip():
+                raise ValidationError(
+                    "An institution or domain relationship needs a value and no team."
+                )
+            self.value = _clean_coi_value(self.kind, self.value)
+        else:
+            raise ValidationError({"kind": "Unknown relationship kind."})
+
+
+class ProjectCOIAttribute(PublicIdModel):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    kind = models.CharField(max_length=20, choices=COIRelationshipKind.choices)
+    value = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["project", "kind", "value"], name="unique_project_coi_attribute"
+            )
+        ]
+
+    def clean(self):
+        if self.kind not in (COIRelationshipKind.INSTITUTION, COIRelationshipKind.DOMAIN):
+            raise ValidationError({"kind": "Project attributes must be institution or domain."})
+        self.value = _clean_coi_value(self.kind, self.value)
+
+
+class COIRuleKind(models.TextChoices):
+    TEAM_MEMBERSHIP = "team_membership", "Shared team"
+    PROJECT_MEMBERSHIP = "project_membership", "Project member"
+    PROJECT_CREATOR = "project_creator", "Project creator"
+
+
+class COIRule(PublicIdModel):
+    event = models.ForeignKey("events.Event", on_delete=models.CASCADE)
+    kind = models.CharField(max_length=20, choices=COIRuleKind.choices)
+    enabled = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["event", "kind"], name="unique_coi_rule")]
 
 
 class AssignmentVersion(PublicIdModel):

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from .models import COIRelationshipKind, COIRuleKind
 from .serializers import BallotResponseSerializer
 
 
@@ -10,6 +11,28 @@ class AssignmentActivateInputSchema(serializers.Serializer):
 class PoolMembershipInputSchema(serializers.Serializer):
     judge = serializers.UUIDField()
     track_expertise = serializers.ListField(child=serializers.UUIDField(), required=False)
+
+
+class JudgeCOIRelationshipInputSchema(serializers.Serializer):
+    judge = serializers.UUIDField(required=False)
+    kind = serializers.ChoiceField(choices=COIRelationshipKind.choices)
+    team = serializers.UUIDField(required=False)
+    value = serializers.CharField(required=False, allow_blank=True, max_length=255)
+
+
+class ProjectCOIAttributeInputSchema(serializers.Serializer):
+    project = serializers.UUIDField()
+    kind = serializers.ChoiceField(choices=["institution", "domain"])
+    value = serializers.CharField(max_length=255)
+
+
+class COIRuleInputSchema(serializers.Serializer):
+    kind = serializers.ChoiceField(choices=COIRuleKind.choices)
+    enabled = serializers.BooleanField()
+
+
+class COIRuleOutputSchema(COIRuleInputSchema):
+    pass
 
 
 class NormalizationInputSchema(serializers.Serializer):

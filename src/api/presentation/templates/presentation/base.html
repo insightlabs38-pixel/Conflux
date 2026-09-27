@@ -10,6 +10,7 @@
 </head>
 <body class="cx-shell{% if theme == "minimal" %} theme-minimal{% endif %}">
   <a class="cx-skip-link" href="#main-content">Skip to main content</a>
+  {% if event %}
   <header class="cx-shell__header">
     <a class="cx-shell__brand" href="{% url 'site-event' event.public_id %}">{{ event.name }}</a>
     <nav class="cx-shell__nav" aria-label="Primary">
@@ -17,6 +18,7 @@
       <a href="{% url 'site-gallery' event.public_id %}">Gallery</a>
     </nav>
   </header>
+  {% endif %}
   <main id="main-content" class="cx-shell__main" tabindex="-1">
     {% block content %}{% endblock %}
   </main>

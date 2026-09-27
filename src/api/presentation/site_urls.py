@@ -3,6 +3,7 @@ from django.urls import path
 from . import site_views
 
 urlpatterns = [
+    path("verify/", site_views.verify, name="site-verify"),
     path("<uuid:event_public_id>/", site_views.event_landing, name="site-event"),
     path("<uuid:event_public_id>/gallery/", site_views.gallery, name="site-gallery"),
     path(

@@ -11,6 +11,18 @@ from .public import (
     project_public_artifacts,
     public_projects,
 )
+from .records import RecordVerificationError, verify_record
+
+
+def verify(request):
+    token = request.GET.get("token", "").strip()
+    result = None
+    if token:
+        try:
+            result = {"valid": True, "claims": verify_record(token)}
+        except RecordVerificationError as exc:
+            result = {"valid": False, "error": str(exc)}
+    return render(request, "presentation/verify.html", {"token": token, "result": result})
 
 
 def _blocks_with_live_data(event, page):

@@ -1,0 +1,35 @@
+{% extends "presentation/base.html" %}
+{% block title %}Verify a record &middot; Conflux{% endblock %}
+{% block content %}
+<h1>Verify a record</h1>
+<p>
+  Paste a record token to check it here, or verify it yourself, offline, with
+  our <a href="/api/v1/records/verification-key/">published public key</a> —
+  this page runs the exact same check and needs no other access to this
+  server.
+</p>
+<form class="cx-search-form" method="get">
+  <label>
+    Record token
+    <textarea name="token" rows="4" cols="60">{{ token }}</textarea>
+  </label>
+  <button class="cx-button cx-button--primary" type="submit">Verify</button>
+</form>
+{% if result %}
+  {% if result.valid %}
+    <div class="cx-card">
+      <p><span class="cx-badge cx-badge--info">Valid</span></p>
+      <dl>
+        <dt>Kind</dt><dd>{{ result.claims.kind }}</dd>
+        <dt>Event</dt><dd>{{ result.claims.event.name }}</dd>
+        <dt>Issued (unix time)</dt><dd>{{ result.claims.iat }}</dd>
+        <dt>Subject</dt><dd>{{ result.claims.subject }}</dd>
+      </dl>
+    </div>
+  {% else %}
+    <div class="cx-card">
+      <p>Not a valid record: {{ result.error }}</p>
+    </div>
+  {% endif %}
+{% endif %}
+{% endblock %}

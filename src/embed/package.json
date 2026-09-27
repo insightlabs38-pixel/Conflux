@@ -1,0 +1,17 @@
+{
+  "name": "@conflux/embed",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "esbuild src/gallery.ts --bundle --minify --format=iife --outfile=dist/conflux-gallery.js",
+    "lint": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "happy-dom": "^20.14.5",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

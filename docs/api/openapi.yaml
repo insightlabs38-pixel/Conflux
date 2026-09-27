@@ -129,6 +129,29 @@ paths:
                 items:
                   $ref: '#/components/schemas/PublicAwardOutput'
           description: ''
+  /api/v1/events/{event_public_id}/gallery/:
+    get:
+      operationId: get_api_v1_events_event_public_id_gallery
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - events
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GalleryItemOutput'
+          description: ''
   /api/v1/export.csv:
     get:
       operationId: get_api_v1_export_csv
@@ -390,6 +413,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/VoteReceiptSchema'
+          description: ''
+  /api/v1/records/verification-key/:
+    get:
+      operationId: get_api_v1_records_verification_key
+      tags:
+      - records
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationKeyOutput'
+          description: ''
+  /api/v1/records/verify/:
+    post:
+      operationId: post_api_v1_records_verify
+      tags:
+      - records
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyRecordInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyRecordInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VerifyRecordInput'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyRecordOutput'
           description: ''
   /api/v1/schema/:
     get:
@@ -3507,6 +3570,114 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SubmissionReceiptSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/records/event/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_records_event
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/records/judge/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_records_judge
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JudgeRecordInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JudgeRecordInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JudgeRecordInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/records/project/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_records_project
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectRecordInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProjectRecordInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProjectRecordInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordOutput'
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stage-evidence/:
     get:
@@ -7290,6 +7461,31 @@ components:
       - public_id
       - state
       - updated_at
+    GalleryItemOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        track:
+          type: string
+          nullable: true
+        team:
+          type: string
+          nullable: true
+        url:
+          type: string
+      required:
+      - description
+      - name
+      - public_id
+      - team
+      - track
+      - url
     GalleryProjectSchema:
       type: object
       properties:
@@ -7360,6 +7556,14 @@ components:
       - name
       - public_id
       - slug
+    JudgeRecordInput:
+      type: object
+      properties:
+        user:
+          type: string
+          format: uuid
+      required:
+      - user
     JudgeScoreSchema:
       type: object
       properties:
@@ -8091,6 +8295,14 @@ components:
       description: |-
         * `owner` - Owner
         * `contributor` - Contributor
+    ProjectRecordInput:
+      type: object
+      properties:
+        project:
+          type: string
+          format: uuid
+      required:
+      - project
     PublicAwardOutput:
       type: object
       properties:
@@ -8229,6 +8441,17 @@ components:
       - rank
       - raw_score
       - tie_break
+    RecordOutput:
+      type: object
+      properties:
+        token:
+          type: string
+        claims:
+          type: object
+          additionalProperties: {}
+      required:
+      - claims
+      - token
     RedeemInviteInput:
       type: object
       properties:
@@ -8750,6 +8973,38 @@ components:
       required:
       - detail
       - outcome
+    VerificationKeyOutput:
+      type: object
+      properties:
+        issuer:
+          type: string
+        algorithm:
+          type: string
+        public_key_pem:
+          type: string
+      required:
+      - algorithm
+      - issuer
+      - public_key_pem
+    VerifyRecordInput:
+      type: object
+      properties:
+        token:
+          type: string
+      required:
+      - token
+    VerifyRecordOutput:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        claims:
+          type: object
+          additionalProperties: {}
+        error:
+          type: string
+      required:
+      - valid
     VoteInputSchema:
       type: object
       properties:

@@ -5,9 +5,9 @@
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "pnpm --filter @conflux/web lint",
-    "test": "pnpm --filter @conflux/web test",
-    "build": "pnpm --filter @conflux/web build"
+    "lint": "pnpm --filter @conflux/web lint && pnpm --filter @conflux/embed lint",
+    "test": "pnpm --filter @conflux/web test && pnpm --filter @conflux/embed test",
+    "build": "pnpm --filter @conflux/web build && pnpm --filter @conflux/embed build"
   },
   "devDependencies": {
     "prettier": "^3.6.2"

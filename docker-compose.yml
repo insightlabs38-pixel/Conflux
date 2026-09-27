@@ -19,6 +19,7 @@ services:
     image: conflux-api:latest
     environment:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-conflux-compose-dev-secret}
+      RECORD_SIGNING_KEY_SEED: ${RECORD_SIGNING_KEY_SEED:-conflux-compose-dev-record-seed}
       DJANGO_DEBUG: ${DJANGO_DEBUG:-0}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,app}
       DATABASE_URL: postgres://${POSTGRES_USER:-conflux}:${POSTGRES_PASSWORD:-conflux}@db:5432/${POSTGRES_DB:-conflux}
@@ -59,6 +60,7 @@ services:
     image: conflux-api:latest
     environment:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-conflux-compose-dev-secret}
+      RECORD_SIGNING_KEY_SEED: ${RECORD_SIGNING_KEY_SEED:-conflux-compose-dev-record-seed}
       DJANGO_DEBUG: ${DJANGO_DEBUG:-0}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,app}
       DATABASE_URL: postgres://${POSTGRES_USER:-conflux}:${POSTGRES_PASSWORD:-conflux}@db:5432/${POSTGRES_DB:-conflux}
@@ -88,6 +90,7 @@ services:
     image: conflux-api:latest
     environment:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-conflux-compose-dev-secret}
+      RECORD_SIGNING_KEY_SEED: ${RECORD_SIGNING_KEY_SEED:-conflux-compose-dev-record-seed}
       DATABASE_URL: postgres://${POSTGRES_USER:-conflux}:${POSTGRES_PASSWORD:-conflux}@db:5432/${POSTGRES_DB:-conflux}
       VALKEY_URL: redis://cache:6379/0
     entrypoint: ["celery", "-A", "config", "beat", "--loglevel=INFO"]

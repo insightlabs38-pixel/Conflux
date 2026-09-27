@@ -12,6 +12,13 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parents[1]
 
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
+
+# Seeds the Ed25519 keypair that signs publicly verifiable records
+# (REC-002): deterministic from the seed so records stay verifiable across
+# restarts without persisting key material anywhere. Runtime deployments
+# must supply their own; rotating it invalidates every previously issued
+# record's signature (there is no key-rotation/multi-key support in v1).
+RECORD_SIGNING_KEY_SEED = os.environ["RECORD_SIGNING_KEY_SEED"]
 DEBUG = os.environ.get("DJANGO_DEBUG", "0") == "1"
 ALLOWED_HOSTS = [
     host.strip()

@@ -1,0 +1,25 @@
+<!doctype html>
+<!--
+  EMB-002: a fully offline, self-hosted embed example.
+
+  This page loads `conflux-gallery.js` from the same folder -- no CDN, no
+  build step, no other file. Populate it once with:
+
+    pnpm --filter @conflux/embed build
+    cp src/embed/dist/conflux-gallery.js examples/conflux-gallery.js
+
+  Then open this file directly (file://) or serve the folder with any
+  static file server. Replace EVENT_PUBLIC_ID and api-base below with a
+  real event and the Conflux API host it should read from.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Conflux gallery embed example</title>
+</head>
+<body>
+  <h1>Projects</h1>
+  <script src="./conflux-gallery.js"></script>
+  <conflux-gallery event="EVENT_PUBLIC_ID" api-base="https://your-conflux-host.example.com"></conflux-gallery>
+</body>
+</html>

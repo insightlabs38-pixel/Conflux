@@ -10,8 +10,11 @@ MAX_PARTS = 100
 
 
 class S3Storage:
-    def __init__(self, *, endpoint=None, bucket=None, access_key=None, secret_key=None):
+    def __init__(
+        self, *, endpoint=None, public_endpoint=None, bucket=None, access_key=None, secret_key=None
+    ):
         self.endpoint = endpoint or settings.S3_ENDPOINT_URL
+        self.public_endpoint = public_endpoint or settings.S3_PUBLIC_ENDPOINT_URL
         self.bucket = bucket or settings.S3_BUCKET_NAME
         self.access_key = access_key or settings.S3_ACCESS_KEY
         self.secret_key = secret_key or settings.S3_SECRET_KEY
@@ -38,7 +41,7 @@ class S3Storage:
             self.client.create_bucket(Bucket=self.bucket)
 
     def presign_put(self, key, content_type, artifact_id, expires):
-        public = self._client(settings.S3_PUBLIC_ENDPOINT_URL)
+        public = self._client(self.public_endpoint)
         return public.generate_presigned_url(
             "put_object",
             Params={
@@ -51,7 +54,7 @@ class S3Storage:
         )
 
     def presign_get(self, key, expires=300):
-        return self._client(settings.S3_PUBLIC_ENDPOINT_URL).generate_presigned_url(
+        return self._client(self.public_endpoint).generate_presigned_url(
             "get_object", Params={"Bucket": self.bucket, "Key": key}, ExpiresIn=expires
         )
 
@@ -66,7 +69,7 @@ class S3Storage:
             Metadata={"artifact-id": artifact_id},
         )
         upload_id = result["UploadId"]
-        public = self._client(settings.S3_PUBLIC_ENDPOINT_URL)
+        public = self._client(self.public_endpoint)
         urls = [
             public.generate_presigned_url(
                 "upload_part",

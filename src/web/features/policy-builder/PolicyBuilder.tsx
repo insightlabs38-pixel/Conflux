@@ -7,7 +7,22 @@ type Gate = {
   name: string;
   opens_at: string | null;
   closes_at: string | null;
+  event_local_opens_at: string | null;
+  event_local_closes_at: string | null;
+  dst_warning: string | null;
 };
+type TimelineWindow = {
+  label: string;
+  opens_at: string | null;
+  closes_at: string | null;
+  event_local_opens_at: string | null;
+  event_local_closes_at: string | null;
+  dst_warning: string | null;
+};
+
+function viewerLocal(iso: string | null): string {
+  return iso ? new Date(iso).toLocaleString() : "—";
+}
 type Preset = { label: string; params: string[] };
 type TraceNode = {
   path: number[];
@@ -105,6 +120,7 @@ export function PolicyBuilder({
   const [policies, setPolicies] = useState<PolicyRow[]>([]);
   const [bindings, setBindings] = useState<Binding[]>([]);
   const [gates, setGates] = useState<Gate[]>([]);
+  const [timeline, setTimeline] = useState<TimelineWindow[]>([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -114,22 +130,26 @@ export function PolicyBuilder({
   const [bindPolicy, setBindPolicy] = useState("");
   const [bindAction, setBindAction] = useState(ACTIONS[0]);
   const [gateName, setGateName] = useState("");
+  const [gateOpensAt, setGateOpensAt] = useState("");
+  const [gateClosesAt, setGateClosesAt] = useState("");
   const [debugAction, setDebugAction] = useState(ACTIONS[0]);
   const [debugSubjectId, setDebugSubjectId] = useState("");
   const [debugResult, setDebugResult] = useState<DebugResult | null>(null);
 
   async function refresh() {
-    const [nextPresets, nextPolicies, nextBindings, nextGates] =
+    const [nextPresets, nextPolicies, nextBindings, nextGates, nextTimeline] =
       await Promise.all([
         request<Record<string, Preset>>(base + "policy-presets/"),
         request<PolicyRow[]>(base + "policies/"),
         request<Binding[]>(base + "policy-bindings/"),
         request<Gate[]>(base + "temporal-gates/"),
+        request<TimelineWindow[]>(base + "timezone-timeline/"),
       ]);
     setPresets(nextPresets);
     setBindings(nextBindings);
     setPolicies(nextPolicies);
     setGates(nextGates);
+    setTimeline(nextTimeline);
   }
 
   useEffect(() => {
@@ -190,8 +210,16 @@ export function PolicyBuilder({
       if (!gateName.trim()) throw new Error("Gate name is required.");
       await request<Gate>(base + "temporal-gates/", "POST", {
         name: gateName.trim(),
+        // <input type="datetime-local"> has no timezone of its own -- the
+        // browser treats it as the viewer's local time, so converting via
+        // `Date` (which does exactly that) before sending gives the
+        // correct UTC instant regardless of where the organizer is.
+        opens_at: gateOpensAt ? new Date(gateOpensAt).toISOString() : null,
+        closes_at: gateClosesAt ? new Date(gateClosesAt).toISOString() : null,
       });
       setGateName("");
+      setGateOpensAt("");
+      setGateClosesAt("");
       await refresh();
     });
   }
@@ -312,8 +340,13 @@ export function PolicyBuilder({
       <ul aria-label="Temporal gates">
         {gates.map((g) => (
           <li key={g.public_id}>
-            {g.name}: {g.opens_at ?? "always open"} –{" "}
-            {g.closes_at ?? "never closes"}
+            {g.name}: {viewerLocal(g.opens_at)} – {viewerLocal(g.closes_at)}
+            {" (your local time; event time zone "}
+            {g.event_local_opens_at ?? "always open"}
+            {" – "}
+            {g.event_local_closes_at ?? "never closes"}
+            {")"}
+            {g.dst_warning && <p role="alert">{g.dst_warning}</p>}
           </li>
         ))}
       </ul>
@@ -326,8 +359,40 @@ export function PolicyBuilder({
             required
           />
         </label>
+        <label>
+          Opens (your local time){" "}
+          <input
+            type="datetime-local"
+            value={gateOpensAt}
+            onChange={(e) => setGateOpensAt(e.target.value)}
+          />
+        </label>
+        <label>
+          Closes (your local time){" "}
+          <input
+            type="datetime-local"
+            value={gateClosesAt}
+            onChange={(e) => setGateClosesAt(e.target.value)}
+          />
+        </label>
         <button disabled={busy}>Add gate</button>
       </form>
+
+      <h3>Timezone timeline (UTC canonical)</h3>
+      <p>
+        Every named window on this event, in the order it actually occurs. Times
+        shown are the event's declared time zone; a warning appears when a
+        window's local span crosses a daylight-saving change there.
+      </p>
+      <ul aria-label="Timezone timeline">
+        {timeline.map((w, index) => (
+          <li key={`${w.label}-${index}`}>
+            {w.label}: {w.event_local_opens_at ?? "always open"} –{" "}
+            {w.event_local_closes_at ?? "never closes"}
+            {w.dst_warning && <p role="alert">{w.dst_warning}</p>}
+          </li>
+        ))}
+      </ul>
 
       <h3>Policy debugger</h3>
       <p>

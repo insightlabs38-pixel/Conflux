@@ -9236,8 +9236,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/TemporalGate'
           description: ''
-    delete:
-      operationId: delete_api_v1_workspaces_workspace_public_id_events_event_public_id_temporal_gates_gate_public_id
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/timezone-timeline/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_timezone_timeline
+      description: |-
+        The event's own start/end plus every `TemporalGate`, sorted by their
+        authoritative UTC instant, each annotated with its event-local
+        rendering and DST warning (VS24) -- one place an organizer can see
+        everything time-boxed about the event without cross-referencing gates
+        and event settings separately.
       parameters:
       - in: path
         name: event_public_id
@@ -9246,7 +9253,36 @@ paths:
           format: uuid
         required: true
       - in: path
-        name: gate_public_id
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimelineWindowSchema'
+          description: ''
+    delete:
+      operationId: delete_api_v1_workspaces_workspace_public_id_events_event_public_id_timezone_timeline
+      description: |-
+        The event's own start/end plus every `TemporalGate`, sorted by their
+        authoritative UTC instant, each annotated with its event-local
+        rendering and DST warning (VS24) -- one place an organizer can see
+        everything time-boxed about the event without cross-referencing gates
+        and event settings separately.
+      parameters:
+      - in: path
+        name: event_public_id
         schema:
           type: string
           format: uuid
@@ -14322,6 +14358,18 @@ components:
           type: string
           format: date-time
           nullable: true
+        event_local_opens_at:
+          type: string
+          nullable: true
+          readOnly: true
+        event_local_closes_at:
+          type: string
+          nullable: true
+          readOnly: true
+        dst_warning:
+          type: string
+          nullable: true
+          readOnly: true
         created_at:
           type: string
           format: date-time
@@ -15921,12 +15969,27 @@ components:
           type: string
           format: date-time
           nullable: true
+        event_local_opens_at:
+          type: string
+          nullable: true
+          readOnly: true
+        event_local_closes_at:
+          type: string
+          nullable: true
+          readOnly: true
+        dst_warning:
+          type: string
+          nullable: true
+          readOnly: true
         created_at:
           type: string
           format: date-time
           readOnly: true
       required:
       - created_at
+      - dst_warning
+      - event_local_closes_at
+      - event_local_opens_at
       - name
       - public_id
     ThemeEnum:
@@ -15939,6 +16002,39 @@ components:
         * `default` - Default
         * `dark` - Dark
         * `minimal` - Minimal
+    TimelineWindowSchema:
+      type: object
+      description: |-
+        One named window (the event itself, or a `TemporalGate`) on the
+        organizer's UTC canonical timeline (VS24) -- `opens_at`/`closes_at` are
+        the authoritative UTC instants; the rest are presentation aids.
+      properties:
+        label:
+          type: string
+        opens_at:
+          type: string
+          format: date-time
+          nullable: true
+        closes_at:
+          type: string
+          format: date-time
+          nullable: true
+        event_local_opens_at:
+          type: string
+          nullable: true
+        event_local_closes_at:
+          type: string
+          nullable: true
+        dst_warning:
+          type: string
+          nullable: true
+      required:
+      - closes_at
+      - dst_warning
+      - event_local_closes_at
+      - event_local_opens_at
+      - label
+      - opens_at
     Track:
       type: object
       properties:

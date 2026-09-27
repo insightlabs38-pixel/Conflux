@@ -36,4 +36,9 @@ urlpatterns = [
         views.ExceptionGrantListView.as_view(),
         name="exception-grant-list",
     ),
+    path(
+        _prefix + "timezone-timeline/",
+        views.TimezoneTimelineView.as_view(),
+        name="timezone-timeline",
+    ),
 ]

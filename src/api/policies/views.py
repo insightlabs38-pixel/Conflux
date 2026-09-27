@@ -19,7 +19,9 @@ from .serializers import (
     PolicyBindingSerializer,
     PolicySerializer,
     TemporalGateSerializer,
+    TimelineWindowSchema,
 )
+from .timezone_safety import dst_warning, local_iso
 
 
 def _as_drf_validation_error(exc):
@@ -214,9 +216,8 @@ class TemporalGateListView(OrganizerView):
     serializer_class = TemporalGateSerializer
 
     def get(self, request, workspace_public_id, event_public_id):
-        return Response(
-            TemporalGateSerializer(self.get_event().temporal_gates.all(), many=True).data
-        )
+        gates = self.get_event().temporal_gates.select_related("event").all()
+        return Response(TemporalGateSerializer(gates, many=True).data)
 
     @extend_schema(responses={201: TemporalGateSerializer})
     def post(self, request, workspace_public_id, event_public_id):
@@ -277,6 +278,42 @@ class TemporalGateDetailView(OrganizerView):
         except ModelValidationError as exc:
             raise _as_drf_validation_error(exc) from exc
         return Response(TemporalGateSerializer(gate).data)
+
+
+class TimezoneTimelineView(OrganizerView):
+    """The event's own start/end plus every `TemporalGate`, sorted by their
+    authoritative UTC instant, each annotated with its event-local
+    rendering and DST warning (VS24) -- one place an organizer can see
+    everything time-boxed about the event without cross-referencing gates
+    and event settings separately.
+    """
+
+    serializer_class = TimelineWindowSchema
+
+    @extend_schema(responses=TimelineWindowSchema(many=True))
+    def get(self, request, workspace_public_id, event_public_id):
+        event = self.get_event()
+        windows = [
+            {"label": "Event window", "opens_at": event.starts_at, "closes_at": event.ends_at}
+        ]
+        windows += [
+            {"label": gate.name, "opens_at": gate.opens_at, "closes_at": gate.closes_at}
+            for gate in event.temporal_gates.order_by("name")
+        ]
+        windows.sort(key=lambda w: (w["opens_at"] is None, w["opens_at"]))
+        return Response(
+            [
+                {
+                    **window,
+                    "event_local_opens_at": local_iso(window["opens_at"], event.timezone),
+                    "event_local_closes_at": local_iso(window["closes_at"], event.timezone),
+                    "dst_warning": dst_warning(
+                        window["opens_at"], window["closes_at"], event.timezone
+                    ),
+                }
+                for window in windows
+            ]
+        )
 
     def delete(self, request, workspace_public_id, event_public_id, gate_public_id):
         gate = self.get_gate(gate_public_id)

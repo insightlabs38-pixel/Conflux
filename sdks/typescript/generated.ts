@@ -2319,6 +2319,9 @@ export type PatchedTemporalGate = {
   name?: string;
   opens_at?: string | null;
   closes_at?: string | null;
+  event_local_opens_at?: string | null;
+  event_local_closes_at?: string | null;
+  dst_warning?: string | null;
   created_at?: string;
 };
 
@@ -3285,6 +3288,9 @@ export type TemporalGate = {
   name: string;
   opens_at?: string | null;
   closes_at?: string | null;
+  event_local_opens_at: string | null;
+  event_local_closes_at: string | null;
+  dst_warning: string | null;
   created_at: string;
 };
 
@@ -3297,6 +3303,24 @@ export type InputOfTemporalGate = {
 export type ThemeEnum = "default" | "dark" | "minimal";
 
 export type InputOfThemeEnum = "default" | "dark" | "minimal";
+
+export type TimelineWindowSchema = {
+  label: string;
+  opens_at: string | null;
+  closes_at: string | null;
+  event_local_opens_at: string | null;
+  event_local_closes_at: string | null;
+  dst_warning: string | null;
+};
+
+export type InputOfTimelineWindowSchema = {
+  label: string;
+  opens_at: string | null;
+  closes_at: string | null;
+  event_local_opens_at: string | null;
+  event_local_closes_at: string | null;
+  dst_warning: string | null;
+};
 
 export type Track = {
   public_id: string;
@@ -5419,14 +5443,12 @@ export interface Operations {
     };
     response: TemporalGate;
   };
-  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_temporal_gates_gate_public_id: {
-    request: {
-      path: {
-        event_public_id: string;
-        gate_public_id: string;
-        workspace_public_id: string;
-      };
-    };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_timezone_timeline: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: TimelineWindowSchema[];
+  };
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_timezone_timeline: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
     response: null;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_tracks: {
@@ -8248,11 +8270,20 @@ export const operations = {
       request_body: true,
       response_kind: "json",
     },
-  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_temporal_gates_gate_public_id:
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_timezone_timeline:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/timezone-timeline/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_timezone_timeline:
     {
       method: "DELETE",
-      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/temporal-gates/{gate_public_id}/",
-      path_params: ["event_public_id", "gate_public_id", "workspace_public_id"],
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/timezone-timeline/",
+      path_params: ["event_public_id", "workspace_public_id"],
       query_params: [],
       request_body: false,
       response_kind: "none",

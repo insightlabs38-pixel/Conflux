@@ -2150,6 +2150,9 @@ class PatchedTemporalGate(TypedDict):
     name: NotRequired[str]
     opens_at: NotRequired[str | None]
     closes_at: NotRequired[str | None]
+    event_local_opens_at: NotRequired[str | None]
+    event_local_closes_at: NotRequired[str | None]
+    dst_warning: NotRequired[str | None]
     created_at: NotRequired[str]
 
 class InputOfPatchedTemporalGate(TypedDict):
@@ -3030,6 +3033,9 @@ class TemporalGate(TypedDict):
     name: str
     opens_at: NotRequired[str | None]
     closes_at: NotRequired[str | None]
+    event_local_opens_at: str | None
+    event_local_closes_at: str | None
+    dst_warning: str | None
     created_at: str
 
 class InputOfTemporalGate(TypedDict):
@@ -3040,6 +3046,22 @@ class InputOfTemporalGate(TypedDict):
 ThemeEnum = Literal['default', 'dark', 'minimal']
 
 InputOfThemeEnum = Literal['default', 'dark', 'minimal']
+
+class TimelineWindowSchema(TypedDict):
+    label: str
+    opens_at: str | None
+    closes_at: str | None
+    event_local_opens_at: str | None
+    event_local_closes_at: str | None
+    dst_warning: str | None
+
+class InputOfTimelineWindowSchema(TypedDict):
+    label: str
+    opens_at: str | None
+    closes_at: str | None
+    event_local_opens_at: str | None
+    event_local_closes_at: str | None
+    dst_warning: str | None
 
 class Track(TypedDict):
     public_id: str
@@ -3413,14 +3435,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                                                 'query_params': [],
                                                                                                                                                                 'request_body': False,
                                                                                                                                                                 'response_kind': 'none'},
- 'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_temporal_gates_gate_public_id': {'method': 'DELETE',
-                                                                                                       'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/temporal-gates/{gate_public_id}/',
-                                                                                                       'path_params': ['event_public_id',
-                                                                                                                       'gate_public_id',
-                                                                                                                       'workspace_public_id'],
-                                                                                                       'query_params': [],
-                                                                                                       'request_body': False,
-                                                                                                       'response_kind': 'none'},
+ 'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_timezone_timeline': {'method': 'DELETE',
+                                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/timezone-timeline/',
+                                                                                           'path_params': ['event_public_id',
+                                                                                                           'workspace_public_id'],
+                                                                                           'query_params': [],
+                                                                                           'request_body': False,
+                                                                                           'response_kind': 'none'},
  'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_tracks_track_public_id': {'method': 'DELETE',
                                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/tracks/{track_public_id}/',
                                                                                                 'path_params': ['event_public_id',
@@ -4269,6 +4290,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                      'query_params': [],
                                                                                      'request_body': False,
                                                                                      'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_timezone_timeline': {'method': 'GET',
+                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/timezone-timeline/',
+                                                                                        'path_params': ['event_public_id',
+                                                                                                        'workspace_public_id'],
+                                                                                        'query_params': [],
+                                                                                        'request_body': False,
+                                                                                        'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_tracks': {'method': 'GET',
                                                                              'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/tracks/',
                                                                              'path_params': ['event_public_id',

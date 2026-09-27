@@ -81,4 +81,34 @@ urlpatterns = [
         views.ResultsCsvExportView.as_view(),
         name="evaluation-plan-results-csv",
     ),
+    path(
+        f"{_PLAN}/pairwise/next/",
+        views.PairwiseNextPairView.as_view(),
+        name="evaluation-plan-pairwise-next",
+    ),
+    path(
+        f"{_PLAN}/pairwise/comparisons/",
+        views.PairwiseComparisonListCreateView.as_view(),
+        name="evaluation-plan-pairwise-comparisons",
+    ),
+    path(
+        f"{_PLAN}/pairwise/runs/",
+        views.PairwiseRunListView.as_view(),
+        name="evaluation-plan-pairwise-runs",
+    ),
+    path(
+        f"{_PLAN}/pairwise/publish-results/",
+        views.PairwiseResultsPublishView.as_view(),
+        name="evaluation-plan-pairwise-publish-results",
+    ),
+    path(
+        f"{_PLAN}/pairwise/results/",
+        views.PairwiseResultsView.as_view(),
+        name="evaluation-plan-pairwise-results",
+    ),
+    path(
+        f"{_PLAN}/pairwise/results.csv",
+        views.PairwiseResultsCsvExportView.as_view(),
+        name="evaluation-plan-pairwise-results-csv",
+    ),
 ]

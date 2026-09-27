@@ -20,6 +20,11 @@ class EvaluationPoolStrategy(models.TextChoices):
     ASSIGNED_SUBSET = "assigned_subset", "Judges score an assigned subset"
 
 
+class EvaluationMode(models.TextChoices):
+    RUBRIC = "rubric", "Weighted rubric scoring"
+    PAIRWISE = "pairwise", "Head-to-head pairwise comparison"
+
+
 class EvaluationPlan(PublicIdModel):
     """Unified evaluation abstraction (JDG-001): what's being judged, by
     whom, and whether feedback is visible to participants. Pool assignment
@@ -37,6 +42,11 @@ class EvaluationPlan(PublicIdModel):
         max_length=20,
         choices=EvaluationPoolStrategy.choices,
         default=EvaluationPoolStrategy.ALL_JUDGES,
+    )
+    mode = models.CharField(
+        max_length=20,
+        choices=EvaluationMode.choices,
+        default=EvaluationMode.RUBRIC,
     )
     results_visible_to_participants = models.BooleanField(default=False)
     draft_criteria = models.JSONField(default=list, blank=True)
@@ -56,6 +66,13 @@ class EvaluationPlan(PublicIdModel):
     )
     published_normalization_run = models.ForeignKey(
         "NormalizationRun",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    published_pairwise_run = models.ForeignKey(
+        "PairwiseRun",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -84,6 +101,10 @@ class EvaluationPlan(PublicIdModel):
         ):
             raise ValidationError(
                 {"published_normalization_run": "Must be a normalization run of this plan."}
+            )
+        if self.published_pairwise_run_id and self.published_pairwise_run.plan_id != self.pk:
+            raise ValidationError(
+                {"published_pairwise_run": "Must be a pairwise run of this plan."}
             )
 
 
@@ -345,3 +366,86 @@ class NormalizationRun(PublicIdModel):
 
     def delete(self, *args, **kwargs):
         raise ValidationError("Normalization runs are immutable once computed.")
+
+
+class PairwiseComparison(PublicIdModel):
+    """One judge's head-to-head verdict between two candidates (S01):
+    holistic comparison judging as an alternative to per-criterion rubric
+    scoring for a `PAIRWISE`-mode EvaluationPlan, aggregated via the
+    Bradley-Terry model (see evaluations/pairwise.py). `project_a`/
+    `project_b` are always stored with `project_a_id < project_b_id` (see
+    `clean`), so a (plan, judge, project_a, project_b) tuple is unique
+    regardless of which order the judge was shown the two candidates in;
+    `winner` is null for a declared tie.
+    """
+
+    plan = models.ForeignKey(
+        EvaluationPlan, on_delete=models.CASCADE, related_name="pairwise_comparisons"
+    )
+    judge = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="pairwise_comparisons"
+    )
+    project_a = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="pairwise_as_a")
+    project_b = models.ForeignKey(Project, on_delete=models.PROTECT, related_name="pairwise_as_b")
+    winner = models.ForeignKey(
+        Project, null=True, blank=True, on_delete=models.PROTECT, related_name="pairwise_wins"
+    )
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["plan", "judge", "project_a", "project_b"],
+                name="unique_pairwise_comparison",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(project_a__lt=models.F("project_b")),
+                name="pairwise_comparison_canonical_order",
+            ),
+        ]
+
+    def clean(self):
+        if self.plan.mode != EvaluationMode.PAIRWISE:
+            raise ValidationError({"plan": "Plan is not configured for pairwise judging."})
+        if self.project_a_id == self.project_b_id:
+            raise ValidationError({"project_b": "A comparison needs two distinct candidates."})
+        if self.project_a_id > self.project_b_id:
+            self.project_a, self.project_b = self.project_b, self.project_a
+        event_id = self.plan.stage.event_id
+        if self.project_a.event_id != event_id or self.project_b.event_id != event_id:
+            raise ValidationError({"project_a": "Both candidates must belong to the plan's event."})
+        if self.winner_id is not None and self.winner_id not in (
+            self.project_a_id,
+            self.project_b_id,
+        ):
+            raise ValidationError({"winner": "Winner must be one of the two compared candidates."})
+
+
+class PairwiseRun(PublicIdModel):
+    """One immutable, computed Bradley-Terry strength estimation for a
+    PAIRWISE-mode plan's comparisons (S01), the pairwise analogue of
+    NormalizationRun -- see evaluations/pairwise.py::run. Rerunning creates
+    a new numbered run rather than mutating a previous one.
+    """
+
+    plan = models.ForeignKey(EvaluationPlan, on_delete=models.PROTECT, related_name="pairwise_runs")
+    number = models.PositiveIntegerField()
+    prior_games = models.FloatField()
+    iterations = models.PositiveIntegerField()
+    converged = models.BooleanField()
+    evidence = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["plan", "number"], name="unique_pairwise_run")
+        ]
+        ordering = ["number"]
+
+    def save(self, *args, **kwargs):
+        if self.pk and type(self).objects.filter(pk=self.pk).exists():
+            raise ValidationError("Pairwise runs are immutable once computed.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("Pairwise runs are immutable once computed.")

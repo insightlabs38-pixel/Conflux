@@ -1,4 +1,5 @@
 import csv
+from collections import defaultdict
 
 from accounts.authentication import CookieSessionAuthentication
 from accounts.models import User
@@ -18,7 +19,7 @@ from rest_framework.response import Response
 from stages.views import StageEventMixin
 from workspaces.models import Role
 
-from . import normalization
+from . import normalization, pairwise
 from .assignment import activate
 from .models import (
     Assignment,
@@ -26,15 +27,18 @@ from .models import (
     BallotDraft,
     BallotResponse,
     ConflictOfInterest,
+    EvaluationMode,
     EvaluationPlan,
     EvaluationPool,
     EvaluationPoolStrategy,
     NormalizationRun,
+    PairwiseComparison,
+    PairwiseRun,
     PoolMembership,
     RubricVersion,
 )
 from .progress import compute_progress
-from .results import ranked_results
+from .results import pairwise_ranked_results, ranked_results
 from .schema import (
     AssignmentActivateInputSchema,
     BallotDraftInputSchema,
@@ -42,6 +46,11 @@ from .schema import (
     CandidateQueueItemSchema,
     EvaluationProgressSchema,
     NormalizationInputSchema,
+    PairwiseComparisonInputSchema,
+    PairwiseNextPairSchema,
+    PairwiseRankedResultSchema,
+    PairwiseResultsPublishInputSchema,
+    PairwiseRunInputSchema,
     PoolMembershipInputSchema,
     RankedResultSchema,
     ResultsPublishInputSchema,
@@ -54,6 +63,8 @@ from .serializers import (
     EvaluationPlanSerializer,
     EvaluationPoolSerializer,
     NormalizationRunSerializer,
+    PairwiseComparisonSerializer,
+    PairwiseRunSerializer,
     PoolMembershipSerializer,
     RubricVersionSerializer,
 )
@@ -61,6 +72,30 @@ from .serializers import (
 
 def _as_drf_validation_error(exc):
     return ValidationError(exc.message_dict if hasattr(exc, "message_dict") else exc.messages)
+
+
+def _eligible_candidates(plan, judge):
+    """Projects `judge` is expected to evaluate under `plan`'s pool
+    strategy, minus their own declared conflicts of interest (JUX-001).
+    Shared by the rubric candidate queue and the pairwise next-pair picker
+    (S01) so both judging modes draw from exactly the same eligibility rule.
+    """
+    candidates = Project.objects.filter(
+        event_id=plan.stage.event_id, submissions__stage=plan.stage
+    ).distinct()
+    if plan.pool_strategy == EvaluationPoolStrategy.ASSIGNED_SUBSET:
+        if plan.active_assignment_version_id is None:
+            return candidates.none()
+        candidates = candidates.filter(
+            assignments__version_id=plan.active_assignment_version_id,
+            assignments__judge=judge,
+        )
+    conflicted = set(
+        ConflictOfInterest.objects.filter(event_id=plan.stage.event_id, judge=judge).values_list(
+            "project_id", flat=True
+        )
+    )
+    return candidates.exclude(id__in=conflicted)
 
 
 class PlanMixin(StageEventMixin):
@@ -213,6 +248,8 @@ class BallotListCreateView(PlanMixin):
         if not has_any_role(request.user, self.get_workspace(), Role.JUDGE):
             raise ValidationError({"detail": "Only a judge may submit a ballot."})
         plan = self.get_plan()
+        if plan.mode != EvaluationMode.RUBRIC:
+            raise ValidationError({"detail": "This plan is configured for pairwise judging."})
         version = plan.current_rubric_version
         if version is None:
             raise ValidationError({"detail": "This plan has no published rubric yet."})
@@ -528,6 +565,8 @@ class NormalizationRunListView(PlanMixin):
     @transaction.atomic
     def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         plan = self.get_plan()
+        if plan.mode != EvaluationMode.RUBRIC:
+            raise ValidationError({"detail": "This plan is configured for pairwise judging."})
         ridge_lambda = request.data.get("ridge_lambda", 1.0)
         if (
             not isinstance(ridge_lambda, (int, float))
@@ -675,23 +714,7 @@ class CandidateListView(PlanMixin):
         if not has_any_role(request.user, self.get_workspace(), Role.JUDGE):
             raise ValidationError({"detail": "Only a judge has a review queue."})
 
-        candidates = Project.objects.filter(
-            event_id=plan.stage.event_id, submissions__stage=plan.stage
-        ).distinct()
-        if plan.pool_strategy == EvaluationPoolStrategy.ASSIGNED_SUBSET:
-            if plan.active_assignment_version_id is None:
-                candidates = candidates.none()
-            else:
-                candidates = candidates.filter(
-                    assignments__version_id=plan.active_assignment_version_id,
-                    assignments__judge=request.user,
-                )
-        conflicted = set(
-            ConflictOfInterest.objects.filter(
-                event_id=plan.stage.event_id, judge=request.user
-            ).values_list("project_id", flat=True)
-        )
-        candidates = candidates.exclude(id__in=conflicted).order_by("name")
+        candidates = _eligible_candidates(plan, request.user).order_by("name")
 
         submitted = set(
             Ballot.objects.filter(rubric_version__plan=plan, judge=request.user).values_list(
@@ -719,3 +742,277 @@ class CandidateListView(PlanMixin):
                 for project in candidates
             ]
         )
+
+
+class PairwiseNextPairView(PlanMixin):
+    """S01: the next pair of candidates for the requesting judge to compare
+    under a PAIRWISE-mode plan -- the two eligible, not-yet-compared-by-
+    this-judge candidates with the fewest comparisons so far, so coverage
+    balances across the field instead of a judge repeatedly seeing the
+    same popular pair. Returns null once every eligible pair has been
+    judged (or fewer than two eligible candidates exist).
+    """
+
+    authentication_classes = [CookieSessionAuthentication]
+    permission_classes = [require_roles(Role.JUDGE, Role.ORGANIZER, Role.ADMIN)]
+
+    @extend_schema(responses=PairwiseNextPairSchema(allow_null=True))
+    def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        if plan.mode != EvaluationMode.PAIRWISE:
+            raise ValidationError({"detail": "This plan is not configured for pairwise judging."})
+        if not has_any_role(request.user, self.get_workspace(), Role.JUDGE):
+            raise ValidationError({"detail": "Only a judge has a comparison queue."})
+
+        candidate_ids = list(
+            _eligible_candidates(plan, request.user).order_by("id").values_list("id", flat=True)
+        )
+        already_compared = set(
+            PairwiseComparison.objects.filter(plan=plan, judge=request.user).values_list(
+                "project_a_id", "project_b_id"
+            )
+        )
+        comparison_counts = defaultdict(int)
+        for a, b in PairwiseComparison.objects.filter(
+            plan=plan, project_a_id__in=candidate_ids, project_b_id__in=candidate_ids
+        ).values_list("project_a_id", "project_b_id"):
+            comparison_counts[a] += 1
+            comparison_counts[b] += 1
+
+        best_pair = None
+        best_load = None
+        for index, project_a_id in enumerate(candidate_ids):
+            for project_b_id in candidate_ids[index + 1 :]:
+                if (project_a_id, project_b_id) in already_compared:
+                    continue
+                load = comparison_counts[project_a_id] + comparison_counts[project_b_id]
+                if best_load is None or load < best_load:
+                    best_load = load
+                    best_pair = (project_a_id, project_b_id)
+
+        if best_pair is None:
+            # See BallotDraftView.get for why this isn't a bare Response(None).
+            return JsonResponse(None, safe=False)
+        projects = {p.id: p for p in Project.objects.filter(id__in=best_pair)}
+        return Response(
+            {
+                "project_a": str(projects[best_pair[0]].public_id),
+                "project_b": str(projects[best_pair[1]].public_id),
+            }
+        )
+
+
+class PairwiseComparisonListCreateView(PlanMixin):
+    """Pairwise comparison storage (S01): a judge submits a head-to-head
+    verdict; isolation mirrors BallotListCreateView -- a judge never sees
+    another judge's comparisons unless they organize.
+    """
+
+    serializer_class = PairwiseComparisonSerializer
+
+    authentication_classes = [CookieSessionAuthentication]
+    permission_classes = [require_roles(Role.JUDGE, Role.ORGANIZER, Role.ADMIN)]
+
+    def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        comparisons = PairwiseComparison.objects.filter(plan=plan).select_related(
+            "judge", "project_a", "project_b", "winner"
+        )
+        is_organizer = has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
+        requested_judge_id = request.GET.get("judge")
+        if requested_judge_id:
+            judge = get_object_or_404(User, public_id=requested_judge_id)
+            if judge.id != request.user.id and not is_organizer:
+                raise PermissionDenied("You cannot view another judge's comparisons.")
+            comparisons = comparisons.filter(judge=judge)
+        elif not is_organizer:
+            comparisons = comparisons.filter(judge=request.user)
+        return Response(PairwiseComparisonSerializer(comparisons, many=True).data)
+
+    @extend_schema(
+        request=PairwiseComparisonInputSchema, responses={201: PairwiseComparisonSerializer}
+    )
+    @transaction.atomic
+    def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        if not has_any_role(request.user, self.get_workspace(), Role.JUDGE):
+            raise ValidationError({"detail": "Only a judge may submit a comparison."})
+        plan = self.get_plan()
+        if plan.mode != EvaluationMode.PAIRWISE:
+            raise ValidationError({"detail": "This plan is not configured for pairwise judging."})
+        event = self.get_event()
+        project_a = get_object_or_404(Project, event=event, public_id=request.data.get("project_a"))
+        project_b = get_object_or_404(Project, event=event, public_id=request.data.get("project_b"))
+        winner = None
+        winner_public_id = request.data.get("winner")
+        if winner_public_id:
+            winner = get_object_or_404(Project, event=event, public_id=winner_public_id)
+
+        if ConflictOfInterest.objects.filter(
+            event=event, judge=request.user, project__in=[project_a, project_b]
+        ).exists():
+            raise ValidationError({"detail": "You have a declared conflict of interest here."})
+        eligible_ids = set(_eligible_candidates(plan, request.user).values_list("id", flat=True))
+        if project_a.id not in eligible_ids or project_b.id not in eligible_ids:
+            raise ValidationError(
+                {"detail": "You are not assigned to compare one of these projects."}
+            )
+
+        comparison = PairwiseComparison(
+            plan=plan, judge=request.user, project_a=project_a, project_b=project_b, winner=winner
+        )
+        try:
+            with transaction.atomic():
+                comparison.full_clean()
+                comparison.save()
+        except ModelValidationError as exc:
+            raise _as_drf_validation_error(exc) from exc
+        except IntegrityError as exc:
+            raise ValidationError(
+                {"detail": "You have already compared these two candidates."}
+            ) from exc
+        record_mutation(
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="pairwise_comparison.submitted",
+            target=comparison,
+        )
+        return Response(PairwiseComparisonSerializer(comparison).data, status=201)
+
+
+class PairwiseRunListView(PlanMixin):
+    """Organizer-only: mirrors NormalizationRunListView but computes
+    Bradley-Terry strengths for a PAIRWISE-mode plan's comparisons (S01).
+    """
+
+    serializer_class = PairwiseRunSerializer
+
+    def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        runs = self.get_plan().pairwise_runs.all()
+        return Response(PairwiseRunSerializer(runs, many=True).data)
+
+    @extend_schema(request=PairwiseRunInputSchema, responses={201: PairwiseRunSerializer})
+    @transaction.atomic
+    def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        if plan.mode != EvaluationMode.PAIRWISE:
+            raise ValidationError({"detail": "This plan is not configured for pairwise judging."})
+        prior_games = request.data.get("prior_games", 2.0)
+        if (
+            not isinstance(prior_games, (int, float))
+            or isinstance(prior_games, bool)
+            or prior_games < 0
+        ):
+            raise ValidationError({"prior_games": "Must be a nonnegative number."})
+        with transaction.atomic():
+            pairwise_run = pairwise.run(plan, prior_games=prior_games)
+        record_mutation(
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="pairwise_run.computed",
+            target=pairwise_run,
+            metadata={"converged": pairwise_run.converged, "number": pairwise_run.number},
+        )
+        return Response(PairwiseRunSerializer(pairwise_run).data, status=201)
+
+
+class PairwiseResultsPublishView(PlanMixin):
+    """S01: pairwise analogue of ResultsPublishView -- points a plan at the
+    PairwiseRun its published ranking is drawn from.
+    """
+
+    @extend_schema(request=PairwiseResultsPublishInputSchema, responses=EvaluationPlanSerializer)
+    @transaction.atomic
+    def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        run = get_object_or_404(PairwiseRun, plan=plan, public_id=request.data.get("pairwise_run"))
+        tie_breaks = request.data.get("tie_breaks", {})
+        if not isinstance(tie_breaks, dict) or not all(
+            isinstance(v, int) and not isinstance(v, bool) for v in tie_breaks.values()
+        ):
+            raise ValidationError({"tie_breaks": "Must map project public_id to an integer."})
+        resolved = {}
+        for project_public_id, value in tie_breaks.items():
+            project = get_object_or_404(
+                Project, event=self.get_event(), public_id=project_public_id
+            )
+            resolved[str(project.id)] = value
+        plan.published_pairwise_run = run
+        plan.tie_breaks = resolved
+        plan.full_clean()
+        plan.save(update_fields=["published_pairwise_run", "tie_breaks", "updated_at"])
+        record_mutation(
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="pairwise_results.published",
+            target=plan,
+            metadata={"pairwise_run": run.number},
+        )
+        return Response(EvaluationPlanSerializer(plan).data)
+
+
+def _serialize_pairwise_ranked(result, projects_by_id):
+    project = projects_by_id.get(result.project_id)
+    return {
+        "rank": result.rank,
+        "project": str(project.public_id) if project else None,
+        "project_name": project.name if project else None,
+        "strength": result.strength,
+        "win_count": result.win_count,
+        "comparison_count": result.comparison_count,
+        "tie_break": result.tie_break,
+    }
+
+
+class PairwiseResultsView(PlanMixin):
+    """S01: pairwise analogue of ResultsView, same visibility rule."""
+
+    authentication_classes = [CookieSessionAuthentication]
+    permission_classes = [require_roles(Role.PARTICIPANT, Role.JUDGE, Role.ORGANIZER, Role.ADMIN)]
+
+    @extend_schema(responses=PairwiseRankedResultSchema(many=True))
+    def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        is_organizer = has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
+        if plan.published_pairwise_run_id is None:
+            return Response(status=404)
+        if not is_organizer and not plan.results_visible_to_participants:
+            raise PermissionDenied("Results are not yet visible to participants.")
+        results = pairwise_ranked_results(plan, plan.published_pairwise_run)
+        projects_by_id = {
+            p.id: p for p in Project.objects.filter(id__in=[r.project_id for r in results])
+        }
+        return Response([_serialize_pairwise_ranked(r, projects_by_id) for r in results])
+
+
+class PairwiseResultsCsvExportView(PlanMixin):
+    """S01: pairwise analogue of ResultsCsvExportView."""
+
+    @extend_schema(responses={(200, "text/csv"): OpenApiTypes.BINARY})
+    def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        if plan.published_pairwise_run_id is None:
+            return Response({"detail": "No results have been published for this plan."}, status=404)
+        results = pairwise_ranked_results(plan, plan.published_pairwise_run)
+        projects_by_id = {
+            p.id: p for p in Project.objects.filter(id__in=[r.project_id for r in results])
+        }
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="pairwise-results.csv"'
+        writer = csv.writer(response)
+        writer.writerow(
+            ["rank", "project", "strength", "win_count", "comparison_count", "tie_break"]
+        )
+        for result in results:
+            project = projects_by_id.get(result.project_id)
+            writer.writerow(
+                [
+                    result.rank,
+                    project.name if project else result.project_id,
+                    result.strength,
+                    result.win_count,
+                    result.comparison_count,
+                    result.tie_break if result.tie_break is not None else "",
+                ]
+            )
+        return response

@@ -64,3 +64,33 @@ class RankedResultSchema(serializers.Serializer):
     raw_score = serializers.FloatField(allow_null=True)
     final_score = serializers.FloatField()
     tie_break = serializers.IntegerField(allow_null=True)
+
+
+class PairwiseComparisonInputSchema(serializers.Serializer):
+    project_a = serializers.UUIDField()
+    project_b = serializers.UUIDField()
+    winner = serializers.UUIDField(required=False, allow_null=True)
+
+
+class PairwiseNextPairSchema(serializers.Serializer):
+    project_a = serializers.UUIDField()
+    project_b = serializers.UUIDField()
+
+
+class PairwiseRunInputSchema(serializers.Serializer):
+    prior_games = serializers.FloatField(min_value=0, required=False)
+
+
+class PairwiseResultsPublishInputSchema(serializers.Serializer):
+    pairwise_run = serializers.UUIDField()
+    tie_breaks = serializers.DictField(child=serializers.IntegerField(), required=False)
+
+
+class PairwiseRankedResultSchema(serializers.Serializer):
+    rank = serializers.IntegerField()
+    project = serializers.UUIDField(allow_null=True)
+    project_name = serializers.CharField(allow_null=True)
+    strength = serializers.FloatField()
+    win_count = serializers.FloatField()
+    comparison_count = serializers.FloatField()
+    tie_break = serializers.IntegerField(allow_null=True)

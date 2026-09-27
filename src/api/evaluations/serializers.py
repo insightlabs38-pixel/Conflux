@@ -11,6 +11,8 @@ from .models import (
     EvaluationPlan,
     EvaluationPool,
     NormalizationRun,
+    PairwiseComparison,
+    PairwiseRun,
     PoolMembership,
     RubricVersion,
 )
@@ -28,6 +30,7 @@ class EvaluationPlanSerializer(serializers.ModelSerializer):
     current_rubric_version = serializers.SerializerMethodField()
     active_assignment_version = serializers.SerializerMethodField()
     published_normalization_run = serializers.SerializerMethodField()
+    published_pairwise_run = serializers.SerializerMethodField()
 
     class Meta:
         model = EvaluationPlan
@@ -36,12 +39,14 @@ class EvaluationPlanSerializer(serializers.ModelSerializer):
             "name",
             "candidate_type",
             "pool_strategy",
+            "mode",
             "results_visible_to_participants",
             "draft_criteria",
             "pool",
             "current_rubric_version",
             "active_assignment_version",
             "published_normalization_run",
+            "published_pairwise_run",
             "created_at",
             "updated_at",
         ]
@@ -58,6 +63,9 @@ class EvaluationPlanSerializer(serializers.ModelSerializer):
         return (
             plan.published_normalization_run.number if plan.published_normalization_run_id else None
         )
+
+    def get_published_pairwise_run(self, plan) -> int | None:
+        return plan.published_pairwise_run.number if plan.published_pairwise_run_id else None
 
     def validate_draft_criteria(self, value):
         try:
@@ -166,6 +174,38 @@ class NormalizationRunSerializer(serializers.ModelSerializer):
             "iterations",
             "converged",
             "grand_mean",
+            "evidence",
+            "created_at",
+        ]
+
+
+class PairwiseComparisonSerializer(serializers.ModelSerializer):
+    public_id = serializers.UUIDField(read_only=True)
+    judge = serializers.UUIDField(source="judge.public_id", read_only=True)
+    project_a = serializers.UUIDField(source="project_a.public_id", read_only=True)
+    project_b = serializers.UUIDField(source="project_b.public_id", read_only=True)
+    winner = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PairwiseComparison
+        fields = ["public_id", "judge", "project_a", "project_b", "winner", "submitted_at"]
+        read_only_fields = ["submitted_at"]
+
+    def get_winner(self, comparison) -> str | None:
+        return str(comparison.winner.public_id) if comparison.winner_id else None
+
+
+class PairwiseRunSerializer(serializers.ModelSerializer):
+    public_id = serializers.UUIDField(read_only=True)
+
+    class Meta:
+        model = PairwiseRun
+        fields = [
+            "public_id",
+            "number",
+            "prior_games",
+            "iterations",
+            "converged",
             "evidence",
             "created_at",
         ]

@@ -58,6 +58,46 @@ normalized final score, every judge's estimated effect, iteration count,
 and convergence status. Re-running normalization creates a new numbered
 run; it never mutates a previous one.
 
+## Pairwise judging (S01)
+
+An `EvaluationPlan.mode` of `pairwise` swaps the weighted rubric above for
+head-to-head comparisons: a judge is shown two candidates at a time and
+records which one is better (or a tie), never a per-criterion score. It
+reuses the plan's assignment/pool/conflict-of-interest machinery unchanged
+-- only the ballot shape and aggregation differ -- and is otherwise fully
+separate from the rubric path: a plan is one mode or the other, and
+`Ballot`/`RubricVersion`/`NormalizationRun` never mix with
+`PairwiseComparison`/`PairwiseRun`.
+
+**Queue.** `GET .../pairwise/next/` hands a judge the two eligible,
+not-yet-compared-by-them candidates with the fewest recorded comparisons
+so far (`evaluations/views.py::PairwiseNextPairView`), so coverage spreads
+across the field instead of a judge exhausting one popular pair before
+ever seeing another candidate.
+
+**Aggregation.** `evaluations/pairwise.py::estimate_strengths` fits a
+Bradley-Terry model (`P(i beats j) = strength_i / (strength_i +
+strength_j)`) by the classical Newman/Hunter MM fixed-point iteration:
+deterministic, fixed sorted id order, same "same input, same output"
+guarantee as the rubric estimator. A declared tie contributes half a win
+in both directions rather than being dropped. Every candidate is
+additionally anchored against a fixed virtual opponent of strength 1.0
+(`prior_games` pseudo-comparisons, default 2): this both regularizes a
+candidate with zero or entirely one-sided real comparisons toward the
+field average instead of 0 or infinity, and fixes the model's otherwise
+free multiplicative scale, the pairwise analogue of NORM-001's ridge
+term. Computing a run freezes an immutable `PairwiseRun`, carrying each
+candidate's strength, raw win count and comparison count in `evidence`;
+rerunning creates a new numbered run, never mutating a previous one.
+Results publish/read/CSV-export through a dedicated `pairwise/results*`
+surface (`evaluations/results.py::pairwise_ranked_results`), parallel to
+the rubric one, sharing only the plan's `tie_breaks` field.
+
+**Known limitation.** Award winner selection
+(`awards/services.py::_source_evidence`) only reads
+`published_normalization_run`; a pairwise-mode plan's published ranking
+is not yet wired into evaluation-sourced award selection.
+
 ## Assumptions
 
 - Judge bias is additive and roughly constant across the candidates a

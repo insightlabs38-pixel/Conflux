@@ -5194,6 +5194,388 @@ paths:
               schema:
                 $ref: '#/components/schemas/NormalizationRun'
           description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/pairwise/comparisons/
+  : get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_pairwise_comparisons
+      description: |-
+        Pairwise comparison storage (S01): a judge submits a head-to-head
+        verdict; isolation mirrors BallotListCreateView -- a judge never sees
+        another judge's comparisons unless they organize.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PairwiseComparison'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_pairwise_comparisons
+      description: |-
+        Pairwise comparison storage (S01): a judge submits a head-to-head
+        verdict; isolation mirrors BallotListCreateView -- a judge never sees
+        another judge's comparisons unless they organize.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PairwiseComparisonInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PairwiseComparisonInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PairwiseComparisonInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PairwiseComparison'
+          description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/pairwise/next/
+  : get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_pairwise_next
+      description: |-
+        S01: the next pair of candidates for the requesting judge to compare
+        under a PAIRWISE-mode plan -- the two eligible, not-yet-compared-by-
+        this-judge candidates with the fewest comparisons so far, so coverage
+        balances across the field instead of a judge repeatedly seeing the
+        same popular pair. Returns null once every eligible pair has been
+        judged (or fewer than two eligible candidates exist).
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PairwiseNextPairSchema'
+          description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/pairwise/publish-results/
+  : post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_pairwise_publish_results
+      description: |-
+        S01: pairwise analogue of ResultsPublishView -- points a plan at the
+        PairwiseRun its published ranking is drawn from.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PairwiseResultsPublishInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PairwiseResultsPublishInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PairwiseResultsPublishInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvaluationPlan'
+          description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/pairwise/results/
+  : get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_pairwise_results
+      description: 'S01: pairwise analogue of ResultsView, same visibility rule.'
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PairwiseRankedResultSchema'
+          description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/pairwise/results.csv
+  : get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_pairwise_results_csv
+      description: 'S01: pairwise analogue of ResultsCsvExportView.'
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/pairwise/runs/
+  : get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_pairwise_runs
+      description: |-
+        Organizer-only: mirrors NormalizationRunListView but computes
+        Bradley-Terry strengths for a PAIRWISE-mode plan's comparisons (S01).
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PairwiseRun'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_pairwise_runs
+      description: |-
+        Organizer-only: mirrors NormalizationRunListView but computes
+        Bradley-Terry strengths for a PAIRWISE-mode plan's comparisons (S01).
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PairwiseRunInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PairwiseRunInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PairwiseRunInputSchema'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PairwiseRun'
+          description: ''
   ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/progress/
   : get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_progress
@@ -7824,6 +8206,8 @@ components:
           $ref: '#/components/schemas/CandidateTypeEnum'
         pool_strategy:
           $ref: '#/components/schemas/PoolStrategyEnum'
+        mode:
+          $ref: '#/components/schemas/ModeEnum'
         results_visible_to_participants:
           type: boolean
         draft_criteria: {}
@@ -7843,6 +8227,10 @@ components:
           type: integer
           nullable: true
           readOnly: true
+        published_pairwise_run:
+          type: integer
+          nullable: true
+          readOnly: true
         created_at:
           type: string
           format: date-time
@@ -7858,6 +8246,7 @@ components:
       - name
       - public_id
       - published_normalization_run
+      - published_pairwise_run
       - updated_at
     EvaluationPool:
       type: object
@@ -8466,6 +8855,14 @@ components:
       - public_id
       - recipient_count
       - subject
+    ModeEnum:
+      enum:
+      - rubric
+      - pairwise
+      type: string
+      description: |-
+        * `rubric` - Weighted rubric scoring
+        * `pairwise` - Head-to-head pairwise comparison
     MyTeamResponse:
       type: object
       properties:
@@ -8639,6 +9036,154 @@ components:
             format: uuid
       required:
       - block_ids
+    PairwiseComparison:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+          readOnly: true
+        judge:
+          type: string
+          format: uuid
+          readOnly: true
+        project_a:
+          type: string
+          format: uuid
+          readOnly: true
+        project_b:
+          type: string
+          format: uuid
+          readOnly: true
+        winner:
+          type: string
+          nullable: true
+          readOnly: true
+        submitted_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - judge
+      - project_a
+      - project_b
+      - public_id
+      - submitted_at
+      - winner
+    PairwiseComparisonInputSchema:
+      type: object
+      properties:
+        project_a:
+          type: string
+          format: uuid
+        project_b:
+          type: string
+          format: uuid
+        winner:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - project_a
+      - project_b
+    PairwiseNextPairSchema:
+      type: object
+      properties:
+        project_a:
+          type: string
+          format: uuid
+        project_b:
+          type: string
+          format: uuid
+      required:
+      - project_a
+      - project_b
+    PairwiseRankedResultSchema:
+      type: object
+      properties:
+        rank:
+          type: integer
+        project:
+          type: string
+          format: uuid
+          nullable: true
+        project_name:
+          type: string
+          nullable: true
+        strength:
+          type: number
+          format: double
+        win_count:
+          type: number
+          format: double
+        comparison_count:
+          type: number
+          format: double
+        tie_break:
+          type: integer
+          nullable: true
+      required:
+      - comparison_count
+      - project
+      - project_name
+      - rank
+      - strength
+      - tie_break
+      - win_count
+    PairwiseResultsPublishInputSchema:
+      type: object
+      properties:
+        pairwise_run:
+          type: string
+          format: uuid
+        tie_breaks:
+          type: object
+          additionalProperties:
+            type: integer
+      required:
+      - pairwise_run
+    PairwiseRun:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+          readOnly: true
+        number:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        prior_games:
+          type: number
+          format: double
+        iterations:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        converged:
+          type: boolean
+        evidence: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - converged
+      - created_at
+      - evidence
+      - iterations
+      - number
+      - prior_games
+      - public_id
+    PairwiseRunInputSchema:
+      type: object
+      properties:
+        prior_games:
+          type: number
+          format: double
+          minimum: 0
     ParticipantEventSummary:
       type: object
       properties:
@@ -8726,6 +9271,8 @@ components:
           $ref: '#/components/schemas/CandidateTypeEnum'
         pool_strategy:
           $ref: '#/components/schemas/PoolStrategyEnum'
+        mode:
+          $ref: '#/components/schemas/ModeEnum'
         results_visible_to_participants:
           type: boolean
         draft_criteria: {}
@@ -8742,6 +9289,10 @@ components:
           nullable: true
           readOnly: true
         published_normalization_run:
+          type: integer
+          nullable: true
+          readOnly: true
+        published_pairwise_run:
           type: integer
           nullable: true
           readOnly: true

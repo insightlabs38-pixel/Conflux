@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# UPG-001: back up authoritative state to a timestamped directory --
+# PostgreSQL (pg_dump, custom format) and the object store's raw volume
+# (a plain tar, since RustFS/SeaweedFS content is opaque blobs, not
+# something a logical dump format applies to).
+#
+# Valkey is deliberately never backed up: disposable cache/broker state
+# only, never authoritative (see config/settings.py's own comment on
+# VALKEY_URL) -- restoring it would be meaningless.
+#
+# Requires the stack already running (`make up`). Usage:
+#   scripts/backup [destination-directory]
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+destination="${1:-backups/$(date -u +%Y%m%dT%H%M%SZ)}"
+mkdir -p "$destination"
+
+echo "== database (pg_dump, custom format) =="
+docker compose exec -T db pg_dump \
+  -U "${POSTGRES_USER:-conflux}" -d "${POSTGRES_DB:-conflux}" \
+  --format=custom > "$destination/db.dump"
+
+echo "== object store (raw volume archive) =="
+objectstore_id="$(docker compose ps -q objectstore)"
+if [ -z "$objectstore_id" ]; then
+  echo "objectstore service is not running (make up first)." >&2
+  exit 1
+fi
+docker run --rm --volumes-from "$objectstore_id" conflux-api:latest \
+  tar czf - -C /data . > "$destination/objectstore.tar.gz"
+
+echo "backup written to $destination"

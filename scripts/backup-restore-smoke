@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# UPG-002: prove scripts/backup + scripts/restore actually recover real
+# state, not just "the commands didn't error": seed a uniquely-named
+# workspace, back up, delete it, restore, and confirm it (and only it,
+# under this marker) is back.
+#
+# Requires the stack already running (`make up`).
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+marker="restore-smoke-$(date -u +%s)"
+tmp_backup="backups/.smoke-$marker"
+
+cleanup() {
+  rm -rf "$tmp_backup"
+}
+trap cleanup EXIT
+
+run_shell() {
+  docker compose exec -T app python manage.py shell -c "$1"
+}
+
+echo "== seeding a known workspace ($marker) =="
+run_shell "
+from workspaces.models import Workspace
+Workspace.objects.create(name='$marker', slug='$marker')
+print('seeded')
+"
+
+echo "== backing up =="
+./scripts/backup "$tmp_backup"
+
+echo "== deleting the seeded workspace to prove restore does real work =="
+run_shell "
+from workspaces.models import Workspace
+Workspace.objects.filter(slug='$marker').delete()
+assert not Workspace.objects.filter(slug='$marker').exists()
+print('deleted')
+"
+
+echo "== restoring =="
+./scripts/restore "$tmp_backup"
+
+echo "== confirming the workspace came back =="
+run_shell "
+from workspaces.models import Workspace
+assert Workspace.objects.filter(slug='$marker').exists(), 'restore did not recover the seeded workspace'
+print('recovered')
+"
+
+echo "backup/restore smoke: PASS"

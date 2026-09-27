@@ -1,4 +1,4 @@
-.PHONY: format format-check lint test build verify-fast verify openapi-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance
+.PHONY: format format-check lint test build verify-fast verify openapi-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance backup restore backup-restore-smoke
 
 # Local checks use disposable keys; runtime deployments must supply their own.
 export DJANGO_SECRET_KEY ?= bootstrap-checks-only
@@ -69,3 +69,16 @@ cold-boot-smoke:
 # the running stack (`make up` first).
 acceptance:
 	./scripts/run-acceptance
+
+# Back up the running stack's authoritative state (Postgres + the object
+# store volume) to backups/<timestamp>/, or DEST if given.
+backup:
+	./scripts/backup $(DEST)
+
+# Restore a backup produced by `make backup` (DEST=path required).
+restore:
+	./scripts/restore $(DEST)
+
+# Proves backup+restore actually round-trip real state end to end.
+backup-restore-smoke:
+	./scripts/backup-restore-smoke

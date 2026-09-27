@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# UPG-002: restore a backup produced by scripts/backup. Stops the
+# application services first so nothing holds a connection or writes to
+# the object store mid-restore, then restarts them once both stores are
+# back in place.
+#
+# Requires the stack already running (`make up`). Usage:
+#   scripts/restore <backup-directory>
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+source_dir="${1:?Usage: scripts/restore <backup-directory>}"
+if [ ! -f "$source_dir/db.dump" ] || [ ! -f "$source_dir/objectstore.tar.gz" ]; then
+  echo "$source_dir does not look like a scripts/backup output (missing db.dump/objectstore.tar.gz)." >&2
+  exit 1
+fi
+
+echo "== stopping application services =="
+docker compose stop app worker beat
+
+echo "== restoring database =="
+docker compose exec -T db pg_restore \
+  -U "${POSTGRES_USER:-conflux}" -d "${POSTGRES_DB:-conflux}" \
+  --clean --if-exists --no-owner < "$source_dir/db.dump"
+
+echo "== restoring object store =="
+objectstore_id="$(docker compose ps -q objectstore)"
+if [ -z "$objectstore_id" ]; then
+  echo "objectstore service is not running (make up first)." >&2
+  exit 1
+fi
+docker run --rm -i --volumes-from "$objectstore_id" conflux-api:latest \
+  sh -c 'find /data -mindepth 1 -delete && tar xzf - -C /data' < "$source_dir/objectstore.tar.gz"
+
+echo "== restarting application services =="
+docker compose start app worker beat
+
+echo "restore complete from $source_dir"

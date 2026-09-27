@@ -6711,12 +6711,16 @@ paths:
   : get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_pairwise_next
       description: |-
-        S01: the next pair of candidates for the requesting judge to compare
-        under a PAIRWISE-mode plan -- the two eligible, not-yet-compared-by-
-        this-judge candidates with the fewest comparisons so far, so coverage
-        balances across the field instead of a judge repeatedly seeing the
-        same popular pair. Returns null once every eligible pair has been
-        judged (or fewer than two eligible candidates exist).
+        S01/VS02: the next pair of candidates for the requesting judge to
+        compare under a PAIRWISE-mode plan. Adaptive (VS02): once at least
+        one PairwiseRun exists, prefers the not-yet-compared-by-this-judge
+        pair whose current Bradley-Terry strengths are closest -- the most
+        informative comparison to run next -- among candidates still within
+        a bounded coverage-fairness window (see pairwise.select_next_pair);
+        before any run exists there is no ranking uncertainty to reduce yet,
+        so it falls back to the original minimal-comparison-count choice.
+        Returns null once every eligible pair has been judged (or fewer than
+        two eligible candidates exist).
       parameters:
       - in: path
         name: event_public_id

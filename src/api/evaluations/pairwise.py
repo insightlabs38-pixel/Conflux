@@ -20,6 +20,13 @@ from collections import defaultdict
 from dataclasses import dataclass
 
 REFERENCE_STRENGTH = 1.0
+# VS02: how far above the field's current minimum comparison count a
+# candidate may sit and still be offered for an uncertainty-driven pick.
+# Keeps coverage from drifting -- a badly under-compared candidate always
+# wins over closing in on an already well-compared, merely uncertain pair
+# -- while still leaving enough room for the uncertainty signal to matter
+# at all (slack 0 would degenerate this back into pure round-robin).
+FAIRNESS_SLACK = 1
 
 
 @dataclass(frozen=True)
@@ -85,6 +92,65 @@ def estimate_strengths(
         converged=converged,
         prior_games=prior_games,
     )
+
+
+def select_next_pair(candidate_ids, already_compared, comparison_counts, strengths=None):
+    """The next pair of candidate ids for a judge to compare (VS02).
+
+    Two-stage, deterministic (ties always broken by ascending-id
+    traversal order, never randomly):
+
+    1. Restrict to the "fair pool" -- candidates within `FAIRNESS_SLACK`
+       comparisons of the field's current minimum -- so coverage never
+       drifts far out of balance.
+    2. Within that pool, prefer the not-yet-judged-by-this-judge pair
+       whose current Bradley-Terry strengths are closest (the outcome
+       least predictable, so the most informative comparison to run
+       next). With no `strengths` yet -- nothing has been judged, so
+       there is no ranking uncertainty to reduce -- this degrades to the
+       same minimal-total-load choice pairwise judging always used.
+
+    Falls back to the full candidate set (still minimal-load, still
+    excluding already-compared pairs) only if the fair pool alone has
+    nothing left to offer, so a judge is never told "done" while a real
+    pair remains, just because that pair happened to sit outside the
+    slack window.
+
+    `candidate_ids`: eligible candidates, any order (sorted internally).
+    `already_compared`: set of (a, b) tuples in the exact order they were
+    stored, matching how the caller compares pairs, unchanged from
+    before this batch.
+    `comparison_counts`: {candidate_id: int}.
+    `strengths`: optional {candidate_id: float}, the latest PairwiseRun.
+    """
+    ids = sorted(candidate_ids)
+    if len(ids) < 2:
+        return None
+    counts = {c: comparison_counts.get(c, 0) for c in ids}
+    min_count = min(counts.values())
+    fair_pool = {c for c in ids if counts[c] <= min_count + FAIRNESS_SLACK}
+
+    def best_in(pool):
+        best_pair = None
+        best_key = None
+        for index, a in enumerate(ids):
+            if a not in pool:
+                continue
+            for b in ids[index + 1 :]:
+                if b not in pool or (a, b) in already_compared:
+                    continue
+                if strengths:
+                    sa = strengths.get(a, REFERENCE_STRENGTH)
+                    sb = strengths.get(b, REFERENCE_STRENGTH)
+                    key = (abs(sa - sb) / (sa + sb), counts[a] + counts[b])
+                else:
+                    key = (counts[a] + counts[b],)
+                if best_key is None or key < best_key:
+                    best_key = key
+                    best_pair = (a, b)
+        return best_pair
+
+    return best_in(fair_pool) or best_in(set(ids))
 
 
 def comparison_observations(plan):

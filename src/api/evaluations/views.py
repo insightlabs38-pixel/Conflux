@@ -1140,12 +1140,16 @@ class CandidateListView(PlanMixin):
 
 
 class PairwiseNextPairView(PlanMixin):
-    """S01: the next pair of candidates for the requesting judge to compare
-    under a PAIRWISE-mode plan -- the two eligible, not-yet-compared-by-
-    this-judge candidates with the fewest comparisons so far, so coverage
-    balances across the field instead of a judge repeatedly seeing the
-    same popular pair. Returns null once every eligible pair has been
-    judged (or fewer than two eligible candidates exist).
+    """S01/VS02: the next pair of candidates for the requesting judge to
+    compare under a PAIRWISE-mode plan. Adaptive (VS02): once at least
+    one PairwiseRun exists, prefers the not-yet-compared-by-this-judge
+    pair whose current Bradley-Terry strengths are closest -- the most
+    informative comparison to run next -- among candidates still within
+    a bounded coverage-fairness window (see pairwise.select_next_pair);
+    before any run exists there is no ranking uncertainty to reduce yet,
+    so it falls back to the original minimal-comparison-count choice.
+    Returns null once every eligible pair has been judged (or fewer than
+    two eligible candidates exist).
     """
 
     authentication_classes = [CookieSessionAuthentication]
@@ -1174,16 +1178,18 @@ class PairwiseNextPairView(PlanMixin):
             comparison_counts[a] += 1
             comparison_counts[b] += 1
 
-        best_pair = None
-        best_load = None
-        for index, project_a_id in enumerate(candidate_ids):
-            for project_b_id in candidate_ids[index + 1 :]:
-                if (project_a_id, project_b_id) in already_compared:
-                    continue
-                load = comparison_counts[project_a_id] + comparison_counts[project_b_id]
-                if best_load is None or load < best_load:
-                    best_load = load
-                    best_pair = (project_a_id, project_b_id)
+        latest_run = plan.pairwise_runs.order_by("-number").first()
+        strengths = (
+            {
+                int(project_id): data["strength"]
+                for project_id, data in latest_run.evidence["projects"].items()
+            }
+            if latest_run
+            else None
+        )
+        best_pair = pairwise.select_next_pair(
+            candidate_ids, already_compared, comparison_counts, strengths
+        )
 
         if best_pair is None:
             # See BallotDraftView.get for why this isn't a bare Response(None).

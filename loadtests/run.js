@@ -29,7 +29,7 @@ const scenarios = {
 };
 const writes = new Set();
 for (const item of config.requests) {
-  if (!/^https?:\/\//.test(item.url) || !['GET', 'POST', 'PATCH'].includes(item.method)) {
+  if (!/^https?:\/\//.test(item.url) || !['GET', 'POST', 'PUT', 'PATCH'].includes(item.method)) {
     throw new Error(`${name} has an invalid URL or method`);
   }
   if (!Number.isInteger(item.expect) || item.expect < 200 || item.expect > 299) {

@@ -85,6 +85,7 @@ class EvaluationPlanListView(StageEventMixin):
         return Response(EvaluationPlanSerializer(plans, many=True).data)
 
     @extend_schema(responses={201: EvaluationPlanSerializer})
+    @transaction.atomic
     def post(self, request, workspace_public_id, event_public_id, stage_public_id):
         serializer = EvaluationPlanSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -156,6 +157,7 @@ class RubricPublishView(PlanMixin):
         return Response(RubricVersionSerializer(version).data)
 
     @extend_schema(request=None, responses={201: RubricVersionSerializer})
+    @transaction.atomic
     def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         plan = self.get_plan()
         next_number = (plan.current_rubric_version.number + 1) if plan.current_rubric_version else 1
@@ -206,6 +208,7 @@ class BallotListCreateView(PlanMixin):
         return Response(BallotSerializer(ballots.prefetch_related("responses"), many=True).data)
 
     @extend_schema(request=BallotSubmitInputSchema, responses={201: BallotSerializer})
+    @transaction.atomic
     def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         if not has_any_role(request.user, self.get_workspace(), Role.JUDGE):
             raise ValidationError({"detail": "Only a judge may submit a ballot."})
@@ -425,6 +428,7 @@ class ConflictOfInterestListCreateView(OrganizerView):
         return Response(ConflictOfInterestSerializer(conflicts, many=True).data)
 
     @extend_schema(responses={201: ConflictOfInterestSerializer})
+    @transaction.atomic
     def post(self, request, workspace_public_id, event_public_id):
         is_organizer = has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
         judge_id = request.data.get("judge")
@@ -463,6 +467,7 @@ class AssignmentActivateView(PlanMixin):
     @extend_schema(
         request=AssignmentActivateInputSchema, responses={201: AssignmentVersionSerializer}
     )
+    @transaction.atomic
     def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         plan = self.get_plan()
         coverage = request.data.get("coverage", 3)
@@ -520,6 +525,7 @@ class NormalizationRunListView(PlanMixin):
         return Response(NormalizationRunSerializer(runs, many=True).data)
 
     @extend_schema(request=NormalizationInputSchema, responses={201: NormalizationRunSerializer})
+    @transaction.atomic
     def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         plan = self.get_plan()
         ridge_lambda = request.data.get("ridge_lambda", 1.0)
@@ -556,6 +562,7 @@ class ResultsPublishView(PlanMixin):
     """
 
     @extend_schema(request=ResultsPublishInputSchema, responses=EvaluationPlanSerializer)
+    @transaction.atomic
     def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         plan = self.get_plan()
         run = get_object_or_404(

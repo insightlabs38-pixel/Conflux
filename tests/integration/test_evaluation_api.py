@@ -1,5 +1,6 @@
 import pytest
 from accounts.models import Session, User
+from audit.models import AuditEvent
 from django.test import Client
 from evaluations.models import Ballot, RubricVersion
 from events.models import Event
@@ -40,6 +41,37 @@ def plans_url(workspace, event, stage, suffix=""):
         f"/api/v1/workspaces/{workspace.public_id}/events/{event.public_id}"
         f"/stages/{stage.public_id}/evaluation-plans/{suffix}"
     )
+
+
+@pytest.mark.django_db(transaction=True)
+def test_ballot_and_audit_commit_together_without_a_test_transaction():
+    workspace, event, stage, project, organizer, judge, _ = make_fixture()
+    organizer_client = cookie_client(Session.issue(organizer).token)
+    plan_id = organizer_client.post(
+        plans_url(workspace, event, stage),
+        data={"name": "Panel", "draft_criteria": CRITERIA},
+        content_type="application/json",
+    ).json()["public_id"]
+    assert (
+        organizer_client.post(
+            plans_url(workspace, event, stage, f"{plan_id}/publish-rubric/")
+        ).status_code
+        == 201
+    )
+    response = cookie_client(Session.issue(judge).token).post(
+        plans_url(workspace, event, stage, f"{plan_id}/ballots/"),
+        data={
+            "project": str(project.public_id),
+            "responses": [
+                {"criterion_id": "impact", "score": 8},
+                {"criterion_id": "polish", "score": 6},
+            ],
+        },
+        content_type="application/json",
+    )
+    assert response.status_code == 201
+    assert Ballot.objects.count() == 1
+    assert AuditEvent.objects.filter(action="ballot.submitted").count() == 1
 
 
 def test_organizer_configures_plan_and_publishes_a_rubric_version():

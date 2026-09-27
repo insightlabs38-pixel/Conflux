@@ -8,7 +8,7 @@ for scenario in baseline deadline_storm judging_open voting_spike gallery_spike;
 done
 ```
 
-The profile is a JSON object keyed by those five names. Each value has `vus` and a `requests` array; every request has `method` (`GET`, `POST`, or `PATCH`), absolute `url`, and expected `expect` status (2xx). Optional `headers`, `body`, and `maxDuration` are accepted. Example:
+The profile is a JSON object keyed by those five names. Each value has `vus` and a `requests` array; every request has `method` (`GET`, `POST`, `PUT`, or `PATCH`), absolute `url`, and expected `expect` status (2xx). Optional `headers`, `body`, and `maxDuration` are accepted. Example:
 
 ```json
 {"baseline":{"vus":2,"requests":[{"method":"GET","url":"http://127.0.0.1:8088/api/v1/health/","expect":200}]}}

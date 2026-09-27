@@ -2,6 +2,8 @@
 
 The live OpenAPI schema is available at `GET /api/v1/schema/`. The [checked schema](openapi.yaml) is generated from the same Django routes and verified with `make openapi-check`. Paths are versioned under `/api/v1/`; JSON routes end in `/`, and CSV exports end in `.csv`.
 
+See the [generated SDK guide](SDK.md) for TypeScript and Python clients derived from the checked schema.
+
 See [webhooks](WEBHOOKS.md) for subscription, signing, retry, and replay behavior.
 See [awards](AWARDS.md) for winner selection, publication, typed prizes, and fulfillment.
 See [the canonical archive](../architecture/CANONICAL_ARCHIVE.md) for exporting and importing an event's configuration.

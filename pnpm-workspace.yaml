@@ -2,5 +2,6 @@ packages:
   - src/web
   - src/embed
   - src/packages/*
+  - sdks/typescript
 allowBuilds:
   esbuild: true

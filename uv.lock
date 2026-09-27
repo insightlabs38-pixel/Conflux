@@ -192,6 +192,7 @@ dev = [
     { name = "pytest" },
     { name = "pytest-django" },
     { name = "pytest-xdist" },
+    { name = "pyyaml" },
     { name = "ruff" },
 ]
 
@@ -217,6 +218,7 @@ dev = [
     { name = "pytest", specifier = ">=8.4,<9" },
     { name = "pytest-django", specifier = ">=4.11,<5" },
     { name = "pytest-xdist", specifier = ">=3.8.0" },
+    { name = "pyyaml", specifier = ">=6,<7" },
     { name = "ruff", specifier = ">=0.13,<0.14" },
 ]
 

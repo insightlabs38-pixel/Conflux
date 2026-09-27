@@ -1,4 +1,4 @@
-.PHONY: format format-check lint test build verify-fast verify openapi-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance backup restore backup-restore-smoke
+.PHONY: format format-check lint test build verify-fast verify openapi-check sdk-generate sdk-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance backup restore backup-restore-smoke
 
 # Local checks use disposable keys; runtime deployments must supply their own.
 export DJANGO_SECRET_KEY ?= bootstrap-checks-only
@@ -25,12 +25,19 @@ build:
 	uv run --frozen python src/api/manage.py check
 	pnpm build
 
-verify-fast: format-check lint test build
+verify-fast: format-check lint test build sdk-check
 
 verify: verify-fast
 
 openapi-check:
 	uv run --frozen python scripts/check_openapi_artifact.py
+
+sdk-generate:
+	uv run --frozen python scripts/generate_sdks.py
+
+sdk-check: openapi-check
+	uv run --frozen python scripts/generate_sdks.py --check
+	pnpm --filter @conflux/sdk build
 
 # Authoritative clean/offline build+boot — full image rebuild every time.
 up:

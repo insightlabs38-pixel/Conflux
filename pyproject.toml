@@ -24,6 +24,7 @@ dev = [
   "pytest-django>=4.11,<5",
   "pytest-xdist>=3.8.0",
   "ruff>=0.13,<0.14",
+  "PyYAML>=6,<7",
 ]
 
 [tool.uv]

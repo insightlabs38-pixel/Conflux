@@ -1,9 +1,20 @@
+from accounts.credential_views import CredentialRevokeView, CredentialView
 from django.urls import include, path
 
 from .views import health
 
 urlpatterns = [
     path("health/", health, name="health"),
+    path(
+        "workspaces/<uuid:workspace_public_id>/api-credentials/",
+        CredentialView.as_view(),
+        name="api-credential-list",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/api-credentials/<uuid:credential_public_id>/revoke/",
+        CredentialRevokeView.as_view(),
+        name="api-credential-revoke",
+    ),
     path("accounts/", include("accounts.urls")),
     path("workspaces/", include("workspaces.urls")),
     path("audit/", include("audit.urls")),

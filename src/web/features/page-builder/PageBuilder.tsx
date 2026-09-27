@@ -17,7 +17,12 @@ type Kind =
   | "results"
   | "rich_text"
   | "cta";
-type Block = { public_id: string; kind: Kind; position: number; config: Record<string, unknown> };
+type Block = {
+  public_id: string;
+  kind: Kind;
+  position: number;
+  config: Record<string, unknown>;
+};
 type Page = { public_id: string; theme: Theme };
 
 const KIND_LABELS: Record<Kind, string> = {
@@ -51,7 +56,11 @@ function message(value: unknown): string {
   return "Request failed.";
 }
 
-async function request<T>(url: string, method = "GET", body?: object): Promise<T> {
+async function request<T>(
+  url: string,
+  method = "GET",
+  body?: object,
+): Promise<T> {
   const response = await fetch(url, {
     method,
     credentials: "include",
@@ -67,11 +76,14 @@ async function request<T>(url: string, method = "GET", body?: object): Promise<T
     }
     throw new Error(message(detail));
   }
-  return response.status === 204 ? (undefined as T) : (response.json() as Promise<T>);
+  return response.status === 204
+    ? (undefined as T)
+    : (response.json() as Promise<T>);
 }
 
 function defaultConfig(kind: Kind): Record<string, unknown> {
-  if (kind === "hero") return { title: "", subtitle: "", cta_label: "", cta_href: "" };
+  if (kind === "hero")
+    return { title: "", subtitle: "", cta_label: "", cta_href: "" };
   if (kind === "cta") return { label: "", href: "" };
   if (kind === "rich_text") return { html: "" };
   if (kind === "gallery") return { limit: 6 };
@@ -127,7 +139,10 @@ function ListEditor({
       <Button
         variant="secondary"
         onClick={() =>
-          onChange([...items, Object.fromEntries(fields.map((field) => [field, ""]))])
+          onChange([
+            ...items,
+            Object.fromEntries(fields.map((field) => [field, ""])),
+          ])
         }
       >
         Add item
@@ -180,21 +195,27 @@ function BlockEditor({
             Subtitle{" "}
             <input
               value={String(config.subtitle ?? "")}
-              onChange={(e) => setConfig({ ...config, subtitle: e.target.value })}
+              onChange={(e) =>
+                setConfig({ ...config, subtitle: e.target.value })
+              }
             />
           </label>
           <label>
             CTA label{" "}
             <input
               value={String(config.cta_label ?? "")}
-              onChange={(e) => setConfig({ ...config, cta_label: e.target.value })}
+              onChange={(e) =>
+                setConfig({ ...config, cta_label: e.target.value })
+              }
             />
           </label>
           <label>
             CTA link{" "}
             <input
               value={String(config.cta_href ?? "")}
-              onChange={(e) => setConfig({ ...config, cta_href: e.target.value })}
+              onChange={(e) =>
+                setConfig({ ...config, cta_href: e.target.value })
+              }
             />
           </label>
         </>
@@ -234,7 +255,9 @@ function BlockEditor({
             min={1}
             max={24}
             value={Number(config.limit ?? 6)}
-            onChange={(e) => setConfig({ ...config, limit: Number(e.target.value) })}
+            onChange={(e) =>
+              setConfig({ ...config, limit: Number(e.target.value) })
+            }
           />
         </label>
       )}
@@ -301,11 +324,17 @@ export function PageBuilder({
   }
 
   async function saveBlock(block: Block, config: Record<string, unknown>) {
-    const updated = await request<Block>(base + `blocks/${block.public_id}/`, "PATCH", {
-      config,
-    });
+    const updated = await request<Block>(
+      base + `blocks/${block.public_id}/`,
+      "PATCH",
+      {
+        config,
+      },
+    );
     setBlocks((items) =>
-      items.map((item) => (item.public_id === block.public_id ? updated : item)),
+      items.map((item) =>
+        item.public_id === block.public_id ? updated : item,
+      ),
     );
   }
 
@@ -336,7 +365,10 @@ export function PageBuilder({
       {page && (
         <label>
           Theme{" "}
-          <select value={page.theme} onChange={(e) => void setTheme(e.target.value as Theme)}>
+          <select
+            value={page.theme}
+            onChange={(e) => void setTheme(e.target.value as Theme)}
+          >
             <option value="default">Default</option>
             <option value="dark">Dark</option>
             <option value="minimal">Minimal</option>
@@ -349,26 +381,39 @@ export function PageBuilder({
         <ol aria-label="Page blocks">
           {blocks.map((block, index) => (
             <li key={block.public_id}>
-              <Badge tone="info">{KIND_LABELS[block.kind]}</Badge> {summarize(block)}
+              <Badge tone="info">{KIND_LABELS[block.kind]}</Badge>{" "}
+              {summarize(block)}
               <div>
-                <Button variant="secondary" onClick={() => void move(index, -1)}>
+                <Button
+                  variant="secondary"
+                  onClick={() => void move(index, -1)}
+                >
                   Move up
                 </Button>
                 <Button variant="secondary" onClick={() => void move(index, 1)}>
                   Move down
                 </Button>
-                <Button variant="danger" onClick={() => void removeBlock(block)}>
+                <Button
+                  variant="danger"
+                  onClick={() => void removeBlock(block)}
+                >
                   Remove
                 </Button>
               </div>
-              <BlockEditor block={block} onSave={(config) => saveBlock(block, config)} />
+              <BlockEditor
+                block={block}
+                onSave={(config) => saveBlock(block, config)}
+              />
             </li>
           ))}
         </ol>
       )}
       <label>
         Add block{" "}
-        <select value={addKind} onChange={(e) => setAddKind(e.target.value as Kind)}>
+        <select
+          value={addKind}
+          onChange={(e) => setAddKind(e.target.value as Kind)}
+        >
           {Object.entries(KIND_LABELS).map(([kind, label]) => (
             <option key={kind} value={kind}>
               {label}

@@ -16,16 +16,19 @@ Or self-hosted, fully offline (see [examples/embed.html](../../examples/embed.ht
 
 ```html
 <script src="./conflux-gallery.js"></script>
-<conflux-gallery event="EVENT_PUBLIC_ID" api-base="https://your-conflux-host.example.com"></conflux-gallery>
+<conflux-gallery
+  event="EVENT_PUBLIC_ID"
+  api-base="https://your-conflux-host.example.com"
+></conflux-gallery>
 ```
 
 ## Attributes
 
-| Attribute  | Required | Meaning |
-|------------|----------|---------|
-| `event`    | yes      | The event's `public_id` (UUID). |
+| Attribute  | Required | Meaning                                                                                                                                                      |
+| ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `event`    | yes      | The event's `public_id` (UUID).                                                                                                                              |
 | `api-base` | no       | Origin to fetch from (default: same origin as the embedding page). Set this when the widget's `<script>` isn't served from the same host as the Conflux API. |
-| `q`        | no       | Initial search filter, forwarded as `?q=` to the gallery API. |
+| `q`        | no       | Initial search filter, forwarded as `?q=` to the gallery API.                                                                                                |
 
 The component only ever reads `GET /api/v1/events/<event>/gallery/` —
 public, unauthenticated, and safe to call from any origin. It only shows

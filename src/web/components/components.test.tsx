@@ -79,15 +79,15 @@ describe("state primitives", () => {
 
 describe("accessibility baseline", () => {
   it("SkipLink points at the shell's main landmark id", () => {
-    expect(renderToStaticMarkup(<SkipLink targetId="main-content" />)).toContain(
-      'href="#main-content"',
-    );
+    expect(
+      renderToStaticMarkup(<SkipLink targetId="main-content" />),
+    ).toContain('href="#main-content"');
   });
 
   it("VisuallyHidden content is present in markup for assistive tech", () => {
-    expect(renderToStaticMarkup(<VisuallyHidden>Column: status</VisuallyHidden>)).toContain(
-      "Column: status",
-    );
+    expect(
+      renderToStaticMarkup(<VisuallyHidden>Column: status</VisuallyHidden>),
+    ).toContain("Column: status");
   });
 
   it("AppShell wires the skip link to a keyboard-focusable main landmark and labels nav", () => {
@@ -106,7 +106,9 @@ describe("accessibility baseline", () => {
     const html = renderToStaticMarkup(
       <AppShell nav={<a href="/x">Link</a>}>body</AppShell>,
     );
-    expect(html.indexOf("cx-skip-link")).toBeLessThan(html.indexOf("cx-shell__nav"));
+    expect(html.indexOf("cx-skip-link")).toBeLessThan(
+      html.indexOf("cx-shell__nav"),
+    );
   });
 
   it("AppShell renders the brand as a page heading by default, or a paragraph when the page owns its own h1", () => {

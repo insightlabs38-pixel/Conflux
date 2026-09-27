@@ -1,7 +1,7 @@
 # External qualifier import (EXTQ-001/002)
 
 Lets an API credential or organizer report the outcome of a qualifying
-round run *outside* this platform — a partner site, a manual review, an
+round run _outside_ this platform — a partner site, a manual review, an
 earlier season — as a direct entry into one of this event's stages.
 
 `POST /api/v1/workspaces/<workspace>/events/<event>/stages/<stage>/external-qualifiers/`
@@ -24,13 +24,13 @@ call for a given `external_ref` must supply `project` (an existing
 Project's `public_id` in this event); that pairing is recorded once as an
 `ExternalQualifierBinding` and every later call for the same `external_ref`
 resolves to that same Project without the caller ever needing to learn our
-internal id. A call that supplies a *different* `project` for an
+internal id. A call that supplies a _different_ `project` for an
 already-bound `external_ref` is rejected outright — the binding is never
 silently reassigned.
 
 Each project's team is entered into the target stage via
 `StageEntry.objects.enter` directly (not `advance_stage`, which requires an
-existing entry in a *from* stage — external qualifiers by definition have
+existing entry in a _from_ stage — external qualifiers by definition have
 no local stage history to advance from). A project whose team already
 holds an active entry in that stage is left alone: re-running the same
 import call twice never creates a duplicate entry.

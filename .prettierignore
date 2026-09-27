@@ -7,3 +7,8 @@ coverage
 # Vendored verbatim from the official challenge spec — kept byte-identical
 # to https://dogfoodhack.com/spec/fixtures.json, not reformatted.
 fixtures/fixtures.json
+# Generated API contract and evidence reports retain their source formatting.
+docs/api/openapi.yaml
+docs/batches/
+# Django template syntax is not HTML and cannot be parsed by Prettier.
+src/api/presentation/templates/

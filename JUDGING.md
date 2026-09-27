@@ -45,7 +45,7 @@ a tolerance, capped at a fixed maximum iteration count. Same input, same
 output, always -- see `evaluations/normalization.py::estimate_judge_effects`.
 
 **Aggregation.** A ballot's aggregate score always uses the weights frozen
-into *that ballot's own* `RubricVersion` (`evaluations/rubric.py::weighted_score`),
+into _that ballot's own_ `RubricVersion` (`evaluations/rubric.py::weighted_score`),
 never the plan's current draft or latest published weights, and never a
 weighting numerically re-derived from the score data itself. Republishing
 a rubric with different weights can never retroactively change what an
@@ -74,7 +74,7 @@ run; it never mutates a previous one.
 
 - **Weak bridges are diagnosed, not fixed.** `connectivity.cut_vertices`
   reports a judge whose removal would disconnect the graph, but the
-  assignment repair only guarantees *one* connected component, not
+  assignment repair only guarantees _one_ connected component, not
   2-edge-connectivity; a single cut judge can still be the sole link
   between two halves of the pool.
 - **No track-conditional bias.** A judge's effect is a single scalar across

@@ -57,7 +57,7 @@ only it) is back. See `scripts/backup-restore-smoke`.
 Exporting/importing an event, saving/instantiating an event template, and
 cloning an event all go through the same canonical archive described in
 `docs/architecture/CANONICAL_ARCHIVE.md`. Its `format_version` is the
-compatibility contract for *that* document, independent of the database
+compatibility contract for _that_ document, independent of the database
 schema above: a build only ever reads the `format_version` values it was
 written to understand, and an archive from an incompatible version is
 rejected outright with a named error, never silently reinterpreted.
@@ -72,7 +72,7 @@ that decision gets recorded.
 
 ## Prior-schema migration smoke fixture
 
-Once a prior released schema/fixture exists to migrate *from* (there is
+Once a prior released schema/fixture exists to migrate _from_ (there is
 only one released version so far, so there is nothing to smoke-test yet),
 `tests/compatibility/` is where that regression fixture and test belong,
 following the same pattern as `test_canonical_archive.py` and

@@ -37,7 +37,11 @@ function message(error: unknown): string {
   return "Request failed.";
 }
 
-async function request<T>(path: string, method = "GET", body?: object): Promise<T> {
+async function request<T>(
+  path: string,
+  method = "GET",
+  body?: object,
+): Promise<T> {
   const response = await fetch(path, {
     method,
     credentials: "include",
@@ -53,10 +57,18 @@ async function request<T>(path: string, method = "GET", body?: object): Promise<
     }
     throw new Error(message(detail));
   }
-  return response.status === 204 ? (undefined as T) : (response.json() as Promise<T>);
+  return response.status === 204
+    ? (undefined as T)
+    : (response.json() as Promise<T>);
 }
 
-export function EventTemplatesPanel({ workspaceId, onCreated }: { workspaceId: string; onCreated?: (eventId: string) => void }) {
+export function EventTemplatesPanel({
+  workspaceId,
+  onCreated,
+}: {
+  workspaceId: string;
+  onCreated?: (eventId: string) => void;
+}) {
   const base = `/api/v1/workspaces/${workspaceId}/`;
   const [events, setEvents] = useState<EventSummary[]>([]);
   const [templates, setTemplates] = useState<Template[]>([]);
@@ -66,7 +78,11 @@ export function EventTemplatesPanel({ workspaceId, onCreated }: { workspaceId: s
   const [templateName, setTemplateName] = useState("");
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
-  const [created, setCreated] = useState<{ public_id: string; name: string; slug: string } | null>(null);
+  const [created, setCreated] = useState<{
+    public_id: string;
+    name: string;
+    slug: string;
+  } | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -85,7 +101,9 @@ export function EventTemplatesPanel({ workspaceId, onCreated }: { workspaceId: s
 
   function toggleSection(key: string) {
     setSections((current) =>
-      current.includes(key) ? current.filter((item) => item !== key) : [...current, key],
+      current.includes(key)
+        ? current.filter((item) => item !== key)
+        : [...current, key],
     );
   }
 
@@ -130,12 +148,17 @@ export function EventTemplatesPanel({ workspaceId, onCreated }: { workspaceId: s
     event.preventDefault();
     void run(async () => {
       if (!sourceEvent) throw new Error("Choose a source event first.");
-      if (!name.trim() || !slug.trim()) throw new Error("Name and slug are required.");
-      const result = await request<{ public_id: string; name: string; slug: string }>(
-        base + `events/${sourceEvent}/clone/`,
-        "POST",
-        { name: name.trim(), slug: slug.trim(), sections },
-      );
+      if (!name.trim() || !slug.trim())
+        throw new Error("Name and slug are required.");
+      const result = await request<{
+        public_id: string;
+        name: string;
+        slug: string;
+      }>(base + `events/${sourceEvent}/clone/`, "POST", {
+        name: name.trim(),
+        slug: slug.trim(),
+        sections,
+      });
       setCreated(result);
       onCreated?.(result.public_id);
       setName("");
@@ -143,15 +166,22 @@ export function EventTemplatesPanel({ workspaceId, onCreated }: { workspaceId: s
     });
   }
 
-  async function instantiate(template: Template, instantiateName: string, instantiateSlug: string) {
+  async function instantiate(
+    template: Template,
+    instantiateName: string,
+    instantiateSlug: string,
+  ) {
     await run(async () => {
       if (!instantiateName.trim() || !instantiateSlug.trim())
         throw new Error("Name and slug are required.");
-      const result = await request<{ public_id: string; name: string; slug: string }>(
-        base + `event-templates/${template.public_id}/instantiate/`,
-        "POST",
-        { name: instantiateName.trim(), slug: instantiateSlug.trim() },
-      );
+      const result = await request<{
+        public_id: string;
+        name: string;
+        slug: string;
+      }>(base + `event-templates/${template.public_id}/instantiate/`, "POST", {
+        name: instantiateName.trim(),
+        slug: instantiateSlug.trim(),
+      });
       setCreated(result);
       onCreated?.(result.public_id);
     });
@@ -160,7 +190,9 @@ export function EventTemplatesPanel({ workspaceId, onCreated }: { workspaceId: s
   async function removeTemplate(template: Template) {
     await run(async () => {
       await request(base + `event-templates/${template.public_id}/`, "DELETE");
-      setTemplates((current) => current.filter((item) => item.public_id !== template.public_id));
+      setTemplates((current) =>
+        current.filter((item) => item.public_id !== template.public_id),
+      );
     });
   }
 
@@ -173,7 +205,11 @@ export function EventTemplatesPanel({ workspaceId, onCreated }: { workspaceId: s
         </p>
       )}
       <label htmlFor="tpl-source">Source event</label>
-      <select id="tpl-source" value={sourceEvent} onChange={(e) => setSourceEvent(e.target.value)}>
+      <select
+        id="tpl-source"
+        value={sourceEvent}
+        onChange={(e) => setSourceEvent(e.target.value)}
+      >
         <option value="">Choose an event</option>
         {events.map((item) => (
           <option key={item.public_id} value={item.public_id}>
@@ -214,14 +250,28 @@ export function EventTemplatesPanel({ workspaceId, onCreated }: { workspaceId: s
           onChange={(e) => setTemplateName(e.target.value)}
           required
         />
-        <Button type="submit" disabled={busy}>Save as template</Button>
+        <Button type="submit" disabled={busy}>
+          Save as template
+        </Button>
       </form>
       <form onSubmit={cloneDirectly}>
         <label htmlFor="clone-name">New event name</label>
-        <input id="clone-name" value={name} onChange={(e) => setName(e.target.value)} required />
+        <input
+          id="clone-name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
         <label htmlFor="clone-slug">New event slug</label>
-        <input id="clone-slug" value={slug} onChange={(e) => setSlug(e.target.value)} required />
-        <Button type="submit" disabled={busy}>Clone directly to a new event now</Button>
+        <input
+          id="clone-slug"
+          value={slug}
+          onChange={(e) => setSlug(e.target.value)}
+          required
+        />
+        <Button type="submit" disabled={busy}>
+          Clone directly to a new event now
+        </Button>
       </form>
       <h4>Saved templates</h4>
       {templates.length === 0 ? (
@@ -248,7 +298,11 @@ function TemplateRow({
   onDelete,
 }: {
   template: Template;
-  onInstantiate: (template: Template, name: string, slug: string) => Promise<void>;
+  onInstantiate: (
+    template: Template,
+    name: string,
+    slug: string,
+  ) => Promise<void>;
   onDelete: (template: Template) => Promise<void>;
 }) {
   const [name, setName] = useState("");
@@ -276,7 +330,11 @@ function TemplateRow({
         >
           Create event from template
         </Button>
-        <Button type="button" variant="danger" onClick={() => void onDelete(template)}>
+        <Button
+          type="button"
+          variant="danger"
+          onClick={() => void onDelete(template)}
+        >
           Delete template
         </Button>
       </div>

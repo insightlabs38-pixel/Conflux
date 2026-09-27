@@ -28,7 +28,11 @@ function message(value: unknown): string {
   return "Request failed.";
 }
 
-async function request<T>(url: string, method = "GET", body?: object): Promise<T> {
+async function request<T>(
+  url: string,
+  method = "GET",
+  body?: object,
+): Promise<T> {
   const response = await fetch(url, {
     method,
     credentials: "include",
@@ -44,12 +48,16 @@ async function request<T>(url: string, method = "GET", body?: object): Promise<T
     }
     throw new Error(message(detail));
   }
-  return response.status === 204 ? (undefined as T) : (response.json() as Promise<T>);
+  return response.status === 204
+    ? (undefined as T)
+    : (response.json() as Promise<T>);
 }
 
 function toLocalInput(value: string): string {
   const date = new Date(value);
-  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
+    .toISOString()
+    .slice(0, 16);
 }
 
 export function CommunityVotingBuilder({
@@ -85,9 +93,13 @@ export function CommunityVotingBuilder({
   async function issueTokens() {
     setError("");
     try {
-      const tokens = await request<{ token: string }[]>(base + "tokens/", "POST", {
-        count: tokenCount,
-      });
+      const tokens = await request<{ token: string }[]>(
+        base + "tokens/",
+        "POST",
+        {
+          count: tokenCount,
+        },
+      );
       setIssuedTokens(tokens.map((t) => t.token));
     } catch (cause) {
       setError(message(cause));
@@ -112,96 +124,108 @@ export function CommunityVotingBuilder({
 
   return (
     <>
-    <Card title="Community voting">
-      {error && <p role="alert">{error}</p>}
-      <label>
-        Identity mode{" "}
-        <select
-          value={plan.identity_mode}
-          onChange={(e) => void patch({ identity_mode: e.target.value as IdentityMode })}
-        >
-          <option value="authenticated">Authenticated workspace member</option>
-          <option value="email_link">Email magic link</option>
-          <option value="token">Pre-issued token</option>
-        </select>
-      </label>
-      <label>
-        Opens{" "}
-        <input
-          type="datetime-local"
-          value={toLocalInput(plan.opens_at)}
-          onChange={(e) => void patch({ opens_at: new Date(e.target.value).toISOString() })}
-        />
-      </label>
-      <label>
-        Closes{" "}
-        <input
-          type="datetime-local"
-          value={toLocalInput(plan.closes_at)}
-          onChange={(e) => void patch({ closes_at: new Date(e.target.value).toISOString() })}
-        />
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          checked={plan.allow_comments}
-          onChange={(e) => void patch({ allow_comments: e.target.checked })}
-        />{" "}
-        Allow comments
-      </label>
-      <label>
-        Comment visibility{" "}
-        <select
-          value={plan.comment_visibility}
-          onChange={(e) => void patch({ comment_visibility: e.target.value as CommentVisibility })}
-        >
-          <option value="everyone">Any workspace member</option>
-          <option value="organizer_judge">Organizers and judges</option>
-          <option value="organizer">Organizer only</option>
-        </select>
-      </label>
+      <Card title="Community voting">
+        {error && <p role="alert">{error}</p>}
+        <label>
+          Identity mode{" "}
+          <select
+            value={plan.identity_mode}
+            onChange={(e) =>
+              void patch({ identity_mode: e.target.value as IdentityMode })
+            }
+          >
+            <option value="authenticated">
+              Authenticated workspace member
+            </option>
+            <option value="email_link">Email magic link</option>
+            <option value="token">Pre-issued token</option>
+          </select>
+        </label>
+        <label>
+          Opens{" "}
+          <input
+            type="datetime-local"
+            value={toLocalInput(plan.opens_at)}
+            onChange={(e) =>
+              void patch({ opens_at: new Date(e.target.value).toISOString() })
+            }
+          />
+        </label>
+        <label>
+          Closes{" "}
+          <input
+            type="datetime-local"
+            value={toLocalInput(plan.closes_at)}
+            onChange={(e) =>
+              void patch({ closes_at: new Date(e.target.value).toISOString() })
+            }
+          />
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={plan.allow_comments}
+            onChange={(e) => void patch({ allow_comments: e.target.checked })}
+          />{" "}
+          Allow comments
+        </label>
+        <label>
+          Comment visibility{" "}
+          <select
+            value={plan.comment_visibility}
+            onChange={(e) =>
+              void patch({
+                comment_visibility: e.target.value as CommentVisibility,
+              })
+            }
+          >
+            <option value="everyone">Any workspace member</option>
+            <option value="organizer_judge">Organizers and judges</option>
+            <option value="organizer">Organizer only</option>
+          </select>
+        </label>
 
-      {plan.identity_mode === "token" && (
-        <div>
-          <label>
-            Tokens to issue{" "}
-            <input
-              type="number"
-              min={1}
-              max={500}
-              value={tokenCount}
-              onChange={(e) => setTokenCount(Number(e.target.value))}
-            />
-          </label>
-          <Button variant="secondary" onClick={() => void issueTokens()}>
-            Issue tokens
-          </Button>
-          {issuedTokens.length > 0 && (
-            <p>
-              Issued {issuedTokens.length} tokens: {issuedTokens.join(", ")}
-            </p>
-          )}
-        </div>
-      )}
+        {plan.identity_mode === "token" && (
+          <div>
+            <label>
+              Tokens to issue{" "}
+              <input
+                type="number"
+                min={1}
+                max={500}
+                value={tokenCount}
+                onChange={(e) => setTokenCount(Number(e.target.value))}
+              />
+            </label>
+            <Button variant="secondary" onClick={() => void issueTokens()}>
+              Issue tokens
+            </Button>
+            {issuedTokens.length > 0 && (
+              <p>
+                Issued {issuedTokens.length} tokens: {issuedTokens.join(", ")}
+              </p>
+            )}
+          </div>
+        )}
 
-      <p>
-        Results:{" "}
-        <Badge tone={plan.results_published_at ? "success" : "neutral"}>
-          {plan.results_published_at ? "published" : "not published"}
-        </Badge>
-      </p>
-      <Button onClick={() => void publishResults()}>Publish results</Button>
-      {results && (
-        <ul>
-          {results.map((result) => (
-            <li key={result.project}>
-              {result.name}: {result.votes}
-            </li>
-          ))}
-        </ul>
-      )}
-    </Card>
-    <FraudReview workspaceId={workspaceId} eventId={eventId} />
+        <p>
+          Results:{" "}
+          <Badge tone={plan.results_published_at ? "success" : "neutral"}>
+            {plan.results_published_at ? "published" : "not published"}
+          </Badge>
+        </p>
+        <Button onClick={() => void publishResults()}>Publish results</Button>
+        {results && (
+          <ul>
+            {results.map((result) => (
+              <li key={result.project}>
+                {result.name}: {result.votes}
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+      <FraudReview workspaceId={workspaceId} eventId={eventId} />
     </>
   );
 }

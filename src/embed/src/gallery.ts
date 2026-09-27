@@ -44,7 +44,9 @@ function escapeHtml(value: string): string {
 }
 
 function renderCard(item: GalleryItem): string {
-  const track = item.track ? `<span class="badge">${escapeHtml(item.track)}</span>` : "";
+  const track = item.track
+    ? `<span class="badge">${escapeHtml(item.track)}</span>`
+    : "";
   const team = item.team ? `<p class="team">${escapeHtml(item.team)}</p>` : "";
   const description = item.description
     ? `<p class="description">${escapeHtml(item.description)}</p>`
@@ -86,7 +88,10 @@ class ConfluxGallery extends HTMLElement {
   private galleryUrl(eventId: string): string {
     const apiBase = this.getAttribute("api-base") ?? "";
     const q = this.getAttribute("q") ?? "";
-    const url = new URL(`${apiBase}/api/v1/events/${eventId}/gallery/`, window.location.href);
+    const url = new URL(
+      `${apiBase}/api/v1/events/${eventId}/gallery/`,
+      window.location.href,
+    );
     if (q) url.searchParams.set("q", q);
     return url.toString();
   }
@@ -94,7 +99,9 @@ class ConfluxGallery extends HTMLElement {
   private async render() {
     const eventId = this.getAttribute("event");
     if (!eventId) {
-      this.shell('<p role="alert">conflux-gallery requires an "event" attribute.</p>');
+      this.shell(
+        '<p role="alert">conflux-gallery requires an "event" attribute.</p>',
+      );
       return;
     }
     this.shell("<p>Loading projects&hellip;</p>");
@@ -103,7 +110,9 @@ class ConfluxGallery extends HTMLElement {
     try {
       const response = await fetch(this.galleryUrl(eventId));
       if (!response.ok) {
-        throw new Error(`Gallery request failed with status ${response.status}.`);
+        throw new Error(
+          `Gallery request failed with status ${response.status}.`,
+        );
       }
       items = await response.json();
     } catch (error) {

@@ -5,7 +5,14 @@ Workspace organizers manage subscriptions at `GET/POST /api/v1/workspaces/{works
 The worker stages matching committed outbox events and sends a JSON envelope:
 
 ```json
-{"version":"1","id":"EVENT_UUID","type":"event.status_changed","created_at":"2026-09-27T06:00:00+00:00","workspace":"WORKSPACE_UUID","data":{"event":"EVENT_UUID","status":"open"}}
+{
+  "version": "1",
+  "id": "EVENT_UUID",
+  "type": "event.status_changed",
+  "created_at": "2026-09-27T06:00:00+00:00",
+  "workspace": "WORKSPACE_UUID",
+  "data": { "event": "EVENT_UUID", "status": "open" }
+}
 ```
 
 Each POST has `X-Conflux-Event-Id`, `X-Conflux-Timestamp` (Unix seconds), and `X-Conflux-Signature: v1=HEX`. Verify the HMAC-SHA256 of the exact received body prefixed by `timestamp + "."`, using the issued secret as UTF-8 bytes. Compare signatures in constant time and reject old timestamps. Deduplicate by event ID: delivery is at least once, including after worker interruption or manual replay. Redirects are never followed. The destination is resolved and checked again for every attempt.

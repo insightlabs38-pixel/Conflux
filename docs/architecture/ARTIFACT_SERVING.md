@@ -1,6 +1,6 @@
 # Stored artifact serving (GSEC-002)
 
-`infra/Caddyfile` reverse-proxies the object store under the *same origin*
+`infra/Caddyfile` reverse-proxies the object store under the _same origin_
 as the application (`/{{S3_BUCKET_NAME}}/*` on the same host:port as
 `/api/v1/*`), so that a plain `<a href>` in the server-rendered public
 gallery (`presentation/templates/presentation/project_detail.html`) can

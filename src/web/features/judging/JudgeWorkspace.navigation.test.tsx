@@ -40,9 +40,17 @@ async function choose(select: HTMLSelectElement, value: string) {
 
 describe("judge navigation", () => {
   it("shows an empty state when no events are available", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => [] }));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => [] }),
+    );
     act(() => root.render(<JudgeWorkspace workspaceId="w" />));
-    await waitFor(() => container.textContent?.includes("No events are available for judging") ?? false);
+    await waitFor(
+      () =>
+        container.textContent?.includes(
+          "No events are available for judging",
+        ) ?? false,
+    );
     expect(container.textContent).not.toContain("Loading judging events");
   });
 

@@ -29,7 +29,7 @@ Critical threats and where each is controlled:
   organizer/admin (`workspaces.views.WorkspaceMembersView`); API
   credentials are scoped to one workspace (optionally one event) and an
   explicit `METHOD:route-name` allowlist (`accounts.authentication
-  .CookieSessionAuthentication`).
+.CookieSessionAuthentication`).
 - **Malicious uploads/path/content-type tricks** — object keys are always
   server-generated (UUIDs + a random token, never a client-supplied
   filename); every download forces `Content-Disposition: attachment`, and
@@ -37,7 +37,7 @@ Critical threats and where each is controlled:
   regardless of artifact kind. See `docs/architecture/ARTIFACT_SERVING.md`
   (added by the GSEC-002 finding this gate raised and fixed).
 - **Webhook SSRF/signature/replay** — `integrations.webhooks
-  .validate_destination` requires HTTPS on port 443, resolves the host and
+.validate_destination` requires HTTPS on port 443, resolves the host and
   rejects any non-global address, and the actual delivery connection is
   pinned to the address validated (DNS-rebinding-proof); deliveries are
   HMAC-signed with a timestamp and deduplicated per (subscription,
@@ -47,7 +47,7 @@ Critical threats and where each is controlled:
   (never cache-based, since Valkey is disposable), explainable
   `AbuseSignal` evidence rather than an opaque score.
 - **Private submission/artifact leakage** — `artifacts.models
-  .can_view_artifact` is the single visibility gate (public/organizer/
+.can_view_artifact` is the single visibility gate (public/organizer/
   judge/participant), checked by every read path including the public
   server-rendered gallery, which additionally requires `status=READY`.
 - **Invite reset/token replay** — `TeamInvite` redemption checks and

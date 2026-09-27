@@ -13,7 +13,8 @@ type InboxMessage = {
 
 async function readJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, { credentials: "include", ...init });
-  if (!response.ok) throw new Error(`Inbox request failed (${response.status}).`);
+  if (!response.ok)
+    throw new Error(`Inbox request failed (${response.status}).`);
   return response.json() as Promise<T>;
 }
 
@@ -29,7 +30,10 @@ export function Inbox({ workspaceId }: { workspaceId: string }) {
         if (active) setMessages(items);
       })
       .catch((cause: unknown) => {
-        if (active) setError(cause instanceof Error ? cause.message : "Inbox could not load.");
+        if (active)
+          setError(
+            cause instanceof Error ? cause.message : "Inbox could not load.",
+          );
       });
     return () => {
       active = false;
@@ -38,10 +42,18 @@ export function Inbox({ workspaceId }: { workspaceId: string }) {
 
   async function markRead(id: string) {
     try {
-      const updated = await readJson<InboxMessage>(`${base}${id}/read/`, { method: "POST" });
-      setMessages((current) => current.map((item) => (item.public_id === id ? updated : item)));
+      const updated = await readJson<InboxMessage>(`${base}${id}/read/`, {
+        method: "POST",
+      });
+      setMessages((current) =>
+        current.map((item) => (item.public_id === id ? updated : item)),
+      );
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "Could not mark message as read.");
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : "Could not mark message as read.",
+      );
     }
   }
 
@@ -54,11 +66,15 @@ export function Inbox({ workspaceId }: { workspaceId: string }) {
         {messages.map((message) => (
           <li key={message.public_id}>
             {!message.read_at && <Badge tone="info">new</Badge>}{" "}
-            <strong>{message.subject}</strong> ({message.event_name}): {message.body}
+            <strong>{message.subject}</strong> ({message.event_name}):{" "}
+            {message.body}
             {!message.read_at && (
               <>
                 {" "}
-                <button type="button" onClick={() => void markRead(message.public_id)}>
+                <button
+                  type="button"
+                  onClick={() => void markRead(message.public_id)}
+                >
                   Mark read
                 </button>
               </>

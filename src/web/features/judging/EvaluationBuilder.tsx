@@ -42,7 +42,11 @@ function message(value: unknown): string {
   return "Request failed.";
 }
 
-async function request<T>(url: string, method = "GET", body?: object): Promise<T> {
+async function request<T>(
+  url: string,
+  method = "GET",
+  body?: object,
+): Promise<T> {
   const response = await fetch(url, {
     method,
     credentials: "include",
@@ -58,11 +62,19 @@ async function request<T>(url: string, method = "GET", body?: object): Promise<T
     }
     throw new Error(message(detail));
   }
-  return response.status === 204 ? (undefined as T) : (response.json() as Promise<T>);
+  return response.status === 204
+    ? (undefined as T)
+    : (response.json() as Promise<T>);
 }
 
 function newCriterion(n: number): Criterion {
-  return { id: `criterion-${n}`, name: "", weight: 1, min_score: 0, max_score: 10 };
+  return {
+    id: `criterion-${n}`,
+    name: "",
+    weight: 1,
+    min_score: 0,
+    max_score: 10,
+  };
 }
 
 function CriteriaEditor({
@@ -73,92 +85,110 @@ function CriteriaEditor({
   onChange: (criteria: Criterion[]) => void;
 }) {
   return (
-    <div className="cx-scroll-region" role="region" aria-label="Rubric criteria table" tabIndex={0}>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Weight</th>
-          <th>Min</th>
-          <th>Max</th>
-          <th />
-        </tr>
-      </thead>
-      <tbody>
-        {criteria.map((criterion, index) => (
-          <tr key={criterion.id}>
-            <td>
-              <input
-                aria-label="Criterion name"
-                value={criterion.name}
-                onChange={(e) => {
-                  const next = criteria.slice();
-                  next[index] = { ...criterion, name: e.target.value };
-                  onChange(next);
-                }}
-              />
-            </td>
-            <td>
-              <input
-                aria-label="Weight"
-                type="number"
-                min={0}
-                value={criterion.weight}
-                onChange={(e) => {
-                  const next = criteria.slice();
-                  next[index] = { ...criterion, weight: Number(e.target.value) };
-                  onChange(next);
-                }}
-              />
-            </td>
-            <td>
-              <input
-                aria-label="Minimum score"
-                type="number"
-                value={criterion.min_score}
-                onChange={(e) => {
-                  const next = criteria.slice();
-                  next[index] = { ...criterion, min_score: Number(e.target.value) };
-                  onChange(next);
-                }}
-              />
-            </td>
-            <td>
-              <input
-                aria-label="Maximum score"
-                type="number"
-                value={criterion.max_score}
-                onChange={(e) => {
-                  const next = criteria.slice();
-                  next[index] = { ...criterion, max_score: Number(e.target.value) };
-                  onChange(next);
-                }}
-              />
-            </td>
-            <td>
+    <div
+      className="cx-scroll-region"
+      role="region"
+      aria-label="Rubric criteria table"
+      tabIndex={0}
+    >
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Weight</th>
+            <th>Min</th>
+            <th>Max</th>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          {criteria.map((criterion, index) => (
+            <tr key={criterion.id}>
+              <td>
+                <input
+                  aria-label="Criterion name"
+                  value={criterion.name}
+                  onChange={(e) => {
+                    const next = criteria.slice();
+                    next[index] = { ...criterion, name: e.target.value };
+                    onChange(next);
+                  }}
+                />
+              </td>
+              <td>
+                <input
+                  aria-label="Weight"
+                  type="number"
+                  min={0}
+                  value={criterion.weight}
+                  onChange={(e) => {
+                    const next = criteria.slice();
+                    next[index] = {
+                      ...criterion,
+                      weight: Number(e.target.value),
+                    };
+                    onChange(next);
+                  }}
+                />
+              </td>
+              <td>
+                <input
+                  aria-label="Minimum score"
+                  type="number"
+                  value={criterion.min_score}
+                  onChange={(e) => {
+                    const next = criteria.slice();
+                    next[index] = {
+                      ...criterion,
+                      min_score: Number(e.target.value),
+                    };
+                    onChange(next);
+                  }}
+                />
+              </td>
+              <td>
+                <input
+                  aria-label="Maximum score"
+                  type="number"
+                  value={criterion.max_score}
+                  onChange={(e) => {
+                    const next = criteria.slice();
+                    next[index] = {
+                      ...criterion,
+                      max_score: Number(e.target.value),
+                    };
+                    onChange(next);
+                  }}
+                />
+              </td>
+              <td>
+                <Button
+                  variant="secondary"
+                  onClick={() =>
+                    onChange(criteria.filter((_, i) => i !== index))
+                  }
+                >
+                  Remove
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colSpan={5}>
               <Button
                 variant="secondary"
-                onClick={() => onChange(criteria.filter((_, i) => i !== index))}
+                onClick={() =>
+                  onChange([...criteria, newCriterion(criteria.length + 1)])
+                }
               >
-                Remove
+                Add criterion
               </Button>
             </td>
           </tr>
-        ))}
-      </tbody>
-      <tfoot>
-        <tr>
-          <td colSpan={5}>
-            <Button
-              variant="secondary"
-              onClick={() => onChange([...criteria, newCriterion(criteria.length + 1)])}
-            >
-              Add criterion
-            </Button>
-          </td>
-        </tr>
-      </tfoot>
-    </table>
+        </tfoot>
+      </table>
     </div>
   );
 }
@@ -180,8 +210,14 @@ function ProgressPanel({ planUrl }: { planUrl: string }) {
     setBusy(true);
     setError("");
     try {
-      const run = await request<{ public_id: string }>(planUrl + "normalization-runs/", "POST", {});
-      await request(planUrl + "publish-results/", "POST", { normalization_run: run.public_id });
+      const run = await request<{ public_id: string }>(
+        planUrl + "normalization-runs/",
+        "POST",
+        {},
+      );
+      await request(planUrl + "publish-results/", "POST", {
+        normalization_run: run.public_id,
+      });
       refresh();
     } catch (cause) {
       setError(message(cause));
@@ -196,8 +232,10 @@ function ProgressPanel({ planUrl }: { planUrl: string }) {
       {error && <p role="alert">{error}</p>}
       <p>
         {progress.submitted_ballots}
-        {progress.expected_ballots !== null ? ` / ${progress.expected_ballots}` : ""} ballots
-        submitted{" "}
+        {progress.expected_ballots !== null
+          ? ` / ${progress.expected_ballots}`
+          : ""}{" "}
+        ballots submitted{" "}
         {progress.completion_ratio !== null && (
           <Badge tone={progress.completion_ratio >= 1 ? "success" : "info"}>
             {Math.round(progress.completion_ratio * 100)}%
@@ -209,15 +247,22 @@ function ProgressPanel({ planUrl }: { planUrl: string }) {
       </Button>
       {progress.results_published && (
         <p>
-          Results published.{" "}
-          <a href={planUrl + "results.csv"}>Download CSV</a>
+          Results published. <a href={planUrl + "results.csv"}>Download CSV</a>
         </p>
       )}
     </div>
   );
 }
 
-function PlanEditor({ base, plan, onChange }: { base: string; plan: Plan; onChange: (plan: Plan) => void }) {
+function PlanEditor({
+  base,
+  plan,
+  onChange,
+}: {
+  base: string;
+  plan: Plan;
+  onChange: (plan: Plan) => void;
+}) {
   const [criteria, setCriteria] = useState(plan.draft_criteria);
   const [error, setError] = useState("");
   const planUrl = `${base}${plan.public_id}/`;
@@ -256,22 +301,32 @@ function PlanEditor({ base, plan, onChange }: { base: string; plan: Plan; onChan
         Pool strategy{" "}
         <select
           value={plan.pool_strategy}
-          onChange={(e) => void patch({ pool_strategy: e.target.value as Plan["pool_strategy"] })}
+          onChange={(e) =>
+            void patch({
+              pool_strategy: e.target.value as Plan["pool_strategy"],
+            })
+          }
         >
           <option value="all_judges">All judges score every candidate</option>
-          <option value="assigned_subset">Judges score an assigned subset</option>
+          <option value="assigned_subset">
+            Judges score an assigned subset
+          </option>
         </select>
       </label>
       <label>
         <input
           type="checkbox"
           checked={plan.results_visible_to_participants}
-          onChange={(e) => void patch({ results_visible_to_participants: e.target.checked })}
+          onChange={(e) =>
+            void patch({ results_visible_to_participants: e.target.checked })
+          }
         />{" "}
         Results visible to participants
       </label>
       <CriteriaEditor criteria={criteria} onChange={setCriteria} />
-      <Button onClick={() => void patch({ draft_criteria: criteria })}>Save criteria</Button>
+      <Button onClick={() => void patch({ draft_criteria: criteria })}>
+        Save criteria
+      </Button>
       <Button variant="secondary" onClick={() => void publish()}>
         Publish rubric
       </Button>
@@ -301,7 +356,9 @@ export function EvaluationBuilder({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspaceId, eventId]);
 
-  const plansBase = stageId ? `${eventBase}stages/${stageId}/evaluation-plans/` : "";
+  const plansBase = stageId
+    ? `${eventBase}stages/${stageId}/evaluation-plans/`
+    : "";
 
   useEffect(() => {
     if (!plansBase) return;
@@ -351,7 +408,9 @@ export function EvaluationBuilder({
               plan={plan}
               onChange={(updated) =>
                 setPlans((items) =>
-                  items.map((item) => (item.public_id === updated.public_id ? updated : item)),
+                  items.map((item) =>
+                    item.public_id === updated.public_id ? updated : item,
+                  ),
                 )
               }
             />

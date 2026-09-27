@@ -4,7 +4,9 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Inbox } from "./Inbox";
 
-(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(
+  globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
 
 let container: HTMLDivElement;
 let root: Root;
@@ -41,14 +43,19 @@ describe("Inbox", () => {
       created_at: "2026-09-27T00:00:00Z",
       read_at: null,
     };
-    const fetchMock = vi.fn().mockImplementation(async (input: unknown, init?: RequestInit) => {
-      const url = String(input);
-      if (url.endsWith("read/")) {
-        expect(init?.method).toBe("POST");
-        return { ok: true, json: async () => ({ ...message, read_at: "2026-09-27T00:01:00Z" }) };
-      }
-      return { ok: true, json: async () => [message] };
-    });
+    const fetchMock = vi
+      .fn()
+      .mockImplementation(async (input: unknown, init?: RequestInit) => {
+        const url = String(input);
+        if (url.endsWith("read/")) {
+          expect(init?.method).toBe("POST");
+          return {
+            ok: true,
+            json: async () => ({ ...message, read_at: "2026-09-27T00:01:00Z" }),
+          };
+        }
+        return { ok: true, json: async () => [message] };
+      });
     vi.stubGlobal("fetch", fetchMock);
     act(() => root.render(<Inbox workspaceId="w1" />));
     await until(() => container.textContent?.includes("Reminder") ?? false);

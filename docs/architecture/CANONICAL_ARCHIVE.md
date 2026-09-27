@@ -46,12 +46,12 @@ Two modes, `config` (default) and `full`:
   published rubric versions — never pool membership, assignments or
   normalization runs, which are activity, not configuration), and `pages`
   (an event's page theme and content blocks, if it has one). An award using
-  evaluation-sourced selection is exported by its evaluation plan's *name*,
+  evaluation-sourced selection is exported by its evaluation plan's _name_,
   not a portable definition of the plan itself — importing such an award
   requires a plan with that exact name to already exist in the target
   event, and fails explicitly (ambiguous or missing) otherwise.
 - `full`: everything in `config`, plus `projects` (name, description, track,
-  and the creating user's *username*). Import resolves that username against
+  and the creating user's _username_). Import resolves that username against
   users that already exist in the target deployment and fails explicitly if
   none matches — it never creates a shadow account, which would invent new
   identity semantics outside the frozen architecture.

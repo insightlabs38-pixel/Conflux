@@ -703,6 +703,22 @@ CategoryEnum = Literal['contrast', 'heading', 'accessible-name', 'keyboard']
 
 InputOfCategoryEnum = Literal['contrast', 'heading', 'accessible-name', 'keyboard']
 
+class CheckIn(TypedDict):
+    public_id: str
+    participant: str
+    participant_username: str
+    checked_in_by: str
+    checked_in_at: str
+
+class InputOfCheckIn(TypedDict):
+    pass
+
+class CheckInInputSchema(TypedDict):
+    participant: str
+
+class InputOfCheckInInputSchema(TypedDict):
+    participant: str
+
 class ChecklistItemSchema(TypedDict):
     id: str
     severity: str
@@ -1599,6 +1615,22 @@ class InputOfMembershipSummarySchema(TypedDict):
     workspace_name: str
     workspace_slug: str
     role: str
+
+class MentorNote(TypedDict):
+    public_id: str
+    mentor: str
+    mentor_username: str
+    body: str
+    created_at: str
+
+class InputOfMentorNote(TypedDict):
+    body: str
+
+class MentorNoteInputSchema(TypedDict):
+    body: str
+
+class InputOfMentorNoteInputSchema(TypedDict):
+    body: str
 
 class MessageInputSchema(TypedDict):
     subject: str
@@ -2670,6 +2702,18 @@ class InputOfSignedArchiveOutput(TypedDict):
     public_key_pem: str
     signature: str
 
+class SponsorProjectSchema(TypedDict):
+    public_id: str
+    name: str
+    team_name: str | None
+    track_name: str | None
+
+class InputOfSponsorProjectSchema(TypedDict):
+    public_id: str
+    name: str
+    team_name: str | None
+    track_name: str | None
+
 class Stage(TypedDict):
     public_id: str
     name: str
@@ -3480,6 +3524,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                   'query_params': [],
                                                                                   'request_body': False,
                                                                                   'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_check_ins': {'method': 'GET',
+                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/check-ins/',
+                                                                                'path_params': ['event_public_id',
+                                                                                                'workspace_public_id'],
+                                                                                'query_params': [],
+                                                                                'request_body': False,
+                                                                                'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_coi_project_attributes': {'method': 'GET',
                                                                                              'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/coi-project-attributes/',
                                                                                              'path_params': ['event_public_id',
@@ -3795,6 +3846,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                   'query_params': [],
                                                                                                                                   'request_body': False,
                                                                                                                                   'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_mentor_notes': {'method': 'GET',
+                                                                                                              'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/mentor-notes/',
+                                                                                                              'path_params': ['event_public_id',
+                                                                                                                              'project_public_id',
+                                                                                                                              'workspace_public_id'],
+                                                                                                              'query_params': [],
+                                                                                                              'request_body': False,
+                                                                                                              'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions': {'method': 'GET',
                                                                                                              'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/submissions/',
                                                                                                              'path_params': ['event_public_id',
@@ -3835,6 +3894,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                             'query_params': [],
                                                                                             'request_body': False,
                                                                                             'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_projects': {'method': 'GET',
+                                                                                       'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-projects/',
+                                                                                       'path_params': ['event_public_id',
+                                                                                                       'workspace_public_id'],
+                                                                                       'query_params': [],
+                                                                                       'request_body': False,
+                                                                                       'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_stage_evidence': {'method': 'GET',
                                                                                      'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stage-evidence/',
                                                                                      'path_params': ['event_public_id',
@@ -4482,6 +4548,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                    'query_params': [],
                                                                                    'request_body': True,
                                                                                    'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_check_ins': {'method': 'POST',
+                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/check-ins/',
+                                                                                 'path_params': ['event_public_id',
+                                                                                                 'workspace_public_id'],
+                                                                                 'query_params': [],
+                                                                                 'request_body': True,
+                                                                                 'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_clone': {'method': 'POST',
                                                                              'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/clone/',
                                                                              'path_params': ['event_public_id',
@@ -4736,6 +4809,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                           'query_params': [],
                                                                                                           'request_body': True,
                                                                                                           'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_mentor_notes': {'method': 'POST',
+                                                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/mentor-notes/',
+                                                                                                               'path_params': ['event_public_id',
+                                                                                                                               'project_public_id',
+                                                                                                                               'workspace_public_id'],
+                                                                                                               'query_params': [],
+                                                                                                               'request_body': True,
+                                                                                                               'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions_stage_public_id_finalize': {'method': 'POST',
                                                                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/submissions/{stage_public_id}/finalize/',
                                                                                                                                        'path_params': ['event_public_id',

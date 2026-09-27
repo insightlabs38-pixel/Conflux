@@ -774,6 +774,20 @@ export type CategoryEnum =
 export type InputOfCategoryEnum =
   "contrast" | "heading" | "accessible-name" | "keyboard";
 
+export type CheckIn = {
+  public_id: string;
+  participant: string;
+  participant_username: string;
+  checked_in_by: string;
+  checked_in_at: string;
+};
+
+export type InputOfCheckIn = {};
+
+export type CheckInInputSchema = { participant: string };
+
+export type InputOfCheckInInputSchema = { participant: string };
+
 export type ChecklistItemSchema = {
   id: string;
   severity: string;
@@ -1709,6 +1723,20 @@ export type InputOfMembershipSummarySchema = {
   workspace_slug: string;
   role: string;
 };
+
+export type MentorNote = {
+  public_id: string;
+  mentor: string;
+  mentor_username: string;
+  body: string;
+  created_at: string;
+};
+
+export type InputOfMentorNote = { body: string };
+
+export type MentorNoteInputSchema = { body: string };
+
+export type InputOfMentorNoteInputSchema = { body: string };
 
 export type MessageInputSchema = {
   subject: string;
@@ -2903,6 +2931,20 @@ export type InputOfSignedArchiveOutput = {
   signature: string;
 };
 
+export type SponsorProjectSchema = {
+  public_id: string;
+  name: string;
+  team_name: string | null;
+  track_name: string | null;
+};
+
+export type InputOfSponsorProjectSchema = {
+  public_id: string;
+  name: string;
+  team_name: string | null;
+  track_name: string | null;
+};
+
 export type Stage = {
   public_id: string;
   name: string;
@@ -3799,6 +3841,17 @@ export interface Operations {
     };
     response: null;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_check_ins: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: CheckIn[];
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_check_ins: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfCheckInInputSchema;
+    };
+    response: CheckIn;
+  };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_clone: {
     request: {
       path: { event_public_id: string; workspace_public_id: string };
@@ -4482,6 +4535,27 @@ export interface Operations {
     };
     response: ProjectMembership;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_mentor_notes: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: MentorNote[];
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_mentor_notes: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfMentorNoteInputSchema;
+    };
+    response: MentorNote;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions: {
     request: {
       path: {
@@ -4599,6 +4673,10 @@ export interface Operations {
       body?: InputOfRegistrationSettings;
     };
     response: RegistrationSettings;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_projects: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: SponsorProjectSchema[];
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_stage_evidence: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -6006,6 +6084,22 @@ export const operations = {
       request_body: false,
       response_kind: "none",
     },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_check_ins: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/check-ins/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_check_ins: {
+    method: "POST",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/check-ins/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: true,
+    response_kind: "json",
+  },
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_clone: {
     method: "POST",
     path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/clone/",
@@ -6954,6 +7048,32 @@ export const operations = {
       request_body: true,
       response_kind: "json",
     },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_mentor_notes:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/mentor-notes/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_mentor_notes:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/mentor-notes/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions:
     {
       method: "GET",
@@ -7107,6 +7227,15 @@ export const operations = {
       path_params: ["event_public_id", "workspace_public_id"],
       query_params: [],
       request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_projects:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-projects/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
       response_kind: "json",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_stage_evidence:

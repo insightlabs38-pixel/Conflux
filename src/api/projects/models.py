@@ -1,3 +1,4 @@
+from core.authz import has_any_role
 from core.models import PublicIdModel
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -5,6 +6,7 @@ from django.db import models
 from events.models import Event, Track
 from participation.models import Team
 from stages.models import Stage
+from workspaces.models import Role
 
 
 class Project(PublicIdModel):
@@ -123,3 +125,26 @@ class SubmissionVersion(PublicIdModel):
 
     def delete(self, *args, **kwargs):
         raise ValidationError("Finalized submission versions are immutable.")
+
+
+class MentorNote(PublicIdModel):
+    """A mentor's private note on a project (VS18) -- visible to organizers/
+    admins/mentors only, same isolation shape as `evaluations.Ballot.comment`
+    but for mentorship rather than judging, and it never feeds scoring or
+    normalization.
+    """
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="mentor_notes")
+    mentor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="mentor_notes"
+    )
+    body = models.CharField(max_length=1000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+
+    def clean(self):
+        workspace = self.project.event.workspace
+        if not has_any_role(self.mentor, workspace, Role.MENTOR, Role.ORGANIZER, Role.ADMIN):
+            raise ValidationError({"mentor": "User must hold the mentor role in this workspace."})

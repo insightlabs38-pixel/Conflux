@@ -1,11 +1,12 @@
 import secrets
 
+from core.authz import has_any_role
 from core.models import PublicIdModel
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
-from workspaces.models import Workspace
+from workspaces.models import Role, Workspace
 
 
 class EventStatus(models.TextChoices):
@@ -203,3 +204,31 @@ class EventApplication(PublicIdModel):
     def clean(self):
         if self.invite_code_id and self.invite_code.event_id != self.event_id:
             raise ValidationError({"invite_code": "Invite code must belong to this event."})
+
+
+class ParticipantCheckIn(PublicIdModel):
+    """A volunteer's record that a participant physically showed up
+    (VS18) -- purely an attendance log, no effect on Membership, teams,
+    or judging.
+    """
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="check_ins")
+    participant = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="event_check_ins"
+    )
+    checked_in_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
+    )
+    checked_in_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["event", "participant"], name="unique_event_check_in")
+        ]
+        ordering = ["-checked_in_at", "-id"]
+
+    def clean(self):
+        if not has_any_role(self.participant, self.event.workspace, Role.PARTICIPANT):
+            raise ValidationError(
+                {"participant": "User must hold the participant role in this workspace."}
+            )

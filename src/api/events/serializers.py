@@ -8,6 +8,7 @@ from .models import (
     EventApplication,
     EventRegistrationSettings,
     EventStatus,
+    ParticipantCheckIn,
     RegistrationInviteCode,
     RegistrationStatus,
     Track,
@@ -161,3 +162,25 @@ class ApplicationDecisionInputSchema(serializers.Serializer):
             RegistrationStatus.REJECTED,
         ]
     )
+
+
+class CheckInInputSchema(serializers.Serializer):
+    participant = serializers.UUIDField()
+
+
+class CheckInSerializer(serializers.ModelSerializer):
+    public_id = serializers.UUIDField(read_only=True)
+    participant = serializers.UUIDField(source="participant.public_id", read_only=True)
+    participant_username = serializers.CharField(source="participant.username", read_only=True)
+    checked_in_by = serializers.CharField(source="checked_in_by.username", read_only=True)
+
+    class Meta:
+        model = ParticipantCheckIn
+        fields = [
+            "public_id",
+            "participant",
+            "participant_username",
+            "checked_in_by",
+            "checked_in_at",
+        ]
+        read_only_fields = fields

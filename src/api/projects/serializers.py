@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Project, ProjectMembership
+from .models import MentorNote, Project, ProjectMembership
 
 
 class ProjectMembershipSerializer(serializers.ModelSerializer):
@@ -29,3 +29,25 @@ class ProjectSerializer(serializers.ModelSerializer):
             "updated_at",
             "members",
         ]
+
+
+class MentorNoteInputSchema(serializers.Serializer):
+    body = serializers.CharField(max_length=1000)
+
+
+class MentorNoteSerializer(serializers.ModelSerializer):
+    public_id = serializers.UUIDField(read_only=True)
+    mentor = serializers.UUIDField(source="mentor.public_id", read_only=True)
+    mentor_username = serializers.CharField(source="mentor.username", read_only=True)
+
+    class Meta:
+        model = MentorNote
+        fields = ["public_id", "mentor", "mentor_username", "body", "created_at"]
+        read_only_fields = ["public_id", "mentor", "mentor_username", "created_at"]
+
+
+class SponsorProjectSchema(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    name = serializers.CharField()
+    team_name = serializers.CharField(allow_null=True)
+    track_name = serializers.CharField(allow_null=True)

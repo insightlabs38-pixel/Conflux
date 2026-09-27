@@ -6,12 +6,21 @@ from django.db import models
 class Role(models.TextChoices):
     """Workspace-scoped roles. "visitor" is deliberately absent: it is the
     state of holding no Membership row at all, not a stored value.
+
+    MENTOR/VOLUNTEER/SPONSOR (VS18) are additive: every existing view gates
+    on an explicit role tuple (`require_roles(...)`/`has_any_role(...)`), so
+    adding a enum member grants it access to nothing until a view lists it
+    by name -- these three start with exactly the one narrow capability
+    wired for each below, nothing else.
     """
 
     PARTICIPANT = "participant", "Participant"
     JUDGE = "judge", "Judge"
     ORGANIZER = "organizer", "Organizer"
     ADMIN = "admin", "Admin"
+    MENTOR = "mentor", "Mentor"
+    VOLUNTEER = "volunteer", "Volunteer"
+    SPONSOR = "sponsor", "Sponsor"
 
 
 class Workspace(PublicIdModel):

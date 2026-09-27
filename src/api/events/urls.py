@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import registration_views, views
+from . import checkin_views, registration_views, views
 
 urlpatterns = [
     path("events/<uuid:event_public_id>/", views.PublicEventView.as_view(), name="event-public"),
@@ -73,5 +73,10 @@ urlpatterns = [
         "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/my-application/",
         registration_views.MyEventApplicationView.as_view(),
         name="my-event-application",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/check-ins/",
+        checkin_views.CheckInListView.as_view(),
+        name="event-check-in-list",
     ),
 ]

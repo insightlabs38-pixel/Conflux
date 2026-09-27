@@ -1867,6 +1867,75 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/check-ins/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_check_ins
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CheckIn'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_check_ins
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckInInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CheckInInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CheckInInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckIn'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/clone/:
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_clone
@@ -5244,6 +5313,87 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProjectMembership'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/mentor-notes/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_mentor_notes
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MentorNote'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_mentor_notes
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MentorNoteInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MentorNoteInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MentorNoteInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MentorNote'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/submissions/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions
@@ -5793,6 +5943,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RegistrationSettings'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-projects/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_projects
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SponsorProjectSchema'
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stage-evidence/:
     get:
@@ -11330,6 +11510,41 @@ components:
         * `heading` - heading
         * `accessible-name` - accessible-name
         * `keyboard` - keyboard
+    CheckIn:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+          readOnly: true
+        participant:
+          type: string
+          format: uuid
+          readOnly: true
+        participant_username:
+          type: string
+          readOnly: true
+        checked_in_by:
+          type: string
+          readOnly: true
+        checked_in_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - checked_in_at
+      - checked_in_by
+      - participant
+      - participant_username
+      - public_id
+    CheckInInputSchema:
+      type: object
+      properties:
+        participant:
+          type: string
+          format: uuid
+      required:
+      - participant
     ChecklistItemSchema:
       type: object
       properties:
@@ -12877,6 +13092,41 @@ components:
       - workspace
       - workspace_name
       - workspace_slug
+    MentorNote:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+          readOnly: true
+        mentor:
+          type: string
+          format: uuid
+          readOnly: true
+        mentor_username:
+          type: string
+          readOnly: true
+        body:
+          type: string
+          maxLength: 1000
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - body
+      - created_at
+      - mentor
+      - mentor_username
+      - public_id
+    MentorNoteInputSchema:
+      type: object
+      properties:
+        body:
+          type: string
+          maxLength: 1000
+      required:
+      - body
     MessageInputSchema:
       type: object
       properties:
@@ -14760,6 +15010,25 @@ components:
       - manifest
       - public_key_pem
       - signature
+    SponsorProjectSchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        team_name:
+          type: string
+          nullable: true
+        track_name:
+          type: string
+          nullable: true
+      required:
+      - name
+      - public_id
+      - team_name
+      - track_name
     Stage:
       type: object
       properties:

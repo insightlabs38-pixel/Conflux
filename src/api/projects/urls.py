@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import roles_views, views
 
 _prefix = "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/projects/"
 
@@ -40,5 +40,15 @@ urlpatterns = [
         _prefix + "<uuid:project_public_id>/submissions/<uuid:stage_public_id>/diff/",
         views.SubmissionDiffView.as_view(),
         name="submission-diff",
+    ),
+    path(
+        _prefix + "<uuid:project_public_id>/mentor-notes/",
+        roles_views.MentorNoteListView.as_view(),
+        name="mentor-note-list",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/sponsor-projects/",
+        roles_views.SponsorProjectListView.as_view(),
+        name="sponsor-project-list",
     ),
 ]

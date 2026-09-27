@@ -70,6 +70,9 @@ def test_draft_revision_and_finalization_receipt_are_idempotent():
     assert SubmissionVersion.objects.count() == 1
     assert AuditEvent.objects.filter(action="submission.finalized").count() == 1
     assert DomainEvent.objects.filter(event_type="submission.finalized").count() == 1
+    assert DomainEvent.objects.get(event_type="submission.finalized").payload["event"] == str(
+        project.event.public_id
+    )
     with pytest.raises(ValidationError, match="finalized"):
         save_draft(project, stage, user, payload={}, revision=2)
 

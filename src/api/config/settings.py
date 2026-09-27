@@ -78,6 +78,12 @@ else:
 VALKEY_URL = os.environ.get("VALKEY_URL", "redis://localhost:6379/0")
 CELERY_BROKER_URL = VALKEY_URL
 CELERY_RESULT_BACKEND = VALKEY_URL
+CELERY_BEAT_SCHEDULE = {
+    "process-webhooks": {
+        "task": "integrations.tasks.process_webhooks",
+        "schedule": 30.0,
+    }
+}
 
 # Generic S3 adapter settings; RustFS is the default local object store.
 S3_ENDPOINT_URL = os.environ.get("S3_ENDPOINT_URL", "http://localhost:9000")

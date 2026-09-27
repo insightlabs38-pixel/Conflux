@@ -28,6 +28,10 @@ services:
     volumes:
       - ./src/api:/app
 
+  beat:
+    volumes:
+      - ./src/api:/app
+
   web:
     image: node:24-slim
     working_dir: /repo

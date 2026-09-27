@@ -5448,6 +5448,191 @@ paths:
                 items:
                   $ref: '#/components/schemas/ParticipantEventSummary'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/webhooks/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_webhooks
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - humanSessionCookie: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubscriptionOutput'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_webhooks
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SubscriptionInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SubscriptionInput'
+        required: true
+      security:
+      - humanSessionCookie: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionIssued'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/webhooks/{subscription_public_id}/:
+    patch:
+      operationId: patch_api_v1_workspaces_workspace_public_id_webhooks_subscription_public_id
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: subscription_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscriptionUpdate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscriptionUpdate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscriptionUpdate'
+      security:
+      - humanSessionCookie: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/webhooks/{subscription_public_id}/deliveries/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_webhooks_subscription_public_id_deliveries
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: subscription_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - humanSessionCookie: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeliveryOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/webhooks/{subscription_public_id}/deliveries/{delivery_public_id}/replay/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_webhooks_subscription_public_id_deliveries_delivery_public_id_replay
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: delivery_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: subscription_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - humanSessionCookie: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryOutput'
+          description: ''
 components:
   schemas:
     AbuseSignalSchema:
@@ -6085,6 +6270,48 @@ components:
       - public_id
       - revoked_at
       - workspace
+    DeliveryOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        event_id:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+        status:
+          type: string
+        attempts:
+          type: integer
+        last_status_code:
+          type: integer
+          nullable: true
+        last_error:
+          type: string
+        next_attempt_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - attempts
+      - completed_at
+      - created_at
+      - event_id
+      - event_type
+      - last_error
+      - last_status_code
+      - next_attempt_at
+      - public_id
+      - status
     EmailTokenInputSchema:
       type: object
       properties:
@@ -6911,6 +7138,11 @@ components:
           type: string
           format: date-time
           readOnly: true
+    PatchedSubscriptionUpdate:
+      type: object
+      properties:
+        enabled:
+          type: boolean
     PatchedTemporalGate:
       type: object
       properties:
@@ -7458,6 +7690,87 @@ components:
       - finalized_by
       - number
       - public_id
+    SubscriptionInput:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          maxLength: 2048
+        event_types:
+          type: array
+          items:
+            type: string
+          maxItems: 50
+          minItems: 1
+        event:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - event_types
+      - url
+    SubscriptionIssued:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uri
+        event_types:
+          type: array
+          items:
+            type: string
+        event:
+          type: string
+          format: uuid
+          nullable: true
+        enabled:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        secret:
+          type: string
+      required:
+      - created_at
+      - enabled
+      - event
+      - event_types
+      - public_id
+      - secret
+      - url
+    SubscriptionOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uri
+        event_types:
+          type: array
+          items:
+            type: string
+        event:
+          type: string
+          format: uuid
+          nullable: true
+        enabled:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - created_at
+      - enabled
+      - event
+      - event_types
+      - public_id
+      - url
     Team:
       type: object
       properties:

@@ -167,6 +167,10 @@ def finalize_submission(project, stage, actor, *, revision):
         target=version,
         metadata={"submission": str(submission.public_id), "digest": digest},
         event_type="submission.finalized",
-        payload={"submission": str(submission.public_id), "version": str(version.public_id)},
+        payload={
+            "event": str(project.event.public_id),
+            "submission": str(submission.public_id),
+            "version": str(version.public_id),
+        },
     )
     return submission, version, True

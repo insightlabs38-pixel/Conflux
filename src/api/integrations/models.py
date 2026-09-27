@@ -1,5 +1,41 @@
+from core.models import PublicIdModel
 from django.conf import settings
 from django.db import models
+
+
+class WebhookSubscription(PublicIdModel):
+    workspace = models.ForeignKey("workspaces.Workspace", on_delete=models.CASCADE)
+    event = models.ForeignKey("events.Event", null=True, blank=True, on_delete=models.CASCADE)
+    url = models.URLField(max_length=2048)
+    event_types = models.JSONField(default=list)
+    enabled = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class WebhookDelivery(PublicIdModel):
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        SUCCEEDED = "succeeded", "Succeeded"
+        DEAD = "dead", "Dead"
+
+    subscription = models.ForeignKey(
+        WebhookSubscription, on_delete=models.CASCADE, related_name="deliveries"
+    )
+    domain_event = models.ForeignKey("audit.DomainEvent", on_delete=models.CASCADE)
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    next_attempt_at = models.DateTimeField(null=True, blank=True)
+    last_status_code = models.PositiveSmallIntegerField(null=True, blank=True)
+    last_error = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["subscription", "domain_event"], name="unique_webhook_delivery"
+            )
+        ]
 
 
 class ImportedFixture(models.Model):

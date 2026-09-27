@@ -2269,6 +2269,16 @@ export type SelectionSourceEnum = "manual" | "evaluation" | "community";
 
 export type InputOfSelectionSourceEnum = "manual" | "evaluation" | "community";
 
+export type SensitivityInputSchema = {
+  ridge_lambdas?: number[];
+  holdout_counts?: number[];
+};
+
+export type InputOfSensitivityInputSchema = {
+  ridge_lambdas?: number[];
+  holdout_counts?: number[];
+};
+
 export type Stage = {
   public_id: string;
   name: string;
@@ -4338,6 +4348,40 @@ export interface Operations {
       };
     };
     response: string;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_sensitivity: {
+    request: {
+      path: {
+        event_public_id: string;
+        plan_public_id: string;
+        stage_public_id: string;
+        workspace_public_id: string;
+      };
+      body?: InputOfSensitivityInputSchema;
+    };
+    response: {
+      ridge_lambda?: {
+        baseline?: string[];
+        scenarios?: Record<
+          string,
+          { order?: string[]; rank_changed?: boolean }
+        >;
+      };
+      judge_removal?: {
+        baseline?: string[];
+        scenarios?: Record<
+          string,
+          { order?: string[]; rank_changed?: boolean }
+        >;
+      };
+      incompleteness?: {
+        baseline?: string[];
+        scenarios?: Record<
+          string,
+          { order?: string[]; rank_changed?: boolean }
+        >;
+      };
+    };
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_external_qualifiers: {
     request: {
@@ -6636,6 +6680,20 @@ export const operations = {
       query_params: [],
       request_body: false,
       response_kind: "text",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_sensitivity:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/sensitivity/",
+      path_params: [
+        "event_public_id",
+        "plan_public_id",
+        "stage_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_external_qualifiers:
     {

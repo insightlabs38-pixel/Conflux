@@ -2094,6 +2094,14 @@ SelectionSourceEnum = Literal['manual', 'evaluation', 'community']
 
 InputOfSelectionSourceEnum = Literal['manual', 'evaluation', 'community']
 
+class SensitivityInputSchema(TypedDict):
+    ridge_lambdas: NotRequired[list[float]]
+    holdout_counts: NotRequired[list[int]]
+
+class InputOfSensitivityInputSchema(TypedDict):
+    ridge_lambdas: NotRequired[list[float]]
+    holdout_counts: NotRequired[list[int]]
+
 class Stage(TypedDict):
     public_id: str
     name: str
@@ -4123,6 +4131,15 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                              'query_params': [],
                                                                                                                                              'request_body': False,
                                                                                                                                              'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_sensitivity': {'method': 'POST',
+                                                                                                                                          'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/sensitivity/',
+                                                                                                                                          'path_params': ['event_public_id',
+                                                                                                                                                          'plan_public_id',
+                                                                                                                                                          'stage_public_id',
+                                                                                                                                                          'workspace_public_id'],
+                                                                                                                                          'query_params': [],
+                                                                                                                                          'request_body': True,
+                                                                                                                                          'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_external_qualifiers': {'method': 'POST',
                                                                                                                   'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/external-qualifiers/',
                                                                                                                   'path_params': ['event_public_id',

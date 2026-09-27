@@ -114,6 +114,15 @@ class CloseCallsSchema(serializers.Serializer):
     projects = serializers.ListField(child=serializers.UUIDField())
 
 
+class SensitivityInputSchema(serializers.Serializer):
+    ridge_lambdas = serializers.ListField(
+        child=serializers.FloatField(min_value=0), required=False, max_length=10
+    )
+    holdout_counts = serializers.ListField(
+        child=serializers.IntegerField(min_value=1), required=False, max_length=10
+    )
+
+
 class PairwiseComparisonInputSchema(serializers.Serializer):
     project_a = serializers.UUIDField()
     project_b = serializers.UUIDField()

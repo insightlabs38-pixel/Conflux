@@ -1,4 +1,5 @@
 import csv
+import math
 from collections import defaultdict
 
 from accounts.authentication import CookieSessionAuthentication
@@ -75,6 +76,15 @@ from .schema import (
     PoolMembershipInputSchema,
     RankedResultSchema,
     ResultsPublishInputSchema,
+    SensitivityInputSchema,
+)
+from .sensitivity import (
+    DEFAULT_HOLDOUT_COUNTS,
+    DEFAULT_RIDGE_LAMBDAS,
+    chronological_observations,
+    incompleteness_sensitivity,
+    judge_removal_sensitivity,
+    ridge_lambda_sensitivity,
 )
 from .serializers import (
     AssignmentVersionSerializer,
@@ -995,6 +1005,119 @@ class CloseCallsView(PlanMixin):
             {
                 "normalization_run": latest_run.number,
                 "projects": [str(p.public_id) for p in projects],
+            }
+        )
+
+
+_SENSITIVITY_SCENARIO_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "order": {"type": "array", "items": {"type": "string", "format": "uuid"}},
+        "rank_changed": {"type": "boolean"},
+    },
+}
+_SENSITIVITY_DIMENSION_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "baseline": {"type": "array", "items": {"type": "string", "format": "uuid"}},
+        "scenarios": {"type": "object", "additionalProperties": _SENSITIVITY_SCENARIO_SCHEMA},
+    },
+}
+
+
+def _translate_sensitivity_dimension(block, projects_by_id, *, key_names=None):
+    def order(ids):
+        return [str(projects_by_id[pid].public_id) for pid in ids if pid in projects_by_id]
+
+    def scenario_key(raw_key):
+        if key_names is None:
+            return raw_key
+        return key_names.get(int(raw_key), raw_key)
+
+    return {
+        "baseline": order(block["baseline"]),
+        "scenarios": {
+            scenario_key(key): {
+                "order": order(value["order"]),
+                "rank_changed": value["rank_changed"],
+            }
+            for key, value in block["scenarios"].items()
+        },
+    }
+
+
+def _valid_ridge_lambda(value):
+    if not isinstance(value, (int, float)) or isinstance(value, bool) or value < 0:
+        return False
+    try:
+        return math.isfinite(value)
+    except OverflowError:
+        return False
+
+
+class SensitivityExplorerView(PlanMixin):
+    """Read-only what-if ranking over the plan's current live ballots."""
+
+    @extend_schema(
+        request=SensitivityInputSchema,
+        responses={
+            200: {
+                "type": "object",
+                "properties": {
+                    "ridge_lambda": _SENSITIVITY_DIMENSION_SCHEMA,
+                    "judge_removal": _SENSITIVITY_DIMENSION_SCHEMA,
+                    "incompleteness": _SENSITIVITY_DIMENSION_SCHEMA,
+                },
+            }
+        },
+    )
+    def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        if plan.mode != EvaluationMode.RUBRIC:
+            raise ValidationError({"detail": "Sensitivity analysis applies to a rubric-mode plan."})
+        ridge_lambdas = request.data.get("ridge_lambdas", list(DEFAULT_RIDGE_LAMBDAS))
+        holdout_counts = request.data.get("holdout_counts", list(DEFAULT_HOLDOUT_COUNTS))
+        if (
+            not isinstance(ridge_lambdas, list)
+            or len(ridge_lambdas) > 10
+            or any(not _valid_ridge_lambda(v) for v in ridge_lambdas)
+        ):
+            raise ValidationError({"ridge_lambdas": "Must be 0-10 nonnegative numbers."})
+        if (
+            not isinstance(holdout_counts, list)
+            or len(holdout_counts) > 10
+            or any(not isinstance(v, int) or isinstance(v, bool) or v < 1 for v in holdout_counts)
+        ):
+            raise ValidationError({"holdout_counts": "Must be 0-10 positive integers."})
+
+        observations = chronological_observations(plan)
+        ridge_result = ridge_lambda_sensitivity(observations, ridge_lambdas=ridge_lambdas)
+        judge_result = judge_removal_sensitivity(observations)
+        incompleteness_result = incompleteness_sensitivity(
+            observations, holdout_counts=holdout_counts
+        )
+
+        all_ids = {
+            project_id
+            for block in (ridge_result, judge_result, incompleteness_result)
+            for project_id in block["baseline"]
+        }
+        for block in (ridge_result, judge_result, incompleteness_result):
+            for scenario in block["scenarios"].values():
+                all_ids.update(scenario["order"])
+        projects_by_id = {p.id: p for p in Project.objects.filter(id__in=all_ids)}
+        judge_ids = [int(judge_id) for judge_id in judge_result["scenarios"]]
+        usernames_by_id = {u.id: u.username for u in User.objects.filter(id__in=judge_ids)}
+
+        return Response(
+            {
+                "ridge_lambda": _translate_sensitivity_dimension(ridge_result, projects_by_id),
+                "judge_removal": _translate_sensitivity_dimension(
+                    judge_result, projects_by_id, key_names=usernames_by_id
+                ),
+                "incompleteness": _translate_sensitivity_dimension(
+                    incompleteness_result, projects_by_id
+                ),
             }
         )
 

@@ -7305,6 +7305,119 @@ paths:
                 type: string
                 format: binary
           description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/sensitivity/
+  : post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_sensitivity
+      description: Read-only what-if ranking over the plan's current live ballots.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SensitivityInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SensitivityInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SensitivityInputSchema'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ridge_lambda:
+                    type: object
+                    properties:
+                      baseline:
+                        type: array
+                        items:
+                          type: string
+                          format: uuid
+                      scenarios:
+                        type: object
+                        additionalProperties:
+                          type: object
+                          properties:
+                            order:
+                              type: array
+                              items:
+                                type: string
+                                format: uuid
+                            rank_changed:
+                              type: boolean
+                  judge_removal:
+                    type: object
+                    properties:
+                      baseline:
+                        type: array
+                        items:
+                          type: string
+                          format: uuid
+                      scenarios:
+                        type: object
+                        additionalProperties:
+                          type: object
+                          properties:
+                            order:
+                              type: array
+                              items:
+                                type: string
+                                format: uuid
+                            rank_changed:
+                              type: boolean
+                  incompleteness:
+                    type: object
+                    properties:
+                      baseline:
+                        type: array
+                        items:
+                          type: string
+                          format: uuid
+                      scenarios:
+                        type: object
+                        additionalProperties:
+                          type: object
+                          properties:
+                            order:
+                              type: array
+                              items:
+                                type: string
+                                format: uuid
+                            rank_changed:
+                              type: boolean
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/external-qualifiers/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_external_qualifiers
@@ -12262,6 +12375,22 @@ components:
         * `manual` - Manual
         * `evaluation` - Evaluation results
         * `community` - Community vote
+    SensitivityInputSchema:
+      type: object
+      properties:
+        ridge_lambdas:
+          type: array
+          items:
+            type: number
+            format: double
+            minimum: 0
+          maxItems: 10
+        holdout_counts:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          maxItems: 10
     Stage:
       type: object
       properties:

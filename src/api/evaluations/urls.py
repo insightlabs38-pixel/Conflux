@@ -120,6 +120,11 @@ urlpatterns = [
         views.CloseCallsView.as_view(),
         name="evaluation-plan-close-calls",
     ),
+    path(
+        f"{_PLAN}/sensitivity/",
+        views.SensitivityExplorerView.as_view(),
+        name="evaluation-plan-sensitivity",
+    ),
     path(f"{_PLAN}/results/", views.ResultsView.as_view(), name="evaluation-plan-results"),
     path(
         f"{_PLAN}/results.csv",

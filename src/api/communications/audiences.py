@@ -11,7 +11,6 @@ from dataclasses import dataclass, field
 
 from accounts.models import User
 from django.core.exceptions import ValidationError
-from django.db.models import Count
 from evaluations.models import Assignment, Ballot, EvaluationPlan
 from participation.models import Team, TeamMembership
 from workspaces.models import Membership, Role
@@ -101,22 +100,17 @@ def _judges_incomplete_assignments(event, params):
         raise ValidationError({"plan": "Evaluation plan not found for this event."})
     if plan.active_assignment_version_id is None:
         return User.objects.none()
-    assigned = (
-        Assignment.objects.filter(version=plan.active_assignment_version)
-        .values("judge_id")
-        .annotate(assigned_count=Count("project_id", distinct=True))
+    assigned_pairs = set(
+        Assignment.objects.filter(version=plan.active_assignment_version).values_list(
+            "judge_id", "project_id"
+        )
     )
-    submitted = dict(
-        Ballot.objects.filter(rubric_version__plan=plan)
-        .values("judge_id")
-        .annotate(count=Count("id"))
-        .values_list("judge_id", "count")
+    submitted_pairs = set(
+        Ballot.objects.filter(rubric_version__plan=plan, is_calibration=False).values_list(
+            "judge_id", "project_id"
+        )
     )
-    incomplete_ids = [
-        row["judge_id"]
-        for row in assigned
-        if submitted.get(row["judge_id"], 0) < row["assigned_count"]
-    ]
+    incomplete_ids = {judge_id for judge_id, project_id in assigned_pairs - submitted_pairs}
     return User.objects.filter(id__in=incomplete_ids).order_by("username")
 
 

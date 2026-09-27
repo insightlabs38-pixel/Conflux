@@ -149,7 +149,10 @@ export function CommunicationsPanel({
             <select
               id="comms-param"
               value={param}
-              onChange={(event) => setParam(event.target.value)}
+              onChange={(event) => {
+                setParam(event.target.value);
+                setPreview(null);
+              }}
               required
             >
               <option value="">Choose one</option>

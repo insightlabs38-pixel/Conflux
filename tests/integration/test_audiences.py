@@ -112,6 +112,59 @@ def test_judges_with_incomplete_assignments():
     assert set(incomplete) == {other_judge}
 
 
+def test_unassigned_ballot_does_not_hide_a_missing_active_assignment():
+    ctx = fixture()
+    event = ctx["event"]
+    stage = Stage.objects.create(event=event, name="Finals")
+    plan = EvaluationPlan.objects.create(
+        stage=stage, name="Judging", pool_strategy=EvaluationPoolStrategy.ASSIGNED_SUBSET
+    )
+    rubric = RubricVersion.objects.create(
+        plan=plan,
+        number=1,
+        criteria=[{"id": "c1", "name": "C1", "weight": 1, "min_score": 0, "max_score": 10}],
+    )
+    version = AssignmentVersion.objects.create(plan=plan, number=1, coverage=1, evidence={})
+    plan.active_assignment_version = version
+    plan.save(update_fields=["active_assignment_version"])
+    assigned = ctx["project"]
+    other = Project.objects.create(event=event, created_by=ctx["participant_b"], name="Other")
+    Assignment.objects.create(version=version, judge=ctx["judge"], project=assigned)
+    Ballot.objects.create(rubric_version=rubric, judge=ctx["judge"], project=other)
+    params = {"plan": str(plan.public_id)}
+    assert set(resolve_audience(event, "judges_incomplete_assignments", params)) == {ctx["judge"]}
+    Ballot.objects.create(rubric_version=rubric, judge=ctx["judge"], project=assigned)
+    assert set(resolve_audience(event, "judges_incomplete_assignments", params)) == set()
+
+
+def test_blocked_team_audience_re_resolves_at_send_time():
+    ctx = fixture()
+    event = ctx["event"]
+    TeamMembership.objects.create(team=ctx["blocked_team"], user=ctx["participant_b"])
+    client = Client()
+    client.cookies["session"] = Session.issue(ctx["organizer"]).token
+    prefix = (
+        f"/api/v1/workspaces/{ctx['workspace'].public_id}/events/{event.public_id}/communications/"
+    )
+    preview = client.post(
+        prefix + "audiences/preview/",
+        {"audience_kind": "teams_without_project"},
+        content_type="application/json",
+    )
+    assert preview.status_code == 200
+    assert preview.json()["count"] == 1
+    Project.objects.create(
+        event=event, team=ctx["blocked_team"], created_by=ctx["participant_b"], name="New"
+    )
+    sent = client.post(
+        prefix + "messages/",
+        {"subject": "Check", "body": "Please review", "audience_kind": "teams_without_project"},
+        content_type="application/json",
+    )
+    assert sent.status_code == 201
+    assert sent.json()["recipient_count"] == 0
+
+
 def test_audience_endpoints_list_and_preview():
     ctx = fixture()
     workspace, event = ctx["workspace"], ctx["event"]

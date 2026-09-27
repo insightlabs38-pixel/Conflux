@@ -1,4 +1,5 @@
 from core.models import PublicIdModel
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from events.models import BasePrize, Event, Track
@@ -91,3 +92,20 @@ class PrizeComponent(PublicIdModel):
             errors["amount"] = "Only cash components can carry an amount and currency."
         if errors:
             raise ValidationError(errors)
+
+
+class AwardWinner(PublicIdModel):
+    award = models.ForeignKey(Award, on_delete=models.CASCADE, related_name="winners")
+    project = models.ForeignKey(
+        "projects.Project", on_delete=models.PROTECT, related_name="award_wins"
+    )
+    selected_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    source = models.CharField(max_length=20, choices=SelectionSource.choices)
+    evidence = models.JSONField(default=dict)
+    override_reason = models.TextField(blank=True)
+    selected_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["award", "project"], name="unique_award_project_winner")
+        ]

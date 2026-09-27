@@ -786,6 +786,8 @@ class EvaluationPlan(TypedDict):
     pool_strategy: NotRequired[PoolStrategyEnum]
     mode: NotRequired[ModeEnum]
     results_visible_to_participants: NotRequired[bool]
+    feedback_visible_to_participants: NotRequired[bool]
+    feedback_anonymous: NotRequired[bool]
     draft_criteria: NotRequired[Any]
     pool: NotRequired[str | None]
     current_rubric_version: int | None
@@ -805,6 +807,8 @@ class InputOfEvaluationPlan(TypedDict):
     pool_strategy: NotRequired[InputOfPoolStrategyEnum]
     mode: NotRequired[InputOfModeEnum]
     results_visible_to_participants: NotRequired[bool]
+    feedback_visible_to_participants: NotRequired[bool]
+    feedback_anonymous: NotRequired[bool]
     draft_criteria: NotRequired[Any]
     pool: NotRequired[str | None]
     calibration_required: NotRequired[bool]
@@ -942,6 +946,16 @@ class InputOfExternalArtifactInputSchema(TypedDict):
     visibility: str
     title: NotRequired[str]
     external_url: str
+
+class FeedbackEntrySchema(TypedDict):
+    judge: str | None
+    comment: str
+    submitted_at: str
+
+class InputOfFeedbackEntrySchema(TypedDict):
+    judge: str | None
+    comment: str
+    submitted_at: str
 
 class FormAnswersInputSchema(TypedDict):
     answers: Any
@@ -1462,6 +1476,8 @@ class PatchedEvaluationPlan(TypedDict):
     pool_strategy: NotRequired[PoolStrategyEnum]
     mode: NotRequired[ModeEnum]
     results_visible_to_participants: NotRequired[bool]
+    feedback_visible_to_participants: NotRequired[bool]
+    feedback_anonymous: NotRequired[bool]
     draft_criteria: NotRequired[Any]
     pool: NotRequired[str | None]
     current_rubric_version: NotRequired[int | None]
@@ -1481,6 +1497,8 @@ class InputOfPatchedEvaluationPlan(TypedDict):
     pool_strategy: NotRequired[InputOfPoolStrategyEnum]
     mode: NotRequired[InputOfModeEnum]
     results_visible_to_participants: NotRequired[bool]
+    feedback_visible_to_participants: NotRequired[bool]
+    feedback_anonymous: NotRequired[bool]
     draft_criteria: NotRequired[Any]
     pool: NotRequired[str | None]
     calibration_required: NotRequired[bool]
@@ -3120,6 +3138,16 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                         'query_params': [],
                                                                                                                                         'request_body': False,
                                                                                                                                         'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_feedback_project_public_id': {'method': 'GET',
+                                                                                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/feedback/{project_public_id}/',
+                                                                                                                                                        'path_params': ['event_public_id',
+                                                                                                                                                                        'plan_public_id',
+                                                                                                                                                                        'project_public_id',
+                                                                                                                                                                        'stage_public_id',
+                                                                                                                                                                        'workspace_public_id'],
+                                                                                                                                                        'query_params': [],
+                                                                                                                                                        'request_body': False,
+                                                                                                                                                        'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_normalization_runs': {'method': 'GET',
                                                                                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/normalization-runs/',
                                                                                                                                                 'path_params': ['event_public_id',

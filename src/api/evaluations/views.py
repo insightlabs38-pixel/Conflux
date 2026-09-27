@@ -57,6 +57,7 @@ from .schema import (
     CalibrationStatusSchema,
     CandidateQueueItemSchema,
     EvaluationProgressSchema,
+    FeedbackEntrySchema,
     NormalizationInputSchema,
     PairwiseComparisonInputSchema,
     PairwiseNextPairSchema,
@@ -891,6 +892,54 @@ class ResultsCsvExportView(PlanMixin):
                 ]
             )
         return response
+
+
+class ProjectFeedbackView(PlanMixin):
+    """S21: a project's released judge feedback (`Ballot.comment`) --
+    never shown until the organizer opts the plan into
+    `feedback_visible_to_participants`, and never with judge identity
+    unless the organizer also opts out of `feedback_anonymous`. Scoped to
+    one project (unlike the plan-wide `ResultsView`): a participant may
+    only ever read their own project's feedback.
+    """
+
+    authentication_classes = [CookieSessionAuthentication]
+    permission_classes = [require_roles(Role.PARTICIPANT, Role.JUDGE, Role.ORGANIZER, Role.ADMIN)]
+
+    @extend_schema(responses=FeedbackEntrySchema(many=True))
+    def get(
+        self,
+        request,
+        workspace_public_id,
+        event_public_id,
+        stage_public_id,
+        plan_public_id,
+        project_public_id,
+    ):
+        plan = self.get_plan()
+        project = get_object_or_404(Project, event=self.get_event(), public_id=project_public_id)
+        is_organizer = has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
+        if not is_organizer:
+            if not plan.feedback_visible_to_participants:
+                raise PermissionDenied("Feedback has not been released for this plan.")
+            if not project.memberships.filter(user=request.user).exists():
+                return Response(status=404)
+        ballots = (
+            Ballot.objects.filter(rubric_version__plan=plan, project=project, is_calibration=False)
+            .exclude(comment="")
+            .select_related("judge")
+            .order_by("submitted_at")
+        )
+        return Response(
+            [
+                {
+                    "judge": None if plan.feedback_anonymous else ballot.judge.username,
+                    "comment": ballot.comment,
+                    "submitted_at": ballot.submitted_at,
+                }
+                for ballot in ballots
+            ]
+        )
 
 
 class CandidateListView(PlanMixin):

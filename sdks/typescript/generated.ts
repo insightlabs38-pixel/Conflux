@@ -851,6 +851,8 @@ export type EvaluationPlan = {
   pool_strategy?: PoolStrategyEnum;
   mode?: ModeEnum;
   results_visible_to_participants?: boolean;
+  feedback_visible_to_participants?: boolean;
+  feedback_anonymous?: boolean;
   draft_criteria?: unknown;
   pool?: string | null;
   current_rubric_version: number | null;
@@ -871,6 +873,8 @@ export type InputOfEvaluationPlan = {
   pool_strategy?: InputOfPoolStrategyEnum;
   mode?: InputOfModeEnum;
   results_visible_to_participants?: boolean;
+  feedback_visible_to_participants?: boolean;
+  feedback_anonymous?: boolean;
   draft_criteria?: unknown;
   pool?: string | null;
   calibration_required?: boolean;
@@ -1020,6 +1024,18 @@ export type InputOfExternalArtifactInputSchema = {
   visibility: string;
   title?: string;
   external_url: string;
+};
+
+export type FeedbackEntrySchema = {
+  judge: string | null;
+  comment: string;
+  submitted_at: string;
+};
+
+export type InputOfFeedbackEntrySchema = {
+  judge: string | null;
+  comment: string;
+  submitted_at: string;
 };
 
 export type FormAnswersInputSchema = { answers: unknown };
@@ -1578,6 +1594,8 @@ export type PatchedEvaluationPlan = {
   pool_strategy?: PoolStrategyEnum;
   mode?: ModeEnum;
   results_visible_to_participants?: boolean;
+  feedback_visible_to_participants?: boolean;
+  feedback_anonymous?: boolean;
   draft_criteria?: unknown;
   pool?: string | null;
   current_rubric_version?: number | null;
@@ -1598,6 +1616,8 @@ export type InputOfPatchedEvaluationPlan = {
   pool_strategy?: InputOfPoolStrategyEnum;
   mode?: InputOfModeEnum;
   results_visible_to_participants?: boolean;
+  feedback_visible_to_participants?: boolean;
+  feedback_anonymous?: boolean;
   draft_criteria?: unknown;
   pool?: string | null;
   calibration_required?: boolean;
@@ -3956,6 +3976,18 @@ export interface Operations {
     };
     response: CandidateQueueItemSchema[];
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_feedback_project_public_id: {
+    request: {
+      path: {
+        event_public_id: string;
+        plan_public_id: string;
+        project_public_id: string;
+        stage_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: FeedbackEntrySchema[];
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_normalization_runs: {
     request: {
       path: {
@@ -6120,6 +6152,21 @@ export const operations = {
       path_params: [
         "event_public_id",
         "plan_public_id",
+        "stage_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_feedback_project_public_id:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/feedback/{project_public_id}/",
+      path_params: [
+        "event_public_id",
+        "plan_public_id",
+        "project_public_id",
         "stage_public_id",
         "workspace_public_id",
       ],

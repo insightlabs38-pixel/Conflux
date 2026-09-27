@@ -74,6 +74,12 @@ class RankedResultSchema(serializers.Serializer):
     tie_break = serializers.IntegerField(allow_null=True)
 
 
+class FeedbackEntrySchema(serializers.Serializer):
+    judge = serializers.CharField(allow_null=True)
+    comment = serializers.CharField()
+    submitted_at = serializers.DateTimeField()
+
+
 class PairwiseComparisonInputSchema(serializers.Serializer):
     project_a = serializers.UUIDField()
     project_b = serializers.UUIDField()

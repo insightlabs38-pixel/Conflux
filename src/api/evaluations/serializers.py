@@ -42,6 +42,8 @@ class EvaluationPlanSerializer(serializers.ModelSerializer):
             "pool_strategy",
             "mode",
             "results_visible_to_participants",
+            "feedback_visible_to_participants",
+            "feedback_anonymous",
             "draft_criteria",
             "pool",
             "current_rubric_version",

@@ -6237,6 +6237,61 @@ paths:
                 items:
                   $ref: '#/components/schemas/CandidateQueueItemSchema'
           description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/feedback/{project_public_id}/
+  : get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_feedback_project_public_id
+      description: |-
+        S21: a project's released judge feedback (`Ballot.comment`) --
+        never shown until the organizer opts the plan into
+        `feedback_visible_to_participants`, and never with judge identity
+        unless the organizer also opts out of `feedback_anonymous`. Scoped to
+        one project (unlike the plan-wide `ResultsView`): a participant may
+        only ever read their own project's feedback.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FeedbackEntrySchema'
+          description: ''
   ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/normalization-runs/
   : get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_normalization_runs
@@ -9729,6 +9784,10 @@ components:
           $ref: '#/components/schemas/ModeEnum'
         results_visible_to_participants:
           type: boolean
+        feedback_visible_to_participants:
+          type: boolean
+        feedback_anonymous:
+          type: boolean
         draft_criteria: {}
         pool:
           type: string
@@ -10015,6 +10074,21 @@ components:
       - external_url
       - kind
       - visibility
+    FeedbackEntrySchema:
+      type: object
+      properties:
+        judge:
+          type: string
+          nullable: true
+        comment:
+          type: string
+        submitted_at:
+          type: string
+          format: date-time
+      required:
+      - comment
+      - judge
+      - submitted_at
     FormAnswersInputSchema:
       type: object
       properties:
@@ -10865,6 +10939,10 @@ components:
         mode:
           $ref: '#/components/schemas/ModeEnum'
         results_visible_to_participants:
+          type: boolean
+        feedback_visible_to_participants:
+          type: boolean
+        feedback_anonymous:
           type: boolean
         draft_criteria: {}
         pool:

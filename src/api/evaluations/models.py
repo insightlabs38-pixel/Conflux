@@ -49,6 +49,16 @@ class EvaluationPlan(PublicIdModel):
         default=EvaluationMode.RUBRIC,
     )
     results_visible_to_participants = models.BooleanField(default=False)
+    # S21: judge Ballot.comment is otherwise never shown outside
+    # organizer/judge context (see Ballot's own docstring). Release is an
+    # explicit organizer opt-in through this same plan -- never automatic
+    # on submission or on a schedule -- so "delayed"/"approved" is this
+    # flag itself, the same shape as `results_visible_to_participants`.
+    feedback_visible_to_participants = models.BooleanField(default=False)
+    # Default True: showing a judge's identity alongside critical feedback
+    # is an organizer opt-in, not a silent default, to avoid exposing
+    # judges to backlash they didn't sign up for.
+    feedback_anonymous = models.BooleanField(default=True)
     draft_criteria = models.JSONField(default=list, blank=True)
     pool = models.ForeignKey(
         "EvaluationPool",

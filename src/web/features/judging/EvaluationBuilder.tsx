@@ -21,6 +21,8 @@ type Plan = {
   pool: string | null;
   prize_judging: boolean;
   results_visible_to_participants: boolean;
+  feedback_visible_to_participants: boolean;
+  feedback_anonymous: boolean;
   draft_criteria: Criterion[];
   current_rubric_version: number | null;
   published_normalization_run: number | null;
@@ -331,6 +333,24 @@ function PlanEditor({
           }
         />{" "}
         Results visible to participants
+      </label>
+      <label>
+        <input
+          type="checkbox"
+          checked={plan.feedback_visible_to_participants}
+          onChange={(e) =>
+            void patch({ feedback_visible_to_participants: e.target.checked })
+          }
+        />{" "}
+        Judge feedback visible to participants
+      </label>
+      <label>
+        <input
+          type="checkbox"
+          checked={plan.feedback_anonymous}
+          onChange={(e) => void patch({ feedback_anonymous: e.target.checked })}
+        />{" "}
+        Keep judge identity anonymous in released feedback
       </label>
       <CriteriaEditor criteria={criteria} onChange={setCriteria} />
       <Button onClick={() => void patch({ draft_criteria: criteria })}>

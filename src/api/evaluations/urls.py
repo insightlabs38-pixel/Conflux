@@ -102,6 +102,11 @@ urlpatterns = [
         name="evaluation-plan-results-csv",
     ),
     path(
+        f"{_PLAN}/feedback/<uuid:project_public_id>/",
+        views.ProjectFeedbackView.as_view(),
+        name="evaluation-plan-feedback",
+    ),
+    path(
         f"{_PLAN}/pairwise/next/",
         views.PairwiseNextPairView.as_view(),
         name="evaluation-plan-pairwise-next",

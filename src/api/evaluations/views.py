@@ -11,11 +11,13 @@ from django.db import IntegrityError, transaction
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, inline_serializer
 from events.views import OrganizerView
 from projects.models import Project
+from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
+from stages.serializers import StageSerializer
 from stages.views import StageEventMixin
 from workspaces.models import Role
 
@@ -78,6 +80,8 @@ from .serializers import (
     PoolMembershipSerializer,
     RubricVersionSerializer,
 )
+from .workflow_presets import PRESETS as WORKFLOW_PRESETS
+from .workflow_presets import apply_preset
 
 
 def _as_drf_validation_error(exc):
@@ -125,6 +129,82 @@ class PlanMixin(StageEventMixin):
     def get_plan(self):
         return get_object_or_404(
             EvaluationPlan, stage=self.get_stage(), public_id=self.kwargs["plan_public_id"]
+        )
+
+
+class WorkflowPresetListView(OrganizerView):
+    @extend_schema(
+        responses={
+            200: {
+                "type": "object",
+                "additionalProperties": {
+                    "type": "object",
+                    "properties": {
+                        "label": {"type": "string"},
+                        "rounds": {"type": "array", "items": {"type": "string"}},
+                    },
+                    "required": ["label", "rounds"],
+                },
+            }
+        }
+    )
+    def get(self, request, workspace_public_id, event_public_id):
+        return Response(
+            {
+                slug: {"label": preset["label"], "rounds": preset["rounds"]}
+                for slug, preset in WORKFLOW_PRESETS.items()
+            }
+        )
+
+
+class WorkflowPresetApplyView(OrganizerView):
+    """Bootstraps a fresh event's stage graph from a named multi-round
+    preset (S20) -- a one-action shortcut for what an organizer could
+    already build stage by stage through StageListView/StageTransitionList
+    View/EvaluationPlanListView.
+    """
+
+    @extend_schema(
+        request=inline_serializer(
+            "WorkflowPresetInput", fields={"preset": serializers.CharField()}
+        ),
+        responses={
+            201: inline_serializer(
+                "WorkflowPresetResult",
+                fields={
+                    "stages": StageSerializer(many=True),
+                    "plans": EvaluationPlanSerializer(many=True),
+                },
+            )
+        },
+    )
+    @transaction.atomic
+    def post(self, request, workspace_public_id, event_public_id):
+        event = self.get_event()
+        preset_slug = request.data.get("preset", "")
+        try:
+            stages, plans = apply_preset(event, preset_slug)
+        except ModelValidationError as exc:
+            raise _as_drf_validation_error(exc) from exc
+        record_mutation(
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="workflow_preset.applied",
+            target=event,
+            event_type="workflow_preset.applied",
+            payload={"event": str(event.public_id), "preset": preset_slug},
+            metadata={
+                "event_id": str(event.public_id),
+                "preset": preset_slug,
+                "stages": [str(stage.public_id) for stage in stages],
+            },
+        )
+        return Response(
+            {
+                "stages": StageSerializer(stages, many=True).data,
+                "plans": EvaluationPlanSerializer(plans, many=True).data,
+            },
+            status=201,
         )
 
 

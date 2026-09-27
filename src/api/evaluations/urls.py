@@ -9,6 +9,16 @@ _PLAN = f"{_STAGE}/evaluation-plans/<uuid:plan_public_id>"
 
 urlpatterns = [
     path(
+        f"{_EVENT}/workflow-presets/",
+        views.WorkflowPresetListView.as_view(),
+        name="workflow-preset-list",
+    ),
+    path(
+        f"{_EVENT}/workflow-presets/apply/",
+        views.WorkflowPresetApplyView.as_view(),
+        name="workflow-preset-apply",
+    ),
+    path(
         f"{_STAGE}/evaluation-plans/",
         views.EvaluationPlanListView.as_view(),
         name="evaluation-plan-list",

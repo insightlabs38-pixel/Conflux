@@ -2589,6 +2589,17 @@ export type InputOfWinnerOutput = {
   fulfillments: Record<string, unknown>[];
 };
 
+export type WorkflowPresetInput = { preset: string };
+
+export type InputOfWorkflowPresetInput = { preset: string };
+
+export type WorkflowPresetResult = { stages: Stage[]; plans: EvaluationPlan[] };
+
+export type InputOfWorkflowPresetResult = {
+  stages: InputOfStage[];
+  plans: InputOfEvaluationPlan[];
+};
+
 export type WorkspaceInputSchema = { name: string; slug?: string };
 
 export type InputOfWorkspaceInputSchema = { name: string; slug?: string };
@@ -4295,6 +4306,17 @@ export interface Operations {
       body: InputOfVoteInputSchema;
     };
     response: VoteReceiptSchema;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_workflow_presets: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: Record<string, { label: string; rounds: string[] }>;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_workflow_presets_apply: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfWorkflowPresetInput;
+    };
+    response: WorkflowPresetResult;
   };
   get_api_v1_workspaces_workspace_public_id_inbox: {
     request: { path: { workspace_public_id: string } };
@@ -6566,6 +6588,24 @@ export const operations = {
     {
       method: "POST",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/voting/votes/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_workflow_presets:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/workflow-presets/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_workflow_presets_apply:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/workflow-presets/apply/",
       path_params: ["event_public_id", "workspace_public_id"],
       query_params: [],
       request_body: true,

@@ -7924,6 +7924,91 @@ paths:
               schema:
                 $ref: '#/components/schemas/VoteReceiptSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/workflow-presets/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_workflow_presets
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    label:
+                      type: string
+                    rounds:
+                      type: array
+                      items:
+                        type: string
+                  required:
+                  - label
+                  - rounds
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/workflow-presets/apply/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_workflow_presets_apply
+      description: |-
+        Bootstraps a fresh event's stage graph from a named multi-round
+        preset (S20) -- a one-action shortcut for what an organizer could
+        already build stage by stage through StageListView/StageTransitionList
+        View/EvaluationPlanListView.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowPresetInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WorkflowPresetInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WorkflowPresetInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowPresetResult'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/inbox/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_inbox
@@ -12408,6 +12493,27 @@ components:
       - public_id
       - selected_at
       - source
+    WorkflowPresetInput:
+      type: object
+      properties:
+        preset:
+          type: string
+      required:
+      - preset
+    WorkflowPresetResult:
+      type: object
+      properties:
+        stages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Stage'
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/EvaluationPlan'
+      required:
+      - plans
+      - stages
     WorkspaceInputSchema:
       type: object
       properties:

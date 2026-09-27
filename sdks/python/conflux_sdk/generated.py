@@ -2411,6 +2411,20 @@ class InputOfWinnerOutput(TypedDict):
     selected_at: str
     fulfillments: list[dict[str, Any]]
 
+class WorkflowPresetInput(TypedDict):
+    preset: str
+
+class InputOfWorkflowPresetInput(TypedDict):
+    preset: str
+
+class WorkflowPresetResult(TypedDict):
+    stages: list[Stage]
+    plans: list[EvaluationPlan]
+
+class InputOfWorkflowPresetResult(TypedDict):
+    stages: list[InputOfStage]
+    plans: list[InputOfEvaluationPlan]
+
 class WorkspaceInputSchema(TypedDict):
     name: str
     slug: NotRequired[str]
@@ -3267,6 +3281,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                     'query_params': [],
                                                                                     'request_body': False,
                                                                                     'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_workflow_presets': {'method': 'GET',
+                                                                                       'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/workflow-presets/',
+                                                                                       'path_params': ['event_public_id',
+                                                                                                       'workspace_public_id'],
+                                                                                       'query_params': [],
+                                                                                       'request_body': False,
+                                                                                       'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_inbox': {'method': 'GET',
                                                      'path': '/api/v1/workspaces/{workspace_public_id}/inbox/',
                                                      'path_params': ['workspace_public_id'],
@@ -3990,6 +4011,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                     'query_params': [],
                                                                                     'request_body': True,
                                                                                     'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_workflow_presets_apply': {'method': 'POST',
+                                                                                              'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/workflow-presets/apply/',
+                                                                                              'path_params': ['event_public_id',
+                                                                                                              'workspace_public_id'],
+                                                                                              'query_params': [],
+                                                                                              'request_body': True,
+                                                                                              'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_inbox_recipient_public_id_read': {'method': 'POST',
                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/inbox/{recipient_public_id}/read/',
                                                                                'path_params': ['recipient_public_id',

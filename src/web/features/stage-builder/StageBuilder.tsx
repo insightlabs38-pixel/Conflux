@@ -19,6 +19,7 @@ type EvidenceRow = {
     advanced: { subject_type: string; subject_id: string }[];
   };
 };
+type WorkflowPreset = { label: string; rounds: string[] };
 
 function message(error: unknown): string {
   if (typeof error === "string") return error;
@@ -85,6 +86,8 @@ export function StageBuilder({
   const [graph, setGraph] = useState<GraphStatus | null>(null);
   const [strategies, setStrategies] = useState<string[]>([]);
   const [evidence, setEvidence] = useState<EvidenceRow[]>([]);
+  const [presets, setPresets] = useState<Record<string, WorkflowPreset>>({});
+  const [selectedPreset, setSelectedPreset] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -98,17 +101,19 @@ export function StageBuilder({
   const [candidateText, setCandidateText] = useState("");
 
   async function refresh() {
-    const [nextStages, nextTransitions, nextGraph, nextEvidence] =
+    const [nextStages, nextTransitions, nextGraph, nextEvidence, nextPresets] =
       await Promise.all([
         request<Stage[]>(base + "stages/"),
         request<Transition[]>(base + "stage-transitions/"),
         request<GraphStatus>(base + "stage-graph/validate/"),
         request<EvidenceRow[]>(base + "stage-evidence/"),
+        request<Record<string, WorkflowPreset>>(base + "workflow-presets/"),
       ]);
     setStages(nextStages);
     setTransitions(nextTransitions);
     setGraph(nextGraph);
     setEvidence(nextEvidence);
+    setPresets(nextPresets);
     if (nextStages[0] && !strategies.length) {
       const { strategies: available } = await request<{
         strategies: string[];
@@ -138,6 +143,18 @@ export function StageBuilder({
     } finally {
       setBusy(false);
     }
+  }
+
+  function applyPreset(event: FormEvent) {
+    event.preventDefault();
+    void run(async () => {
+      if (!selectedPreset) throw new Error("Choose a preset first.");
+      await request(base + "workflow-presets/apply/", "POST", {
+        preset: selectedPreset,
+      });
+      setSelectedPreset("");
+      await refresh();
+    });
   }
 
   function addStage(event: FormEvent) {
@@ -226,6 +243,26 @@ export function StageBuilder({
           </li>
         ))}
       </ol>
+      {stages.length === 0 && Object.keys(presets).length > 0 && (
+        <form onSubmit={applyPreset}>
+          <h3>Apply a workflow preset</h3>
+          <label>
+            Preset{" "}
+            <select
+              value={selectedPreset}
+              onChange={(e) => setSelectedPreset(e.target.value)}
+            >
+              <option value="" />
+              {Object.entries(presets).map(([slug, preset]) => (
+                <option key={slug} value={slug}>
+                  {preset.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button disabled={busy}>Apply preset</button>
+        </form>
+      )}
       <form onSubmit={addStage}>
         <h3>Add stage</h3>
         <label>

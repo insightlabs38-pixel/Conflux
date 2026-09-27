@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     "audit",
     "events",
     "integrations",
+    "awards",
     "stages",
     "policies",
     "participation",

@@ -12,7 +12,7 @@ from django.conf import settings
 from django.db import models, transaction
 from django.utils import timezone
 
-from .models import WebhookDelivery, WebhookSubscription
+from .models import WebhookDelivery, WebhookPlatform, WebhookSubscription
 
 ENVELOPE_VERSION = "1"
 MAX_ATTEMPTS = 5
@@ -59,6 +59,32 @@ def envelope(domain_event):
         "workspace": str(domain_event.workspace.public_id),
         "data": domain_event.payload,
     }
+
+
+def chat_summary(domain_event) -> str:
+    """A short, human-readable line for a chat platform (S23). Only
+    scalar payload fields are rendered -- nested structures and internal
+    IDs stay in the full `envelope()` a generic subscription still gets,
+    never dumped raw into a chat message.
+    """
+    label = domain_event.event_type.replace(".", " ").replace("_", " ")
+    details = ", ".join(
+        f"{key}: {value}"
+        for key, value in domain_event.payload.items()
+        if key != "event" and isinstance(value, (str, int, float, bool))
+    )
+    return f"Conflux — {label}" + (f" ({details})" if details else "")
+
+
+def payload_for(subscription, domain_event):
+    """The JSON body a delivery should send: the signed envelope for a
+    generic subscription, or a platform-native chat message otherwise.
+    """
+    if subscription.platform == WebhookPlatform.DISCORD:
+        return {"content": chat_summary(domain_event)}
+    if subscription.platform == WebhookPlatform.SLACK:
+        return {"text": chat_summary(domain_event)}
+    return envelope(domain_event)
 
 
 def signed_headers(subscription, domain_event, body, now=None):
@@ -156,7 +182,9 @@ def deliver_pending(limit=100):
             delivery.save(update_fields=["attempts", "next_attempt_at"])
         try:
             body = json.dumps(
-                envelope(delivery.domain_event), separators=(",", ":"), sort_keys=True
+                payload_for(delivery.subscription, delivery.domain_event),
+                separators=(",", ":"),
+                sort_keys=True,
             ).encode()
             status = send_delivery(delivery.subscription, delivery.domain_event, body)
             error = "" if 200 <= status < 300 else f"HTTP {status}"

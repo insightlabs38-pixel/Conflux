@@ -3,11 +3,28 @@ from django.conf import settings
 from django.db import models
 
 
+class WebhookPlatform(models.TextChoices):
+    """S23: what shape the delivered body should take. GENERIC is the
+    signed Conflux envelope every subscription used before this batch;
+    DISCORD/SLACK reshape the same underlying DomainEvent into that
+    platform's plain incoming-webhook message format instead -- no new
+    hosted service or OAuth app, just a different body for the same
+    delivery/retry/signing pipeline.
+    """
+
+    GENERIC = "generic", "Generic (signed Conflux envelope)"
+    DISCORD = "discord", "Discord incoming webhook"
+    SLACK = "slack", "Slack incoming webhook"
+
+
 class WebhookSubscription(PublicIdModel):
     workspace = models.ForeignKey("workspaces.Workspace", on_delete=models.CASCADE)
     event = models.ForeignKey("events.Event", null=True, blank=True, on_delete=models.CASCADE)
     url = models.URLField(max_length=2048)
     event_types = models.JSONField(default=list)
+    platform = models.CharField(
+        max_length=10, choices=WebhookPlatform.choices, default=WebhookPlatform.GENERIC
+    )
     enabled = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

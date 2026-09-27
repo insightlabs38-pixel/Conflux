@@ -12,7 +12,13 @@ from .models import (
     ArtifactStatus,
     ArtifactValidation,
 )
-from .reachability import GITHUB_REPO_PATH, github_evidence, pinned_get
+from .reachability import (
+    GITHUB_REPO_PATH,
+    GITLAB_REPO_PATH,
+    github_evidence,
+    gitlab_evidence,
+    pinned_get,
+)
 from .storage import S3Storage
 
 SUBMISSION_CI_VALIDATOR = "submission_ci"
@@ -157,6 +163,10 @@ def inspect_submission_ci(artifact) -> ValidationResult:
         match = GITHUB_REPO_PATH.match(parts.path or "")
         if match:
             detail += " " + github_evidence(match["owner"], match["repo"])
+    elif artifact.kind == ArtifactKind.REPOSITORY and parts.hostname == "gitlab.com":
+        match = GITLAB_REPO_PATH.match(parts.path or "")
+        if match:
+            detail += " " + gitlab_evidence(match["owner"], match["repo"])
     return ValidationResult(SUBMISSION_CI_VALIDATOR, "ok", detail[:500])
 
 

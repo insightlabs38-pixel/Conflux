@@ -1658,6 +1658,10 @@ class InputOfPatchedVotingPlan(TypedDict):
     allow_comments: NotRequired[bool]
     comment_visibility: NotRequired[InputOfCommentVisibilityEnum]
 
+PlatformEnum = Literal['generic', 'discord', 'slack']
+
+InputOfPlatformEnum = Literal['generic', 'discord', 'slack']
+
 class Policy(TypedDict):
     public_id: str
     name: str
@@ -2124,17 +2128,20 @@ class SubscriptionInput(TypedDict):
     url: str
     event_types: list[str]
     event: NotRequired[str | None]
+    platform: NotRequired[PlatformEnum]
 
 class InputOfSubscriptionInput(TypedDict):
     url: str
     event_types: list[str]
     event: NotRequired[str | None]
+    platform: NotRequired[InputOfPlatformEnum]
 
 class SubscriptionIssued(TypedDict):
     public_id: str
     url: str
     event_types: list[str]
     event: str | None
+    platform: str
     enabled: bool
     created_at: str
     secret: str
@@ -2144,6 +2151,7 @@ class InputOfSubscriptionIssued(TypedDict):
     url: str
     event_types: list[str]
     event: str | None
+    platform: str
     enabled: bool
     created_at: str
     secret: str
@@ -2153,6 +2161,7 @@ class SubscriptionOutput(TypedDict):
     url: str
     event_types: list[str]
     event: str | None
+    platform: str
     enabled: bool
     created_at: str
 
@@ -2161,6 +2170,7 @@ class InputOfSubscriptionOutput(TypedDict):
     url: str
     event_types: list[str]
     event: str | None
+    platform: str
     enabled: bool
     created_at: str
 

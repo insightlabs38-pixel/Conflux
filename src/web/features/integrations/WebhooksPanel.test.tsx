@@ -27,6 +27,7 @@ it("shows scoped subscriptions and replays a failed delivery", async () => {
       url: "https://receiver.example/hook",
       event_types: ["event.status_changed"],
       event: "e1",
+      platform: "generic",
       enabled: true,
     },
   ];
@@ -87,6 +88,63 @@ it("shows scoped subscriptions and replays a failed delivery", async () => {
   expect(fetchMock).toHaveBeenCalledWith(
     expect.stringContaining("d1/replay/"),
     expect.objectContaining({ method: "POST", credentials: "include" }),
+  );
+  act(() => root.unmount());
+  container.remove();
+});
+
+it("sends the chosen delivery format when creating a subscription", async () => {
+  const fetchMock = vi
+    .fn()
+    .mockImplementation(async (input: unknown, init?: RequestInit) => {
+      const url = String(input);
+      if (init?.method === "POST") {
+        expect(JSON.parse(String(init.body))).toMatchObject({
+          platform: "discord",
+        });
+        return {
+          ok: true,
+          json: async () => ({
+            public_id: "s2",
+            url: "https://discord.com/api/webhooks/1/token",
+            event_types: ["event.status_changed"],
+            event: "e1",
+            platform: "discord",
+            enabled: true,
+            secret: "one-time-secret",
+          }),
+        };
+      }
+      return { ok: true, json: async () => [] };
+    });
+  vi.stubGlobal("fetch", fetchMock);
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  act(() => root.render(<WebhooksPanel workspaceId="w1" eventId="e1" />));
+  await until(() => container.querySelector("form") !== null);
+
+  const urlInput = container.querySelector(
+    'input[type="url"]',
+  ) as HTMLInputElement;
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(
+      HTMLInputElement.prototype,
+      "value",
+    )?.set?.call(urlInput, "https://discord.com/api/webhooks/1/token");
+    urlInput.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+  const platformSelect = container.querySelector("select") as HTMLSelectElement;
+  await act(async () => {
+    platformSelect.value = "discord";
+    platformSelect.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  await act(async () => {
+    (container.querySelector("form") as HTMLFormElement).requestSubmit();
+  });
+
+  await until(
+    () => container.textContent?.includes("one-time-secret") ?? false,
   );
   act(() => root.unmount());
   container.remove();

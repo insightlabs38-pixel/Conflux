@@ -60,6 +60,20 @@ def test_check_evidence_reports_a_non_200_as_a_warning(monkeypatch):
     assert "404" in response.json()["ci_evidence"][0]["detail"]
 
 
+def test_check_evidence_records_gitlab_evidence_for_a_gitlab_repository(monkeypatch):
+    client, artifact, base = setup_api(url="https://gitlab.com/octo/demo")
+    monkeypatch.setattr("artifacts.validators.pinned_get", lambda host, address, path: 200)
+    monkeypatch.setattr(
+        "artifacts.validators.gitlab_evidence",
+        lambda owner, repo: "license: mit; HEAD commit abc123.",
+    )
+
+    response = client.post(base + "check-evidence/")
+    assert response.status_code == 200
+    detail = response.json()["ci_evidence"][0]["detail"]
+    assert "mit" in detail
+
+
 def test_check_evidence_only_calls_github_for_github_repository_urls(monkeypatch):
     client, artifact, base = setup_api(kind="live_url", url="https://demo.example.com/app")
     called = {"github": False}

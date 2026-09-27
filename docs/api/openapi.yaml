@@ -11266,6 +11266,16 @@ components:
           type: string
           format: date-time
           readOnly: true
+    PlatformEnum:
+      enum:
+      - generic
+      - discord
+      - slack
+      type: string
+      description: |-
+        * `generic` - Generic (signed Conflux envelope)
+        * `discord` - Discord incoming webhook
+        * `slack` - Slack incoming webhook
     Policy:
       type: object
       properties:
@@ -12090,6 +12100,8 @@ components:
           type: string
           format: uuid
           nullable: true
+        platform:
+          $ref: '#/components/schemas/PlatformEnum'
       required:
       - event_types
       - url
@@ -12110,6 +12122,8 @@ components:
           type: string
           format: uuid
           nullable: true
+        platform:
+          type: string
         enabled:
           type: boolean
         created_at:
@@ -12122,6 +12136,7 @@ components:
       - enabled
       - event
       - event_types
+      - platform
       - public_id
       - secret
       - url
@@ -12142,6 +12157,8 @@ components:
           type: string
           format: uuid
           nullable: true
+        platform:
+          type: string
         enabled:
           type: boolean
         created_at:
@@ -12152,6 +12169,7 @@ components:
       - enabled
       - event
       - event_types
+      - platform
       - public_id
       - url
     Team:

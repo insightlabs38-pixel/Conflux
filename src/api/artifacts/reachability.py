@@ -20,8 +20,14 @@ import http.client
 import json
 import re
 import socket
+from urllib.parse import quote
 
 GITHUB_REPO_PATH = re.compile(r"^/(?P<owner>[\w.-]+)/(?P<repo>[\w.-]+?)(?:\.git)?/?$")
+# S23: same simple owner/repo shape github.com uses. GitLab also allows
+# nested subgroups (group/subgroup/project); those fall outside this
+# pattern and simply get no evidence, the same "best-effort, never
+# guessed" degrade as a private or rate-limited repository below.
+GITLAB_REPO_PATH = re.compile(r"^/(?P<owner>[\w.-]+)/(?P<repo>[\w.-]+?)(?:\.git)?/?$")
 
 
 def pinned_get(host: str, address: str, path: str, *, timeout: float = 5.0) -> int:
@@ -91,6 +97,46 @@ def github_evidence(owner: str, repo: str) -> str:
     license_id = (info.get("license") or {}).get("spdx_id") or "none detected"
     commit = _github_get_json(f"/repos/{owner}/{repo}/commits/{branch}")
     sha = (commit or {}).get("sha") or ""
+    commit_note = (
+        f"HEAD commit {sha[:12]} on {branch}" if sha else f"commit unavailable on {branch}"
+    )
+    return f"license: {license_id}; {commit_note}."
+
+
+def _gitlab_get_json(path: str) -> dict | None:
+    """A plain HTTPS GET to the fixed `gitlab.com` host -- same fixed-host
+    reasoning as `_github_get_json` above.
+    """
+    connection = http.client.HTTPSConnection("gitlab.com", 443, timeout=5)
+    try:
+        connection.request(
+            "GET",
+            path,
+            headers={"User-Agent": "conflux-submission-ci", "Accept": "application/json"},
+        )
+        response = connection.getresponse()
+        body = response.read(65536)
+        if response.status != 200:
+            return None
+        return json.loads(body)
+    except (OSError, TimeoutError, http.client.HTTPException, ValueError):
+        return None
+    finally:
+        connection.close()
+
+
+def gitlab_evidence(owner: str, repo: str) -> str:
+    """Best-effort license + latest-commit evidence for a public GitLab
+    project, mirroring `github_evidence` exactly. Never raises.
+    """
+    project_id = quote(f"{owner}/{repo}", safe="")
+    info = _gitlab_get_json(f"/api/v4/projects/{project_id}?license=true")
+    if info is None:
+        return "GitLab metadata unavailable (rate-limited, private, or not found)."
+    branch = info.get("default_branch") or "HEAD"
+    license_id = (info.get("license") or {}).get("key") or "none detected"
+    commit = _gitlab_get_json(f"/api/v4/projects/{project_id}/repository/commits/{branch}")
+    sha = (commit or {}).get("id") or ""
     commit_note = (
         f"HEAD commit {sha[:12]} on {branch}" if sha else f"commit unavailable on {branch}"
     )

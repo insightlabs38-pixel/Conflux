@@ -1,6 +1,12 @@
 import socket
 
-from artifacts.reachability import GITHUB_REPO_PATH, github_evidence, pinned_get
+from artifacts.reachability import (
+    GITHUB_REPO_PATH,
+    GITLAB_REPO_PATH,
+    github_evidence,
+    gitlab_evidence,
+    pinned_get,
+)
 
 
 class FakeResponse:
@@ -70,3 +76,34 @@ def test_github_repo_path_pattern_extracts_owner_and_repo():
     assert match["owner"] == "octo"
     assert match["repo"] == "demo"
     assert GITHUB_REPO_PATH.match("/octo") is None
+
+
+def test_gitlab_evidence_reports_license_and_commit_on_success(monkeypatch):
+    calls = {"count": 0}
+
+    def fake_get_json(path):
+        calls["count"] += 1
+        if path == "/api/v4/projects/octo%2Fdemo?license=true":
+            return {"default_branch": "main", "license": {"key": "mit"}}
+        if path == "/api/v4/projects/octo%2Fdemo/repository/commits/main":
+            return {"id": "abcdef0123456789"}
+        raise AssertionError(f"unexpected path {path}")
+
+    monkeypatch.setattr("artifacts.reachability._gitlab_get_json", fake_get_json)
+    result = gitlab_evidence("octo", "demo")
+    assert "license: mit" in result
+    assert "abcdef012345" in result
+    assert calls["count"] == 2
+
+
+def test_gitlab_evidence_degrades_honestly_when_the_api_is_unavailable(monkeypatch):
+    monkeypatch.setattr("artifacts.reachability._gitlab_get_json", lambda path: None)
+    result = gitlab_evidence("octo", "demo")
+    assert "unavailable" in result
+
+
+def test_gitlab_repo_path_pattern_extracts_owner_and_repo():
+    match = GITLAB_REPO_PATH.match("/octo/demo.git")
+    assert match["owner"] == "octo"
+    assert match["repo"] == "demo"
+    assert GITLAB_REPO_PATH.match("/octo") is None

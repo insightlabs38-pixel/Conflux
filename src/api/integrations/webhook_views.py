@@ -14,7 +14,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from workspaces.models import Role
 
-from .models import WebhookDelivery, WebhookSubscription
+from .models import WebhookDelivery, WebhookPlatform, WebhookSubscription
 from .webhooks import signing_secret, validate_destination
 
 EVENT_TYPE = re.compile(r"^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+$")
@@ -24,6 +24,7 @@ class SubscriptionInput(serializers.Serializer):
     url = serializers.URLField(max_length=2048)
     event_types = serializers.ListField(child=serializers.CharField(), min_length=1, max_length=50)
     event = serializers.UUIDField(required=False, allow_null=True)
+    platform = serializers.ChoiceField(choices=WebhookPlatform.choices, required=False)
 
 
 class SubscriptionOutput(serializers.Serializer):
@@ -31,6 +32,7 @@ class SubscriptionOutput(serializers.Serializer):
     url = serializers.URLField()
     event_types = serializers.ListField(child=serializers.CharField())
     event = serializers.UUIDField(allow_null=True)
+    platform = serializers.CharField()
     enabled = serializers.BooleanField()
     created_at = serializers.DateTimeField()
 
@@ -62,6 +64,7 @@ def subscription_data(item):
         "url": item.url,
         "event_types": item.event_types,
         "event": str(item.event.public_id) if item.event else None,
+        "platform": item.platform,
         "enabled": item.enabled,
         "created_at": item.created_at,
     }
@@ -126,7 +129,11 @@ class WebhookSubscriptionsView(WebhookBase):
         )
         with transaction.atomic():
             item = WebhookSubscription.objects.create(
-                workspace=self.get_workspace(), event=event, url=url, event_types=event_types
+                workspace=self.get_workspace(),
+                event=event,
+                url=url,
+                event_types=event_types,
+                platform=data.validated_data.get("platform", WebhookPlatform.GENERIC),
             )
             record_mutation(
                 actor=request.user,

@@ -1,11 +1,13 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Card } from "../../components/Card";
 
+type Platform = "generic" | "discord" | "slack";
 type Subscription = {
   public_id: string;
   url: string;
   event_types: string[];
   event: string | null;
+  platform: Platform;
   enabled: boolean;
 };
 type Delivery = {
@@ -45,6 +47,7 @@ export function WebhooksPanel({
   const [hasMore, setHasMore] = useState(false);
   const [url, setUrl] = useState("");
   const [types, setTypes] = useState("event.status_changed");
+  const [platform, setPlatform] = useState<Platform>("generic");
   const [secret, setSecret] = useState("");
   const [error, setError] = useState("");
 
@@ -86,6 +89,7 @@ export function WebhooksPanel({
             .split(",")
             .map((type) => type.trim())
             .filter(Boolean),
+          platform,
         }),
       });
       setSecret(issued.secret);
@@ -178,6 +182,17 @@ export function WebhooksPanel({
             required
           />
         </label>
+        <label>
+          Delivery format{" "}
+          <select
+            value={platform}
+            onChange={(event) => setPlatform(event.target.value as Platform)}
+          >
+            <option value="generic">Generic (signed Conflux envelope)</option>
+            <option value="discord">Discord incoming webhook</option>
+            <option value="slack">Slack incoming webhook</option>
+          </select>
+        </label>
         <button type="submit">Add webhook for this event</button>
       </form>
       <ul>
@@ -188,7 +203,7 @@ export function WebhooksPanel({
               <strong>{item.url}</strong> ·{" "}
               {item.enabled ? "Enabled" : "Disabled"} ·{" "}
               {item.event === null ? "All events" : "This event"} ·{" "}
-              {item.event_types.join(", ")}
+              {item.platform} · {item.event_types.join(", ")}
               <button type="button" onClick={() => toggle(item)}>
                 {item.enabled ? "Disable" : "Enable"}
               </button>

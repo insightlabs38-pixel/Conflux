@@ -1795,6 +1795,10 @@ export type InputOfPatchedVotingPlan = {
   comment_visibility?: InputOfCommentVisibilityEnum;
 };
 
+export type PlatformEnum = "generic" | "discord" | "slack";
+
+export type InputOfPlatformEnum = "generic" | "discord" | "slack";
+
 export type Policy = {
   public_id: string;
   name: string;
@@ -2299,12 +2303,14 @@ export type SubscriptionInput = {
   url: string;
   event_types: string[];
   event?: string | null;
+  platform?: PlatformEnum;
 };
 
 export type InputOfSubscriptionInput = {
   url: string;
   event_types: string[];
   event?: string | null;
+  platform?: InputOfPlatformEnum;
 };
 
 export type SubscriptionIssued = {
@@ -2312,6 +2318,7 @@ export type SubscriptionIssued = {
   url: string;
   event_types: string[];
   event: string | null;
+  platform: string;
   enabled: boolean;
   created_at: string;
   secret: string;
@@ -2322,6 +2329,7 @@ export type InputOfSubscriptionIssued = {
   url: string;
   event_types: string[];
   event: string | null;
+  platform: string;
   enabled: boolean;
   created_at: string;
   secret: string;
@@ -2332,6 +2340,7 @@ export type SubscriptionOutput = {
   url: string;
   event_types: string[];
   event: string | null;
+  platform: string;
   enabled: boolean;
   created_at: string;
 };
@@ -2341,6 +2350,7 @@ export type InputOfSubscriptionOutput = {
   url: string;
   event_types: string[];
   event: string | null;
+  platform: string;
   enabled: boolean;
   created_at: string;
 };

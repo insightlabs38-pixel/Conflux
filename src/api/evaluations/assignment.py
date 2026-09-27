@@ -1,4 +1,5 @@
-"""Deterministic, explainable baseline assignment (JDG-007).
+"""Deterministic, explainable baseline assignment (JDG-007), extended with a
+connectivity-aware objective for the assigned-subset strategy (JDG-009/010).
 
 Track-fit prefers a judge whose PoolMembership.track_expertise includes the
 candidate Project's `track` (added as a corrective fix ahead of C-B15 --
@@ -10,6 +11,7 @@ from dataclasses import dataclass
 
 from projects.models import Project
 
+from .connectivity import connectivity_report, repair_connectivity
 from .models import Assignment, ConflictOfInterest, EvaluationPoolStrategy, PoolMembership
 
 
@@ -74,6 +76,13 @@ def compute_assignment(plan, *, coverage: int = 3) -> list[Pairing]:
         for judge_id in eligible[: min(coverage, len(eligible))]:
             load[judge_id] += 1
             pairs.append(Pairing(judge_id, project.id))
+
+    # Connectivity-aware objective (JDG-010): the pure coverage/load pass
+    # above can leave the judge-overlap graph disconnected (e.g. coverage=1
+    # never creates any overlap at all). Stitch it back together where
+    # feasible -- see connectivity.repair_connectivity for the bound.
+    if len(judge_ids) > 1:
+        pairs, _ = repair_connectivity(pairs, judge_ids=judge_ids, load=load, conflicts=conflicts)
     return pairs
 
 
@@ -91,6 +100,7 @@ def activate(plan, *, coverage: int = 3):
     per_judge = {}
     for pairing in pairs:
         per_judge[pairing.judge_id] = per_judge.get(pairing.judge_id, 0) + 1
+    conflict_count = ConflictOfInterest.objects.filter(event_id=plan.stage.event_id).count()
     version = AssignmentVersion.objects.create(
         plan=plan,
         number=next_number,
@@ -100,6 +110,8 @@ def activate(plan, *, coverage: int = 3):
             "judge_count": len(per_judge),
             "assignment_count": len(pairs),
             "load_by_judge": {str(k): v for k, v in sorted(per_judge.items())},
+            "conflict_count": conflict_count,
+            "connectivity": connectivity_report(pairs, per_judge.keys()).as_dict(),
         },
     )
     Assignment.objects.bulk_create(

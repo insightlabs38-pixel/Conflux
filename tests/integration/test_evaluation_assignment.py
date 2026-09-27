@@ -2,6 +2,7 @@ import pytest
 from accounts.models import Session, User
 from django.test import Client
 from evaluations.assignment import compute_assignment
+from evaluations.connectivity import connectivity_report
 from evaluations.models import (
     ConflictOfInterest,
     EvaluationPlan,
@@ -105,6 +106,7 @@ def test_activation_endpoint_freezes_a_version_and_enforces_it_on_ballots():
     )
     assert activated.status_code == 201
     assert activated.json()["coverage"] == 1
+    assert activated.json()["evidence"]["connectivity"]["connected"] is True
 
     plan.refresh_from_db()
     assigned_judge_id = (
@@ -224,3 +226,34 @@ def test_track_fit_is_a_harmless_no_op_for_a_project_with_no_track():
     pairs = compute_assignment(plan, coverage=1)
     # No track on the candidate -> falls back to load/id tie-break, not fit.
     assert [p.judge_id for p in pairs] == [judges[0].id]
+
+
+def test_coverage_one_is_repaired_into_a_connected_graph_when_possible():
+    # Pathological (JDG-012): coverage=1 never creates a shared candidate on
+    # its own, so without the connectivity repair every judge would be its
+    # own isolated component.
+    _, event, stage, pool, plan, organizer, judges, projects = make_fixture(
+        judge_count=4, project_count=4
+    )
+    pairs = compute_assignment(plan, coverage=1)
+    judge_ids = {p.judge_id for p in pairs}
+    report = connectivity_report(pairs, judge_ids)
+    assert report.connected
+
+
+def test_assignment_infeasible_to_fully_connect_still_reports_honestly():
+    # Two judges, two candidates, and a conflict on every possible bridge:
+    # repair cannot succeed, and the report must say so rather than lie.
+    _, event, stage, pool, plan, organizer, judges, projects = make_fixture(
+        judge_count=2, project_count=2
+    )
+    ConflictOfInterest.objects.create(
+        event=event, judge=judges[0], project=projects[1], declared_by=organizer
+    )
+    ConflictOfInterest.objects.create(
+        event=event, judge=judges[1], project=projects[0], declared_by=organizer
+    )
+    pairs = compute_assignment(plan, coverage=1)
+    judge_ids = {p.judge_id for p in pairs}
+    report = connectivity_report(pairs, judge_ids)
+    assert not report.connected

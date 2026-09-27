@@ -5,6 +5,7 @@ from uuid import UUID
 from artifacts.models import Artifact
 from artifacts.preflight import run_preflight
 from audit.services import record_mutation
+from core.authz import has_any_role
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
@@ -12,6 +13,7 @@ from django.utils import timezone
 from forms.models import FormDefinition, FormResponse
 from policies.models import Action
 from policies.services import base_facts, explain_action
+from workspaces.models import Role
 
 from .models import Project, Submission, SubmissionStatus, SubmissionVersion
 
@@ -151,9 +153,12 @@ def finalize_submission(project, stage, actor, *, revision):
     digest = hashlib.sha256(
         json.dumps(snapshot, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
+    next_number = (
+        submission.versions.order_by("-number").values_list("number", flat=True).first() or 0
+    ) + 1
     version = SubmissionVersion.objects.create(
         submission=submission,
-        number=1,
+        number=next_number,
         snapshot=snapshot,
         digest=digest,
         finalized_by=actor,
@@ -176,3 +181,37 @@ def finalize_submission(project, stage, actor, *, revision):
         },
     )
     return submission, version, True
+
+
+@transaction.atomic
+def reopen_submission(project, stage, actor, *, reason=""):
+    """Allow an organizer to request a correction while preserving the prior version."""
+    project = (
+        Project.objects.select_for_update(of=("self",)).select_related("event").get(pk=project.pk)
+    )
+    if not has_any_role(actor, project.event.workspace, Role.ORGANIZER, Role.ADMIN):
+        raise ValidationError("Only organizers can reopen a submission.")
+    _require_window(project, timezone.now())
+    if stage.event_id != project.event_id:
+        raise ValidationError("Stage must belong to the project's event.")
+    try:
+        submission = Submission.objects.select_for_update().get(project=project, stage=stage)
+    except Submission.DoesNotExist as exc:
+        raise ValidationError("This project has no submission for this stage.") from exc
+    if submission.status != SubmissionStatus.FINALIZED:
+        raise ValidationError("Only a finalized submission can be reopened.")
+    reopened_version = submission.current_version
+    submission.status = SubmissionStatus.DRAFT
+    submission.updated_by = actor
+    submission.save(update_fields=["status", "updated_by", "updated_at"])
+    record_mutation(
+        actor=actor,
+        workspace=project.event.workspace,
+        action="submission.reopened",
+        target=submission,
+        metadata={
+            "reason": reason,
+            "reopened_version": reopened_version.number if reopened_version else None,
+        },
+    )
+    return submission

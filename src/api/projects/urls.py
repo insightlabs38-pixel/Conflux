@@ -31,4 +31,14 @@ urlpatterns = [
         views.SubmissionFinalizeView.as_view(),
         name="submission-finalize",
     ),
+    path(
+        _prefix + "<uuid:project_public_id>/submissions/<uuid:stage_public_id>/reopen/",
+        views.SubmissionReopenView.as_view(),
+        name="submission-reopen",
+    ),
+    path(
+        _prefix + "<uuid:project_public_id>/submissions/<uuid:stage_public_id>/diff/",
+        views.SubmissionDiffView.as_view(),
+        name="submission-diff",
+    ),
 ]

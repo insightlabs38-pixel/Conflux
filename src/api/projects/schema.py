@@ -50,3 +50,13 @@ class SubmissionFinalizeInputSchema(serializers.Serializer):
 class SubmissionReceiptSchema(serializers.Serializer):
     submission = SubmissionSchema()
     receipt = serializers.UUIDField()
+
+
+class SubmissionReopenInputSchema(serializers.Serializer):
+    reason = serializers.CharField(required=False, allow_blank=True, max_length=1000)
+
+
+class SubmissionDiffSchema(serializers.Serializer):
+    from_version = serializers.IntegerField()
+    to_version = serializers.IntegerField()
+    diff = serializers.JSONField()

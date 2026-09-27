@@ -3981,6 +3981,47 @@ paths:
               schema:
                 $ref: '#/components/schemas/SubmissionSchema'
           description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/submissions/{stage_public_id}/diff/
+  : get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions_stage_public_id_diff
+      description: Compare two immutable versions, defaulting to the most recent pair.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionDiffSchema'
+          description: ''
   ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/submissions/{stage_public_id}/finalize/
   : post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions_stage_public_id_finalize
@@ -4038,6 +4079,58 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SubmissionReceiptSchema'
+          description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/submissions/{stage_public_id}/reopen/
+  : post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions_stage_public_id_reopen
+      description: Allow organizers to inspect submissions without project membership.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmissionReopenInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SubmissionReopenInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SubmissionReopenInputSchema'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubmissionSchema'
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/records/event/:
     post:
@@ -10807,6 +10900,18 @@ components:
         * `sent` - Sent
         * `claimed` - Claimed
         * `failed` - Failed
+    SubmissionDiffSchema:
+      type: object
+      properties:
+        from_version:
+          type: integer
+        to_version:
+          type: integer
+        diff: {}
+      required:
+      - diff
+      - from_version
+      - to_version
     SubmissionDraftInputSchema:
       type: object
       properties:
@@ -10834,6 +10939,12 @@ components:
       required:
       - receipt
       - submission
+    SubmissionReopenInputSchema:
+      type: object
+      properties:
+        reason:
+          type: string
+          maxLength: 1000
     SubmissionSchema:
       type: object
       properties:

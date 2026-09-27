@@ -871,6 +871,10 @@ class InputOfCredentialReadSchema(TypedDict):
     expires_at: str
     revoked_at: str | None
 
+DecisionEnum = Literal['accept', 'decline']
+
+InputOfDecisionEnum = Literal['accept', 'decline']
+
 class DeliveryOutput(TypedDict):
     public_id: str
     event_id: str
@@ -1320,6 +1324,14 @@ class InputOfJudgeCalendarSchema(TypedDict):
     windows: list[InputOfCalendarWindowSchema]
     assignments: list[InputOfCalendarAssignmentSchema]
 
+class JudgeDirectorySchema(TypedDict):
+    judge: str
+    username: str
+
+class InputOfJudgeDirectorySchema(TypedDict):
+    judge: str
+    username: str
+
 class JudgeEventSummary(TypedDict):
     public_id: str
     name: str
@@ -1327,6 +1339,48 @@ class JudgeEventSummary(TypedDict):
 class InputOfJudgeEventSummary(TypedDict):
     public_id: str
     name: str
+
+class JudgeInvitationDecisionSchema(TypedDict):
+    decision: DecisionEnum
+
+class InputOfJudgeInvitationDecisionSchema(TypedDict):
+    decision: InputOfDecisionEnum
+
+class JudgeInvitationInputSchema(TypedDict):
+    pool: str
+    judge: str
+
+class InputOfJudgeInvitationInputSchema(TypedDict):
+    pool: str
+    judge: str
+
+class JudgeInvitationSchema(TypedDict):
+    public_id: str
+    event: str
+    event_name: str
+    pool: str
+    pool_name: str
+    judge: str
+    judge_username: str
+    status: JudgeInvitationSchemaStatusEnum
+    created_at: str
+    responded_at: str | None
+
+class InputOfJudgeInvitationSchema(TypedDict):
+    public_id: str
+    event: str
+    event_name: str
+    pool: str
+    pool_name: str
+    judge: str
+    judge_username: str
+    status: InputOfJudgeInvitationSchemaStatusEnum
+    created_at: str
+    responded_at: str | None
+
+JudgeInvitationSchemaStatusEnum = Literal['pending', 'accepted', 'declined', 'revoked']
+
+InputOfJudgeInvitationSchemaStatusEnum = Literal['pending', 'accepted', 'declined', 'revoked']
 
 class JudgeRecordInput(TypedDict):
     user: str
@@ -3008,6 +3062,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                           'query_params': [],
                                                                                                                                           'request_body': False,
                                                                                                                                           'response_kind': 'none'},
+ 'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_invitations_invitation_public_id': {'method': 'DELETE',
+                                                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-invitations/{invitation_public_id}/',
+                                                                                                                'path_params': ['event_public_id',
+                                                                                                                                'invitation_public_id',
+                                                                                                                                'workspace_public_id'],
+                                                                                                                'query_params': [],
+                                                                                                                'request_body': False,
+                                                                                                                'response_kind': 'none'},
  'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_my_team_invites_invite_public_id': {'method': 'DELETE',
                                                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-team/invites/{invite_public_id}/',
                                                                                                           'path_params': ['event_public_id',
@@ -3363,6 +3425,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                       'query_params': [],
                                                                                       'request_body': False,
                                                                                       'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_invitations': {'method': 'GET',
+                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-invitations/',
+                                                                                        'path_params': ['event_public_id',
+                                                                                                        'workspace_public_id'],
+                                                                                        'query_params': [],
+                                                                                        'request_body': False,
+                                                                                        'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_workload': {'method': 'GET',
                                                                                      'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-workload/',
                                                                                      'path_params': ['event_public_id',
@@ -3912,6 +3981,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                      'query_params': [],
                                                      'request_body': False,
                                                      'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_judge_directory': {'method': 'GET',
+                                                               'path': '/api/v1/workspaces/{workspace_public_id}/judge-directory/',
+                                                               'path_params': ['workspace_public_id'],
+                                                               'query_params': [],
+                                                               'request_body': False,
+                                                               'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_judge_events': {'method': 'GET',
                                                             'path': '/api/v1/workspaces/{workspace_public_id}/judge-events/',
                                                             'path_params': ['workspace_public_id'],
@@ -3924,6 +3999,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                        'query_params': [],
                                                        'request_body': False,
                                                        'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_my_judge_invitations': {'method': 'GET',
+                                                                    'path': '/api/v1/workspaces/{workspace_public_id}/my-judge-invitations/',
+                                                                    'path_params': ['workspace_public_id'],
+                                                                    'query_params': [],
+                                                                    'request_body': False,
+                                                                    'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_operator_console': {'method': 'GET',
                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/operator-console/',
                                                                 'path_params': ['workspace_public_id'],
@@ -4282,6 +4363,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                        'query_params': [],
                                                                                        'request_body': True,
                                                                                        'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_invitations': {'method': 'POST',
+                                                                                         'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-invitations/',
+                                                                                         'path_params': ['event_public_id',
+                                                                                                         'workspace_public_id'],
+                                                                                         'query_params': [],
+                                                                                         'request_body': True,
+                                                                                         'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_marketplace_openings': {'method': 'POST',
                                                                                             'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/marketplace/openings/',
                                                                                             'path_params': ['event_public_id',
@@ -4733,6 +4821,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                         'query_params': [],
                                                         'request_body': True,
                                                         'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_my_judge_invitations_invitation_public_id_respond': {'method': 'POST',
+                                                                                                  'path': '/api/v1/workspaces/{workspace_public_id}/my-judge-invitations/{invitation_public_id}/respond/',
+                                                                                                  'path_params': ['invitation_public_id',
+                                                                                                                  'workspace_public_id'],
+                                                                                                  'query_params': [],
+                                                                                                  'request_body': True,
+                                                                                                  'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_webhooks': {'method': 'POST',
                                                          'path': '/api/v1/workspaces/{workspace_public_id}/webhooks/',
                                                          'path_params': ['workspace_public_id'],

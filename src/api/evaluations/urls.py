@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import judge_directory, views
 
 _EVENT = "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>"
 _STAGE = f"{_EVENT}/stages/<uuid:stage_public_id>"
@@ -8,6 +8,31 @@ _POOL = f"{_EVENT}/evaluation-pools/<uuid:pool_public_id>"
 _PLAN = f"{_STAGE}/evaluation-plans/<uuid:plan_public_id>"
 
 urlpatterns = [
+    path(
+        "workspaces/<uuid:workspace_public_id>/judge-directory/",
+        judge_directory.JudgeDirectoryView.as_view(),
+        name="judge-directory",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/my-judge-invitations/",
+        judge_directory.MyJudgeInvitationView.as_view(),
+        name="my-judge-invitations",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/my-judge-invitations/<uuid:invitation_public_id>/respond/",
+        judge_directory.JudgeInvitationDetailView.as_view(),
+        name="judge-invitation-respond",
+    ),
+    path(
+        f"{_EVENT}/judge-invitations/",
+        judge_directory.JudgeInvitationListView.as_view(),
+        name="judge-invitation-list",
+    ),
+    path(
+        f"{_EVENT}/judge-invitations/<uuid:invitation_public_id>/",
+        judge_directory.JudgeInvitationRevokeView.as_view(),
+        name="judge-invitation-revoke",
+    ),
     path(
         f"{_EVENT}/workflow-presets/",
         views.WorkflowPresetListView.as_view(),

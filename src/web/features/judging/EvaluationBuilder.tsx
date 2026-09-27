@@ -3,6 +3,7 @@ import { Badge } from "../../components/Badge";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
+import { JudgeDirectoryPanel } from "./JudgeDirectoryPanel";
 
 type Stage = { public_id: string; name: string };
 type Pool = { public_id: string; name: string };
@@ -571,7 +572,6 @@ export function EvaluationBuilder({
   const [plans, setPlans] = useState<Plan[]>([]);
   const [name, setName] = useState("");
   const [poolName, setPoolName] = useState("");
-  const [judgeId, setJudgeId] = useState("");
   const [selectedPool, setSelectedPool] = useState("");
   const [prizeJudging, setPrizeJudging] = useState(false);
   const [error, setError] = useState("");
@@ -613,20 +613,6 @@ export function EvaluationBuilder({
       setPools((items) => [...items, pool]);
       setSelectedPool(pool.public_id);
       setPoolName("");
-    } catch (cause) {
-      setError(message(cause));
-    }
-  }
-
-  async function addJudge() {
-    setError("");
-    try {
-      await request(
-        `${eventBase}evaluation-pools/${selectedPool}/memberships/`,
-        "POST",
-        { judge: judgeId.trim() },
-      );
-      setJudgeId("");
     } catch (cause) {
       setError(message(cause));
     }
@@ -695,21 +681,11 @@ export function EvaluationBuilder({
             Create pool
           </Button>
           {selectedPool && (
-            <>
-              <label>
-                Judge user ID{" "}
-                <input
-                  value={judgeId}
-                  onChange={(event) => setJudgeId(event.target.value)}
-                />
-              </label>
-              <Button
-                disabled={!judgeId.trim()}
-                onClick={() => void addJudge()}
-              >
-                Add judge to pool
-              </Button>
-            </>
+            <JudgeDirectoryPanel
+              workspaceId={workspaceId}
+              eventId={eventId}
+              poolId={selectedPool}
+            />
           )}
           {plans.map((plan) => (
             <PlanEditor

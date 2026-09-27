@@ -335,6 +335,30 @@ class PoolMembership(PublicIdModel):
             raise ValidationError({"judge": "User must hold the judge role in this workspace."})
 
 
+class JudgeInvitation(PublicIdModel):
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        ACCEPTED = "accepted", "Accepted"
+        DECLINED = "declined", "Declined"
+        REVOKED = "revoked", "Revoked"
+
+    pool = models.ForeignKey(EvaluationPool, on_delete=models.CASCADE, related_name="invitations")
+    judge = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="judge_invitations"
+    )
+    invited_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="sent_judge_invitations"
+    )
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
+    responded_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["pool", "judge"], name="unique_judge_invitation")
+        ]
+
+
 class ConflictOfInterest(PublicIdModel):
     """A judge's declared (or organizer-recorded) recusal from one candidate
     (JDG-006). Hard-enforced: excluded from assignment and rejected outright

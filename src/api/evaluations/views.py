@@ -135,7 +135,7 @@ def _eligible_candidates(plan, judge):
     """
     candidates = eligible_projects(plan)
     if (
-        plan.prize_judging
+        plan.pool_id
         and not PoolMembership.objects.filter(pool_id=plan.pool_id, judge=judge).exists()
     ):
         return candidates.none()
@@ -495,6 +495,11 @@ class BallotListCreateView(PlanMixin):
         if is_conflicted(self.get_event().id, request.user.id, project.id):
             raise ValidationError({"detail": "You have a declared conflict of interest here."})
         if (
+            plan.pool_id
+            and not PoolMembership.objects.filter(pool_id=plan.pool_id, judge=request.user).exists()
+        ):
+            raise ValidationError({"detail": "You are not in this plan's judging pool."})
+        if (
             plan.prize_judging
             and not _eligible_candidates(plan, request.user).filter(id=project.id).exists()
         ):
@@ -592,6 +597,11 @@ class BallotDraftView(PlanMixin):
     ):
         plan = self.get_plan()
         project = self.get_project()
+        if (
+            plan.pool_id
+            and not PoolMembership.objects.filter(pool_id=plan.pool_id, judge=request.user).exists()
+        ):
+            raise ValidationError({"detail": "You are not in this plan's judging pool."})
         if (
             plan.prize_judging
             and not _eligible_candidates(plan, request.user).filter(id=project.id).exists()
@@ -1933,11 +1943,11 @@ class CalibrationProjectsView(PlanMixin):
     def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         plan = self.get_plan()
         if (
-            plan.prize_judging
+            plan.pool_id
             and not has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
             and not PoolMembership.objects.filter(pool_id=plan.pool_id, judge=request.user).exists()
         ):
-            raise PermissionDenied("You are not in this prize judging pool.")
+            raise PermissionDenied("You are not in this judging pool.")
         projects = plan.calibration_projects.all()
         return Response([{"project": str(p.public_id), "name": p.name} for p in projects])
 
@@ -1999,10 +2009,10 @@ class CalibrationBallotListCreateView(PlanMixin):
             raise ValidationError({"detail": "Only a judge may submit a calibration ballot."})
         plan = self.get_plan()
         if (
-            plan.prize_judging
+            plan.pool_id
             and not PoolMembership.objects.filter(pool_id=plan.pool_id, judge=request.user).exists()
         ):
-            raise ValidationError({"detail": "You are not in this prize judging pool."})
+            raise ValidationError({"detail": "You are not in this judging pool."})
         version = plan.current_rubric_version
         if version is None:
             raise ValidationError({"detail": "This plan has no published rubric yet."})

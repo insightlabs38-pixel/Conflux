@@ -2947,6 +2947,105 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConflictOfInterest'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-invitations/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_invitations
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JudgeInvitationSchema'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_invitations
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JudgeInvitationInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JudgeInvitationInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JudgeInvitationInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JudgeInvitationSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-invitations/{invitation_public_id}/:
+    delete:
+      operationId: delete_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_invitations_invitation_public_id
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: invitation_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-workload/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_workload
@@ -9114,6 +9213,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/InboxMessageSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/judge-directory/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_judge_directory
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JudgeDirectorySchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/judge-events/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_judge_events
@@ -9215,6 +9344,82 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MembershipSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/my-judge-invitations/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_my_judge_invitations
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JudgeInvitationSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/my-judge-invitations/{invitation_public_id}/respond/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_my_judge_invitations_invitation_public_id_respond
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: invitation_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JudgeInvitationDecisionSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JudgeInvitationDecisionSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JudgeInvitationDecisionSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JudgeInvitationSchema'
           description: ''
   /api/v1/workspaces/{workspace_public_id}/operator-console/:
     get:
@@ -10932,6 +11137,14 @@ components:
       - public_id
       - revoked_at
       - workspace
+    DecisionEnum:
+      enum:
+      - accept
+      - decline
+      type: string
+      description: |-
+        * `accept` - accept
+        * `decline` - decline
     DeliveryOutput:
       type: object
       properties:
@@ -11689,6 +11902,17 @@ components:
       required:
       - assignments
       - windows
+    JudgeDirectorySchema:
+      type: object
+      properties:
+        judge:
+          type: string
+          format: uuid
+        username:
+          type: string
+      required:
+      - judge
+      - username
     JudgeEventSummary:
       type: object
       properties:
@@ -11700,6 +11924,78 @@ components:
       required:
       - name
       - public_id
+    JudgeInvitationDecisionSchema:
+      type: object
+      properties:
+        decision:
+          $ref: '#/components/schemas/DecisionEnum'
+      required:
+      - decision
+    JudgeInvitationInputSchema:
+      type: object
+      properties:
+        pool:
+          type: string
+          format: uuid
+        judge:
+          type: string
+          format: uuid
+      required:
+      - judge
+      - pool
+    JudgeInvitationSchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        event:
+          type: string
+          format: uuid
+        event_name:
+          type: string
+        pool:
+          type: string
+          format: uuid
+        pool_name:
+          type: string
+        judge:
+          type: string
+          format: uuid
+        judge_username:
+          type: string
+        status:
+          $ref: '#/components/schemas/JudgeInvitationSchemaStatusEnum'
+        created_at:
+          type: string
+          format: date-time
+        responded_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - created_at
+      - event
+      - event_name
+      - judge
+      - judge_username
+      - pool
+      - pool_name
+      - public_id
+      - responded_at
+      - status
+    JudgeInvitationSchemaStatusEnum:
+      enum:
+      - pending
+      - accepted
+      - declined
+      - revoked
+      type: string
+      description: |-
+        * `pending` - pending
+        * `accepted` - accepted
+        * `declined` - declined
+        * `revoked` - revoked
     JudgeRecordInput:
       type: object
       properties:

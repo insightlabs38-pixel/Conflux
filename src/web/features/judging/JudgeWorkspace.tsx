@@ -7,6 +7,7 @@ import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 import { Inbox } from "../communications/Inbox";
 import { JudgeCalendarPanel } from "./JudgeCalendarPanel";
+import { JudgeInvitationInbox } from "./JudgeInvitationInbox";
 
 type Event = { public_id: string; name: string };
 type Stage = { public_id: string; name: string };
@@ -446,6 +447,7 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
     <section aria-label="Judging">
       <h2>Judging</h2>
       <Inbox workspaceId={workspaceId} />
+      <JudgeInvitationInbox workspaceId={workspaceId} />
       {error && <p role="alert">{error}</p>}
       {loadingEvents && <LoadingState label="Loading judging events…" />}
       {!loadingEvents && !error && events.length === 0 && (

@@ -13,6 +13,33 @@ class PoolMembershipInputSchema(serializers.Serializer):
     track_expertise = serializers.ListField(child=serializers.UUIDField(), required=False)
 
 
+class JudgeDirectorySchema(serializers.Serializer):
+    judge = serializers.UUIDField()
+    username = serializers.CharField()
+
+
+class JudgeInvitationInputSchema(serializers.Serializer):
+    pool = serializers.UUIDField()
+    judge = serializers.UUIDField()
+
+
+class JudgeInvitationDecisionSchema(serializers.Serializer):
+    decision = serializers.ChoiceField(choices=["accept", "decline"])
+
+
+class JudgeInvitationSchema(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    event = serializers.UUIDField()
+    event_name = serializers.CharField()
+    pool = serializers.UUIDField()
+    pool_name = serializers.CharField()
+    judge = serializers.UUIDField()
+    judge_username = serializers.CharField()
+    status = serializers.ChoiceField(choices=["pending", "accepted", "declined", "revoked"])
+    created_at = serializers.DateTimeField()
+    responded_at = serializers.DateTimeField(allow_null=True)
+
+
 class JudgeCOIRelationshipInputSchema(serializers.Serializer):
     judge = serializers.UUIDField(required=False)
     kind = serializers.ChoiceField(choices=COIRelationshipKind.choices)

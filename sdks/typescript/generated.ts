@@ -956,6 +956,10 @@ export type InputOfCredentialReadSchema = {
   revoked_at: string | null;
 };
 
+export type DecisionEnum = "accept" | "decline";
+
+export type InputOfDecisionEnum = "accept" | "decline";
+
 export type DeliveryOutput = {
   public_id: string;
   event_id: string;
@@ -1427,9 +1431,55 @@ export type InputOfJudgeCalendarSchema = {
   assignments: InputOfCalendarAssignmentSchema[];
 };
 
+export type JudgeDirectorySchema = { judge: string; username: string };
+
+export type InputOfJudgeDirectorySchema = { judge: string; username: string };
+
 export type JudgeEventSummary = { public_id: string; name: string };
 
 export type InputOfJudgeEventSummary = { public_id: string; name: string };
+
+export type JudgeInvitationDecisionSchema = { decision: DecisionEnum };
+
+export type InputOfJudgeInvitationDecisionSchema = {
+  decision: InputOfDecisionEnum;
+};
+
+export type JudgeInvitationInputSchema = { pool: string; judge: string };
+
+export type InputOfJudgeInvitationInputSchema = { pool: string; judge: string };
+
+export type JudgeInvitationSchema = {
+  public_id: string;
+  event: string;
+  event_name: string;
+  pool: string;
+  pool_name: string;
+  judge: string;
+  judge_username: string;
+  status: JudgeInvitationSchemaStatusEnum;
+  created_at: string;
+  responded_at: string | null;
+};
+
+export type InputOfJudgeInvitationSchema = {
+  public_id: string;
+  event: string;
+  event_name: string;
+  pool: string;
+  pool_name: string;
+  judge: string;
+  judge_username: string;
+  status: InputOfJudgeInvitationSchemaStatusEnum;
+  created_at: string;
+  responded_at: string | null;
+};
+
+export type JudgeInvitationSchemaStatusEnum =
+  "pending" | "accepted" | "declined" | "revoked";
+
+export type InputOfJudgeInvitationSchemaStatusEnum =
+  "pending" | "accepted" | "declined" | "revoked";
 
 export type JudgeRecordInput = { user: string };
 
@@ -3801,6 +3851,27 @@ export interface Operations {
     };
     response: ConflictOfInterest;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_invitations: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: JudgeInvitationSchema[];
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_invitations: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfJudgeInvitationInputSchema;
+    };
+    response: JudgeInvitationSchema;
+  };
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_invitations_invitation_public_id: {
+    request: {
+      path: {
+        event_public_id: string;
+        invitation_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: null;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_workload: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: JudgeWorkloadRowSchema[];
@@ -5123,6 +5194,10 @@ export interface Operations {
     };
     response: InboxMessageSchema;
   };
+  get_api_v1_workspaces_workspace_public_id_judge_directory: {
+    request: { path: { workspace_public_id: string } };
+    response: JudgeDirectorySchema[];
+  };
   get_api_v1_workspaces_workspace_public_id_judge_events: {
     request: { path: { workspace_public_id: string } };
     response: JudgeEventSummary[];
@@ -5137,6 +5212,17 @@ export interface Operations {
       body: InputOfMembershipInputSchema;
     };
     response: MembershipSchema;
+  };
+  get_api_v1_workspaces_workspace_public_id_my_judge_invitations: {
+    request: { path: { workspace_public_id: string } };
+    response: JudgeInvitationSchema[];
+  };
+  post_api_v1_workspaces_workspace_public_id_my_judge_invitations_invitation_public_id_respond: {
+    request: {
+      path: { invitation_public_id: string; workspace_public_id: string };
+      body: InputOfJudgeInvitationDecisionSchema;
+    };
+    response: JudgeInvitationSchema;
   };
   get_api_v1_workspaces_workspace_public_id_operator_console: {
     request: { path: { workspace_public_id: string } };
@@ -5954,6 +6040,37 @@ export const operations = {
       query_params: [],
       request_body: true,
       response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_invitations:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-invitations/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_invitations:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-invitations/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_invitations_invitation_public_id:
+    {
+      method: "DELETE",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-invitations/{invitation_public_id}/",
+      path_params: [
+        "event_public_id",
+        "invitation_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_workload:
     {
@@ -7687,6 +7804,14 @@ export const operations = {
     request_body: false,
     response_kind: "json",
   },
+  get_api_v1_workspaces_workspace_public_id_judge_directory: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/judge-directory/",
+    path_params: ["workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
   get_api_v1_workspaces_workspace_public_id_judge_events: {
     method: "GET",
     path: "/api/v1/workspaces/{workspace_public_id}/judge-events/",
@@ -7711,6 +7836,23 @@ export const operations = {
     request_body: true,
     response_kind: "json",
   },
+  get_api_v1_workspaces_workspace_public_id_my_judge_invitations: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/my-judge-invitations/",
+    path_params: ["workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  post_api_v1_workspaces_workspace_public_id_my_judge_invitations_invitation_public_id_respond:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/my-judge-invitations/{invitation_public_id}/respond/",
+      path_params: ["invitation_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
   get_api_v1_workspaces_workspace_public_id_operator_console: {
     method: "GET",
     path: "/api/v1/workspaces/{workspace_public_id}/operator-console/",

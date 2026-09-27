@@ -151,6 +151,24 @@ export type InputOfAgreementSummarySchema = {
   rankings: InputOfAgreementRankingSchema[];
 };
 
+export type ApplicationDecisionInputSchema = {
+  decision: ApplicationDecisionInputSchemaDecisionEnum;
+};
+
+export type InputOfApplicationDecisionInputSchema = {
+  decision: InputOfApplicationDecisionInputSchemaDecisionEnum;
+};
+
+export type ApplicationDecisionInputSchemaDecisionEnum =
+  "approved" | "waitlisted" | "rejected";
+
+export type InputOfApplicationDecisionInputSchemaDecisionEnum =
+  "approved" | "waitlisted" | "rejected";
+
+export type ApplyToEventInputSchema = { note?: string; code?: string };
+
+export type InputOfApplyToEventInputSchema = { note?: string; code?: string };
+
 export type ArchiveImportInput = {
   name: string;
   slug: string;
@@ -956,10 +974,6 @@ export type InputOfCredentialReadSchema = {
   revoked_at: string | null;
 };
 
-export type DecisionEnum = "accept" | "decline";
-
-export type InputOfDecisionEnum = "accept" | "decline";
-
 export type DeliveryOutput = {
   public_id: string;
   event_id: string;
@@ -1047,7 +1061,7 @@ export type EvaluationPlan = {
   name: string;
   candidate_type?: CandidateTypeEnum;
   pool_strategy?: PoolStrategyEnum;
-  mode?: ModeEnum;
+  mode?: EvaluationPlanModeEnum;
   results_visible_to_participants?: boolean;
   feedback_visible_to_participants?: boolean;
   feedback_anonymous?: boolean;
@@ -1070,7 +1084,7 @@ export type InputOfEvaluationPlan = {
   name: string;
   candidate_type?: InputOfCandidateTypeEnum;
   pool_strategy?: InputOfPoolStrategyEnum;
-  mode?: InputOfModeEnum;
+  mode?: InputOfEvaluationPlanModeEnum;
   results_visible_to_participants?: boolean;
   feedback_visible_to_participants?: boolean;
   feedback_anonymous?: boolean;
@@ -1081,6 +1095,10 @@ export type InputOfEvaluationPlan = {
   blind_judging?: boolean;
   prize_judging?: boolean;
 };
+
+export type EvaluationPlanModeEnum = "rubric" | "pairwise";
+
+export type InputOfEvaluationPlanModeEnum = "rubric" | "pairwise";
 
 export type EvaluationPool = {
   public_id: string;
@@ -1141,6 +1159,26 @@ export type InputOfEvent = {
   ends_at?: string | null;
   is_public?: boolean;
 };
+
+export type EventApplication = {
+  public_id: string;
+  user: string;
+  username: string;
+  status: EventApplicationStatusEnum;
+  note: string;
+  waitlist_position: number | null;
+  decided_by: string | null;
+  decided_at: string | null;
+  created_at: string;
+};
+
+export type InputOfEventApplication = {};
+
+export type EventApplicationStatusEnum =
+  "pending" | "approved" | "waitlisted" | "rejected";
+
+export type InputOfEventApplicationStatusEnum =
+  "pending" | "approved" | "waitlisted" | "rejected";
 
 export type EventDashboardSchema = {
   event: Event;
@@ -1455,11 +1493,18 @@ export type JudgeEventSummary = { public_id: string; name: string };
 
 export type InputOfJudgeEventSummary = { public_id: string; name: string };
 
-export type JudgeInvitationDecisionSchema = { decision: DecisionEnum };
+export type JudgeInvitationDecisionSchema = {
+  decision: JudgeInvitationDecisionSchemaDecisionEnum;
+};
 
 export type InputOfJudgeInvitationDecisionSchema = {
-  decision: InputOfDecisionEnum;
+  decision: InputOfJudgeInvitationDecisionSchemaDecisionEnum;
 };
+
+export type JudgeInvitationDecisionSchemaDecisionEnum = "accept" | "decline";
+
+export type InputOfJudgeInvitationDecisionSchemaDecisionEnum =
+  "accept" | "decline";
 
 export type JudgeInvitationInputSchema = { pool: string; judge: string };
 
@@ -1701,9 +1746,13 @@ export type InputOfMessageSchema = {
   created_at: string;
 };
 
-export type ModeEnum = "rubric" | "pairwise";
+export type MyEventApplicationResponse = {
+  application: EventApplication | null;
+};
 
-export type InputOfModeEnum = "rubric" | "pairwise";
+export type InputOfMyEventApplicationResponse = {
+  application: InputOfEventApplication | null;
+};
 
 export type MyMarketplaceProfileResponse = {
   profile: MarketplaceProfileSchema | null;
@@ -2031,7 +2080,7 @@ export type PatchedEvaluationPlan = {
   name?: string;
   candidate_type?: CandidateTypeEnum;
   pool_strategy?: PoolStrategyEnum;
-  mode?: ModeEnum;
+  mode?: EvaluationPlanModeEnum;
   results_visible_to_participants?: boolean;
   feedback_visible_to_participants?: boolean;
   feedback_anonymous?: boolean;
@@ -2054,7 +2103,7 @@ export type InputOfPatchedEvaluationPlan = {
   name?: string;
   candidate_type?: InputOfCandidateTypeEnum;
   pool_strategy?: InputOfPoolStrategyEnum;
-  mode?: InputOfModeEnum;
+  mode?: InputOfEvaluationPlanModeEnum;
   results_visible_to_participants?: boolean;
   feedback_visible_to_participants?: boolean;
   feedback_anonymous?: boolean;
@@ -2639,6 +2688,36 @@ export type InputOfRecordOutput = {
 export type RedeemInviteInput = { token: string };
 
 export type InputOfRedeemInviteInput = { token: string };
+
+export type RegistrationInviteCode = {
+  public_id: string;
+  code: string;
+  max_uses?: number;
+  use_count: number;
+  created_at: string;
+  revoked_at: string | null;
+};
+
+export type InputOfRegistrationInviteCode = { max_uses?: number };
+
+export type RegistrationSettings = {
+  mode?: RegistrationSettingsModeEnum;
+  capacity?: number | null;
+  waitlist_enabled?: boolean;
+  updated_at: string;
+};
+
+export type InputOfRegistrationSettings = {
+  mode?: InputOfRegistrationSettingsModeEnum;
+  capacity?: number | null;
+  waitlist_enabled?: boolean;
+};
+
+export type RegistrationSettingsModeEnum =
+  "open" | "application" | "invite_only";
+
+export type InputOfRegistrationSettingsModeEnum =
+  "open" | "application" | "invite_only";
 
 export type ReminderInputSchema = {
   kind: ReminderInputSchemaKindEnum;
@@ -3602,6 +3681,21 @@ export interface Operations {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: null;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_applications: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: EventApplication[];
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_applications_application_public_id_decide: {
+    request: {
+      path: {
+        application_public_id: string;
+        event_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfApplicationDecisionInputSchema;
+    };
+    response: EventApplication;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: ArchiveOutput;
@@ -4022,6 +4116,17 @@ export interface Operations {
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_marketplace_profiles: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: MarketplaceProfileSchema[];
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_application: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: MyEventApplicationResponse;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_my_application: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body?: InputOfApplyToEventInputSchema;
+    };
+    response: EventApplication;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_team: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -4462,6 +4567,38 @@ export interface Operations {
       body: InputOfProjectRecordInput;
     };
     response: RecordOutput;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_invite_codes: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: RegistrationInviteCode[];
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_invite_codes: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body?: InputOfRegistrationInviteCode;
+    };
+    response: RegistrationInviteCode;
+  };
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_invite_codes_code_public_id: {
+    request: {
+      path: {
+        code_public_id: string;
+        event_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: null;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_settings: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: RegistrationSettings;
+  };
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_settings: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body?: InputOfRegistrationSettings;
+    };
+    response: RegistrationSettings;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_stage_evidence: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -5699,6 +5836,28 @@ export const operations = {
     request_body: false,
     response_kind: "none",
   },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_applications:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/applications/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_applications_application_public_id_decide:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/applications/{application_public_id}/decide/",
+      path_params: [
+        "application_public_id",
+        "event_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive: {
     method: "GET",
     path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/archive/",
@@ -6293,6 +6452,24 @@ export const operations = {
       request_body: false,
       response_kind: "json",
     },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_application:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-application/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_my_application:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-application/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_team: {
     method: "GET",
     path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-team/",
@@ -6882,6 +7059,51 @@ export const operations = {
     {
       method: "POST",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/records/project/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_invite_codes:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/registration-invite-codes/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_invite_codes:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/registration-invite-codes/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_invite_codes_code_public_id:
+    {
+      method: "DELETE",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/registration-invite-codes/{code_public_id}/",
+      path_params: ["code_public_id", "event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_settings:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/registration-settings/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_settings:
+    {
+      method: "PUT",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/registration-settings/",
       path_params: ["event_public_id", "workspace_public_id"],
       query_params: [],
       request_body: true,

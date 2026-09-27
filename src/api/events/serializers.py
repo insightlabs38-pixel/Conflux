@@ -2,7 +2,16 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from rest_framework import serializers
 
-from .models import BasePrize, Event, EventStatus, Track
+from .models import (
+    BasePrize,
+    Event,
+    EventApplication,
+    EventRegistrationSettings,
+    EventStatus,
+    RegistrationInviteCode,
+    RegistrationStatus,
+    Track,
+)
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -88,3 +97,67 @@ class BasePrizeSerializer(serializers.ModelSerializer):
         if currency and (len(currency) != 3 or not currency.isalpha()):
             raise serializers.ValidationError({"currency": "Use a three-letter currency code."})
         return attrs
+
+
+class RegistrationSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EventRegistrationSettings
+        fields = ["mode", "capacity", "waitlist_enabled", "updated_at"]
+        read_only_fields = ["updated_at"]
+
+    def validate_capacity(self, value):
+        if value is not None and value < 1:
+            raise serializers.ValidationError("Capacity must be at least 1.")
+        return value
+
+
+class RegistrationInviteCodeSerializer(serializers.ModelSerializer):
+    public_id = serializers.UUIDField(read_only=True)
+
+    class Meta:
+        model = RegistrationInviteCode
+        fields = ["public_id", "code", "max_uses", "use_count", "created_at", "revoked_at"]
+        read_only_fields = ["public_id", "code", "use_count", "created_at", "revoked_at"]
+
+
+class ApplyToEventInputSchema(serializers.Serializer):
+    note = serializers.CharField(required=False, allow_blank=True, max_length=500)
+    code = serializers.CharField(required=False, allow_blank=True, max_length=32)
+
+
+class EventApplicationSerializer(serializers.ModelSerializer):
+    public_id = serializers.UUIDField(read_only=True)
+    user = serializers.UUIDField(source="user.public_id", read_only=True)
+    username = serializers.CharField(source="user.username", read_only=True)
+    decided_by = serializers.UUIDField(
+        source="decided_by.public_id", read_only=True, allow_null=True
+    )
+
+    class Meta:
+        model = EventApplication
+        fields = [
+            "public_id",
+            "user",
+            "username",
+            "status",
+            "note",
+            "waitlist_position",
+            "decided_by",
+            "decided_at",
+            "created_at",
+        ]
+        read_only_fields = fields
+
+
+class MyEventApplicationResponse(serializers.Serializer):
+    application = EventApplicationSerializer(allow_null=True)
+
+
+class ApplicationDecisionInputSchema(serializers.Serializer):
+    decision = serializers.ChoiceField(
+        choices=[
+            RegistrationStatus.APPROVED,
+            RegistrationStatus.WAITLISTED,
+            RegistrationStatus.REJECTED,
+        ]
+    )

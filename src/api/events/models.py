@@ -1,4 +1,7 @@
+import secrets
+
 from core.models import PublicIdModel
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -104,3 +107,99 @@ class BasePrize(PublicIdModel):
             errors["amount"] = "Only cash prizes may have an amount or currency."
         if errors:
             raise ValidationError(errors)
+
+
+class RegistrationMode(models.TextChoices):
+    OPEN = "open", "Open — anyone can register"
+    APPLICATION = "application", "Application — organizer reviews each request"
+    INVITE_ONLY = "invite_only", "Invite only — a code is required"
+
+
+class EventRegistrationSettings(PublicIdModel):
+    """One organizer-tunable policy per event (VS17): how someone becomes a
+    PARTICIPANT here. Capacity/waitlist are counted against this event's own
+    `EventApplication` rows, not workspace `Membership` -- a workspace can
+    host several events (see VS15's cross-event fixtures) and Membership's
+    PARTICIPANT role is workspace-wide, so per-event capacity has to live on
+    the event-scoped record that actually tracks "applied to this event".
+    """
+
+    event = models.OneToOneField(
+        Event, on_delete=models.CASCADE, related_name="registration_settings"
+    )
+    mode = models.CharField(
+        max_length=20, choices=RegistrationMode.choices, default=RegistrationMode.OPEN
+    )
+    capacity = models.PositiveIntegerField(null=True, blank=True)
+    waitlist_enabled = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+def _generate_registration_code():
+    return secrets.token_urlsafe(9)
+
+
+class RegistrationInviteCode(PublicIdModel):
+    """A redeemable code for INVITE_ONLY registration -- same
+    validity/replay shape as `participation.TeamInvite`."""
+
+    event = models.ForeignKey(
+        Event, on_delete=models.CASCADE, related_name="registration_invite_codes"
+    )
+    code = models.CharField(max_length=32, unique=True, default=_generate_registration_code)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
+    )
+    max_uses = models.PositiveIntegerField(default=1)
+    use_count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+
+    def is_valid(self):
+        return self.revoked_at is None and self.use_count < self.max_uses
+
+
+class RegistrationStatus(models.TextChoices):
+    PENDING = "pending", "Pending"
+    APPROVED = "approved", "Approved"
+    WAITLISTED = "waitlisted", "Waitlisted"
+    REJECTED = "rejected", "Rejected"
+
+
+class EventApplication(PublicIdModel):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="applications")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="event_applications"
+    )
+    status = models.CharField(
+        max_length=12, choices=RegistrationStatus.choices, default=RegistrationStatus.PENDING
+    )
+    note = models.CharField(max_length=500, blank=True)
+    invite_code = models.ForeignKey(
+        RegistrationInviteCode,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="applications",
+    )
+    waitlist_position = models.PositiveIntegerField(null=True, blank=True)
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    decided_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["event", "user"], name="unique_event_application")
+        ]
+        ordering = ["created_at", "id"]
+
+    def clean(self):
+        if self.invite_code_id and self.invite_code.event_id != self.event_id:
+            raise ValidationError({"invite_code": "Invite code must belong to this event."})

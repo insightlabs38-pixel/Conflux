@@ -1278,6 +1278,82 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/applications/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_applications
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventApplication'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/applications/{application_public_id}/decide/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_applications_application_public_id_decide
+      parameters:
+      - in: path
+        name: application_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationDecisionInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ApplicationDecisionInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ApplicationDecisionInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventApplication'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/archive/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive
@@ -3452,6 +3528,82 @@ paths:
                 items:
                   $ref: '#/components/schemas/MarketplaceProfileSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-application/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_application
+      description: |-
+        Self-serve: any authenticated user, whether or not they already hold
+        a workspace membership, can check or submit their own application --
+        unlike every other event-scoped view here, membership is exactly what
+        this endpoint exists to grant, so it can't be a precondition of it.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyEventApplicationResponse'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_my_application
+      description: |-
+        Self-serve: any authenticated user, whether or not they already hold
+        a workspace membership, can check or submit their own application --
+        unlike every other event-scoped view here, membership is exactly what
+        this endpoint exists to grant, so it can't be a precondition of it.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplyToEventInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ApplyToEventInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ApplyToEventInputSchema'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventApplication'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-team/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_team
@@ -5477,6 +5629,170 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RecordOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/registration-invite-codes/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_invite_codes
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RegistrationInviteCode'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_invite_codes
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationInviteCode'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegistrationInviteCode'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegistrationInviteCode'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationInviteCode'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/registration-invite-codes/{code_public_id}/:
+    delete:
+      operationId: delete_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_invite_codes_code_public_id
+      parameters:
+      - in: path
+        name: code_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/registration-settings/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_settings
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationSettings'
+          description: ''
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_settings
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationSettings'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegistrationSettings'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegistrationSettings'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationSettings'
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stage-evidence/:
     get:
@@ -10057,6 +10373,32 @@ components:
       required:
       - criteria
       - rankings
+    ApplicationDecisionInputSchema:
+      type: object
+      properties:
+        decision:
+          $ref: '#/components/schemas/ApplicationDecisionInputSchemaDecisionEnum'
+      required:
+      - decision
+    ApplicationDecisionInputSchemaDecisionEnum:
+      enum:
+      - approved
+      - waitlisted
+      - rejected
+      type: string
+      description: |-
+        * `approved` - approved
+        * `waitlisted` - waitlisted
+        * `rejected` - rejected
+    ApplyToEventInputSchema:
+      type: object
+      properties:
+        note:
+          type: string
+          maxLength: 500
+        code:
+          type: string
+          maxLength: 32
     ArchiveImportInput:
       type: object
       properties:
@@ -11319,14 +11661,6 @@ components:
       - public_id
       - revoked_at
       - workspace
-    DecisionEnum:
-      enum:
-      - accept
-      - decline
-      type: string
-      description: |-
-        * `accept` - accept
-        * `decline` - decline
     DeliveryOutput:
       type: object
       properties:
@@ -11479,7 +11813,7 @@ components:
         pool_strategy:
           $ref: '#/components/schemas/PoolStrategyEnum'
         mode:
-          $ref: '#/components/schemas/ModeEnum'
+          $ref: '#/components/schemas/EvaluationPlanModeEnum'
         results_visible_to_participants:
           type: boolean
         feedback_visible_to_participants:
@@ -11540,6 +11874,14 @@ components:
       - published_normalization_run
       - published_pairwise_run
       - updated_at
+    EvaluationPlanModeEnum:
+      enum:
+      - rubric
+      - pairwise
+      type: string
+      description: |-
+        * `rubric` - Weighted rubric scoring
+        * `pairwise` - Head-to-head pairwise comparison
     EvaluationPool:
       type: object
       properties:
@@ -11650,6 +11992,67 @@ components:
       - slug
       - status
       - updated_at
+    EventApplication:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          type: string
+          format: uuid
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/EventApplicationStatusEnum'
+          readOnly: true
+        note:
+          type: string
+          readOnly: true
+        waitlist_position:
+          type: integer
+          readOnly: true
+          nullable: true
+        decided_by:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        decided_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - decided_at
+      - decided_by
+      - note
+      - public_id
+      - status
+      - user
+      - username
+      - waitlist_position
+    EventApplicationStatusEnum:
+      enum:
+      - pending
+      - approved
+      - waitlisted
+      - rejected
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `approved` - Approved
+        * `waitlisted` - Waitlisted
+        * `rejected` - Rejected
     EventDashboardSchema:
       type: object
       properties:
@@ -12139,9 +12542,17 @@ components:
       type: object
       properties:
         decision:
-          $ref: '#/components/schemas/DecisionEnum'
+          $ref: '#/components/schemas/JudgeInvitationDecisionSchemaDecisionEnum'
       required:
       - decision
+    JudgeInvitationDecisionSchemaDecisionEnum:
+      enum:
+      - accept
+      - decline
+      type: string
+      description: |-
+        * `accept` - accept
+        * `decline` - decline
     JudgeInvitationInputSchema:
       type: object
       properties:
@@ -12510,14 +12921,15 @@ components:
       - public_id
       - recipient_count
       - subject
-    ModeEnum:
-      enum:
-      - rubric
-      - pairwise
-      type: string
-      description: |-
-        * `rubric` - Weighted rubric scoring
-        * `pairwise` - Head-to-head pairwise comparison
+    MyEventApplicationResponse:
+      type: object
+      properties:
+        application:
+          allOf:
+          - $ref: '#/components/schemas/EventApplication'
+          nullable: true
+      required:
+      - application
     MyMarketplaceProfileResponse:
       type: object
       properties:
@@ -13026,7 +13438,7 @@ components:
         pool_strategy:
           $ref: '#/components/schemas/PoolStrategyEnum'
         mode:
-          $ref: '#/components/schemas/ModeEnum'
+          $ref: '#/components/schemas/EvaluationPlanModeEnum'
         results_visible_to_participants:
           type: boolean
         feedback_visible_to_participants:
@@ -13995,6 +14407,68 @@ components:
           type: string
       required:
       - token
+    RegistrationInviteCode:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+          readOnly: true
+        code:
+          type: string
+          readOnly: true
+        max_uses:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        use_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        revoked_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - code
+      - created_at
+      - public_id
+      - revoked_at
+      - use_count
+    RegistrationSettings:
+      type: object
+      properties:
+        mode:
+          $ref: '#/components/schemas/RegistrationSettingsModeEnum'
+        capacity:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+        waitlist_enabled:
+          type: boolean
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - updated_at
+    RegistrationSettingsModeEnum:
+      enum:
+      - open
+      - application
+      - invite_only
+      type: string
+      description: |-
+        * `open` - Open — anyone can register
+        * `application` - Application — organizer reviews each request
+        * `invite_only` - Invite only — a code is required
     ReminderInputSchema:
       type: object
       properties:

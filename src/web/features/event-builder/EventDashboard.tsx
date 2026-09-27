@@ -14,6 +14,7 @@ import { OperatorConsole } from "../operations/OperatorConsole";
 import { CommunicationsPanel } from "../communications/CommunicationsPanel";
 import { ConfigHistoryPanel } from "../audit/ConfigHistoryPanel";
 import { EventTemplatesPanel } from "./EventTemplatesPanel";
+import { RegistrationPanel } from "./RegistrationPanel";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 
@@ -474,6 +475,11 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
             eventId={selected.public_id}
           />
           <PolicyBuilder
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+          />
+          <RegistrationPanel
+            key={`registration-${selected.public_id}`}
             workspaceId={workspaceId}
             eventId={selected.public_id}
           />

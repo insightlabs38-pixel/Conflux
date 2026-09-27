@@ -140,6 +140,24 @@ class InputOfAgreementSummarySchema(TypedDict):
     criteria: list[InputOfAgreementCriterionSchema]
     rankings: list[InputOfAgreementRankingSchema]
 
+class ApplicationDecisionInputSchema(TypedDict):
+    decision: ApplicationDecisionInputSchemaDecisionEnum
+
+class InputOfApplicationDecisionInputSchema(TypedDict):
+    decision: InputOfApplicationDecisionInputSchemaDecisionEnum
+
+ApplicationDecisionInputSchemaDecisionEnum = Literal['approved', 'waitlisted', 'rejected']
+
+InputOfApplicationDecisionInputSchemaDecisionEnum = Literal['approved', 'waitlisted', 'rejected']
+
+class ApplyToEventInputSchema(TypedDict):
+    note: NotRequired[str]
+    code: NotRequired[str]
+
+class InputOfApplyToEventInputSchema(TypedDict):
+    note: NotRequired[str]
+    code: NotRequired[str]
+
 class ArchiveImportInput(TypedDict):
     name: str
     slug: str
@@ -871,10 +889,6 @@ class InputOfCredentialReadSchema(TypedDict):
     expires_at: str
     revoked_at: str | None
 
-DecisionEnum = Literal['accept', 'decline']
-
-InputOfDecisionEnum = Literal['accept', 'decline']
-
 class DeliveryOutput(TypedDict):
     public_id: str
     event_id: str
@@ -962,7 +976,7 @@ class EvaluationPlan(TypedDict):
     name: str
     candidate_type: NotRequired[CandidateTypeEnum]
     pool_strategy: NotRequired[PoolStrategyEnum]
-    mode: NotRequired[ModeEnum]
+    mode: NotRequired[EvaluationPlanModeEnum]
     results_visible_to_participants: NotRequired[bool]
     feedback_visible_to_participants: NotRequired[bool]
     feedback_anonymous: NotRequired[bool]
@@ -984,7 +998,7 @@ class InputOfEvaluationPlan(TypedDict):
     name: str
     candidate_type: NotRequired[InputOfCandidateTypeEnum]
     pool_strategy: NotRequired[InputOfPoolStrategyEnum]
-    mode: NotRequired[InputOfModeEnum]
+    mode: NotRequired[InputOfEvaluationPlanModeEnum]
     results_visible_to_participants: NotRequired[bool]
     feedback_visible_to_participants: NotRequired[bool]
     feedback_anonymous: NotRequired[bool]
@@ -994,6 +1008,10 @@ class InputOfEvaluationPlan(TypedDict):
     calibration_required: NotRequired[bool]
     blind_judging: NotRequired[bool]
     prize_judging: NotRequired[bool]
+
+EvaluationPlanModeEnum = Literal['rubric', 'pairwise']
+
+InputOfEvaluationPlanModeEnum = Literal['rubric', 'pairwise']
 
 class EvaluationPool(TypedDict):
     public_id: str
@@ -1050,6 +1068,24 @@ class InputOfEvent(TypedDict):
     starts_at: NotRequired[str | None]
     ends_at: NotRequired[str | None]
     is_public: NotRequired[bool]
+
+class EventApplication(TypedDict):
+    public_id: str
+    user: str
+    username: str
+    status: EventApplicationStatusEnum
+    note: str
+    waitlist_position: int | None
+    decided_by: str | None
+    decided_at: str | None
+    created_at: str
+
+class InputOfEventApplication(TypedDict):
+    pass
+
+EventApplicationStatusEnum = Literal['pending', 'approved', 'waitlisted', 'rejected']
+
+InputOfEventApplicationStatusEnum = Literal['pending', 'approved', 'waitlisted', 'rejected']
 
 class EventDashboardSchema(TypedDict):
     event: Event
@@ -1357,10 +1393,14 @@ class InputOfJudgeEventSummary(TypedDict):
     name: str
 
 class JudgeInvitationDecisionSchema(TypedDict):
-    decision: DecisionEnum
+    decision: JudgeInvitationDecisionSchemaDecisionEnum
 
 class InputOfJudgeInvitationDecisionSchema(TypedDict):
-    decision: InputOfDecisionEnum
+    decision: InputOfJudgeInvitationDecisionSchemaDecisionEnum
+
+JudgeInvitationDecisionSchemaDecisionEnum = Literal['accept', 'decline']
+
+InputOfJudgeInvitationDecisionSchemaDecisionEnum = Literal['accept', 'decline']
 
 class JudgeInvitationInputSchema(TypedDict):
     pool: str
@@ -1592,9 +1632,11 @@ class InputOfMessageSchema(TypedDict):
     email_failure_count: int
     created_at: str
 
-ModeEnum = Literal['rubric', 'pairwise']
+class MyEventApplicationResponse(TypedDict):
+    application: EventApplication | None
 
-InputOfModeEnum = Literal['rubric', 'pairwise']
+class InputOfMyEventApplicationResponse(TypedDict):
+    application: InputOfEventApplication | None
 
 class MyMarketplaceProfileResponse(TypedDict):
     profile: MarketplaceProfileSchema | None
@@ -1877,7 +1919,7 @@ class PatchedEvaluationPlan(TypedDict):
     name: NotRequired[str]
     candidate_type: NotRequired[CandidateTypeEnum]
     pool_strategy: NotRequired[PoolStrategyEnum]
-    mode: NotRequired[ModeEnum]
+    mode: NotRequired[EvaluationPlanModeEnum]
     results_visible_to_participants: NotRequired[bool]
     feedback_visible_to_participants: NotRequired[bool]
     feedback_anonymous: NotRequired[bool]
@@ -1899,7 +1941,7 @@ class InputOfPatchedEvaluationPlan(TypedDict):
     name: NotRequired[str]
     candidate_type: NotRequired[InputOfCandidateTypeEnum]
     pool_strategy: NotRequired[InputOfPoolStrategyEnum]
-    mode: NotRequired[InputOfModeEnum]
+    mode: NotRequired[InputOfEvaluationPlanModeEnum]
     results_visible_to_participants: NotRequired[bool]
     feedback_visible_to_participants: NotRequired[bool]
     feedback_anonymous: NotRequired[bool]
@@ -2435,6 +2477,32 @@ class RedeemInviteInput(TypedDict):
 
 class InputOfRedeemInviteInput(TypedDict):
     token: str
+
+class RegistrationInviteCode(TypedDict):
+    public_id: str
+    code: str
+    max_uses: NotRequired[int]
+    use_count: int
+    created_at: str
+    revoked_at: str | None
+
+class InputOfRegistrationInviteCode(TypedDict):
+    max_uses: NotRequired[int]
+
+class RegistrationSettings(TypedDict):
+    mode: NotRequired[RegistrationSettingsModeEnum]
+    capacity: NotRequired[int | None]
+    waitlist_enabled: NotRequired[bool]
+    updated_at: str
+
+class InputOfRegistrationSettings(TypedDict):
+    mode: NotRequired[InputOfRegistrationSettingsModeEnum]
+    capacity: NotRequired[int | None]
+    waitlist_enabled: NotRequired[bool]
+
+RegistrationSettingsModeEnum = Literal['open', 'application', 'invite_only']
+
+InputOfRegistrationSettingsModeEnum = Literal['open', 'application', 'invite_only']
 
 class ReminderInputSchema(TypedDict):
     kind: ReminderInputSchemaKindEnum
@@ -3182,6 +3250,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                            'query_params': [],
                                                                                                            'request_body': False,
                                                                                                            'response_kind': 'none'},
+ 'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_invite_codes_code_public_id': {'method': 'DELETE',
+                                                                                                                  'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/registration-invite-codes/{code_public_id}/',
+                                                                                                                  'path_params': ['code_public_id',
+                                                                                                                                  'event_public_id',
+                                                                                                                                  'workspace_public_id'],
+                                                                                                                  'query_params': [],
+                                                                                                                  'request_body': False,
+                                                                                                                  'response_kind': 'none'},
  'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_stage_transitions_transition_public_id': {'method': 'DELETE',
                                                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stage-transitions/{transition_public_id}/',
                                                                                                                 'path_params': ['event_public_id',
@@ -3355,6 +3431,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                       'query_params': [],
                                                                       'request_body': False,
                                                                       'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_applications': {'method': 'GET',
+                                                                                   'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/applications/',
+                                                                                   'path_params': ['event_public_id',
+                                                                                                   'workspace_public_id'],
+                                                                                   'query_params': [],
+                                                                                   'request_body': False,
+                                                                                   'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive': {'method': 'GET',
                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/archive/',
                                                                               'path_params': ['event_public_id',
@@ -3570,6 +3653,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                            'query_params': [],
                                                                                            'request_body': False,
                                                                                            'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_application': {'method': 'GET',
+                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-application/',
+                                                                                     'path_params': ['event_public_id',
+                                                                                                     'workspace_public_id'],
+                                                                                     'query_params': [],
+                                                                                     'request_body': False,
+                                                                                     'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_team': {'method': 'GET',
                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-team/',
                                                                               'path_params': ['event_public_id',
@@ -3731,6 +3821,20 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                   'query_params': [],
                                                                                                                                   'request_body': False,
                                                                                                                                   'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_invite_codes': {'method': 'GET',
+                                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/registration-invite-codes/',
+                                                                                                'path_params': ['event_public_id',
+                                                                                                                'workspace_public_id'],
+                                                                                                'query_params': [],
+                                                                                                'request_body': False,
+                                                                                                'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_settings': {'method': 'GET',
+                                                                                            'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/registration-settings/',
+                                                                                            'path_params': ['event_public_id',
+                                                                                                            'workspace_public_id'],
+                                                                                            'query_params': [],
+                                                                                            'request_body': False,
+                                                                                            'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_stage_evidence': {'method': 'GET',
                                                                                      'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stage-evidence/',
                                                                                      'path_params': ['event_public_id',
@@ -4332,6 +4436,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                        'query_params': [],
                                                        'request_body': True,
                                                        'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_applications_application_public_id_decide': {'method': 'POST',
+                                                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/applications/{application_public_id}/decide/',
+                                                                                                                 'path_params': ['application_public_id',
+                                                                                                                                 'event_public_id',
+                                                                                                                                 'workspace_public_id'],
+                                                                                                                 'query_params': [],
+                                                                                                                 'request_body': True,
+                                                                                                                 'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards': {'method': 'POST',
                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/',
                                                                               'path_params': ['event_public_id',
@@ -4478,6 +4590,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                             'query_params': [],
                                                                                             'request_body': True,
                                                                                             'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_my_application': {'method': 'POST',
+                                                                                      'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-application/',
+                                                                                      'path_params': ['event_public_id',
+                                                                                                      'workspace_public_id'],
+                                                                                      'query_params': [],
+                                                                                      'request_body': True,
+                                                                                      'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_my_team': {'method': 'POST',
                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-team/',
                                                                                'path_params': ['event_public_id',
@@ -4656,6 +4775,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                        'query_params': [],
                                                                                        'request_body': True,
                                                                                        'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_invite_codes': {'method': 'POST',
+                                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/registration-invite-codes/',
+                                                                                                 'path_params': ['event_public_id',
+                                                                                                                 'workspace_public_id'],
+                                                                                                 'query_params': [],
+                                                                                                 'request_body': True,
+                                                                                                 'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_stage_transitions': {'method': 'POST',
                                                                                          'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stage-transitions/',
                                                                                          'path_params': ['event_public_id',
@@ -4983,6 +5109,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                              'query_params': [],
                                                                                                                              'request_body': True,
                                                                                                                              'response_kind': 'json'},
+ 'put_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_settings': {'method': 'PUT',
+                                                                                            'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/registration-settings/',
+                                                                                            'path_params': ['event_public_id',
+                                                                                                            'workspace_public_id'],
+                                                                                            'query_params': [],
+                                                                                            'request_body': True,
+                                                                                            'response_kind': 'json'},
  'put_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_ballots_project_public_id_draft': {'method': 'PUT',
                                                                                                                                                              'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/ballots/{project_public_id}/draft/',
                                                                                                                                                              'path_params': ['event_public_id',

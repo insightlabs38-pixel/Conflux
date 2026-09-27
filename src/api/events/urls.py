@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import registration_views, views
 
 urlpatterns = [
     path("events/<uuid:event_public_id>/", views.PublicEventView.as_view(), name="event-public"),
@@ -43,5 +43,35 @@ urlpatterns = [
         "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/base-prizes/<uuid:prize_public_id>/",
         views.BasePrizeDetailView.as_view(),
         name="base-prize-detail",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/registration-settings/",
+        registration_views.RegistrationSettingsView.as_view(),
+        name="registration-settings",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/registration-invite-codes/",
+        registration_views.RegistrationInviteCodeListView.as_view(),
+        name="registration-invite-code-list",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/registration-invite-codes/<uuid:code_public_id>/",
+        registration_views.RegistrationInviteCodeDetailView.as_view(),
+        name="registration-invite-code-detail",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/applications/",
+        registration_views.EventApplicationListView.as_view(),
+        name="event-application-list",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/applications/<uuid:application_public_id>/decide/",
+        registration_views.EventApplicationDecisionView.as_view(),
+        name="event-application-decide",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/my-application/",
+        registration_views.MyEventApplicationView.as_view(),
+        name="my-event-application",
     ),
 ]

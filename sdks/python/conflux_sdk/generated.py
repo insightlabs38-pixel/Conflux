@@ -1414,6 +1414,28 @@ class InputOfJudgeScoreSchema(TypedDict):
     comment: str
     criteria: dict[str, int]
 
+class JudgeSuggestionSchema(TypedDict):
+    rank: int
+    judge: str
+    username: str
+    expertise_tags: list[str]
+    matched_tags: list[str]
+    events_judged: int
+    ballots_completed: int
+    assignments_received: int
+    completion_rate: float | None
+
+class InputOfJudgeSuggestionSchema(TypedDict):
+    rank: int
+    judge: str
+    username: str
+    expertise_tags: list[str]
+    matched_tags: list[str]
+    events_judged: int
+    ballots_completed: int
+    assignments_received: int
+    completion_rate: float | None
+
 class JudgeWorkloadRowSchema(TypedDict):
     judge: str
     assigned_count: int
@@ -3397,6 +3419,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                   'query_params': [],
                                                                                                                   'request_body': False,
                                                                                                                   'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_evaluation_pools_pool_public_id_suggest_judges': {'method': 'GET',
+                                                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/evaluation-pools/{pool_public_id}/suggest-judges/',
+                                                                                                                     'path_params': ['event_public_id',
+                                                                                                                                     'pool_public_id',
+                                                                                                                                     'workspace_public_id'],
+                                                                                                                     'query_params': [],
+                                                                                                                     'request_body': False,
+                                                                                                                     'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_exception_grants': {'method': 'GET',
                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/exception-grants/',
                                                                                        'path_params': ['event_public_id',

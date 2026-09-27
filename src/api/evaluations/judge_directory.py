@@ -133,7 +133,9 @@ class JudgeInvitationDetailView(WorkspaceLookupMixin, APIView):
         decision = serializer.validated_data["decision"]
         with transaction.atomic():
             invitation = get_object_or_404(
-                JudgeInvitation.objects.select_for_update().select_related("pool__event", "judge"),
+                JudgeInvitation.objects.select_for_update(of=("self",)).select_related(
+                    "pool__event", "judge"
+                ),
                 public_id=invitation_public_id,
                 pool__event__workspace=self.get_workspace(),
                 judge=request.user,
@@ -175,7 +177,9 @@ class JudgeInvitationRevokeView(OrganizerView):
     def delete(self, request, workspace_public_id, event_public_id, invitation_public_id):
         with transaction.atomic():
             invitation = get_object_or_404(
-                JudgeInvitation.objects.select_for_update().select_related("pool__event"),
+                JudgeInvitation.objects.select_for_update(of=("self",)).select_related(
+                    "pool__event"
+                ),
                 public_id=invitation_public_id,
                 pool__event=self.get_event(),
             )

@@ -2556,6 +2556,42 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/evaluation-pools/{pool_public_id}/suggest-judges/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_evaluation_pools_pool_public_id_suggest_judges
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: pool_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JudgeSuggestionSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/exception-grants/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_exception_grants
@@ -12194,6 +12230,44 @@ components:
       - comment
       - criteria
       - project
+    JudgeSuggestionSchema:
+      type: object
+      properties:
+        rank:
+          type: integer
+        judge:
+          type: string
+          format: uuid
+        username:
+          type: string
+        expertise_tags:
+          type: array
+          items:
+            type: string
+        matched_tags:
+          type: array
+          items:
+            type: string
+        events_judged:
+          type: integer
+        ballots_completed:
+          type: integer
+        assignments_received:
+          type: integer
+        completion_rate:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - assignments_received
+      - ballots_completed
+      - completion_rate
+      - events_judged
+      - expertise_tags
+      - judge
+      - matched_tags
+      - rank
+      - username
     JudgeWorkloadRowSchema:
       type: object
       properties:

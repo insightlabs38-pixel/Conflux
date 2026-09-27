@@ -18,6 +18,18 @@ class JudgeDirectorySchema(serializers.Serializer):
     username = serializers.CharField()
 
 
+class JudgeSuggestionSchema(serializers.Serializer):
+    rank = serializers.IntegerField()
+    judge = serializers.UUIDField()
+    username = serializers.CharField()
+    expertise_tags = serializers.ListField(child=serializers.CharField())
+    matched_tags = serializers.ListField(child=serializers.CharField())
+    events_judged = serializers.IntegerField()
+    ballots_completed = serializers.IntegerField()
+    assignments_received = serializers.IntegerField()
+    completion_rate = serializers.FloatField(allow_null=True)
+
+
 class JudgeInvitationInputSchema(serializers.Serializer):
     pool = serializers.UUIDField()
     judge = serializers.UUIDField()

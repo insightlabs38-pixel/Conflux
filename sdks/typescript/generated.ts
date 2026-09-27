@@ -1513,6 +1513,30 @@ export type InputOfJudgeScoreSchema = {
   criteria: Record<string, number>;
 };
 
+export type JudgeSuggestionSchema = {
+  rank: number;
+  judge: string;
+  username: string;
+  expertise_tags: string[];
+  matched_tags: string[];
+  events_judged: number;
+  ballots_completed: number;
+  assignments_received: number;
+  completion_rate: number | null;
+};
+
+export type InputOfJudgeSuggestionSchema = {
+  rank: number;
+  judge: string;
+  username: string;
+  expertise_tags: string[];
+  matched_tags: string[];
+  events_judged: number;
+  ballots_completed: number;
+  assignments_received: number;
+  completion_rate: number | null;
+};
+
 export type JudgeWorkloadRowSchema = {
   judge: string;
   assigned_count: number;
@@ -3789,6 +3813,16 @@ export interface Operations {
     };
     response: null;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_evaluation_pools_pool_public_id_suggest_judges: {
+    request: {
+      path: {
+        event_public_id: string;
+        pool_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: JudgeSuggestionSchema[];
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_exception_grants: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: ExceptionGrant;
@@ -5981,6 +6015,15 @@ export const operations = {
       query_params: [],
       request_body: false,
       response_kind: "none",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_evaluation_pools_pool_public_id_suggest_judges:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/evaluation-pools/{pool_public_id}/suggest-judges/",
+      path_params: ["event_public_id", "pool_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_exception_grants:
     {

@@ -11,6 +11,19 @@ from workspaces.models import Workspace
 
 from .models import FormResponse, FormVersion
 from .services import save_response
+from .validation import field_visible
+
+
+def participant_answers(response):
+    if response is None:
+        return {}
+    values = {answer.field_id: answer.value for answer in response.answers.all()}
+    fields = {field["id"]: field for field in response.version.schema["fields"]}
+    return {
+        field_id: value
+        for field_id, value in values.items()
+        if field_id in fields and field_visible(fields[field_id], "participant", values)
+    }
 
 
 class ProjectFormResponseView(APIView):
@@ -43,9 +56,7 @@ class ProjectFormResponseView(APIView):
         return Response(
             {
                 "version": str(version.public_id),
-                "answers": {answer.field_id: answer.value for answer in response.answers.all()}
-                if response
-                else {},
+                "answers": participant_answers(response),
             }
         )
 
@@ -62,6 +73,6 @@ class ProjectFormResponseView(APIView):
         return Response(
             {
                 "version": str(version.public_id),
-                "answers": {answer.field_id: answer.value for answer in response.answers.all()},
+                "answers": participant_answers(response),
             }
         )

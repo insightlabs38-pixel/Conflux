@@ -19,6 +19,26 @@ FIELD_TYPES = {
     "artifact",
 }
 FIELD_ID = re.compile(r"^[a-z][a-z0-9_]{0,63}$")
+SCOPES = {"public", "participant", "judge", "organizer"}
+
+
+def field_scopes(field):
+    return set(field.get("visible_to", ["participant", "judge", "organizer"]))
+
+
+def field_visible(field, scope, answers):
+    scopes = field_scopes(field)
+    if scope not in scopes and "public" not in scopes:
+        return False
+    condition = field.get("visible_if")
+    return condition is None or answers.get(condition["field"]) == condition["equals"]
+
+
+def field_required(field, answers):
+    condition = field.get("required_if")
+    return field.get("required", False) or (
+        condition is not None and answers.get(condition["field"]) == condition["equals"]
+    )
 
 
 def validate_schema(schema):
@@ -28,6 +48,7 @@ def validate_schema(schema):
     if len(fields) > 100:
         raise ValidationError({"schema": "A form may have at most 100 fields."})
     seen = set()
+    prior = {}
     for field in fields:
         if not isinstance(field, dict):
             raise ValidationError({"schema": "Every field must be an object."})
@@ -54,6 +75,64 @@ def validate_schema(schema):
                 raise ValidationError(
                     {"schema": f"Field {field_id} needs unique nonempty options."}
                 )
+        scopes = field.get("visible_to", ["participant", "judge", "organizer"])
+        if (
+            not isinstance(scopes, list)
+            or not scopes
+            or any(not isinstance(scope, str) or scope not in SCOPES for scope in scopes)
+            or len(scopes) != len(set(scopes))
+        ):
+            raise ValidationError({"schema": f"Field {field_id} has invalid visibility scopes."})
+        for key in ("visible_if", "required_if"):
+            condition = field.get(key)
+            if condition is None:
+                continue
+            if (
+                not isinstance(condition, dict)
+                or set(condition) != {"field", "equals"}
+                or not isinstance(condition.get("field"), str)
+                or condition["field"] not in prior
+            ):
+                raise ValidationError(
+                    {"schema": f"Field {field_id} has an invalid {key} condition."}
+                )
+            controller = prior[condition["field"]]
+            if (
+                controller["type"] not in {"select", "boolean"}
+                or (
+                    controller["type"] == "select"
+                    and condition["equals"] not in controller["options"]
+                )
+                or (controller["type"] == "boolean" and not isinstance(condition["equals"], bool))
+            ):
+                raise ValidationError(
+                    {"schema": f"Field {field_id} has an incompatible {key} condition."}
+                )
+            controller_scopes = field_scopes(controller)
+            dependent_scopes = field_scopes(field)
+            if "public" not in controller_scopes and (
+                "public" in dependent_scopes or not dependent_scopes <= controller_scopes
+            ):
+                raise ValidationError(
+                    {"schema": f"Field {field_id} condition refers to a less visible field."}
+                )
+        prior[field_id] = field
+
+
+def validate_response_answers(schema, answers, scope):
+    if not isinstance(answers, dict):
+        raise ValidationError("Answers must be an object keyed by field id.")
+    fields = {field["id"]: field for field in schema["fields"]}
+    if set(answers) - set(fields):
+        raise ValidationError("Answers contain an unknown field.")
+    for field in schema["fields"]:
+        field_id = field["id"]
+        if not field_visible(field, scope, answers):
+            if field_id in answers:
+                raise ValidationError(f"{field_id} is not visible in this response.")
+            continue
+        effective = {**field, "required": field_required(field, answers)}
+        validate_answer(effective, answers.get(field_id))
 
 
 def validate_answer(field, value):

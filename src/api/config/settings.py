@@ -26,8 +26,9 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.staticfiles",
     "rest_framework",
+    "drf_spectacular",
     "core",
-    "accounts",
+    "accounts.apps.AccountsConfig",
     "workspaces",
     "audit",
     "events",
@@ -90,6 +91,15 @@ USE_TZ = True
 
 # Identity/authorization spine (C-B02): custom User carries a stable public ID.
 AUTH_USER_MODEL = "accounts.User"
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "core.schema.ConfluxAutoSchema",
+}
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Conflux API",
+    "VERSION": "1.0.0",
+    "SCHEMA_PATH_PREFIX": r"/api/v1",
+}
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATIC_URL = "static/"

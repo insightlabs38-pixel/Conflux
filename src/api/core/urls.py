@@ -1,10 +1,12 @@
 from accounts.credential_views import CredentialRevokeView, CredentialView
 from django.urls import include, path
+from drf_spectacular.views import SpectacularAPIView
 
 from .views import health
 
 urlpatterns = [
     path("health/", health, name="health"),
+    path("schema/", SpectacularAPIView.as_view(), name="api-schema"),
     path(
         "workspaces/<uuid:workspace_public_id>/api-credentials/",
         CredentialView.as_view(),

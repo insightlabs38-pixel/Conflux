@@ -26,6 +26,8 @@ class StageEventMixin(OrganizerView):
 
 
 class StageListView(StageEventMixin):
+    serializer_class = StageSerializer
+
     def get_permissions(self):
         # Any workspace member may read the stage list (e.g. a judge finding
         # which stage's evaluation plan applies to them); only organizers
@@ -72,6 +74,8 @@ class StageListView(StageEventMixin):
 
 
 class StageDetailView(StageEventMixin):
+    serializer_class = StageSerializer
+
     def patch(self, request, workspace_public_id, event_public_id, stage_public_id):
         stage = self.get_stage()
         serializer = StageSerializer(stage, data=request.data, partial=True)
@@ -118,6 +122,8 @@ class StageDetailView(StageEventMixin):
 
 
 class StageTransitionListView(StageEventMixin):
+    serializer_class = StageTransitionSerializer
+
     def get(self, request, workspace_public_id, event_public_id):
         transitions = StageTransition.objects.filter(from_stage__event=self.get_event())
         return Response(StageTransitionSerializer(transitions, many=True).data)

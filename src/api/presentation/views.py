@@ -20,6 +20,8 @@ class PageMixin(OrganizerView):
 
 
 class PageDetailView(PageMixin):
+    serializer_class = PageSerializer
+
     def get(self, request, workspace_public_id, event_public_id):
         return Response(PageSerializer(self.get_page()).data)
 
@@ -32,6 +34,8 @@ class PageDetailView(PageMixin):
 
 
 class PageBlockListView(PageMixin):
+    serializer_class = PageBlockSerializer
+
     def get(self, request, workspace_public_id, event_public_id):
         return Response(PageBlockSerializer(self.get_page().blocks.all(), many=True).data)
 
@@ -51,6 +55,8 @@ class PageBlockListView(PageMixin):
 
 
 class PageBlockDetailView(PageMixin):
+    serializer_class = PageBlockSerializer
+
     def get_block(self):
         return get_object_or_404(
             PageBlock, page=self.get_page(), public_id=self.kwargs["block_public_id"]
@@ -75,6 +81,8 @@ class PageBlockDetailView(PageMixin):
 
 
 class PageBlockReorderView(PageMixin):
+    serializer_class = PageBlockSerializer
+
     def post(self, request, workspace_public_id, event_public_id):
         page = self.get_page()
         order = request.data.get("block_ids")

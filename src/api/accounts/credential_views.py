@@ -9,7 +9,9 @@ from core.permissions import require_roles
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema
 from events.models import Event
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -19,6 +21,30 @@ from .authentication import CookieOnlyAuthentication
 from .models import ApiCredential, digest_api_token
 
 ACTION_PATTERN = re.compile(r"^(GET|POST|PATCH|PUT|DELETE):[a-z0-9-]+$")
+
+
+class CredentialCreateSchema(serializers.Serializer):
+    name = serializers.CharField(max_length=120)
+    allowed_actions = serializers.ListField(
+        child=serializers.RegexField(ACTION_PATTERN.pattern), min_length=1, max_length=50
+    )
+    event = serializers.UUIDField(required=False, allow_null=True)
+    expires_in_days = serializers.IntegerField(required=False, min_value=1, max_value=90)
+
+
+class CredentialReadSchema(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    name = serializers.CharField()
+    workspace = serializers.UUIDField()
+    event = serializers.UUIDField(allow_null=True)
+    allowed_actions = serializers.ListField(child=serializers.CharField())
+    created_at = serializers.DateTimeField()
+    expires_at = serializers.DateTimeField()
+    revoked_at = serializers.DateTimeField(allow_null=True)
+
+
+class CredentialIssuedSchema(CredentialReadSchema):
+    token = serializers.CharField()
 
 
 def _serialize(credential):
@@ -38,6 +64,7 @@ class CredentialView(WorkspaceLookupMixin, APIView):
     authentication_classes = [CookieOnlyAuthentication]
     permission_classes = [require_roles(Role.ORGANIZER, Role.ADMIN)]
 
+    @extend_schema(responses=CredentialReadSchema(many=True))
     def get(self, request, workspace_public_id):
         credentials = (
             ApiCredential.objects.filter(workspace=self.get_workspace())
@@ -46,6 +73,7 @@ class CredentialView(WorkspaceLookupMixin, APIView):
         )
         return Response([_serialize(item) for item in credentials])
 
+    @extend_schema(request=CredentialCreateSchema, responses={201: CredentialIssuedSchema})
     def post(self, request, workspace_public_id):
         name = request.data.get("name")
         actions = request.data.get("allowed_actions")
@@ -99,6 +127,7 @@ class CredentialRevokeView(WorkspaceLookupMixin, APIView):
     authentication_classes = [CookieOnlyAuthentication]
     permission_classes = [require_roles(Role.ORGANIZER, Role.ADMIN)]
 
+    @extend_schema(request=None, responses=CredentialReadSchema)
     def post(self, request, workspace_public_id, credential_public_id):
         with transaction.atomic():
             credential = get_object_or_404(

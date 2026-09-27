@@ -45,6 +45,8 @@ class VotingPlanMixin(OrganizerView):
 
 
 class VotingPlanDetailView(VotingPlanMixin):
+    serializer_class = VotingPlanSerializer
+
     def get(self, request, workspace_public_id, event_public_id):
         return Response(VotingPlanSerializer(self.get_plan(create=True)).data)
 
@@ -69,6 +71,8 @@ class VotingPlanDetailView(VotingPlanMixin):
 
 
 class VoteTokenBatchView(VotingPlanMixin):
+    serializer_class = VoteTokenSerializer
+
     def get(self, request, workspace_public_id, event_public_id):
         tokens = self.get_plan().vote_tokens.all()
         return Response(VoteTokenSerializer(tokens, many=True).data)
@@ -230,6 +234,8 @@ class ResultsView(PublicVotingMixin):
 
 
 class ResultsPublishView(VotingPlanMixin):
+    serializer_class = VotingPlanSerializer
+
     def post(self, request, workspace_public_id, event_public_id):
         plan = self.get_plan()
         with transaction.atomic():
@@ -373,6 +379,7 @@ def _comment_visibility_allows(plan, workspace, user):
 
 
 class CommentListCreateView(APIView):
+    serializer_class = CommentSerializer
     authentication_classes = [CookieSessionAuthentication]
     permission_classes = [require_roles(Role.PARTICIPANT, Role.JUDGE, Role.ORGANIZER, Role.ADMIN)]
 
@@ -422,6 +429,7 @@ class CommentListCreateView(APIView):
 
 
 class CommentHideView(APIView):
+    serializer_class = CommentSerializer
     authentication_classes = [CookieSessionAuthentication]
     permission_classes = [require_roles(Role.ORGANIZER, Role.ADMIN)]
 

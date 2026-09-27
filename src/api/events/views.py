@@ -62,6 +62,8 @@ class OrganizerView(APIView):
 
 
 class EventListView(OrganizerView):
+    serializer_class = EventSerializer
+
     def get(self, request, workspace_public_id):
         events = Event.objects.filter(workspace=self.get_workspace())
         return Response(EventSerializer(events, many=True).data)
@@ -80,6 +82,8 @@ class EventListView(OrganizerView):
 
 
 class EventDetailView(OrganizerView):
+    serializer_class = EventSerializer
+
     def get(self, request, workspace_public_id, event_public_id):
         return Response(EventSerializer(self.get_event()).data)
 
@@ -112,6 +116,7 @@ class EventDetailView(OrganizerView):
 
 
 class EventStatusView(OrganizerView):
+    serializer_class = EventSerializer
     transitions = {
         EventStatus.DRAFT: EventStatus.OPEN,
         EventStatus.OPEN: EventStatus.CLOSED,
@@ -168,6 +173,8 @@ class EventDashboardView(OrganizerView):
 
 
 class TrackListView(OrganizerView):
+    serializer_class = TrackSerializer
+
     def get_permissions(self):
         # Any workspace member may read the track list (e.g. a participant
         # choosing their project's track); only organizers may create one.
@@ -195,6 +202,8 @@ class TrackListView(OrganizerView):
 
 
 class TrackDetailView(OrganizerView):
+    serializer_class = TrackSerializer
+
     def get_track(self):
         return get_object_or_404(
             Track, event=self.get_event(), public_id=self.kwargs["track_public_id"]
@@ -231,6 +240,8 @@ class TrackDetailView(OrganizerView):
 
 
 class BasePrizeListView(OrganizerView):
+    serializer_class = BasePrizeSerializer
+
     def get(self, request, workspace_public_id, event_public_id):
         return Response(BasePrizeSerializer(self.get_event().base_prizes.all(), many=True).data)
 
@@ -254,6 +265,8 @@ class BasePrizeListView(OrganizerView):
 
 
 class BasePrizeDetailView(OrganizerView):
+    serializer_class = BasePrizeSerializer
+
     def get_prize(self):
         return get_object_or_404(
             BasePrize, event=self.get_event(), public_id=self.kwargs["prize_public_id"]

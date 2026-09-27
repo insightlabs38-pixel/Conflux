@@ -36,6 +36,8 @@ class ProjectView(APIView):
 
 
 class ProjectListView(ProjectView):
+    serializer_class = ProjectSerializer
+
     def get(self, request, workspace_public_id, event_public_id):
         projects = Project.objects.filter(
             event=self.get_event(), memberships__user=request.user
@@ -68,6 +70,8 @@ class ProjectListView(ProjectView):
 
 
 class ProjectDetailView(ProjectView):
+    serializer_class = ProjectSerializer
+
     def get(self, request, workspace_public_id, event_public_id, project_public_id):
         project = self.get_project()
         if not project.memberships.filter(user=request.user).exists():
@@ -99,6 +103,8 @@ class ProjectDetailView(ProjectView):
 
 
 class ProjectMemberView(ProjectView):
+    serializer_class = ProjectMembershipSerializer
+
     def post(self, request, workspace_public_id, event_public_id, project_public_id):
         project = self.get_project()
         if not project.memberships.filter(

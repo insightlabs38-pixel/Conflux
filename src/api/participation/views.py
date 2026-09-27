@@ -65,6 +65,8 @@ class MyTeamView(ParticipantView):
     yet on a team is a normal, expected status, not an error).
     """
 
+    serializer_class = TeamSerializer
+
     def get(self, request, workspace_public_id, event_public_id):
         # {"team": null} on purpose, not a bare `Response(None)`: DRF
         # renders `None` data as an empty body with no Content-Type at
@@ -118,6 +120,8 @@ class TransferCaptainView(ParticipantView):
 
 
 class TeamInviteListView(ParticipantView):
+    serializer_class = TeamInviteSerializer
+
     def get(self, request, workspace_public_id, event_public_id):
         membership = self.my_membership(self.get_event())
         if membership is None or membership.role != TeamMembershipRole.CAPTAIN:

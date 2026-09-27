@@ -1,4 +1,4 @@
-.PHONY: format format-check lint test build verify-fast verify up dev dev-build down dev-down logs seed cold-boot-smoke acceptance
+.PHONY: format format-check lint test build verify-fast verify openapi-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance
 
 # Local checks use a disposable key; runtime deployments must supply their own.
 export DJANGO_SECRET_KEY ?= bootstrap-checks-only
@@ -27,6 +27,9 @@ build:
 verify-fast: format-check lint test build
 
 verify: verify-fast
+
+openapi-check:
+	uv run --frozen python src/api/manage.py spectacular --validate --fail-on-warn --file /dev/null
 
 # Authoritative clean/offline build+boot — full image rebuild every time.
 up:

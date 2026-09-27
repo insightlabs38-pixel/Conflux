@@ -29,6 +29,8 @@ class PresetListView(OrganizerView):
 
 
 class PolicyListView(OrganizerView):
+    serializer_class = PolicySerializer
+
     def get(self, request, workspace_public_id, event_public_id):
         return Response(PolicySerializer(self.get_event().policies.all(), many=True).data)
 
@@ -80,6 +82,8 @@ class PolicyDetailView(OrganizerView):
 
 
 class PolicyBindingListView(OrganizerView):
+    serializer_class = PolicyBindingSerializer
+
     def get(self, request, workspace_public_id, event_public_id):
         bindings = PolicyBinding.objects.filter(event=self.get_event())
         return Response(PolicyBindingSerializer(bindings, many=True).data)
@@ -132,6 +136,8 @@ class PolicyBindingDetailView(OrganizerView):
 
 
 class TemporalGateListView(OrganizerView):
+    serializer_class = TemporalGateSerializer
+
     def get(self, request, workspace_public_id, event_public_id):
         return Response(
             TemporalGateSerializer(self.get_event().temporal_gates.all(), many=True).data
@@ -162,6 +168,8 @@ class TemporalGateListView(OrganizerView):
 
 
 class TemporalGateDetailView(OrganizerView):
+    serializer_class = TemporalGateSerializer
+
     def get_gate(self, gate_public_id):
         return get_object_or_404(TemporalGate, event=self.get_event(), public_id=gate_public_id)
 
@@ -203,6 +211,8 @@ class TemporalGateDetailView(OrganizerView):
 
 
 class ExceptionGrantListView(OrganizerView):
+    serializer_class = ExceptionGrantSerializer
+
     def get(self, request, workspace_public_id, event_public_id):
         grants = ExceptionGrant.objects.filter(event=self.get_event())
         return Response(ExceptionGrantSerializer(grants, many=True).data)

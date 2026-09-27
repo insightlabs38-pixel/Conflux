@@ -58,6 +58,8 @@ class PlanMixin(StageEventMixin):
 
 
 class EvaluationPlanListView(StageEventMixin):
+    serializer_class = EvaluationPlanSerializer
+
     def get_permissions(self):
         # A judge needs to find the plan(s) that apply to them; only an
         # organizer may create one.
@@ -91,6 +93,8 @@ class EvaluationPlanListView(StageEventMixin):
 
 
 class EvaluationPlanDetailView(PlanMixin):
+    serializer_class = EvaluationPlanSerializer
+
     def get_permissions(self):
         if self.request.method == "GET":
             return [IsWorkspaceMember()]
@@ -160,6 +164,8 @@ class BallotListCreateView(PlanMixin):
     never sees another judge's ballot -- same isolation invariant as the
     fixture-backed T2 checks elsewhere, now on the real evaluation model.
     """
+
+    serializer_class = BallotSerializer
 
     authentication_classes = [CookieSessionAuthentication]
     permission_classes = [require_roles(Role.JUDGE, Role.ORGANIZER, Role.ADMIN)]
@@ -247,6 +253,8 @@ class BallotDraftView(PlanMixin):
     BallotListCreateView.post, which deletes the matching draft on success.
     """
 
+    serializer_class = BallotDraftSerializer
+
     authentication_classes = [CookieSessionAuthentication]
     permission_classes = [require_roles(Role.JUDGE)]
 
@@ -313,6 +321,8 @@ class BallotDraftView(PlanMixin):
 
 
 class EvaluationPoolListView(OrganizerView):
+    serializer_class = EvaluationPoolSerializer
+
     def get(self, request, workspace_public_id, event_public_id):
         pools = self.get_event().evaluation_pools.all()
         return Response(EvaluationPoolSerializer(pools, many=True).data)
@@ -337,6 +347,8 @@ class PoolMixin(OrganizerView):
 
 
 class PoolMembershipListView(PoolMixin):
+    serializer_class = PoolMembershipSerializer
+
     def get(self, request, workspace_public_id, event_public_id, pool_public_id):
         memberships = self.get_pool().memberships.prefetch_related("track_expertise")
         return Response(PoolMembershipSerializer(memberships, many=True).data)
@@ -378,6 +390,8 @@ class ConflictOfInterestListCreateView(OrganizerView):
     (see permission_classes) but only ever see/create their own -- self-
     declared recusal never requires organizer action to take effect.
     """
+
+    serializer_class = ConflictOfInterestSerializer
 
     authentication_classes = [CookieSessionAuthentication]
     permission_classes = [require_roles(Role.JUDGE, Role.ORGANIZER, Role.ADMIN)]
@@ -448,6 +462,8 @@ class AssignmentDetailView(PlanMixin):
     sees only their own (same isolation shape as ballots).
     """
 
+    serializer_class = AssignmentVersionSerializer
+
     authentication_classes = [CookieSessionAuthentication]
     permission_classes = [require_roles(Role.JUDGE, Role.ORGANIZER, Role.ADMIN)]
 
@@ -470,6 +486,8 @@ class NormalizationRunListView(PlanMixin):
     at once, which is not something a single judge should be able to
     trigger or needs to see the internals of.
     """
+
+    serializer_class = NormalizationRunSerializer
 
     def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         runs = self.get_plan().normalization_runs.all()

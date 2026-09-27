@@ -47,14 +47,14 @@ class EvaluationPlanSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["created_at", "updated_at"]
 
-    def get_current_rubric_version(self, plan):
+    def get_current_rubric_version(self, plan) -> int | None:
         version = plan.current_rubric_version
         return version.number if version else None
 
-    def get_active_assignment_version(self, plan):
+    def get_active_assignment_version(self, plan) -> int | None:
         return plan.active_assignment_version.number if plan.active_assignment_version_id else None
 
-    def get_published_normalization_run(self, plan):
+    def get_published_normalization_run(self, plan) -> int | None:
         return (
             plan.published_normalization_run.number if plan.published_normalization_run_id else None
         )

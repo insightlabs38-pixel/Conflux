@@ -53,3 +53,63 @@ class CommentSerializer(serializers.ModelSerializer):
         except ModelValidationError as exc:
             raise serializers.ValidationError(exc.message_dict.get("body", exc.messages)) from exc
         return value
+
+
+class VotingStatusSchema(serializers.Serializer):
+    identity_mode = serializers.CharField()
+    opens_at = serializers.DateTimeField()
+    closes_at = serializers.DateTimeField()
+    is_open = serializers.BooleanField()
+    allow_comments = serializers.BooleanField()
+
+
+class CandidateSchema(serializers.Serializer):
+    project = serializers.UUIDField()
+    name = serializers.CharField()
+
+
+class VoteInputSchema(serializers.Serializer):
+    project = serializers.UUIDField()
+    token = serializers.CharField(required=False)
+
+
+class VoteReceiptSchema(serializers.Serializer):
+    public_id = serializers.UUIDField()
+
+
+class EmailTokenInputSchema(serializers.Serializer):
+    email = serializers.EmailField()
+
+
+class EmailTokenReceiptSchema(serializers.Serializer):
+    token = serializers.CharField()
+    expires_at = serializers.DateTimeField()
+
+
+class VotingResultSchema(serializers.Serializer):
+    project = serializers.UUIDField()
+    name = serializers.CharField()
+    votes = serializers.IntegerField()
+
+
+class AbuseSignalSchema(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    signal_type = serializers.CharField()
+    detail = serializers.CharField()
+    evidence = serializers.JSONField()
+    occurred_at = serializers.DateTimeField()
+    resolved_at = serializers.DateTimeField(allow_null=True)
+    resolved_by = serializers.UUIDField(allow_null=True)
+    resolution_note = serializers.CharField(allow_blank=True)
+
+
+class ResolutionInputSchema(serializers.Serializer):
+    resolution_note = serializers.CharField(min_length=1, max_length=2000)
+
+
+class CommunityAuditSchema(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    actor = serializers.CharField(allow_null=True)
+    action = serializers.CharField()
+    detail = serializers.CharField()
+    created_at = serializers.DateTimeField()

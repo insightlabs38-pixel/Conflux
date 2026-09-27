@@ -11,6 +11,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema
 from events.models import Event
 from events.views import OrganizerView
 from presentation.public import public_projects
@@ -25,7 +26,21 @@ from . import abuse, voting
 from .models import AbuseSignal, Comment, CommentVisibility, VoteIdentityMode, VoteToken, VotingPlan
 from .ordering import ordered_candidates
 from .results import results_visible_to, tally
-from .serializers import CommentSerializer, VoteTokenSerializer, VotingPlanSerializer
+from .serializers import (
+    AbuseSignalSchema,
+    CandidateSchema,
+    CommentSerializer,
+    CommunityAuditSchema,
+    EmailTokenInputSchema,
+    EmailTokenReceiptSchema,
+    ResolutionInputSchema,
+    VoteInputSchema,
+    VoteReceiptSchema,
+    VoteTokenSerializer,
+    VotingPlanSerializer,
+    VotingResultSchema,
+    VotingStatusSchema,
+)
 
 
 def _as_drf_validation_error(exc):
@@ -126,6 +141,7 @@ class PublicVotingStatusView(PublicVotingMixin):
     anything organizer-only.
     """
 
+    @extend_schema(responses=VotingStatusSchema(allow_null=True))
     def get(self, request, event_public_id, workspace_public_id=None):
         plan = VotingPlan.objects.filter(event=self.get_event()).first()
         if plan is None:
@@ -142,6 +158,7 @@ class PublicVotingStatusView(PublicVotingMixin):
 
 
 class CandidateOrderView(PublicVotingMixin):
+    @extend_schema(responses=CandidateSchema(many=True))
     def get(self, request, event_public_id, workspace_public_id=None):
         event = self.get_event()
         voter_key = request.GET.get("token") or (
@@ -152,6 +169,7 @@ class CandidateOrderView(PublicVotingMixin):
 
 
 class VoteCreateView(PublicVotingMixin):
+    @extend_schema(request=VoteInputSchema, responses={201: VoteReceiptSchema})
     def post(self, request, event_public_id, workspace_public_id=None):
         plan = self.get_plan()
         project = get_object_or_404(
@@ -181,6 +199,7 @@ class VoteCreateView(PublicVotingMixin):
 
 
 class RequestEmailVoteTokenView(PublicVotingMixin):
+    @extend_schema(request=EmailTokenInputSchema, responses={201: EmailTokenReceiptSchema})
     def post(self, request, event_public_id, workspace_public_id=None):
         plan = self.get_plan()
         email = request.data.get("email", "")
@@ -209,6 +228,7 @@ class RequestEmailVoteTokenView(PublicVotingMixin):
 
 
 class ResultsView(PublicVotingMixin):
+    @extend_schema(responses=VotingResultSchema(many=True))
     def get(self, request, event_public_id, workspace_public_id=None):
         plan = self.get_plan()
         is_organizer = has_any_role(
@@ -276,6 +296,7 @@ def _review_offset(request):
 
 
 class AbuseSignalListView(VotingPlanMixin):
+    @extend_schema(responses=AbuseSignalSchema(many=True))
     def get(self, request, workspace_public_id, event_public_id):
         plan = self.get_plan()
         offset = _review_offset(request)
@@ -286,6 +307,7 @@ class AbuseSignalListView(VotingPlanMixin):
 
 
 class AbuseSignalResolveView(VotingPlanMixin):
+    @extend_schema(request=ResolutionInputSchema, responses=AbuseSignalSchema)
     def post(self, request, workspace_public_id, event_public_id, signal_public_id):
         note = request.data.get("resolution_note")
         if not isinstance(note, str) or not note.strip() or len(note.strip()) > 2000:
@@ -316,6 +338,7 @@ class AbuseSignalResolveView(VotingPlanMixin):
 
 
 class CommunityAuditView(VotingPlanMixin):
+    @extend_schema(responses=CommunityAuditSchema(many=True))
     def get(self, request, workspace_public_id, event_public_id):
         plan = self.get_plan()
         offset = _review_offset(request)

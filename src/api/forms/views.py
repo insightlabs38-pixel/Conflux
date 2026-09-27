@@ -2,9 +2,11 @@ from accounts.authentication import CookieSessionAuthentication
 from core.permissions import IsWorkspaceMember
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema
 from events.models import Event
 from events.views import OrganizerView
 from projects.models import Project
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,6 +15,37 @@ from workspaces.models import Workspace
 from .models import FormDefinition, FormResponse, FormVersion
 from .services import create_form, publish_form, save_draft, save_response
 from .validation import field_visible
+
+
+class FormPayloadSchema(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    name = serializers.CharField()
+    stage = serializers.UUIDField(allow_null=True)
+    draft_schema = serializers.JSONField()
+
+
+class FormVersionSchema(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    number = serializers.IntegerField()
+    schema = serializers.JSONField()
+    published_at = serializers.DateTimeField()
+
+
+class FormResponseSchema(serializers.Serializer):
+    version = serializers.UUIDField()
+    answers = serializers.JSONField()
+
+
+class FormNameInputSchema(serializers.Serializer):
+    name = serializers.CharField()
+
+
+class FormDraftInputSchema(serializers.Serializer):
+    schema = serializers.JSONField()
+
+
+class FormAnswersInputSchema(serializers.Serializer):
+    answers = serializers.JSONField()
 
 
 def participant_answers(response):
@@ -53,6 +86,8 @@ class FormOrganizerView(OrganizerView):
 
 
 class FormListView(FormOrganizerView):
+    serializer_class = FormPayloadSchema
+
     def get(self, request, workspace_public_id, event_public_id):
         return Response(
             [
@@ -61,6 +96,7 @@ class FormListView(FormOrganizerView):
             ]
         )
 
+    @extend_schema(request=FormNameInputSchema, responses={201: FormPayloadSchema})
     def post(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
         self.ensure_mutable(event)
@@ -77,9 +113,12 @@ class FormListView(FormOrganizerView):
 
 
 class FormDetailView(FormOrganizerView):
+    serializer_class = FormPayloadSchema
+
     def get(self, request, workspace_public_id, event_public_id, form_public_id):
         return Response(form_payload(self.get_form()))
 
+    @extend_schema(request=FormDraftInputSchema, responses=FormPayloadSchema)
     def put(self, request, workspace_public_id, event_public_id, form_public_id):
         form = self.get_form()
         self.ensure_mutable(form.event)
@@ -93,11 +132,14 @@ class FormDetailView(FormOrganizerView):
 
 
 class FormVersionListView(FormOrganizerView):
+    serializer_class = FormVersionSchema
+
     def get(self, request, workspace_public_id, event_public_id, form_public_id):
         return Response([version_payload(version) for version in self.get_form().versions.all()])
 
 
 class FormPublishView(FormOrganizerView):
+    @extend_schema(request=None, responses={201: FormVersionSchema})
     def post(self, request, workspace_public_id, event_public_id, form_public_id):
         form = self.get_form()
         self.ensure_mutable(form.event)
@@ -111,6 +153,7 @@ class FormPublishView(FormOrganizerView):
 
 
 class ProjectFormResponseView(APIView):
+    serializer_class = FormResponseSchema
     authentication_classes = [CookieSessionAuthentication]
     permission_classes = [IsWorkspaceMember]
 
@@ -144,6 +187,7 @@ class ProjectFormResponseView(APIView):
             }
         )
 
+    @extend_schema(request=FormAnswersInputSchema, responses=FormResponseSchema)
     def put(
         self, request, workspace_public_id, event_public_id, project_public_id, version_public_id
     ):

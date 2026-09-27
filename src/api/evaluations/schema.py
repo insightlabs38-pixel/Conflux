@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import COIRelationshipKind, COIRuleKind
+from .models import AppealStatus, COIRelationshipKind, COIRuleKind
 from .serializers import BallotResponseSerializer
 
 
@@ -409,3 +409,29 @@ class PairwiseRankedResultSchema(serializers.Serializer):
     win_count = serializers.FloatField()
     comparison_count = serializers.FloatField()
     tie_break = serializers.IntegerField(allow_null=True)
+
+
+class AppealInputSchema(serializers.Serializer):
+    project = serializers.UUIDField()
+    body = serializers.CharField(max_length=4000)
+
+
+class AppealDecisionInputSchema(serializers.Serializer):
+    status = serializers.ChoiceField(
+        choices=[AppealStatus.UPHELD, AppealStatus.OVERTURNED, AppealStatus.DISMISSED]
+    )
+    decision_note = serializers.CharField(required=False, allow_blank=True, max_length=2000)
+
+
+class AppealSchema(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    project = serializers.UUIDField()
+    project_name = serializers.CharField()
+    submitted_by = serializers.UUIDField()
+    submitted_by_username = serializers.CharField()
+    body = serializers.CharField()
+    status = serializers.CharField()
+    decision_note = serializers.CharField()
+    decided_by = serializers.CharField(allow_null=True)
+    decided_at = serializers.DateTimeField(allow_null=True)
+    created_at = serializers.DateTimeField()

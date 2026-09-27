@@ -140,6 +140,52 @@ class InputOfAgreementSummarySchema(TypedDict):
     criteria: list[InputOfAgreementCriterionSchema]
     rankings: list[InputOfAgreementRankingSchema]
 
+class AppealDecisionInputSchema(TypedDict):
+    status: AppealDecisionInputSchemaStatusEnum
+    decision_note: NotRequired[str]
+
+class InputOfAppealDecisionInputSchema(TypedDict):
+    status: InputOfAppealDecisionInputSchemaStatusEnum
+    decision_note: NotRequired[str]
+
+AppealDecisionInputSchemaStatusEnum = Literal['upheld', 'overturned', 'dismissed']
+
+InputOfAppealDecisionInputSchemaStatusEnum = Literal['upheld', 'overturned', 'dismissed']
+
+class AppealInputSchema(TypedDict):
+    project: str
+    body: str
+
+class InputOfAppealInputSchema(TypedDict):
+    project: str
+    body: str
+
+class AppealSchema(TypedDict):
+    public_id: str
+    project: str
+    project_name: str
+    submitted_by: str
+    submitted_by_username: str
+    body: str
+    status: str
+    decision_note: str
+    decided_by: str | None
+    decided_at: str | None
+    created_at: str
+
+class InputOfAppealSchema(TypedDict):
+    public_id: str
+    project: str
+    project_name: str
+    submitted_by: str
+    submitted_by_username: str
+    body: str
+    status: str
+    decision_note: str
+    decided_by: str | None
+    decided_at: str | None
+    created_at: str
+
 class ApplicationDecisionInputSchema(TypedDict):
     decision: ApplicationDecisionInputSchemaDecisionEnum
 
@@ -3981,6 +4027,15 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                        'query_params': [],
                                                                                                                                        'request_body': False,
                                                                                                                                        'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_appeals': {'method': 'GET',
+                                                                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/appeals/',
+                                                                                                                                     'path_params': ['event_public_id',
+                                                                                                                                                     'plan_public_id',
+                                                                                                                                                     'stage_public_id',
+                                                                                                                                                     'workspace_public_id'],
+                                                                                                                                     'query_params': [],
+                                                                                                                                     'request_body': False,
+                                                                                                                                     'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments': {'method': 'GET',
                                                                                                                                          'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/',
                                                                                                                                          'path_params': ['event_public_id',
@@ -4919,6 +4974,25 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                'query_params': [],
                                                                                                                'request_body': True,
                                                                                                                'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_appeals': {'method': 'POST',
+                                                                                                                                      'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/appeals/',
+                                                                                                                                      'path_params': ['event_public_id',
+                                                                                                                                                      'plan_public_id',
+                                                                                                                                                      'stage_public_id',
+                                                                                                                                                      'workspace_public_id'],
+                                                                                                                                      'query_params': [],
+                                                                                                                                      'request_body': True,
+                                                                                                                                      'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_appeals_appeal_public_id_decide': {'method': 'POST',
+                                                                                                                                                              'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/appeals/{appeal_public_id}/decide/',
+                                                                                                                                                              'path_params': ['appeal_public_id',
+                                                                                                                                                                              'event_public_id',
+                                                                                                                                                                              'plan_public_id',
+                                                                                                                                                                              'stage_public_id',
+                                                                                                                                                                              'workspace_public_id'],
+                                                                                                                                                              'query_params': [],
+                                                                                                                                                              'request_body': True,
+                                                                                                                                                              'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_activate': {'method': 'POST',
                                                                                                                                                    'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/activate/',
                                                                                                                                                    'path_params': ['event_public_id',

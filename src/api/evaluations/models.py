@@ -680,3 +680,48 @@ class PairwiseRun(PublicIdModel):
 
     def delete(self, *args, **kwargs):
         raise ValidationError("Pairwise runs are immutable once computed.")
+
+
+class AppealStatus(models.TextChoices):
+    PENDING = "pending", "Pending"
+    UPHELD = "upheld", "Upheld"
+    OVERTURNED = "overturned", "Overturned"
+    DISMISSED = "dismissed", "Dismissed"
+
+
+class Appeal(PublicIdModel):
+    """A participant's structured post-result dispute (VS20). Deciding one
+    never itself mutates a Ballot/NormalizationRun/AssignmentVersion --
+    those stay immutable exactly as everywhere else in this app. "Upheld"/
+    "overturned"/"dismissed" record the organizer's verdict as an
+    auditable fact; any actual remedy (a fresh rubric edit, a new
+    normalization run, `tie_breaks`) goes through those existing paths.
+    """
+
+    plan = models.ForeignKey(EvaluationPlan, on_delete=models.CASCADE, related_name="appeals")
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="appeals")
+    submitted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="appeals_submitted"
+    )
+    body = models.TextField(max_length=4000)
+    status = models.CharField(
+        max_length=12, choices=AppealStatus.choices, default=AppealStatus.PENDING
+    )
+    decision_note = models.TextField(blank=True)
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    decided_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["created_at", "id"]
+
+    def clean(self):
+        if self.project.event_id != self.plan.stage.event_id:
+            raise ValidationError({"project": "Project must belong to the plan's event."})

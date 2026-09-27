@@ -151,6 +151,54 @@ export type InputOfAgreementSummarySchema = {
   rankings: InputOfAgreementRankingSchema[];
 };
 
+export type AppealDecisionInputSchema = {
+  status: AppealDecisionInputSchemaStatusEnum;
+  decision_note?: string;
+};
+
+export type InputOfAppealDecisionInputSchema = {
+  status: InputOfAppealDecisionInputSchemaStatusEnum;
+  decision_note?: string;
+};
+
+export type AppealDecisionInputSchemaStatusEnum =
+  "upheld" | "overturned" | "dismissed";
+
+export type InputOfAppealDecisionInputSchemaStatusEnum =
+  "upheld" | "overturned" | "dismissed";
+
+export type AppealInputSchema = { project: string; body: string };
+
+export type InputOfAppealInputSchema = { project: string; body: string };
+
+export type AppealSchema = {
+  public_id: string;
+  project: string;
+  project_name: string;
+  submitted_by: string;
+  submitted_by_username: string;
+  body: string;
+  status: string;
+  decision_note: string;
+  decided_by: string | null;
+  decided_at: string | null;
+  created_at: string;
+};
+
+export type InputOfAppealSchema = {
+  public_id: string;
+  project: string;
+  project_name: string;
+  submitted_by: string;
+  submitted_by_username: string;
+  body: string;
+  status: string;
+  decision_note: string;
+  decided_by: string | null;
+  decided_at: string | null;
+  created_at: string;
+};
+
 export type ApplicationDecisionInputSchema = {
   decision: ApplicationDecisionInputSchemaDecisionEnum;
 };
@@ -4865,6 +4913,42 @@ export interface Operations {
     };
     response: AgreementSummarySchema;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_appeals: {
+    request: {
+      path: {
+        event_public_id: string;
+        plan_public_id: string;
+        stage_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: AppealSchema[];
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_appeals: {
+    request: {
+      path: {
+        event_public_id: string;
+        plan_public_id: string;
+        stage_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfAppealInputSchema;
+    };
+    response: AppealSchema;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_appeals_appeal_public_id_decide: {
+    request: {
+      path: {
+        appeal_public_id: string;
+        event_public_id: string;
+        plan_public_id: string;
+        stage_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfAppealDecisionInputSchema;
+    };
+    response: AppealSchema;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments: {
     request: {
       path: {
@@ -7524,6 +7608,49 @@ export const operations = {
       ],
       query_params: [],
       request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_appeals:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/appeals/",
+      path_params: [
+        "event_public_id",
+        "plan_public_id",
+        "stage_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_appeals:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/appeals/",
+      path_params: [
+        "event_public_id",
+        "plan_public_id",
+        "stage_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_appeals_appeal_public_id_decide:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/appeals/{appeal_public_id}/decide/",
+      path_params: [
+        "appeal_public_id",
+        "event_public_id",
+        "plan_public_id",
+        "stage_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
       response_kind: "json",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments:

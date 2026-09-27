@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import judge_directory, judge_expertise, judge_suggestions, views
+from . import appeals, judge_directory, judge_expertise, judge_suggestions, views
 
 _EVENT = "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>"
 _STAGE = f"{_EVENT}/stages/<uuid:stage_public_id>"
@@ -266,5 +266,15 @@ urlpatterns = [
         f"{_PLAN}/agreement/",
         views.AgreementSummaryView.as_view(),
         name="evaluation-plan-agreement",
+    ),
+    path(
+        f"{_PLAN}/appeals/",
+        appeals.AppealListCreateView.as_view(),
+        name="evaluation-plan-appeal-list",
+    ),
+    path(
+        f"{_PLAN}/appeals/<uuid:appeal_public_id>/decide/",
+        appeals.AppealDecisionView.as_view(),
+        name="evaluation-plan-appeal-decide",
     ),
 ]

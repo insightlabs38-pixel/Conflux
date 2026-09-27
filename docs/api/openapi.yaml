@@ -6763,6 +6763,157 @@ paths:
               schema:
                 $ref: '#/components/schemas/AgreementSummarySchema'
           description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/appeals/
+  : get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_appeals
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppealSchema'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_appeals
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppealInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AppealInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AppealInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppealSchema'
+          description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/appeals/{appeal_public_id}/decide/
+  : post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_appeals_appeal_public_id_decide
+      parameters:
+      - in: path
+        name: appeal_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppealDecisionInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AppealDecisionInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AppealDecisionInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppealSchema'
+          description: ''
   ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/
   : get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments
@@ -10697,6 +10848,82 @@ components:
       required:
       - criteria
       - rankings
+    AppealDecisionInputSchema:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/AppealDecisionInputSchemaStatusEnum'
+        decision_note:
+          type: string
+          maxLength: 2000
+      required:
+      - status
+    AppealDecisionInputSchemaStatusEnum:
+      enum:
+      - upheld
+      - overturned
+      - dismissed
+      type: string
+      description: |-
+        * `upheld` - upheld
+        * `overturned` - overturned
+        * `dismissed` - dismissed
+    AppealInputSchema:
+      type: object
+      properties:
+        project:
+          type: string
+          format: uuid
+        body:
+          type: string
+          maxLength: 4000
+      required:
+      - body
+      - project
+    AppealSchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        project:
+          type: string
+          format: uuid
+        project_name:
+          type: string
+        submitted_by:
+          type: string
+          format: uuid
+        submitted_by_username:
+          type: string
+        body:
+          type: string
+        status:
+          type: string
+        decision_note:
+          type: string
+        decided_by:
+          type: string
+          nullable: true
+        decided_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - body
+      - created_at
+      - decided_at
+      - decided_by
+      - decision_note
+      - project
+      - project_name
+      - public_id
+      - status
+      - submitted_by
+      - submitted_by_username
     ApplicationDecisionInputSchema:
       type: object
       properties:

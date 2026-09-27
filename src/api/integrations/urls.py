@@ -1,8 +1,18 @@
 from django.urls import path
 
-from . import views, webhook_views
+from . import archive_views, views, webhook_views
 
 urlpatterns = [
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/archive/",
+        archive_views.EventArchiveExportView.as_view(),
+        name="event-archive-export",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/archive/import/",
+        archive_views.WorkspaceArchiveImportView.as_view(),
+        name="workspace-archive-import",
+    ),
     path(
         "workspaces/<uuid:workspace_public_id>/webhooks/",
         webhook_views.WebhookSubscriptionsView.as_view(),

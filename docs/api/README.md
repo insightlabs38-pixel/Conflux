@@ -4,6 +4,7 @@ The live OpenAPI schema is available at `GET /api/v1/schema/`. The [checked sche
 
 See [webhooks](WEBHOOKS.md) for subscription, signing, retry, and replay behavior.
 See [awards](AWARDS.md) for winner selection, publication, typed prizes, and fulfillment.
+See [the canonical archive](../architecture/CANONICAL_ARCHIVE.md) for exporting and importing an event's configuration.
 
 ## Authenticate
 

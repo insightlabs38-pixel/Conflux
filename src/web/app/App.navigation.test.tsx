@@ -168,8 +168,12 @@ describe("App navigation", () => {
     act(() => {
       (container.querySelector("button") as HTMLButtonElement).click();
     });
-    await waitFor(() => container.querySelector('[aria-label="Judging"]') !== null);
-    expect(container.querySelector('[aria-label="Event dashboard"]')).toBeNull();
+    await waitFor(
+      () => container.querySelector('[aria-label="Judging"]') !== null,
+    );
+    expect(
+      container.querySelector('[aria-label="Event dashboard"]'),
+    ).toBeNull();
   });
 
   it("denies a direct link to a workspace without membership and offers a way back", async () => {
@@ -186,8 +190,12 @@ describe("App navigation", () => {
       root.render(<App />);
     });
 
-    await waitFor(() => container.textContent?.includes("Access denied") ?? false);
-    expect(container.querySelector('[aria-label="Event dashboard"]')).toBeNull();
+    await waitFor(
+      () => container.textContent?.includes("Access denied") ?? false,
+    );
+    expect(
+      container.querySelector('[aria-label="Event dashboard"]'),
+    ).toBeNull();
     const backButton = [...container.querySelectorAll("button")].find(
       (button) => button.textContent === "Back to workspaces",
     );
@@ -206,26 +214,86 @@ describe("App navigation", () => {
   it("waits for membership before showing a direct linked organizer dashboard", async () => {
     window.history.pushState({}, "", "/?workspace=w1");
     let resolveMe!: (value: unknown) => void;
-    vi.stubGlobal("fetch", vi.fn().mockImplementation((input: unknown) => {
-      if (String(input).includes("/accounts/me/")) {
-        return new Promise((resolve) => { resolveMe = resolve; });
-      }
-      return Promise.resolve({ ok: true, status: 200, json: async () => [] });
-    }));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((input: unknown) => {
+        if (String(input).includes("/accounts/me/")) {
+          return new Promise((resolve) => {
+            resolveMe = resolve;
+          });
+        }
+        return Promise.resolve({ ok: true, status: 200, json: async () => [] });
+      }),
+    );
     act(() => root.render(<App />));
     expect(container.textContent).toContain("Checking workspace access");
-    expect(container.querySelector('[aria-label="Event dashboard"]')).toBeNull();
-    await act(async () => resolveMe({ ok: true, json: async () => ({ memberships: [{ workspace: "w1", role: "organizer" }] }) }));
-    await waitFor(() => container.querySelector('[aria-label="Event dashboard"]') !== null);
+    expect(
+      container.querySelector('[aria-label="Event dashboard"]'),
+    ).toBeNull();
+    await act(async () =>
+      resolveMe({
+        ok: true,
+        json: async () => ({
+          memberships: [{ workspace: "w1", role: "organizer" }],
+        }),
+      }),
+    );
+    await waitFor(
+      () => container.querySelector('[aria-label="Event dashboard"]') !== null,
+    );
   });
 
   it("shows a retryable error when the membership check fails", async () => {
     window.history.pushState({}, "", "/?workspace=w1");
     mockApi(503, {}, 200, []);
     act(() => root.render(<App />));
-    await waitFor(() => container.textContent?.includes("Could not check workspace access") ?? false);
-    expect(container.querySelector('[aria-label="Event dashboard"]')).toBeNull();
-    expect([...container.querySelectorAll("button")].some((button) => button.textContent === "Try again")).toBe(true);
+    await waitFor(
+      () =>
+        container.textContent?.includes("Could not check workspace access") ??
+        false,
+    );
+    expect(
+      container.querySelector('[aria-label="Event dashboard"]'),
+    ).toBeNull();
+    expect(
+      [...container.querySelectorAll("button")].some(
+        (button) => button.textContent === "Try again",
+      ),
+    ).toBe(true);
+  });
+
+  it("clears participant event and invite context when returning to workspaces", async () => {
+    window.history.pushState(
+      {},
+      "",
+      "/?workspace=w1&event=missing&invite=secret",
+    );
+    mockApi(
+      200,
+      { memberships: [{ workspace: "w1", role: "participant" }] },
+      200,
+      [],
+    );
+    act(() => root.render(<App />));
+    await waitFor(
+      () =>
+        container.textContent?.includes("not available for participation") ??
+        false,
+    );
+    expect(
+      container.querySelector('[aria-label="Participant events"]'),
+    ).not.toBeNull();
+    const back = [...container.querySelectorAll("button")].find(
+      (button) => button.textContent === "Back to workspaces",
+    );
+    act(() => back?.click());
+    expect(window.location.search).toBe("");
+    expect(
+      container.querySelector('[aria-label="Participant events"]'),
+    ).toBeNull();
+    await waitFor(
+      () => container.querySelector('[aria-label="Your workspaces"]') !== null,
+    );
   });
 
   it("routes a bare ?event= link to the public event site without requiring auth", async () => {
@@ -258,7 +326,8 @@ describe("App navigation", () => {
       root.render(<App />);
     });
     await waitFor(
-      () => container.querySelector('[aria-label="Regionals event page"]') !== null,
+      () =>
+        container.querySelector('[aria-label="Regionals event page"]') !== null,
     );
     expect(container.textContent).not.toContain("Back to workspaces");
   });

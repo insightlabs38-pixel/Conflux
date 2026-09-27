@@ -5,6 +5,7 @@ from .views import (
     FormListView,
     FormPublishView,
     FormVersionListView,
+    ProjectFormListView,
     ProjectFormResponseView,
 )
 
@@ -19,6 +20,11 @@ urlpatterns = [
     ),
     path(
         _prefix + "<uuid:form_public_id>/publish/", FormPublishView.as_view(), name="form-publish"
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/projects/<uuid:project_public_id>/forms/",
+        ProjectFormListView.as_view(),
+        name="project-form-list",
     ),
     path(
         "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/projects/<uuid:project_public_id>/forms/<uuid:version_public_id>/response/",

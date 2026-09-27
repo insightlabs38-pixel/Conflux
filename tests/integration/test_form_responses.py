@@ -130,3 +130,54 @@ def test_response_api_enforces_project_membership_and_validation():
         ).status_code
         == 404
     )
+
+
+def test_project_form_list_exposes_latest_published_participant_fields_only():
+    event, user, project, form = setup_form()
+    save_draft(form, {"fields": [{"id": "draft", "type": "text", "label": "Draft"}]})
+    save_draft(
+        form,
+        {
+            "fields": [
+                {"id": "pitch", "type": "text", "label": "Pitch"},
+                {"id": "score", "type": "number", "label": "Score", "visible_to": ["judge"]},
+            ]
+        },
+    )
+    publish_form(form)
+    save_draft(
+        form,
+        {
+            "fields": [
+                {"id": "pitch", "type": "text", "label": "Pitch", "required": True},
+                {"id": "private", "type": "text", "label": "Private", "visible_to": ["organizer"]},
+            ]
+        },
+    )
+    latest = publish_form(form)
+    unpublished = create_form(event, "Unpublished")
+    assert unpublished.versions.count() == 0
+    url = (
+        f"/api/v1/workspaces/{event.workspace.public_id}/events/{event.public_id}/"
+        f"projects/{project.public_id}/forms/"
+    )
+    client = Client()
+    client.cookies["session"] = Session.issue(user).token
+    response = client.get(url)
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "public_id": str(latest.public_id),
+            "name": "Submission",
+            "stage": None,
+            "number": 2,
+            "schema": {
+                "fields": [{"id": "pitch", "type": "text", "label": "Pitch", "required": True}]
+            },
+        }
+    ]
+    assert client.put(url, {"answers": {}}, content_type="application/json").status_code == 405
+    outsider = User.objects.create_user(username="form-outsider", password="unused")
+    Membership.objects.create(workspace=event.workspace, user=outsider, role=Role.PARTICIPANT)
+    client.cookies["session"] = Session.issue(outsider).token
+    assert client.get(url).status_code == 404

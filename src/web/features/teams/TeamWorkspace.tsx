@@ -63,6 +63,15 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
       {!loading && !error && events.length === 0 && (
         <p>No events are open for participation.</p>
       )}
+      {!loading &&
+        !error &&
+        selectedId &&
+        !events.some((event) => event.public_id === selectedId) && (
+          <p role="alert">
+            This event is not available for participation. Choose another event
+            or return to workspaces.
+          </p>
+        )}
       {events.length > 0 && (
         <label>
           Event{" "}

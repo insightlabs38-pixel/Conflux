@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { ArtifactPanel } from "./ArtifactPanel";
 import { SubmissionPanel } from "../submissions/SubmissionPanel";
+import { ProjectForms } from "../form-builder/ProjectForms";
 
 type Project = {
   public_id: string;
@@ -63,7 +64,10 @@ export function ProjectWorkspace({
 
   useEffect(() => {
     let active = true;
-    Promise.all([request<Project[]>(base + "projects/"), request<Track[]>(base + "tracks/")])
+    Promise.all([
+      request<Project[]>(base + "projects/"),
+      request<Track[]>(base + "tracks/"),
+    ])
       .then(([nextProjects, nextTracks]) => {
         if (active) {
           setProjects(nextProjects);
@@ -116,7 +120,10 @@ export function ProjectWorkspace({
         {tracks.length > 0 && (
           <label>
             Track{" "}
-            <select value={trackId} onChange={(event) => setTrackId(event.target.value)}>
+            <select
+              value={trackId}
+              onChange={(event) => setTrackId(event.target.value)}
+            >
               <option value="">No track</option>
               {tracks.map((track) => (
                 <option key={track.public_id} value={track.public_id}>
@@ -149,6 +156,11 @@ export function ProjectWorkspace({
       {selectedId && (
         <div key={selectedId}>
           <ArtifactPanel
+            workspaceId={workspaceId}
+            eventId={eventId}
+            projectId={selectedId}
+          />
+          <ProjectForms
             workspaceId={workspaceId}
             eventId={eventId}
             projectId={selectedId}

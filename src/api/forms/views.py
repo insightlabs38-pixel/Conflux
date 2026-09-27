@@ -14,7 +14,7 @@ from workspaces.models import Workspace
 
 from .models import FormDefinition, FormResponse, FormVersion
 from .services import create_form, publish_form, save_draft, save_response
-from .validation import field_visible
+from .validation import field_scopes, field_visible
 
 
 class FormPayloadSchema(serializers.Serializer):
@@ -34,6 +34,14 @@ class FormVersionSchema(serializers.Serializer):
 class FormResponseSchema(serializers.Serializer):
     version = serializers.UUIDField()
     answers = serializers.JSONField()
+
+
+class ParticipantFormSchema(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    name = serializers.CharField()
+    stage = serializers.UUIDField(allow_null=True)
+    number = serializers.IntegerField()
+    schema = serializers.JSONField()
 
 
 class FormNameInputSchema(serializers.Serializer):
@@ -160,18 +168,21 @@ class ProjectFormResponseView(APIView):
     def get_workspace(self):
         return get_object_or_404(Workspace, public_id=self.kwargs["workspace_public_id"])
 
-    def get_objects(self, request):
+    def get_project(self, request):
         event = get_object_or_404(
             Event, workspace=self.get_workspace(), public_id=self.kwargs["event_public_id"]
         )
-        project = get_object_or_404(
+        return get_object_or_404(
             Project,
             event=event,
             public_id=self.kwargs["project_public_id"],
             memberships__user=request.user,
         )
+
+    def get_objects(self, request):
+        project = self.get_project(request)
         version = get_object_or_404(
-            FormVersion, definition__event=event, public_id=self.kwargs["version_public_id"]
+            FormVersion, definition__event=project.event, public_id=self.kwargs["version_public_id"]
         )
         return project, version
 
@@ -204,3 +215,36 @@ class ProjectFormResponseView(APIView):
                 "answers": participant_answers(response),
             }
         )
+
+
+class ProjectFormListView(ProjectFormResponseView):
+    http_method_names = ["get", "head", "options"]
+
+    @extend_schema(responses=ParticipantFormSchema(many=True))
+    def get(self, request, workspace_public_id, event_public_id, project_public_id):
+        project = self.get_project(request)
+        forms = []
+        definitions = (
+            FormDefinition.objects.filter(event=project.event)
+            .prefetch_related("versions")
+            .order_by("name")
+        )
+        for definition in definitions:
+            version = max(definition.versions.all(), key=lambda item: item.number, default=None)
+            if version is None:
+                continue
+            fields = [
+                field
+                for field in version.schema["fields"]
+                if "participant" in field_scopes(field) or "public" in field_scopes(field)
+            ]
+            forms.append(
+                {
+                    "public_id": str(version.public_id),
+                    "name": definition.name,
+                    "stage": str(definition.stage.public_id) if definition.stage_id else None,
+                    "number": version.number,
+                    "schema": {"fields": fields},
+                }
+            )
+        return Response(forms)

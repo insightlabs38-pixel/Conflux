@@ -28,7 +28,11 @@ function setWorkspaceParam(id: string | null) {
   if (typeof window === "undefined") return;
   const url = new URL(window.location.href);
   if (id) url.searchParams.set("workspace", id);
-  else url.searchParams.delete("workspace");
+  else {
+    url.searchParams.delete("workspace");
+    url.searchParams.delete("event");
+    url.searchParams.delete("invite");
+  }
   window.history.pushState({}, "", url);
 }
 
@@ -37,7 +41,9 @@ export function App() {
     workspaceFromLocation,
   );
   const [workspaceRole, setWorkspaceRole] = useState<string | null>(null);
-  const [roleState, setRoleState] = useState<"loading" | "ready" | "denied" | "error">("loading");
+  const [roleState, setRoleState] = useState<
+    "loading" | "ready" | "denied" | "error"
+  >("loading");
   const [roleRetry, setRoleRetry] = useState(0);
   const publicEventId = publicEventFromLocation();
 
@@ -50,23 +56,24 @@ export function App() {
         if (!response.ok) throw new Error("Could not check workspace access.");
         return response.json();
       })
-      .then(
-        (
-          me: { memberships?: { workspace: string; role: string }[] },
-        ) => {
-          if (!active) return;
-          const role = me?.memberships?.find(
-            (membership) => membership.workspace === workspaceId,
-          )?.role;
-          if (role === "participant" || role === "judge" || role === "organizer" || role === "admin") {
-            setWorkspaceRole(role);
-            setRoleState("ready");
-          } else {
-            setWorkspaceRole(null);
-            setRoleState("denied");
-          }
-        },
-      )
+      .then((me: { memberships?: { workspace: string; role: string }[] }) => {
+        if (!active) return;
+        const role = me?.memberships?.find(
+          (membership) => membership.workspace === workspaceId,
+        )?.role;
+        if (
+          role === "participant" ||
+          role === "judge" ||
+          role === "organizer" ||
+          role === "admin"
+        ) {
+          setWorkspaceRole(role);
+          setRoleState("ready");
+        } else {
+          setWorkspaceRole(null);
+          setRoleState("denied");
+        }
+      })
       .catch(() => {
         if (active) setRoleState("error");
       });
@@ -107,13 +114,16 @@ export function App() {
         roleState === "loading" ? (
           <LoadingState label="Checking workspace access…" />
         ) : roleState === "error" ? (
-          <ErrorState message="Could not check workspace access." onRetry={() => setRoleRetry((count) => count + 1)} />
+          <ErrorState
+            message="Could not check workspace access."
+            onRetry={() => setRoleRetry((count) => count + 1)}
+          />
         ) : roleState === "denied" ? (
           <DeniedState message="You are not a member of this workspace." />
         ) : workspaceRole === "participant" ? (
-          <TeamWorkspace workspaceId={workspaceId} />
+          <TeamWorkspace key={workspaceId} workspaceId={workspaceId} />
         ) : workspaceRole === "judge" ? (
-          <JudgeWorkspace workspaceId={workspaceId} />
+          <JudgeWorkspace key={workspaceId} workspaceId={workspaceId} />
         ) : workspaceRole === "organizer" || workspaceRole === "admin" ? (
           <EventDashboard key={workspaceId} workspaceId={workspaceId} />
         ) : (

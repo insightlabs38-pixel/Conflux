@@ -151,6 +151,16 @@ export type InputOfAgreementSummarySchema = {
   rankings: InputOfAgreementRankingSchema[];
 };
 
+export type Announcement = {
+  public_id: string;
+  title: string;
+  body?: string;
+  posted_by: string;
+  created_at: string;
+};
+
+export type InputOfAnnouncement = { title: string; body?: string };
+
 export type AppealDecisionInputSchema = {
   status: AppealDecisionInputSchemaStatusEnum;
   decision_note?: string;
@@ -2001,6 +2011,7 @@ export type PageBlockKindEnum =
   | "resources"
   | "gallery"
   | "results"
+  | "announcements"
   | "rich_text"
   | "cta";
 
@@ -2014,6 +2025,7 @@ export type InputOfPageBlockKindEnum =
   | "resources"
   | "gallery"
   | "results"
+  | "announcements"
   | "rich_text"
   | "cta";
 
@@ -3771,6 +3783,27 @@ export interface Operations {
   };
   delete_api_v1_workspaces_workspace_public_id_events_event_public_id: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: null;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: Announcement;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfAnnouncement;
+    };
+    response: Announcement;
+  };
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements_announcement_public_id: {
+    request: {
+      path: {
+        announcement_public_id: string;
+        event_public_id: string;
+        workspace_public_id: string;
+      };
+    };
     response: null;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_applications: {
@@ -6037,6 +6070,37 @@ export const operations = {
     request_body: false,
     response_kind: "none",
   },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/announcements/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/announcements/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements_announcement_public_id:
+    {
+      method: "DELETE",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/announcements/{announcement_public_id}/",
+      path_params: [
+        "announcement_public_id",
+        "event_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_applications:
     {
       method: "GET",

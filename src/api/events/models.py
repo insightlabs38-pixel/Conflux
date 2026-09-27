@@ -206,6 +206,26 @@ class EventApplication(PublicIdModel):
             raise ValidationError({"invite_code": "Invite code must belong to this event."})
 
 
+class Announcement(PublicIdModel):
+    """An organizer broadcast shown on the public site's live "announcements"
+    block (VS22) -- the same "live, no organizer content of its own"
+    treatment as `schedule`/`gallery`/`results` blocks: this data always
+    reflects real posts, so there is nothing here for a page-builder
+    rewrite to go stale against.
+    """
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="announcements")
+    title = models.CharField(max_length=160)
+    body = models.TextField(max_length=4000, blank=True)
+    posted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+
+
 class ParticipantCheckIn(PublicIdModel):
     """A volunteer's record that a participant physically showed up
     (VS18) -- purely an attendance log, no effect on Membership, teams,

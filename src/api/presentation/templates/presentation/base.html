@@ -7,6 +7,10 @@
   <link rel="stylesheet" href="{% static 'tokens.css' %}">
   <link rel="stylesheet" href="{% static 'components.css' %}">
   <link rel="stylesheet" href="{% static 'presentation.css' %}">
+  <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
+  <link rel="icon" href="{% static 'icon.svg' %}" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="{% static 'icon.svg' %}">
+  <meta name="theme-color" content="#2952cc">
 </head>
 <body class="cx-shell{% if theme == "minimal" %} theme-minimal{% endif %}">
   <a class="cx-skip-link" href="#main-content">Skip to main content</a>
@@ -22,5 +26,13 @@
   <main id="main-content" class="cx-shell__main" tabindex="-1">
     {% block content %}{% endblock %}
   </main>
+  <script>
+    // Optional: an offline shell (VS22). Registration failure (unsupported
+    // browser, blocked by policy) is silently ignored -- the site already
+    // works fully without it, this only adds install/offline support.
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/e/sw.js").catch(() => {});
+    }
+  </script>
 </body>
 </html>

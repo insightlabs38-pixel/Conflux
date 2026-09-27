@@ -96,6 +96,22 @@
         {% endif %}
         <p><a href="{% url 'site-gallery' event.public_id %}">View the full gallery</a></p>
       </section>
+    {% elif block.kind == "announcements" %}
+      <section class="cx-block" aria-label="Announcements">
+        <h2>Announcements</h2>
+        {% if block.live %}
+          <ul>
+            {% for item in block.live %}
+              <li>
+                <strong>{{ item.title }}</strong>
+                {% if item.body %}<p>{{ item.body }}</p>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>No announcements yet.</p>
+        {% endif %}
+      </section>
     {% elif block.kind == "results" %}
       <section class="cx-block" aria-label="Results">
         <h2>Results</h2>

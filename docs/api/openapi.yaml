@@ -1278,6 +1278,103 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/announcements/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Announcement'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Announcement'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Announcement'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Announcement'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Announcement'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/announcements/{announcement_public_id}/:
+    delete:
+      operationId: delete_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements_announcement_public_id
+      parameters:
+      - in: path
+        name: announcement_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/applications/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_applications
@@ -10848,6 +10945,31 @@ components:
       required:
       - criteria
       - rankings
+    Announcement:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 160
+        body:
+          type: string
+          maxLength: 4000
+        posted_by:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - posted_by
+      - public_id
+      - title
     AppealDecisionInputSchema:
       type: object
       properties:
@@ -13803,6 +13925,7 @@ components:
       - resources
       - gallery
       - results
+      - announcements
       - rich_text
       - cta
       type: string
@@ -13816,6 +13939,7 @@ components:
         * `resources` - Resources
         * `gallery` - Gallery
         * `results` - Results
+        * `announcements` - Announcements
         * `rich_text` - Rich text
         * `cta` - Call to action
     PageBlockOrderInput:

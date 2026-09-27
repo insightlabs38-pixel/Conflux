@@ -21,6 +21,7 @@ class PageBlockKind(models.TextChoices):
     RESOURCES = "resources", "Resources"
     GALLERY = "gallery", "Gallery"
     RESULTS = "results", "Results"
+    ANNOUNCEMENTS = "announcements", "Announcements"
     RICH_TEXT = "rich_text", "Rich text"
     CTA = "cta", "Call to action"
 

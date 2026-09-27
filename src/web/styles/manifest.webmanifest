@@ -1,0 +1,16 @@
+{
+  "name": "Conflux event site",
+  "short_name": "Conflux",
+  "description": "Agenda, projects, and announcements for this event.",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2952cc",
+  "icons": [
+    {
+      "src": "/static/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

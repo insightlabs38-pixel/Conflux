@@ -13,9 +13,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from workspaces.models import Role, Workspace
 
-from .models import PUBLICLY_VISIBLE_STATUSES, BasePrize, Event, EventStatus, Track
+from .models import PUBLICLY_VISIBLE_STATUSES, Announcement, BasePrize, Event, EventStatus, Track
 from .schema import EventDashboardSchema, PublicEventSchema
-from .serializers import BasePrizeSerializer, EventSerializer, TrackSerializer
+from .serializers import (
+    AnnouncementSerializer,
+    BasePrizeSerializer,
+    EventSerializer,
+    TrackSerializer,
+)
 
 
 def _save(serializer, *, actor, workspace, action, event=None, diff_fields=None, **save_kwargs):
@@ -340,6 +345,53 @@ class BasePrizeDetailView(OrganizerView):
                 payload={"event": str(prize.event.public_id)},
             )
             prize.delete()
+        return Response(status=204)
+
+
+class AnnouncementListView(OrganizerView):
+    serializer_class = AnnouncementSerializer
+
+    def get(self, request, workspace_public_id, event_public_id):
+        announcements = Announcement.objects.filter(event=self.get_event()).select_related(
+            "posted_by"
+        )
+        return Response(AnnouncementSerializer(announcements, many=True).data)
+
+    @extend_schema(responses={201: AnnouncementSerializer})
+    def post(self, request, workspace_public_id, event_public_id):
+        event = self.get_event()
+        self.ensure_mutable(event)
+        serializer = AnnouncementSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        announcement = _save(
+            serializer,
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="announcement.posted",
+            event=event,
+            event_id=event.id,
+            posted_by=request.user,
+        )
+        return Response(AnnouncementSerializer(announcement).data, status=201)
+
+
+class AnnouncementDetailView(OrganizerView):
+    serializer_class = AnnouncementSerializer
+
+    def delete(self, request, workspace_public_id, event_public_id, announcement_public_id):
+        announcement = get_object_or_404(
+            Announcement, event=self.get_event(), public_id=announcement_public_id
+        )
+        with transaction.atomic():
+            record_mutation(
+                actor=request.user,
+                workspace=self.get_workspace(),
+                action="announcement.deleted",
+                target=announcement,
+                event_type="announcement.deleted",
+                payload={"event": str(announcement.event.public_id)},
+            )
+            announcement.delete()
         return Response(status=204)
 
 

@@ -3,6 +3,8 @@ a raw HTTP GET (no JS) already contains real content -- see DECISIONS.md.
 """
 
 from awards.services import published_awards_for_public_display
+from django.contrib.staticfiles import finders
+from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render
 
 from .models import Page, PageBlockKind
@@ -14,6 +16,19 @@ from .public import (
 )
 from .records import RecordVerificationError, verify_record
 from .technical import render_technical_description
+
+
+def service_worker(request):
+    """Served under `/e/` (not `/static/`) so its default scope covers every
+    event page (VS22) -- a service worker can never control paths outside
+    the directory it's served from without a `Service-Worker-Allowed`
+    header, which plain static-file serving here doesn't set.
+    """
+    path = finders.find("sw.js")
+    if not path:
+        return HttpResponseNotFound()
+    with open(path, "rb") as handle:
+        return HttpResponse(handle.read(), content_type="application/javascript")
 
 
 def verify(request):
@@ -40,6 +55,8 @@ def _blocks_with_live_data(event, page):
             block.live = list(public_projects(event)[: block.config.get("limit", 6)])
         elif block.kind == PageBlockKind.RESULTS:
             block.live = published_awards_for_public_display(event)
+        elif block.kind == PageBlockKind.ANNOUNCEMENTS:
+            block.live = list(event.announcements.select_related("posted_by")[:10])
     return blocks
 
 

@@ -140,6 +140,17 @@ class InputOfAgreementSummarySchema(TypedDict):
     criteria: list[InputOfAgreementCriterionSchema]
     rankings: list[InputOfAgreementRankingSchema]
 
+class Announcement(TypedDict):
+    public_id: str
+    title: str
+    body: NotRequired[str]
+    posted_by: str
+    created_at: str
+
+class InputOfAnnouncement(TypedDict):
+    title: str
+    body: NotRequired[str]
+
 class AppealDecisionInputSchema(TypedDict):
     status: AppealDecisionInputSchemaStatusEnum
     decision_note: NotRequired[str]
@@ -1862,9 +1873,9 @@ class InputOfPageBlock(TypedDict):
     position: NotRequired[int]
     config: NotRequired[Any]
 
-PageBlockKindEnum = Literal['hero', 'tracks', 'prizes', 'schedule', 'sponsors', 'faq', 'resources', 'gallery', 'results', 'rich_text', 'cta']
+PageBlockKindEnum = Literal['hero', 'tracks', 'prizes', 'schedule', 'sponsors', 'faq', 'resources', 'gallery', 'results', 'announcements', 'rich_text', 'cta']
 
-InputOfPageBlockKindEnum = Literal['hero', 'tracks', 'prizes', 'schedule', 'sponsors', 'faq', 'resources', 'gallery', 'results', 'rich_text', 'cta']
+InputOfPageBlockKindEnum = Literal['hero', 'tracks', 'prizes', 'schedule', 'sponsors', 'faq', 'resources', 'gallery', 'results', 'announcements', 'rich_text', 'cta']
 
 class PageBlockOrderInput(TypedDict):
     block_ids: list[str]
@@ -3269,6 +3280,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                          'query_params': [],
                                                                          'request_body': False,
                                                                          'response_kind': 'none'},
+ 'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements_announcement_public_id': {'method': 'DELETE',
+                                                                                                              'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/announcements/{announcement_public_id}/',
+                                                                                                              'path_params': ['announcement_public_id',
+                                                                                                                              'event_public_id',
+                                                                                                                              'workspace_public_id'],
+                                                                                                              'query_params': [],
+                                                                                                              'request_body': False,
+                                                                                                              'response_kind': 'none'},
  'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_sponsors_user_public_id': {'method': 'DELETE',
                                                                                                                         'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/sponsors/{user_public_id}/',
                                                                                                                         'path_params': ['award_public_id',
@@ -3532,6 +3551,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                       'query_params': [],
                                                                       'request_body': False,
                                                                       'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements': {'method': 'GET',
+                                                                                    'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/announcements/',
+                                                                                    'path_params': ['event_public_id',
+                                                                                                    'workspace_public_id'],
+                                                                                    'query_params': [],
+                                                                                    'request_body': False,
+                                                                                    'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_applications': {'method': 'GET',
                                                                                    'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/applications/',
                                                                                    'path_params': ['event_public_id',
@@ -4583,6 +4609,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                        'query_params': [],
                                                        'request_body': True,
                                                        'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements': {'method': 'POST',
+                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/announcements/',
+                                                                                     'path_params': ['event_public_id',
+                                                                                                     'workspace_public_id'],
+                                                                                     'query_params': [],
+                                                                                     'request_body': True,
+                                                                                     'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_applications_application_public_id_decide': {'method': 'POST',
                                                                                                                  'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/applications/{application_public_id}/decide/',
                                                                                                                  'path_params': ['application_public_id',

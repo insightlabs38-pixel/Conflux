@@ -3,6 +3,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from rest_framework import serializers
 
 from .models import (
+    Announcement,
     BasePrize,
     Event,
     EventApplication,
@@ -98,6 +99,16 @@ class BasePrizeSerializer(serializers.ModelSerializer):
         if currency and (len(currency) != 3 or not currency.isalpha()):
             raise serializers.ValidationError({"currency": "Use a three-letter currency code."})
         return attrs
+
+
+class AnnouncementSerializer(serializers.ModelSerializer):
+    public_id = serializers.UUIDField(read_only=True)
+    posted_by = serializers.CharField(source="posted_by.username", read_only=True)
+
+    class Meta:
+        model = Announcement
+        fields = ["public_id", "title", "body", "posted_by", "created_at"]
+        read_only_fields = ["public_id", "posted_by", "created_at"]
 
 
 class RegistrationSettingsSerializer(serializers.ModelSerializer):

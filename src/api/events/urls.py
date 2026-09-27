@@ -79,4 +79,15 @@ urlpatterns = [
         checkin_views.CheckInListView.as_view(),
         name="event-check-in-list",
     ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/announcements/",
+        views.AnnouncementListView.as_view(),
+        name="announcement-list",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>"
+        "/announcements/<uuid:announcement_public_id>/",
+        views.AnnouncementDetailView.as_view(),
+        name="announcement-detail",
+    ),
 ]

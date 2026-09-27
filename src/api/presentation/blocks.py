@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 
 from .sanitize import sanitize_html
 
-LIVE_KINDS = {"tracks", "prizes", "schedule", "gallery", "results"}
+LIVE_KINDS = {"tracks", "prizes", "schedule", "gallery", "results", "announcements"}
 
 
 def _require_str(config, key, *, max_length, required=True):

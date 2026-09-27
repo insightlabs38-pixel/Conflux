@@ -15,6 +15,7 @@ type Kind =
   | "resources"
   | "gallery"
   | "results"
+  | "announcements"
   | "rich_text"
   | "cta";
 type Block = {
@@ -41,10 +42,17 @@ const KIND_LABELS: Record<Kind, string> = {
   resources: "Resources",
   gallery: "Gallery preview (live)",
   results: "Results (live)",
+  announcements: "Announcements (live)",
   rich_text: "Rich text",
   cta: "Call to action",
 };
-const LIVE_KINDS = new Set<Kind>(["tracks", "prizes", "schedule", "results"]);
+const LIVE_KINDS = new Set<Kind>([
+  "tracks",
+  "prizes",
+  "schedule",
+  "results",
+  "announcements",
+]);
 const LIST_FIELDS: Partial<Record<Kind, [string, string]>> = {
   faq: ["question", "answer"],
   sponsors: ["name", "url"],

@@ -80,6 +80,35 @@ class FeedbackEntrySchema(serializers.Serializer):
     submitted_at = serializers.DateTimeField()
 
 
+class CalendarWindowSchema(serializers.Serializer):
+    name = serializers.CharField()
+    opens_at = serializers.DateTimeField(allow_null=True)
+    closes_at = serializers.DateTimeField(allow_null=True)
+    status = serializers.ChoiceField(choices=["not_yet_open", "open", "closed"])
+
+
+class CalendarAssignmentSchema(serializers.Serializer):
+    stage_name = serializers.CharField()
+    plan = serializers.UUIDField()
+    plan_name = serializers.CharField()
+    rubric_published = serializers.BooleanField()
+    assigned_count = serializers.IntegerField()
+    submitted_count = serializers.IntegerField()
+    completion_ratio = serializers.FloatField(allow_null=True)
+
+
+class JudgeCalendarSchema(serializers.Serializer):
+    windows = CalendarWindowSchema(many=True)
+    assignments = CalendarAssignmentSchema(many=True)
+
+
+class JudgeWorkloadRowSchema(serializers.Serializer):
+    judge = serializers.CharField()
+    assigned_count = serializers.IntegerField()
+    submitted_count = serializers.IntegerField()
+    completion_ratio = serializers.FloatField()
+
+
 class PairwiseComparisonInputSchema(serializers.Serializer):
     project_a = serializers.UUIDField()
     project_b = serializers.UUIDField()

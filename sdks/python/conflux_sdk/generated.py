@@ -465,6 +465,40 @@ BasePrizeKind = Literal['cash', 'credit', 'discount', 'subscription', 'hardware'
 
 InputOfBasePrizeKind = Literal['cash', 'credit', 'discount', 'subscription', 'hardware', 'travel', 'service', 'mentorship', 'swag', 'other']
 
+class CalendarAssignmentSchema(TypedDict):
+    stage_name: str
+    plan: str
+    plan_name: str
+    rubric_published: bool
+    assigned_count: int
+    submitted_count: int
+    completion_ratio: float | None
+
+class InputOfCalendarAssignmentSchema(TypedDict):
+    stage_name: str
+    plan: str
+    plan_name: str
+    rubric_published: bool
+    assigned_count: int
+    submitted_count: int
+    completion_ratio: float | None
+
+class CalendarWindowSchema(TypedDict):
+    name: str
+    opens_at: str | None
+    closes_at: str | None
+    status: CalendarWindowSchemaStatusEnum
+
+class InputOfCalendarWindowSchema(TypedDict):
+    name: str
+    opens_at: str | None
+    closes_at: str | None
+    status: InputOfCalendarWindowSchemaStatusEnum
+
+CalendarWindowSchemaStatusEnum = Literal['not_yet_open', 'open', 'closed']
+
+InputOfCalendarWindowSchemaStatusEnum = Literal['not_yet_open', 'open', 'closed']
+
 class CalibrationCriterionSummarySchema(TypedDict):
     criterion_id: str
     scores: dict[str, float]
@@ -1127,6 +1161,14 @@ class InputOfInstantiateInput(TypedDict):
     name: str
     slug: str
 
+class JudgeCalendarSchema(TypedDict):
+    windows: list[CalendarWindowSchema]
+    assignments: list[CalendarAssignmentSchema]
+
+class InputOfJudgeCalendarSchema(TypedDict):
+    windows: list[InputOfCalendarWindowSchema]
+    assignments: list[InputOfCalendarAssignmentSchema]
+
 class JudgeEventSummary(TypedDict):
     public_id: str
     name: str
@@ -1150,6 +1192,18 @@ class InputOfJudgeScoreSchema(TypedDict):
     project: str
     comment: str
     criteria: dict[str, int]
+
+class JudgeWorkloadRowSchema(TypedDict):
+    judge: str
+    assigned_count: int
+    submitted_count: int
+    completion_ratio: float
+
+class InputOfJudgeWorkloadRowSchema(TypedDict):
+    judge: str
+    assigned_count: int
+    submitted_count: int
+    completion_ratio: float
 
 class LaunchChecklistSchema(TypedDict):
     status: str
@@ -2825,6 +2879,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                     'query_params': [],
                                                                                                     'request_body': False,
                                                                                                     'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_calendar': {'method': 'GET',
+                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-calendar/',
+                                                                                     'path_params': ['event_public_id',
+                                                                                                     'workspace_public_id'],
+                                                                                     'query_params': [],
+                                                                                     'request_body': False,
+                                                                                     'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_conflicts': {'method': 'GET',
                                                                                       'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-conflicts/',
                                                                                       'path_params': ['event_public_id',
@@ -2832,6 +2893,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                       'query_params': [],
                                                                                       'request_body': False,
                                                                                       'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_workload': {'method': 'GET',
+                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-workload/',
+                                                                                     'path_params': ['event_public_id',
+                                                                                                     'workspace_public_id'],
+                                                                                     'query_params': [],
+                                                                                     'request_body': False,
+                                                                                     'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_marketplace_matches': {'method': 'GET',
                                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/marketplace/matches/',
                                                                                           'path_params': ['event_public_id',

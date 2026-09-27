@@ -2381,6 +2381,42 @@ paths:
               schema:
                 $ref: '#/components/schemas/FormVersionSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-calendar/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_calendar
+      description: |-
+        S24: one judge's own time-aware view across every plan in the
+        event -- this event's open/closed windows (`TemporalGate`s aren't
+        tied to a specific plan in the data model, so they're reported
+        alongside assignments rather than invented as a per-plan link) plus
+        their assigned/submitted count per plan they actually have candidates
+        in. Reuses `_eligible_candidates` so eligibility (pool strategy,
+        conflicts, prize-pool membership) is exactly what judging itself uses.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JudgeCalendarSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-conflicts/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_conflicts
@@ -2454,6 +2490,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConflictOfInterest'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-workload/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_workload
+      description: |-
+        S24: organizer-only roll-up of every judge's assigned/submitted
+        count across the whole event, sorted least-complete first, so a
+        judge falling behind is the first thing an organizer sees. Never
+        exposes ballot content -- counts only, the same boundary
+        `EvaluationProgressView` already draws for the plan-wide summary.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JudgeWorkloadRowSchema'
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/marketplace/matches/:
     get:
@@ -9267,6 +9339,64 @@ components:
         * `mentorship` - Mentorship
         * `swag` - Swag
         * `other` - Other
+    CalendarAssignmentSchema:
+      type: object
+      properties:
+        stage_name:
+          type: string
+        plan:
+          type: string
+          format: uuid
+        plan_name:
+          type: string
+        rubric_published:
+          type: boolean
+        assigned_count:
+          type: integer
+        submitted_count:
+          type: integer
+        completion_ratio:
+          type: number
+          format: double
+          nullable: true
+      required:
+      - assigned_count
+      - completion_ratio
+      - plan
+      - plan_name
+      - rubric_published
+      - stage_name
+      - submitted_count
+    CalendarWindowSchema:
+      type: object
+      properties:
+        name:
+          type: string
+        opens_at:
+          type: string
+          format: date-time
+          nullable: true
+        closes_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          $ref: '#/components/schemas/CalendarWindowSchemaStatusEnum'
+      required:
+      - closes_at
+      - name
+      - opens_at
+      - status
+    CalendarWindowSchemaStatusEnum:
+      enum:
+      - not_yet_open
+      - open
+      - closed
+      type: string
+      description: |-
+        * `not_yet_open` - not_yet_open
+        * `open` - open
+        * `closed` - closed
     CalibrationCriterionSummarySchema:
       type: object
       properties:
@@ -10380,6 +10510,20 @@ components:
       required:
       - name
       - slug
+    JudgeCalendarSchema:
+      type: object
+      properties:
+        windows:
+          type: array
+          items:
+            $ref: '#/components/schemas/CalendarWindowSchema'
+        assignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/CalendarAssignmentSchema'
+      required:
+      - assignments
+      - windows
     JudgeEventSummary:
       type: object
       properties:
@@ -10414,6 +10558,23 @@ components:
       - comment
       - criteria
       - project
+    JudgeWorkloadRowSchema:
+      type: object
+      properties:
+        judge:
+          type: string
+        assigned_count:
+          type: integer
+        submitted_count:
+          type: integer
+        completion_ratio:
+          type: number
+          format: double
+      required:
+      - assigned_count
+      - completion_ratio
+      - judge
+      - submitted_count
     LaunchChecklistSchema:
       type: object
       properties:

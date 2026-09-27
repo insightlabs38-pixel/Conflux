@@ -518,6 +518,45 @@ export type InputOfBasePrizeKind =
   | "swag"
   | "other";
 
+export type CalendarAssignmentSchema = {
+  stage_name: string;
+  plan: string;
+  plan_name: string;
+  rubric_published: boolean;
+  assigned_count: number;
+  submitted_count: number;
+  completion_ratio: number | null;
+};
+
+export type InputOfCalendarAssignmentSchema = {
+  stage_name: string;
+  plan: string;
+  plan_name: string;
+  rubric_published: boolean;
+  assigned_count: number;
+  submitted_count: number;
+  completion_ratio: number | null;
+};
+
+export type CalendarWindowSchema = {
+  name: string;
+  opens_at: string | null;
+  closes_at: string | null;
+  status: CalendarWindowSchemaStatusEnum;
+};
+
+export type InputOfCalendarWindowSchema = {
+  name: string;
+  opens_at: string | null;
+  closes_at: string | null;
+  status: InputOfCalendarWindowSchemaStatusEnum;
+};
+
+export type CalendarWindowSchemaStatusEnum = "not_yet_open" | "open" | "closed";
+
+export type InputOfCalendarWindowSchemaStatusEnum =
+  "not_yet_open" | "open" | "closed";
+
 export type CalibrationCriterionSummarySchema = {
   criterion_id: string;
   scores: Record<string, number>;
@@ -1212,6 +1251,16 @@ export type InstantiateInput = { name: string; slug: string };
 
 export type InputOfInstantiateInput = { name: string; slug: string };
 
+export type JudgeCalendarSchema = {
+  windows: CalendarWindowSchema[];
+  assignments: CalendarAssignmentSchema[];
+};
+
+export type InputOfJudgeCalendarSchema = {
+  windows: InputOfCalendarWindowSchema[];
+  assignments: InputOfCalendarAssignmentSchema[];
+};
+
 export type JudgeEventSummary = { public_id: string; name: string };
 
 export type InputOfJudgeEventSummary = { public_id: string; name: string };
@@ -1230,6 +1279,20 @@ export type InputOfJudgeScoreSchema = {
   project: string;
   comment: string;
   criteria: Record<string, number>;
+};
+
+export type JudgeWorkloadRowSchema = {
+  judge: string;
+  assigned_count: number;
+  submitted_count: number;
+  completion_ratio: number;
+};
+
+export type InputOfJudgeWorkloadRowSchema = {
+  judge: string;
+  assigned_count: number;
+  submitted_count: number;
+  completion_ratio: number;
 };
 
 export type LaunchChecklistSchema = {
@@ -3170,6 +3233,10 @@ export interface Operations {
     };
     response: FormVersionSchema;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_calendar: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: JudgeCalendarSchema;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_conflicts: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: ConflictOfInterest;
@@ -3180,6 +3247,10 @@ export interface Operations {
       body?: InputOfConflictOfInterest;
     };
     response: ConflictOfInterest;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_workload: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: JudgeWorkloadRowSchema[];
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_marketplace_matches: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -5075,6 +5146,15 @@ export const operations = {
       request_body: false,
       response_kind: "json",
     },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_calendar:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-calendar/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_conflicts:
     {
       method: "GET",
@@ -5091,6 +5171,15 @@ export const operations = {
       path_params: ["event_public_id", "workspace_public_id"],
       query_params: [],
       request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_workload:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-workload/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
       response_kind: "json",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_marketplace_matches:

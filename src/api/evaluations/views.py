@@ -58,6 +58,8 @@ from .schema import (
     CandidateQueueItemSchema,
     EvaluationProgressSchema,
     FeedbackEntrySchema,
+    JudgeCalendarSchema,
+    JudgeWorkloadRowSchema,
     NormalizationInputSchema,
     PairwiseComparisonInputSchema,
     PairwiseNextPairSchema,
@@ -207,6 +209,92 @@ class WorkflowPresetApplyView(OrganizerView):
             },
             status=201,
         )
+
+
+class JudgeCalendarView(OrganizerView):
+    """S24: one judge's own time-aware view across every plan in the
+    event -- this event's open/closed windows (`TemporalGate`s aren't
+    tied to a specific plan in the data model, so they're reported
+    alongside assignments rather than invented as a per-plan link) plus
+    their assigned/submitted count per plan they actually have candidates
+    in. Reuses `_eligible_candidates` so eligibility (pool strategy,
+    conflicts, prize-pool membership) is exactly what judging itself uses.
+    """
+
+    permission_classes = [require_roles(Role.JUDGE, Role.ORGANIZER, Role.ADMIN)]
+
+    @extend_schema(responses=JudgeCalendarSchema)
+    def get(self, request, workspace_public_id, event_public_id):
+        event = self.get_event()
+        windows = [
+            {
+                "name": gate.name,
+                "opens_at": gate.opens_at,
+                "closes_at": gate.closes_at,
+                "status": gate.status(),
+            }
+            for gate in event.temporal_gates.all()
+        ]
+        assignments = []
+        for plan in EvaluationPlan.objects.filter(stage__event=event).select_related("stage"):
+            assigned = _eligible_candidates(plan, request.user).count()
+            if assigned == 0:
+                continue
+            submitted = Ballot.objects.filter(
+                rubric_version__plan=plan, judge=request.user, is_calibration=False
+            ).count()
+            assignments.append(
+                {
+                    "stage_name": plan.stage.name,
+                    "plan": str(plan.public_id),
+                    "plan_name": plan.name,
+                    "rubric_published": plan.current_rubric_version is not None,
+                    "assigned_count": assigned,
+                    "submitted_count": submitted,
+                    "completion_ratio": submitted / assigned,
+                }
+            )
+        return Response({"windows": windows, "assignments": assignments})
+
+
+class JudgeWorkloadView(OrganizerView):
+    """S24: organizer-only roll-up of every judge's assigned/submitted
+    count across the whole event, sorted least-complete first, so a
+    judge falling behind is the first thing an organizer sees. Never
+    exposes ballot content -- counts only, the same boundary
+    `EvaluationProgressView` already draws for the plan-wide summary.
+    """
+
+    @extend_schema(responses=JudgeWorkloadRowSchema(many=True))
+    def get(self, request, workspace_public_id, event_public_id):
+        event = self.get_event()
+        plans = list(EvaluationPlan.objects.filter(stage__event=event).select_related("stage"))
+        judges = User.objects.filter(
+            memberships__workspace=self.get_workspace(), memberships__role=Role.JUDGE
+        ).distinct()
+        rows = []
+        for judge in judges:
+            assigned = 0
+            submitted = 0
+            for plan in plans:
+                plan_assigned = _eligible_candidates(plan, judge).count()
+                if plan_assigned == 0:
+                    continue
+                assigned += plan_assigned
+                submitted += Ballot.objects.filter(
+                    rubric_version__plan=plan, judge=judge, is_calibration=False
+                ).count()
+            if assigned == 0:
+                continue
+            rows.append(
+                {
+                    "judge": judge.username,
+                    "assigned_count": assigned,
+                    "submitted_count": submitted,
+                    "completion_ratio": submitted / assigned,
+                }
+            )
+        return Response(sorted(rows, key=lambda row: row["completion_ratio"]))
 
 
 class EvaluationPlanListView(StageEventMixin):

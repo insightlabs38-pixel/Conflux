@@ -6,6 +6,7 @@ import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 import { Inbox } from "../communications/Inbox";
+import { JudgeCalendarPanel } from "./JudgeCalendarPanel";
 
 type Event = { public_id: string; name: string };
 type Stage = { public_id: string; name: string };
@@ -461,6 +462,13 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
           ))}
         </select>
       </label>
+      {eventId && (
+        <JudgeCalendarPanel
+          key={`calendar-${eventId}`}
+          workspaceId={workspaceId}
+          eventId={eventId}
+        />
+      )}
       {eventId && loadingStages && <LoadingState label="Loading stages…" />}
       {eventId && !loadingStages && !error && stages.length === 0 && (
         <EmptyState title="This event has no stages yet." />

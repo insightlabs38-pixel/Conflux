@@ -19,6 +19,16 @@ urlpatterns = [
         name="workflow-preset-apply",
     ),
     path(
+        f"{_EVENT}/judge-calendar/",
+        views.JudgeCalendarView.as_view(),
+        name="judge-calendar",
+    ),
+    path(
+        f"{_EVENT}/judge-workload/",
+        views.JudgeWorkloadView.as_view(),
+        name="judge-workload",
+    ),
+    path(
         f"{_STAGE}/evaluation-plans/",
         views.EvaluationPlanListView.as_view(),
         name="evaluation-plan-list",

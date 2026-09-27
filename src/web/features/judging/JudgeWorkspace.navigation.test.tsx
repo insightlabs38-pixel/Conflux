@@ -62,16 +62,24 @@ describe("judge navigation", () => {
             { public_id: "e1", name: "First" },
             { public_id: "e2", name: "Second" },
           ]
-        : url.includes("/e1/stages/") && url.endsWith("/stages/")
-          ? [{ public_id: "s1", name: "Final" }]
-          : url.includes("/s1/evaluation-plans/") &&
-              url.endsWith("evaluation-plans/")
-            ? [{ public_id: "p1", name: "Final review" }]
-            : url.endsWith("candidates/")
-              ? [{ project: "project", name: "Old project", status: "pending" }]
-              : url.endsWith("publish-rubric/")
-                ? { number: 1, criteria: [] }
-                : [];
+        : url.endsWith("judge-calendar/")
+          ? { windows: [], assignments: [] }
+          : url.includes("/e1/stages/") && url.endsWith("/stages/")
+            ? [{ public_id: "s1", name: "Final" }]
+            : url.includes("/s1/evaluation-plans/") &&
+                url.endsWith("evaluation-plans/")
+              ? [{ public_id: "p1", name: "Final review" }]
+              : url.endsWith("candidates/")
+                ? [
+                    {
+                      project: "project",
+                      name: "Old project",
+                      status: "pending",
+                    },
+                  ]
+                : url.endsWith("publish-rubric/")
+                  ? { number: 1, criteria: [] }
+                  : [];
       return { ok: true, status: 200, json: async () => body };
     });
     vi.stubGlobal("fetch", fetchMock);
@@ -99,28 +107,30 @@ describe("judge navigation", () => {
         const url = String(input);
         const body = url.endsWith("judge-events/")
           ? [{ public_id: "e1", name: "First" }]
-          : url.endsWith("/stages/")
-            ? [{ public_id: "s1", name: "Final" }]
-            : url.endsWith("evaluation-plans/")
-              ? [{ public_id: "p1", name: "Review" }]
-              : url.endsWith("candidates/")
-                ? [{ project: "project", name: "Project", status: "pending" }]
-                : url.endsWith("publish-rubric/")
-                  ? {
-                      number: 1,
-                      criteria: [
-                        {
-                          id: "impact",
-                          name: "Impact",
-                          min_score: 0,
-                          max_score: 10,
-                          anchors: {},
-                        },
-                      ],
-                    }
-                  : url.endsWith("/draft/")
-                    ? null
-                    : [];
+          : url.endsWith("judge-calendar/")
+            ? { windows: [], assignments: [] }
+            : url.endsWith("/stages/")
+              ? [{ public_id: "s1", name: "Final" }]
+              : url.endsWith("evaluation-plans/")
+                ? [{ public_id: "p1", name: "Review" }]
+                : url.endsWith("candidates/")
+                  ? [{ project: "project", name: "Project", status: "pending" }]
+                  : url.endsWith("publish-rubric/")
+                    ? {
+                        number: 1,
+                        criteria: [
+                          {
+                            id: "impact",
+                            name: "Impact",
+                            min_score: 0,
+                            max_score: 10,
+                            anchors: {},
+                          },
+                        ],
+                      }
+                    : url.endsWith("/draft/")
+                      ? null
+                      : [];
         if (url.endsWith("/draft/") && options?.method === "PUT") {
           return {
             ok: false,

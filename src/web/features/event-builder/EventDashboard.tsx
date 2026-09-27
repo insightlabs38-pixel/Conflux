@@ -5,6 +5,7 @@ import { TeamPanel } from "../teams/TeamPanel";
 import { FormBuilder } from "../form-builder/FormBuilder";
 import { PageBuilder } from "../page-builder/PageBuilder";
 import { EvaluationBuilder } from "../judging/EvaluationBuilder";
+import { JudgeWorkloadPanel } from "../judging/JudgeWorkloadPanel";
 import { CommunityVotingBuilder } from "../community-voting/CommunityVotingBuilder";
 import { WebhooksPanel } from "../integrations/WebhooksPanel";
 import { AwardsPanel } from "../awards/AwardsPanel";
@@ -478,6 +479,11 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
           <FormBuilder workspaceId={workspaceId} eventId={selected.public_id} />
           <PageBuilder workspaceId={workspaceId} eventId={selected.public_id} />
           <EvaluationBuilder
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+          />
+          <JudgeWorkloadPanel
+            key={`judge-workload-${selected.public_id}`}
             workspaceId={workspaceId}
             eventId={selected.public_id}
           />

@@ -180,6 +180,44 @@ class InputOfArchiveOutput(TypedDict):
     awards: list[dict[str, Any]]
     projects: NotRequired[list[dict[str, Any]]]
 
+class ArchivePreviewChange(TypedDict):
+    field: str
+    source: Any
+    imported: Any
+
+class InputOfArchivePreviewChange(TypedDict):
+    field: str
+    source: Any
+    imported: Any
+
+class ArchivePreviewOutput(TypedDict):
+    format_version: int
+    mode: str
+    migration_steps: list[str]
+    deprecations: list[str]
+    event_changes: list[ArchivePreviewChange]
+    sections: list[ArchivePreviewSection]
+    ignored_sections: list[str]
+
+class InputOfArchivePreviewOutput(TypedDict):
+    format_version: int
+    mode: str
+    migration_steps: list[str]
+    deprecations: list[str]
+    event_changes: list[InputOfArchivePreviewChange]
+    sections: list[InputOfArchivePreviewSection]
+    ignored_sections: list[str]
+
+class ArchivePreviewSection(TypedDict):
+    section: str
+    source_count: int
+    imported_count: int
+
+class InputOfArchivePreviewSection(TypedDict):
+    section: str
+    source_count: int
+    imported_count: int
+
 class ArtifactSchema(TypedDict):
     public_id: str
     kind: str
@@ -3981,6 +4019,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                'query_params': [],
                                                                'request_body': True,
                                                                'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_archive_preview': {'method': 'POST',
+                                                                'path': '/api/v1/workspaces/{workspace_public_id}/archive/preview/',
+                                                                'path_params': ['workspace_public_id'],
+                                                                'query_params': [],
+                                                                'request_body': True,
+                                                                'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_event_templates': {'method': 'POST',
                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/event-templates/',
                                                                 'path_params': ['workspace_public_id'],

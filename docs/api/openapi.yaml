@@ -834,6 +834,46 @@ paths:
               schema:
                 $ref: '#/components/schemas/ImportedEventOutput'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/archive/preview/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_archive_preview
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchiveImportInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ArchiveImportInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ArchiveImportInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchivePreviewOutput'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/event-templates/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_event_templates
@@ -9622,6 +9662,67 @@ components:
       - stages
       - temporal_gates
       - tracks
+    ArchivePreviewChange:
+      type: object
+      properties:
+        field:
+          type: string
+        source:
+          nullable: true
+        imported:
+          nullable: true
+      required:
+      - field
+      - imported
+      - source
+    ArchivePreviewOutput:
+      type: object
+      properties:
+        format_version:
+          type: integer
+        mode:
+          type: string
+        migration_steps:
+          type: array
+          items:
+            type: string
+        deprecations:
+          type: array
+          items:
+            type: string
+        event_changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArchivePreviewChange'
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArchivePreviewSection'
+        ignored_sections:
+          type: array
+          items:
+            type: string
+      required:
+      - deprecations
+      - event_changes
+      - format_version
+      - ignored_sections
+      - migration_steps
+      - mode
+      - sections
+    ArchivePreviewSection:
+      type: object
+      properties:
+        section:
+          type: string
+        source_count:
+          type: integer
+        imported_count:
+          type: integer
+      required:
+      - imported_count
+      - section
+      - source_count
     ArtifactSchema:
       type: object
       properties:

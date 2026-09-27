@@ -7,11 +7,20 @@ keep an offline backup of it.
 
 `GET  /api/v1/workspaces/<workspace>/events/<event>/archive/?mode=config|full`
 `POST /api/v1/workspaces/<workspace>/archive/import/` — body `{name, slug, archive}`
+`POST /api/v1/workspaces/<workspace>/archive/preview/` — same body, import preflight
 
 Both require the organizer/admin role on the workspace. Import always creates
 a **new** event — it never overwrites an existing one — starting as an
 unpublished `draft`, with the `name`/`slug` the caller supplies (never the
 source event's, so cloning within one workspace can't collide on slug).
+
+Preview runs the same importer in a transaction that is rolled back. It
+reports event-field changes, per-section source/imported counts, and ignored
+top-level sections without leaving a new event or configuration rows. It
+does not reserve the requested slug: another import can create that slug
+between preview and import. Only v1 is supported; the preview returns a
+named error for another `format_version` rather than claiming an undefined
+migration or deprecation path.
 
 ## `format_version`
 

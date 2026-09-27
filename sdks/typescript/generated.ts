@@ -195,6 +195,50 @@ export type InputOfArchiveOutput = {
   projects?: Record<string, unknown>[];
 };
 
+export type ArchivePreviewChange = {
+  field: string;
+  source: unknown;
+  imported: unknown;
+};
+
+export type InputOfArchivePreviewChange = {
+  field: string;
+  source: unknown;
+  imported: unknown;
+};
+
+export type ArchivePreviewOutput = {
+  format_version: number;
+  mode: string;
+  migration_steps: string[];
+  deprecations: string[];
+  event_changes: ArchivePreviewChange[];
+  sections: ArchivePreviewSection[];
+  ignored_sections: string[];
+};
+
+export type InputOfArchivePreviewOutput = {
+  format_version: number;
+  mode: string;
+  migration_steps: string[];
+  deprecations: string[];
+  event_changes: InputOfArchivePreviewChange[];
+  sections: InputOfArchivePreviewSection[];
+  ignored_sections: string[];
+};
+
+export type ArchivePreviewSection = {
+  section: string;
+  source_count: number;
+  imported_count: number;
+};
+
+export type InputOfArchivePreviewSection = {
+  section: string;
+  source_count: number;
+  imported_count: number;
+};
+
 export type ArtifactSchema = {
   public_id: string;
   kind: string;
@@ -3262,6 +3306,13 @@ export interface Operations {
     };
     response: ImportedEventOutput;
   };
+  post_api_v1_workspaces_workspace_public_id_archive_preview: {
+    request: {
+      path: { workspace_public_id: string };
+      body: InputOfArchiveImportInput;
+    };
+    response: ArchivePreviewOutput;
+  };
   get_api_v1_workspaces_workspace_public_id_event_templates: {
     request: { path: { workspace_public_id: string } };
     response: EventTemplateOutput[];
@@ -5229,6 +5280,14 @@ export const operations = {
   post_api_v1_workspaces_workspace_public_id_archive_import: {
     method: "POST",
     path: "/api/v1/workspaces/{workspace_public_id}/archive/import/",
+    path_params: ["workspace_public_id"],
+    query_params: [],
+    request_body: true,
+    response_kind: "json",
+  },
+  post_api_v1_workspaces_workspace_public_id_archive_preview: {
+    method: "POST",
+    path: "/api/v1/workspaces/{workspace_public_id}/archive/preview/",
     path_params: ["workspace_public_id"],
     query_params: [],
     request_body: true,

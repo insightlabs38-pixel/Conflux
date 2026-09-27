@@ -14,6 +14,11 @@ urlpatterns = [
         name="workspace-archive-import",
     ),
     path(
+        "workspaces/<uuid:workspace_public_id>/archive/preview/",
+        archive_views.WorkspaceArchivePreviewView.as_view(),
+        name="workspace-archive-preview",
+    ),
+    path(
         "workspaces/<uuid:workspace_public_id>/event-templates/",
         template_views.EventTemplateListView.as_view(),
         name="event-template-list",

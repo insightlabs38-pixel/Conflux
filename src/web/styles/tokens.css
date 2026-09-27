@@ -50,3 +50,27 @@
 
   --header-height: 3.5rem;
 }
+
+/* Organizer-selectable presets (PAGE-001), applied to the public event site
+   via `data-theme="dark"` / `.theme-minimal` on <html>/<body>. The React
+   app never sets these today, so it keeps the default palette above. */
+:root[data-theme="dark"] {
+  --color-bg: #12161c;
+  --color-surface: #1b2028;
+  --color-surface-raised: #1b2028;
+  --color-border: #2c333d;
+  --color-border-strong: #3d4551;
+  --color-text: #e8ecf1;
+  --color-text-muted: #a7b0bb;
+  --color-accent: #6d8fff;
+  --color-accent-strong: #92abff;
+  --color-accent-contrast: #0c1220;
+}
+
+.theme-minimal .cx-card {
+  box-shadow: none;
+  border-radius: var(--radius-sm);
+}
+.theme-minimal .cx-shell__header {
+  box-shadow: none;
+}

@@ -1,0 +1,113 @@
+{% extends "presentation/base.html" %}
+{% load presentation_tags %}
+{% block title %}{{ event.name }}{% endblock %}
+{% block content %}
+<article aria-label="{{ event.name }} event page">
+  {% if not blocks %}
+    <h1>{{ event.name }}</h1>
+    {% if event.description %}<p>{{ event.description }}</p>{% endif %}
+  {% endif %}
+  {% for block in blocks %}
+    {% if block.kind == "hero" %}
+      <section class="cx-block cx-hero" aria-label="Hero">
+        <h1>{{ block.config.title }}</h1>
+        {% if block.config.subtitle %}<p>{{ block.config.subtitle }}</p>{% endif %}
+        {% if block.config.cta_label and block.config.cta_href %}
+          <p><a class="cx-button cx-button--primary" href="{{ block.config.cta_href }}">{{ block.config.cta_label }}</a></p>
+        {% endif %}
+      </section>
+    {% elif block.kind == "tracks" %}
+      <section class="cx-block" aria-label="Tracks">
+        <h2>Tracks</h2>
+        {% if block.live %}
+          <ul class="cx-grid">
+            {% for track in block.live %}
+              <li class="cx-card">
+                <h3 class="cx-card__title">{{ track.name }}</h3>
+                {% if track.description %}<p>{{ track.description }}</p>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>Tracks will be announced soon.</p>
+        {% endif %}
+      </section>
+    {% elif block.kind == "prizes" %}
+      <section class="cx-block" aria-label="Prizes">
+        <h2>Prizes</h2>
+        {% if block.live %}
+          <ul class="cx-grid">
+            {% for prize in block.live %}
+              <li class="cx-card">
+                <h3 class="cx-card__title">{{ prize.name }}</h3>
+                <p>{% if prize.kind == "cash" %}{{ prize.currency }} {{ prize.amount }}{% else %}{{ prize.get_kind_display }}{% endif %}</p>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>Prizes will be announced soon.</p>
+        {% endif %}
+      </section>
+    {% elif block.kind == "schedule" %}
+      <section class="cx-block" aria-label="Schedule">
+        <h2>Schedule</h2>
+        <p>{{ event.starts_at }} &ndash; {{ event.ends_at }} ({{ event.timezone }})</p>
+        {% if block.live %}
+          <ol>
+            {% for stage in block.live %}<li>{{ stage.name }}</li>{% endfor %}
+          </ol>
+        {% endif %}
+      </section>
+    {% elif block.kind == "sponsors" %}
+      <section class="cx-block" aria-label="Sponsors">
+        <h2>Sponsors</h2>
+        <ul class="cx-grid">
+          {% for item in block.config.items %}
+            <li class="cx-card">{% if item.url %}<a href="{{ item.url }}">{{ item.name }}</a>{% else %}{{ item.name }}{% endif %}</li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% elif block.kind == "faq" %}
+      <section class="cx-block" aria-label="FAQ">
+        <h2>FAQ</h2>
+        {% for item in block.config.items %}
+          <h3>{{ item.question }}</h3>
+          <p>{{ item.answer }}</p>
+        {% endfor %}
+      </section>
+    {% elif block.kind == "resources" %}
+      <section class="cx-block" aria-label="Resources">
+        <h2>Resources</h2>
+        <ul>
+          {% for item in block.config.items %}<li><a href="{{ item.url }}">{{ item.label }}</a></li>{% endfor %}
+        </ul>
+      </section>
+    {% elif block.kind == "gallery" %}
+      <section class="cx-block" aria-label="Gallery preview">
+        <h2>Projects</h2>
+        {% if block.live %}
+          <ul class="cx-grid">
+            {% for project in block.live %}
+              <li class="cx-card"><a href="{% url 'site-project' event.public_id project.public_id %}">{{ project.name }}</a></li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>No projects have been submitted yet.</p>
+        {% endif %}
+        <p><a href="{% url 'site-gallery' event.public_id %}">View the full gallery</a></p>
+      </section>
+    {% elif block.kind == "results" %}
+      <section class="cx-block" aria-label="Results">
+        <h2>Results</h2>
+        <p>Results will be announced after judging.</p>
+      </section>
+    {% elif block.kind == "rich_text" %}
+      <section class="cx-block" aria-label="Content">{{ block.config.html|sanitize_html }}</section>
+    {% elif block.kind == "cta" %}
+      <section class="cx-block" aria-label="Call to action">
+        <p><a class="cx-button cx-button--primary" href="{{ block.config.href }}">{{ block.config.label }}</a></p>
+      </section>
+    {% endif %}
+  {% endfor %}
+</article>
+{% endblock %}

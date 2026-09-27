@@ -3,6 +3,7 @@ import { PolicyBuilder } from "../policy-builder/PolicyBuilder";
 import { StageBuilder } from "../stage-builder/StageBuilder";
 import { TeamPanel } from "../teams/TeamPanel";
 import { FormBuilder } from "../form-builder/FormBuilder";
+import { PageBuilder } from "../page-builder/PageBuilder";
 
 type Event = {
   public_id: string;
@@ -441,6 +442,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
           />
           <TeamPanel workspaceId={workspaceId} eventId={selected.public_id} />
           <FormBuilder workspaceId={workspaceId} eventId={selected.public_id} />
+          <PageBuilder workspaceId={workspaceId} eventId={selected.public_id} />
         </article>
       )}
     </section>

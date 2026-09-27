@@ -1,0 +1,24 @@
+{% load static %}<!doctype html>
+<html lang="en"{% if theme == "dark" %} data-theme="dark"{% endif %}>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Conflux{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'tokens.css' %}">
+  <link rel="stylesheet" href="{% static 'components.css' %}">
+  <link rel="stylesheet" href="{% static 'presentation.css' %}">
+</head>
+<body class="cx-shell{% if theme == "minimal" %} theme-minimal{% endif %}">
+  <a class="cx-skip-link" href="#main-content">Skip to main content</a>
+  <header class="cx-shell__header">
+    <a class="cx-shell__brand" href="{% url 'site-event' event.public_id %}">{{ event.name }}</a>
+    <nav class="cx-shell__nav" aria-label="Primary">
+      <a href="{% url 'site-event' event.public_id %}">Overview</a>
+      <a href="{% url 'site-gallery' event.public_id %}">Gallery</a>
+    </nav>
+  </header>
+  <main id="main-content" class="cx-shell__main" tabindex="-1">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{% extends "presentation/base.html" %}
+{% block title %}{{ project.name }} &middot; {{ event.name }}{% endblock %}
+{% block content %}
+<article aria-label="{{ project.name }} project page">
+  <p><a href="{% url 'site-gallery' event.public_id %}">&larr; Back to gallery</a></p>
+  <h1>{{ project.name }}</h1>
+  {% if project.team %}<p>{{ project.team.name }}</p>{% endif %}
+  {% if project.description %}<p>{{ project.description }}</p>{% endif %}
+
+  <section aria-label="Artifacts">
+    <h2>Artifacts</h2>
+    {% if artifacts %}
+      <ul class="cx-artifact-list">
+        {% for artifact in artifacts %}
+          <li>{% if artifact.url %}<a href="{{ artifact.url }}">{{ artifact.title }}</a>{% else %}{{ artifact.title }}{% endif %} <span class="cx-badge cx-badge--neutral">{{ artifact.kind }}</span></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No public artifacts.</p>
+    {% endif %}
+  </section>
+
+  <section aria-label="Submissions">
+    <h2>Submissions</h2>
+    <ul>
+      {% for submission in submissions %}
+        <li>{{ submission.stage.name }} &mdash; finalized {{ submission.current_version.finalized_at }} (receipt {{ submission.current_version.public_id }})</li>
+      {% endfor %}
+    </ul>
+  </section>
+</article>
+{% endblock %}

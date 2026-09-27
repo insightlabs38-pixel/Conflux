@@ -1,0 +1,36 @@
+{% extends "presentation/base.html" %}
+{% block title %}Gallery &middot; {{ event.name }}{% endblock %}
+{% block content %}
+<h1>Project gallery</h1>
+<form class="cx-search-form" method="get" role="search" aria-label="Search projects">
+  <label>
+    Search
+    <input type="search" name="q" value="{{ q }}" placeholder="Project name">
+  </label>
+  {% if stages %}
+    <label>
+      Stage
+      <select name="stage">
+        <option value="">All stages</option>
+        {% for stage in stages %}
+          <option value="{{ stage.public_id }}" {% if selected_stage == stage.public_id|stringformat:"s" %}selected{% endif %}>{{ stage.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  {% endif %}
+  <button class="cx-button cx-button--primary" type="submit">Search</button>
+</form>
+{% if projects %}
+  <ul class="cx-grid">
+    {% for project in projects %}
+      <li class="cx-card">
+        <h2 class="cx-card__title"><a href="{% url 'site-project' event.public_id project.public_id %}">{{ project.name }}</a></h2>
+        {% if project.description %}<p>{{ project.description|truncatewords:24 }}</p>{% endif %}
+        {% if project.team %}<p>{{ project.team.name }}</p>{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No projects match yet.</p>
+{% endif %}
+{% endblock %}

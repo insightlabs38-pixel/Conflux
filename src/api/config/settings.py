@@ -38,9 +38,27 @@ INSTALLED_APPS = [
     "projects",
     "forms",
     "artifacts",
+    "presentation",
 ]
 
 MIDDLEWARE = ["django.middleware.common.CommonMiddleware"]
+
+# Presentation (C-B12): the public gallery/event/project pages must show real
+# content in the raw HTTP response with no JS execution (the acceptance
+# checker, and any similarly plain crawler, only ever does that). Those
+# routes are server-rendered Django templates rather than the React SPA.
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {"context_processors": []},
+    }
+]
+
+# Serves the same design tokens/component CSS the React app uses (single
+# source of truth in src/web/styles), so server-rendered pages match it.
+STATICFILES_DIRS = [BASE_DIR.parent / "web" / "styles"]
 
 # Compose and deployed runtimes provide DATABASE_URL; the default keeps
 # bootstrap-style local checks (pytest, manage.py check) working without it.

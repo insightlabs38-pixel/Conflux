@@ -1,9 +1,12 @@
+from core.authz import has_any_role
 from core.models import PublicIdModel
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from events.models import Track
 from projects.models import Project
 from stages.models import Stage
+from workspaces.models import Role
 
 from .rubric import clean_criteria
 
@@ -37,6 +40,20 @@ class EvaluationPlan(PublicIdModel):
     )
     results_visible_to_participants = models.BooleanField(default=False)
     draft_criteria = models.JSONField(default=list, blank=True)
+    pool = models.ForeignKey(
+        "EvaluationPool",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="plans",
+    )
+    active_assignment_version = models.ForeignKey(
+        "AssignmentVersion",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -48,6 +65,10 @@ class EvaluationPlan(PublicIdModel):
     @property
     def current_rubric_version(self):
         return self.rubric_versions.order_by("-number").first()
+
+    def clean(self):
+        if self.pool_id and self.pool.event_id != self.stage.event_id:
+            raise ValidationError({"pool": "Pool must belong to the plan's event."})
 
 
 class RubricVersion(PublicIdModel):
@@ -134,3 +155,120 @@ class BallotResponse(PublicIdModel):
                     )
                 }
             )
+
+
+class EvaluationPool(PublicIdModel):
+    """A named roster of judges an EvaluationPlan draws from (JDG-005)."""
+
+    event = models.ForeignKey(
+        "events.Event", on_delete=models.CASCADE, related_name="evaluation_pools"
+    )
+    name = models.CharField(max_length=160)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["event", "name"], name="unique_evaluation_pool_name")
+        ]
+
+
+class PoolMembership(PublicIdModel):
+    """One judge's membership in a pool, with the tracks they're expert in.
+
+    Track-fit is a real scoring factor in `assignment.compute_assignment`,
+    but nothing upstream (Project/Team) records which track a candidate
+    belongs to yet, so it currently never discriminates -- see JDG-007's
+    docstring and the C-B14 batch report.
+    """
+
+    pool = models.ForeignKey(EvaluationPool, on_delete=models.CASCADE, related_name="memberships")
+    judge = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="pool_memberships"
+    )
+    track_expertise = models.ManyToManyField(Track, blank=True, related_name="expert_judges")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["pool", "judge"], name="unique_pool_membership")
+        ]
+
+    def clean(self):
+        workspace = self.pool.event.workspace
+        if not has_any_role(self.judge, workspace, Role.JUDGE):
+            raise ValidationError({"judge": "User must hold the judge role in this workspace."})
+
+
+class ConflictOfInterest(PublicIdModel):
+    """A judge's declared (or organizer-recorded) recusal from one candidate
+    (JDG-006). Hard-enforced: excluded from assignment and rejected outright
+    if a ballot is attempted anyway (see evaluations.views).
+    """
+
+    event = models.ForeignKey(
+        "events.Event", on_delete=models.CASCADE, related_name="conflicts_of_interest"
+    )
+    judge = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="declared_conflicts"
+    )
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="judge_conflicts")
+    reason = models.TextField(blank=True)
+    declared_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="conflicts_declared"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["judge", "project"], name="unique_conflict_of_interest")
+        ]
+
+    def clean(self):
+        if self.project.event_id != self.event_id:
+            raise ValidationError({"project": "Project must belong to the declared event."})
+
+
+class AssignmentVersion(PublicIdModel):
+    """One immutable, computed assignment run (JDG-008): freezes exactly
+    which judge reviews which candidate, and why (evidence), the same way
+    RubricVersion freezes a rubric.
+    """
+
+    plan = models.ForeignKey(
+        EvaluationPlan, on_delete=models.PROTECT, related_name="assignment_versions"
+    )
+    number = models.PositiveIntegerField()
+    coverage = models.PositiveIntegerField()
+    evidence = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["plan", "number"], name="unique_assignment_version")
+        ]
+        ordering = ["number"]
+
+    def save(self, *args, **kwargs):
+        if self.pk and type(self).objects.filter(pk=self.pk).exists():
+            raise ValidationError("Activated assignment versions are immutable.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("Activated assignment versions are immutable.")
+
+
+class Assignment(PublicIdModel):
+    version = models.ForeignKey(
+        AssignmentVersion, on_delete=models.CASCADE, related_name="assignments"
+    )
+    judge = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="assignments"
+    )
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="assignments")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["version", "judge", "project"], name="unique_assignment"
+            )
+        ]

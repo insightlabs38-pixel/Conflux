@@ -38,6 +38,17 @@ type Award = {
   winners: Winner[];
   components: Component[];
 };
+type Proposal = {
+  search_limited: boolean;
+  awards: {
+    award: string;
+    name: string;
+    existing: string[];
+    proposed: string[];
+    unfilled: number;
+    blocker: string | null;
+  }[];
+};
 
 async function request<T>(
   url: string,
@@ -86,9 +97,11 @@ export function AwardsPanel({
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState("USD");
   const [error, setError] = useState("");
+  const [proposals, setProposals] = useState<Proposal | null>(null);
 
   async function refresh() {
     setAwards(await request<Award[]>(base));
+    setProposals(null);
   }
   useEffect(() => {
     let active = true;
@@ -172,6 +185,15 @@ export function AwardsPanel({
     try {
       await request(`${base}${selected}/publish/`, "POST");
       await refresh();
+    } catch (cause) {
+      setError((cause as Error).message);
+    }
+  }
+
+  async function previewAllocations() {
+    setError("");
+    try {
+      setProposals(await request<Proposal>(base + "proposals/"));
     } catch (cause) {
       setError((cause as Error).message);
     }
@@ -280,6 +302,52 @@ export function AwardsPanel({
         </label>
         <button type="submit">Create award</button>
       </form>
+      <section aria-label="Award allocation preview">
+        <h3>Allocation preview</h3>
+        <p>
+          Suggestions respect eligibility, existing winners, stacking, and
+          conflict groups. Select each winner to save it.
+        </p>
+        <button type="button" onClick={() => void previewAllocations()}>
+          Preview allocations
+        </button>
+        {proposals && (
+          <>
+            {proposals.search_limited && (
+              <p>
+                Search limit reached; these suggestions may leave fillable
+                positions.
+              </p>
+            )}
+            <ul>
+              {proposals.awards.map((item) => (
+                <li key={item.award}>
+                  <strong>{item.name}</strong>
+                  {item.blocker && <span> · {item.blocker}</span>}
+                  {item.proposed.map((projectId) => (
+                    <button
+                      key={projectId}
+                      type="button"
+                      onClick={() => {
+                        setSelected(item.award);
+                        setProject(projectId);
+                      }}
+                    >
+                      Use{" "}
+                      {projects.find(
+                        (candidate) => candidate.public_id === projectId,
+                      )?.name ?? projectId}
+                    </button>
+                  ))}
+                  {item.unfilled > 0 && (
+                    <span> · {item.unfilled} unfilled</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </section>
       <label>
         Manage award{" "}
         <select

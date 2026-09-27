@@ -1397,6 +1397,34 @@ paths:
                 items:
                   $ref: '#/components/schemas/CandidateOutput'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/proposals/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_proposals
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AwardProposalOutput'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/base-prizes/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_base_prizes
@@ -8829,6 +8857,48 @@ components:
       - selection_source
       - winner_count
       - winners
+    AwardProposalItem:
+      type: object
+      properties:
+        award:
+          type: string
+          format: uuid
+        name:
+          type: string
+        existing:
+          type: array
+          items:
+            type: string
+            format: uuid
+        proposed:
+          type: array
+          items:
+            type: string
+            format: uuid
+        unfilled:
+          type: integer
+        blocker:
+          type: string
+          nullable: true
+      required:
+      - award
+      - blocker
+      - existing
+      - name
+      - proposed
+      - unfilled
+    AwardProposalOutput:
+      type: object
+      properties:
+        search_limited:
+          type: boolean
+        awards:
+          type: array
+          items:
+            $ref: '#/components/schemas/AwardProposalItem'
+      required:
+      - awards
+      - search_limited
     Ballot:
       type: object
       properties:

@@ -12,6 +12,7 @@ urlpatterns = [
     ),
     path(_prefix, views.AwardListView.as_view(), name="award-list"),
     path(_prefix + "candidates/", views.AwardCandidateView.as_view(), name="award-candidates"),
+    path(_prefix + "proposals/", views.AwardProposalView.as_view(), name="award-proposals"),
     path(
         _prefix + "<uuid:award_public_id>/winners/",
         views.AwardWinnerView.as_view(),

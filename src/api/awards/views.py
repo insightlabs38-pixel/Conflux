@@ -23,6 +23,7 @@ from .models import (
     SelectionSource,
 )
 from .services import advance_fulfillment, select_winner
+from .solver import propose_allocations
 
 
 class AwardInput(serializers.Serializer):
@@ -120,6 +121,20 @@ class PublicAwardOutput(AwardOutput):
     winners = PublicWinnerOutput(many=True)
 
 
+class AwardProposalItem(serializers.Serializer):
+    award = serializers.UUIDField()
+    name = serializers.CharField()
+    existing = serializers.ListField(child=serializers.UUIDField())
+    proposed = serializers.ListField(child=serializers.UUIDField())
+    unfilled = serializers.IntegerField()
+    blocker = serializers.CharField(allow_null=True)
+
+
+class AwardProposalOutput(serializers.Serializer):
+    search_limited = serializers.BooleanField()
+    awards = AwardProposalItem(many=True)
+
+
 def _winner_data(winner):
     return {
         "public_id": str(winner.public_id),
@@ -184,6 +199,12 @@ def _award_data(award):
 class AwardBase(OrganizerView):
     def get_award(self, award_public_id):
         return get_object_or_404(Award, event=self.get_event(), public_id=award_public_id)
+
+
+class AwardProposalView(AwardBase):
+    @extend_schema(responses=AwardProposalOutput)
+    def get(self, request, workspace_public_id, event_public_id):
+        return Response(propose_allocations(self.get_event()))
 
 
 class AwardListView(AwardBase):

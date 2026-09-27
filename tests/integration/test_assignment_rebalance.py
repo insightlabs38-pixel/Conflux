@@ -183,3 +183,85 @@ def test_rebalance_endpoint_is_organizer_only():
         content_type="application/json",
     )
     assert response.status_code == 403
+
+
+def post_simulation(client, workspace, event, stage, plan, scenarios):
+    return client.post(
+        url(workspace, event, stage, plan, "assignments/dropout-simulation/"),
+        data={"drop_scenarios": scenarios},
+        content_type="application/json",
+    )
+
+
+def test_dropout_simulation_matches_rebalance_without_writing():
+    workspace, event, stage, plan, organizer, judges, projects = make_fixture()
+    RubricVersion.objects.create(plan=plan, number=1, criteria=CRITERIA)
+    active = activate(plan, coverage=2)
+    dropped = judges[0]
+    submitted_project_id = (
+        active.assignments.filter(judge=dropped).values_list("project_id", flat=True).first()
+    )
+    submitted_project = next(p for p in projects if p.id == submitted_project_id)
+    submit_ballot(plan, dropped, submitted_project)
+    client = cookie_client(Session.issue(organizer).token)
+
+    response = post_simulation(
+        client,
+        workspace,
+        event,
+        stage,
+        plan,
+        [[str(dropped.public_id)], [str(j.public_id) for j in judges]],
+    )
+    assert response.status_code == 200, response.content
+    body = response.json()
+    assert body["active_version"] == str(active.public_id)
+    assert body["baseline"] == active.evidence
+    assert len(body["scenarios"]) == 2
+    first, all_dropped = body["scenarios"]
+    assert first["drop_judges"] == [str(dropped.public_id)]
+    assert first["coverage_gaps"] == []
+    assert first["pending_removed"] >= 1
+    assert first["assignments_added"] >= 1
+    assert all_dropped["assignments_added"] == 0
+    assert {gap["project"] for gap in all_dropped["coverage_gaps"]} == {
+        str(p.public_id) for p in projects
+    }
+    assert all_dropped["evidence"]["assignment_count"] == 1
+    assert plan.assignment_versions.count() == 1
+    plan.refresh_from_db()
+    assert plan.active_assignment_version_id == active.id
+
+    frozen = rebalance(plan, drop_judge_ids={dropped.id})
+    assert frozen.evidence["assignment_count"] == first["evidence"]["assignment_count"]
+    assert frozen.evidence["load_by_judge"] == first["evidence"]["load_by_judge"]
+    assert frozen.evidence["connectivity"] == first["evidence"]["connectivity"]
+
+
+def test_dropout_simulation_rejects_invalid_scope_and_plan_state():
+    workspace, event, stage, plan, organizer, judges, _ = make_fixture()
+    owner = cookie_client(Session.issue(organizer).token)
+    judge_id = str(judges[0].public_id)
+    assert post_simulation(owner, workspace, event, stage, plan, [[judge_id]]).status_code == 400
+    activate(plan, coverage=2)
+
+    invalid = [
+        [],
+        [[]],
+        [[judge_id, judge_id]],
+        [["00000000-0000-0000-0000-000000000000"]],
+        [[str(organizer.public_id)]],
+        [[judge_id]] * 11,
+    ]
+    for scenarios in invalid:
+        response = post_simulation(owner, workspace, event, stage, plan, scenarios)
+        assert response.status_code == 400, (scenarios, response.content)
+
+    judge_client = cookie_client(Session.issue(judges[0]).token)
+    assert (
+        post_simulation(judge_client, workspace, event, stage, plan, [[judge_id]]).status_code
+        == 403
+    )
+    plan.pool_strategy = EvaluationPoolStrategy.ALL_JUDGES
+    plan.save(update_fields=["pool_strategy"])
+    assert post_simulation(owner, workspace, event, stage, plan, [[judge_id]]).status_code == 400

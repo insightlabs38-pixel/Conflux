@@ -5738,6 +5738,59 @@ paths:
               schema:
                 $ref: '#/components/schemas/AssignmentCompareSchema'
           description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/dropout-simulation/
+  : post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_dropout_simulation
+      description: Preview assignment fragility with one or more pool judges absent.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DropoutSimulationInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DropoutSimulationInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DropoutSimulationInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DropoutSimulationSchema'
+          description: ''
   ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/preview/
   : post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_preview
@@ -10243,6 +10296,75 @@ components:
       - next_attempt_at
       - public_id
       - status
+    DropoutCoverageGapSchema:
+      type: object
+      properties:
+        project:
+          type: string
+          format: uuid
+        missing:
+          type: integer
+      required:
+      - missing
+      - project
+    DropoutScenarioSchema:
+      type: object
+      properties:
+        drop_judges:
+          type: array
+          items:
+            type: string
+            format: uuid
+        evidence:
+          type: object
+          additionalProperties: {}
+        pending_removed:
+          type: integer
+        assignments_added:
+          type: integer
+        coverage_gaps:
+          type: array
+          items:
+            $ref: '#/components/schemas/DropoutCoverageGapSchema'
+      required:
+      - assignments_added
+      - coverage_gaps
+      - drop_judges
+      - evidence
+      - pending_removed
+    DropoutSimulationInputSchema:
+      type: object
+      properties:
+        drop_scenarios:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
+              format: uuid
+            maxItems: 10
+            minItems: 1
+          maxItems: 10
+          minItems: 1
+      required:
+      - drop_scenarios
+    DropoutSimulationSchema:
+      type: object
+      properties:
+        active_version:
+          type: string
+          format: uuid
+        baseline:
+          type: object
+          additionalProperties: {}
+        scenarios:
+          type: array
+          items:
+            $ref: '#/components/schemas/DropoutScenarioSchema'
+      required:
+      - active_version
+      - baseline
+      - scenarios
     EmailTokenInputSchema:
       type: object
       properties:

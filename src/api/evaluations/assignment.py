@@ -20,6 +20,14 @@ class Pairing:
     project_id: int
 
 
+@dataclass(frozen=True)
+class RebalanceCalculation:
+    pairs: list[Pairing]
+    current_pairs: list[Pairing]
+    candidate_ids: list[int]
+    coverage: int
+
+
 def track_fit(judge_track_ids: set[int], project_track_id: int | None) -> int:
     """1 if the judge's declared expertise covers the candidate's track, else 0."""
     return 1 if project_track_id is not None and project_track_id in judge_track_ids else 0
@@ -137,22 +145,11 @@ def activate(plan, *, coverage: int = 3):
     return version
 
 
-def rebalance(plan, *, drop_judge_ids: set[int] | None = None, coverage: int | None = None):
-    """Recover an ASSIGNED_SUBSET plan's active assignment after judge
-    dropout/backlog (S05).
-
-    Every already-submitted Ballot's pairing is kept forever -- real
-    judging work is never orphaned or silently discarded, regardless of
-    whether that judge is being dropped. Every *pending* (not yet
-    ballotted) pairing for a judge in `drop_judge_ids` is dropped instead,
-    and any project left under `coverage` is topped back up from the
-    remaining pool using the same least-loaded, track-fit-preferred,
-    id-tie-broken rule as `compute_assignment`. The overlap graph is then
-    repaired for connectivity exactly like a fresh activation. Freezes a
-    new AssignmentVersion and makes it active; the previous one is never
-    mutated.
-    """
-    from .models import Assignment, AssignmentVersion, Ballot
+def compute_rebalance(
+    plan, *, drop_judge_ids: set[int] | None = None, coverage: int | None = None
+) -> RebalanceCalculation:
+    """Compute the same pairings a rebalance would freeze, without writing."""
+    from .models import Ballot
 
     if plan.pool_strategy != EvaluationPoolStrategy.ASSIGNED_SUBSET:
         raise ValueError("Rebalancing only applies to the assigned-subset strategy.")
@@ -218,21 +215,56 @@ def rebalance(plan, *, drop_judge_ids: set[int] | None = None, coverage: int | N
             new_pairs, judge_ids=active_judge_ids, load=load, conflicts=conflicts
         )
 
+    return RebalanceCalculation(
+        pairs=new_pairs,
+        current_pairs=current_pairs,
+        candidate_ids=[project.id for project in candidates],
+        coverage=coverage,
+    )
+
+
+def rebalance(plan, *, drop_judge_ids: set[int] | None = None, coverage: int | None = None):
+    """Freeze a new assignment after judge dropout, preserving submitted work."""
+    from .models import AssignmentVersion
+
+    calculation = compute_rebalance(plan, drop_judge_ids=drop_judge_ids, coverage=coverage)
+    drop_judge_ids = set(drop_judge_ids or ())
     next_number = (
         plan.assignment_versions.order_by("-number").values_list("number", flat=True).first() or 0
     ) + 1
-    evidence = build_evidence(plan, new_pairs, coverage=coverage)
-    evidence["rebalanced_from"] = current.number
+    evidence = build_evidence(plan, calculation.pairs, coverage=calculation.coverage)
+    evidence["rebalanced_from"] = plan.active_assignment_version.number
     evidence["dropped_judges"] = sorted(drop_judge_ids)
     version = AssignmentVersion.objects.create(
-        plan=plan, number=next_number, coverage=coverage, evidence=evidence
+        plan=plan, number=next_number, coverage=calculation.coverage, evidence=evidence
     )
     Assignment.objects.bulk_create(
         [
             Assignment(version=version, judge_id=p.judge_id, project_id=p.project_id)
-            for p in new_pairs
+            for p in calculation.pairs
         ]
     )
     plan.active_assignment_version = version
     plan.save(update_fields=["active_assignment_version", "updated_at"])
     return version
+
+
+def simulate_dropout(plan, *, drop_judge_ids: set[int]) -> dict:
+    """Summarize coverage risk and replacement work using rebalance's exact solver."""
+    calculation = compute_rebalance(plan, drop_judge_ids=drop_judge_ids)
+    before = {(p.judge_id, p.project_id) for p in calculation.current_pairs}
+    after = {(p.judge_id, p.project_id) for p in calculation.pairs}
+    coverage_by_project = {project_id: 0 for project_id in calculation.candidate_ids}
+    for pairing in calculation.pairs:
+        if pairing.project_id in coverage_by_project:
+            coverage_by_project[pairing.project_id] += 1
+    return {
+        "evidence": build_evidence(plan, calculation.pairs, coverage=calculation.coverage),
+        "pending_removed": len(before - after),
+        "assignments_added": len(after - before),
+        "coverage_gaps": [
+            {"project_id": project_id, "missing": calculation.coverage - count}
+            for project_id, count in coverage_by_project.items()
+            if count < calculation.coverage
+        ],
+    }

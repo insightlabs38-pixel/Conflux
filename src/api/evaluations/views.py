@@ -23,7 +23,7 @@ from stages.views import StageEventMixin
 from workspaces.models import Role
 
 from . import agreement, anonymize, normalization, pairwise
-from .assignment import activate, rebalance
+from .assignment import activate, rebalance, simulate_dropout
 from .assignment import preview as preview_assignment
 from .eligibility import eligible_projects
 from .hybrid import close_call_project_ids
@@ -63,6 +63,8 @@ from .schema import (
     CalibrationStatusSchema,
     CandidateQueueItemSchema,
     CloseCallsSchema,
+    DropoutSimulationInputSchema,
+    DropoutSimulationSchema,
     EvaluationProgressSchema,
     FeedbackEntrySchema,
     JudgeCalendarSchema,
@@ -873,6 +875,53 @@ class AssignmentRebalanceView(PlanMixin):
             metadata=version.evidence,
         )
         return Response(AssignmentVersionSerializer(version).data, status=201)
+
+
+class AssignmentDropoutSimulationView(PlanMixin):
+    """Preview assignment fragility with one or more pool judges absent."""
+
+    @extend_schema(request=DropoutSimulationInputSchema, responses=DropoutSimulationSchema)
+    def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        schema = DropoutSimulationInputSchema(data=request.data)
+        schema.is_valid(raise_exception=True)
+        scenarios = schema.validated_data["drop_scenarios"]
+        if any(len(set(scenario)) != len(scenario) for scenario in scenarios):
+            raise ValidationError({"drop_scenarios": "A scenario cannot repeat a judge."})
+
+        requested_ids = {public_id for scenario in scenarios for public_id in scenario}
+        pool_judges = {
+            public_id: judge_id
+            for public_id, judge_id in PoolMembership.objects.filter(
+                pool_id=plan.pool_id, judge__public_id__in=requested_ids
+            ).values_list("judge__public_id", "judge_id")
+        }
+        if requested_ids != pool_judges.keys():
+            raise ValidationError({"drop_scenarios": "All judges must belong to this plan's pool."})
+
+        try:
+            results = [
+                simulate_dropout(plan, drop_judge_ids={pool_judges[j] for j in scenario})
+                for scenario in scenarios
+            ]
+        except ValueError as exc:
+            raise ValidationError({"detail": str(exc)}) from exc
+
+        project_ids = {gap["project_id"] for result in results for gap in result["coverage_gaps"]}
+        projects = Project.objects.in_bulk(project_ids)
+        for requested, result in zip(scenarios, results):
+            result["drop_judges"] = [str(public_id) for public_id in requested]
+            result["coverage_gaps"] = [
+                {"project": str(projects[gap["project_id"]].public_id), "missing": gap["missing"]}
+                for gap in result["coverage_gaps"]
+            ]
+        return Response(
+            {
+                "active_version": str(plan.active_assignment_version.public_id),
+                "baseline": plan.active_assignment_version.evidence,
+                "scenarios": results,
+            }
+        )
 
 
 class AssignmentDetailView(PlanMixin):

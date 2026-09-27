@@ -61,6 +61,11 @@ urlpatterns = [
         name="evaluation-plan-assignments-rebalance",
     ),
     path(
+        f"{_PLAN}/assignments/dropout-simulation/",
+        views.AssignmentDropoutSimulationView.as_view(),
+        name="evaluation-plan-assignments-dropout-simulation",
+    ),
+    path(
         f"{_PLAN}/assignments/compare/",
         views.AssignmentCompareView.as_view(),
         name="evaluation-plan-assignments-compare",

@@ -148,6 +148,33 @@ class AssignmentRebalanceInputSchema(serializers.Serializer):
     coverage = serializers.IntegerField(min_value=1, required=False)
 
 
+class DropoutSimulationInputSchema(serializers.Serializer):
+    drop_scenarios = serializers.ListField(
+        child=serializers.ListField(child=serializers.UUIDField(), min_length=1, max_length=10),
+        min_length=1,
+        max_length=10,
+    )
+
+
+class DropoutCoverageGapSchema(serializers.Serializer):
+    project = serializers.UUIDField()
+    missing = serializers.IntegerField()
+
+
+class DropoutScenarioSchema(serializers.Serializer):
+    drop_judges = serializers.ListField(child=serializers.UUIDField())
+    evidence = serializers.DictField()
+    pending_removed = serializers.IntegerField()
+    assignments_added = serializers.IntegerField()
+    coverage_gaps = DropoutCoverageGapSchema(many=True)
+
+
+class DropoutSimulationSchema(serializers.Serializer):
+    active_version = serializers.UUIDField()
+    baseline = serializers.DictField()
+    scenarios = DropoutScenarioSchema(many=True)
+
+
 class AssignmentPreviewInputSchema(serializers.Serializer):
     coverage_options = serializers.ListField(
         child=serializers.IntegerField(min_value=1), required=False

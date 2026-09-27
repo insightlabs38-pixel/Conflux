@@ -914,6 +914,47 @@ export type InputOfDeliveryOutput = {
   completed_at: string | null;
 };
 
+export type DropoutCoverageGapSchema = { project: string; missing: number };
+
+export type InputOfDropoutCoverageGapSchema = {
+  project: string;
+  missing: number;
+};
+
+export type DropoutScenarioSchema = {
+  drop_judges: string[];
+  evidence: Record<string, unknown>;
+  pending_removed: number;
+  assignments_added: number;
+  coverage_gaps: DropoutCoverageGapSchema[];
+};
+
+export type InputOfDropoutScenarioSchema = {
+  drop_judges: string[];
+  evidence: Record<string, unknown>;
+  pending_removed: number;
+  assignments_added: number;
+  coverage_gaps: InputOfDropoutCoverageGapSchema[];
+};
+
+export type DropoutSimulationInputSchema = { drop_scenarios: string[][] };
+
+export type InputOfDropoutSimulationInputSchema = {
+  drop_scenarios: string[][];
+};
+
+export type DropoutSimulationSchema = {
+  active_version: string;
+  baseline: Record<string, unknown>;
+  scenarios: DropoutScenarioSchema[];
+};
+
+export type InputOfDropoutSimulationSchema = {
+  active_version: string;
+  baseline: Record<string, unknown>;
+  scenarios: InputOfDropoutScenarioSchema[];
+};
+
 export type EmailTokenInputSchema = { email: string };
 
 export type InputOfEmailTokenInputSchema = { email: string };
@@ -3982,6 +4023,18 @@ export interface Operations {
     };
     response: AssignmentCompareSchema;
   };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_dropout_simulation: {
+    request: {
+      path: {
+        event_public_id: string;
+        plan_public_id: string;
+        stage_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfDropoutSimulationInputSchema;
+    };
+    response: DropoutSimulationSchema;
+  };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_preview: {
     request: {
       path: {
@@ -6219,6 +6272,20 @@ export const operations = {
     {
       method: "POST",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/compare/",
+      path_params: [
+        "event_public_id",
+        "plan_public_id",
+        "stage_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_dropout_simulation:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/dropout-simulation/",
       path_params: [
         "event_public_id",
         "plan_public_id",

@@ -833,6 +833,44 @@ class InputOfDeliveryOutput(TypedDict):
     created_at: str
     completed_at: str | None
 
+class DropoutCoverageGapSchema(TypedDict):
+    project: str
+    missing: int
+
+class InputOfDropoutCoverageGapSchema(TypedDict):
+    project: str
+    missing: int
+
+class DropoutScenarioSchema(TypedDict):
+    drop_judges: list[str]
+    evidence: dict[str, Any]
+    pending_removed: int
+    assignments_added: int
+    coverage_gaps: list[DropoutCoverageGapSchema]
+
+class InputOfDropoutScenarioSchema(TypedDict):
+    drop_judges: list[str]
+    evidence: dict[str, Any]
+    pending_removed: int
+    assignments_added: int
+    coverage_gaps: list[InputOfDropoutCoverageGapSchema]
+
+class DropoutSimulationInputSchema(TypedDict):
+    drop_scenarios: list[list[str]]
+
+class InputOfDropoutSimulationInputSchema(TypedDict):
+    drop_scenarios: list[list[str]]
+
+class DropoutSimulationSchema(TypedDict):
+    active_version: str
+    baseline: dict[str, Any]
+    scenarios: list[DropoutScenarioSchema]
+
+class InputOfDropoutSimulationSchema(TypedDict):
+    active_version: str
+    baseline: dict[str, Any]
+    scenarios: list[InputOfDropoutScenarioSchema]
+
 class EmailTokenInputSchema(TypedDict):
     email: str
 
@@ -4041,6 +4079,15 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                                   'query_params': [],
                                                                                                                                                   'request_body': True,
                                                                                                                                                   'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_dropout_simulation': {'method': 'POST',
+                                                                                                                                                             'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/dropout-simulation/',
+                                                                                                                                                             'path_params': ['event_public_id',
+                                                                                                                                                                             'plan_public_id',
+                                                                                                                                                                             'stage_public_id',
+                                                                                                                                                                             'workspace_public_id'],
+                                                                                                                                                             'query_params': [],
+                                                                                                                                                             'request_body': True,
+                                                                                                                                                             'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_preview': {'method': 'POST',
                                                                                                                                                   'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/preview/',
                                                                                                                                                   'path_params': ['event_public_id',

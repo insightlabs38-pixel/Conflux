@@ -14,7 +14,7 @@ from .marketplace import (
     available_profiles,
     matches_for_opening,
     matches_for_participant,
-    normalize_skills,
+    normalize_tags,
     opening_data,
     profile_data,
 )
@@ -57,12 +57,17 @@ class MyMarketplaceProfileView(MarketplaceView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         try:
-            skills = normalize_skills(data["skills"])
+            skills = normalize_tags(data["skills"], field="skills")
+            roles = normalize_tags(data.get("roles", []), field="roles")
+            interests = normalize_tags(data.get("interests", []), field="interests")
             with transaction.atomic():
                 profile, _ = MarketplaceProfile.objects.select_for_update().get_or_create(
                     event=self.get_event(), user=request.user
                 )
                 profile.skills = skills
+                profile.roles = roles
+                profile.interests = interests
+                profile.availability_hours_per_week = data.get("availability_hours_per_week")
                 profile.bio = data.get("bio", "")
                 profile.visible = data["visible"]
                 profile.full_clean()
@@ -100,7 +105,11 @@ class TeamOpeningListView(MarketplaceView):
             get_object_or_404(Project, team=team, public_id=project_id) if project_id else None
         )
         try:
-            data["desired_skills"] = normalize_skills(data["desired_skills"])
+            data["desired_skills"] = normalize_tags(data["desired_skills"], field="desired_skills")
+            data["desired_roles"] = normalize_tags(
+                data.get("desired_roles", []), field="desired_roles"
+            )
+            data["interests"] = normalize_tags(data.get("interests", []), field="interests")
             with transaction.atomic():
                 opening = TeamOpening(team=team, project=project, **data)
                 opening.full_clean()
@@ -146,7 +155,15 @@ class TeamOpeningDetailView(MarketplaceView):
                         else None
                     )
                 if "desired_skills" in data:
-                    data["desired_skills"] = normalize_skills(data["desired_skills"])
+                    data["desired_skills"] = normalize_tags(
+                        data["desired_skills"], field="desired_skills"
+                    )
+                if "desired_roles" in data:
+                    data["desired_roles"] = normalize_tags(
+                        data["desired_roles"], field="desired_roles"
+                    )
+                if "interests" in data:
+                    data["interests"] = normalize_tags(data["interests"], field="interests")
                 for key, value in data.items():
                     setattr(opening, key, value)
                 opening.full_clean()

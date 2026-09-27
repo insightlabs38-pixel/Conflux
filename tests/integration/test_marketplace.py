@@ -37,20 +37,42 @@ def client_for(user):
     return client
 
 
-def save_profile(client, base, *, skills, visible):
+def save_profile(
+    client, base, *, skills, visible, roles=None, interests=None, availability_hours_per_week=None
+):
     return client.put(
         base + "profile/",
-        {"skills": skills, "bio": "Available", "visible": visible},
+        {
+            "skills": skills,
+            "roles": roles or [],
+            "interests": interests or [],
+            "availability_hours_per_week": availability_hours_per_week,
+            "bio": "Available",
+            "visible": visible,
+        },
         content_type="application/json",
     )
 
 
-def create_opening(client, base, *, project=None, title="Builder", skills=None):
+def create_opening(
+    client,
+    base,
+    *,
+    project=None,
+    title="Builder",
+    skills=None,
+    roles=None,
+    interests=None,
+    min_availability_hours_per_week=None,
+):
     return client.post(
         base + "openings/",
         {
             "title": title,
             "desired_skills": skills or ["python"],
+            "desired_roles": roles or [],
+            "interests": interests or [],
+            "min_availability_hours_per_week": min_availability_hours_per_week,
             "project": str(project.public_id) if project else None,
         },
         content_type="application/json",
@@ -122,6 +144,67 @@ def test_matching_ranks_overlap_and_hides_teamed_profiles():
     TeamMembership.objects.create(team=team, user=seeker)
     assert captain_client.get(base + f"openings/{opening_id}/matches/").json() == []
     assert seeker_client.get(base + "matches/").json() == []
+
+
+def test_advanced_matching_ranks_roles_over_skills_and_surfaces_availability():
+    _, event, captain, seeker, _, _, team, project, base = setup_case()
+    captain_client = client_for(captain)
+    seeker_client = client_for(seeker)
+    save_profile(
+        seeker_client,
+        base,
+        skills=["python"],
+        roles=["backend"],
+        interests=["climate"],
+        availability_hours_per_week=20,
+        visible=True,
+    )
+    create_opening(
+        captain_client,
+        base,
+        project=project,
+        title="Any Coder",
+        skills=["python", "django"],
+    )
+    create_opening(
+        captain_client,
+        base,
+        title="Backend Lead",
+        skills=["python"],
+        roles=["backend"],
+        interests=["climate"],
+        min_availability_hours_per_week=10,
+    )
+    create_opening(
+        captain_client,
+        base,
+        title="Backend Remote",
+        skills=["python"],
+        roles=["backend"],
+        interests=["climate"],
+        min_availability_hours_per_week=40,
+    )
+
+    matches = seeker_client.get(base + "matches/").json()
+    assert [item["title"] for item in matches] == [
+        "Backend Lead",
+        "Backend Remote",
+        "Any Coder",
+    ]
+    lead, remote, any_coder = matches
+    assert lead["matched_roles"] == ["backend"]
+    assert lead["matched_interests"] == ["climate"]
+    assert lead["availability_compatible"] is True
+    assert remote["availability_compatible"] is False
+    assert any_coder["matched_roles"] == []
+    assert any_coder["matched_skills"] == ["python"]
+    assert any_coder["availability_compatible"] is None
+
+    lead_id = [item for item in matches if item["title"] == "Backend Lead"][0]["public_id"]
+    candidates = captain_client.get(base + f"openings/{lead_id}/matches/").json()
+    assert candidates[0]["username"] == "seeker"
+    assert candidates[0]["matched_roles"] == ["backend"]
+    assert candidates[0]["availability_compatible"] is True
 
 
 def test_full_and_team_locked_openings_disappear_from_discovery():

@@ -40,6 +40,11 @@ class TeamInviteSerializer(serializers.ModelSerializer):
 
 class MarketplaceProfileInput(serializers.Serializer):
     skills = serializers.ListField(child=serializers.CharField(), max_length=10)
+    roles = serializers.ListField(child=serializers.CharField(), max_length=10, required=False)
+    interests = serializers.ListField(child=serializers.CharField(), max_length=10, required=False)
+    availability_hours_per_week = serializers.IntegerField(
+        min_value=0, max_value=168, required=False, allow_null=True
+    )
     bio = serializers.CharField(required=False, allow_blank=True, max_length=500)
     visible = serializers.BooleanField()
 
@@ -49,9 +54,15 @@ class MarketplaceProfileSchema(serializers.Serializer):
     user = serializers.UUIDField()
     username = serializers.CharField()
     skills = serializers.ListField(child=serializers.CharField())
+    roles = serializers.ListField(child=serializers.CharField())
+    interests = serializers.ListField(child=serializers.CharField())
+    availability_hours_per_week = serializers.IntegerField(allow_null=True)
     bio = serializers.CharField()
     visible = serializers.BooleanField()
     matched_skills = serializers.ListField(child=serializers.CharField(), required=False)
+    matched_roles = serializers.ListField(child=serializers.CharField(), required=False)
+    matched_interests = serializers.ListField(child=serializers.CharField(), required=False)
+    availability_compatible = serializers.BooleanField(required=False, allow_null=True)
 
 
 class MyMarketplaceProfileResponse(serializers.Serializer):
@@ -62,6 +73,13 @@ class TeamOpeningInput(serializers.Serializer):
     title = serializers.CharField(max_length=120)
     description = serializers.CharField(required=False, allow_blank=True, max_length=500)
     desired_skills = serializers.ListField(child=serializers.CharField(), max_length=10)
+    desired_roles = serializers.ListField(
+        child=serializers.CharField(), max_length=10, required=False
+    )
+    interests = serializers.ListField(child=serializers.CharField(), max_length=10, required=False)
+    min_availability_hours_per_week = serializers.IntegerField(
+        min_value=0, max_value=168, required=False, allow_null=True
+    )
     project = serializers.UUIDField(required=False, allow_null=True)
     is_open = serializers.BooleanField(required=False)
 
@@ -75,5 +93,11 @@ class TeamOpeningSchema(serializers.Serializer):
     title = serializers.CharField()
     description = serializers.CharField()
     desired_skills = serializers.ListField(child=serializers.CharField())
+    desired_roles = serializers.ListField(child=serializers.CharField())
+    interests = serializers.ListField(child=serializers.CharField())
+    min_availability_hours_per_week = serializers.IntegerField(allow_null=True)
     is_open = serializers.BooleanField()
     matched_skills = serializers.ListField(child=serializers.CharField())
+    matched_roles = serializers.ListField(child=serializers.CharField(), required=False)
+    matched_interests = serializers.ListField(child=serializers.CharField(), required=False)
+    availability_compatible = serializers.BooleanField(required=False, allow_null=True)

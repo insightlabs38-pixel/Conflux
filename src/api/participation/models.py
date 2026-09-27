@@ -112,6 +112,13 @@ class MarketplaceProfile(PublicIdModel):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="marketplace_profiles"
     )
     skills = models.JSONField(default=list, blank=True)
+    # VS16: participant-controlled matching signals beyond skills, all
+    # optional -- an unset roles/interests list or a null availability
+    # simply contributes no match evidence rather than excluding the
+    # profile from any listing (additive, same as `skills` always was).
+    roles = models.JSONField(default=list, blank=True)
+    interests = models.JSONField(default=list, blank=True)
+    availability_hours_per_week = models.PositiveSmallIntegerField(null=True, blank=True)
     bio = models.CharField(max_length=500, blank=True)
     visible = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True)
@@ -134,6 +141,9 @@ class TeamOpening(PublicIdModel):
     title = models.CharField(max_length=120)
     description = models.CharField(max_length=500, blank=True)
     desired_skills = models.JSONField(default=list, blank=True)
+    desired_roles = models.JSONField(default=list, blank=True)
+    interests = models.JSONField(default=list, blank=True)
+    min_availability_hours_per_week = models.PositiveSmallIntegerField(null=True, blank=True)
     is_open = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

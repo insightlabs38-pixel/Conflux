@@ -9,9 +9,15 @@ type Profile = {
   public_id: string;
   username: string;
   skills: string[];
+  roles?: string[];
+  interests?: string[];
+  availability_hours_per_week?: number | null;
   bio: string;
   visible: boolean;
   matched_skills?: string[];
+  matched_roles?: string[];
+  matched_interests?: string[];
+  availability_compatible?: boolean | null;
 };
 type Opening = {
   public_id: string;
@@ -20,9 +26,35 @@ type Opening = {
   title: string;
   description: string;
   desired_skills: string[];
+  desired_roles?: string[];
+  interests?: string[];
+  min_availability_hours_per_week?: number | null;
   matched_skills: string[];
+  matched_roles?: string[];
+  matched_interests?: string[];
+  availability_compatible?: boolean | null;
   is_open: boolean;
 };
+
+function matchSummary(item: {
+  matched_skills?: string[];
+  matched_roles?: string[];
+  matched_interests?: string[];
+  availability_compatible?: boolean | null;
+}): string {
+  const parts: string[] = [];
+  if (item.matched_roles?.length)
+    parts.push(`roles: ${item.matched_roles.join(", ")}`);
+  parts.push(
+    `skills: ${item.matched_skills?.length ? item.matched_skills.join(", ") : "none"}`,
+  );
+  if (item.matched_interests?.length)
+    parts.push(`interests: ${item.matched_interests.join(", ")}`);
+  if (item.availability_compatible === true) parts.push("availability: fits");
+  else if (item.availability_compatible === false)
+    parts.push("availability: below the ask");
+  return parts.join(" · ");
+}
 
 async function request<T>(
   url: string,
@@ -40,11 +72,17 @@ async function request<T>(
   return response.json() as Promise<T>;
 }
 
-function skills(value: string): string[] {
+function parseTags(value: string): string[] {
   return value
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function parseHours(value: string): number | null {
+  if (value.trim() === "") return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
 export function MarketplacePanel({
@@ -64,11 +102,17 @@ export function MarketplacePanel({
   const [candidates, setCandidates] = useState<Profile[]>([]);
   const [selectedOpening, setSelectedOpening] = useState("");
   const [profileSkills, setProfileSkills] = useState("");
+  const [profileRoles, setProfileRoles] = useState("");
+  const [profileInterests, setProfileInterests] = useState("");
+  const [profileAvailability, setProfileAvailability] = useState("");
   const [bio, setBio] = useState("");
   const [visible, setVisible] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [desiredSkills, setDesiredSkills] = useState("");
+  const [desiredRoles, setDesiredRoles] = useState("");
+  const [openingInterests, setOpeningInterests] = useState("");
+  const [minAvailability, setMinAvailability] = useState("");
   const [projectId, setProjectId] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -84,6 +128,11 @@ export function MarketplacePanel({
     setStatus(nextStatus);
     setProfile(nextProfile.profile);
     setProfileSkills(nextProfile.profile?.skills.join(", ") ?? "");
+    setProfileRoles(nextProfile.profile?.roles?.join(", ") ?? "");
+    setProfileInterests(nextProfile.profile?.interests?.join(", ") ?? "");
+    setProfileAvailability(
+      nextProfile.profile?.availability_hours_per_week?.toString() ?? "",
+    );
     setBio(nextProfile.profile?.bio ?? "");
     setVisible(nextProfile.profile?.visible ?? false);
     setMatches(nextMatches);
@@ -134,7 +183,10 @@ export function MarketplacePanel({
     event.preventDefault();
     void run(async () => {
       await request<Profile>(market + "profile/", "PUT", {
-        skills: skills(profileSkills),
+        skills: parseTags(profileSkills),
+        roles: parseTags(profileRoles),
+        interests: parseTags(profileInterests),
+        availability_hours_per_week: parseHours(profileAvailability),
         bio,
         visible,
       });
@@ -148,12 +200,18 @@ export function MarketplacePanel({
       await request<Opening>(market + "openings/", "POST", {
         title,
         description,
-        desired_skills: skills(desiredSkills),
+        desired_skills: parseTags(desiredSkills),
+        desired_roles: parseTags(desiredRoles),
+        interests: parseTags(openingInterests),
+        min_availability_hours_per_week: parseHours(minAvailability),
         project: projectId || null,
       });
       setTitle("");
       setDescription("");
       setDesiredSkills("");
+      setDesiredRoles("");
+      setOpeningInterests("");
+      setMinAvailability("");
       setProjectId("");
       await refresh();
     });
@@ -193,6 +251,30 @@ export function MarketplacePanel({
           <input
             value={profileSkills}
             onChange={(event) => setProfileSkills(event.target.value)}
+          />
+        </label>
+        <label>
+          Roles you'd take, separated by commas{" "}
+          <input
+            value={profileRoles}
+            onChange={(event) => setProfileRoles(event.target.value)}
+          />
+        </label>
+        <label>
+          Interests, separated by commas{" "}
+          <input
+            value={profileInterests}
+            onChange={(event) => setProfileInterests(event.target.value)}
+          />
+        </label>
+        <label>
+          Hours per week you're available{" "}
+          <input
+            type="number"
+            min={0}
+            max={168}
+            value={profileAvailability}
+            onChange={(event) => setProfileAvailability(event.target.value)}
           />
         </label>
         <label>
@@ -277,6 +359,30 @@ export function MarketplacePanel({
               />
             </label>
             <label>
+              Role tags wanted, separated by commas{" "}
+              <input
+                value={desiredRoles}
+                onChange={(event) => setDesiredRoles(event.target.value)}
+              />
+            </label>
+            <label>
+              Interests, separated by commas{" "}
+              <input
+                value={openingInterests}
+                onChange={(event) => setOpeningInterests(event.target.value)}
+              />
+            </label>
+            <label>
+              Minimum hours per week expected{" "}
+              <input
+                type="number"
+                min={0}
+                max={168}
+                value={minAvailability}
+                onChange={(event) => setMinAvailability(event.target.value)}
+              />
+            </label>
+            <label>
               Description{" "}
               <textarea
                 value={description}
@@ -293,7 +399,7 @@ export function MarketplacePanel({
                 {candidates.map((item) => (
                   <li key={item.public_id}>
                     {item.username} · {item.skills.join(", ")} · matching:{" "}
-                    {item.matched_skills?.join(", ") || "none"}
+                    {matchSummary(item)}
                   </li>
                 ))}
               </ul>
@@ -314,7 +420,7 @@ export function MarketplacePanel({
                 <li key={opening.public_id}>
                   <strong>{opening.title}</strong> · {opening.team_name}
                   {opening.project_name ? ` · ${opening.project_name}` : ""} ·
-                  matching skills: {opening.matched_skills.join(", ") || "none"}
+                  matching: {matchSummary(opening)}
                   <p>{opening.description}</p>
                 </li>
               ))}

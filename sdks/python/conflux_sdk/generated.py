@@ -1486,11 +1486,17 @@ class InputOfLoginResponseSchema(TypedDict):
 
 class MarketplaceProfileInput(TypedDict):
     skills: list[str]
+    roles: NotRequired[list[str]]
+    interests: NotRequired[list[str]]
+    availability_hours_per_week: NotRequired[int | None]
     bio: NotRequired[str]
     visible: bool
 
 class InputOfMarketplaceProfileInput(TypedDict):
     skills: list[str]
+    roles: NotRequired[list[str]]
+    interests: NotRequired[list[str]]
+    availability_hours_per_week: NotRequired[int | None]
     bio: NotRequired[str]
     visible: bool
 
@@ -1499,18 +1505,30 @@ class MarketplaceProfileSchema(TypedDict):
     user: str
     username: str
     skills: list[str]
+    roles: list[str]
+    interests: list[str]
+    availability_hours_per_week: int | None
     bio: str
     visible: bool
     matched_skills: NotRequired[list[str]]
+    matched_roles: NotRequired[list[str]]
+    matched_interests: NotRequired[list[str]]
+    availability_compatible: NotRequired[bool | None]
 
 class InputOfMarketplaceProfileSchema(TypedDict):
     public_id: str
     user: str
     username: str
     skills: list[str]
+    roles: list[str]
+    interests: list[str]
+    availability_hours_per_week: int | None
     bio: str
     visible: bool
     matched_skills: NotRequired[list[str]]
+    matched_roles: NotRequired[list[str]]
+    matched_interests: NotRequired[list[str]]
+    availability_compatible: NotRequired[bool | None]
 
 class MembershipInputSchema(TypedDict):
     username: str
@@ -1978,6 +1996,9 @@ class PatchedTeamOpeningInput(TypedDict):
     title: NotRequired[str]
     description: NotRequired[str]
     desired_skills: NotRequired[list[str]]
+    desired_roles: NotRequired[list[str]]
+    interests: NotRequired[list[str]]
+    min_availability_hours_per_week: NotRequired[int | None]
     project: NotRequired[str | None]
     is_open: NotRequired[bool]
 
@@ -1985,6 +2006,9 @@ class InputOfPatchedTeamOpeningInput(TypedDict):
     title: NotRequired[str]
     description: NotRequired[str]
     desired_skills: NotRequired[list[str]]
+    desired_roles: NotRequired[list[str]]
+    interests: NotRequired[list[str]]
+    min_availability_hours_per_week: NotRequired[int | None]
     project: NotRequired[str | None]
     is_open: NotRequired[bool]
 
@@ -2778,6 +2802,9 @@ class TeamOpeningInput(TypedDict):
     title: str
     description: NotRequired[str]
     desired_skills: list[str]
+    desired_roles: NotRequired[list[str]]
+    interests: NotRequired[list[str]]
+    min_availability_hours_per_week: NotRequired[int | None]
     project: NotRequired[str | None]
     is_open: NotRequired[bool]
 
@@ -2785,6 +2812,9 @@ class InputOfTeamOpeningInput(TypedDict):
     title: str
     description: NotRequired[str]
     desired_skills: list[str]
+    desired_roles: NotRequired[list[str]]
+    interests: NotRequired[list[str]]
+    min_availability_hours_per_week: NotRequired[int | None]
     project: NotRequired[str | None]
     is_open: NotRequired[bool]
 
@@ -2797,8 +2827,14 @@ class TeamOpeningSchema(TypedDict):
     title: str
     description: str
     desired_skills: list[str]
+    desired_roles: list[str]
+    interests: list[str]
+    min_availability_hours_per_week: int | None
     is_open: bool
     matched_skills: list[str]
+    matched_roles: NotRequired[list[str]]
+    matched_interests: NotRequired[list[str]]
+    availability_compatible: NotRequired[bool | None]
 
 class InputOfTeamOpeningSchema(TypedDict):
     public_id: str
@@ -2809,8 +2845,14 @@ class InputOfTeamOpeningSchema(TypedDict):
     title: str
     description: str
     desired_skills: list[str]
+    desired_roles: list[str]
+    interests: list[str]
+    min_availability_hours_per_week: int | None
     is_open: bool
     matched_skills: list[str]
+    matched_roles: NotRequired[list[str]]
+    matched_interests: NotRequired[list[str]]
+    availability_compatible: NotRequired[bool | None]
 
 class TemporalGate(TypedDict):
     public_id: str

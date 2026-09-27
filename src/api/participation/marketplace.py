@@ -6,17 +6,19 @@ from workspaces.models import Membership, Role
 from .models import MAX_TEAM_SIZE, MarketplaceProfile, TeamMembership, TeamOpening
 
 
-def normalize_skills(values):
+def normalize_tags(values, *, field):
     if not isinstance(values, list) or len(values) > 10:
-        raise ValidationError({"skills": "Provide at most 10 skills."})
-    skills = []
+        raise ValidationError({field: f"Provide at most 10 {field}."})
+    tags = []
     for value in values:
         if not isinstance(value, str) or not 1 <= len(value.strip()) <= 30:
-            raise ValidationError({"skills": "Each skill must contain 1 to 30 characters."})
-        skill = value.strip().casefold()
-        if skill not in skills:
-            skills.append(skill)
-    return skills
+            raise ValidationError(
+                {field: f"Each entry in {field} must contain 1 to 30 characters."}
+            )
+        tag = value.strip().casefold()
+        if tag not in tags:
+            tags.append(tag)
+    return tags
 
 
 def available_profiles(event):
@@ -53,19 +55,32 @@ def available_openings(event):
     ]
 
 
+def _availability_compatible(candidate_hours, required_hours):
+    """None means "unknown" (one side never specified a number) -- never
+    treated as a mismatch, only as the absence of that evidence.
+    """
+    if candidate_hours is None or required_hours is None:
+        return None
+    return candidate_hours >= required_hours
+
+
 def profile_data(profile):
     return {
         "public_id": str(profile.public_id),
         "user": str(profile.user.public_id),
         "username": profile.user.username,
         "skills": profile.skills,
+        "roles": profile.roles,
+        "interests": profile.interests,
+        "availability_hours_per_week": profile.availability_hours_per_week,
         "bio": profile.bio,
         "visible": profile.visible,
     }
 
 
-def opening_data(opening, *, match_skills=()):
-    overlap = sorted(set(opening.desired_skills) & set(match_skills))
+def opening_data(
+    opening, *, match_skills=(), match_roles=(), match_interests=(), candidate_hours=None
+):
     return {
         "public_id": str(opening.public_id),
         "team": str(opening.team.public_id),
@@ -75,9 +90,31 @@ def opening_data(opening, *, match_skills=()):
         "title": opening.title,
         "description": opening.description,
         "desired_skills": opening.desired_skills,
+        "desired_roles": opening.desired_roles,
+        "interests": opening.interests,
+        "min_availability_hours_per_week": opening.min_availability_hours_per_week,
         "is_open": opening.is_open,
-        "matched_skills": overlap,
+        "matched_skills": sorted(set(opening.desired_skills) & set(match_skills)),
+        "matched_roles": sorted(set(opening.desired_roles) & set(match_roles)),
+        "matched_interests": sorted(set(opening.interests) & set(match_interests)),
+        "availability_compatible": _availability_compatible(
+            candidate_hours, opening.min_availability_hours_per_week
+        ),
     }
+
+
+def _match_sort_key(item):
+    # Roles are the strongest signal (closest to "can do this job"), then
+    # skills, then shared interests; availability never excludes a match,
+    # it only breaks ties among candidates tied on every other signal --
+    # an explicit incompatibility sorts after an unknown one.
+    availability = item["availability_compatible"]
+    return (
+        -len(item["matched_roles"]),
+        -len(item["matched_skills"]),
+        -len(item["matched_interests"]),
+        0 if availability is not False else 1,
+    )
 
 
 def matches_for_participant(event, user):
@@ -85,9 +122,21 @@ def matches_for_participant(event, user):
         return []
     profile = MarketplaceProfile.objects.filter(event=event, user=user).first()
     match_skills = profile.skills if profile else ()
+    match_roles = profile.roles if profile else ()
+    match_interests = profile.interests if profile else ()
+    candidate_hours = profile.availability_hours_per_week if profile else None
     return sorted(
-        [opening_data(item, match_skills=match_skills) for item in available_openings(event)],
-        key=lambda item: (-len(item["matched_skills"]), item["team_name"], item["title"]),
+        [
+            opening_data(
+                item,
+                match_skills=match_skills,
+                match_roles=match_roles,
+                match_interests=match_interests,
+                candidate_hours=candidate_hours,
+            )
+            for item in available_openings(event)
+        ],
+        key=lambda item: (*_match_sort_key(item), item["team_name"], item["title"]),
     )
 
 
@@ -95,7 +144,12 @@ def matches_for_opening(event, opening):
     profiles = [profile_data(item) for item in available_profiles(event)]
     for profile in profiles:
         profile["matched_skills"] = sorted(set(profile["skills"]) & set(opening.desired_skills))
+        profile["matched_roles"] = sorted(set(profile["roles"]) & set(opening.desired_roles))
+        profile["matched_interests"] = sorted(set(profile["interests"]) & set(opening.interests))
+        profile["availability_compatible"] = _availability_compatible(
+            profile["availability_hours_per_week"], opening.min_availability_hours_per_week
+        )
     return sorted(
         profiles,
-        key=lambda item: (-len(item["matched_skills"]), item["username"]),
+        key=lambda item: (*_match_sort_key(item), item["username"]),
     )

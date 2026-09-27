@@ -1587,12 +1587,18 @@ export type InputOfLoginResponseSchema = { user: InputOfUserSummarySchema };
 
 export type MarketplaceProfileInput = {
   skills: string[];
+  roles?: string[];
+  interests?: string[];
+  availability_hours_per_week?: number | null;
   bio?: string;
   visible: boolean;
 };
 
 export type InputOfMarketplaceProfileInput = {
   skills: string[];
+  roles?: string[];
+  interests?: string[];
+  availability_hours_per_week?: number | null;
   bio?: string;
   visible: boolean;
 };
@@ -1602,9 +1608,15 @@ export type MarketplaceProfileSchema = {
   user: string;
   username: string;
   skills: string[];
+  roles: string[];
+  interests: string[];
+  availability_hours_per_week: number | null;
   bio: string;
   visible: boolean;
   matched_skills?: string[];
+  matched_roles?: string[];
+  matched_interests?: string[];
+  availability_compatible?: boolean | null;
 };
 
 export type InputOfMarketplaceProfileSchema = {
@@ -1612,9 +1624,15 @@ export type InputOfMarketplaceProfileSchema = {
   user: string;
   username: string;
   skills: string[];
+  roles: string[];
+  interests: string[];
+  availability_hours_per_week: number | null;
   bio: string;
   visible: boolean;
   matched_skills?: string[];
+  matched_roles?: string[];
+  matched_interests?: string[];
+  availability_compatible?: boolean | null;
 };
 
 export type MembershipInputSchema = { username: string; role: string };
@@ -2139,6 +2157,9 @@ export type PatchedTeamOpeningInput = {
   title?: string;
   description?: string;
   desired_skills?: string[];
+  desired_roles?: string[];
+  interests?: string[];
+  min_availability_hours_per_week?: number | null;
   project?: string | null;
   is_open?: boolean;
 };
@@ -2147,6 +2168,9 @@ export type InputOfPatchedTeamOpeningInput = {
   title?: string;
   description?: string;
   desired_skills?: string[];
+  desired_roles?: string[];
+  interests?: string[];
+  min_availability_hours_per_week?: number | null;
   project?: string | null;
   is_open?: boolean;
 };
@@ -3017,6 +3041,9 @@ export type TeamOpeningInput = {
   title: string;
   description?: string;
   desired_skills: string[];
+  desired_roles?: string[];
+  interests?: string[];
+  min_availability_hours_per_week?: number | null;
   project?: string | null;
   is_open?: boolean;
 };
@@ -3025,6 +3052,9 @@ export type InputOfTeamOpeningInput = {
   title: string;
   description?: string;
   desired_skills: string[];
+  desired_roles?: string[];
+  interests?: string[];
+  min_availability_hours_per_week?: number | null;
   project?: string | null;
   is_open?: boolean;
 };
@@ -3038,8 +3068,14 @@ export type TeamOpeningSchema = {
   title: string;
   description: string;
   desired_skills: string[];
+  desired_roles: string[];
+  interests: string[];
+  min_availability_hours_per_week: number | null;
   is_open: boolean;
   matched_skills: string[];
+  matched_roles?: string[];
+  matched_interests?: string[];
+  availability_compatible?: boolean | null;
 };
 
 export type InputOfTeamOpeningSchema = {
@@ -3051,8 +3087,14 @@ export type InputOfTeamOpeningSchema = {
   title: string;
   description: string;
   desired_skills: string[];
+  desired_roles: string[];
+  interests: string[];
+  min_availability_hours_per_week: number | null;
   is_open: boolean;
   matched_skills: string[];
+  matched_roles?: string[];
+  matched_interests?: string[];
+  availability_compatible?: boolean | null;
 };
 
 export type TemporalGate = {

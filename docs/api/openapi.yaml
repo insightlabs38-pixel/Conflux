@@ -12347,6 +12347,21 @@ components:
           items:
             type: string
           maxItems: 10
+        roles:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+        interests:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+        availability_hours_per_week:
+          type: integer
+          maximum: 168
+          minimum: 0
+          nullable: true
         bio:
           type: string
           maxLength: 500
@@ -12370,6 +12385,17 @@ components:
           type: array
           items:
             type: string
+        roles:
+          type: array
+          items:
+            type: string
+        interests:
+          type: array
+          items:
+            type: string
+        availability_hours_per_week:
+          type: integer
+          nullable: true
         bio:
           type: string
         visible:
@@ -12378,9 +12404,23 @@ components:
           type: array
           items:
             type: string
+        matched_roles:
+          type: array
+          items:
+            type: string
+        matched_interests:
+          type: array
+          items:
+            type: string
+        availability_compatible:
+          type: boolean
+          nullable: true
       required:
+      - availability_hours_per_week
       - bio
+      - interests
       - public_id
+      - roles
       - skills
       - user
       - username
@@ -13178,6 +13218,21 @@ components:
           items:
             type: string
           maxItems: 10
+        desired_roles:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+        interests:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+        min_availability_hours_per_week:
+          type: integer
+          maximum: 168
+          minimum: 0
+          nullable: true
         project:
           type: string
           format: uuid
@@ -14610,6 +14665,21 @@ components:
           items:
             type: string
           maxItems: 10
+        desired_roles:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+        interests:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+        min_availability_hours_per_week:
+          type: integer
+          maximum: 168
+          minimum: 0
+          nullable: true
         project:
           type: string
           format: uuid
@@ -14645,17 +14715,42 @@ components:
           type: array
           items:
             type: string
+        desired_roles:
+          type: array
+          items:
+            type: string
+        interests:
+          type: array
+          items:
+            type: string
+        min_availability_hours_per_week:
+          type: integer
+          nullable: true
         is_open:
           type: boolean
         matched_skills:
           type: array
           items:
             type: string
+        matched_roles:
+          type: array
+          items:
+            type: string
+        matched_interests:
+          type: array
+          items:
+            type: string
+        availability_compatible:
+          type: boolean
+          nullable: true
       required:
       - description
+      - desired_roles
       - desired_skills
+      - interests
       - is_open
       - matched_skills
+      - min_availability_hours_per_week
       - project
       - project_name
       - public_id

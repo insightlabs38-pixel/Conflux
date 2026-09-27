@@ -158,3 +158,49 @@ class Comment(PublicIdModel):
             raise ValidationError({"body": "Comment cannot be empty."})
         if len(self.body) > 2000:
             raise ValidationError({"body": "Comment must be at most 2000 characters."})
+
+
+class RateLimitEvent(models.Model):
+    """One counted attempt against a rate limit (ABUSE-001). `key_hash`
+    never stores the raw identifier (an email or client IP) -- only its
+    hash -- so this table is useless for anything except counting recent
+    attempts, which is all it's for.
+    """
+
+    scope = models.CharField(max_length=64)
+    key_hash = models.CharField(max_length=64, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+
+class AbuseSignalType(models.TextChoices):
+    RATE_LIMIT_EXCEEDED = "rate_limit_exceeded", "Rate limit exceeded"
+    TOKEN_REPLAY_ATTEMPT = "token_replay_attempt", "Token replay attempt"
+    DUPLICATE_VOTE_ATTEMPT = "duplicate_vote_attempt", "Duplicate vote attempt"
+    INVALID_TOKEN_ATTEMPT = "invalid_token_attempt", "Invalid token attempt"
+
+
+class AbuseSignal(PublicIdModel):
+    """A concrete, explainable fact about a suspicious attempt (ABUSE-002) --
+    deliberately not a numeric fraud score. `detail` is a plain-English
+    sentence an organizer can read without decoding anything; `evidence` is
+    the specific counts/facts backing it, never raw voter-identifying data
+    (no email, no token value).
+    """
+
+    plan = models.ForeignKey(VotingPlan, on_delete=models.CASCADE, related_name="abuse_signals")
+    signal_type = models.CharField(max_length=32, choices=AbuseSignalType.choices)
+    detail = models.CharField(max_length=300)
+    evidence = models.JSONField(default=dict, blank=True)
+    occurred_at = models.DateTimeField(auto_now_add=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="abuse_signals_resolved",
+    )
+    resolution_note = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-occurred_at"]

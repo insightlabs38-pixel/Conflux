@@ -2,10 +2,10 @@ from datetime import timedelta
 
 from accounts.authentication import CookieSessionAuthentication
 from audit.services import record_mutation
-from core.authz import has_any_role
+from core.authz import has_any_role, is_workspace_member
 from core.permissions import require_roles
 from django.core.exceptions import ValidationError as ModelValidationError
-from django.db import IntegrityError
+from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -19,7 +19,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from workspaces.models import Role, Workspace
 
-from . import voting
+from . import abuse, voting
 from .models import Comment, CommentVisibility, VoteIdentityMode, VoteToken, VotingPlan
 from .ordering import ordered_candidates
 from .results import results_visible_to, tally
@@ -68,14 +68,15 @@ class VoteTokenBatchView(VotingPlanMixin):
         count = request.data.get("count", 1)
         if not isinstance(count, int) or isinstance(count, bool) or not (1 <= count <= 500):
             raise ValidationError({"count": "Must be an integer from 1 to 500."})
-        tokens = VoteToken.objects.bulk_create([VoteToken(plan=plan) for _ in range(count)])
-        record_mutation(
-            actor=request.user,
-            workspace=self.get_workspace(),
-            action="vote_tokens.issued",
-            target=plan,
-            metadata={"count": count},
-        )
+        with transaction.atomic():
+            tokens = VoteToken.objects.bulk_create([VoteToken(plan=plan) for _ in range(count)])
+            record_mutation(
+                actor=request.user,
+                workspace=self.get_workspace(),
+                action="vote_tokens.issued",
+                target=plan,
+                metadata={"count": count},
+            )
         return Response(VoteTokenSerializer(tokens, many=True).data, status=201)
 
 
@@ -96,7 +97,10 @@ class PublicVotingMixin(APIView):
     permission_classes = [AllowAny]
 
     def get_event(self):
-        return get_object_or_404(Event, public_id=self.kwargs["event_public_id"])
+        query = {"public_id": self.kwargs["event_public_id"]}
+        if self.kwargs.get("workspace_public_id"):
+            query["workspace__public_id"] = self.kwargs["workspace_public_id"]
+        return get_object_or_404(Event, **query)
 
     def get_plan(self):
         return get_object_or_404(VotingPlan, event=self.get_event())
@@ -139,19 +143,26 @@ class VoteCreateView(PublicVotingMixin):
         project = get_object_or_404(
             Project, event=self.get_event(), public_id=request.data.get("project")
         )
+        client_ip = abuse.client_identifier(request)
         try:
             if plan.identity_mode == VoteIdentityMode.AUTHENTICATED:
                 if not request.user.is_authenticated:
                     raise PermissionDenied("Sign in to vote in this event.")
-                vote = voting.cast_authenticated_vote(plan, request.user, project)
+                if not is_workspace_member(request.user, plan.event.workspace):
+                    raise PermissionDenied("You are not a member of this event's workspace.")
+                vote = voting.cast_authenticated_vote(
+                    plan, request.user, project, client_ip=client_ip
+                )
             elif plan.identity_mode == VoteIdentityMode.EMAIL_LINK:
-                vote = voting.cast_email_vote(plan, request.data.get("token", ""), project)
+                vote = voting.cast_email_vote(
+                    plan, request.data.get("token", ""), project, client_ip=client_ip
+                )
             else:
-                vote = voting.cast_token_vote(plan, request.data.get("token", ""), project)
+                vote = voting.cast_token_vote(
+                    plan, request.data.get("token", ""), project, client_ip=client_ip
+                )
         except ModelValidationError as exc:
             raise _as_drf_validation_error(exc) from exc
-        except IntegrityError as exc:
-            raise ValidationError({"detail": "You have already voted in this event."}) from exc
         return Response({"public_id": str(vote.public_id)}, status=201)
 
 
@@ -159,17 +170,24 @@ class RequestEmailVoteTokenView(PublicVotingMixin):
     def post(self, request, event_public_id, workspace_public_id=None):
         plan = self.get_plan()
         email = request.data.get("email", "")
+        client_ip = abuse.client_identifier(request)
         try:
-            token = voting.request_email_vote_token(plan, email)
+            if plan.identity_mode != VoteIdentityMode.EMAIL_LINK:
+                raise ModelValidationError("This event does not use email-link voting.")
+            voting.require_open(plan)
+            email = voting.normalize_vote_email(email)
+            voting.enforce_email_request_limits(plan, email, client_ip)
+            with transaction.atomic():
+                token = voting.request_email_vote_token(plan, email, limits_checked=True)
+                record_mutation(
+                    actor=request.user,
+                    workspace=self.get_event().workspace,
+                    action="email_vote_token.requested",
+                    target=plan,
+                    metadata={},
+                )
         except ModelValidationError as exc:
             raise _as_drf_validation_error(exc) from exc
-        record_mutation(
-            actor=request.user,
-            workspace=self.get_event().workspace,
-            action="email_vote_token.requested",
-            target=plan,
-            metadata={"email": email},
-        )
         # No email transport is configured in this project (see
         # EmailVoteToken's docstring): returning the token directly is the
         # explicit, documented stand-in for "and then we email it to them".

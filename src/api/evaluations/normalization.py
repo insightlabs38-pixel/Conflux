@@ -125,9 +125,9 @@ def run(plan, *, ridge_lambda: float = 1.0):
     assignment.activate().
     """
     from .models import NormalizationRun
-    from .scoring import ballot_observations
+    from .scoring import scored_ballots
 
-    observations = ballot_observations(plan)
+    observations, ballots = scored_ballots(plan)
     result = estimate_judge_effects(observations, ridge_lambda=ridge_lambda)
     project_ids = sorted({p for _, p, _ in observations}, key=str)
     next_number = (
@@ -144,6 +144,15 @@ def run(plan, *, ridge_lambda: float = 1.0):
             }
             for project_id in project_ids
         },
+        "ballots": [
+            {
+                **ballot,
+                "adjusted_score": adjusted_score(
+                    result, ballot["judge_id"], ballot["weighted_score"]
+                ),
+            }
+            for ballot in ballots
+        ],
     }
     normalization_run = NormalizationRun.objects.create(
         plan=plan,

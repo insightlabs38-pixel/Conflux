@@ -1928,6 +1928,84 @@ class ProjectRecordInput(TypedDict):
 class InputOfProjectRecordInput(TypedDict):
     project: str
 
+class ProvenanceAwardSchema(TypedDict):
+    award: str
+    name: str
+    winner: str
+    rank_at_selection: int | None
+    override_reason: str
+    published: bool
+
+class InputOfProvenanceAwardSchema(TypedDict):
+    award: str
+    name: str
+    winner: str
+    rank_at_selection: int | None
+    override_reason: str
+    published: bool
+
+class ProvenanceBallotSchema(TypedDict):
+    ballot: str
+    judge: str
+    rubric_version: str
+    responses: list[ProvenanceCriterionSchema]
+    weighted_score: float
+    judge_effect: float
+    adjusted_score: float
+    submitted_at: str
+
+class InputOfProvenanceBallotSchema(TypedDict):
+    ballot: str
+    judge: str
+    rubric_version: str
+    responses: list[InputOfProvenanceCriterionSchema]
+    weighted_score: float
+    judge_effect: float
+    adjusted_score: float
+    submitted_at: str
+
+class ProvenanceCriterionSchema(TypedDict):
+    criterion_id: str
+    criterion_name: str
+    weight: float
+    score: float
+
+class InputOfProvenanceCriterionSchema(TypedDict):
+    criterion_id: str
+    criterion_name: str
+    weight: float
+    score: float
+
+class ProvenanceSchema(TypedDict):
+    project: str
+    project_name: str
+    rank: int
+    raw_score: float | None
+    final_score: float
+    tie_break: int | None
+    normalization_run: str
+    ridge_lambda: float
+    converged: bool
+    grand_mean: float
+    ballot_snapshot_available: bool
+    ballots: list[ProvenanceBallotSchema] | None
+    awards: list[ProvenanceAwardSchema]
+
+class InputOfProvenanceSchema(TypedDict):
+    project: str
+    project_name: str
+    rank: int
+    raw_score: float | None
+    final_score: float
+    tie_break: int | None
+    normalization_run: str
+    ridge_lambda: float
+    converged: bool
+    grand_mean: float
+    ballot_snapshot_available: bool
+    ballots: list[InputOfProvenanceBallotSchema] | None
+    awards: list[InputOfProvenanceAwardSchema]
+
 class PublicAwardOutput(TypedDict):
     public_id: str
     name: str
@@ -3395,6 +3473,16 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                       'query_params': [],
                                                                                                                                       'request_body': False,
                                                                                                                                       'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_provenance_project_public_id': {'method': 'GET',
+                                                                                                                                                          'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/provenance/{project_public_id}/',
+                                                                                                                                                          'path_params': ['event_public_id',
+                                                                                                                                                                          'plan_public_id',
+                                                                                                                                                                          'project_public_id',
+                                                                                                                                                                          'stage_public_id',
+                                                                                                                                                                          'workspace_public_id'],
+                                                                                                                                                          'query_params': [],
+                                                                                                                                                          'request_body': False,
+                                                                                                                                                          'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_publish_rubric': {'method': 'GET',
                                                                                                                                             'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/publish-rubric/',
                                                                                                                                             'path_params': ['event_public_id',

@@ -35,6 +35,46 @@ type Progress = {
   latest_normalization_run: { number: number; converged: boolean } | null;
   results_published: boolean;
 };
+type RankedProject = {
+  rank: number;
+  project: string | null;
+  project_name: string | null;
+};
+type Provenance = {
+  project_name: string;
+  rank: number;
+  raw_score: number | null;
+  final_score: number;
+  tie_break: number | null;
+  normalization_run: string;
+  ridge_lambda: number;
+  converged: boolean;
+  grand_mean: number;
+  ballot_snapshot_available: boolean;
+  ballots:
+    | {
+        ballot: string;
+        judge: string;
+        rubric_version: string;
+        responses: {
+          criterion_id: string;
+          criterion_name: string;
+          weight: number;
+          score: number;
+        }[];
+        weighted_score: number;
+        judge_effect: number;
+        adjusted_score: number;
+      }[]
+    | null;
+  awards: {
+    award: string;
+    name: string;
+    rank_at_selection: number | null;
+    override_reason: string;
+    published: boolean;
+  }[];
+};
 
 function message(value: unknown): string {
   if (typeof value === "string") return value;
@@ -251,11 +291,164 @@ function ProgressPanel({ planUrl }: { planUrl: string }) {
         {busy ? "Computing…" : "Compute normalization and publish results"}
       </Button>
       {progress.results_published && (
-        <p>
-          Results published. <a href={planUrl + "results.csv"}>Download CSV</a>
-        </p>
+        <>
+          <p>
+            Results published.{" "}
+            <a href={planUrl + "results.csv"}>Download CSV</a>
+          </p>
+          <ProvenanceExplorer planUrl={planUrl} />
+        </>
       )}
     </div>
+  );
+}
+
+function ProvenanceExplorer({ planUrl }: { planUrl: string }) {
+  const [projects, setProjects] = useState<RankedProject[]>([]);
+  const [selected, setSelected] = useState("");
+  const [provenance, setProvenance] = useState<Provenance | null>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    request<RankedProject[]>(planUrl + "results/")
+      .then((rows) => {
+        if (!active) return;
+        setProjects(rows);
+        setSelected(rows.find((row) => row.project)?.project ?? "");
+      })
+      .catch((cause: unknown) => {
+        if (active) setError(message(cause));
+      });
+    return () => {
+      active = false;
+    };
+  }, [planUrl]);
+
+  useEffect(() => {
+    if (!selected) return;
+    let active = true;
+    setProvenance(null);
+    request<Provenance>(planUrl + `provenance/${selected}/`)
+      .then((entry) => {
+        if (active) setProvenance(entry);
+      })
+      .catch((cause: unknown) => {
+        if (active) setError(message(cause));
+      });
+    return () => {
+      active = false;
+    };
+  }, [planUrl, selected]);
+
+  return (
+    <section aria-label="Judging provenance">
+      <h4>Judging provenance</h4>
+      {error && <p role="alert">{error}</p>}
+      {projects.length === 0 ? (
+        <p>No scored projects in this published run.</p>
+      ) : (
+        <label>
+          Project{" "}
+          <select
+            aria-label="Project provenance"
+            value={selected}
+            onChange={(event) => {
+              setError("");
+              setSelected(event.target.value);
+            }}
+          >
+            {projects
+              .filter((row) => row.project)
+              .map((row) => (
+                <option key={row.project} value={row.project ?? ""}>
+                  #{row.rank} {row.project_name}
+                </option>
+              ))}
+          </select>
+        </label>
+      )}
+      {provenance && (
+        <>
+          <p>
+            #{provenance.rank} {provenance.project_name}: raw{" "}
+            {provenance.raw_score?.toFixed(2) ?? "—"}, normalized{" "}
+            {provenance.final_score.toFixed(2)}
+            {provenance.tie_break !== null &&
+              ` · tie-break ${provenance.tie_break}`}
+            .
+          </p>
+          <p>
+            Normalization run {provenance.normalization_run} · judge-bias
+            strength {provenance.ridge_lambda} · grand mean{" "}
+            {provenance.grand_mean.toFixed(2)} ·{" "}
+            {provenance.converged ? "converged" : "not converged"}
+          </p>
+          {!provenance.ballot_snapshot_available ? (
+            <p>Authored-ballot snapshot unavailable for this earlier run.</p>
+          ) : provenance.ballots?.length ? (
+            <div
+              className="cx-scroll-region"
+              role="region"
+              aria-label="Authored ballot evidence"
+              tabIndex={0}
+            >
+              <table>
+                <thead>
+                  <tr>
+                    <th>Judge</th>
+                    <th>Authored scores</th>
+                    <th>Weighted</th>
+                    <th>Judge effect</th>
+                    <th>Adjusted</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {provenance.ballots.map((ballot) => (
+                    <tr key={ballot.ballot}>
+                      <td>
+                        <code>{ballot.judge}</code>
+                      </td>
+                      <td>
+                        {ballot.responses
+                          .map(
+                            (response) =>
+                              `${response.criterion_name}: ${response.score} (weight ${response.weight})`,
+                          )
+                          .join(", ")}
+                      </td>
+                      <td>{ballot.weighted_score.toFixed(2)}</td>
+                      <td>{ballot.judge_effect.toFixed(2)}</td>
+                      <td>{ballot.adjusted_score.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p>No authored ballots were included in this run.</p>
+          )}
+          <h5>Award evidence</h5>
+          {provenance.awards.length ? (
+            <ul>
+              {provenance.awards.map((award) => (
+                <li key={award.award}>
+                  {award.name}: selected from rank{" "}
+                  {award.rank_at_selection ?? "—"} ·{" "}
+                  {award.published ? "published" : "draft"}
+                  {award.override_reason &&
+                    ` · Override: ${award.override_reason}`}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p>
+              No evaluation award selection references this run and project.
+            </p>
+          )}
+        </>
+      )}
+    </section>
   );
 }
 

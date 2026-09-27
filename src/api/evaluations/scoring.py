@@ -17,16 +17,47 @@ def ballot_observations(plan):
     """[(judge_id, project_id, weighted_score), ...] for every ballot ever
     cast under any of `plan`'s rubric versions.
     """
+    observations, _ = scored_ballots(plan)
+    return observations
+
+
+def scored_ballots(plan):
+    """Return observations and a frozen authored-score trace from one ballot query."""
     from .models import Ballot
 
-    ballots = Ballot.objects.filter(
-        rubric_version__plan=plan, is_calibration=False
-    ).prefetch_related("responses", "rubric_version")
+    ballots = (
+        Ballot.objects.filter(rubric_version__plan=plan, is_calibration=False)
+        .order_by("id")
+        .select_related("rubric_version", "judge")
+        .prefetch_related("responses")
+    )
     observations = []
+    snapshots = []
     for ballot in ballots:
         scores = {response.criterion_id: response.score for response in ballot.responses.all()}
         criteria = [c for c in ballot.rubric_version.criteria if c["id"] in scores]
         if not criteria:
             continue
-        observations.append((ballot.judge_id, ballot.project_id, weighted_score(criteria, scores)))
-    return observations
+        score = weighted_score(criteria, scores)
+        observations.append((ballot.judge_id, ballot.project_id, score))
+        snapshots.append(
+            {
+                "ballot": str(ballot.public_id),
+                "judge": str(ballot.judge.public_id),
+                "judge_id": ballot.judge_id,
+                "project_id": ballot.project_id,
+                "rubric_version": str(ballot.rubric_version.public_id),
+                "responses": [
+                    {
+                        "criterion_id": criterion["id"],
+                        "criterion_name": criterion["name"],
+                        "weight": criterion["weight"],
+                        "score": scores[criterion["id"]],
+                    }
+                    for criterion in criteria
+                ],
+                "weighted_score": score,
+                "submitted_at": ballot.submitted_at.isoformat(),
+            }
+        )
+    return observations, snapshots

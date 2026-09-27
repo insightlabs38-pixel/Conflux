@@ -5,6 +5,7 @@ from collections import defaultdict
 from accounts.authentication import CookieSessionAuthentication
 from accounts.models import User
 from audit.services import diff_snapshots, record_mutation
+from awards.models import AwardWinner, SelectionSource
 from core.authz import has_any_role
 from core.permissions import IsWorkspaceMember, require_roles
 from django.core.exceptions import ValidationError as ModelValidationError
@@ -76,6 +77,7 @@ from .schema import (
     PairwiseResultsPublishInputSchema,
     PairwiseRunInputSchema,
     PoolMembershipInputSchema,
+    ProvenanceSchema,
     RankedResultSchema,
     ResultsPublishInputSchema,
     SensitivityInputSchema,
@@ -1205,6 +1207,80 @@ class ResultsView(PlanMixin):
             p.id: p for p in Project.objects.filter(id__in=[r.project_id for r in results])
         }
         return Response([_serialize_ranked(r, projects_by_id) for r in results])
+
+
+class JudgingProvenanceView(PlanMixin):
+    """Trace a published rubric result to frozen authored scores and awards."""
+
+    @extend_schema(responses=ProvenanceSchema)
+    def get(
+        self,
+        request,
+        workspace_public_id,
+        event_public_id,
+        stage_public_id,
+        plan_public_id,
+        project_public_id,
+    ):
+        plan = self.get_plan()
+        if plan.mode != EvaluationMode.RUBRIC or plan.published_normalization_run_id is None:
+            return Response({"detail": "No rubric results have been published."}, status=404)
+        project = get_object_or_404(Project, event=self.get_event(), public_id=project_public_id)
+        run = plan.published_normalization_run
+        result = next(
+            (row for row in ranked_results(plan, run) if row.project_id == project.id), None
+        )
+        if result is None:
+            return Response({"detail": "Project is absent from this published run."}, status=404)
+
+        frozen_ballots = run.evidence.get("ballots")
+        ballots = None
+        if frozen_ballots is not None:
+            ballots = [
+                {
+                    **{
+                        key: value
+                        for key, value in ballot.items()
+                        if key not in {"judge_id", "project_id"}
+                    },
+                    "judge_effect": run.evidence["judge_effects"].get(str(ballot["judge_id"]), 0.0),
+                }
+                for ballot in frozen_ballots
+                if ballot["project_id"] == project.id
+            ]
+
+        award_winners = AwardWinner.objects.filter(
+            award__evaluation_plan=plan, project=project, source=SelectionSource.EVALUATION
+        ).select_related("award")
+        awards = [
+            {
+                "award": str(winner.award.public_id),
+                "name": winner.award.name,
+                "winner": str(winner.public_id),
+                "rank_at_selection": winner.evidence.get("rank"),
+                "override_reason": winner.override_reason,
+                "published": winner.award.published_at is not None,
+            }
+            for winner in award_winners
+            if winner.evidence.get("normalization_run") == str(run.public_id)
+        ]
+        return Response(
+            {
+                "project": str(project.public_id),
+                "project_name": project.name,
+                "rank": result.rank,
+                "raw_score": result.raw_score,
+                "final_score": result.final_score,
+                "tie_break": result.tie_break,
+                "normalization_run": str(run.public_id),
+                "ridge_lambda": run.ridge_lambda,
+                "converged": run.converged,
+                "grand_mean": run.grand_mean,
+                "ballot_snapshot_available": ballots is not None,
+                "ballots": ballots,
+                "awards": awards,
+            }
+        )
 
 
 class ResultsCsvExportView(PlanMixin):

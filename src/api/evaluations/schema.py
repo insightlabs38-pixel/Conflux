@@ -74,6 +74,49 @@ class RankedResultSchema(serializers.Serializer):
     tie_break = serializers.IntegerField(allow_null=True)
 
 
+class ProvenanceCriterionSchema(serializers.Serializer):
+    criterion_id = serializers.CharField()
+    criterion_name = serializers.CharField()
+    weight = serializers.FloatField()
+    score = serializers.FloatField()
+
+
+class ProvenanceBallotSchema(serializers.Serializer):
+    ballot = serializers.UUIDField()
+    judge = serializers.UUIDField()
+    rubric_version = serializers.UUIDField()
+    responses = ProvenanceCriterionSchema(many=True)
+    weighted_score = serializers.FloatField()
+    judge_effect = serializers.FloatField()
+    adjusted_score = serializers.FloatField()
+    submitted_at = serializers.DateTimeField()
+
+
+class ProvenanceAwardSchema(serializers.Serializer):
+    award = serializers.UUIDField()
+    name = serializers.CharField()
+    winner = serializers.UUIDField()
+    rank_at_selection = serializers.IntegerField(allow_null=True)
+    override_reason = serializers.CharField()
+    published = serializers.BooleanField()
+
+
+class ProvenanceSchema(serializers.Serializer):
+    project = serializers.UUIDField()
+    project_name = serializers.CharField()
+    rank = serializers.IntegerField()
+    raw_score = serializers.FloatField(allow_null=True)
+    final_score = serializers.FloatField()
+    tie_break = serializers.IntegerField(allow_null=True)
+    normalization_run = serializers.UUIDField()
+    ridge_lambda = serializers.FloatField()
+    converged = serializers.BooleanField()
+    grand_mean = serializers.FloatField()
+    ballot_snapshot_available = serializers.BooleanField()
+    ballots = ProvenanceBallotSchema(many=True, allow_null=True)
+    awards = ProvenanceAwardSchema(many=True)
+
+
 class FeedbackEntrySchema(serializers.Serializer):
     judge = serializers.CharField(allow_null=True)
     comment = serializers.CharField()

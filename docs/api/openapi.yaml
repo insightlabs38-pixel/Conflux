@@ -7135,6 +7135,53 @@ paths:
               schema:
                 $ref: '#/components/schemas/EvaluationProgressSchema'
           description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/provenance/{project_public_id}/
+  : get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_provenance_project_public_id
+      description: Trace a published rubric result to frozen authored scores and awards.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProvenanceSchema'
+          description: ''
   ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/publish-results/
   : post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_publish_results
@@ -12151,6 +12198,142 @@ components:
           format: uuid
       required:
       - project
+    ProvenanceAwardSchema:
+      type: object
+      properties:
+        award:
+          type: string
+          format: uuid
+        name:
+          type: string
+        winner:
+          type: string
+          format: uuid
+        rank_at_selection:
+          type: integer
+          nullable: true
+        override_reason:
+          type: string
+        published:
+          type: boolean
+      required:
+      - award
+      - name
+      - override_reason
+      - published
+      - rank_at_selection
+      - winner
+    ProvenanceBallotSchema:
+      type: object
+      properties:
+        ballot:
+          type: string
+          format: uuid
+        judge:
+          type: string
+          format: uuid
+        rubric_version:
+          type: string
+          format: uuid
+        responses:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProvenanceCriterionSchema'
+        weighted_score:
+          type: number
+          format: double
+        judge_effect:
+          type: number
+          format: double
+        adjusted_score:
+          type: number
+          format: double
+        submitted_at:
+          type: string
+          format: date-time
+      required:
+      - adjusted_score
+      - ballot
+      - judge
+      - judge_effect
+      - responses
+      - rubric_version
+      - submitted_at
+      - weighted_score
+    ProvenanceCriterionSchema:
+      type: object
+      properties:
+        criterion_id:
+          type: string
+        criterion_name:
+          type: string
+        weight:
+          type: number
+          format: double
+        score:
+          type: number
+          format: double
+      required:
+      - criterion_id
+      - criterion_name
+      - score
+      - weight
+    ProvenanceSchema:
+      type: object
+      properties:
+        project:
+          type: string
+          format: uuid
+        project_name:
+          type: string
+        rank:
+          type: integer
+        raw_score:
+          type: number
+          format: double
+          nullable: true
+        final_score:
+          type: number
+          format: double
+        tie_break:
+          type: integer
+          nullable: true
+        normalization_run:
+          type: string
+          format: uuid
+        ridge_lambda:
+          type: number
+          format: double
+        converged:
+          type: boolean
+        grand_mean:
+          type: number
+          format: double
+        ballot_snapshot_available:
+          type: boolean
+        ballots:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProvenanceBallotSchema'
+          nullable: true
+        awards:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProvenanceAwardSchema'
+      required:
+      - awards
+      - ballot_snapshot_available
+      - ballots
+      - converged
+      - final_score
+      - grand_mean
+      - normalization_run
+      - project
+      - project_name
+      - rank
+      - raw_score
+      - ridge_lambda
+      - tie_break
     PublicAwardOutput:
       type: object
       properties:

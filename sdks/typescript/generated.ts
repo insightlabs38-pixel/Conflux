@@ -2094,6 +2094,92 @@ export type ProjectRecordInput = { project: string };
 
 export type InputOfProjectRecordInput = { project: string };
 
+export type ProvenanceAwardSchema = {
+  award: string;
+  name: string;
+  winner: string;
+  rank_at_selection: number | null;
+  override_reason: string;
+  published: boolean;
+};
+
+export type InputOfProvenanceAwardSchema = {
+  award: string;
+  name: string;
+  winner: string;
+  rank_at_selection: number | null;
+  override_reason: string;
+  published: boolean;
+};
+
+export type ProvenanceBallotSchema = {
+  ballot: string;
+  judge: string;
+  rubric_version: string;
+  responses: ProvenanceCriterionSchema[];
+  weighted_score: number;
+  judge_effect: number;
+  adjusted_score: number;
+  submitted_at: string;
+};
+
+export type InputOfProvenanceBallotSchema = {
+  ballot: string;
+  judge: string;
+  rubric_version: string;
+  responses: InputOfProvenanceCriterionSchema[];
+  weighted_score: number;
+  judge_effect: number;
+  adjusted_score: number;
+  submitted_at: string;
+};
+
+export type ProvenanceCriterionSchema = {
+  criterion_id: string;
+  criterion_name: string;
+  weight: number;
+  score: number;
+};
+
+export type InputOfProvenanceCriterionSchema = {
+  criterion_id: string;
+  criterion_name: string;
+  weight: number;
+  score: number;
+};
+
+export type ProvenanceSchema = {
+  project: string;
+  project_name: string;
+  rank: number;
+  raw_score: number | null;
+  final_score: number;
+  tie_break: number | null;
+  normalization_run: string;
+  ridge_lambda: number;
+  converged: boolean;
+  grand_mean: number;
+  ballot_snapshot_available: boolean;
+  ballots: ProvenanceBallotSchema[] | null;
+  awards: ProvenanceAwardSchema[];
+};
+
+export type InputOfProvenanceSchema = {
+  project: string;
+  project_name: string;
+  rank: number;
+  raw_score: number | null;
+  final_score: number;
+  tie_break: number | null;
+  normalization_run: string;
+  ridge_lambda: number;
+  converged: boolean;
+  grand_mean: number;
+  ballot_snapshot_available: boolean;
+  ballots: InputOfProvenanceBallotSchema[] | null;
+  awards: InputOfProvenanceAwardSchema[];
+};
+
 export type PublicAwardOutput = {
   public_id: string;
   name: string;
@@ -4345,6 +4431,18 @@ export interface Operations {
       };
     };
     response: EvaluationProgressSchema;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_provenance_project_public_id: {
+    request: {
+      path: {
+        event_public_id: string;
+        plan_public_id: string;
+        project_public_id: string;
+        stage_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: ProvenanceSchema;
   };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_publish_results: {
     request: {
@@ -6671,6 +6769,21 @@ export const operations = {
       path_params: [
         "event_public_id",
         "plan_public_id",
+        "stage_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_provenance_project_public_id:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/provenance/{project_public_id}/",
+      path_params: [
+        "event_public_id",
+        "plan_public_id",
+        "project_public_id",
         "stage_public_id",
         "workspace_public_id",
       ],

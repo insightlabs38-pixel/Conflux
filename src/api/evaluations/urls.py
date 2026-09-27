@@ -132,6 +132,11 @@ urlpatterns = [
     ),
     path(f"{_PLAN}/results/", views.ResultsView.as_view(), name="evaluation-plan-results"),
     path(
+        f"{_PLAN}/provenance/<uuid:project_public_id>/",
+        views.JudgingProvenanceView.as_view(),
+        name="evaluation-plan-provenance",
+    ),
+    path(
         f"{_PLAN}/results.csv",
         views.ResultsCsvExportView.as_view(),
         name="evaluation-plan-results-csv",

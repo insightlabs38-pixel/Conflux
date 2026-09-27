@@ -27,6 +27,12 @@ class EvaluationPlanSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
+    hybrid_source = serializers.SlugRelatedField(
+        slug_field="public_id",
+        queryset=EvaluationPlan.objects.all(),
+        required=False,
+        allow_null=True,
+    )
     current_rubric_version = serializers.SerializerMethodField()
     active_assignment_version = serializers.SerializerMethodField()
     published_normalization_run = serializers.SerializerMethodField()
@@ -46,6 +52,7 @@ class EvaluationPlanSerializer(serializers.ModelSerializer):
             "feedback_anonymous",
             "draft_criteria",
             "pool",
+            "hybrid_source",
             "current_rubric_version",
             "active_assignment_version",
             "published_normalization_run",

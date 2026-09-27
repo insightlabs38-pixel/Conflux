@@ -645,6 +645,14 @@ class InputOfCloneInput(TypedDict):
     slug: str
     sections: NotRequired[list[str]]
 
+class CloseCallsSchema(TypedDict):
+    normalization_run: int | None
+    projects: list[str]
+
+class InputOfCloseCallsSchema(TypedDict):
+    normalization_run: int | None
+    projects: list[str]
+
 class Comment(TypedDict):
     public_id: str
     author: str
@@ -856,6 +864,7 @@ class EvaluationPlan(TypedDict):
     feedback_anonymous: NotRequired[bool]
     draft_criteria: NotRequired[Any]
     pool: NotRequired[str | None]
+    hybrid_source: NotRequired[str | None]
     current_rubric_version: int | None
     active_assignment_version: int | None
     published_normalization_run: int | None
@@ -877,6 +886,7 @@ class InputOfEvaluationPlan(TypedDict):
     feedback_anonymous: NotRequired[bool]
     draft_criteria: NotRequired[Any]
     pool: NotRequired[str | None]
+    hybrid_source: NotRequired[str | None]
     calibration_required: NotRequired[bool]
     blind_judging: NotRequired[bool]
     prize_judging: NotRequired[bool]
@@ -1566,6 +1576,7 @@ class PatchedEvaluationPlan(TypedDict):
     feedback_anonymous: NotRequired[bool]
     draft_criteria: NotRequired[Any]
     pool: NotRequired[str | None]
+    hybrid_source: NotRequired[str | None]
     current_rubric_version: NotRequired[int | None]
     active_assignment_version: NotRequired[int | None]
     published_normalization_run: NotRequired[int | None]
@@ -1587,6 +1598,7 @@ class InputOfPatchedEvaluationPlan(TypedDict):
     feedback_anonymous: NotRequired[bool]
     draft_criteria: NotRequired[Any]
     pool: NotRequired[str | None]
+    hybrid_source: NotRequired[str | None]
     calibration_required: NotRequired[bool]
     blind_judging: NotRequired[bool]
     prize_judging: NotRequired[bool]
@@ -3255,6 +3267,15 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                         'query_params': [],
                                                                                                                                         'request_body': False,
                                                                                                                                         'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_close_calls': {'method': 'GET',
+                                                                                                                                         'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/close-calls/',
+                                                                                                                                         'path_params': ['event_public_id',
+                                                                                                                                                         'plan_public_id',
+                                                                                                                                                         'stage_public_id',
+                                                                                                                                                         'workspace_public_id'],
+                                                                                                                                         'query_params': [],
+                                                                                                                                         'request_body': False,
+                                                                                                                                         'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_feedback_project_public_id': {'method': 'GET',
                                                                                                                                                         'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/feedback/{project_public_id}/',
                                                                                                                                                         'path_params': ['event_public_id',

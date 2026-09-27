@@ -106,6 +106,17 @@ class EvaluationPlan(PublicIdModel):
     # product actually exposes to a judge during live judging.
     blind_judging = models.BooleanField(default=False)
     prize_judging = models.BooleanField(default=False)
+    # VS03: rubric-screening-then-pairwise hybrid evaluation. When set on
+    # a PAIRWISE plan, its eligible candidates (evaluations.eligibility.
+    # eligible_projects) are structurally bounded to `hybrid_source`'s own
+    # latest normalization run's close calls -- the adjacent-rank pairs
+    # too close to confidently order -- rather than the whole field. A
+    # judge can never submit a comparison outside that bounded set: the
+    # same `_eligible_candidates` check every comparison submission
+    # already runs enforces it, no separate validation layer needed.
+    hybrid_source = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.SET_NULL, related_name="hybrid_tiebreaks"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -134,6 +145,17 @@ class EvaluationPlan(PublicIdModel):
             raise ValidationError(
                 {"published_pairwise_run": "Must be a pairwise run of this plan."}
             )
+        if self.hybrid_source_id:
+            if self.mode != EvaluationMode.PAIRWISE:
+                raise ValidationError(
+                    {"hybrid_source": "Only a pairwise plan may declare a hybrid source."}
+                )
+            if self.hybrid_source_id == self.pk:
+                raise ValidationError({"hybrid_source": "A plan cannot be its own hybrid source."})
+            if self.hybrid_source.mode != EvaluationMode.RUBRIC:
+                raise ValidationError({"hybrid_source": "Hybrid source must be a rubric plan."})
+            if self.hybrid_source.stage_id != self.stage_id:
+                raise ValidationError({"hybrid_source": "Hybrid source must be on the same stage."})
 
 
 class RubricVersion(PublicIdModel):

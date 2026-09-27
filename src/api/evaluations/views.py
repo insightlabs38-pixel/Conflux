@@ -25,6 +25,7 @@ from . import agreement, anonymize, normalization, pairwise
 from .assignment import activate, rebalance
 from .assignment import preview as preview_assignment
 from .eligibility import eligible_projects
+from .hybrid import close_call_project_ids
 from .models import (
     Assignment,
     Ballot,
@@ -60,6 +61,7 @@ from .schema import (
     CalibrationProjectSummarySchema,
     CalibrationStatusSchema,
     CandidateQueueItemSchema,
+    CloseCallsSchema,
     EvaluationProgressSchema,
     FeedbackEntrySchema,
     JudgeCalendarSchema,
@@ -968,6 +970,33 @@ class ResultsPublishView(PlanMixin):
             metadata={"normalization_run": run.number},
         )
         return Response(EvaluationPlanSerializer(plan).data)
+
+
+class CloseCallsView(PlanMixin):
+    """VS03: organizer-only preview of a rubric plan's current close
+    calls -- the exact bounded set a linked pairwise `hybrid_source` plan
+    would restrict its eligible candidates to -- so an organizer can
+    decide whether a tie-break round is worth setting up before creating
+    one. Read-only; computes from the plan's own latest normalization
+    run, never a live re-scan of in-progress ballots.
+    """
+
+    @extend_schema(responses=CloseCallsSchema)
+    def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        if plan.mode != EvaluationMode.RUBRIC:
+            raise ValidationError({"detail": "Close calls apply to a rubric-mode plan."})
+        latest_run = plan.normalization_runs.order_by("-number").first()
+        if latest_run is None:
+            return Response({"normalization_run": None, "projects": []})
+        close_ids = close_call_project_ids(plan, latest_run)
+        projects = Project.objects.filter(id__in=close_ids)
+        return Response(
+            {
+                "normalization_run": latest_run.number,
+                "projects": [str(p.public_id) for p in projects],
+            }
+        )
 
 
 def _serialize_ranked(result, projects_by_id):

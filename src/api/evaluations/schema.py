@@ -109,6 +109,11 @@ class JudgeWorkloadRowSchema(serializers.Serializer):
     completion_ratio = serializers.FloatField()
 
 
+class CloseCallsSchema(serializers.Serializer):
+    normalization_run = serializers.IntegerField(allow_null=True)
+    projects = serializers.ListField(child=serializers.UUIDField())
+
+
 class PairwiseComparisonInputSchema(serializers.Serializer):
     project_a = serializers.UUIDField()
     project_b = serializers.UUIDField()

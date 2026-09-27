@@ -115,6 +115,11 @@ urlpatterns = [
         views.ResultsPublishView.as_view(),
         name="evaluation-plan-publish-results",
     ),
+    path(
+        f"{_PLAN}/close-calls/",
+        views.CloseCallsView.as_view(),
+        name="evaluation-plan-close-calls",
+    ),
     path(f"{_PLAN}/results/", views.ResultsView.as_view(), name="evaluation-plan-results"),
     path(
         f"{_PLAN}/results.csv",

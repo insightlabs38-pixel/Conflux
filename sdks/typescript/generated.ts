@@ -710,6 +710,16 @@ export type InputOfCloneInput = {
   sections?: string[];
 };
 
+export type CloseCallsSchema = {
+  normalization_run: number | null;
+  projects: string[];
+};
+
+export type InputOfCloseCallsSchema = {
+  normalization_run: number | null;
+  projects: string[];
+};
+
 export type Comment = {
   public_id: string;
   author: string;
@@ -930,6 +940,7 @@ export type EvaluationPlan = {
   feedback_anonymous?: boolean;
   draft_criteria?: unknown;
   pool?: string | null;
+  hybrid_source?: string | null;
   current_rubric_version: number | null;
   active_assignment_version: number | null;
   published_normalization_run: number | null;
@@ -952,6 +963,7 @@ export type InputOfEvaluationPlan = {
   feedback_anonymous?: boolean;
   draft_criteria?: unknown;
   pool?: string | null;
+  hybrid_source?: string | null;
   calibration_required?: boolean;
   blind_judging?: boolean;
   prize_judging?: boolean;
@@ -1697,6 +1709,7 @@ export type PatchedEvaluationPlan = {
   feedback_anonymous?: boolean;
   draft_criteria?: unknown;
   pool?: string | null;
+  hybrid_source?: string | null;
   current_rubric_version?: number | null;
   active_assignment_version?: number | null;
   published_normalization_run?: number | null;
@@ -1719,6 +1732,7 @@ export type InputOfPatchedEvaluationPlan = {
   feedback_anonymous?: boolean;
   draft_criteria?: unknown;
   pool?: string | null;
+  hybrid_source?: string | null;
   calibration_required?: boolean;
   blind_judging?: boolean;
   prize_judging?: boolean;
@@ -4121,6 +4135,17 @@ export interface Operations {
     };
     response: CandidateQueueItemSchema[];
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_close_calls: {
+    request: {
+      path: {
+        event_public_id: string;
+        plan_public_id: string;
+        stage_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: CloseCallsSchema;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_feedback_project_public_id: {
     request: {
       path: {
@@ -6349,6 +6374,20 @@ export const operations = {
     {
       method: "GET",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/candidates/",
+      path_params: [
+        "event_public_id",
+        "plan_public_id",
+        "stage_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_close_calls:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/close-calls/",
       path_params: [
         "event_public_id",
         "plan_public_id",

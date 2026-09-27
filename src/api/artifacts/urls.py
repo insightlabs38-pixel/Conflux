@@ -24,6 +24,11 @@ urlpatterns = [
         name="artifact-validate",
     ),
     path(
+        _prefix + "<uuid:artifact_public_id>/check-evidence/",
+        views.ArtifactEvidenceCheckView.as_view(),
+        name="artifact-check-evidence",
+    ),
+    path(
         _prefix + "<uuid:artifact_public_id>/upload-intents/<uuid:intent_public_id>/complete/",
         views.UploadCompleteView.as_view(),
         name="artifact-upload-complete",

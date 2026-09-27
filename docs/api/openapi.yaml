@@ -3339,6 +3339,52 @@ paths:
               schema:
                 $ref: '#/components/schemas/ArtifactSchema'
           description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/artifacts/{artifact_public_id}/check-evidence/
+  : post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_artifacts_artifact_public_id_check_evidence
+      description: |-
+        S07: explicitly-triggered advanced submission CI -- real link
+        reachability and, for a public GitHub repository, license + latest-
+        commit evidence. Deliberately separate from ArtifactValidateView: this
+        performs real outbound network I/O and never changes `artifact.status`
+        (see validators.run_submission_ci).
+      parameters:
+      - in: path
+        name: artifact_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArtifactSchema'
+          description: ''
   ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/artifacts/{artifact_public_id}/upload-intents/{intent_public_id}/complete/
   : post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_artifacts_artifact_public_id_upload_intents_intent_public_id_complete
@@ -7934,6 +7980,10 @@ components:
           allOf:
           - $ref: '#/components/schemas/ValidationSchema'
           nullable: true
+        ci_evidence:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationSchema'
         download_url:
           type: string
           format: uri

@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from workspaces.models import Membership, Workspace
 
-from .models import Artifact, ArtifactStatus, ArtifactUploadIntent, can_view_artifact
+from .models import Artifact, ArtifactKind, ArtifactStatus, ArtifactUploadIntent, can_view_artifact
 from .preflight import run_preflight
 from .schema import (
     ArtifactSchema,
@@ -22,11 +22,12 @@ from .schema import (
 )
 from .services import begin_upload, complete_upload, create_external_artifact
 from .storage import S3Storage
-from .validators import validate_artifact
+from .validators import SUBMISSION_CI_VALIDATOR, run_submission_ci, validate_artifact
 
 
 def artifact_payload(artifact):
     latest = artifact.validations.first()
+    ci_evidence = artifact.validations.filter(validator=SUBMISSION_CI_VALIDATOR)[:10]
     return {
         "public_id": str(artifact.public_id),
         "kind": artifact.kind,
@@ -37,6 +38,7 @@ def artifact_payload(artifact):
         "byte_size": artifact.byte_size,
         "status": artifact.status,
         "validation": {"outcome": latest.outcome, "detail": latest.detail} if latest else None,
+        "ci_evidence": [{"outcome": e.outcome, "detail": e.detail} for e in ci_evidence],
     }
 
 
@@ -189,6 +191,29 @@ class ArtifactValidateView(ProjectArtifactView):
                 "validation": {"outcome": evidence.outcome, "detail": evidence.detail},
             }
         )
+
+
+class ArtifactEvidenceCheckView(ProjectArtifactView):
+    """S07: explicitly-triggered advanced submission CI -- real link
+    reachability and, for a public GitHub repository, license + latest-
+    commit evidence. Deliberately separate from ArtifactValidateView: this
+    performs real outbound network I/O and never changes `artifact.status`
+    (see validators.run_submission_ci).
+    """
+
+    @extend_schema(request=None, responses=ArtifactSchema)
+    def post(
+        self, request, workspace_public_id, event_public_id, project_public_id, artifact_public_id
+    ):
+        artifact = self.get_artifact()
+        if not self.can_view(artifact) and artifact.created_by_id != request.user.id:
+            return Response(status=404)
+        if artifact.kind not in {ArtifactKind.REPOSITORY, ArtifactKind.LIVE_URL}:
+            raise ValidationError(
+                {"detail": "Submission CI only applies to repository/live_url artifacts."}
+            )
+        run_submission_ci(artifact)
+        return Response(artifact_payload(artifact))
 
 
 class ProjectPreflightView(ProjectArtifactView):

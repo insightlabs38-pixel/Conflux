@@ -1,3 +1,4 @@
+import http.client
 from dataclasses import dataclass
 
 from botocore.exceptions import ClientError
@@ -11,7 +12,11 @@ from .models import (
     ArtifactStatus,
     ArtifactValidation,
 )
+from .reachability import GITHUB_REPO_PATH, github_evidence, pinned_get
 from .storage import S3Storage
+
+SUBMISSION_CI_VALIDATOR = "submission_ci"
+SUBMISSION_CI_KINDS = {ArtifactKind.REPOSITORY, ArtifactKind.LIVE_URL}
 
 # Content types a browser will execute or actively render if ever served
 # inline (GSEC-002): never acceptable for a stored artifact regardless of
@@ -118,3 +123,51 @@ def validate_artifact(artifact, *, storage=None):
         if result.outcome != "retry":
             current.save(update_fields=["status", "updated_at"])
     return evidence
+
+
+def inspect_submission_ci(artifact) -> ValidationResult:
+    """Real reachability (and, for a public GitHub repository, license +
+    latest-commit) evidence for one `repository`/`live_url` artifact
+    (S07). Never touches `artifact.status` -- this is supplementary
+    evidence for an organizer to review, not a gate on artifact validity
+    (a demo site being briefly down shouldn't destroy a team's submission).
+    """
+    from integrations.webhooks import validate_destination
+
+    try:
+        parts, address = validate_destination(artifact.external_url)
+    except ValueError as exc:
+        return ValidationResult(SUBMISSION_CI_VALIDATOR, "blocked", f"Unreachable link: {exc}")
+
+    path = (parts.path or "/") + (f"?{parts.query}" if parts.query else "")
+    try:
+        status = pinned_get(parts.hostname, address, path)
+    except (OSError, TimeoutError, http.client.HTTPException) as exc:
+        return ValidationResult(
+            SUBMISSION_CI_VALIDATOR, "retry", f"Could not reach link: {exc}"[:500]
+        )
+
+    if status >= 400:
+        return ValidationResult(
+            SUBMISSION_CI_VALIDATOR, "warning", f"Link responded with HTTP {status}."[:500]
+        )
+
+    detail = f"Reachable (HTTP {status})."
+    if artifact.kind == ArtifactKind.REPOSITORY and parts.hostname == "github.com":
+        match = GITHUB_REPO_PATH.match(parts.path or "")
+        if match:
+            detail += " " + github_evidence(match["owner"], match["repo"])
+    return ValidationResult(SUBMISSION_CI_VALIDATOR, "ok", detail[:500])
+
+
+def run_submission_ci(artifact) -> ArtifactValidation | None:
+    """Compute + record one `inspect_submission_ci` evidence row. Returns
+    None for a kind this check doesn't apply to (stored files, external
+    video -- only repository/live_url are "advanced submission CI" here).
+    """
+    if artifact.kind not in SUBMISSION_CI_KINDS:
+        return None
+    result = inspect_submission_ci(artifact)
+    return ArtifactValidation.objects.create(
+        artifact=artifact, validator=result.validator, outcome=result.outcome, detail=result.detail
+    )

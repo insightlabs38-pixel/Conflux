@@ -16,6 +16,7 @@ class ArtifactSchema(serializers.Serializer):
     byte_size = serializers.IntegerField(allow_null=True)
     status = serializers.CharField()
     validation = ValidationSchema(allow_null=True)
+    ci_evidence = ValidationSchema(many=True, required=False)
     download_url = serializers.URLField(required=False)
 
 

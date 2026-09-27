@@ -1115,6 +1115,22 @@ class InputOfExceptionGrant(TypedDict):
     reason: NotRequired[str]
     expires_at: NotRequired[str | None]
 
+class ExpertiseInputSchema(TypedDict):
+    tags: list[str]
+
+class InputOfExpertiseInputSchema(TypedDict):
+    tags: list[str]
+
+class ExpertiseOutputSchema(TypedDict):
+    judge: str
+    tags: list[str]
+    updated_at: str | None
+
+class InputOfExpertiseOutputSchema(TypedDict):
+    judge: str
+    tags: list[str]
+    updated_at: str | None
+
 class ExternalArtifactInputSchema(TypedDict):
     kind: str
     visibility: str
@@ -3993,12 +4009,25 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                             'query_params': [],
                                                             'request_body': False,
                                                             'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_judge_expertise_judge_public_id': {'method': 'GET',
+                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/judge-expertise/{judge_public_id}/',
+                                                                               'path_params': ['judge_public_id',
+                                                                                               'workspace_public_id'],
+                                                                               'query_params': [],
+                                                                               'request_body': False,
+                                                                               'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_members': {'method': 'GET',
                                                        'path': '/api/v1/workspaces/{workspace_public_id}/members/',
                                                        'path_params': ['workspace_public_id'],
                                                        'query_params': [],
                                                        'request_body': False,
                                                        'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_my_judge_expertise': {'method': 'GET',
+                                                                  'path': '/api/v1/workspaces/{workspace_public_id}/my-judge-expertise/',
+                                                                  'path_params': ['workspace_public_id'],
+                                                                  'query_params': [],
+                                                                  'request_body': False,
+                                                                  'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_my_judge_invitations': {'method': 'GET',
                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/my-judge-invitations/',
                                                                     'path_params': ['workspace_public_id'],
@@ -4900,4 +4929,17 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                                                   'workspace_public_id'],
                                                                                                                                                   'query_params': [],
                                                                                                                                                   'request_body': True,
-                                                                                                                                                  'response_kind': 'json'}}
+                                                                                                                                                  'response_kind': 'json'},
+ 'put_api_v1_workspaces_workspace_public_id_judge_expertise_judge_public_id': {'method': 'PUT',
+                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/judge-expertise/{judge_public_id}/',
+                                                                               'path_params': ['judge_public_id',
+                                                                                               'workspace_public_id'],
+                                                                               'query_params': [],
+                                                                               'request_body': True,
+                                                                               'response_kind': 'json'},
+ 'put_api_v1_workspaces_workspace_public_id_my_judge_expertise': {'method': 'PUT',
+                                                                  'path': '/api/v1/workspaces/{workspace_public_id}/my-judge-expertise/',
+                                                                  'path_params': ['workspace_public_id'],
+                                                                  'query_params': [],
+                                                                  'request_body': True,
+                                                                  'response_kind': 'json'}}

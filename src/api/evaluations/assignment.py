@@ -1,10 +1,8 @@
 """Deterministic, explainable baseline assignment (JDG-007), extended with a
 connectivity-aware objective for the assigned-subset strategy (JDG-009/010).
 
-Track-fit prefers a judge whose PoolMembership.track_expertise includes the
-candidate Project's `track` (added as a corrective fix ahead of C-B15 --
-Project previously had no Track association at all, silently degrading
-this to a permanent tie; see DECISIONS.md).
+Track-fit combines explicit PoolMembership tracks with reusable workspace
+expertise tags that exactly match the candidate Project's event track name.
 """
 
 from dataclasses import dataclass
@@ -12,6 +10,7 @@ from dataclasses import dataclass
 from .coi import conflict_pairs
 from .connectivity import connectivity_report, repair_connectivity
 from .eligibility import eligible_projects
+from .expertise import judge_track_ids_for_pool
 from .models import Assignment, EvaluationPoolStrategy, PoolMembership
 
 
@@ -46,7 +45,7 @@ def compute_assignment(plan, *, coverage: int = 3) -> list[Pairing]:
         .prefetch_related("track_expertise")
         .order_by("judge_id")
     )
-    judge_tracks = {m.judge_id: {t.id for t in m.track_expertise.all()} for m in memberships}
+    judge_tracks = judge_track_ids_for_pool(memberships, plan.stage.event)
     judge_ids = [m.judge_id for m in memberships]
 
     candidates = list(eligible_projects(plan).order_by("id"))
@@ -179,7 +178,7 @@ def compute_rebalance(
         .prefetch_related("track_expertise")
         .order_by("judge_id")
     )
-    judge_tracks = {m.judge_id: {t.id for t in m.track_expertise.all()} for m in memberships}
+    judge_tracks = judge_track_ids_for_pool(memberships, plan.stage.event)
     active_judge_ids = [m.judge_id for m in memberships if m.judge_id not in drop_judge_ids]
     candidates = list(eligible_projects(plan).order_by("id"))
     conflicts = conflict_pairs(

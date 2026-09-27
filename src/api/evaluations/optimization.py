@@ -41,6 +41,7 @@ from .assignment import Pairing, build_evidence, track_fit
 from .coi import conflict_pairs
 from .connectivity import repair_connectivity
 from .eligibility import eligible_projects
+from .expertise import judge_track_ids_for_pool
 from .models import EvaluationPoolStrategy, PoolMembership
 
 TRACK_MISMATCH_COST = 1
@@ -139,7 +140,7 @@ def compute_assignment_optimized(plan, *, coverage: int = 3) -> list[Pairing]:
         .prefetch_related("track_expertise")
         .order_by("judge_id")
     )
-    judge_tracks = {m.judge_id: {t.id for t in m.track_expertise.all()} for m in memberships}
+    judge_tracks = judge_track_ids_for_pool(memberships, plan.stage.event)
     judge_ids = [m.judge_id for m in memberships]
     candidates = list(eligible_projects(plan).order_by("id"))
     conflicts = conflict_pairs(

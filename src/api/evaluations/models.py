@@ -359,6 +359,24 @@ class JudgeInvitation(PublicIdModel):
         ]
 
 
+class JudgeExpertiseProfile(PublicIdModel):
+    workspace = models.ForeignKey(
+        "workspaces.Workspace", on_delete=models.CASCADE, related_name="judge_expertise_profiles"
+    )
+    judge = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="expertise_profiles"
+    )
+    tags = models.JSONField(default=list)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["workspace", "judge"], name="unique_judge_expertise_profile"
+            )
+        ]
+
+
 class ConflictOfInterest(PublicIdModel):
     """A judge's declared (or organizer-recorded) recusal from one candidate
     (JDG-006). Hard-enforced: excluded from assignment and rejected outright

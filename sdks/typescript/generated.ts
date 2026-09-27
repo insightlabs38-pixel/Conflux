@@ -1212,6 +1212,22 @@ export type InputOfExceptionGrant = {
   expires_at?: string | null;
 };
 
+export type ExpertiseInputSchema = { tags: string[] };
+
+export type InputOfExpertiseInputSchema = { tags: string[] };
+
+export type ExpertiseOutputSchema = {
+  judge: string;
+  tags: string[];
+  updated_at: string | null;
+};
+
+export type InputOfExpertiseOutputSchema = {
+  judge: string;
+  tags: string[];
+  updated_at: string | null;
+};
+
 export type ExternalArtifactInputSchema = {
   kind: string;
   visibility: string;
@@ -5202,6 +5218,17 @@ export interface Operations {
     request: { path: { workspace_public_id: string } };
     response: JudgeEventSummary[];
   };
+  get_api_v1_workspaces_workspace_public_id_judge_expertise_judge_public_id: {
+    request: { path: { judge_public_id: string; workspace_public_id: string } };
+    response: ExpertiseOutputSchema;
+  };
+  put_api_v1_workspaces_workspace_public_id_judge_expertise_judge_public_id: {
+    request: {
+      path: { judge_public_id: string; workspace_public_id: string };
+      body: InputOfExpertiseInputSchema;
+    };
+    response: ExpertiseOutputSchema;
+  };
   get_api_v1_workspaces_workspace_public_id_members: {
     request: { path: { workspace_public_id: string } };
     response: MembershipSchema[];
@@ -5212,6 +5239,17 @@ export interface Operations {
       body: InputOfMembershipInputSchema;
     };
     response: MembershipSchema;
+  };
+  get_api_v1_workspaces_workspace_public_id_my_judge_expertise: {
+    request: { path: { workspace_public_id: string } };
+    response: ExpertiseOutputSchema;
+  };
+  put_api_v1_workspaces_workspace_public_id_my_judge_expertise: {
+    request: {
+      path: { workspace_public_id: string };
+      body: InputOfExpertiseInputSchema;
+    };
+    response: ExpertiseOutputSchema;
   };
   get_api_v1_workspaces_workspace_public_id_my_judge_invitations: {
     request: { path: { workspace_public_id: string } };
@@ -7820,6 +7858,22 @@ export const operations = {
     request_body: false,
     response_kind: "json",
   },
+  get_api_v1_workspaces_workspace_public_id_judge_expertise_judge_public_id: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/judge-expertise/{judge_public_id}/",
+    path_params: ["judge_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  put_api_v1_workspaces_workspace_public_id_judge_expertise_judge_public_id: {
+    method: "PUT",
+    path: "/api/v1/workspaces/{workspace_public_id}/judge-expertise/{judge_public_id}/",
+    path_params: ["judge_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: true,
+    response_kind: "json",
+  },
   get_api_v1_workspaces_workspace_public_id_members: {
     method: "GET",
     path: "/api/v1/workspaces/{workspace_public_id}/members/",
@@ -7831,6 +7885,22 @@ export const operations = {
   post_api_v1_workspaces_workspace_public_id_members: {
     method: "POST",
     path: "/api/v1/workspaces/{workspace_public_id}/members/",
+    path_params: ["workspace_public_id"],
+    query_params: [],
+    request_body: true,
+    response_kind: "json",
+  },
+  get_api_v1_workspaces_workspace_public_id_my_judge_expertise: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/my-judge-expertise/",
+    path_params: ["workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  put_api_v1_workspaces_workspace_public_id_my_judge_expertise: {
+    method: "PUT",
+    path: "/api/v1/workspaces/{workspace_public_id}/my-judge-expertise/",
     path_params: ["workspace_public_id"],
     query_params: [],
     request_body: true,

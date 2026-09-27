@@ -9270,6 +9270,85 @@ paths:
                 items:
                   $ref: '#/components/schemas/JudgeEventSummary'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/judge-expertise/{judge_public_id}/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_judge_expertise_judge_public_id
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: judge_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpertiseOutputSchema'
+          description: ''
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_judge_expertise_judge_public_id
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: judge_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpertiseInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExpertiseInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExpertiseInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpertiseOutputSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/members/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_members
@@ -9344,6 +9423,73 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MembershipSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/my-judge-expertise/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_my_judge_expertise
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpertiseOutputSchema'
+          description: ''
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_my_judge_expertise
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpertiseInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExpertiseInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExpertiseInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpertiseOutputSchema'
           description: ''
   /api/v1/workspaces/{workspace_public_id}/my-judge-invitations/:
     get:
@@ -11578,6 +11724,35 @@ components:
       - public_id
       - subject_id
       - subject_type
+    ExpertiseInputSchema:
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            type: string
+            maxLength: 80
+          maxItems: 20
+      required:
+      - tags
+    ExpertiseOutputSchema:
+      type: object
+      properties:
+        judge:
+          type: string
+          format: uuid
+        tags:
+          type: array
+          items:
+            type: string
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - judge
+      - tags
+      - updated_at
     ExternalArtifactInputSchema:
       type: object
       properties:

@@ -2391,6 +2391,340 @@ paths:
               schema:
                 $ref: '#/components/schemas/ConflictOfInterest'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/marketplace/matches/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_marketplace_matches
+      description: |-
+        Any workspace member (any role) may manage their own participation —
+        this is not organizer-only, unlike events.views.OrganizerView.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamOpeningSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/marketplace/my-openings/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_marketplace_my_openings
+      description: |-
+        Any workspace member (any role) may manage their own participation —
+        this is not organizer-only, unlike events.views.OrganizerView.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamOpeningSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/marketplace/openings/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_marketplace_openings
+      description: |-
+        Any workspace member (any role) may manage their own participation —
+        this is not organizer-only, unlike events.views.OrganizerView.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamOpeningSchema'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_marketplace_openings
+      description: |-
+        Any workspace member (any role) may manage their own participation —
+        this is not organizer-only, unlike events.views.OrganizerView.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TeamOpeningInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TeamOpeningInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TeamOpeningInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamOpeningSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/marketplace/openings/{opening_public_id}/:
+    patch:
+      operationId: patch_api_v1_workspaces_workspace_public_id_events_event_public_id_marketplace_openings_opening_public_id
+      description: |-
+        Any workspace member (any role) may manage their own participation —
+        this is not organizer-only, unlike events.views.OrganizerView.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: opening_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTeamOpeningInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTeamOpeningInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTeamOpeningInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamOpeningSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/marketplace/openings/{opening_public_id}/matches/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_marketplace_openings_opening_public_id_matches
+      description: |-
+        Any workspace member (any role) may manage their own participation —
+        this is not organizer-only, unlike events.views.OrganizerView.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: opening_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MarketplaceProfileSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/marketplace/profile/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_marketplace_profile
+      description: |-
+        Any workspace member (any role) may manage their own participation —
+        this is not organizer-only, unlike events.views.OrganizerView.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyMarketplaceProfileResponse'
+          description: ''
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_events_event_public_id_marketplace_profile
+      description: |-
+        Any workspace member (any role) may manage their own participation —
+        this is not organizer-only, unlike events.views.OrganizerView.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarketplaceProfileInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MarketplaceProfileInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MarketplaceProfileInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketplaceProfileSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/marketplace/profiles/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_marketplace_profiles
+      description: |-
+        Any workspace member (any role) may manage their own participation —
+        this is not organizer-only, unlike events.views.OrganizerView.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MarketplaceProfileSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-team/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_team
@@ -9752,6 +10086,52 @@ components:
           $ref: '#/components/schemas/UserSummarySchema'
       required:
       - user
+    MarketplaceProfileInput:
+      type: object
+      properties:
+        skills:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+        bio:
+          type: string
+          maxLength: 500
+        visible:
+          type: boolean
+      required:
+      - skills
+      - visible
+    MarketplaceProfileSchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        user:
+          type: string
+          format: uuid
+        username:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        bio:
+          type: string
+        visible:
+          type: boolean
+        matched_skills:
+          type: array
+          items:
+            type: string
+      required:
+      - bio
+      - public_id
+      - skills
+      - user
+      - username
+      - visible
     MembershipInputSchema:
       type: object
       properties:
@@ -9845,6 +10225,15 @@ components:
       description: |-
         * `rubric` - Weighted rubric scoring
         * `pairwise` - Head-to-head pairwise comparison
+    MyMarketplaceProfileResponse:
+      type: object
+      properties:
+        profile:
+          allOf:
+          - $ref: '#/components/schemas/MarketplaceProfileSchema'
+          nullable: true
+      required:
+      - profile
     MyTeamResponse:
       type: object
       properties:
@@ -10421,6 +10810,26 @@ components:
       type: object
       properties:
         enabled:
+          type: boolean
+    PatchedTeamOpeningInput:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 500
+        desired_skills:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+        project:
+          type: string
+          format: uuid
+          nullable: true
+        is_open:
           type: boolean
     PatchedTemporalGate:
       type: object
@@ -11471,6 +11880,72 @@ components:
       description: |-
         * `member` - Member
         * `captain` - Captain
+    TeamOpeningInput:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 500
+        desired_skills:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+        project:
+          type: string
+          format: uuid
+          nullable: true
+        is_open:
+          type: boolean
+      required:
+      - desired_skills
+      - title
+    TeamOpeningSchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        team:
+          type: string
+          format: uuid
+        team_name:
+          type: string
+        project:
+          type: string
+          format: uuid
+          nullable: true
+        project_name:
+          type: string
+          nullable: true
+        title:
+          type: string
+        description:
+          type: string
+        desired_skills:
+          type: array
+          items:
+            type: string
+        is_open:
+          type: boolean
+        matched_skills:
+          type: array
+          items:
+            type: string
+      required:
+      - description
+      - desired_skills
+      - is_open
+      - matched_skills
+      - project
+      - project_name
+      - public_id
+      - team
+      - team_name
+      - title
     TemporalGate:
       type: object
       properties:

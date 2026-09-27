@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { TeamPanel } from "./TeamPanel";
+import { MarketplacePanel } from "./MarketplacePanel";
 import { ProjectWorkspace } from "../artifacts/ProjectWorkspace";
 import { Inbox } from "../communications/Inbox";
 import { ErrorState } from "../../components/ErrorState";
@@ -19,6 +20,7 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [retry, setRetry] = useState(0);
+  const [teamRevision, setTeamRevision] = useState(0);
 
   function selectEvent(id: string) {
     setSelectedId(id);
@@ -105,6 +107,12 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
           <>
             <TeamPanel
               key={selectedId}
+              workspaceId={workspaceId}
+              eventId={selectedId}
+              onTeamChange={() => setTeamRevision((revision) => revision + 1)}
+            />
+            <MarketplacePanel
+              key={`marketplace-${selectedId}-${teamRevision}`}
               workspaceId={workspaceId}
               eventId={selectedId}
             />

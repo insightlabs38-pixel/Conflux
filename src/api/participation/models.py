@@ -104,3 +104,40 @@ class TeamInvite(PublicIdModel):
         if self.expires_at and now >= self.expires_at:
             return False
         return self.use_count < self.max_uses
+
+
+class MarketplaceProfile(PublicIdModel):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="marketplace_profiles")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="marketplace_profiles"
+    )
+    skills = models.JSONField(default=list, blank=True)
+    bio = models.CharField(max_length=500, blank=True)
+    visible = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["event", "user"], name="unique_marketplace_profile")
+        ]
+
+
+class TeamOpening(PublicIdModel):
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="marketplace_openings")
+    project = models.ForeignKey(
+        "projects.Project",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="team_openings",
+    )
+    title = models.CharField(max_length=120)
+    description = models.CharField(max_length=500, blank=True)
+    desired_skills = models.JSONField(default=list, blank=True)
+    is_open = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        if self.project_id and self.project.team_id != self.team_id:
+            raise ValidationError({"project": "Project must belong to this team."})

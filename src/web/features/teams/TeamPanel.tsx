@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 type Member = { user_public_id: string; username: string; role: string };
 type Team = { public_id: string; name: string; members: Member[] };
@@ -70,9 +70,11 @@ async function request<T>(
 export function TeamPanel({
   workspaceId,
   eventId,
+  onTeamChange,
 }: {
   workspaceId: string;
   eventId: string;
+  onTeamChange?: () => void;
 }) {
   const base = `/api/v1/workspaces/${workspaceId}/events/${eventId}/`;
   const [status, setStatus] = useState<Status | null>(null);
@@ -81,10 +83,16 @@ export function TeamPanel({
   const [teamName, setTeamName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const teamFingerprint = useRef<string | null>(null);
 
   async function refresh() {
     const nextStatus = await request<Status>(base + "my-team/");
     setStatus(nextStatus);
+    const fingerprint = `${nextStatus.team?.public_id ?? ""}:${nextStatus.my_role ?? ""}`;
+    if (teamFingerprint.current !== fingerprint) {
+      teamFingerprint.current = fingerprint;
+      onTeamChange?.();
+    }
     if (nextStatus.team && nextStatus.my_role === "captain") {
       setInvites(await request<Invite[]>(base + "my-team/invites/"));
     } else {

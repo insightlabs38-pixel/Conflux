@@ -22,6 +22,20 @@ export type InputOfAbuseSignalSchema = {
   resolution_note: string;
 };
 
+export type AccessibilityWarning = {
+  category: CategoryEnum;
+  severity: string;
+  message: string;
+  block_public_id: string | null;
+};
+
+export type InputOfAccessibilityWarning = {
+  category: InputOfCategoryEnum;
+  severity: string;
+  message: string;
+  block_public_id: string | null;
+};
+
 export type ActionEnum = "submit" | "join" | "advance" | "vote" | "award";
 
 export type InputOfActionEnum =
@@ -612,6 +626,12 @@ export type InputOfCandidateSchema = { project: string; name: string };
 export type CandidateTypeEnum = "project";
 
 export type InputOfCandidateTypeEnum = "project";
+
+export type CategoryEnum =
+  "contrast" | "heading" | "accessible-name" | "keyboard";
+
+export type InputOfCategoryEnum =
+  "contrast" | "heading" | "accessible-name" | "keyboard";
 
 export type ChecklistItemSchema = {
   id: string;
@@ -3268,6 +3288,10 @@ export interface Operations {
     };
     response: Page;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_page_accessibility_audit: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: AccessibilityWarning[];
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_page_blocks: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: PageBlock;
@@ -5247,6 +5271,15 @@ export const operations = {
     request_body: true,
     response_kind: "json",
   },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_page_accessibility_audit:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/page/accessibility-audit/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_page_blocks:
     {
       method: "GET",

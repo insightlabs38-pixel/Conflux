@@ -7,6 +7,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
+from .accessibility import audit_page
 from .models import Page, PageBlock
 from .serializers import PageBlockSerializer, PageSerializer
 
@@ -81,6 +82,30 @@ class PageBlockDetailView(PageMixin):
     def delete(self, request, workspace_public_id, event_public_id, block_public_id):
         self.get_block().delete()
         return Response(status=204)
+
+
+class PageAccessibilityAuditView(PageMixin):
+    """S22: on-demand advisory contrast/heading/accessible-name/keyboard
+    warnings for this page's current theme and blocks. Purely a read --
+    nothing here blocks saving or publishing a page.
+    """
+
+    @extend_schema(
+        responses=inline_serializer(
+            "AccessibilityWarning",
+            fields={
+                "category": serializers.ChoiceField(
+                    choices=["contrast", "heading", "accessible-name", "keyboard"]
+                ),
+                "severity": serializers.CharField(),
+                "message": serializers.CharField(),
+                "block_public_id": serializers.UUIDField(allow_null=True),
+            },
+            many=True,
+        )
+    )
+    def get(self, request, workspace_public_id, event_public_id):
+        return Response(audit_page(self.get_page()))
 
 
 class PageBlockReorderView(PageMixin):

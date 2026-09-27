@@ -24,6 +24,12 @@ type Block = {
   config: Record<string, unknown>;
 };
 type Page = { public_id: string; theme: Theme };
+type AuditWarning = {
+  category: "contrast" | "heading" | "accessible-name" | "keyboard";
+  severity: string;
+  message: string;
+  block_public_id: string | null;
+};
 
 const KIND_LABELS: Record<Kind, string> = {
   hero: "Hero",
@@ -286,7 +292,12 @@ export function PageBuilder({
   const [page, setPage] = useState<Page | null>(null);
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [addKind, setAddKind] = useState<Kind>("hero");
+  const [warnings, setWarnings] = useState<AuditWarning[]>([]);
   const [error, setError] = useState("");
+
+  async function refreshAudit() {
+    setWarnings(await request<AuditWarning[]>(base + "accessibility-audit/"));
+  }
 
   async function refresh() {
     const [nextPage, nextBlocks] = await Promise.all([
@@ -295,6 +306,7 @@ export function PageBuilder({
     ]);
     setPage(nextPage);
     setBlocks(nextBlocks);
+    await refreshAudit();
   }
 
   useEffect(() => {
@@ -306,6 +318,7 @@ export function PageBuilder({
     try {
       const updated = await request<Page>(base, "PATCH", { theme });
       setPage(updated);
+      await refreshAudit();
     } catch (cause) {
       setError(message(cause));
     }
@@ -336,6 +349,7 @@ export function PageBuilder({
         item.public_id === block.public_id ? updated : item,
       ),
     );
+    await refreshAudit();
   }
 
   async function removeBlock(block: Block) {
@@ -374,6 +388,19 @@ export function PageBuilder({
             <option value="minimal">Minimal</option>
           </select>
         </label>
+      )}
+      {warnings.length > 0 && (
+        <div role="status" aria-label="Accessibility warnings">
+          <h4>Accessibility warnings</h4>
+          <ul>
+            {warnings.map((warning, index) => (
+              <li key={index}>
+                <Badge tone="warning">{warning.category}</Badge>{" "}
+                {warning.message}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
       {blocks.length === 0 ? (
         <EmptyState title="This event's public page has no blocks yet." />

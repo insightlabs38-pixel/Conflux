@@ -41,6 +41,11 @@ urlpatterns = [
         name="page-block-list",
     ),
     path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/page/accessibility-audit/",
+        views.PageAccessibilityAuditView.as_view(),
+        name="page-accessibility-audit",
+    ),
+    path(
         "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/page/blocks/reorder/",
         views.PageBlockReorderView.as_view(),
         name="page-block-reorder",

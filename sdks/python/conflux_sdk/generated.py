@@ -24,6 +24,18 @@ class InputOfAbuseSignalSchema(TypedDict):
     resolved_by: str | None
     resolution_note: str
 
+class AccessibilityWarning(TypedDict):
+    category: CategoryEnum
+    severity: str
+    message: str
+    block_public_id: str | None
+
+class InputOfAccessibilityWarning(TypedDict):
+    category: InputOfCategoryEnum
+    severity: str
+    message: str
+    block_public_id: str | None
+
 ActionEnum = Literal['submit', 'join', 'advance', 'vote', 'award']
 
 InputOfActionEnum = Literal['submit', 'join', 'advance', 'vote', 'award']
@@ -556,6 +568,10 @@ class InputOfCandidateSchema(TypedDict):
 CandidateTypeEnum = Literal['project']
 
 InputOfCandidateTypeEnum = Literal['project']
+
+CategoryEnum = Literal['contrast', 'heading', 'accessible-name', 'keyboard']
+
+InputOfCategoryEnum = Literal['contrast', 'heading', 'accessible-name', 'keyboard']
 
 class ChecklistItemSchema(TypedDict):
     id: str
@@ -2884,6 +2900,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                            'query_params': [],
                                                                            'request_body': False,
                                                                            'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_page_accessibility_audit': {'method': 'GET',
+                                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/page/accessibility-audit/',
+                                                                                               'path_params': ['event_public_id',
+                                                                                                               'workspace_public_id'],
+                                                                                               'query_params': [],
+                                                                                               'request_body': False,
+                                                                                               'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_page_blocks': {'method': 'GET',
                                                                                   'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/page/blocks/',
                                                                                   'path_params': ['event_public_id',

@@ -88,6 +88,34 @@ def compute_assignment(plan, *, coverage: int = 3) -> list[Pairing]:
     return pairs
 
 
+def _build_evidence(plan, pairs: list[Pairing], *, coverage: int) -> dict:
+    per_judge = {}
+    for pairing in pairs:
+        per_judge[pairing.judge_id] = per_judge.get(pairing.judge_id, 0) + 1
+    conflict_count = ConflictOfInterest.objects.filter(event_id=plan.stage.event_id).count()
+    return {
+        "coverage": coverage,
+        "candidate_count": len({p.project_id for p in pairs}),
+        "judge_count": len(per_judge),
+        "assignment_count": len(pairs),
+        "load_by_judge": {str(k): v for k, v in sorted(per_judge.items())},
+        "conflict_count": conflict_count,
+        "connectivity": connectivity_report(pairs, per_judge.keys()).as_dict(),
+    }
+
+
+def preview(plan, *, coverage: int = 3) -> dict:
+    """Read-only preview of what `activate(plan, coverage=coverage)` would
+    produce -- the same coverage/load/conflict/expertise(-via-connectivity)
+    evidence, without writing an AssignmentVersion or touching `plan`'s
+    active one (S04). Lets an organizer compare several coverage values
+    before committing to an activation, which is otherwise immutable once
+    created.
+    """
+    pairs = compute_assignment(plan, coverage=coverage)
+    return _build_evidence(plan, pairs, coverage=coverage)
+
+
 def activate(plan, *, coverage: int = 3):
     """Compute + freeze a new AssignmentVersion, and make it `plan`'s active
     one. Caller is responsible for wrapping this in a transaction and
@@ -99,22 +127,11 @@ def activate(plan, *, coverage: int = 3):
     next_number = (
         plan.assignment_versions.order_by("-number").values_list("number", flat=True).first() or 0
     ) + 1
-    per_judge = {}
-    for pairing in pairs:
-        per_judge[pairing.judge_id] = per_judge.get(pairing.judge_id, 0) + 1
-    conflict_count = ConflictOfInterest.objects.filter(event_id=plan.stage.event_id).count()
     version = AssignmentVersion.objects.create(
         plan=plan,
         number=next_number,
         coverage=coverage,
-        evidence={
-            "candidate_count": len({p.project_id for p in pairs}),
-            "judge_count": len(per_judge),
-            "assignment_count": len(pairs),
-            "load_by_judge": {str(k): v for k, v in sorted(per_judge.items())},
-            "conflict_count": conflict_count,
-            "connectivity": connectivity_report(pairs, per_judge.keys()).as_dict(),
-        },
+        evidence=_build_evidence(plan, pairs, coverage=coverage),
     )
     Assignment.objects.bulk_create(
         [Assignment(version=version, judge_id=p.judge_id, project_id=p.project_id) for p in pairs]

@@ -31,6 +31,11 @@ urlpatterns = [
         name="evaluation-plan-assignments-activate",
     ),
     path(
+        f"{_PLAN}/assignments/preview/",
+        views.AssignmentPreviewView.as_view(),
+        name="evaluation-plan-assignments-preview",
+    ),
+    path(
         f"{_PLAN}/assignments/",
         views.AssignmentDetailView.as_view(),
         name="evaluation-plan-assignments",

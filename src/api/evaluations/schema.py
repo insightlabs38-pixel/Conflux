@@ -94,6 +94,22 @@ class PairwiseResultsPublishInputSchema(serializers.Serializer):
     tie_breaks = serializers.DictField(child=serializers.IntegerField(), required=False)
 
 
+class AssignmentPreviewInputSchema(serializers.Serializer):
+    coverage_options = serializers.ListField(
+        child=serializers.IntegerField(min_value=1), required=False
+    )
+
+
+class AssignmentCoveragePreviewSchema(serializers.Serializer):
+    coverage = serializers.IntegerField()
+    candidate_count = serializers.IntegerField()
+    judge_count = serializers.IntegerField()
+    assignment_count = serializers.IntegerField()
+    load_by_judge = serializers.DictField(child=serializers.IntegerField())
+    conflict_count = serializers.IntegerField()
+    connectivity = serializers.DictField()
+
+
 class AgreementCriterionSchema(serializers.Serializer):
     project = serializers.UUIDField()
     project_name = serializers.CharField()

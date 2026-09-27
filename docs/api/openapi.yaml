@@ -4840,6 +4840,64 @@ paths:
               schema:
                 $ref: '#/components/schemas/AssignmentVersion'
           description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/preview/
+  : post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments_preview
+      description: |-
+        S04: preview what `activate` would produce for one or more coverage
+        values, without writing anything -- an organizer can compare coverage/
+        load/conflict/expertise(-via-connectivity) before committing to an
+        activation, which is otherwise immutable once created.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignmentPreviewInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AssignmentPreviewInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssignmentPreviewInputSchema'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AssignmentCoveragePreviewSchema'
+          description: ''
   ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/ballots/
   : get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_ballots
@@ -7852,6 +7910,42 @@ components:
         coverage:
           type: integer
           minimum: 1
+    AssignmentCoveragePreviewSchema:
+      type: object
+      properties:
+        coverage:
+          type: integer
+        candidate_count:
+          type: integer
+        judge_count:
+          type: integer
+        assignment_count:
+          type: integer
+        load_by_judge:
+          type: object
+          additionalProperties:
+            type: integer
+        conflict_count:
+          type: integer
+        connectivity:
+          type: object
+          additionalProperties: {}
+      required:
+      - assignment_count
+      - candidate_count
+      - conflict_count
+      - connectivity
+      - coverage
+      - judge_count
+      - load_by_judge
+    AssignmentPreviewInputSchema:
+      type: object
+      properties:
+        coverage_options:
+          type: array
+          items:
+            type: integer
+            minimum: 1
     AssignmentVersion:
       type: object
       properties:

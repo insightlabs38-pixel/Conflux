@@ -21,6 +21,7 @@ from workspaces.models import Role
 
 from . import agreement, normalization, pairwise
 from .assignment import activate
+from .assignment import preview as preview_assignment
 from .models import (
     Assignment,
     Ballot,
@@ -42,6 +43,8 @@ from .results import pairwise_ranked_results, ranked_results
 from .schema import (
     AgreementSummarySchema,
     AssignmentActivateInputSchema,
+    AssignmentCoveragePreviewSchema,
+    AssignmentPreviewInputSchema,
     BallotDraftInputSchema,
     BallotSubmitInputSchema,
     CalibrationProjectItemSchema,
@@ -540,6 +543,33 @@ class AssignmentActivateView(PlanMixin):
             metadata=version.evidence,
         )
         return Response(AssignmentVersionSerializer(version).data, status=201)
+
+
+class AssignmentPreviewView(PlanMixin):
+    """S04: preview what `activate` would produce for one or more coverage
+    values, without writing anything -- an organizer can compare coverage/
+    load/conflict/expertise(-via-connectivity) before committing to an
+    activation, which is otherwise immutable once created.
+    """
+
+    @extend_schema(
+        request=AssignmentPreviewInputSchema, responses=AssignmentCoveragePreviewSchema(many=True)
+    )
+    def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        coverage_options = request.data.get("coverage_options") or [3]
+        if (
+            not isinstance(coverage_options, list)
+            or not coverage_options
+            or len(coverage_options) > 10
+            or any(not isinstance(v, int) or isinstance(v, bool) or v < 1 for v in coverage_options)
+        ):
+            raise ValidationError({"coverage_options": "Must be 1-10 positive integers."})
+        try:
+            previews = [preview_assignment(plan, coverage=value) for value in coverage_options]
+        except ValueError as exc:
+            raise ValidationError({"detail": str(exc)}) from exc
+        return Response(previews)
 
 
 class AssignmentDetailView(PlanMixin):

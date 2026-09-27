@@ -2,6 +2,7 @@ from accounts.authentication import CookieSessionAuthentication
 from core.permissions import IsWorkspaceMember
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema
 from events.models import Event
 from projects.models import Project
 from rest_framework.exceptions import ValidationError
@@ -11,6 +12,14 @@ from workspaces.models import Membership, Workspace
 
 from .models import Artifact, ArtifactStatus, ArtifactUploadIntent, can_view_artifact
 from .preflight import run_preflight
+from .schema import (
+    ArtifactSchema,
+    ExternalArtifactInputSchema,
+    PreflightSchema,
+    UploadCompleteInputSchema,
+    UploadIntentInputSchema,
+    UploadIntentSchema,
+)
 from .services import begin_upload, complete_upload, create_external_artifact
 from .storage import S3Storage
 from .validators import validate_artifact
@@ -66,6 +75,8 @@ class ProjectArtifactView(APIView):
 
 
 class ArtifactListView(ProjectArtifactView):
+    serializer_class = ArtifactSchema
+
     def get(self, request, workspace_public_id, event_public_id, project_public_id):
         return Response(
             [
@@ -75,6 +86,7 @@ class ArtifactListView(ProjectArtifactView):
             ]
         )
 
+    @extend_schema(request=ExternalArtifactInputSchema, responses={201: ArtifactSchema})
     def post(self, request, workspace_public_id, event_public_id, project_public_id):
         try:
             artifact = create_external_artifact(
@@ -91,6 +103,7 @@ class ArtifactListView(ProjectArtifactView):
 
 
 class UploadIntentView(ProjectArtifactView):
+    @extend_schema(request=UploadIntentInputSchema, responses={201: UploadIntentSchema})
     def post(self, request, workspace_public_id, event_public_id, project_public_id):
         if isinstance(request.data.get("byte_size"), bool):
             raise ValidationError({"byte_size": "A valid byte size is required."})
@@ -122,6 +135,7 @@ class UploadIntentView(ProjectArtifactView):
 
 
 class UploadCompleteView(ProjectArtifactView):
+    @extend_schema(request=UploadCompleteInputSchema, responses=ArtifactSchema)
     def post(
         self,
         request,
@@ -143,6 +157,8 @@ class UploadCompleteView(ProjectArtifactView):
 
 
 class ArtifactDetailView(ProjectArtifactView):
+    serializer_class = ArtifactSchema
+
     def get(
         self, request, workspace_public_id, event_public_id, project_public_id, artifact_public_id
     ):
@@ -156,6 +172,7 @@ class ArtifactDetailView(ProjectArtifactView):
 
 
 class ArtifactValidateView(ProjectArtifactView):
+    @extend_schema(request=None, responses=ArtifactSchema)
     def post(
         self, request, workspace_public_id, event_public_id, project_public_id, artifact_public_id
     ):
@@ -173,5 +190,7 @@ class ArtifactValidateView(ProjectArtifactView):
 
 
 class ProjectPreflightView(ProjectArtifactView):
+    serializer_class = PreflightSchema
+
     def get(self, request, workspace_public_id, event_public_id, project_public_id):
         return Response(run_preflight(self.get_project()).as_dict())

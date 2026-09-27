@@ -269,3 +269,22 @@ def test_participant_event_picker_shows_only_published_events_in_own_workspace()
     assert cookie_client(outsider).get(
         f"/api/v1/workspaces/{workspace.public_id}/participant-events/"
     ).status_code in (401, 403)
+
+
+def test_judge_event_picker_includes_private_events_but_requires_judge_role():
+    workspace, event = make_event_and_members()
+    event.name = "Private final"
+    event.status = "closed"
+    event.is_public = False
+    event.save(update_fields=["name", "status", "is_public"])
+    Event.objects.create(workspace=workspace, name="Archived", slug="archived", status="archived")
+    other_workspace = Workspace.objects.create(name="Other", slug="other")
+    Event.objects.create(workspace=other_workspace, name="Other", slug="other")
+    judge = add_member(workspace, "judge", Role.JUDGE)
+    participant = add_member(workspace, "participant")
+    url = f"/api/v1/workspaces/{workspace.public_id}/judge-events/"
+    assert cookie_client(judge).get(url).json() == [
+        {"public_id": str(event.public_id), "name": "Private final"}
+    ]
+    assert cookie_client(participant).get(url).status_code == 403
+    assert cookie_client(make_user("stranger")).get(url).status_code in (401, 403)

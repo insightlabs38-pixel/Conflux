@@ -9,7 +9,11 @@ import { Inbox } from "../communications/Inbox";
 
 type Event = { public_id: string; name: string };
 type Stage = { public_id: string; name: string };
-type Plan = { public_id: string; name: string; current_rubric_version: number | null };
+type Plan = {
+  public_id: string;
+  name: string;
+  current_rubric_version: number | null;
+};
 type Candidate = {
   project: string;
   name: string;
@@ -37,7 +41,11 @@ function message(value: unknown): string {
   return "Request failed.";
 }
 
-async function request<T>(url: string, method = "GET", body?: object): Promise<T> {
+async function request<T>(
+  url: string,
+  method = "GET",
+  body?: object,
+): Promise<T> {
   const response = await fetch(url, {
     method,
     credentials: "include",
@@ -53,7 +61,9 @@ async function request<T>(url: string, method = "GET", body?: object): Promise<T
     }
     throw new Error(message(detail));
   }
-  return response.status === 204 ? (undefined as T) : (response.json() as Promise<T>);
+  return response.status === 204
+    ? (undefined as T)
+    : (response.json() as Promise<T>);
 }
 
 function BallotForm({
@@ -72,42 +82,78 @@ function BallotForm({
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState("");
   const draftUrl = `${base}ballots/${candidate.project}/draft/`;
   const latest = useRef({ scores: {} as Record<string, string>, comment: "" });
+  const pending = useRef<Promise<void>>(Promise.resolve());
 
   useEffect(() => {
     let active = true;
     request<Draft>(draftUrl)
       .then((draft) => {
-        if (!active || !draft) return;
+        if (!active) return;
+        if (!draft) {
+          setLoaded(true);
+          return;
+        }
         const loaded = Object.fromEntries(
-          Object.entries(draft.responses).map(([id, score]) => [id, String(score)]),
+          Object.entries(draft.responses).map(([id, score]) => [
+            id,
+            String(score),
+          ]),
         );
         setScores(loaded);
         setComment(draft.comment);
         latest.current = { scores: loaded, comment: draft.comment };
+        setLoaded(true);
       })
-      .catch(() => undefined);
+      .catch((cause: unknown) => {
+        if (active) setError(message(cause));
+      });
     return () => {
       active = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftUrl]);
 
+  function saveDraft() {
+    const snapshot = {
+      ...latest.current,
+      scores: { ...latest.current.scores },
+    };
+    const numeric = Object.fromEntries(
+      Object.entries(snapshot.scores)
+        .filter(([, value]) => value !== "")
+        .map(([id, value]) => [id, Number(value)]),
+    );
+    setSaving(true);
+    const work = pending.current
+      .catch(() => undefined)
+      .then(async () => {
+        await request(draftUrl, "PUT", {
+          responses: numeric,
+          comment: snapshot.comment,
+        });
+        if (JSON.stringify(latest.current) === JSON.stringify(snapshot))
+          setDirty(false);
+        setError("");
+      });
+    pending.current = work;
+    return work
+      .catch((cause: unknown) => {
+        setError(`Draft not saved: ${message(cause)}`);
+        throw cause;
+      })
+      .finally(() => {
+        if (pending.current === work) setSaving(false);
+      });
+  }
+
   useEffect(() => {
     if (!dirty) return;
     const timer = window.setTimeout(() => {
-      setSaving(true);
-      const numeric = Object.fromEntries(
-        Object.entries(latest.current.scores)
-          .filter(([, value]) => value !== "")
-          .map(([id, value]) => [id, Number(value)]),
-      );
-      request(draftUrl, "PUT", { responses: numeric, comment: latest.current.comment })
-        .catch(() => undefined)
-        .finally(() => setSaving(false));
-      setDirty(false);
+      void saveDraft().catch(() => undefined);
     }, 700);
     return () => window.clearTimeout(timer);
   }, [scores, comment, dirty, draftUrl]);
@@ -127,14 +173,24 @@ function BallotForm({
       criterion_id: criterion.id,
       score: Number(scores[criterion.id]),
     }));
-    const missing = responses.some((r) => Number.isNaN(r.score));
+    const missing = rubric.criteria.some(
+      (criterion) =>
+        scores[criterion.id] === "" || scores[criterion.id] === undefined,
+    );
     if (missing) {
       setError("Every criterion needs a score before you can submit.");
       setSubmitting(false);
       return;
     }
     try {
-      await request(`${base}ballots/`, "POST", { project: candidate.project, comment, responses });
+      if (!loaded) throw new Error("Draft has not loaded.");
+      if (dirty) await saveDraft();
+      else await pending.current;
+      await request(`${base}ballots/`, "POST", {
+        project: candidate.project,
+        comment,
+        responses,
+      });
       onSubmitted();
     } catch (cause) {
       setError(message(cause));
@@ -150,7 +206,7 @@ function BallotForm({
       {error && <p role="alert">{error}</p>}
       <form onSubmit={submit}>
         {rubric.criteria.map((criterion) => (
-          <fieldset key={criterion.id} disabled={finalized}>
+          <fieldset key={criterion.id} disabled={!loaded || finalized}>
             <legend>
               {criterion.name} ({criterion.min_score}–{criterion.max_score})
             </legend>
@@ -175,19 +231,41 @@ function BallotForm({
         <label>
           Comment{" "}
           <textarea
-            disabled={finalized}
+            disabled={!loaded || finalized}
             value={comment}
             onChange={(event) => {
               setComment(event.target.value);
-              latest.current = { ...latest.current, comment: event.target.value };
+              latest.current = {
+                ...latest.current,
+                comment: event.target.value,
+              };
               setDirty(true);
             }}
           />
         </label>
         {!finalized && (
           <>
-            <p role="status">{saving ? "Saving draft…" : dirty ? "Unsaved changes" : "Draft saved"}</p>
-            <Button disabled={submitting}>{submitting ? "Submitting…" : "Submit ballot"}</Button>
+            <p role="status">
+              {!loaded
+                ? "Draft unavailable"
+                : saving
+                  ? "Saving draft…"
+                  : dirty
+                    ? "Unsaved changes"
+                    : "Draft saved"}
+            </p>
+            {error && dirty && loaded && (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => void saveDraft().catch(() => undefined)}
+              >
+                Retry draft save
+              </Button>
+            )}
+            <Button disabled={!loaded || submitting || saving}>
+              {submitting ? "Submitting…" : "Submit ballot"}
+            </Button>
           </>
         )}
         {finalized && <p role="status">Ballot submitted.</p>}
@@ -221,9 +299,12 @@ function PlanQueue({ base }: { base: string }) {
 
   if (loading) return <LoadingState label="Loading your review queue…" />;
   if (error) return <ErrorState message={error} onRetry={refresh} />;
-  if (!rubric) return <EmptyState title="This plan has no published rubric yet." />;
+  if (!rubric)
+    return <EmptyState title="This plan has no published rubric yet." />;
   if (candidates.length === 0)
-    return <EmptyState title="You have no projects assigned to review right now." />;
+    return (
+      <EmptyState title="You have no projects assigned to review right now." />
+    );
 
   const current = candidates.find((c) => c.project === selected);
 
@@ -232,7 +313,10 @@ function PlanQueue({ base }: { base: string }) {
       <ul>
         {candidates.map((candidate) => (
           <li key={candidate.project}>
-            <button type="button" onClick={() => setSelected(candidate.project)}>
+            <button
+              type="button"
+              onClick={() => setSelected(candidate.project)}
+            >
               {candidate.name}
             </button>{" "}
             <Badge
@@ -272,29 +356,70 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    request<Event[]>(`/api/v1/workspaces/${workspaceId}/participant-events/`)
-      .then(setEvents)
-      .catch((cause: unknown) => setError(message(cause)));
+    let active = true;
+    request<Event[]>(`/api/v1/workspaces/${workspaceId}/judge-events/`)
+      .then((items) => {
+        if (active) setEvents(items);
+      })
+      .catch((cause: unknown) => {
+        if (active) setError(message(cause));
+      });
+    return () => {
+      active = false;
+    };
   }, [workspaceId]);
 
   useEffect(() => {
     if (!eventId) return;
-    request<Stage[]>(`/api/v1/workspaces/${workspaceId}/events/${eventId}/stages/`)
-      .then(setStages)
-      .catch((cause: unknown) => setError(message(cause)));
+    let active = true;
+    request<Stage[]>(
+      `/api/v1/workspaces/${workspaceId}/events/${eventId}/stages/`,
+    )
+      .then((items) => {
+        if (active) setStages(items);
+      })
+      .catch((cause: unknown) => {
+        if (active) setError(message(cause));
+      });
+    return () => {
+      active = false;
+    };
   }, [workspaceId, eventId]);
 
   useEffect(() => {
     if (!stageId) return;
+    let active = true;
     request<Plan[]>(
       `/api/v1/workspaces/${workspaceId}/events/${eventId}/stages/${stageId}/evaluation-plans/`,
     )
       .then((items) => {
+        if (!active) return;
         setPlans(items);
         if (items.length === 1) setPlanId(items[0].public_id);
       })
-      .catch((cause: unknown) => setError(message(cause)));
+      .catch((cause: unknown) => {
+        if (active) setError(message(cause));
+      });
+    return () => {
+      active = false;
+    };
   }, [workspaceId, eventId, stageId]);
+
+  function chooseEvent(id: string) {
+    setEventId(id);
+    setStages([]);
+    setStageId("");
+    setPlans([]);
+    setPlanId("");
+    setError("");
+  }
+
+  function chooseStage(id: string) {
+    setStageId(id);
+    setPlans([]);
+    setPlanId("");
+    setError("");
+  }
 
   const planBase = planId
     ? `/api/v1/workspaces/${workspaceId}/events/${eventId}/stages/${stageId}/evaluation-plans/${planId}/`
@@ -307,7 +432,7 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
       {error && <p role="alert">{error}</p>}
       <label>
         Event{" "}
-        <select value={eventId} onChange={(e) => setEventId(e.target.value)}>
+        <select value={eventId} onChange={(e) => chooseEvent(e.target.value)}>
           <option value="">Choose an event</option>
           {events.map((event) => (
             <option key={event.public_id} value={event.public_id}>
@@ -319,7 +444,7 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
       {stages.length > 0 && (
         <label>
           Stage{" "}
-          <select value={stageId} onChange={(e) => setStageId(e.target.value)}>
+          <select value={stageId} onChange={(e) => chooseStage(e.target.value)}>
             <option value="">Choose a stage</option>
             {stages.map((stage) => (
               <option key={stage.public_id} value={stage.public_id}>

@@ -62,12 +62,15 @@ export function EventSite({ eventId }: { eventId: string }) {
     setError("");
     fetch(`/api/v1/events/${eventId}/`)
       .then((response) => {
-        if (!response.ok) throw new Error(`Event not found (${response.status}).`);
+        if (!response.ok)
+          throw new Error(`Event not found (${response.status}).`);
         return response.json() as Promise<PublicEvent>;
       })
       .then(setEvent)
       .catch((cause: unknown) =>
-        setError(cause instanceof Error ? cause.message : "Could not load this event."),
+        setError(
+          cause instanceof Error ? cause.message : "Could not load this event.",
+        ),
       )
       .finally(() => setLoading(false));
   };
@@ -86,6 +89,9 @@ export function EventSite({ eventId }: { eventId: string }) {
           <Badge tone="info">{event.status}</Badge>
           {schedule && <p>{schedule}</p>}
           {event.description && <p>{event.description}</p>}
+          <p>
+            <a href={`/e/${eventId}/gallery/`}>Browse project gallery</a>
+          </p>
           <PublicAwards eventId={eventId} />
 
           <section aria-label="Tracks">

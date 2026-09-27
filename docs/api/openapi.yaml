@@ -6461,6 +6461,33 @@ paths:
               schema:
                 $ref: '#/components/schemas/InboxMessageSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/judge-events/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_judge_events
+      description: |-
+        Any workspace member (any role) may manage their own participation —
+        this is not organizer-only, unlike events.views.OrganizerView.
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JudgeEventSummary'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/members/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_members
@@ -8290,6 +8317,17 @@ components:
       required:
       - name
       - slug
+    JudgeEventSummary:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+      required:
+      - name
+      - public_id
     JudgeRecordInput:
       type: object
       properties:

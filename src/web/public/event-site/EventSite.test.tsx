@@ -76,13 +76,18 @@ describe("EventSite", () => {
     expect(container.textContent).toContain("A great event.");
     expect(container.textContent).toContain("AI");
     expect(container.textContent).toContain("Best AI");
-    expect(container.querySelector('h1')?.textContent).toBe("Regionals");
+    expect(container.querySelector("h1")?.textContent).toBe("Regionals");
+    expect(
+      container.querySelector('a[href="/e/e1/gallery/"]')?.textContent,
+    ).toBe("Browse project gallery");
   });
 
   it("shows an error state with retry when the event cannot be loaded", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue({ ok: false, status: 404, json: async () => ({}) }),
+      vi
+        .fn()
+        .mockResolvedValue({ ok: false, status: 404, json: async () => ({}) }),
     );
     act(() => {
       root.render(<EventSite eventId="missing" />);

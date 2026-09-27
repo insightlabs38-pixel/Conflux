@@ -32,3 +32,23 @@ it("shows published winners without internal selection evidence", async () => {
   act(() => root.unmount());
   container.remove();
 });
+
+it("shows a retryable error instead of hiding an awards failure", async () => {
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValueOnce({ ok: false, status: 503, json: async () => ({}) })
+    .mockResolvedValueOnce({ ok: true, json: async () => [] });
+  vi.stubGlobal("fetch", fetchMock);
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  await act(async () => root.render(<PublicAwards eventId="e1" />));
+  expect(container.textContent).toContain("Could not load awards (503)");
+  await act(async () => {
+    (container.querySelector("button") as HTMLButtonElement).click();
+  });
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+  expect(container.querySelector('[role="alert"]')).toBeNull();
+  act(() => root.unmount());
+  container.remove();
+});

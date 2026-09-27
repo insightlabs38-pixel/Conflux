@@ -10,6 +10,11 @@ urlpatterns = [
         views.ParticipantEventListView.as_view(),
         name="participant-events",
     ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/judge-events/",
+        views.JudgeEventListView.as_view(),
+        name="judge-events",
+    ),
     path(_prefix + "my-team/", views.MyTeamView.as_view(), name="my-team"),
     path(_prefix + "my-team/leave/", views.LeaveTeamView.as_view(), name="my-team-leave"),
     path(

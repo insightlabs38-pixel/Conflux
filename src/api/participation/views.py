@@ -1,6 +1,6 @@
 from accounts.authentication import CookieSessionAuthentication
 from accounts.models import User
-from core.permissions import IsWorkspaceMember
+from core.permissions import IsWorkspaceMember, require_roles
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
@@ -10,7 +10,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from workspaces.models import Workspace
+from workspaces.models import Role, Workspace
 
 from .models import TeamInvite, TeamMembership, TeamMembershipRole
 from .serializers import TeamInviteSerializer, TeamSerializer
@@ -63,6 +63,27 @@ class ParticipantEventListView(ParticipantView):
     def get(self, request, workspace_public_id):
         events = Event.objects.filter(workspace=self.get_workspace(), is_public=True).exclude(
             status__in=[EventStatus.DRAFT, EventStatus.ARCHIVED]
+        )
+        return Response(
+            [{"public_id": str(event.public_id), "name": event.name} for event in events]
+        )
+
+
+class JudgeEventListView(ParticipantView):
+    permission_classes = [require_roles(Role.JUDGE, Role.ORGANIZER, Role.ADMIN)]
+
+    @extend_schema(
+        responses=inline_serializer(
+            "JudgeEventSummary",
+            fields={"public_id": serializers.UUIDField(), "name": serializers.CharField()},
+            many=True,
+        )
+    )
+    def get(self, request, workspace_public_id):
+        events = (
+            Event.objects.filter(workspace=self.get_workspace())
+            .exclude(status=EventStatus.ARCHIVED)
+            .order_by("name")
         )
         return Response(
             [{"public_id": str(event.public_id), "name": event.name} for event in events]

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card } from "../../components/Card";
+import { ErrorState } from "../../components/ErrorState";
 
 type Award = {
   public_id: string;
@@ -10,20 +11,39 @@ type Award = {
 
 export function PublicAwards({ eventId }: { eventId: string }) {
   const [awards, setAwards] = useState<Award[]>([]);
+  const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
   useEffect(() => {
     let active = true;
     fetch(`/api/v1/events/${eventId}/awards/`)
-      .then((response) =>
-        response.ok ? (response.json() as Promise<Award[]>) : [],
-      )
-      .then((items) => {
-        if (active && Array.isArray(items)) setAwards(items);
+      .then((response) => {
+        if (!response.ok)
+          throw new Error(`Could not load awards (${response.status}).`);
+        return response.json() as Promise<Award[]>;
       })
-      .catch(() => {});
+      .then((items) => {
+        if (active && Array.isArray(items)) {
+          setAwards(items);
+          setError("");
+        }
+      })
+      .catch((cause: unknown) => {
+        if (active)
+          setError(
+            cause instanceof Error ? cause.message : "Could not load awards.",
+          );
+      });
     return () => {
       active = false;
     };
-  }, [eventId]);
+  }, [eventId, retry]);
+  if (error)
+    return (
+      <ErrorState
+        message={error}
+        onRetry={() => setRetry((count) => count + 1)}
+      />
+    );
   if (awards.length === 0) return null;
   return (
     <section aria-label="Awards">

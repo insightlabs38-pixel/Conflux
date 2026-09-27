@@ -2,21 +2,15 @@ from copy import deepcopy
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from projects.models import Project
 from stages.models import Stage
 
-from .models import FormDefinition, FormVersion
+from .models import FormAnswer, FormDefinition, FormResponse, FormVersion
+from .validation import validate_answer, validate_schema
 
 
 def validate_draft_schema(schema):
-    if not isinstance(schema, dict) or not isinstance(schema.get("fields"), list):
-        raise ValidationError({"schema": "Schema must contain a fields list."})
-    ids = []
-    for field in schema["fields"]:
-        if not isinstance(field, dict) or not isinstance(field.get("id"), str) or not field["id"]:
-            raise ValidationError({"schema": "Every field needs a nonempty string id."})
-        ids.append(field["id"])
-    if len(ids) != len(set(ids)):
-        raise ValidationError({"schema": "Field ids must be unique."})
+    validate_schema(schema)
 
 
 @transaction.atomic
@@ -50,3 +44,31 @@ def publish_form(definition):
     version.full_clean()
     version.save()
     return version
+
+
+@transaction.atomic
+def save_response(project, version, actor, answers):
+    Project.objects.select_for_update().get(pk=project.pk)
+    if not project.memberships.filter(user=actor).exists():
+        raise ValidationError("Only project members can edit its form response.")
+    if version.definition.event_id != project.event_id:
+        raise ValidationError("Form and project must belong to the same event.")
+    if not isinstance(answers, dict):
+        raise ValidationError("Answers must be an object keyed by field id.")
+    fields = {field["id"]: field for field in version.schema["fields"]}
+    if set(answers) - set(fields):
+        raise ValidationError("Answers contain an unknown field.")
+    for field_id, field in fields.items():
+        validate_answer(field, answers.get(field_id))
+    response, _ = FormResponse.objects.select_for_update().get_or_create(
+        project=project, version=version, defaults={"updated_by": actor}
+    )
+    response.updated_by = actor
+    response.full_clean()
+    response.save(update_fields=["updated_by", "updated_at"])
+    response.answers.all().delete()
+    for field_id, value in answers.items():
+        answer = FormAnswer(response=response, field_id=field_id, value=value)
+        answer.full_clean()
+        answer.save()
+    return response

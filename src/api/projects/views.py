@@ -8,11 +8,13 @@ from participation.models import Team
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from stages.models import Stage
 from workspaces.models import Workspace
 
-from .models import Project, ProjectMembershipRole
+from .models import Project, ProjectMembershipRole, Submission
 from .serializers import ProjectMembershipSerializer, ProjectSerializer
 from .services import add_project_member, create_project
+from .submissions import finalize_submission, save_draft
 
 
 class ProjectView(APIView):
@@ -85,3 +87,111 @@ class ProjectMemberView(ProjectView):
                 exc.message_dict if hasattr(exc, "message_dict") else exc.messages
             ) from exc
         return Response(ProjectMembershipSerializer(membership).data, status=201)
+
+
+def submission_payload(submission):
+    current = submission.current_version
+    return {
+        "public_id": str(submission.public_id),
+        "stage": str(submission.stage.public_id),
+        "status": submission.status,
+        "draft_payload": submission.draft_payload,
+        "draft_revision": submission.draft_revision,
+        "current_version": str(current.public_id) if current else None,
+        "versions": [
+            {
+                "public_id": str(version.public_id),
+                "number": version.number,
+                "digest": version.digest,
+                "finalized_at": version.finalized_at,
+                "finalized_by": str(version.finalized_by.public_id),
+            }
+            for version in submission.versions.select_related("finalized_by").all()
+        ],
+    }
+
+
+class ProjectSubmissionView(ProjectView):
+    def get_project(self):
+        return get_object_or_404(
+            Project,
+            event=self.get_event(),
+            public_id=self.kwargs["project_public_id"],
+            memberships__user=self.request.user,
+        )
+
+    def get_stage(self):
+        return get_object_or_404(
+            Stage, event=self.get_event(), public_id=self.kwargs["stage_public_id"]
+        )
+
+
+class SubmissionStageListView(ProjectSubmissionView):
+    def get(self, request, workspace_public_id, event_public_id, project_public_id):
+        project = self.get_project()
+        submissions = {
+            item.stage_id: item
+            for item in Submission.objects.filter(project=project).select_related(
+                "stage", "current_version"
+            )
+        }
+        return Response(
+            [
+                {
+                    "public_id": str(stage.public_id),
+                    "name": stage.name,
+                    "submission": submission_payload(submissions[stage.pk])
+                    if stage.pk in submissions
+                    else None,
+                }
+                for stage in Stage.objects.filter(event=project.event)
+            ]
+        )
+
+
+class SubmissionDetailView(ProjectSubmissionView):
+    def get(
+        self, request, workspace_public_id, event_public_id, project_public_id, stage_public_id
+    ):
+        submission = get_object_or_404(
+            Submission, project=self.get_project(), stage=self.get_stage()
+        )
+        return Response(submission_payload(submission))
+
+    def put(
+        self, request, workspace_public_id, event_public_id, project_public_id, stage_public_id
+    ):
+        try:
+            submission = save_draft(
+                self.get_project(),
+                self.get_stage(),
+                request.user,
+                payload=request.data.get("draft_payload"),
+                revision=request.data.get("draft_revision"),
+            )
+        except ModelValidationError as exc:
+            raise ValidationError(
+                exc.message_dict if hasattr(exc, "message_dict") else exc.messages
+            ) from exc
+        return Response(submission_payload(submission))
+
+
+class SubmissionFinalizeView(ProjectSubmissionView):
+    def post(
+        self, request, workspace_public_id, event_public_id, project_public_id, stage_public_id
+    ):
+        try:
+            submission, version, created = finalize_submission(
+                self.get_project(),
+                self.get_stage(),
+                request.user,
+                revision=request.data.get("draft_revision"),
+            )
+        except ModelValidationError as exc:
+            raise ValidationError(
+                exc.message_dict if hasattr(exc, "message_dict") else exc.messages
+            ) from exc
+        return Response(
+            {"submission": submission_payload(submission), "receipt": str(version.public_id)},
+            status=201 if created else 200,
+        )

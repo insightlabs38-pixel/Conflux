@@ -16,4 +16,19 @@ urlpatterns = [
         views.ProjectMemberView.as_view(),
         name="project-members",
     ),
+    path(
+        _prefix + "<uuid:project_public_id>/submissions/",
+        views.SubmissionStageListView.as_view(),
+        name="submission-stage-list",
+    ),
+    path(
+        _prefix + "<uuid:project_public_id>/submissions/<uuid:stage_public_id>/",
+        views.SubmissionDetailView.as_view(),
+        name="submission-detail",
+    ),
+    path(
+        _prefix + "<uuid:project_public_id>/submissions/<uuid:stage_public_id>/finalize/",
+        views.SubmissionFinalizeView.as_view(),
+        name="submission-finalize",
+    ),
 ]

@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { ArtifactPanel } from "./ArtifactPanel";
+import { SubmissionPanel } from "../submissions/SubmissionPanel";
 
 type Project = { public_id: string; name: string; team: string | null };
 type TeamStatus = { team: { public_id: string } | null };
@@ -120,12 +121,18 @@ export function ProjectWorkspace({
         </label>
       )}
       {selectedId && (
-        <ArtifactPanel
-          key={selectedId}
-          workspaceId={workspaceId}
-          eventId={eventId}
-          projectId={selectedId}
-        />
+        <div key={selectedId}>
+          <ArtifactPanel
+            workspaceId={workspaceId}
+            eventId={eventId}
+            projectId={selectedId}
+          />
+          <SubmissionPanel
+            workspaceId={workspaceId}
+            eventId={eventId}
+            projectId={selectedId}
+          />
+        </div>
       )}
     </section>
   );

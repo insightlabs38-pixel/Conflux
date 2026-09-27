@@ -142,6 +142,36 @@ describe("App navigation", () => {
     expect(container.textContent).toContain("Back to workspaces");
   });
 
+  it("routes a judge to their review workspace, not the organizer dashboard", async () => {
+    window.history.pushState({}, "", "/");
+    mockApi(
+      200,
+      {
+        public_id: "u1",
+        username: "judge",
+        memberships: [
+          {
+            workspace: "w1",
+            workspace_name: "Regionals",
+            workspace_slug: "regionals",
+            role: "judge",
+          },
+        ],
+      },
+      200,
+      [],
+    );
+    act(() => {
+      root.render(<App />);
+    });
+    await waitFor(() => container.querySelectorAll("button").length > 0);
+    act(() => {
+      (container.querySelector("button") as HTMLButtonElement).click();
+    });
+    await waitFor(() => container.querySelector('[aria-label="Judging"]') !== null);
+    expect(container.querySelector('[aria-label="Event dashboard"]')).toBeNull();
+  });
+
   it("preserves a direct link to an unauthorized or invalid workspace id and always offers a way back", async () => {
     // The dashboard itself (pre-existing C-B04 code) surfaces the resulting
     // 403/404 as an alert; this covers the navigation contract App owns:

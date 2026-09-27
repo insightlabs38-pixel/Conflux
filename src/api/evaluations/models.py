@@ -54,6 +54,15 @@ class EvaluationPlan(PublicIdModel):
         on_delete=models.SET_NULL,
         related_name="+",
     )
+    published_normalization_run = models.ForeignKey(
+        "NormalizationRun",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    # {project_public_id: integer} manual override, lower wins ties (JUX-005).
+    tie_breaks = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -69,6 +78,13 @@ class EvaluationPlan(PublicIdModel):
     def clean(self):
         if self.pool_id and self.pool.event_id != self.stage.event_id:
             raise ValidationError({"pool": "Pool must belong to the plan's event."})
+        if (
+            self.published_normalization_run_id
+            and self.published_normalization_run.plan_id != self.pk
+        ):
+            raise ValidationError(
+                {"published_normalization_run": "Must be a normalization run of this plan."}
+            )
 
 
 class RubricVersion(PublicIdModel):
@@ -128,6 +144,29 @@ class Ballot(PublicIdModel):
     def clean(self):
         if self.project.event_id != self.rubric_version.plan.stage.event_id:
             raise ValidationError({"project": "Project must belong to the plan's event."})
+
+
+class BallotDraft(PublicIdModel):
+    """A judge's in-progress, autosaved ballot (JUX-002). Deliberately kept
+    separate from the immutable `Ballot`/`BallotResponse` pair rather than
+    adding draft/submitted states to those models: a draft can be partial,
+    invalid, or abandoned entirely, none of which should ever be able to
+    touch the submitted-evidence tables. Submitting deletes the draft.
+    """
+
+    plan = models.ForeignKey(EvaluationPlan, on_delete=models.CASCADE, related_name="ballot_drafts")
+    judge = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="ballot_drafts"
+    )
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="ballot_drafts")
+    responses = models.JSONField(default=dict, blank=True)  # {criterion_id: score}, may be partial
+    comment = models.TextField(blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["plan", "judge", "project"], name="unique_ballot_draft")
+        ]
 
 
 class BallotResponse(PublicIdModel):

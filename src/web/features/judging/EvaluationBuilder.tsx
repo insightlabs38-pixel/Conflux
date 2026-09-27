@@ -20,6 +20,15 @@ type Plan = {
   results_visible_to_participants: boolean;
   draft_criteria: Criterion[];
   current_rubric_version: number | null;
+  published_normalization_run: number | null;
+};
+type Progress = {
+  candidate_count: number;
+  submitted_ballots: number;
+  expected_ballots: number | null;
+  completion_ratio: number | null;
+  latest_normalization_run: { number: number; converged: boolean } | null;
+  results_published: boolean;
 };
 
 function message(value: unknown): string {
@@ -152,6 +161,60 @@ function CriteriaEditor({
   );
 }
 
+function ProgressPanel({ planUrl }: { planUrl: string }) {
+  const [progress, setProgress] = useState<Progress | null>(null);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  function refresh() {
+    request<Progress>(planUrl + "progress/")
+      .then(setProgress)
+      .catch((cause: unknown) => setError(message(cause)));
+  }
+
+  useEffect(refresh, [planUrl]);
+
+  async function computeAndPublish() {
+    setBusy(true);
+    setError("");
+    try {
+      const run = await request<{ public_id: string }>(planUrl + "normalization-runs/", "POST", {});
+      await request(planUrl + "publish-results/", "POST", { normalization_run: run.public_id });
+      refresh();
+    } catch (cause) {
+      setError(message(cause));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (!progress) return null;
+  return (
+    <div aria-label="Judging progress">
+      {error && <p role="alert">{error}</p>}
+      <p>
+        {progress.submitted_ballots}
+        {progress.expected_ballots !== null ? ` / ${progress.expected_ballots}` : ""} ballots
+        submitted{" "}
+        {progress.completion_ratio !== null && (
+          <Badge tone={progress.completion_ratio >= 1 ? "success" : "info"}>
+            {Math.round(progress.completion_ratio * 100)}%
+          </Badge>
+        )}
+      </p>
+      <Button disabled={busy} onClick={() => void computeAndPublish()}>
+        {busy ? "Computing…" : "Compute normalization and publish results"}
+      </Button>
+      {progress.results_published && (
+        <p>
+          Results published.{" "}
+          <a href={planUrl + "results.csv"}>Download CSV</a>
+        </p>
+      )}
+    </div>
+  );
+}
+
 function PlanEditor({ base, plan, onChange }: { base: string; plan: Plan; onChange: (plan: Plan) => void }) {
   const [criteria, setCriteria] = useState(plan.draft_criteria);
   const [error, setError] = useState("");
@@ -210,6 +273,7 @@ function PlanEditor({ base, plan, onChange }: { base: string; plan: Plan; onChan
       <Button variant="secondary" onClick={() => void publish()}>
         Publish rubric
       </Button>
+      <ProgressPanel planUrl={planUrl} />
     </Card>
   );
 }

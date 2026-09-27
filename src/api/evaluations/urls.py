@@ -21,6 +21,11 @@ urlpatterns = [
     ),
     path(f"{_PLAN}/ballots/", views.BallotListCreateView.as_view(), name="evaluation-plan-ballots"),
     path(
+        f"{_PLAN}/candidates/",
+        views.CandidateListView.as_view(),
+        name="evaluation-plan-candidates",
+    ),
+    path(
         f"{_PLAN}/assignments/activate/",
         views.AssignmentActivateView.as_view(),
         name="evaluation-plan-assignments-activate",
@@ -54,5 +59,26 @@ urlpatterns = [
         f"{_PLAN}/normalization-runs/",
         views.NormalizationRunListView.as_view(),
         name="evaluation-plan-normalization-runs",
+    ),
+    path(
+        f"{_PLAN}/ballots/<uuid:project_public_id>/draft/",
+        views.BallotDraftView.as_view(),
+        name="evaluation-plan-ballot-draft",
+    ),
+    path(
+        f"{_PLAN}/progress/",
+        views.EvaluationProgressView.as_view(),
+        name="evaluation-plan-progress",
+    ),
+    path(
+        f"{_PLAN}/publish-results/",
+        views.ResultsPublishView.as_view(),
+        name="evaluation-plan-publish-results",
+    ),
+    path(f"{_PLAN}/results/", views.ResultsView.as_view(), name="evaluation-plan-results"),
+    path(
+        f"{_PLAN}/results.csv",
+        views.ResultsCsvExportView.as_view(),
+        name="evaluation-plan-results-csv",
     ),
 ]

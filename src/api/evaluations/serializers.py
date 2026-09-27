@@ -5,6 +5,7 @@ from .models import (
     Assignment,
     AssignmentVersion,
     Ballot,
+    BallotDraft,
     BallotResponse,
     ConflictOfInterest,
     EvaluationPlan,
@@ -26,6 +27,7 @@ class EvaluationPlanSerializer(serializers.ModelSerializer):
     )
     current_rubric_version = serializers.SerializerMethodField()
     active_assignment_version = serializers.SerializerMethodField()
+    published_normalization_run = serializers.SerializerMethodField()
 
     class Meta:
         model = EvaluationPlan
@@ -39,6 +41,7 @@ class EvaluationPlanSerializer(serializers.ModelSerializer):
             "pool",
             "current_rubric_version",
             "active_assignment_version",
+            "published_normalization_run",
             "created_at",
             "updated_at",
         ]
@@ -50,6 +53,11 @@ class EvaluationPlanSerializer(serializers.ModelSerializer):
 
     def get_active_assignment_version(self, plan):
         return plan.active_assignment_version.number if plan.active_assignment_version_id else None
+
+    def get_published_normalization_run(self, plan):
+        return (
+            plan.published_normalization_run.number if plan.published_normalization_run_id else None
+        )
 
     def validate_draft_criteria(self, value):
         try:
@@ -83,6 +91,16 @@ class BallotSerializer(serializers.ModelSerializer):
         model = Ballot
         fields = ["public_id", "project", "comment", "responses", "submitted_at"]
         read_only_fields = ["submitted_at"]
+
+
+class BallotDraftSerializer(serializers.ModelSerializer):
+    public_id = serializers.UUIDField(read_only=True)
+    project = serializers.UUIDField(source="project.public_id", read_only=True)
+
+    class Meta:
+        model = BallotDraft
+        fields = ["public_id", "project", "responses", "comment", "updated_at"]
+        read_only_fields = ["updated_at"]
 
 
 class EvaluationPoolSerializer(serializers.ModelSerializer):

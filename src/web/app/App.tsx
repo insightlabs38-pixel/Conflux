@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { AppShell } from "../components/AppShell";
 import { Button } from "../components/Button";
 import { EventDashboard } from "../features/event-builder/EventDashboard";
+import { JudgeWorkspace } from "../features/judging/JudgeWorkspace";
 import { TeamWorkspace } from "../features/teams/TeamWorkspace";
 import { EventSite } from "../public/event-site/EventSite";
 import { WorkspaceSelector } from "./WorkspaceSelector";
@@ -87,6 +88,8 @@ export function App() {
       {workspaceId ? (
         workspaceRole === "participant" ? (
           <TeamWorkspace workspaceId={workspaceId} />
+        ) : workspaceRole === "judge" ? (
+          <JudgeWorkspace workspaceId={workspaceId} />
         ) : (
           <EventDashboard workspaceId={workspaceId} />
         )

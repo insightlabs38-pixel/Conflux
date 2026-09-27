@@ -61,6 +61,14 @@ def urls(workspace, event, stage=None, plan=None):
     return base
 
 
+def test_assignment_detail_returns_a_parseable_null_before_any_activation():
+    workspace, event, stage, pool, plan, organizer, judges, projects = make_fixture(judge_count=1)
+    organizer_client = cookie_client(Session.issue(organizer).token)
+    response = organizer_client.get(urls(workspace, event, stage, plan) + "/assignments/")
+    assert response.status_code == 200
+    assert response.json() is None
+
+
 def test_all_judges_strategy_pairs_every_judge_with_every_candidate_minus_conflicts():
     _, event, stage, pool, plan, organizer, judges, projects = make_fixture()
     plan.pool_strategy = EvaluationPoolStrategy.ALL_JUDGES

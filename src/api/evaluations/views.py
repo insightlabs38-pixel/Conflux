@@ -1,14 +1,17 @@
+import csv
+
 from accounts.authentication import CookieSessionAuthentication
 from accounts.models import User
 from audit.services import record_mutation
 from core.authz import has_any_role
-from core.permissions import require_roles
+from core.permissions import IsWorkspaceMember, require_roles
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError, transaction
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from events.views import OrganizerView
 from projects.models import Project
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 from stages.views import StageEventMixin
 from workspaces.models import Role
@@ -18,16 +21,21 @@ from .assignment import activate
 from .models import (
     Assignment,
     Ballot,
+    BallotDraft,
     BallotResponse,
     ConflictOfInterest,
     EvaluationPlan,
     EvaluationPool,
     EvaluationPoolStrategy,
+    NormalizationRun,
     PoolMembership,
     RubricVersion,
 )
+from .progress import compute_progress
+from .results import ranked_results
 from .serializers import (
     AssignmentVersionSerializer,
+    BallotDraftSerializer,
     BallotSerializer,
     ConflictOfInterestSerializer,
     EvaluationPlanSerializer,
@@ -50,6 +58,13 @@ class PlanMixin(StageEventMixin):
 
 
 class EvaluationPlanListView(StageEventMixin):
+    def get_permissions(self):
+        # A judge needs to find the plan(s) that apply to them; only an
+        # organizer may create one.
+        if self.request.method == "GET":
+            return [IsWorkspaceMember()]
+        return super().get_permissions()
+
     def get(self, request, workspace_public_id, event_public_id, stage_public_id):
         plans = self.get_stage().evaluation_plans.all()
         return Response(EvaluationPlanSerializer(plans, many=True).data)
@@ -76,6 +91,11 @@ class EvaluationPlanListView(StageEventMixin):
 
 
 class EvaluationPlanDetailView(PlanMixin):
+    def get_permissions(self):
+        if self.request.method == "GET":
+            return [IsWorkspaceMember()]
+        return super().get_permissions()
+
     def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         return Response(EvaluationPlanSerializer(self.get_plan()).data)
 
@@ -103,6 +123,19 @@ class EvaluationPlanDetailView(PlanMixin):
 
 
 class RubricPublishView(PlanMixin):
+    def get_permissions(self):
+        # A judge needs to read the current published rubric to render a
+        # ballot form; only an organizer may publish a new version.
+        if self.request.method == "GET":
+            return [IsWorkspaceMember()]
+        return super().get_permissions()
+
+    def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        version = self.get_plan().current_rubric_version
+        if version is None:
+            return JsonResponse(None, safe=False)
+        return Response(RubricVersionSerializer(version).data)
+
     def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         plan = self.get_plan()
         next_number = (plan.current_rubric_version.number + 1) if plan.current_rubric_version else 1
@@ -132,9 +165,21 @@ class BallotListCreateView(PlanMixin):
     permission_classes = [require_roles(Role.JUDGE, Role.ORGANIZER, Role.ADMIN)]
 
     def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        """JUX-003: mirrors the official checker's own/peer-score contract
+        exactly (integrations.views.JudgeScoresView) -- no `?judge=` means
+        "my own scores"; an explicit `?judge=<id>` is refused for anyone but
+        that judge themself or an organizer/admin.
+        """
         plan = self.get_plan()
         ballots = Ballot.objects.filter(rubric_version__plan=plan).select_related("project")
-        if not has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN):
+        is_organizer = has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
+        requested_judge_id = request.GET.get("judge")
+        if requested_judge_id:
+            judge = get_object_or_404(User, public_id=requested_judge_id)
+            if judge.id != request.user.id and not is_organizer:
+                raise PermissionDenied("You cannot view another judge's ballots.")
+            ballots = ballots.filter(judge=judge)
+        elif not is_organizer:
             ballots = ballots.filter(judge=request.user)
         return Response(BallotSerializer(ballots.prefetch_related("responses"), many=True).data)
 
@@ -185,6 +230,7 @@ class BallotListCreateView(PlanMixin):
             raise ValidationError(
                 {"detail": "You have already submitted a ballot for this project."}
             ) from exc
+        BallotDraft.objects.filter(plan=plan, judge=request.user, project=project).delete()
         record_mutation(
             actor=request.user,
             workspace=self.get_workspace(),
@@ -192,6 +238,78 @@ class BallotListCreateView(PlanMixin):
             target=ballot,
         )
         return Response(BallotSerializer(ballot).data, status=201)
+
+
+class BallotDraftView(PlanMixin):
+    """Autosave storage for an in-progress ballot (JUX-002): a judge can
+    save partial/invalid state freely here without ever touching the
+    immutable submitted-evidence tables. Submitting goes through
+    BallotListCreateView.post, which deletes the matching draft on success.
+    """
+
+    authentication_classes = [CookieSessionAuthentication]
+    permission_classes = [require_roles(Role.JUDGE)]
+
+    def get_project(self):
+        return get_object_or_404(
+            Project, event=self.get_event(), public_id=self.kwargs["project_public_id"]
+        )
+
+    def get(
+        self,
+        request,
+        workspace_public_id,
+        event_public_id,
+        stage_public_id,
+        plan_public_id,
+        project_public_id,
+    ):
+        draft = BallotDraft.objects.filter(
+            plan=self.get_plan(), judge=request.user, project=self.get_project()
+        ).first()
+        if draft is None:
+            # A bare DRF `Response(None)` renders to an empty body with no
+            # Content-Type (DRF treats None as "no content"), which breaks
+            # any client expecting a parseable `null` -- use JsonResponse
+            # instead so this actually round-trips.
+            return JsonResponse(None, safe=False)
+        return Response(BallotDraftSerializer(draft).data)
+
+    def put(
+        self,
+        request,
+        workspace_public_id,
+        event_public_id,
+        stage_public_id,
+        plan_public_id,
+        project_public_id,
+    ):
+        plan = self.get_plan()
+        project = self.get_project()
+        responses = request.data.get("responses", {})
+        if not isinstance(responses, dict):
+            raise ValidationError({"responses": "Must be an object of criterion_id -> score."})
+        draft, _ = BallotDraft.objects.update_or_create(
+            plan=plan,
+            judge=request.user,
+            project=project,
+            defaults={"responses": responses, "comment": request.data.get("comment", "")},
+        )
+        return Response(BallotDraftSerializer(draft).data)
+
+    def delete(
+        self,
+        request,
+        workspace_public_id,
+        event_public_id,
+        stage_public_id,
+        plan_public_id,
+        project_public_id,
+    ):
+        BallotDraft.objects.filter(
+            plan=self.get_plan(), judge=request.user, project=self.get_project()
+        ).delete()
+        return Response(status=204)
 
 
 class EvaluationPoolListView(OrganizerView):
@@ -336,7 +454,8 @@ class AssignmentDetailView(PlanMixin):
     def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
         plan = self.get_plan()
         if plan.active_assignment_version_id is None:
-            return Response(None)
+            # See BallotDraftView.get for why this isn't a bare Response(None).
+            return JsonResponse(None, safe=False)
         version = plan.active_assignment_version
         data = AssignmentVersionSerializer(version).data
         if not has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN):
@@ -375,3 +494,171 @@ class NormalizationRunListView(PlanMixin):
             metadata={"converged": normalization_run.converged, "number": normalization_run.number},
         )
         return Response(NormalizationRunSerializer(normalization_run).data, status=201)
+
+
+class EvaluationProgressView(PlanMixin):
+    """JUX-004: coverage/load/completion/normalization state in one call."""
+
+    def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        return Response(compute_progress(self.get_plan()))
+
+
+class ResultsPublishView(PlanMixin):
+    """JUX-005: point a plan at the normalization run its results are drawn
+    from, with any organizer tie-break overrides. Publishing is what makes
+    results reachable at all (ResultsView 404s until this has run once).
+    """
+
+    def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        run = get_object_or_404(
+            NormalizationRun, plan=plan, public_id=request.data.get("normalization_run")
+        )
+        tie_breaks = request.data.get("tie_breaks", {})
+        if not isinstance(tie_breaks, dict) or not all(
+            isinstance(v, int) and not isinstance(v, bool) for v in tie_breaks.values()
+        ):
+            raise ValidationError({"tie_breaks": "Must map project public_id to an integer."})
+        resolved = {}
+        for project_public_id, value in tie_breaks.items():
+            project = get_object_or_404(
+                Project, event=self.get_event(), public_id=project_public_id
+            )
+            resolved[str(project.id)] = value
+        plan.published_normalization_run = run
+        plan.tie_breaks = resolved
+        plan.full_clean()
+        plan.save(update_fields=["published_normalization_run", "tie_breaks", "updated_at"])
+        record_mutation(
+            actor=request.user,
+            workspace=self.get_workspace(),
+            action="results.published",
+            target=plan,
+            metadata={"normalization_run": run.number},
+        )
+        return Response(EvaluationPlanSerializer(plan).data)
+
+
+def _serialize_ranked(result, projects_by_id):
+    project = projects_by_id.get(result.project_id)
+    return {
+        "rank": result.rank,
+        "project": str(project.public_id) if project else None,
+        "project_name": project.name if project else None,
+        "raw_score": result.raw_score,
+        "final_score": result.final_score,
+        "tie_break": result.tie_break,
+    }
+
+
+class ResultsView(PlanMixin):
+    """Public-ish read of published results: organizers/admins always see
+    them; anyone else (participants) only once the organizer has both
+    published a run AND opted into `results_visible_to_participants`.
+    """
+
+    authentication_classes = [CookieSessionAuthentication]
+    permission_classes = [require_roles(Role.PARTICIPANT, Role.JUDGE, Role.ORGANIZER, Role.ADMIN)]
+
+    def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        is_organizer = has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
+        if plan.published_normalization_run_id is None:
+            return Response(status=404)
+        if not is_organizer and not plan.results_visible_to_participants:
+            raise PermissionDenied("Results are not yet visible to participants.")
+        results = ranked_results(plan, plan.published_normalization_run)
+        projects_by_id = {
+            p.id: p for p in Project.objects.filter(id__in=[r.project_id for r in results])
+        }
+        return Response([_serialize_ranked(r, projects_by_id) for r in results])
+
+
+class ResultsCsvExportView(PlanMixin):
+    """JUX-006: organizer CSV export of a plan's published results."""
+
+    def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        if plan.published_normalization_run_id is None:
+            return Response({"detail": "No results have been published for this plan."}, status=404)
+        results = ranked_results(plan, plan.published_normalization_run)
+        projects_by_id = {
+            p.id: p for p in Project.objects.filter(id__in=[r.project_id for r in results])
+        }
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="results.csv"'
+        writer = csv.writer(response)
+        writer.writerow(["rank", "project", "raw_score", "final_score", "tie_break"])
+        for result in results:
+            project = projects_by_id.get(result.project_id)
+            writer.writerow(
+                [
+                    result.rank,
+                    project.name if project else result.project_id,
+                    result.raw_score,
+                    result.final_score,
+                    result.tie_break if result.tie_break is not None else "",
+                ]
+            )
+        return response
+
+
+class CandidateListView(PlanMixin):
+    """JUX-001: the judge's own queue -- every candidate they're expected to
+    review under this plan's strategy, minus their own declared conflicts,
+    each flagged with where they've gotten to (pending/drafted/submitted).
+    """
+
+    authentication_classes = [CookieSessionAuthentication]
+    permission_classes = [require_roles(Role.JUDGE, Role.ORGANIZER, Role.ADMIN)]
+
+    def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        if not has_any_role(request.user, self.get_workspace(), Role.JUDGE):
+            raise ValidationError({"detail": "Only a judge has a review queue."})
+
+        candidates = Project.objects.filter(
+            event_id=plan.stage.event_id, submissions__stage=plan.stage
+        ).distinct()
+        if plan.pool_strategy == EvaluationPoolStrategy.ASSIGNED_SUBSET:
+            if plan.active_assignment_version_id is None:
+                candidates = candidates.none()
+            else:
+                candidates = candidates.filter(
+                    assignments__version_id=plan.active_assignment_version_id,
+                    assignments__judge=request.user,
+                )
+        conflicted = set(
+            ConflictOfInterest.objects.filter(
+                event_id=plan.stage.event_id, judge=request.user
+            ).values_list("project_id", flat=True)
+        )
+        candidates = candidates.exclude(id__in=conflicted).order_by("name")
+
+        submitted = set(
+            Ballot.objects.filter(rubric_version__plan=plan, judge=request.user).values_list(
+                "project_id", flat=True
+            )
+        )
+        drafted = set(
+            BallotDraft.objects.filter(plan=plan, judge=request.user).values_list(
+                "project_id", flat=True
+            )
+        )
+        return Response(
+            [
+                {
+                    "project": str(project.public_id),
+                    "name": project.name,
+                    "status": (
+                        "submitted"
+                        if project.id in submitted
+                        else "drafted"
+                        if project.id in drafted
+                        else "pending"
+                    ),
+                }
+                for project in candidates
+            ]
+        )

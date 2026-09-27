@@ -1,5 +1,6 @@
 from audit.models import AuditEvent
 from audit.services import record_mutation
+from core.permissions import IsWorkspaceMember
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
@@ -25,6 +26,14 @@ class StageEventMixin(OrganizerView):
 
 
 class StageListView(StageEventMixin):
+    def get_permissions(self):
+        # Any workspace member may read the stage list (e.g. a judge finding
+        # which stage's evaluation plan applies to them); only organizers
+        # may create one.
+        if self.request.method == "GET":
+            return [IsWorkspaceMember()]
+        return super().get_permissions()
+
     def get(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
         try:

@@ -89,6 +89,12 @@ class EvaluationPlan(PublicIdModel):
         Project, blank=True, related_name="calibration_plans"
     )
     calibration_required = models.BooleanField(default=False)
+    # S06: when set, CandidateListView replaces a candidate's real project
+    # name with a deterministic pseudonym for judges (see
+    # evaluations/anonymize.py). No institution/affiliation field exists on
+    # Project/Team to redact -- this scopes to the one identity signal the
+    # product actually exposes to a judge during live judging.
+    blind_judging = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

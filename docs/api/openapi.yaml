@@ -8919,6 +8919,8 @@ components:
           readOnly: true
         calibration_required:
           type: boolean
+        blind_judging:
+          type: boolean
         created_at:
           type: string
           format: date-time
@@ -9996,6 +9998,8 @@ components:
             type: string
           readOnly: true
         calibration_required:
+          type: boolean
+        blind_judging:
           type: boolean
         created_at:
           type: string

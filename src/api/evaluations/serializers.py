@@ -50,6 +50,7 @@ class EvaluationPlanSerializer(serializers.ModelSerializer):
             "published_pairwise_run",
             "calibration_projects",
             "calibration_required",
+            "blind_judging",
             "created_at",
             "updated_at",
         ]

@@ -19,7 +19,7 @@ from rest_framework.response import Response
 from stages.views import StageEventMixin
 from workspaces.models import Role
 
-from . import agreement, normalization, pairwise
+from . import agreement, anonymize, normalization, pairwise
 from .assignment import activate, rebalance
 from .assignment import preview as preview_assignment
 from .models import (
@@ -806,7 +806,12 @@ class CandidateListView(PlanMixin):
         if not has_any_role(request.user, self.get_workspace(), Role.JUDGE):
             raise ValidationError({"detail": "Only a judge has a review queue."})
 
-        candidates = _eligible_candidates(plan, request.user).order_by("name")
+        # S06: under blind judging, ordering by the real name would leak an
+        # alphabetical-by-identity signal into the queue itself -- order by
+        # public_id (stable, identity-independent) instead.
+        candidates = _eligible_candidates(plan, request.user).order_by(
+            "public_id" if plan.blind_judging else "name"
+        )
 
         submitted = set(
             Ballot.objects.filter(rubric_version__plan=plan, judge=request.user).values_list(
@@ -822,7 +827,11 @@ class CandidateListView(PlanMixin):
             [
                 {
                     "project": str(project.public_id),
-                    "name": project.name,
+                    "name": (
+                        anonymize.anonymized_label(plan.id, project.public_id)
+                        if plan.blind_judging
+                        else project.name
+                    ),
                     "status": (
                         "submitted"
                         if project.id in submitted

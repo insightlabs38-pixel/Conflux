@@ -6,6 +6,13 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .coverage
+.dogfood/master.lock
+.dogfood/master.pid
+.dogfood/master.log
+.dogfood/master.next
+.dogfood/master.stop
+.dogfood/master.complete
+.dogfood/master.console.log
 *.sqlite3
 .env
 .env.*

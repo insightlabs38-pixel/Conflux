@@ -195,4 +195,15 @@ TABLES = {
         "version token issued_at",
         "",
     ),
+    "continuation.projectcontinuation": (
+        "project__event",
+        "project summary url seeking is_public hidden_at hidden_reason hidden_by "
+        "created_at updated_at",
+        "",
+    ),
+    "continuation.continuationupdate": (
+        "continuation__project__event",
+        "continuation body created_by created_at",
+        "",
+    ),
 }

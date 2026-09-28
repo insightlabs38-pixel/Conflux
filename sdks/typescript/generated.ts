@@ -1289,6 +1289,20 @@ export type InputOfConformanceReportOutput = {
   manual_review: Record<string, unknown>[];
 };
 
+export type ContinuationInput = {
+  summary: string;
+  url?: string;
+  seeking?: SeekingEnum[];
+  is_public?: boolean;
+};
+
+export type InputOfContinuationInput = {
+  summary: string;
+  url?: string;
+  seeking?: InputOfSeekingEnum[];
+  is_public?: boolean;
+};
+
 export type CreateTeamInput = { name: string };
 
 export type InputOfCreateTeamInput = { name: string };
@@ -2392,6 +2406,10 @@ export type InputOfMessageSchema = {
 export type MethodEnum = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export type InputOfMethodEnum = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+export type ModerationInput = { reason?: string };
+
+export type InputOfModerationInput = { reason?: string };
 
 export type ModerationQueueResponse = { sections: unknown[] };
 
@@ -4021,6 +4039,12 @@ export type InputOfSearchOutput = {
   items: InputOfSearchItemOutput[];
 };
 
+export type SeekingEnum =
+  "contributors" | "mentors" | "users" | "feedback" | "partners";
+
+export type InputOfSeekingEnum =
+  "contributors" | "mentors" | "users" | "feedback" | "partners";
+
 export type SelectionSourceEnum = "manual" | "evaluation" | "community";
 
 export type InputOfSelectionSourceEnum = "manual" | "evaluation" | "community";
@@ -4534,6 +4558,10 @@ export type TransferCaptainInput = { user: string };
 
 export type InputOfTransferCaptainInput = { user: string };
 
+export type UpdateInput = { body: string };
+
+export type InputOfUpdateInput = { body: string };
+
 export type UploadCompleteInputSchema = { parts?: unknown };
 
 export type InputOfUploadCompleteInputSchema = { parts?: unknown };
@@ -4775,6 +4803,10 @@ export interface Operations {
   get_api_v1_events_event_public_id_awards: {
     request: { path: { event_public_id: string } };
     response: PublicAwardOutput[];
+  };
+  get_api_v1_events_event_public_id_continuations: {
+    request: { path: { event_public_id: string } };
+    response: Record<string, unknown>[];
   };
   get_api_v1_events_event_public_id_finalists: {
     request: { path: { event_public_id: string } };
@@ -5414,6 +5446,10 @@ export interface Operations {
       };
     };
     response: ReminderSchema;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_continuations: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: Record<string, unknown>[];
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_dashboard: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -6299,6 +6335,60 @@ export interface Operations {
       };
     };
     response: Comment;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_continuation: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: Record<string, unknown>;
+  };
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_continuation: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfContinuationInput;
+    };
+    response: Record<string, unknown>;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_continuation_hide: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+      body?: InputOfModerationInput;
+    };
+    response: Record<string, unknown>;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_continuation_restore: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+      body?: InputOfModerationInput;
+    };
+    response: Record<string, unknown>;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_continuation_updates: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfUpdateInput;
+    };
+    response: Record<string, unknown>;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility: {
     request: {
@@ -8120,6 +8210,14 @@ export const operations = {
     request_body: false,
     response_kind: "json",
   },
+  get_api_v1_events_event_public_id_continuations: {
+    method: "GET",
+    path: "/api/v1/events/{event_public_id}/continuations/",
+    path_params: ["event_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
   get_api_v1_events_event_public_id_finalists: {
     method: "GET",
     path: "/api/v1/events/{event_public_id}/finalists/",
@@ -9025,6 +9123,15 @@ export const operations = {
         "reminder_public_id",
         "workspace_public_id",
       ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_continuations:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/continuations/",
+      path_params: ["event_public_id", "workspace_public_id"],
       query_params: [],
       request_body: false,
       response_kind: "json",
@@ -10243,6 +10350,71 @@ export const operations = {
       ],
       query_params: [],
       request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_continuation:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/continuation/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_continuation:
+    {
+      method: "PUT",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/continuation/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_continuation_hide:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/continuation/hide/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_continuation_restore:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/continuation/restore/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_continuation_updates:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/continuation/updates/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
       response_kind: "json",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility:

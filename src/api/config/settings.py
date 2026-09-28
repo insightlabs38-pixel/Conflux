@@ -86,6 +86,7 @@ INSTALLED_APPS = [
     "governance",
     "mcp_adapter",
     "portfolio",
+    "continuation",
 ]
 
 MIDDLEWARE = [

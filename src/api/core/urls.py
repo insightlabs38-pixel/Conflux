@@ -41,4 +41,5 @@ urlpatterns = [
     path("", include("governance.urls")),
     path("", include("mcp_adapter.urls")),
     path("", include("portfolio.urls")),
+    path("", include("continuation.urls")),
 ]

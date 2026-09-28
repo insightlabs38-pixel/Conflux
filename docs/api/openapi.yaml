@@ -279,6 +279,29 @@ paths:
                 items:
                   $ref: '#/components/schemas/PublicAwardOutput'
           description: ''
+  /api/v1/events/{event_public_id}/continuations/:
+    get:
+      operationId: get_api_v1_events_event_public_id_continuations
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - events
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+          description: ''
   /api/v1/events/{event_public_id}/finalists/:
     get:
       operationId: get_api_v1_events_event_public_id_finalists
@@ -3676,6 +3699,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReminderSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/continuations/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_continuations
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/dashboard/:
     get:
@@ -7928,6 +7981,221 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comment'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/continuation/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_continuation
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_continuation
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContinuationInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ContinuationInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ContinuationInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/continuation/hide/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_continuation_hide
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModerationInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ModerationInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ModerationInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/continuation/restore/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_continuation_restore
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModerationInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ModerationInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ModerationInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/continuation/updates/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_continuation_updates
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UpdateInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/:
     get:
@@ -17674,6 +17942,23 @@ components:
       - standard
       - summary
       - theme
+    ContinuationInput:
+      type: object
+      properties:
+        summary:
+          type: string
+          maxLength: 1000
+        url:
+          type: string
+          format: uri
+        seeking:
+          type: array
+          items:
+            $ref: '#/components/schemas/SeekingEnum'
+        is_public:
+          type: boolean
+      required:
+      - summary
     CreateTeamInput:
       type: object
       properties:
@@ -19468,6 +19753,12 @@ components:
         * `PUT` - PUT
         * `PATCH` - PATCH
         * `DELETE` - DELETE
+    ModerationInput:
+      type: object
+      properties:
+        reason:
+          type: string
+          maxLength: 300
     ModerationQueueResponse:
       type: object
       properties:
@@ -22049,6 +22340,20 @@ components:
       - count
       - items
       - next_offset
+    SeekingEnum:
+      enum:
+      - contributors
+      - mentors
+      - users
+      - feedback
+      - partners
+      type: string
+      description: |-
+        * `contributors` - contributors
+        * `mentors` - mentors
+        * `users` - users
+        * `feedback` - feedback
+        * `partners` - partners
     SelectionSourceEnum:
       enum:
       - manual
@@ -22925,6 +23230,14 @@ components:
           format: uuid
       required:
       - user
+    UpdateInput:
+      type: object
+      properties:
+        body:
+          type: string
+          maxLength: 1000
+      required:
+      - body
     UploadCompleteInputSchema:
       type: object
       properties:

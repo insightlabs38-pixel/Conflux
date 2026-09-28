@@ -103,11 +103,14 @@ export function App() {
   return (
     <AppShell
       nav={
-        workspaceId && (
-          <Button variant="secondary" onClick={backToWorkspaces}>
-            Back to workspaces
-          </Button>
-        )
+        <>
+          <a href="/?api=explorer">API explorer</a>
+          {workspaceId && (
+            <Button variant="secondary" onClick={backToWorkspaces}>
+              Back to workspaces
+            </Button>
+          )}
+        </>
       }
     >
       {workspaceId ? (

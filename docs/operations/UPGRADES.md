@@ -30,6 +30,10 @@ plain `migrate` could apply in an ambiguous order).
 
 Before any upgrade, back up authoritative state:
 
+For quiesced snapshots with integrity manifests and post-restore verification,
+see [verified backup checkpoints](BACKUP_CHECKPOINTS.md). The Core commands below
+remain available.
+
 ```
 make backup                    # -> backups/<timestamp>/
 make backup DEST=/path/to/dir  # or a caller-chosen destination

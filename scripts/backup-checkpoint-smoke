@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+smoke_dir="$(mktemp -d /tmp/conflux-checkpoint-smoke.XXXXXXXX)"
+export COMPOSE_PROJECT_NAME="checkpoint-smoke-$(basename "$smoke_dir" | tr '[:upper:]' '[:lower:]' | tr '.' '-')"
+export COMPOSE_FILE="$smoke_dir/compose.yaml"
+export POSTGRES_USER=conflux POSTGRES_DB=conflux
+cleanup() {
+  docker compose down -v --remove-orphans
+  rm -rf "$smoke_dir"
+}
+trap cleanup EXIT
+cat > "$COMPOSE_FILE" <<'YAML'
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: conflux
+      POSTGRES_DB: conflux
+      POSTGRES_PASSWORD: checkpoint-smoke-only
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U conflux -d conflux"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  objectstore:
+    image: ghcr.io/rustfs/rustfs:latest
+    command: [rustfs, server, /data, --address, ":9000"]
+    environment:
+      RUSTFS_ACCESS_KEY: conflux
+      RUSTFS_SECRET_KEY: checkpoint-smoke-only
+    volumes:
+      - objects:/data
+    healthcheck:
+      test: [CMD, curl, -fsS, -o, /dev/null, "http://localhost:9000/minio/health/live"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+volumes:
+  database:
+  objects:
+networks:
+  default:
+    internal: true
+YAML
+docker compose up -d --pull never --wait --wait-timeout 90
+docker compose exec -T db psql -U conflux -d conflux -v ON_ERROR_STOP=1 -c \
+  "CREATE TABLE checkpoint_probe (id integer PRIMARY KEY, value text); INSERT INTO checkpoint_probe VALUES (1, 'restore me');"
+docker compose stop objectstore
+objectstore_id="$(docker compose ps -aq objectstore)"
+docker run --rm --entrypoint sh --volumes-from "$objectstore_id" conflux-api:latest \
+  -c 'printf "restore object bytes" > /data/checkpoint-probe'
+docker compose start objectstore
+scripts/backup-checkpoint create "$smoke_dir/backup" > "$smoke_dir/create.json"
+scripts/backup-checkpoint verify "$smoke_dir/backup" > "$smoke_dir/verify.json"
+docker compose exec -T db psql -U conflux -d conflux -v ON_ERROR_STOP=1 -c "DELETE FROM checkpoint_probe;"
+docker compose stop objectstore
+docker run --rm --entrypoint rm --volumes-from "$objectstore_id" conflux-api:latest /data/checkpoint-probe
+docker compose start objectstore
+scripts/backup-checkpoint restore "$smoke_dir/backup" > "$smoke_dir/restore.json"
+test "$(docker compose exec -T db psql -U conflux -d conflux -qAt -c 'SELECT value FROM checkpoint_probe WHERE id=1')" = 'restore me'
+test "$(docker run --rm --entrypoint cat --volumes-from "$objectstore_id" conflux-api:latest /data/checkpoint-probe)" = 'restore object bytes'
+echo 'checkpoint smoke: PASS (database value and object bytes recovered)'

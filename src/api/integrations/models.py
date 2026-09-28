@@ -20,6 +20,21 @@ class ArchiveRestoration(PublicIdModel):
         super().save(*args, **kwargs)
 
 
+class DemoScenario(PublicIdModel):
+    """Marks a workspace as synthetic. Its presence is the only thing that makes
+    a workspace purgeable by the demo tooling.
+    """
+
+    workspace = models.OneToOneField(
+        "workspaces.Workspace", on_delete=models.CASCADE, related_name="demo_scenario"
+    )
+    scenario = models.CharField(max_length=40)
+    seed = models.PositiveIntegerField()
+    participants = models.PositiveSmallIntegerField()
+    judges = models.PositiveSmallIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 class EventRetentionPolicy(PublicIdModel):
     """Organizer-chosen retention windows, counted from `event.ends_at`. A null
     window means "never automatically"; enforcement only runs on demand.

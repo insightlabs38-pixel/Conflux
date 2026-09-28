@@ -121,3 +121,45 @@ def test_evaluation_selection_requires_published_rank_or_audited_override():
         AuditEvent.objects.get(action="award.winner_selected").metadata["override_reason"]
         == winner.override_reason
     )
+
+
+def test_track_award_ranks_its_eligible_field_not_the_whole_event():
+    event, actor, track, projects = setup_case()
+    other_track = Track.objects.create(event=event, name="Other")
+    rival = Project.objects.create(event=event, created_by=actor, name="Rival", track=other_track)
+    stage = Stage.objects.create(event=event, name="Judging")
+    plan = EvaluationPlan.objects.create(stage=stage, name="Final")
+    scores = {rival: 9.0, projects[0]: 5.0, projects[1]: 4.0, projects[2]: 3.0}
+    run = NormalizationRun.objects.create(
+        plan=plan,
+        number=1,
+        ridge_lambda=1.0,
+        iterations=1,
+        converged=True,
+        grand_mean=5.0,
+        evidence={"projects": {str(p.pk): {"raw": s, "final": s} for p, s in scores.items()}},
+    )
+    plan.published_normalization_run = run
+    plan.save(update_fields=["published_normalization_run"])
+    award = Award.objects.create(
+        event=event,
+        name="Best in track",
+        require_finalized_submission=False,
+        selection_source="evaluation",
+        evaluation_plan=plan,
+        eligibility_track=track,
+    )
+    winner = select_winner(award=award, project=projects[0], actor=actor)
+    assert winner.evidence["rank"] == 1 and winner.override_reason == ""
+    with pytest.raises(ValidationError, match="outside the award's eligible track"):
+        select_winner(award=award, project=rival, actor=actor)
+    other = Award.objects.create(
+        event=event,
+        name="Second",
+        require_finalized_submission=False,
+        selection_source="evaluation",
+        evaluation_plan=plan,
+        eligibility_track=track,
+    )
+    with pytest.raises(ValidationError, match="override reason"):
+        select_winner(award=other, project=projects[1], actor=actor)

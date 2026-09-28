@@ -44,7 +44,19 @@ def _source_evidence(award, project):
         if plan is None or plan.published_normalization_run_id is None:
             raise ValidationError("Evaluation results must be published before winner selection.")
         rows = ranked_results(plan, plan.published_normalization_run)
-        rank = next((row.rank for row in rows if row.project_id == project.pk), None)
+        if award.eligibility_track_id:
+            # A track award ranks its own eligible field, not the whole event.
+            eligible = set(
+                Project.objects.filter(
+                    event=award.event, track_id=award.eligibility_track_id
+                ).values_list("pk", flat=True)
+            )
+            rows = [row for row in rows if row.project_id in eligible]
+            rank = next(
+                (index + 1 for index, row in enumerate(rows) if row.project_id == project.pk), None
+            )
+        else:
+            rank = next((row.rank for row in rows if row.project_id == project.pk), None)
         return {
             "plan": str(plan.public_id),
             "normalization_run": str(plan.published_normalization_run.public_id),

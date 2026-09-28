@@ -402,6 +402,21 @@ def import_archive(*, workspace, archive, name, slug):
         binding.full_clean()
         binding.save()
 
+    for p in archive.get("evaluation_plans", []):
+        plan = EvaluationPlan(
+            stage=_resolve(refs, p["stage_ref"], "evaluation_plans.stage_ref"),
+            name=p["name"],
+            candidate_type=p["candidate_type"],
+            pool_strategy=p["pool_strategy"],
+            results_visible_to_participants=p.get("results_visible_to_participants", False),
+        )
+        plan.full_clean()
+        plan.save()
+        for rv in p.get("rubric_versions", []):
+            rubric_version = RubricVersion(plan=plan, number=rv["number"], criteria=rv["criteria"])
+            rubric_version.full_clean()
+            rubric_version.save()
+
     for a in archive.get("awards", []):
         evaluation_plan = None
         plan_name = a.get("evaluation_plan_name")
@@ -460,21 +475,6 @@ def import_archive(*, workspace, archive, name, slug):
                 )
                 component.full_clean()
                 component.save()
-
-    for p in archive.get("evaluation_plans", []):
-        plan = EvaluationPlan(
-            stage=_resolve(refs, p["stage_ref"], "evaluation_plans.stage_ref"),
-            name=p["name"],
-            candidate_type=p["candidate_type"],
-            pool_strategy=p["pool_strategy"],
-            results_visible_to_participants=p.get("results_visible_to_participants", False),
-        )
-        plan.full_clean()
-        plan.save()
-        for rv in p.get("rubric_versions", []):
-            rubric_version = RubricVersion(plan=plan, number=rv["number"], criteria=rv["criteria"])
-            rubric_version.full_clean()
-            rubric_version.save()
 
     for page_data in archive.get("pages", []):
         page = Page(event=event, theme=page_data.get("theme", "default"))

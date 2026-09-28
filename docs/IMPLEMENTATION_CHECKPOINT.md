@@ -1,26 +1,27 @@
-# VS50 — Sequential implementation checkpoint
+# PVS07 — Sequential implementation checkpoint
 
 ## Result
 
-VS45–VS50 complete on canonical `main` (`0be5272`…VS50 commit). Very-Stretch is done; earliest unfinished batch is PVS-H00.
-BOOT-B00, Core, S01–S24 and VS01–VS50 retain Git/code/artifact evidence; owner X015 promoted STRETCH-GATE.
+Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS06 and PVS07 complete on `main`. Earliest unfinished batch: **PVS08**, then PVS09, PVS10, PVS-H02, PVS11–PVS15, PVS-H03, PVS16–PVS18 (PVS18 only if PVS-H02 finds a bottleneck), PVS-H04, PVS-H05.
 
 ## Changes
 
-- VS45 final archive v2, VS46 retention/privacy, VS47 accessibility evidence, VS48 demo generator, VS49 fulfillment exports, VS50 taxonomies; reports in `docs/batches/`, operator docs in `docs/operations/`.
-- Real defects fixed on the way: VS41 unnamed routes, config-archive award/plan import order, track-award ranking, CSV formula injection (`core.csv_safety`).
-- Preserve unrelated owner dirt: `.gitignore`, `master.sh`, `master/`, `tests/test_master_supervisor.py`. Do not run `ruff format` on `tests/` root.
+- Each batch has `docs/batches/<ID>.md`; operator docs in `docs/operations/`; PVS-H00/H01 evidence in `docs/verification/`.
+- New apps: `taxonomy`, `eligibility`, `deliberation`, `onsite`; new libs `segno`, `pyyaml`.
+- Standing guards: `tests/security` (route/isolation/fuzz/CSRF/idempotency sweeps), `tests/integration/concurrency/test_pvs_races.py` (PostgreSQL), final-archive guard test that forces every new event-owned model to be archived or excluded.
+- Preserve unrelated owner dirt: `.gitignore`, `master.sh`, `master/`, `tests/test_master_supervisor.py`. Never `ruff format` the `tests/` root or add those files.
 
 ## Verification
 
-- Full `tests` → 1081 passed, 15 skipped (before VS50 OpenAPI enum override); OpenAPI + SDK freshness → fresh; Ruff → clean.
-- Env: `DJANGO_SECRET_KEY=analytics-test-only`, `RECORD_SIGNING_KEY_SEED=000…001`, `DJANGO_DEBUG=1`; use `.venv/bin/pytest`. Regenerate schema with `manage.py spectacular --validate --fail-on-warn --file docs/api/openapi.yaml` then `scripts/generate_sdks.py`.
+- Full suite: SQLite 1169 passed/20 skipped; PostgreSQL 17 (`DATABASE_URL=postgres://conflux:conflux@localhost:15432/conflux` from `COMPOSE_PROJECT_NAME=confluxh00 POSTGRES_PORT=15432 ... docker compose up -d db`, see `/tmp/h00-env.sh` pattern in docs/verification/PVS-H00) 1168 passed/5 skipped at PVS-H01.
+- Env for tests: `DJANGO_SECRET_KEY=analytics-test-only RECORD_SIGNING_KEY_SEED=000…001 DJANGO_DEBUG=1`; run `.venv/bin/pytest tests -q -n auto -p no:logging`.
+- After any API change: `manage.py spectacular --validate --fail-on-warn --file docs/api/openapi.yaml`, `scripts/generate_sdks.py`, then `scripts/check_openapi_artifact.py` and `scripts/generate_sdks.py --check`.
 
 ## Limitations
 
-- C-B33 release limitations remain. Frontend/browser suites untouched since VS44; run in PVS-H00.
-- No recorded-scene manifest found; footage unaffected for VS45–VS50.
+- PVS features are API/CLI only so far; UI, Playwright scenes and demo package are PVS-H03/H05. Public server-rendered pages lack font/link styling (H03 finding).
+- Session tokens unhashed at rest (documented in PVS-H01 findings).
 
 ## Next
 
-PVS-H00 (baseline evidence: acceptance, tier/bonus state, cold/offline Compose, seed, migrations, restart, backup/restore, Core tests, browser journeys, perf baseline), then PVS01… in the fixed order. Specs for PVS are in the owner append of this prompt; no TASKS.yaml entries exist for PVS.
+PVS08 (safe submission artifact/demo inspector), then in order. Code freeze Tuesday 2026-09-29 18:00 UTC; stop new features at 08:00 UTC that day.

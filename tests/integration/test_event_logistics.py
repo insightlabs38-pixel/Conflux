@@ -337,3 +337,12 @@ def test_expo_map_lists_tables_with_only_publicly_visible_projects(world):
     assert "Shown Bot" in html and "Draft Bot" not in html
     assert "Table T1" in html and "Booth B9" in html and "Hall" in html
     assert "Room Hall" not in html
+
+
+def test_agenda_page_shows_times_in_utc_regardless_of_server_timezone(world, settings):
+    w = world
+    settings.TIME_ZONE = "Pacific/Auckland"
+    start = w["now"].replace(hour=9, minute=0, second=0, microsecond=0) + timedelta(days=1)
+    add_session(w, title="Nine", starts_at=start, ends_at=start + timedelta(hours=1))
+    html = Client().get(f"/e/{w['event'].public_id}/agenda/").content.decode()
+    assert "09:00" in html and "10:00" in html

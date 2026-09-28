@@ -15,6 +15,8 @@ test("scene 01 — public event, gallery and results", async ({ page }) => {
     ["01-landing", `/e/${event}/`],
     ["02-gallery", `/e/${event}/gallery/`],
     ["03-results", `/e/${event}/results/`],
+    ["07-agenda", `/e/${event}/agenda/`],
+    ["08-expo-map", `/e/${event}/map/`],
   ]) {
     await page.goto(path);
     await settled(page);
@@ -35,3 +37,11 @@ for (const [n, role] of [
     await page.screenshot({ path: shot(`${n}-workspace`), fullPage: true });
   });
 }
+
+test("scene 09 — API explorer and sign-in", async ({ page }) => {
+  await page.goto("/app/");
+  await page.screenshot({ path: shot("10-signin") });
+  await page.goto("/app/?api=explorer");
+  await settled(page);
+  await page.screenshot({ path: shot("09-api-explorer"), fullPage: true });
+});

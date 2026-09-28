@@ -1,10 +1,11 @@
 {% extends "presentation/base.html" %}
-{% load i18n %}
+{% load i18n tz %}
 {% block title %}{% trans "Agenda" %} &middot; {{ event.name }}{% endblock %}
 {% block content %}
 <h1>{% trans "Agenda" %}</h1>
 <p><a href="{% url 'site-agenda-ics' event.public_id %}">{% trans "Subscribe (iCalendar)" %}</a></p>
 {% if sessions %}
+  {% timezone "UTC" %}
   <ol class="cx-agenda">
     {% for session in sessions %}
       <li class="cx-card">
@@ -24,6 +25,7 @@
       </li>
     {% endfor %}
   </ol>
+  {% endtimezone %}
 {% else %}
   <p>{% trans "No sessions have been scheduled yet." %}</p>
 {% endif %}

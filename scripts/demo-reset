@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Recreate the deterministic demo event from scratch (PVS-H05). Safe to run repeatedly:
+# it only ever purges the generated demo workspace (guarded by the DemoScenario marker).
+#
+#   scripts/demo-reset                 # against the stack in the current compose project
+#   DEMO_SEED=7 DEMO_PASSWORD=... DEMO_BASE_URL=http://localhost:8080 scripts/demo-reset
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+seed=${DEMO_SEED:-7}
+password=${DEMO_PASSWORD:-demo-pass-7}
+base=${DEMO_BASE_URL:-http://localhost:${CONFLUX_PORT:-8080}}
+slug="demo-hackathon-$seed"
+manage() { docker compose exec -T app python manage.py "$@"; }
+
+manage demo_scenario purge "$slug" >/dev/null 2>&1 || true
+out=$(manage demo_scenario create --seed "$seed" --participants 24 --judges 6 \
+  --password "$password" --public | tail -1)
+event=$(printf '%s' "$out" | python3 -c 'import sys,json; print(json.load(sys.stdin)["event"])')
+manage demo_showcase "$slug" >/dev/null
+curl -fsS "$base/api/v1/health/" >/dev/null
+
+cat <<EOF
+Demo ready (seed $seed).
+  Sign in:   $base/app/     (password for every demo account: $password)
+  organizer  demo-hackathon-$seed-organizer
+  judge      demo-hackathon-$seed-judge-01 .. 06
+  team       demo-hackathon-$seed-participant-01 .. 24
+  Public:    $base/e/$event/            landing
+             $base/e/$event/gallery/    gallery
+             $base/e/$event/results/    results
+             $base/e/$event/agenda/     agenda   ($base/e/$event/agenda.ics)
+             $base/e/$event/map/        expo map
+  Event id:  $event
+EOF

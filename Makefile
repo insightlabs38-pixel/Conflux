@@ -1,4 +1,4 @@
-.PHONY: format format-check lint test build verify-fast verify openapi-check sdk-generate sdk-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance backup restore backup-restore-smoke
+.PHONY: demo-reset demo-e2e format format-check lint test build verify-fast verify openapi-check sdk-generate sdk-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance backup restore backup-restore-smoke
 
 # Local checks use disposable keys; runtime deployments must supply their own.
 export DJANGO_SECRET_KEY ?= bootstrap-checks-only
@@ -113,3 +113,11 @@ restore:
 # Proves backup+restore actually round-trip real state end to end.
 backup-restore-smoke:
 	./scripts/backup-restore-smoke
+
+# Recreate the deterministic demo event (see docs/operations/DEMO.md).
+demo-reset:
+	./scripts/demo-reset
+
+# Regenerate demo screenshots and clips into tests/e2e/artifacts/ (needs a running, demo-reset stack).
+demo-e2e:
+	npx playwright test -c tests/e2e/playwright.config.ts

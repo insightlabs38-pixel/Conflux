@@ -19,6 +19,8 @@ for (const [name, path] of [
   ["event landing", (e: string) => `/e/${e}/`],
   ["gallery", (e: string) => `/e/${e}/gallery/`],
   ["results", (e: string) => `/e/${e}/results/`],
+  ["agenda", (e: string) => `/e/${e}/agenda/`],
+  ["expo map", (e: string) => `/e/${e}/map/`],
 ] as const) {
   test(`public ${name}: styled, accessible, no overflow, no errors`, async ({
     page,

@@ -7,6 +7,7 @@ from accounts.models import User
 from audit.services import diff_snapshots, record_mutation
 from awards.models import AwardWinner, SelectionSource
 from core.authz import has_any_role
+from core.csv_safety import safe_cell
 from core.permissions import IsWorkspaceMember, require_roles
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError, transaction
@@ -1572,7 +1573,7 @@ class ResultsCsvExportView(PlanMixin):
             writer.writerow(
                 [
                     result.rank,
-                    project.name if project else result.project_id,
+                    safe_cell(project.name) if project else result.project_id,
                     result.raw_score,
                     result.final_score,
                     result.tie_break if result.tie_break is not None else "",
@@ -1959,7 +1960,7 @@ class PairwiseResultsCsvExportView(PlanMixin):
             writer.writerow(
                 [
                     result.rank,
-                    project.name if project else result.project_id,
+                    safe_cell(project.name) if project else result.project_id,
                     result.strength,
                     result.win_count,
                     result.comparison_count,

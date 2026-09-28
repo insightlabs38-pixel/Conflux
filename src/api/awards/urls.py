@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import sponsor_portal, views
+from . import fulfillment_export, sponsor_portal, views
 
 _prefix = "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/awards/"
 
@@ -11,6 +11,16 @@ urlpatterns = [
         name="public-awards",
     ),
     path(_prefix, views.AwardListView.as_view(), name="award-list"),
+    path(
+        _prefix + "fulfillment-export/",
+        fulfillment_export.FulfillmentExportView.as_view(),
+        name="award-fulfillment-export",
+    ),
+    path(
+        _prefix + "fulfillment-export.csv",
+        fulfillment_export.FulfillmentExportCsvView.as_view(),
+        name="award-fulfillment-export-csv",
+    ),
     path(_prefix + "candidates/", views.AwardCandidateView.as_view(), name="award-candidates"),
     path(_prefix + "proposals/", views.AwardProposalView.as_view(), name="award-proposals"),
     path(

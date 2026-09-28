@@ -4493,6 +4493,30 @@ export interface Operations {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: CandidateOutput[];
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_fulfillment_export: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      query?: {
+        include_notes?: boolean;
+        include_recipients?: boolean;
+        state?:
+          "claimed" | "contacted" | "failed" | "pending" | "sent" | "verified";
+      };
+    };
+    response: Record<string, unknown>;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_fulfillment_export_csv: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      query?: {
+        include_notes?: boolean;
+        include_recipients?: boolean;
+        state?:
+          "claimed" | "contacted" | "failed" | "pending" | "sent" | "verified";
+      };
+    };
+    response: string;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_proposals: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: AwardProposalOutput;
@@ -7137,6 +7161,24 @@ export const operations = {
       query_params: [],
       request_body: false,
       response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_fulfillment_export:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/fulfillment-export/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: ["include_notes", "include_recipients", "state"],
+      request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_fulfillment_export_csv:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/fulfillment-export.csv",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: ["include_notes", "include_recipients", "state"],
+      request_body: false,
+      response_kind: "text",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_proposals:
     {

@@ -2029,6 +2029,102 @@ paths:
                 items:
                   $ref: '#/components/schemas/CandidateOutput'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/fulfillment-export/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_fulfillment_export
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: include_notes
+        schema:
+          type: boolean
+      - in: query
+        name: include_recipients
+        schema:
+          type: boolean
+      - in: query
+        name: state
+        schema:
+          type: string
+          enum:
+          - claimed
+          - contacted
+          - failed
+          - pending
+          - sent
+          - verified
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/fulfillment-export.csv:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_fulfillment_export_csv
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: include_notes
+        schema:
+          type: boolean
+      - in: query
+        name: include_recipients
+        schema:
+          type: boolean
+      - in: query
+        name: state
+        schema:
+          type: string
+          enum:
+          - claimed
+          - contacted
+          - failed
+          - pending
+          - sent
+          - verified
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/proposals/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_proposals

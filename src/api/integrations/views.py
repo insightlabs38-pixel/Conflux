@@ -2,6 +2,7 @@ import csv
 
 from accounts.authentication import CookieSessionAuthentication
 from core.authz import has_any_role
+from core.csv_safety import safe_cell
 from core.permissions import require_roles
 from django.http import HttpResponse
 from django.utils import timezone
@@ -141,12 +142,15 @@ class CsvExportView(APIView):
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = 'attachment; filename="scores.csv"'
         writer = csv.writer(response)
-        writer.writerow(["judge", "project", *criterion_names, "comment"])
+        writer.writerow(["judge", "project", *[safe_cell(n) for n in criterion_names], "comment"])
         for s in scores:
             values = {c.name: c.value for c in s.criteria.all()}
             writer.writerow(
-                [s.judge.external_id, s.project.external_id]
-                + [values.get(name, "") for name in criterion_names]
-                + [s.comment]
+                [
+                    safe_cell(cell)
+                    for cell in [s.judge.external_id, s.project.external_id]
+                    + [values.get(name, "") for name in criterion_names]
+                    + [s.comment]
+                ]
             )
         return response

@@ -12,3 +12,4 @@ docs/api/openapi.yaml
 docs/batches/
 # Django template syntax is not HTML and cannot be parsed by Prettier.
 src/api/presentation/templates/
+tests/e2e/artifacts

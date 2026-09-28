@@ -2,7 +2,7 @@
 
 ## Result
 
-Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS06–PVS10, PVS-H02, PVS11, PVS12, PVS13, PVS14, PVS15, PVS-H03 complete on `main`. Earliest unfinished batch: **PVS16**, then PVS17, PVS16–PVS17, PVS-H04, PVS-H05. PVS18 skipped: H02 found no throughput bottleneck (only the fixed connection-bound bug).
+Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS06–PVS10, PVS-H02, PVS11, PVS12, PVS13, PVS14, PVS15, PVS-H03 complete on `main`. Earliest unfinished batch: **PVS16**, then PVS17, PVS-H04, PVS-H05. PVS18 skipped: H02 found no throughput bottleneck (only the fixed connection-bound bug).
 
 ## Changes
 

@@ -114,6 +114,12 @@ TEMPLATES = [
 # Serves the same design tokens/component CSS the React app uses (single
 # source of truth in src/web/styles), so server-rendered pages match it.
 STATICFILES_DIRS = [BASE_DIR.parent / "web" / "styles"]
+# The built single-page app (image builds bake it in at /web/dist), collected under
+# /static/app/; absent in a bare source checkout, which serves only the API and
+# server-rendered pages.
+_WEB_DIST = Path(os.environ.get("CONFLUX_WEB_DIST", "/web/dist"))
+if _WEB_DIST.is_dir():
+    STATICFILES_DIRS.append(("app", _WEB_DIST))
 
 # Compose and deployed runtimes provide DATABASE_URL; the default keeps
 # bootstrap-style local checks (pytest, manage.py check) working without it.

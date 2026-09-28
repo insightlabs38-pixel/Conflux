@@ -10,6 +10,8 @@
     "build": "pnpm --filter @conflux/web build && pnpm --filter @conflux/embed build"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "1.63.0",
     "prettier": "^3.6.2"
   }
 }

@@ -37,8 +37,20 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  margin: 0;
+  font-family: var(--font-sans);
+  line-height: 1.5;
   background: var(--color-bg);
   color: var(--color-text);
+}
+:where(.cx-shell) a {
+  color: var(--color-accent);
+}
+:where(.cx-shell) a:hover {
+  color: var(--color-accent-strong);
+}
+:where(.cx-shell) :where(input, select, textarea, button) {
+  font: inherit;
 }
 .cx-shell__header {
   min-height: var(--header-height);

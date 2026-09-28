@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { Button } from "../components/Button";
+import { SignIn } from "./SignIn";
 
 type Membership = {
   workspace: string;
@@ -43,6 +45,18 @@ export function WorkspaceSelector({
   const [state, setState] = useState<LoadState>("loading");
   const [workspaces, setWorkspaces] = useState<Membership[]>([]);
   const [error, setError] = useState("");
+  const [attempt, setAttempt] = useState(0);
+  const reload = useCallback(() => {
+    setState("loading");
+    setAttempt((count) => count + 1);
+  }, []);
+  const signOut = useCallback(async () => {
+    await fetch("/api/v1/accounts/logout/", {
+      method: "POST",
+      credentials: "include",
+    }).catch(() => undefined);
+    reload();
+  }, [reload]);
 
   useEffect(() => {
     let active = true;
@@ -68,28 +82,35 @@ export function WorkspaceSelector({
     return () => {
       active = false;
     };
-  }, []);
+  }, [attempt]);
 
   if (state === "loading") return <p>Loading your workspaces…</p>;
-  if (state === "signed-out") return <p>Sign in to see your workspaces.</p>;
+  if (state === "signed-out") return <SignIn onSignedIn={reload} />;
   if (state === "error") return <p role="alert">{error}</p>;
   if (workspaces.length === 0)
     return <p>You are not a member of any workspace yet.</p>;
 
   return (
-    <nav aria-label="Your workspaces">
-      <ul>
-        {workspaces.map((membership) => (
-          <li key={membership.workspace}>
-            <button
-              type="button"
-              onClick={() => onSelect(membership.workspace, membership.role)}
-            >
-              {membership.workspace_name} ({membership.role})
-            </button>
-          </li>
-        ))}
-      </ul>
-    </nav>
+    <>
+      <nav aria-label="Your workspaces">
+        <ul>
+          {workspaces.map((membership) => (
+            <li key={membership.workspace}>
+              <button
+                type="button"
+                onClick={() => onSelect(membership.workspace, membership.role)}
+              >
+                {membership.workspace_name} ({membership.role})
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <p>
+        <Button variant="secondary" onClick={signOut}>
+          Sign out
+        </Button>
+      </p>
+    </>
   );
 }

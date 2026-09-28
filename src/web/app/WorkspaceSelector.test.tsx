@@ -79,10 +79,14 @@ describe("WorkspaceSelector", () => {
     });
     await waitFor(() => container.querySelectorAll("button").length > 0);
 
-    const buttons = container.querySelectorAll("button");
+    const nav = container.querySelector("nav")!;
+    const buttons = nav.querySelectorAll("button");
     expect(buttons).toHaveLength(2);
     expect(container.textContent).toContain("Regionals");
     expect(container.textContent).toContain("Finals");
+    expect(
+      [...container.querySelectorAll("button")].map((b) => b.textContent),
+    ).toContain("Sign out");
 
     (buttons[0] as HTMLButtonElement).click();
     expect(onSelect).toHaveBeenCalledWith("w1", "organizer");
@@ -105,6 +109,8 @@ describe("WorkspaceSelector", () => {
     });
     await waitFor(() => container.textContent !== "Loading your workspaces…");
     expect(container.textContent).toContain("Sign in");
-    expect(container.querySelectorAll("button")).toHaveLength(0);
+    expect(container.querySelector("nav")).toBeNull();
+    expect(container.querySelector('input[name="username"]')).not.toBeNull();
+    expect(container.querySelector('input[type="password"]')).not.toBeNull();
   });
 });

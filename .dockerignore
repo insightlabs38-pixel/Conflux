@@ -1,7 +1,7 @@
 .git
 .venv
-node_modules
-dist
+**/node_modules
+**/dist
 coverage
 .pytest_cache
 .ruff_cache
@@ -14,8 +14,9 @@ docs
 tests
 loadtests
 examples
-src/web/**
-!src/web/styles/**
-src/embed
+src/embed/**
+!src/embed/package.json
 src/packages
+src/web/**/*.test.ts
+src/web/**/*.test.tsx
 acceptance-report.txt

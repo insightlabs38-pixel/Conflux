@@ -8,6 +8,15 @@
 		root * /srv/static
 		file_server
 	}
+	# The browser workspace app: one shell page (client-side state lives in the query string).
+	@root path /
+	redir @root /app/?{query} 302
+	@app path /app /app/
+	handle @app {
+		rewrite * /app/index.html
+		root * /srv/static
+		file_server
+	}
 	handle {
 		reverse_proxy app:8000
 	}

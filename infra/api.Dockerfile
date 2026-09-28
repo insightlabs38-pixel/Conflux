@@ -1,3 +1,14 @@
+FROM node:24-slim AS web
+WORKDIR /repo
+RUN corepack enable
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY src/web/package.json src/web/package.json
+COPY src/embed/package.json src/embed/package.json
+COPY sdks/typescript/package.json sdks/typescript/package.json
+RUN pnpm install --frozen-lockfile --filter @conflux/web...
+COPY src/web src/web
+RUN pnpm --filter @conflux/web exec vite build
+
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -15,6 +26,7 @@ RUN python -m pip install --no-cache-dir "uv==0.12.18" \
 
 COPY src/api /app
 COPY src/web/styles /web/styles
+COPY --from=web /repo/src/web/dist /web/dist
 COPY fixtures /app/fixtures
 
 WORKDIR /app

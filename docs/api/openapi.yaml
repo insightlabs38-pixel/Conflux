@@ -1634,6 +1634,158 @@ paths:
               schema:
                 $ref: '#/components/schemas/SignedArchiveOutput'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/as-code/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_as_code
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/as-code/apply/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_as_code_apply
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventAsCodeApplyInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EventAsCodeApplyInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EventAsCodeApplyInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/as-code/plan/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_as_code_plan
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventAsCodeDocumentInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EventAsCodeDocumentInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EventAsCodeDocumentInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/as-code/validate/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_as_code_validate
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventAsCodeDocumentInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EventAsCodeDocumentInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EventAsCodeDocumentInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/attendance/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_attendance
@@ -16151,6 +16303,29 @@ components:
         * `approved` - Approved
         * `waitlisted` - Waitlisted
         * `rejected` - Rejected
+    EventAsCodeApplyInput:
+      type: object
+      properties:
+        document: {}
+        prune:
+          type: boolean
+          default: false
+        expected_digest:
+          type: string
+          maxLength: 64
+          minLength: 64
+      required:
+      - document
+      - expected_digest
+    EventAsCodeDocumentInput:
+      type: object
+      properties:
+        document: {}
+        prune:
+          type: boolean
+          default: false
+      required:
+      - document
     EventDashboardSchema:
       type: object
       properties:

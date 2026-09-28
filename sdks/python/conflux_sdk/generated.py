@@ -1469,6 +1469,24 @@ EventApplicationStatusEnum = Literal['pending', 'approved', 'waitlisted', 'rejec
 
 InputOfEventApplicationStatusEnum = Literal['pending', 'approved', 'waitlisted', 'rejected']
 
+class EventAsCodeApplyInput(TypedDict):
+    document: Any
+    prune: NotRequired[bool]
+    expected_digest: str
+
+class InputOfEventAsCodeApplyInput(TypedDict):
+    document: Any
+    prune: NotRequired[bool]
+    expected_digest: str
+
+class EventAsCodeDocumentInput(TypedDict):
+    document: Any
+    prune: NotRequired[bool]
+
+class InputOfEventAsCodeDocumentInput(TypedDict):
+    document: Any
+    prune: NotRequired[bool]
+
 class EventDashboardSchema(TypedDict):
     event: Event
     track_count: int
@@ -4563,6 +4581,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                      'query_params': ['mode'],
                                                                                      'request_body': False,
                                                                                      'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_as_code': {'method': 'GET',
+                                                                              'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/as-code/',
+                                                                              'path_params': ['event_public_id',
+                                                                                              'workspace_public_id'],
+                                                                              'query_params': [],
+                                                                              'request_body': False,
+                                                                              'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_attendance': {'method': 'GET',
                                                                                  'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/attendance/',
                                                                                  'path_params': ['event_public_id',
@@ -5867,6 +5892,27 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                  'query_params': [],
                                                                                                                  'request_body': True,
                                                                                                                  'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_as_code_apply': {'method': 'POST',
+                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/as-code/apply/',
+                                                                                     'path_params': ['event_public_id',
+                                                                                                     'workspace_public_id'],
+                                                                                     'query_params': [],
+                                                                                     'request_body': True,
+                                                                                     'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_as_code_plan': {'method': 'POST',
+                                                                                    'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/as-code/plan/',
+                                                                                    'path_params': ['event_public_id',
+                                                                                                    'workspace_public_id'],
+                                                                                    'query_params': [],
+                                                                                    'request_body': True,
+                                                                                    'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_as_code_validate': {'method': 'POST',
+                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/as-code/validate/',
+                                                                                        'path_params': ['event_public_id',
+                                                                                                        'workspace_public_id'],
+                                                                                        'query_params': [],
+                                                                                        'request_body': True,
+                                                                                        'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_authz_dry_run': {'method': 'POST',
                                                                                      'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/authz-dry-run/',
                                                                                      'path_params': ['event_public_id',

@@ -17,6 +17,7 @@ dependencies = [
   "markdown-it-py>=4,<5",
   "pygments>=2.21,<3",
   "segno>=1.6.6",
+  "pyyaml>=6.0.3",
 ]
 
 [dependency-groups]

@@ -1625,6 +1625,25 @@ export type EventApplicationStatusEnum =
 export type InputOfEventApplicationStatusEnum =
   "pending" | "approved" | "waitlisted" | "rejected";
 
+export type EventAsCodeApplyInput = {
+  document: unknown;
+  prune?: boolean;
+  expected_digest: string;
+};
+
+export type InputOfEventAsCodeApplyInput = {
+  document: unknown;
+  prune?: boolean;
+  expected_digest: string;
+};
+
+export type EventAsCodeDocumentInput = { document: unknown; prune?: boolean };
+
+export type InputOfEventAsCodeDocumentInput = {
+  document: unknown;
+  prune?: boolean;
+};
+
 export type EventDashboardSchema = {
   event: Event;
   track_count: number;
@@ -4793,6 +4812,31 @@ export interface Operations {
     };
     response: SignedArchiveOutput;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_as_code: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: Record<string, unknown>;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_as_code_apply: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfEventAsCodeApplyInput;
+    };
+    response: Record<string, unknown>;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_as_code_plan: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfEventAsCodeDocumentInput;
+    };
+    response: Record<string, unknown>;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_as_code_validate: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfEventAsCodeDocumentInput;
+    };
+    response: Record<string, unknown>;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_attendance: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: Record<string, unknown>;
@@ -7744,6 +7788,41 @@ export const operations = {
       path_params: ["event_public_id", "workspace_public_id"],
       query_params: ["mode"],
       request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_as_code: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/as-code/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_as_code_apply:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/as-code/apply/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_as_code_plan:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/as-code/plan/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_as_code_validate:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/as-code/validate/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
       response_kind: "json",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_attendance: {

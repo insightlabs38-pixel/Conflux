@@ -2,6 +2,7 @@ from django.urls import path
 
 from . import (
     archive_views,
+    eventascode_views,
     external_qualifier_views,
     privacy_views,
     template_views,
@@ -12,6 +13,16 @@ from . import (
 _event = "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/"
 
 urlpatterns = [
+    path(_event + "as-code/", eventascode_views.EventAsCodeView.as_view(), name="event-as-code"),
+    path(
+        _event + "as-code/validate/",
+        eventascode_views.ValidateView.as_view(),
+        name="event-as-code-validate",
+    ),
+    path(_event + "as-code/plan/", eventascode_views.PlanView.as_view(), name="event-as-code-plan"),
+    path(
+        _event + "as-code/apply/", eventascode_views.ApplyView.as_view(), name="event-as-code-apply"
+    ),
     path(
         _event + "privacy/retention-policy/",
         privacy_views.RetentionPolicyView.as_view(),

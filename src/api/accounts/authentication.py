@@ -1,9 +1,32 @@
+from urllib.parse import urlsplit
+
+from django.conf import settings
+from django.core.exceptions import DisallowedHost
 from rest_framework.authentication import BaseAuthentication
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
 
 from .models import ApiCredential, Session, digest_api_token
 
 COOKIE_NAME = "session"
+UNSAFE_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
+
+
+def cross_site_write(request):
+    """True when a browser is making a cookie-authenticated write from another
+    origin. Browsers always attach Origin (or Sec-Fetch-Site) to such requests;
+    scripts and API clients send neither, so they are unaffected.
+    """
+    if request.method not in UNSAFE_METHODS:
+        return False
+    origin = request.META.get("HTTP_ORIGIN")
+    if origin is None:
+        return request.META.get("HTTP_SEC_FETCH_SITE") not in (None, "same-origin", "none")
+    if origin in settings.CSRF_TRUSTED_ORIGINS:
+        return False
+    try:
+        return urlsplit(origin).netloc != request.get_host()
+    except (ValueError, DisallowedHost):
+        return True
 
 
 class CookieOnlyAuthentication(BaseAuthentication):
@@ -26,6 +49,8 @@ class CookieOnlyAuthentication(BaseAuthentication):
             raise AuthenticationFailed("Session expired.")
         if not session.user.is_active:
             raise AuthenticationFailed("Account disabled.")
+        if cross_site_write(request):
+            raise PermissionDenied("Cross-site requests are not allowed.")
         return (session.user, session)
 
     def authenticate_header(self, request):

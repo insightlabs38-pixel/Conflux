@@ -1,16 +1,19 @@
 from datetime import timedelta
 
 from django.contrib.auth import authenticate
+from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .authentication import COOKIE_NAME, CookieSessionAuthentication
-from .models import Session
+from .models import LoginFailure, Session
 from .serializers import LoginInputSchema, LoginResponseSchema, UserSummarySchema
 
 SESSION_TTL = timedelta(hours=12)
+LOGIN_FAILURE_LIMIT = 10
+LOGIN_FAILURE_WINDOW = timedelta(minutes=15)
 
 
 def _serialize_user(user):
@@ -39,12 +42,32 @@ def _serialize_user(user):
 def login(request):
     username = request.data.get("username")
     password = request.data.get("password")
+    if not isinstance(username, str) or not isinstance(password, str):
+        return Response({"detail": "Invalid credentials."}, status=401)
+    key = username.strip().lower()[:150]
+    cutoff = timezone.now() - LOGIN_FAILURE_WINDOW
+    recent = LoginFailure.objects.filter(username=key, created_at__gte=cutoff)
+    if recent.count() >= LOGIN_FAILURE_LIMIT:
+        response = Response({"detail": "Too many failed attempts. Try again later."}, status=429)
+        response["Retry-After"] = str(int(LOGIN_FAILURE_WINDOW.total_seconds()))
+        return response
     user = authenticate(request, username=username, password=password)
     if user is None:
+        LoginFailure.objects.create(username=key)
+        LoginFailure.objects.filter(created_at__lt=cutoff - LOGIN_FAILURE_WINDOW).delete()
         return Response({"detail": "Invalid credentials."}, status=401)
+    LoginFailure.objects.filter(username=key).delete()
     session = Session.issue(user, ttl=SESSION_TTL)
     response = Response({"user": _serialize_user(user)})
-    response.set_cookie(COOKIE_NAME, session.token, httponly=True, samesite="Lax")
+    secure = request.is_secure() or request.META.get("HTTP_X_FORWARDED_PROTO") == "https"
+    response.set_cookie(
+        COOKIE_NAME,
+        session.token,
+        max_age=int(SESSION_TTL.total_seconds()),
+        httponly=True,
+        samesite="Lax",
+        secure=secure,
+    )
     return response
 
 

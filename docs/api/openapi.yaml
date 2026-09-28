@@ -738,9 +738,10 @@ paths:
         Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
 
         Put before the DRF view class in the MRO. Requests without the header are
-        passed through untouched, so normal (non-idempotent) callers see no change.
-        A replayed key with a different body is rejected rather than silently
-        served the stale response.
+        passed through untouched. A key is private to the caller and to one
+        method+path; reusing it for a different request is rejected (422), a
+        duplicate while the first is still running is refused (409) instead of
+        running twice, and server errors are never cached so they can be retried.
       tags:
       - workspaces
       requestBody:

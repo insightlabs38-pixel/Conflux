@@ -62,3 +62,12 @@ class ApiCredential(PublicIdModel):
 
     def is_active(self):
         return self.revoked_at is None and self.expires_at > timezone.now() and self.owner.is_active
+
+
+class LoginFailure(models.Model):
+    """One failed password attempt, kept only to throttle guessing per account.
+    Stores the normalized username, never the password or the client address.
+    """
+
+    username = models.CharField(max_length=150, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)

@@ -12,6 +12,12 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parents[1]
 
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
+# Extra browser origins allowed to make cookie-authenticated writes (same-origin always is).
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",")
+    if origin.strip()
+]
 
 # Seeds the Ed25519 keypair that signs publicly verifiable records
 # (REC-002): deterministic from the seed so records stay verifiable across
@@ -152,6 +158,11 @@ AUTH_USER_MODEL = "accounts.User"
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "core.schema.ConfluxAutoSchema",
+    "DEFAULT_PARSER_CLASSES": [
+        "core.parsers.ObjectJSONParser",
+        "rest_framework.parsers.FormParser",
+        "rest_framework.parsers.MultiPartParser",
+    ],
 }
 SPECTACULAR_SETTINGS = {
     "TITLE": "Conflux API",

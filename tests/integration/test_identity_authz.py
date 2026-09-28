@@ -186,7 +186,7 @@ def test_idempotency_key_replays_the_original_response_without_double_creating()
     assert second.status_code == 201
     assert first.json() == second.json()
     assert Workspace.objects.filter(slug="once-only").count() == 1
-    assert IdempotencyKey.objects.filter(key="dedupe-1").count() == 1
+    assert IdempotencyKey.objects.filter(key__endswith=":dedupe-1").count() == 1
 
 
 def test_idempotency_key_reused_with_different_body_is_rejected():

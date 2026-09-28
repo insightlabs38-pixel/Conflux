@@ -164,6 +164,8 @@ class PublicVotingStatusView(PublicVotingMixin):
 class CandidateOrderView(PublicVotingMixin):
     @extend_schema(responses=CandidateSchema(many=True))
     def get(self, request, event_public_id, workspace_public_id=None):
+        # No voting plan means nobody enabled voting: never list an event's projects.
+        self.get_plan()
         event = self.get_event()
         voter_key = request.GET.get("token") or (
             str(request.user.public_id) if request.user.is_authenticated else "anonymous"

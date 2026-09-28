@@ -8,6 +8,7 @@ working if a cache is unavailable is worse than a slightly heavier table.
 """
 
 import hashlib
+import ipaddress
 from datetime import timedelta
 
 from audit.services import record_mutation
@@ -31,7 +32,27 @@ def client_identifier(request) -> str:
     """A best-effort, privacy-respecting client identifier for rate limiting
     only -- never stored raw, never used for anything but counting.
     """
-    return request.META.get("REMOTE_ADDR", "unknown")
+    remote = request.META.get("REMOTE_ADDR", "unknown")
+    forwarded = request.META.get("HTTP_X_FORWARDED_FOR", "")
+    if forwarded and _internal(remote):
+        # The bundled Caddy replaces any client-supplied X-Forwarded-For with the real
+        # peer, so behind it the first entry is the visitor rather than the proxy that
+        # every visitor would otherwise share a rate limit through.
+        candidate = forwarded.split(",")[0].strip()
+        try:
+            ipaddress.ip_address(candidate)
+        except ValueError:
+            return remote
+        return candidate
+    return remote
+
+
+def _internal(address):
+    try:
+        ip = ipaddress.ip_address(address)
+    except ValueError:
+        return False
+    return ip.is_private or ip.is_loopback or ip.is_link_local
 
 
 def enforce_rate_limit(plan, scope: str, identifier: str, *, limit: int, window: timedelta):

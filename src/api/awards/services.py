@@ -78,7 +78,7 @@ def _source_evidence(award, project):
     }, rank is not None and rank <= award.winner_count
 
 
-def select_winner(*, award, project, actor, override_reason=""):
+def select_winner(*, award, project, actor, override_reason="", extra_evidence=None):
     reason = override_reason.strip()
     with transaction.atomic():
         project = Project.objects.select_for_update().get(pk=project.pk)
@@ -116,6 +116,7 @@ def select_winner(*, award, project, actor, override_reason=""):
         ):
             raise ValidationError("Project already won in this conflict group.")
         evidence, matches_source = _source_evidence(award, project)
+        evidence = {**evidence, **(extra_evidence or {})}
         if not matches_source and not reason:
             raise ValidationError(
                 "Selection outside the source ranking requires an override reason."

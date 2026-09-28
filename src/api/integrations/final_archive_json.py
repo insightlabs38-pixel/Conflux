@@ -14,6 +14,7 @@ def remap_json(label, field, value, *, pk, public):
         ("evaluations.pairwiserun", "evidence"),
         ("evaluations.assignmentversion", "evidence"),
         ("awards.awardwinner", "evidence"),
+        ("deliberation.deliberationroom", "finalization"),
     }
     if (label, field) in adapted and not isinstance(value, dict):
         raise ValidationError(f"{label}.{field} must be an object.")
@@ -78,4 +79,13 @@ def remap_json(label, field, value, *, pk, public):
         ):
             if key in result:
                 result[key] = public(table, result[key])
+        if "deliberation" in result:
+            result["deliberation"]["room"] = public(
+                "deliberation.deliberationroom", result["deliberation"]["room"]
+            )
+    if label == "deliberation.deliberationroom" and field == "finalization":
+        if "winners" in result:
+            result["winners"] = [public(project, ref) for ref in result["winners"]]
+        for row in result.get("tally", []):
+            row["project"] = public(project, row["project"])
     return result

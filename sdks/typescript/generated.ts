@@ -1721,6 +1721,13 @@ export type InputOfFeedbackEntrySchema = {
   submitted_at: string;
 };
 
+export type FinalizeInput = { winners: string[]; override_reason?: string };
+
+export type InputOfFinalizeInput = {
+  winners: string[];
+  override_reason?: string;
+};
+
 export type FindingInput = { message: string; severity?: SeverityEnum };
 
 export type InputOfFindingInput = {
@@ -2342,6 +2349,14 @@ export type InputOfNormalizationRun = {
   grand_mean: number;
   evidence: unknown;
 };
+
+export type NoteInput = { body: string; project?: string };
+
+export type InputOfNoteInput = { body: string; project?: string };
+
+export type OpenInput = { quorum?: number };
+
+export type InputOfOpenInput = { quorum?: number };
 
 export type OperationsSummarySchema = {
   participants: unknown;
@@ -3529,6 +3544,26 @@ export type InputOfReviewSummaryOutput = {
   revision: number;
 };
 
+export type RoomOutput = {
+  public_id: string;
+  status: string;
+  quorum: number;
+  notes: Record<string, unknown>[];
+  stances: Record<string, unknown>[];
+  tally: Record<string, unknown>[];
+  finalization: Record<string, unknown>;
+};
+
+export type InputOfRoomOutput = {
+  public_id: string;
+  status: string;
+  quorum: number;
+  notes: Record<string, unknown>[];
+  stances: Record<string, unknown>[];
+  tally: Record<string, unknown>[];
+  finalization: Record<string, unknown>;
+};
+
 export type RubricLabCriterionSchema = {
   criterion_id: string;
   name: string;
@@ -3794,6 +3829,17 @@ export type StageTransition = {
 };
 
 export type InputOfStageTransition = { from_stage: string; to_stage: string };
+
+export type StanceEnum = "endorse" | "object" | "abstain";
+
+export type InputOfStanceEnum = "endorse" | "object" | "abstain";
+
+export type StanceInput = { stance: StanceEnum; rationale?: string };
+
+export type InputOfStanceInput = {
+  stance: InputOfStanceEnum;
+  rationale?: string;
+};
 
 export type SubjectExportOutput = {
   subject: Record<string, unknown>;
@@ -4673,6 +4719,71 @@ export interface Operations {
       body: InputOfComponentInput;
     };
     response: ComponentOutput;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation: {
+    request: {
+      path: {
+        award_public_id: string;
+        event_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: RoomOutput;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation: {
+    request: {
+      path: {
+        award_public_id: string;
+        event_public_id: string;
+        workspace_public_id: string;
+      };
+      body?: InputOfOpenInput;
+    };
+    response: RoomOutput;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation_close: {
+    request: {
+      path: {
+        award_public_id: string;
+        event_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: RoomOutput;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation_finalize: {
+    request: {
+      path: {
+        award_public_id: string;
+        event_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfFinalizeInput;
+    };
+    response: RoomOutput;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation_notes: {
+    request: {
+      path: {
+        award_public_id: string;
+        event_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfNoteInput;
+    };
+    response: RoomOutput;
+  };
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation_projects_project_public_id_stance: {
+    request: {
+      path: {
+        award_public_id: string;
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfStanceInput;
+    };
+    response: RoomOutput;
   };
   patch_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_fulfillments_fulfillment_public_id: {
     request: {
@@ -7453,6 +7564,85 @@ export const operations = {
       path_params: [
         "award_public_id",
         "event_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/deliberation/",
+      path_params: [
+        "award_public_id",
+        "event_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/deliberation/",
+      path_params: [
+        "award_public_id",
+        "event_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation_close:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/deliberation/close/",
+      path_params: [
+        "award_public_id",
+        "event_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation_finalize:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/deliberation/finalize/",
+      path_params: [
+        "award_public_id",
+        "event_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation_notes:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/deliberation/notes/",
+      path_params: [
+        "award_public_id",
+        "event_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation_projects_project_public_id_stance:
+    {
+      method: "PUT",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/deliberation/projects/{project_public_id}/stance/",
+      path_params: [
+        "award_public_id",
+        "event_public_id",
+        "project_public_id",
         "workspace_public_id",
       ],
       query_params: [],

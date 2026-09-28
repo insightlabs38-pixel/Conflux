@@ -149,4 +149,19 @@ TABLES = {
         "resolution_note closed_by opened_at addressed_at closed_at",
         "",
     ),
+    "deliberation.deliberationroom": (
+        "award__event",
+        "award status quorum opened_by opened_at closed_at finalized_at finalization",
+        "",
+    ),
+    "deliberation.deliberationnote": (
+        "room__award__event",
+        "room project author body created_at",
+        "",
+    ),
+    "deliberation.deliberationstance": (
+        "room__award__event",
+        "room judge project stance rationale updated_at",
+        "",
+    ),
 }

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "communications",
     "taxonomy",
     "eligibility",
+    "deliberation",
 ]
 
 MIDDLEWARE = [

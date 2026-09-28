@@ -8,6 +8,7 @@ from artifacts.models import Artifact, ArtifactValidation
 from artifacts.validators import inspect_artifact
 from audit.models import AuditEvent
 from awards.models import Award, AwardWinner
+from deliberation.models import DeliberationNote, DeliberationRoom, DeliberationStance
 from django.core.exceptions import ValidationError
 from django.test import Client
 from django.utils import timezone
@@ -122,6 +123,18 @@ def source():
         evaluation_plan=plan,
         published_at=timezone.now(),
     )
+    room = DeliberationRoom.objects.create(
+        award=award,
+        status="finalized",
+        quorum=1,
+        opened_by=owner,
+        finalization={
+            "winners": [str(project.public_id)],
+            "tally": [{"project": str(project.public_id), "endorse": 1}],
+        },
+    )
+    DeliberationNote.objects.create(room=room, project=project, author=judge, body="Solid")
+    DeliberationStance.objects.create(room=room, judge=judge, project=project, stance="endorse")
     AwardWinner.objects.create(
         award=award,
         project=project,
@@ -131,6 +144,7 @@ def source():
             "plan": str(plan.public_id),
             "normalization_run": str(normalization.public_id),
             "rank": 1,
+            "deliberation": {"room": str(room.public_id), "endorse": 1},
         },
     )
     rules = EligibilityRules.objects.create(event=event, min_team_size=1, require_clearance=True)
@@ -178,6 +192,11 @@ def test_restore_live_evidence_results_privacy_and_provenance_without_recomputat
     assert winner.evidence["normalization_run"] == str(
         copied_plan.published_normalization_run.public_id
     )
+    copied_room = DeliberationRoom.objects.get(award__event=copied)
+    assert winner.evidence["deliberation"]["room"] == str(copied_room.public_id)
+    assert copied_room.finalization["winners"] == [str(copied_project.public_id)]
+    assert copied_room.finalization["tally"][0]["project"] == str(copied_project.public_id)
+    assert copied_room.stances.get().judge.username == "restore-judge"
     copied_review = copied_project.eligibility_review
     assert (copied_review.status, copied_review.decided_by.username) == ("cleared", "restore-owner")
     assert copied_review.findings.get().state == "waived"

@@ -1793,6 +1793,262 @@ paths:
               schema:
                 $ref: '#/components/schemas/ComponentOutput'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/deliberation/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation
+      parameters:
+      - in: path
+        name: award_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomOutput'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation
+      parameters:
+      - in: path
+        name: award_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OpenInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OpenInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/deliberation/close/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation_close
+      parameters:
+      - in: path
+        name: award_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/deliberation/finalize/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation_finalize
+      parameters:
+      - in: path
+        name: award_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FinalizeInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FinalizeInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FinalizeInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/deliberation/notes/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation_notes
+      parameters:
+      - in: path
+        name: award_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NoteInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NoteInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomOutput'
+          description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/deliberation/projects/{project_public_id}/stance/
+  : put:
+      operationId: put_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation_projects_project_public_id_stance
+      parameters:
+      - in: path
+        name: award_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StanceInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StanceInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StanceInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomOutput'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/fulfillments/{fulfillment_public_id}/:
     patch:
       operationId: patch_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_fulfillments_fulfillment_public_id
@@ -15453,6 +15709,22 @@ components:
       - comment
       - judge
       - submitted_at
+    FinalizeInput:
+      type: object
+      properties:
+        winners:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 50
+          minItems: 1
+        override_reason:
+          type: string
+          default: ''
+          maxLength: 1000
+      required:
+      - winners
     FindingInput:
       type: object
       properties:
@@ -16438,6 +16710,24 @@ components:
       - number
       - public_id
       - ridge_lambda
+    NoteInput:
+      type: object
+      properties:
+        body:
+          type: string
+          maxLength: 2000
+        project:
+          type: string
+          format: uuid
+      required:
+      - body
+    OpenInput:
+      type: object
+      properties:
+        quorum:
+          type: integer
+          maximum: 200
+          minimum: 1
     OperationsSummarySchema:
       type: object
       properties:
@@ -18322,6 +18612,42 @@ components:
       - project_name
       - revision
       - status
+    RoomOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        quorum:
+          type: integer
+        notes:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        stances:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        tally:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        finalization:
+          type: object
+          additionalProperties: {}
+      required:
+      - finalization
+      - notes
+      - public_id
+      - quorum
+      - stances
+      - status
+      - tally
     RubricLabCriterionSchema:
       type: object
       properties:
@@ -18761,6 +19087,27 @@ components:
       - from_stage
       - public_id
       - to_stage
+    StanceEnum:
+      enum:
+      - endorse
+      - object
+      - abstain
+      type: string
+      description: |-
+        * `endorse` - Endorse
+        * `object` - Object
+        * `abstain` - Abstain
+    StanceInput:
+      type: object
+      properties:
+        stance:
+          $ref: '#/components/schemas/StanceEnum'
+        rationale:
+          type: string
+          default: ''
+          maxLength: 500
+      required:
+      - stance
     SubjectExportOutput:
       type: object
       properties:

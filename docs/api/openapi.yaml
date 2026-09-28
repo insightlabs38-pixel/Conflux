@@ -4198,6 +4198,131 @@ paths:
               schema:
                 $ref: '#/components/schemas/LaunchChecklistSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/moderation/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_moderation
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: kind
+        schema:
+          type: string
+          enum:
+          - artifact
+          - content
+          - duplicate
+          - eligibility
+          - voting
+      - in: query
+        name: offset
+        schema:
+          type: integer
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModerationQueueResponse'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/moderation/reviews/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_moderation_reviews
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: kind
+        schema:
+          type: string
+          enum:
+          - artifact
+          - content
+          - duplicate
+          - eligibility
+          - voting
+      - in: query
+        name: offset
+        schema:
+          type: integer
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ModerationReviewResponse'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_moderation_reviews
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModerationReviewInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ModerationReviewInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ModerationReviewInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModerationReviewResponse'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/summary/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_summary
@@ -12956,6 +13081,26 @@ components:
       - next_attempt_at
       - public_id
       - status
+    DispositionEnum:
+      enum:
+      - dismiss
+      - escalate
+      - resolve
+      - hide
+      - acknowledge
+      - approve
+      - reject
+      - waitlist
+      type: string
+      description: |-
+        * `dismiss` - dismiss
+        * `escalate` - escalate
+        * `resolve` - resolve
+        * `hide` - hide
+        * `acknowledge` - acknowledge
+        * `approve` - approve
+        * `reject` - reject
+        * `waitlist` - waitlist
     DropoutCoverageGapSchema:
       type: object
       properties:
@@ -14223,6 +14368,83 @@ components:
         * `PUT` - PUT
         * `PATCH` - PATCH
         * `DELETE` - DELETE
+    ModerationQueueResponse:
+      type: object
+      properties:
+        sections:
+          type: array
+          items: {}
+      required:
+      - sections
+    ModerationReviewInput:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/ModerationReviewInputKindEnum'
+        source_key:
+          type: string
+          maxLength: 64
+        evidence_digest:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        disposition:
+          $ref: '#/components/schemas/DispositionEnum'
+        note:
+          type: string
+          maxLength: 2000
+      required:
+      - disposition
+      - evidence_digest
+      - kind
+      - note
+      - source_key
+    ModerationReviewInputKindEnum:
+      enum:
+      - duplicate
+      - voting
+      - content
+      - artifact
+      - eligibility
+      type: string
+      description: |-
+        * `duplicate` - duplicate
+        * `voting` - voting
+        * `content` - content
+        * `artifact` - artifact
+        * `eligibility` - eligibility
+    ModerationReviewResponse:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+        source_key:
+          type: string
+        evidence_digest:
+          type: string
+        evidence: {}
+        disposition:
+          type: string
+        note:
+          type: string
+        actor:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+      required:
+      - actor
+      - created_at
+      - disposition
+      - evidence
+      - evidence_digest
+      - kind
+      - note
+      - public_id
+      - source_key
     MyEventApplicationResponse:
       type: object
       properties:

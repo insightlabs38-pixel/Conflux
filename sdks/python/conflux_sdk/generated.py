@@ -1146,6 +1146,10 @@ class InputOfDeliveryOutput(TypedDict):
     created_at: str
     completed_at: str | None
 
+DispositionEnum = Literal['dismiss', 'escalate', 'resolve', 'hide', 'acknowledge', 'approve', 'reject', 'waitlist']
+
+InputOfDispositionEnum = Literal['dismiss', 'escalate', 'resolve', 'hide', 'acknowledge', 'approve', 'reject', 'waitlist']
+
 class DropoutCoverageGapSchema(TypedDict):
     project: str
     missing: int
@@ -1884,6 +1888,52 @@ class InputOfMessageSchema(TypedDict):
 MethodEnum = Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
 
 InputOfMethodEnum = Literal['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+
+class ModerationQueueResponse(TypedDict):
+    sections: list[Any]
+
+class InputOfModerationQueueResponse(TypedDict):
+    sections: list[Any]
+
+class ModerationReviewInput(TypedDict):
+    kind: ModerationReviewInputKindEnum
+    source_key: str
+    evidence_digest: str
+    disposition: DispositionEnum
+    note: str
+
+class InputOfModerationReviewInput(TypedDict):
+    kind: InputOfModerationReviewInputKindEnum
+    source_key: str
+    evidence_digest: str
+    disposition: InputOfDispositionEnum
+    note: str
+
+ModerationReviewInputKindEnum = Literal['duplicate', 'voting', 'content', 'artifact', 'eligibility']
+
+InputOfModerationReviewInputKindEnum = Literal['duplicate', 'voting', 'content', 'artifact', 'eligibility']
+
+class ModerationReviewResponse(TypedDict):
+    public_id: str
+    kind: str
+    source_key: str
+    evidence_digest: str
+    evidence: Any
+    disposition: str
+    note: str
+    actor: str
+    created_at: str
+
+class InputOfModerationReviewResponse(TypedDict):
+    public_id: str
+    kind: str
+    source_key: str
+    evidence_digest: str
+    evidence: Any
+    disposition: str
+    note: str
+    actor: str
+    created_at: str
 
 class MyEventApplicationResponse(TypedDict):
     application: EventApplication | None
@@ -4037,6 +4087,22 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                            'query_params': [],
                                                                                            'request_body': False,
                                                                                            'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_moderation': {'method': 'GET',
+                                                                                            'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/moderation/',
+                                                                                            'path_params': ['event_public_id',
+                                                                                                            'workspace_public_id'],
+                                                                                            'query_params': ['kind',
+                                                                                                             'offset'],
+                                                                                            'request_body': False,
+                                                                                            'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_moderation_reviews': {'method': 'GET',
+                                                                                                    'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/moderation/reviews/',
+                                                                                                    'path_params': ['event_public_id',
+                                                                                                                    'workspace_public_id'],
+                                                                                                    'query_params': ['kind',
+                                                                                                                     'offset'],
+                                                                                                    'request_body': False,
+                                                                                                    'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_summary': {'method': 'GET',
                                                                                          'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/summary/',
                                                                                          'path_params': ['event_public_id',
@@ -5095,6 +5161,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                        'query_params': [],
                                                                                        'request_body': True,
                                                                                        'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_moderation_reviews': {'method': 'POST',
+                                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/moderation/reviews/',
+                                                                                                     'path_params': ['event_public_id',
+                                                                                                                     'workspace_public_id'],
+                                                                                                     'query_params': [],
+                                                                                                     'request_body': True,
+                                                                                                     'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_page_blocks': {'method': 'POST',
                                                                                    'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/page/blocks/',
                                                                                    'path_params': ['event_public_id',

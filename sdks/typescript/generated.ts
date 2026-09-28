@@ -1251,6 +1251,26 @@ export type InputOfDeliveryOutput = {
   completed_at: string | null;
 };
 
+export type DispositionEnum =
+  | "dismiss"
+  | "escalate"
+  | "resolve"
+  | "hide"
+  | "acknowledge"
+  | "approve"
+  | "reject"
+  | "waitlist";
+
+export type InputOfDispositionEnum =
+  | "dismiss"
+  | "escalate"
+  | "resolve"
+  | "hide"
+  | "acknowledge"
+  | "approve"
+  | "reject"
+  | "waitlist";
+
 export type DropoutCoverageGapSchema = { project: string; missing: number };
 
 export type InputOfDropoutCoverageGapSchema = {
@@ -2014,6 +2034,56 @@ export type InputOfMessageSchema = {
 export type MethodEnum = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export type InputOfMethodEnum = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+export type ModerationQueueResponse = { sections: unknown[] };
+
+export type InputOfModerationQueueResponse = { sections: unknown[] };
+
+export type ModerationReviewInput = {
+  kind: ModerationReviewInputKindEnum;
+  source_key: string;
+  evidence_digest: string;
+  disposition: DispositionEnum;
+  note: string;
+};
+
+export type InputOfModerationReviewInput = {
+  kind: InputOfModerationReviewInputKindEnum;
+  source_key: string;
+  evidence_digest: string;
+  disposition: InputOfDispositionEnum;
+  note: string;
+};
+
+export type ModerationReviewInputKindEnum =
+  "duplicate" | "voting" | "content" | "artifact" | "eligibility";
+
+export type InputOfModerationReviewInputKindEnum =
+  "duplicate" | "voting" | "content" | "artifact" | "eligibility";
+
+export type ModerationReviewResponse = {
+  public_id: string;
+  kind: string;
+  source_key: string;
+  evidence_digest: string;
+  evidence: unknown;
+  disposition: string;
+  note: string;
+  actor: string;
+  created_at: string;
+};
+
+export type InputOfModerationReviewResponse = {
+  public_id: string;
+  kind: string;
+  source_key: string;
+  evidence_digest: string;
+  evidence: unknown;
+  disposition: string;
+  note: string;
+  actor: string;
+  created_at: string;
+};
 
 export type MyEventApplicationResponse = {
   application: EventApplication | null;
@@ -4518,6 +4588,33 @@ export interface Operations {
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_checklist: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: LaunchChecklistSchema;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_moderation: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      query?: {
+        kind?: "artifact" | "content" | "duplicate" | "eligibility" | "voting";
+        offset?: number;
+      };
+    };
+    response: ModerationQueueResponse;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_moderation_reviews: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      query?: {
+        kind?: "artifact" | "content" | "duplicate" | "eligibility" | "voting";
+        offset?: number;
+      };
+    };
+    response: ModerationReviewResponse[];
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_moderation_reviews: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfModerationReviewInput;
+    };
+    response: ModerationReviewResponse;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_summary: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -7117,6 +7214,33 @@ export const operations = {
       path_params: ["event_public_id", "workspace_public_id"],
       query_params: [],
       request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_moderation:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/moderation/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: ["kind", "offset"],
+      request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_moderation_reviews:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/moderation/reviews/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: ["kind", "offset"],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_moderation_reviews:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/moderation/reviews/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
       response_kind: "json",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_summary:

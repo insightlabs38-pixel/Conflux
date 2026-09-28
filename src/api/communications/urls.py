@@ -2,10 +2,19 @@ from django.urls import path
 
 from . import views
 from .bulk_views import BulkOperationsView
+from .moderation_views import ModerationQueueView, ModerationReviewsView
 
 _prefix = "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/"
 
 urlpatterns = [
+    path(
+        _prefix + "operations/moderation/", ModerationQueueView.as_view(), name="moderation-queue"
+    ),
+    path(
+        _prefix + "operations/moderation/reviews/",
+        ModerationReviewsView.as_view(),
+        name="moderation-reviews",
+    ),
     path(_prefix + "operations/bulk/", BulkOperationsView.as_view(), name="operations-bulk"),
     path(
         "workspaces/<uuid:workspace_public_id>/operator-console/",

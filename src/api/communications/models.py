@@ -5,6 +5,21 @@ from django.db import models
 from events.models import Event
 
 
+class ModerationReview(PublicIdModel):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="moderation_reviews")
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    kind = models.CharField(max_length=16)
+    source_key = models.CharField(max_length=64)
+    evidence_digest = models.CharField(max_length=64)
+    evidence = models.JSONField()
+    disposition = models.CharField(max_length=16)
+    note = models.CharField(max_length=2000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["event", "kind", "source_key", "created_at"])]
+
+
 class BulkReceipt(PublicIdModel):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="bulk_receipts")
     actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)

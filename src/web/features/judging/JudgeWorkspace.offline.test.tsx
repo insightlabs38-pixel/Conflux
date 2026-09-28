@@ -83,83 +83,101 @@ async function scoreAndSubmit() {
 }
 
 describe("offline judge workspace", () => {
-  it("queues a ballot submitted while offline and syncs it once online", async () => {
-    let online = true;
-    let submitted = false;
-    const fetchMock = vi
-      .fn()
-      .mockImplementation(async (input: unknown, options?: RequestInit) => {
-        const url = String(input);
-        if (url.endsWith("judge-events/"))
-          return {
-            ok: true,
-            json: async () => [{ public_id: "e1", name: "First" }],
-          };
-        if (url.endsWith("judge-calendar/"))
-          return {
-            ok: true,
-            json: async () => ({ windows: [], assignments: [] }),
-          };
-        if (url.endsWith("/stages/"))
-          return {
-            ok: true,
-            json: async () => [{ public_id: "s1", name: "Final" }],
-          };
-        if (url.endsWith("evaluation-plans/"))
-          return {
-            ok: true,
-            json: async () => [{ public_id: "p1", name: "Review" }],
-          };
-        if (url.endsWith("candidates/"))
-          return {
-            ok: true,
-            json: async () => [
-              {
-                project: "project",
-                name: "Project",
-                status: submitted ? "submitted" : "pending",
-              },
-            ],
-          };
-        if (url.endsWith("publish-rubric/"))
-          return { ok: true, json: async () => RUBRIC };
-        if (url.endsWith("/draft/")) {
-          if (options?.method === "PUT" && !online)
-            throw new TypeError("Failed to fetch");
-          return { ok: true, json: async () => null };
-        }
-        if (url.endsWith("/ballots/") && options?.method === "POST") {
-          if (!online) throw new TypeError("Failed to fetch");
-          submitted = true;
-          return { ok: true, status: 201, json: async () => ({}) };
-        }
-        return { ok: true, json: async () => [] };
+  it.each([false, true])(
+    "syncs an offline ballot after browser restart=%s",
+    async (restart) => {
+      let online = true;
+      let submitted = false;
+      const fetchMock = vi
+        .fn()
+        .mockImplementation(async (input: unknown, options?: RequestInit) => {
+          const url = String(input);
+          if (url.endsWith("judge-events/"))
+            return {
+              ok: true,
+              json: async () => [{ public_id: "e1", name: "First" }],
+            };
+          if (url.endsWith("judge-calendar/"))
+            return {
+              ok: true,
+              json: async () => ({ windows: [], assignments: [] }),
+            };
+          if (url.endsWith("/stages/"))
+            return {
+              ok: true,
+              json: async () => [{ public_id: "s1", name: "Final" }],
+            };
+          if (url.endsWith("evaluation-plans/"))
+            return {
+              ok: true,
+              json: async () => [{ public_id: "p1", name: "Review" }],
+            };
+          if (url.endsWith("candidates/"))
+            return {
+              ok: true,
+              json: async () => [
+                {
+                  project: "project",
+                  name: "Project",
+                  status: submitted ? "submitted" : "pending",
+                },
+              ],
+            };
+          if (url.endsWith("publish-rubric/"))
+            return { ok: true, json: async () => RUBRIC };
+          if (url.endsWith("/draft/")) {
+            if (options?.method === "PUT" && !online)
+              throw new TypeError("Failed to fetch");
+            return { ok: true, json: async () => null };
+          }
+          if (url.endsWith("/ballots/") && options?.method === "POST") {
+            if (!online) throw new TypeError("Failed to fetch");
+            submitted = true;
+            return { ok: true, status: 201, json: async () => ({}) };
+          }
+          return { ok: true, json: async () => [] };
+        });
+      vi.stubGlobal("fetch", fetchMock);
+      act(() => root.render(<JudgeWorkspace workspaceId="w" />));
+      await navigateToProject();
+
+      online = false;
+      await scoreAndSubmit();
+      await waitFor(
+        () => container.textContent?.includes("Queued offline") ?? false,
+      );
+      expect(container.textContent).toContain("1 ballot queued");
+
+      if (restart) {
+        await act(async () => root.unmount());
+        root = createRoot(container);
+        act(() => root.render(<JudgeWorkspace workspaceId="w" />));
+        await waitFor(() => container.textContent?.includes("First") ?? false);
+        await choose(container.querySelector("select")!, "e1");
+        await waitFor(() => container.textContent?.includes("Final") ?? false);
+        await choose(container.querySelectorAll("select")[1], "s1");
+        await waitFor(
+          () => container.textContent?.includes("1 ballot queued") ?? false,
+        );
+      }
+
+      online = true;
+      await act(async () => {
+        window.dispatchEvent(new Event("online"));
       });
-    vi.stubGlobal("fetch", fetchMock);
-    act(() => root.render(<JudgeWorkspace workspaceId="w" />));
-    await navigateToProject();
-
-    online = false;
-    await scoreAndSubmit();
-    await waitFor(
-      () => container.textContent?.includes("Queued offline") ?? false,
-    );
-    expect(container.textContent).toContain("1 ballot queued");
-
-    online = true;
-    await act(async () => {
-      window.dispatchEvent(new Event("online"));
-    });
-    await waitFor(
-      () => container.textContent?.includes("Ballot submitted.") ?? false,
-    );
-    expect(
-      fetchMock.mock.calls.some(
-        ([url, options]) =>
-          String(url).endsWith("/ballots/") && options?.method === "POST",
-      ),
-    ).toBe(true);
-  });
+      await waitFor(
+        () =>
+          submitted &&
+          !(container.textContent?.includes("1 ballot queued") ?? true),
+      );
+      expect(
+        fetchMock.mock.calls.some(
+          ([url, options]) =>
+            String(url).endsWith("/ballots/") && options?.method === "POST",
+        ),
+      ).toBe(true);
+    },
+  );
 
   it("shows the last cached assignments and rubric when reopened offline", async () => {
     function navigationBody(url: string, online: boolean) {

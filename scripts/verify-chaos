@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+export DJANGO_SECRET_KEY="${DJANGO_SECRET_KEY:-chaos-checks-only}"
+export RECORD_SIGNING_KEY_SEED="${RECORD_SIGNING_KEY_SEED:-0000000000000000000000000000000000000000000000000000000000000001}"
+export DJANGO_DEBUG=1
+uv run --frozen pytest -q tests/chaos \
+  tests/integration/test_artifact_upload.py tests/integration/test_webhooks.py \
+  tests/integration/test_webhook_chat_adapters.py tests/security/test_stored_xss_hardening.py
+pnpm --dir src/web exec vitest run features/judging/JudgeWorkspace.offline.test.tsx

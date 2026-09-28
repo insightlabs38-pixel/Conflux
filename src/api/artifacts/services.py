@@ -1,6 +1,7 @@
 import secrets
 from datetime import timedelta
 
+from botocore.exceptions import ClientError
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
@@ -137,7 +138,13 @@ def complete_upload(intent, actor, *, parts=None, storage=None):
             )
         ):
             raise ValidationError("Multipart completion needs every numbered part and ETag.")
-        storage.complete_multipart(intent.object_key, intent.upload_id, parts)
+        try:
+            storage.complete_multipart(intent.object_key, intent.upload_id, parts)
+        except ClientError as exc:
+            # Completion can succeed in S3 before its response or DB commit is
+            # lost. Only a matching HEAD below can confirm that recovery.
+            if exc.response.get("Error", {}).get("Code") != "NoSuchUpload":
+                raise
     elif parts:
         raise ValidationError("Single-part uploads do not accept multipart parts.")
     try:

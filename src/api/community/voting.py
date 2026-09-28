@@ -60,8 +60,12 @@ def cast_authenticated_vote(plan, user, project, *, client_ip=None):
         raise ValidationError("This event does not use authenticated voting.")
     require_open(plan)
     if client_ip:
+        # Authenticated voters are throttled per account: an in-person venue puts every
+        # attendee behind one public IP, so an IP key would lock out the whole room.
         limit, window = VOTE_ATTEMPT_IP_LIMIT
-        abuse.enforce_rate_limit(plan, "vote_attempt", client_ip, limit=limit, window=window)
+        abuse.enforce_rate_limit(
+            plan, "vote_attempt_user", str(user.public_id), limit=limit, window=window
+        )
     try:
         with transaction.atomic():
             vote = Vote(plan=plan, project=project, voter_key=f"user:{user.public_id}")

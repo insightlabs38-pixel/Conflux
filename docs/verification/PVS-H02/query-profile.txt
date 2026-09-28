@@ -1,0 +1,13 @@
+health             200    0 queries    203.3 ms  db=   0.0 ms  bytes=15
+gallery            200    3 queries     32.9 ms  db=   6.0 ms  bytes=87281
+search             200    6 queries     15.9 ms  db=   8.0 ms  bytes=15278
+sub_list           200    9 queries      7.4 ms  db=   2.0 ms  bytes=87
+autosave           200   23 queries     13.7 ms  db=   1.0 ms  bytes=220
+finalize           201   31 queries     17.8 ms  db=   1.0 ms  bytes=560
+judge_events       200    4 queries      2.6 ms  db=   0.0 ms  bytes=73
+ballot_list        200    8 queries      9.3 ms  db=   2.0 ms  bytes=2
+ballot_draft_put   200   14 queries     13.2 ms  db=   2.0 ms  bytes=187
+ballot_submit      201   42 queries     21.4 ms  db=   1.0 ms  bytes=254
+progress           200   18 queries     25.8 ms  db=  14.0 ms  bytes=260
+vote               201   18 queries     15.5 ms  db=   2.0 ms  bytes=52
+vote_results       200    8 queries      4.7 ms  db=   0.0 ms  bytes=87

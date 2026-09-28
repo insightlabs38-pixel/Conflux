@@ -1,8 +1,8 @@
-# PVS10 — Sequential implementation checkpoint
+# PVS-H02 — Sequential implementation checkpoint
 
 ## Result
 
-Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS06–PVS10 complete on `main`. Earliest unfinished batch: **PVS-H02**, then PVS11–PVS15, PVS-H03, PVS16–PVS18 (PVS18 only if PVS-H02 finds a bottleneck), PVS-H04, PVS-H05.
+Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS06–PVS10, PVS-H02 complete on `main`. Earliest unfinished batch: **PVS11**, then PVS12–PVS15, PVS-H03, PVS16–PVS17, PVS-H04, PVS-H05. PVS18 skipped: H02 found no throughput bottleneck (only the fixed connection-bound bug).
 
 ## Changes
 
@@ -32,4 +32,4 @@ Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS0
 
 ## Next
 
-PVS-H02 (realistic load, DB and performance hardening) — the fixed-order Core→PVS10 feature roadmap is now complete. Code freeze Tuesday 2026-09-29 18:00 UTC; stop new features at 08:00 UTC that day.
+PVS11 (governance utility pack). H02 evidence: `docs/batches/PVS-H02.md`, `docs/operations/CAPACITY.md`, `loadtests/h02/run.sh`. Full SQLite suite 1199 passed. Code freeze Tuesday 2026-09-29 18:00 UTC; stop new features at 08:00 UTC that day.

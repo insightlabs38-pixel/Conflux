@@ -30,6 +30,7 @@ services:
       S3_SECRET_KEY: ${S3_SECRET_KEY:-conflux-secret}
       S3_BUCKET_NAME: ${S3_BUCKET_NAME:-conflux-artifacts}
       UVICORN_WORKERS: ${UVICORN_WORKERS:-2}
+      CONFLUX_MAX_INFLIGHT_REQUESTS: ${CONFLUX_MAX_INFLIGHT_REQUESTS:-12}
     volumes:
       - app-static:/app/staticfiles
     depends_on:

@@ -9,7 +9,7 @@ from django.test import Client
 from django.utils import timezone
 from events.models import Event, EventStatus
 from test_voting_flows import cookie_client, make_public_event_with_projects, open_plan, votes_url
-from workspaces.models import Workspace
+from workspaces.models import Membership, Role, Workspace
 
 pytestmark = pytest.mark.django_db
 
@@ -43,6 +43,27 @@ def test_vote_attempt_limit_boundary_and_window_recovery(monkeypatch):
     RateLimitEvent.objects.update(created_at=timezone.now() - timedelta(minutes=11))
     assert post_vote(client, url, projects[0], tokens[2].token).status_code == 201
     assert Vote.objects.count() == 3
+
+
+def test_authenticated_voters_sharing_one_ip_are_throttled_per_account(monkeypatch):
+    workspace, event, _, projects = make_public_event_with_projects()
+    open_plan(event, identity_mode="authenticated")
+    monkeypatch.setattr(voting, "VOTE_ATTEMPT_IP_LIMIT", (2, timedelta(minutes=10)))
+    url = votes_url(workspace, event)
+    voters = []
+    for i in range(4):
+        user = User.objects.create_user(username=f"venue-{i}", password="unused")
+        Membership.objects.create(user=user, workspace=workspace, role=Role.PARTICIPANT)
+        client = Client(REMOTE_ADDR="203.0.113.7")
+        client.cookies["session"] = Session.issue(user).token
+        voters.append(client)
+
+    assert [post_vote(c, url, projects[0]).status_code for c in voters] == [201] * 4
+    assert post_vote(voters[0], url, projects[1]).status_code == 400
+    assert post_vote(voters[0], url, projects[1]).status_code == 400
+    blocked = post_vote(voters[0], url, projects[1])
+    assert "Too many attempts" in str(blocked.json())
+    assert Vote.objects.count() == 4
 
 
 def test_email_case_variants_cannot_cast_two_ballots():

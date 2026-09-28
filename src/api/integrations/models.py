@@ -3,6 +3,23 @@ from django.conf import settings
 from django.db import models
 
 
+class ArchiveRestoration(PublicIdModel):
+    event = models.OneToOneField(
+        "events.Event", on_delete=models.CASCADE, related_name="archive_restoration"
+    )
+    source_sha256 = models.CharField(max_length=64)
+    source_archive = models.JSONField()
+    identity_map = models.JSONField()
+    restored_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self.pk and type(self).objects.filter(pk=self.pk).exists():
+            from django.core.exceptions import ValidationError
+
+            raise ValidationError("Archive restoration provenance is immutable.")
+        super().save(*args, **kwargs)
+
+
 class WebhookPlatform(models.TextChoices):
     """S23: what shape the delivered body should take. GENERIC is the
     signed Conflux envelope every subscription used before this batch;

@@ -22,16 +22,21 @@ class ArchiveOutput(serializers.Serializer):
     format_version = serializers.IntegerField()
     mode = serializers.CharField()
     event = serializers.DictField()
-    tracks = serializers.ListField(child=serializers.DictField())
-    base_prizes = serializers.ListField(child=serializers.DictField())
-    stages = serializers.ListField(child=serializers.DictField())
-    stage_transitions = serializers.ListField(child=serializers.DictField())
-    forms = serializers.ListField(child=serializers.DictField())
-    policies = serializers.ListField(child=serializers.DictField())
-    temporal_gates = serializers.ListField(child=serializers.DictField())
-    policy_bindings = serializers.ListField(child=serializers.DictField())
-    awards = serializers.ListField(child=serializers.DictField())
+    tracks = serializers.ListField(child=serializers.DictField(), required=False)
+    base_prizes = serializers.ListField(child=serializers.DictField(), required=False)
+    stages = serializers.ListField(child=serializers.DictField(), required=False)
+    stage_transitions = serializers.ListField(child=serializers.DictField(), required=False)
+    forms = serializers.ListField(child=serializers.DictField(), required=False)
+    policies = serializers.ListField(child=serializers.DictField(), required=False)
+    temporal_gates = serializers.ListField(child=serializers.DictField(), required=False)
+    policy_bindings = serializers.ListField(child=serializers.DictField(), required=False)
+    awards = serializers.ListField(child=serializers.DictField(), required=False)
     projects = serializers.ListField(child=serializers.DictField(), required=False)
+    evaluation_plans = serializers.ListField(child=serializers.DictField(), required=False)
+    pages = serializers.ListField(child=serializers.DictField(), required=False)
+    tables = serializers.DictField(required=False)
+    users = serializers.ListField(child=serializers.DictField(), required=False)
+    provenance = serializers.ListField(child=serializers.DictField(), required=False)
 
 
 class ArchiveImportInput(serializers.Serializer):
@@ -81,7 +86,18 @@ class SignedArchiveImportInput(serializers.Serializer):
     envelope = serializers.JSONField()
 
 
-ARCHIVE_MODE = OpenApiParameter("mode", str, enum=["config", "full"], default="config")
+ARCHIVE_MODE = OpenApiParameter("mode", str, enum=["config", "full", "final"])
+
+
+def _export(event, mode):
+    if mode not in (None, "config", "full", "final"):
+        raise ValidationError({"mode": "mode must be 'config', 'full' or 'final'."})
+    try:
+        return build_archive(event, mode=mode)
+    except ModelValidationError as exc:
+        raise ValidationError(
+            exc.message_dict if hasattr(exc, "message_dict") else exc.messages
+        ) from exc
 
 
 class EventArchiveExportView(WorkspaceLookupMixin, APIView):
@@ -95,19 +111,13 @@ class EventArchiveExportView(WorkspaceLookupMixin, APIView):
 
     @extend_schema(responses=ArchiveOutput, parameters=[ARCHIVE_MODE])
     def get(self, request, workspace_public_id, event_public_id):
-        mode = request.query_params.get("mode", "config")
-        if mode not in ("config", "full"):
-            raise ValidationError({"mode": "mode must be 'config' or 'full'."})
-        return Response(build_archive(self.get_event(), mode=mode))
+        return Response(_export(self.get_event(), request.query_params.get("mode")))
 
 
 class EventSignedArchiveExportView(EventArchiveExportView):
     @extend_schema(responses=SignedArchiveOutput, parameters=[ARCHIVE_MODE])
     def get(self, request, workspace_public_id, event_public_id):
-        mode = request.query_params.get("mode", "config")
-        if mode not in ("config", "full"):
-            raise ValidationError({"mode": "mode must be 'config' or 'full'."})
-        return Response(sign_archive(build_archive(self.get_event(), mode=mode)))
+        return Response(sign_archive(_export(self.get_event(), request.query_params.get("mode"))))
 
 
 class WorkspaceArchivePreviewView(WorkspaceLookupMixin, APIView):

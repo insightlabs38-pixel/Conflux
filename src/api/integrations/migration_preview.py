@@ -9,12 +9,15 @@ from .archive import FORMAT_VERSION, SECTION_KEYS, build_archive, import_archive
 def preview_archive_import(*, workspace, archive, name, slug):
     if not isinstance(archive, dict):
         raise ValidationError({"archive": "Archive must be an object."})
-    if archive.get("format_version") != FORMAT_VERSION:
+    if type(archive.get("format_version")) is not int or archive.get("format_version") not in (
+        FORMAT_VERSION,
+        2,
+    ):
         raise ValidationError(
             {
                 "format_version": (
                     f"Unsupported archive format_version: {archive.get('format_version')!r}. "
-                    f"This build only reads version {FORMAT_VERSION}; no migration path is defined."
+                    "This build reads v1 config/full and v2 final; no migration path is defined."
                 )
             }
         )
@@ -24,11 +27,16 @@ def preview_archive_import(*, workspace, archive, name, slug):
         imported = build_archive(event, mode=archive["mode"])
         transaction.set_rollback(True)
 
-    source_event = archive["event"]
+    source_event = (
+        archive["event"]["fields"] if archive["format_version"] == 2 else archive["event"]
+    )
+    imported_event = (
+        imported["event"]["fields"] if archive["format_version"] == 2 else imported["event"]
+    )
     event_changes = [
-        {"field": field, "source": source_event.get(field), "imported": imported["event"][field]}
+        {"field": field, "source": source_event.get(field), "imported": imported_event[field]}
         for field in ("name", "slug", "status", "is_public")
-        if source_event.get(field) != imported["event"][field]
+        if source_event.get(field) != imported_event[field]
     ]
     sections = [
         {
@@ -42,8 +50,18 @@ def preview_archive_import(*, workspace, archive, name, slug):
     ignored_sections = sorted(
         set(archive) - {"format_version", "mode", "event", *SECTION_KEYS, "projects"}
     )
+    if archive["format_version"] == 2:
+        sections = [
+            {
+                "section": label,
+                "source_count": len(rows),
+                "imported_count": len(imported["tables"][label]),
+            }
+            for label, rows in archive["tables"].items()
+        ]
+        ignored_sections = []
     return {
-        "format_version": FORMAT_VERSION,
+        "format_version": archive["format_version"],
         "mode": archive["mode"],
         "migration_steps": [],
         "deprecations": [],

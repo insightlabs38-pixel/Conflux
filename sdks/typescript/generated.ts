@@ -277,32 +277,42 @@ export type ArchiveOutput = {
   format_version: number;
   mode: string;
   event: Record<string, unknown>;
-  tracks: Record<string, unknown>[];
-  base_prizes: Record<string, unknown>[];
-  stages: Record<string, unknown>[];
-  stage_transitions: Record<string, unknown>[];
-  forms: Record<string, unknown>[];
-  policies: Record<string, unknown>[];
-  temporal_gates: Record<string, unknown>[];
-  policy_bindings: Record<string, unknown>[];
-  awards: Record<string, unknown>[];
+  tracks?: Record<string, unknown>[];
+  base_prizes?: Record<string, unknown>[];
+  stages?: Record<string, unknown>[];
+  stage_transitions?: Record<string, unknown>[];
+  forms?: Record<string, unknown>[];
+  policies?: Record<string, unknown>[];
+  temporal_gates?: Record<string, unknown>[];
+  policy_bindings?: Record<string, unknown>[];
+  awards?: Record<string, unknown>[];
   projects?: Record<string, unknown>[];
+  evaluation_plans?: Record<string, unknown>[];
+  pages?: Record<string, unknown>[];
+  tables?: Record<string, unknown>;
+  users?: Record<string, unknown>[];
+  provenance?: Record<string, unknown>[];
 };
 
 export type InputOfArchiveOutput = {
   format_version: number;
   mode: string;
   event: Record<string, unknown>;
-  tracks: Record<string, unknown>[];
-  base_prizes: Record<string, unknown>[];
-  stages: Record<string, unknown>[];
-  stage_transitions: Record<string, unknown>[];
-  forms: Record<string, unknown>[];
-  policies: Record<string, unknown>[];
-  temporal_gates: Record<string, unknown>[];
-  policy_bindings: Record<string, unknown>[];
-  awards: Record<string, unknown>[];
+  tracks?: Record<string, unknown>[];
+  base_prizes?: Record<string, unknown>[];
+  stages?: Record<string, unknown>[];
+  stage_transitions?: Record<string, unknown>[];
+  forms?: Record<string, unknown>[];
+  policies?: Record<string, unknown>[];
+  temporal_gates?: Record<string, unknown>[];
+  policy_bindings?: Record<string, unknown>[];
+  awards?: Record<string, unknown>[];
   projects?: Record<string, unknown>[];
+  evaluation_plans?: Record<string, unknown>[];
+  pages?: Record<string, unknown>[];
+  tables?: Record<string, unknown>;
+  users?: Record<string, unknown>[];
+  provenance?: Record<string, unknown>[];
 };
 
 export type ArchivePreviewChange = {
@@ -4300,14 +4310,14 @@ export interface Operations {
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive: {
     request: {
       path: { event_public_id: string; workspace_public_id: string };
-      query?: { mode?: "config" | "full" };
+      query?: { mode?: "config" | "final" | "full" };
     };
     response: ArchiveOutput;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_signed: {
     request: {
       path: { event_public_id: string; workspace_public_id: string };
-      query?: { mode?: "config" | "full" };
+      query?: { mode?: "config" | "final" | "full" };
     };
     response: SignedArchiveOutput;
   };

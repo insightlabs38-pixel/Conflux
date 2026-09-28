@@ -1544,8 +1544,8 @@ paths:
           type: string
           enum:
           - config
+          - final
           - full
-          default: config
       - in: path
         name: workspace_public_id
         schema:
@@ -1586,8 +1586,8 @@ paths:
           type: string
           enum:
           - config
+          - final
           - full
-          default: config
       - in: path
         name: workspace_public_id
         schema:
@@ -12294,19 +12294,33 @@ components:
           items:
             type: object
             additionalProperties: {}
+        evaluation_plans:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        pages:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        tables:
+          type: object
+          additionalProperties: {}
+        users:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        provenance:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
       required:
-      - awards
-      - base_prizes
       - event
       - format_version
-      - forms
       - mode
-      - policies
-      - policy_bindings
-      - stage_transitions
-      - stages
-      - temporal_gates
-      - tracks
     ArchivePreviewChange:
       type: object
       properties:

@@ -150,3 +150,27 @@ went through a template.
 — body `{name, slug}`
 `POST /api/v1/workspaces/<workspace>/events/<event>/clone/` — body
 `{name, slug, sections?}`
+
+## Final archive v2 (`mode: final`, `format_version: 2`)
+
+`GET .../archive/?mode=final` exports a frozen table contract
+(`integrations/final_archive_schema.py`) covering configuration, teams,
+projects, form responses, submissions and frozen versions, assignments,
+ballots, normalization/pairwise runs, awards, winners, fulfillment, votes
+and presentation. Every row carries a stable `ref` (the source public id),
+and evidence JSON is remapped on restore; free-text answers stay opaque.
+
+Restoration is deterministic and never recomputes: `import_archive` on a v2
+document builds a **new private draft event** (`is_public=False`) atomically
+inside the caller's transaction, stores immutable `ArchiveRestoration`
+provenance (source SHA-256, identity map) and rejects any missing table,
+duplicate or foreign reference, non-finite value or inconsistent link,
+rolling back every row. Users resolve by exact existing username; stored
+artifacts are restored as `pending` (bytes are never asserted to exist).
+Re-exporting a restored event defaults to final and preserves original refs
+and appends provenance; explicit `config`/`full` remain available.
+
+Not archived (operational or secret): API credentials, webhooks, invite
+codes, applications, check-ins, exception grants, marketplace profiles,
+saved searches, COI rules, messages, moderation and reminders. A test forces
+every new event-owned model to be classified as archived or excluded.

@@ -73,7 +73,16 @@ def _decimal(value):
     return None if value is None else Decimal(value)
 
 
-def build_archive(event, mode="config", sections=None):
+def build_archive(event, mode=None, sections=None):
+    from .final_archive import build_final_archive
+    from .models import ArchiveRestoration
+
+    restored = ArchiveRestoration.objects.filter(event=event).exists()
+    mode = mode or ("final" if restored else "config")
+    if mode == "final":
+        if sections is not None:
+            raise ValidationError({"sections": "Final archives cannot omit tables."})
+        return build_final_archive(event)
     if mode not in MODES:
         raise ValueError(f"Unknown archive mode: {mode!r}")
 
@@ -267,6 +276,12 @@ def import_archive(*, workspace, archive, name, slug):
     data — import never bypasses them. Must run inside the caller's
     transaction so a validation failure midway leaves nothing behind.
     """
+    if not isinstance(archive, dict):
+        raise ValidationError({"archive": "Archive must be an object."})
+    if archive.get("format_version") == 2:
+        from .final_archive import restore_final_archive
+
+        return restore_final_archive(workspace=workspace, archive=archive, name=name, slug=slug)
     missing = [key for key in ("format_version", "mode", "event") if key not in archive]
     if missing:
         raise ValidationError(

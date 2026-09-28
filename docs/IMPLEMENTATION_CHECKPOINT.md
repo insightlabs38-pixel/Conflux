@@ -1,21 +1,16 @@
-# VS44 — Sequential implementation checkpoint
+# VS45 — Sequential implementation checkpoint
 ## Result
-VS44-01/02 complete on canonical `main`, implementation `bada907`. Earliest unfinished batch is VS45; investigation only, no implementation begun.
-BOOT-B00, Core, S01–S24 and VS01–VS43 retain Git/code/artifact evidence; owner X015 explicitly promoted STRETCH-GATE.
+VS45-01/02 complete on canonical `main`. Earliest unfinished batch is VS46.
+BOOT-B00, Core, S01–S24 and VS01–VS44 retain Git/code/artifact evidence; owner X015 promoted STRETCH-GATE.
 ## Changes
-- VS44 examples and integration limits: `examples/EXTENSIONS.md`, `extensions.examples`, `docs/batches/VS44.md`.
+- VS45 final v2 archive/restoration: `integrations/final_archive*.py`, `docs/batches/VS45.md`, `docs/architecture/CANONICAL_ARCHIVE.md`.
+- Decision (reversible, autonomous): reconstruct into a new private draft live-model event with immutable provenance.
 - Preserve unrelated owner dirt: `.gitignore`, `master.sh`, `master/`, `tests/test_master_supervisor.py`; abandoned supervisor untouched.
-- Prior VS41–VS43 implementations: `df912ae`, `cab5fed`, `01c7984`; reports/browser artifacts remain under `docs/batches/` and `docs/verification/`.
 ## Verification
-- Examples/SDK/CSV/artifact/advancement/assignment/canonical archive/bootstrap scope → 45 passed; BOOT bootstrap commit `3906bf1` and current tests verified.
-- Scoped Ruff/format, documentation Prettier and diff checks → passed. No unresolved test failure; no implementation dirt remains.
+- Archive/template/clone/OpenAPI/SDK/extension scope → 72 passed; OpenAPI + SDK freshness → fresh; Ruff/format/Prettier → passed.
 - Test env: `DJANGO_SECRET_KEY=analytics-test-only`, `RECORD_SIGNING_KEY_SEED=0000000000000000000000000000000000000000000000000000000000000001`, `DJANGO_DEBUG=1`; use `.venv/bin/pytest`.
 ## Limitations
-- C-B33 release limitations remain; schedules are API-managed and omitted from canonical imports. SDK/examples are code-owned, requiring full persisted-kind integration.
-- Footage unaffected: no public surface changes. No recorded-scene manifest found; shared runtime untouched.
-- VS45 owner question pending: reconstruct into a new private live event (recommended) or offline read-only state? No authoritative decision found.
+- C-B33 release limitations remain; restored users must pre-exist by username; stored artifacts restore as `pending`.
+- Footage unaffected: no public surface changes.
 ## Next
-Resolve that semantic choice before VS45-01; then VS45-02, VS46–VS50 in fixed order. Do not skip VS45 or mark it complete.
-Sources: TASKS.yaml:9321–9377, BATCHES.yaml:1576–1588, post-spec `23_VERY_STRETCH_GOALS.md`:137–138 and `12_API_WEBHOOKS_PORTABILITY.md`:12–16.
-Evidence: `docs/architecture/CANONICAL_ARCHIVE.md`:98–120 explicitly excludes submission/evaluation/winner activity; `integrations.archive` supports only config/full v1, without a final archive contract.
-Next code inspection: `projects.models.SubmissionVersion`, `evaluations.models.NormalizationRun/PairwiseRun`, `awards.models.AwardWinner`, canonical reference remapping and signed envelopes. Preserve v1 semantics; no reconstruction implementation has been started.
+VS46 (spec: TASKS.yaml VS46-01/02 in /home/dogfood-control/execution), then VS47–VS50, then PVS campaign.

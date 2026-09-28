@@ -397,6 +397,26 @@ class InputOfAssignmentVersion(TypedDict):
     coverage: int
     evidence: NotRequired[Any]
 
+class AttemptOutput(TypedDict):
+    public_id: str
+    destination: str
+    body: str
+    headers: dict[str, str]
+    started_at: str
+    completed_at: str | None
+    status_code: int | None
+    error: str
+
+class InputOfAttemptOutput(TypedDict):
+    public_id: str
+    destination: str
+    body: str
+    headers: dict[str, str]
+    started_at: str
+    completed_at: str | None
+    status_code: int | None
+    error: str
+
 class AudienceKindSchema(TypedDict):
     key: str
     label: str
@@ -1009,6 +1029,42 @@ class InputOfCredentialReadSchema(TypedDict):
     created_at: str
     expires_at: str
     revoked_at: str | None
+
+class DeliveryInspection(TypedDict):
+    public_id: str
+    event_id: str
+    event_type: str
+    status: str
+    attempts: int
+    last_status_code: int | None
+    last_error: str
+    next_attempt_at: str | None
+    created_at: str
+    completed_at: str | None
+    destination: str
+    next_body: str
+    body_sha256: str
+    signature_scheme: str
+    history: list[AttemptOutput]
+    history_has_more: bool
+
+class InputOfDeliveryInspection(TypedDict):
+    public_id: str
+    event_id: str
+    event_type: str
+    status: str
+    attempts: int
+    last_status_code: int | None
+    last_error: str
+    next_attempt_at: str | None
+    created_at: str
+    completed_at: str | None
+    destination: str
+    next_body: str
+    body_sha256: str
+    signature_scheme: str
+    history: list[InputOfAttemptOutput]
+    history_has_more: bool
 
 class DeliveryOutput(TypedDict):
     public_id: str
@@ -2186,9 +2242,11 @@ class InputOfPatchedStage(TypedDict):
 
 class PatchedSubscriptionUpdate(TypedDict):
     enabled: NotRequired[bool]
+    url: NotRequired[str]
 
 class InputOfPatchedSubscriptionUpdate(TypedDict):
     enabled: NotRequired[bool]
+    url: NotRequired[str]
 
 class PatchedTeamOpeningInput(TypedDict):
     title: NotRequired[str]
@@ -4522,6 +4580,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                           'query_params': [],
                                                                                           'request_body': False,
                                                                                           'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_webhooks_subscription_public_id_deliveries_delivery_public_id': {'method': 'GET',
+                                                                                                             'path': '/api/v1/workspaces/{workspace_public_id}/webhooks/{subscription_public_id}/deliveries/{delivery_public_id}/',
+                                                                                                             'path_params': ['delivery_public_id',
+                                                                                                                             'subscription_public_id',
+                                                                                                                             'workspace_public_id'],
+                                                                                                             'query_params': [],
+                                                                                                             'request_body': False,
+                                                                                                             'response_kind': 'json'},
  'patch_api_v1_workspaces_workspace_public_id_events_event_public_id': {'method': 'PATCH',
                                                                         'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/',
                                                                         'path_params': ['event_public_id',

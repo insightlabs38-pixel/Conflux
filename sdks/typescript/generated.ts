@@ -423,6 +423,28 @@ export type InputOfAssignmentVersion = {
   evidence?: unknown;
 };
 
+export type AttemptOutput = {
+  public_id: string;
+  destination: string;
+  body: string;
+  headers: Record<string, string>;
+  started_at: string;
+  completed_at: string | null;
+  status_code: number | null;
+  error: string;
+};
+
+export type InputOfAttemptOutput = {
+  public_id: string;
+  destination: string;
+  body: string;
+  headers: Record<string, string>;
+  started_at: string;
+  completed_at: string | null;
+  status_code: number | null;
+  error: string;
+};
+
 export type AudienceKindSchema = {
   key: string;
   label: string;
@@ -1099,6 +1121,44 @@ export type InputOfCredentialReadSchema = {
   created_at: string;
   expires_at: string;
   revoked_at: string | null;
+};
+
+export type DeliveryInspection = {
+  public_id: string;
+  event_id: string;
+  event_type: string;
+  status: string;
+  attempts: number;
+  last_status_code: number | null;
+  last_error: string;
+  next_attempt_at: string | null;
+  created_at: string;
+  completed_at: string | null;
+  destination: string;
+  next_body: string;
+  body_sha256: string;
+  signature_scheme: string;
+  history: AttemptOutput[];
+  history_has_more: boolean;
+};
+
+export type InputOfDeliveryInspection = {
+  public_id: string;
+  event_id: string;
+  event_type: string;
+  status: string;
+  attempts: number;
+  last_status_code: number | null;
+  last_error: string;
+  next_attempt_at: string | null;
+  created_at: string;
+  completed_at: string | null;
+  destination: string;
+  next_body: string;
+  body_sha256: string;
+  signature_scheme: string;
+  history: InputOfAttemptOutput[];
+  history_has_more: boolean;
 };
 
 export type DeliveryOutput = {
@@ -2362,9 +2422,12 @@ export type InputOfPatchedStage = {
   participation_mode?: InputOfParticipationModeEnum;
 };
 
-export type PatchedSubscriptionUpdate = { enabled?: boolean };
+export type PatchedSubscriptionUpdate = { enabled?: boolean; url?: string };
 
-export type InputOfPatchedSubscriptionUpdate = { enabled?: boolean };
+export type InputOfPatchedSubscriptionUpdate = {
+  enabled?: boolean;
+  url?: string;
+};
 
 export type PatchedTeamOpeningInput = {
   title?: string;
@@ -5812,6 +5875,16 @@ export interface Operations {
     };
     response: DeliveryOutput[];
   };
+  get_api_v1_workspaces_workspace_public_id_webhooks_subscription_public_id_deliveries_delivery_public_id: {
+    request: {
+      path: {
+        delivery_public_id: string;
+        subscription_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: DeliveryInspection;
+  };
   post_api_v1_workspaces_workspace_public_id_webhooks_subscription_public_id_deliveries_delivery_public_id_replay: {
     request: {
       path: {
@@ -8837,6 +8910,19 @@ export const operations = {
       method: "GET",
       path: "/api/v1/workspaces/{workspace_public_id}/webhooks/{subscription_public_id}/deliveries/",
       path_params: ["subscription_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_webhooks_subscription_public_id_deliveries_delivery_public_id:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/webhooks/{subscription_public_id}/deliveries/{delivery_public_id}/",
+      path_params: [
+        "delivery_public_id",
+        "subscription_public_id",
+        "workspace_public_id",
+      ],
       query_params: [],
       request_body: false,
       response_kind: "json",

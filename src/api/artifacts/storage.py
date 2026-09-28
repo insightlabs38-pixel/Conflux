@@ -123,13 +123,22 @@ class S3Storage:
     def get(self, key):
         return self.client.get_object(Bucket=self.bucket, Key=key)
 
-    def put(self, key, data, *, content_type="application/octet-stream", metadata=None):
+    def put(
+        self,
+        key,
+        data,
+        *,
+        content_type="application/octet-stream",
+        metadata=None,
+        only_if_absent=False,
+    ):
         self.client.put_object(
             Bucket=self.bucket,
             Key=key,
             Body=data,
             ContentType=content_type,
             Metadata=metadata or {},
+            **({"IfNoneMatch": "*"} if only_if_absent else {}),
         )
 
     def delete(self, key):

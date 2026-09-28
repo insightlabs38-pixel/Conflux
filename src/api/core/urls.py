@@ -40,4 +40,5 @@ urlpatterns = [
     path("", include("mentorship.urls")),
     path("", include("governance.urls")),
     path("", include("mcp_adapter.urls")),
+    path("", include("portfolio.urls")),
 ]

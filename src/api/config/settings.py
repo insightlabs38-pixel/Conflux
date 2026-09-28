@@ -85,6 +85,7 @@ INSTALLED_APPS = [
     "mentorship",
     "governance",
     "mcp_adapter",
+    "portfolio",
 ]
 
 MIDDLEWARE = [

@@ -15164,6 +15164,135 @@ paths:
                 items:
                   $ref: '#/components/schemas/ParticipantEventSummary'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/portfolio/me/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_portfolio_me
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/portfolio/participants/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_portfolio_participants
+      parameters:
+      - in: query
+        name: limit
+        schema:
+          type: integer
+      - in: query
+        name: offset
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/portfolio/participants/{user_public_id}/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_portfolio_participants_user_public_id
+      parameters:
+      - in: path
+        name: user_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/portfolio/projects/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_portfolio_projects
+      parameters:
+      - in: query
+        name: event
+        schema:
+          type: string
+      - in: query
+        name: limit
+        schema:
+          type: integer
+      - in: query
+        name: offset
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - finalized
+          - unfinalized
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/taxonomies/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_taxonomies

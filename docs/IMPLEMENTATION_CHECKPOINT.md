@@ -1,27 +1,18 @@
-# VS28 — Sequential implementation checkpoint
-
+# VS29 — Sequential implementation checkpoint
 ## Result
-
-VS27 and VS28 complete on canonical `main`. Git/artifacts support BOOT-B00, Core through C-B33, S01–S24 and VS01–VS26; owner decision X015 explicitly promoted STRETCH-GATE.
-
+VS29 complete at `5860ca4` on canonical `main`; next is VS30-01. Git evidence supports BOOT-B00, C-B01–C-B33, S01–S24 and VS01–VS28; owner decision X015 promoted STRETCH-GATE.
 ## Changes
-
-- Startup HEAD `4e0ee4d`; resumed partial VS27, committed as `a33ee4f`, then completed VS28-01 and VS28-02 sequentially.
-- Batch evidence: `docs/batches/VS27.md`, `docs/batches/VS28.md`; simulator usage: `docs/operations/EVENT_SIMULATOR.md`.
-- Owner files remain unchanged: dirty `.gitignore`, untracked `master.sh`, `master/`, `tests/test_master_supervisor.py`. No orchestration or runtime work performed.
-
+- VS29 covers worker/DB/object-store/webhook/browser interruption; multipart recovery verifies a completed object after `NoSuchUpload`.
+- Evidence: `docs/batches/VS29.md`, `docs/operations/CHAOS_SUITE.md`, `tests/chaos/test_interruptions.py`, `scripts/verify-chaos`.
+- Preserve owner dirt: `.gitignore`, `master.sh`, `master/`, `tests/test_master_supervisor.py`; do not run supervisor tooling.
 ## Verification
-
-- VS27: 70 backend tests, 98 web tests; build, scoped lint/format, OpenAPI/SDK checks and no migration drift.
-- VS28: 42 simulator/adjacent tests; scoped Ruff, Django check and CLI help passed. No browser surface changed.
-- Environment: `DJANGO_SECRET_KEY=simulator-test-only`, `RECORD_SIGNING_KEY_SEED=0000000000000000000000000000000000000000000000000000000000000001`, `DJANGO_DEBUG=1`; `uv run --frozen pytest` uses disposable SQLite.
-
+- `scripts/verify-chaos` → 27 backend and 3 offline-browser tests passed.
+- Backend bootstrap-inclusive scope → 23 passed; full web suite → 99 passed (existing React warnings).
+- Scoped Ruff lint/format, Prettier and diff checks passed; no product visual changes, footage unaffected.
+- Test env: `DJANGO_SECRET_KEY=chaos-test-only`, `RECORD_SIGNING_KEY_SEED=0000000000000000000000000000000000000000000000000000000000000001`, `DJANGO_DEBUG=1`.
 ## Limitations
-
-- No new blockers. Simulator scope is explicit in its usage document; it fails closed for unsupported plans and unmet preflight requirements.
-- Existing owner release deliverables/unreleased T3/T4 assertions remain documented in C-B33. No recorded scene/surface manifest exists.
-
+- Fault injection is deterministic, not physical failover evidence. Shared runtime remains untouched.
+- Existing C-B33 owner release limitations remain. No recorded scene manifest exists.
 ## Next
-
-VS29-01 then VS29-02: worker/DB/object-store/webhook/browser interruption scenarios. No VS29 implementation started.
-Locate VS29 IDs in BATCHES/TASKS and the exact heading in `23_VERY_STRETCH_GOALS.md`; inspect existing reliability tests and actual isolated-runtime tooling before choosing scenarios. Continue VS30–VS50 in order after VS29.
+VS30-01 then VS30-02: richer backup manifests/restore verification. Task sections: TASKS.yaml:8466, BATCHES.yaml:1381; post-spec heading: `23_VERY_STRETCH_GOALS.md:92`.
+Existing `scripts/backup`, `scripts/restore`, `scripts/backup-restore-smoke` and `docs/operations/UPGRADES.md:29` are understood. Implement additive tooling; keep Core backup scripts supported.

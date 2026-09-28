@@ -64,6 +64,9 @@ modes/sections; current archive limitations remain.
 
 ## Contributor verification
 
+Maintained examples and explicit integration limits are indexed in
+[`examples/EXTENSIONS.md`](../../examples/EXTENSIONS.md).
+
 Add positive, negative and compatibility tests at the affected boundary. Include
 artifact security/readiness tests, strategy identity/conflict/math tests, block
 schema/sanitization/UI tests, or importer rollback/roundtrip tests as appropriate.

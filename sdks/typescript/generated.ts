@@ -4019,6 +4019,36 @@ export type SubmissionFinalizeInputSchema = { draft_revision: number };
 
 export type InputOfSubmissionFinalizeInputSchema = { draft_revision: number };
 
+export type SubmissionPreviewArtifactSchema = {
+  id: string;
+  title: string;
+  kind: string;
+  drift: string | null;
+  inspection: unknown;
+  download_url: string | null;
+};
+
+export type InputOfSubmissionPreviewArtifactSchema = {
+  id: string;
+  title: string;
+  kind: string;
+  drift: string | null;
+  inspection: unknown;
+  download_url: string | null;
+};
+
+export type SubmissionPreviewSchema = {
+  version: number;
+  verified: boolean;
+  artifacts: SubmissionPreviewArtifactSchema[];
+};
+
+export type InputOfSubmissionPreviewSchema = {
+  version: number;
+  verified: boolean;
+  artifacts: InputOfSubmissionPreviewArtifactSchema[];
+};
+
 export type SubmissionReceiptSchema = {
   submission: SubmissionSchema;
   receipt: string;
@@ -5862,6 +5892,28 @@ export interface Operations {
     };
     response: ArtifactSchema;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_artifacts_artifact_public_id_inspection: {
+    request: {
+      path: {
+        artifact_public_id: string;
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: Record<string, unknown>;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_artifacts_artifact_public_id_inspection: {
+    request: {
+      path: {
+        artifact_public_id: string;
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: Record<string, unknown>;
+  };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_artifacts_artifact_public_id_upload_intents_intent_public_id_complete: {
     request: {
       path: {
@@ -6081,6 +6133,38 @@ export interface Operations {
     };
     response: MentorNote;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_review_artifacts: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: Record<string, unknown>;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_review_artifacts_artifact_public_id_inspection: {
+    request: {
+      path: {
+        artifact_public_id: string;
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: Record<string, unknown>;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_review_artifacts_artifact_public_id_inspection: {
+    request: {
+      path: {
+        artifact_public_id: string;
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: Record<string, unknown>;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions: {
     request: {
       path: {
@@ -6136,6 +6220,17 @@ export interface Operations {
       body: InputOfSubmissionFinalizeInputSchema;
     };
     response: SubmissionReceiptSchema;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions_stage_public_id_preview: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        stage_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: SubmissionPreviewSchema;
   };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions_stage_public_id_reopen: {
     request: {
@@ -9258,6 +9353,34 @@ export const operations = {
       request_body: false,
       response_kind: "json",
     },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_artifacts_artifact_public_id_inspection:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/artifacts/{artifact_public_id}/inspection/",
+      path_params: [
+        "artifact_public_id",
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_artifacts_artifact_public_id_inspection:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/artifacts/{artifact_public_id}/inspection/",
+      path_params: [
+        "artifact_public_id",
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_artifacts_artifact_public_id_upload_intents_intent_public_id_complete:
     {
       method: "POST",
@@ -9526,6 +9649,47 @@ export const operations = {
       request_body: true,
       response_kind: "json",
     },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_review_artifacts:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/review-artifacts/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_review_artifacts_artifact_public_id_inspection:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/review-artifacts/{artifact_public_id}/inspection/",
+      path_params: [
+        "artifact_public_id",
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_review_artifacts_artifact_public_id_inspection:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/review-artifacts/{artifact_public_id}/inspection/",
+      path_params: [
+        "artifact_public_id",
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions:
     {
       method: "GET",
@@ -9593,6 +9757,20 @@ export const operations = {
       ],
       query_params: [],
       request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions_stage_public_id_preview:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/submissions/{stage_public_id}/preview/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "stage_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
       response_kind: "json",
     },
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions_stage_public_id_reopen:

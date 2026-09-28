@@ -1,5 +1,6 @@
 from accounts.authentication import CookieSessionAuthentication
 from accounts.models import User
+from core.authz import has_any_role
 from core.permissions import IsWorkspaceMember
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.shortcuts import get_object_or_404
@@ -8,11 +9,11 @@ from events.models import Event, Track
 from events.views import OrganizerView
 from participation.models import Team
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from stages.models import Stage
-from workspaces.models import Workspace
+from workspaces.models import Role, Workspace
 
 from .diff import diff_snapshots
 from .models import Project, ProjectMembershipRole, Submission
@@ -22,6 +23,7 @@ from .schema import (
     SubmissionDiffSchema,
     SubmissionDraftInputSchema,
     SubmissionFinalizeInputSchema,
+    SubmissionPreviewSchema,
     SubmissionReceiptSchema,
     SubmissionReopenInputSchema,
     SubmissionSchema,
@@ -29,7 +31,12 @@ from .schema import (
 )
 from .serializers import ProjectMembershipSerializer, ProjectSerializer
 from .services import add_project_member, create_project, update_project
-from .submissions import finalize_submission, reopen_submission, save_draft
+from .submissions import (
+    finalize_submission,
+    preview_frozen_submission,
+    reopen_submission,
+    save_draft,
+)
 
 
 class ProjectView(APIView):
@@ -232,6 +239,33 @@ class SubmissionDetailView(ProjectSubmissionView):
                 exc.message_dict if hasattr(exc, "message_dict") else exc.messages
             ) from exc
         return Response(submission_payload(submission))
+
+
+class SubmissionPreviewView(ProjectView):
+    """Show a project owner or an organizer exactly what a judge will see
+    for this submission's frozen version (PVS08-03). Uses the requester's
+    own real permission to reach this endpoint; it never impersonates a
+    judge identity.
+    """
+
+    def get_stage(self):
+        return get_object_or_404(
+            Stage, event=self.get_event(), public_id=self.kwargs["stage_public_id"]
+        )
+
+    @extend_schema(responses=SubmissionPreviewSchema)
+    def get(
+        self, request, workspace_public_id, event_public_id, project_public_id, stage_public_id
+    ):
+        project = self.get_project()
+        is_member = project.memberships.filter(user=request.user).exists()
+        is_organizer = has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
+        if not is_member and not is_organizer:
+            raise NotFound()
+        preview = preview_frozen_submission(project, self.get_stage())
+        if preview is None:
+            raise NotFound("This submission has not been finalized yet.")
+        return Response(preview)
 
 
 class SubmissionFinalizeView(ProjectSubmissionView):

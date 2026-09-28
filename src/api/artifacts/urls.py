@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import review_views, views
 
 _prefix = (
     "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/"
@@ -32,5 +32,22 @@ urlpatterns = [
         _prefix + "<uuid:artifact_public_id>/upload-intents/<uuid:intent_public_id>/complete/",
         views.UploadCompleteView.as_view(),
         name="artifact-upload-complete",
+    ),
+    path(
+        _prefix + "<uuid:artifact_public_id>/inspection/",
+        review_views.InspectionView.as_view(),
+        name="artifact-inspection",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/"
+        "projects/<uuid:project_public_id>/review-artifacts/",
+        review_views.ReviewArtifactListView.as_view(),
+        name="review-artifact-list",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/"
+        "projects/<uuid:project_public_id>/review-artifacts/<uuid:artifact_public_id>/inspection/",
+        review_views.InspectionView.as_view(),
+        name="review-artifact-inspection",
     ),
 ]

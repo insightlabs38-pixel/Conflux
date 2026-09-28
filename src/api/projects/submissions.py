@@ -2,8 +2,10 @@ import hashlib
 import json
 from uuid import UUID
 
-from artifacts.models import Artifact
+from artifacts.models import Artifact, ArtifactStatus, ArtifactVisibility
 from artifacts.preflight import run_preflight
+from artifacts.services import inspection_data
+from artifacts.storage import S3Storage
 from audit.services import record_mutation
 from core.authz import has_any_role
 from django.core.exceptions import ValidationError
@@ -215,3 +217,69 @@ def reopen_submission(project, stage, actor, *, reason=""):
         },
     )
     return submission
+
+
+JUDGE_VISIBLE = {ArtifactVisibility.PUBLIC, ArtifactVisibility.JUDGE}
+
+
+def preview_frozen_submission(project, stage):
+    """The judge-visible artifacts of this submission's latest finalized
+    version, exactly as they were frozen at finalize time.
+
+    Each artifact is checked against its live row: if the row was deleted or
+    its content/visibility/kind has since changed, the snapshot is untrusted
+    for that artifact (drift) and no download is offered for it, so a
+    preview can never show something other than what was actually frozen.
+    Returns None when this submission has never been finalized.
+    """
+    submission = Submission.objects.filter(project=project, stage=stage).first()
+    version = submission.current_version if submission else None
+    if version is None:
+        return None
+    frozen = [
+        item
+        for item in version.snapshot.get("artifacts", [])
+        if item["visibility"] in JUDGE_VISIBLE
+    ]
+    live = {
+        str(a.public_id): a
+        for a in Artifact.objects.filter(public_id__in=[i["id"] for i in frozen])
+    }
+    storage = S3Storage()
+    rows = []
+    verified = True
+    for snap in frozen:
+        artifact = live.get(snap["id"])
+        if artifact is None:
+            drift = "removed"
+        elif (
+            artifact.kind != snap["kind"]
+            or artifact.visibility != snap["visibility"]
+            or artifact.object_key != snap["object_key"]
+            or artifact.sha256 != snap["sha256"]
+        ):
+            drift = "content_changed"
+        else:
+            drift = None
+        if drift:
+            verified = False
+        latest = artifact.inspections.first() if artifact else None
+        download = None
+        if (
+            drift is None
+            and artifact.object_key
+            and artifact.status == ArtifactStatus.READY
+            and (latest is None or latest.verdict != "blocked")
+        ):
+            download = storage.presign_get(artifact.object_key, download_filename=artifact.title)
+        rows.append(
+            {
+                "id": snap["id"],
+                "title": snap["title"],
+                "kind": snap["kind"],
+                "drift": drift,
+                "inspection": inspection_data(latest) if latest else None,
+                "download_url": download,
+            }
+        )
+    return {"version": version.number, "verified": verified, "artifacts": rows}

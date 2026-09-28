@@ -6,10 +6,33 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
-from .models import STORED_KINDS, Artifact, ArtifactStatus, ArtifactUploadIntent
+from .inspector import INSPECTOR_VERSION, MAX_INSPECT_BYTES, Inspection, inspect_bytes
+from .models import (
+    EXTERNAL_KINDS,
+    STORED_KINDS,
+    Artifact,
+    ArtifactInspection,
+    ArtifactStatus,
+    ArtifactUploadIntent,
+)
 from .storage import MAX_PARTS, MULTIPART_THRESHOLD, PART_SIZE, S3Storage
+from .url_inspector import inspect_url
 
 MAX_UPLOAD_BYTES = MAX_PARTS * PART_SIZE
+
+
+def inspection_data(record):
+    return {
+        "public_id": str(record.public_id),
+        "verdict": record.verdict,
+        "subject": record.subject,
+        "detected_type": record.detected_type,
+        "findings": record.findings,
+        "facts": record.facts,
+        "preview": record.preview,
+        "inspector_version": record.inspector_version,
+        "inspected_at": record.inspected_at,
+    }
 
 
 def _require_project_member(project, user):
@@ -165,3 +188,74 @@ def complete_upload(intent, actor, *, parts=None, storage=None):
     intent.completed_at = timezone.now()
     intent.save(update_fields=["completed_at"])
     return artifact
+
+
+INSPECTION_COOLDOWN = timedelta(seconds=15)
+PARTIAL_BYTES = 1024 * 1024
+
+
+@transaction.atomic
+def run_inspection(artifact, actor, *, storage=None, fetcher=None, validator=None):
+    """Inspect one artifact and persist the report. A fresh report inside the
+    cooldown is returned instead of inspecting again.
+    """
+    from audit.services import record_mutation
+
+    artifact = Artifact.objects.select_for_update(of=("self",)).get(pk=artifact.pk)
+    if artifact.status == ArtifactStatus.PURGED:
+        raise ValidationError("This artifact's content was purged by retention policy.")
+    latest = artifact.inspections.first()
+    if latest and timezone.now() - latest.inspected_at < INSPECTION_COOLDOWN:
+        return latest
+    report = Inspection()
+    subject = "content"
+    if artifact.kind in EXTERNAL_KINDS:
+        subject = "link"
+        kwargs = {}
+        if fetcher:
+            kwargs["fetcher"] = fetcher
+        if validator:
+            kwargs["validator"] = validator
+        inspect_url(artifact.external_url, report, **kwargs)
+    else:
+        if (
+            artifact.status not in (ArtifactStatus.READY, ArtifactStatus.UPLOADED)
+            or not artifact.object_key
+        ):
+            raise ValidationError("This artifact has no uploaded content to inspect.")
+        storage = storage or S3Storage()
+        limit = (
+            MAX_INSPECT_BYTES if (artifact.byte_size or 0) <= MAX_INSPECT_BYTES else PARTIAL_BYTES
+        )
+        data = storage.get(artifact.object_key)["Body"].read(limit + 1)[:limit]
+        partial = (artifact.byte_size or 0) > limit
+        report = inspect_bytes(
+            data,
+            claimed_type=artifact.content_type,
+            filename=artifact.title,
+            kind=artifact.kind,
+            expected_sha256="" if partial else artifact.sha256,
+        )
+        if partial:
+            report.add(
+                "warning", "partial_inspection", f"Only the first {limit} bytes were inspected."
+            )
+    record = ArtifactInspection.objects.create(
+        artifact=artifact,
+        verdict=report.verdict,
+        subject=subject,
+        detected_type=report.detected_type,
+        findings=report.findings,
+        facts=report.facts,
+        preview=report.preview,
+        inspector_version=INSPECTOR_VERSION,
+        inspected_by=actor,
+    )
+    record_mutation(
+        actor=actor,
+        workspace=artifact.project.event.workspace,
+        action="artifact.inspected",
+        target=artifact,
+        metadata={"verdict": record.verdict, "findings": [f["code"] for f in report.findings]},
+    )
+    return record

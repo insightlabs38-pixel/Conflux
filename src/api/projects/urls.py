@@ -27,6 +27,11 @@ urlpatterns = [
         name="submission-detail",
     ),
     path(
+        _prefix + "<uuid:project_public_id>/submissions/<uuid:stage_public_id>/preview/",
+        views.SubmissionPreviewView.as_view(),
+        name="submission-preview",
+    ),
+    path(
         _prefix + "<uuid:project_public_id>/submissions/<uuid:stage_public_id>/finalize/",
         views.SubmissionFinalizeView.as_view(),
         name="submission-finalize",

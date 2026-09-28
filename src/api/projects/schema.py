@@ -38,6 +38,21 @@ class SubmissionStageSchema(serializers.Serializer):
     submission = SubmissionSchema(allow_null=True)
 
 
+class SubmissionPreviewArtifactSchema(serializers.Serializer):
+    id = serializers.UUIDField()
+    title = serializers.CharField()
+    kind = serializers.CharField()
+    drift = serializers.CharField(allow_null=True)
+    inspection = serializers.JSONField(allow_null=True)
+    download_url = serializers.URLField(allow_null=True)
+
+
+class SubmissionPreviewSchema(serializers.Serializer):
+    version = serializers.IntegerField()
+    verified = serializers.BooleanField()
+    artifacts = SubmissionPreviewArtifactSchema(many=True)
+
+
 class SubmissionDraftInputSchema(serializers.Serializer):
     draft_payload = serializers.JSONField()
     draft_revision = serializers.IntegerField()

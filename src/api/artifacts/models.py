@@ -132,3 +132,35 @@ class ArtifactValidation(PublicIdModel):
 
     class Meta:
         ordering = ["-checked_at", "-id"]
+
+
+class ArtifactInspection(PublicIdModel):
+    """One immutable static-inspection report (PVS08). Advisory: it never
+    changes the artifact's status.
+    """
+
+    class Verdict(models.TextChoices):
+        CLEAN = "clean", "Clean"
+        WARNINGS = "warnings", "Warnings"
+        BLOCKED = "blocked", "Blocked"
+
+    artifact = models.ForeignKey(Artifact, on_delete=models.CASCADE, related_name="inspections")
+    verdict = models.CharField(max_length=10, choices=Verdict.choices)
+    subject = models.CharField(max_length=10, default="content")
+    detected_type = models.CharField(max_length=40, blank=True)
+    findings = models.JSONField(default=list)
+    facts = models.JSONField(default=dict)
+    preview = models.TextField(blank=True)
+    inspector_version = models.CharField(max_length=10)
+    inspected_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    inspected_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-inspected_at", "-id"]
+
+    def save(self, *args, **kwargs):
+        if self.pk and type(self).objects.filter(pk=self.pk).exists():
+            raise ValidationError("Inspection reports are immutable.")
+        super().save(*args, **kwargs)

@@ -3684,6 +3684,32 @@ class SubmissionFinalizeInputSchema(TypedDict):
 class InputOfSubmissionFinalizeInputSchema(TypedDict):
     draft_revision: int
 
+class SubmissionPreviewArtifactSchema(TypedDict):
+    id: str
+    title: str
+    kind: str
+    drift: str | None
+    inspection: Any
+    download_url: str | None
+
+class InputOfSubmissionPreviewArtifactSchema(TypedDict):
+    id: str
+    title: str
+    kind: str
+    drift: str | None
+    inspection: Any
+    download_url: str | None
+
+class SubmissionPreviewSchema(TypedDict):
+    version: int
+    verified: bool
+    artifacts: list[SubmissionPreviewArtifactSchema]
+
+class InputOfSubmissionPreviewSchema(TypedDict):
+    version: int
+    verified: bool
+    artifacts: list[InputOfSubmissionPreviewArtifactSchema]
+
 class SubmissionReceiptSchema(TypedDict):
     submission: SubmissionSchema
     receipt: str
@@ -5038,6 +5064,15 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                               'query_params': [],
                                                                                                                               'request_body': False,
                                                                                                                               'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_artifacts_artifact_public_id_inspection': {'method': 'GET',
+                                                                                                                                         'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/artifacts/{artifact_public_id}/inspection/',
+                                                                                                                                         'path_params': ['artifact_public_id',
+                                                                                                                                                         'event_public_id',
+                                                                                                                                                         'project_public_id',
+                                                                                                                                                         'workspace_public_id'],
+                                                                                                                                         'query_params': [],
+                                                                                                                                         'request_body': False,
+                                                                                                                                         'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_artifacts_preflight': {'method': 'GET',
                                                                                                                      'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/artifacts/preflight/',
                                                                                                                      'path_params': ['event_public_id',
@@ -5087,6 +5122,23 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                               'query_params': [],
                                                                                                               'request_body': False,
                                                                                                               'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_review_artifacts': {'method': 'GET',
+                                                                                                                  'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/review-artifacts/',
+                                                                                                                  'path_params': ['event_public_id',
+                                                                                                                                  'project_public_id',
+                                                                                                                                  'workspace_public_id'],
+                                                                                                                  'query_params': [],
+                                                                                                                  'request_body': False,
+                                                                                                                  'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_review_artifacts_artifact_public_id_inspection': {'method': 'GET',
+                                                                                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/review-artifacts/{artifact_public_id}/inspection/',
+                                                                                                                                                'path_params': ['artifact_public_id',
+                                                                                                                                                                'event_public_id',
+                                                                                                                                                                'project_public_id',
+                                                                                                                                                                'workspace_public_id'],
+                                                                                                                                                'query_params': [],
+                                                                                                                                                'request_body': False,
+                                                                                                                                                'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions': {'method': 'GET',
                                                                                                              'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/submissions/',
                                                                                                              'path_params': ['event_public_id',
@@ -5113,6 +5165,15 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                   'query_params': [],
                                                                                                                                   'request_body': False,
                                                                                                                                   'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions_stage_public_id_preview': {'method': 'GET',
+                                                                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/submissions/{stage_public_id}/preview/',
+                                                                                                                                     'path_params': ['event_public_id',
+                                                                                                                                                     'project_public_id',
+                                                                                                                                                     'stage_public_id',
+                                                                                                                                                     'workspace_public_id'],
+                                                                                                                                     'query_params': [],
+                                                                                                                                     'request_body': False,
+                                                                                                                                     'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_tags': {'method': 'GET',
                                                                                                       'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/tags/',
                                                                                                       'path_params': ['event_public_id',
@@ -6318,6 +6379,15 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                               'query_params': [],
                                                                                                                                               'request_body': False,
                                                                                                                                               'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_artifacts_artifact_public_id_inspection': {'method': 'POST',
+                                                                                                                                          'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/artifacts/{artifact_public_id}/inspection/',
+                                                                                                                                          'path_params': ['artifact_public_id',
+                                                                                                                                                          'event_public_id',
+                                                                                                                                                          'project_public_id',
+                                                                                                                                                          'workspace_public_id'],
+                                                                                                                                          'query_params': [],
+                                                                                                                                          'request_body': False,
+                                                                                                                                          'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_artifacts_artifact_public_id_upload_intents_intent_public_id_complete': {'method': 'POST',
                                                                                                                                                                         'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/artifacts/{artifact_public_id}/upload-intents/{intent_public_id}/complete/',
                                                                                                                                                                         'path_params': ['artifact_public_id',
@@ -6420,6 +6490,15 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                'query_params': [],
                                                                                                                'request_body': True,
                                                                                                                'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_review_artifacts_artifact_public_id_inspection': {'method': 'POST',
+                                                                                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/review-artifacts/{artifact_public_id}/inspection/',
+                                                                                                                                                 'path_params': ['artifact_public_id',
+                                                                                                                                                                 'event_public_id',
+                                                                                                                                                                 'project_public_id',
+                                                                                                                                                                 'workspace_public_id'],
+                                                                                                                                                 'query_params': [],
+                                                                                                                                                 'request_body': False,
+                                                                                                                                                 'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions_stage_public_id_finalize': {'method': 'POST',
                                                                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/submissions/{stage_public_id}/finalize/',
                                                                                                                                        'path_params': ['event_public_id',

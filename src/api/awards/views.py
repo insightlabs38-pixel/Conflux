@@ -1,5 +1,7 @@
+from accounts.authentication import CookieSessionAuthentication
 from accounts.models import User
 from audit.services import record_mutation
+from core.permissions import IsWorkspaceMember
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import transaction
 from django.http import Http404
@@ -17,10 +19,11 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from workspaces.models import Role
+from workspaces.models import Role, Workspace
 
 from .models import (
     Award,
+    AwardResource,
     FulfillmentState,
     PrizeComponent,
     PrizeFulfillment,
@@ -85,6 +88,23 @@ class WinnerOutput(serializers.Serializer):
     override_reason = serializers.CharField()
     selected_at = serializers.DateTimeField()
     fulfillments = serializers.ListField(child=serializers.DictField())
+
+
+class ResourceInput(serializers.Serializer):
+    kind = serializers.ChoiceField(choices=AwardResource.Kind.choices)
+    title = serializers.CharField(max_length=160)
+    url = serializers.URLField(required=False, allow_blank=True)
+    body = serializers.CharField(required=False, allow_blank=True)
+    position = serializers.IntegerField(required=False, min_value=0, max_value=100000)
+
+
+class ResourceOutput(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    kind = serializers.CharField()
+    title = serializers.CharField()
+    url = serializers.CharField()
+    body = serializers.CharField()
+    position = serializers.IntegerField()
 
 
 class FulfillmentInput(serializers.Serializer):
@@ -191,6 +211,17 @@ def _component_data(component):
     }
 
 
+def _resource_data(resource):
+    return {
+        "public_id": str(resource.public_id),
+        "kind": resource.kind,
+        "title": resource.title,
+        "url": resource.url,
+        "body": resource.body,
+        "position": resource.position,
+    }
+
+
 def award_data(award):
     package = PrizePackage.objects.filter(award=award).first()
     return {
@@ -214,6 +245,7 @@ def award_data(award):
         "sponsor_contacts": [
             contact.username for contact in award.sponsor_contacts.all().order_by("username")
         ],
+        "resources": [_resource_data(item) for item in award.resources.all()],
     }
 
 
@@ -474,3 +506,45 @@ class PublicAwardsView(APIView):
             del row["sponsor_contacts"]
             awards.append(row)
         return Response(awards)
+
+
+class ChallengeOutput(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    name = serializers.CharField()
+    description = serializers.CharField()
+    eligibility_track = serializers.UUIDField(allow_null=True)
+    components = ComponentOutput(many=True)
+    resources = ResourceOutput(many=True)
+
+
+class ChallengeListView(APIView):
+    """PVS09: a participant's own view of sponsor challenges -- what a
+    sponsor is offering (prize components, resources) and which track
+    entering it requires, without exposing sponsor_contacts, eligible
+    projects or judges (sponsor-portal-only).
+    """
+
+    authentication_classes = [CookieSessionAuthentication]
+    permission_classes = [IsWorkspaceMember]
+
+    def get_workspace(self):
+        return get_object_or_404(Workspace, public_id=self.kwargs["workspace_public_id"])
+
+    @extend_schema(responses=ChallengeOutput(many=True))
+    def get(self, request, workspace_public_id, event_public_id):
+        event = get_object_or_404(Event, workspace=self.get_workspace(), public_id=event_public_id)
+        awards = Award.objects.filter(event=event, sponsor_contacts__isnull=False).distinct()
+        rows = []
+        for award in awards.order_by("pk"):
+            data = award_data(award)
+            rows.append(
+                {
+                    "public_id": data["public_id"],
+                    "name": data["name"],
+                    "description": data["description"],
+                    "eligibility_track": data["eligibility_track"],
+                    "components": data["components"],
+                    "resources": data["resources"],
+                }
+            )
+        return Response(rows)

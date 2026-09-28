@@ -167,3 +167,40 @@ class PrizeFulfillment(PublicIdModel):
             and self.component.package.award_id != self.winner.award_id
         ):
             raise ValidationError({"component": "Component must belong to the winner's award."})
+
+
+class AwardResource(PublicIdModel):
+    """A sponsor's challenge content for an award (PVS09): API docs, a
+    starter repo, a contact, an FAQ entry or a workshop reference. Managed
+    by the same people who can already touch this award's fulfillments --
+    organizers, or the award's own `sponsor_contacts` -- never a generic
+    CMS block detached from a specific challenge.
+    """
+
+    class Kind(models.TextChoices):
+        API = "api", "API documentation"
+        STARTER_REPO = "starter_repo", "Starter repository"
+        CONTACT = "contact", "Contact"
+        FAQ = "faq", "FAQ"
+        WORKSHOP = "workshop", "Workshop reference"
+        OTHER = "other", "Other"
+
+    URL_REQUIRED = {Kind.API, Kind.STARTER_REPO, Kind.WORKSHOP}
+
+    award = models.ForeignKey(Award, on_delete=models.CASCADE, related_name="resources")
+    kind = models.CharField(max_length=20, choices=Kind.choices)
+    title = models.CharField(max_length=160)
+    url = models.URLField(blank=True)
+    body = models.TextField(blank=True)
+    position = models.PositiveIntegerField(default=0)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["position", "pk"]
+
+    def clean(self):
+        if self.kind in self.URL_REQUIRED and not self.url:
+            raise ValidationError({"url": f"A {self.get_kind_display()} resource needs a URL."})
+        if not self.url and not self.body:
+            raise ValidationError({"body": "A resource needs a URL, a body, or both."})

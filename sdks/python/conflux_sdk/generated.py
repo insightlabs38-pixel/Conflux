@@ -955,6 +955,22 @@ CategoryEnum = Literal['contrast', 'heading', 'accessible-name', 'keyboard']
 
 InputOfCategoryEnum = Literal['contrast', 'heading', 'accessible-name', 'keyboard']
 
+class ChallengeOutput(TypedDict):
+    public_id: str
+    name: str
+    description: str
+    eligibility_track: str | None
+    components: list[ComponentOutput]
+    resources: list[ResourceOutput]
+
+class InputOfChallengeOutput(TypedDict):
+    public_id: str
+    name: str
+    description: str
+    eligibility_track: str | None
+    components: list[InputOfComponentOutput]
+    resources: list[InputOfResourceOutput]
+
 class CheckIn(TypedDict):
     public_id: str
     participant: str
@@ -2627,6 +2643,20 @@ class InputOfPatchedProjectPatchInputSchema(TypedDict):
     description: NotRequired[str]
     track: NotRequired[str | None]
 
+class PatchedResourceInput(TypedDict):
+    kind: NotRequired[ResourceInputKindEnum]
+    title: NotRequired[str]
+    url: NotRequired[str]
+    body: NotRequired[str]
+    position: NotRequired[int]
+
+class InputOfPatchedResourceInput(TypedDict):
+    kind: NotRequired[InputOfResourceInputKindEnum]
+    title: NotRequired[str]
+    url: NotRequired[str]
+    body: NotRequired[str]
+    position: NotRequired[int]
+
 class PatchedStage(TypedDict):
     public_id: NotRequired[str]
     name: NotRequired[str]
@@ -3288,6 +3318,40 @@ class ResolutionInputSchema(TypedDict):
 
 class InputOfResolutionInputSchema(TypedDict):
     resolution_note: str
+
+class ResourceInput(TypedDict):
+    kind: ResourceInputKindEnum
+    title: str
+    url: NotRequired[str]
+    body: NotRequired[str]
+    position: NotRequired[int]
+
+class InputOfResourceInput(TypedDict):
+    kind: InputOfResourceInputKindEnum
+    title: str
+    url: NotRequired[str]
+    body: NotRequired[str]
+    position: NotRequired[int]
+
+ResourceInputKindEnum = Literal['api', 'starter_repo', 'contact', 'faq', 'workshop', 'other']
+
+InputOfResourceInputKindEnum = Literal['api', 'starter_repo', 'contact', 'faq', 'workshop', 'other']
+
+class ResourceOutput(TypedDict):
+    public_id: str
+    kind: str
+    title: str
+    url: str
+    body: str
+    position: int
+
+class InputOfResourceOutput(TypedDict):
+    public_id: str
+    kind: str
+    title: str
+    url: str
+    body: str
+    position: int
 
 class RespondInput(TypedDict):
     response: str
@@ -4364,6 +4428,15 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                        'query_params': [],
                                                                                                        'request_body': False,
                                                                                                        'response_kind': 'none'},
+ 'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards_award_public_id_resources_resource_public_id': {'method': 'DELETE',
+                                                                                                                                            'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-portal/awards/{award_public_id}/resources/{resource_public_id}/',
+                                                                                                                                            'path_params': ['award_public_id',
+                                                                                                                                                            'event_public_id',
+                                                                                                                                                            'resource_public_id',
+                                                                                                                                                            'workspace_public_id'],
+                                                                                                                                            'query_params': [],
+                                                                                                                                            'request_body': False,
+                                                                                                                                            'response_kind': 'none'},
  'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_stage_transitions_transition_public_id': {'method': 'DELETE',
                                                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stage-transitions/{transition_public_id}/',
                                                                                                                 'path_params': ['event_public_id',
@@ -4675,6 +4748,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                   'query_params': [],
                                                                                   'request_body': False,
                                                                                   'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_challenges': {'method': 'GET',
+                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/challenges/',
+                                                                                 'path_params': ['event_public_id',
+                                                                                                 'workspace_public_id'],
+                                                                                 'query_params': [],
+                                                                                 'request_body': False,
+                                                                                 'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_check_ins': {'method': 'GET',
                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/check-ins/',
                                                                                 'path_params': ['event_public_id',
@@ -5798,6 +5878,15 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                    'query_params': [],
                                                                                                    'request_body': True,
                                                                                                    'response_kind': 'json'},
+ 'patch_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards_award_public_id_resources_resource_public_id': {'method': 'PATCH',
+                                                                                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-portal/awards/{award_public_id}/resources/{resource_public_id}/',
+                                                                                                                                           'path_params': ['award_public_id',
+                                                                                                                                                           'event_public_id',
+                                                                                                                                                           'resource_public_id',
+                                                                                                                                                           'workspace_public_id'],
+                                                                                                                                           'query_params': [],
+                                                                                                                                           'request_body': True,
+                                                                                                                                           'response_kind': 'json'},
  'patch_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_fulfillments_fulfillment_public_id': {'method': 'PATCH',
                                                                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-portal/fulfillments/{fulfillment_public_id}/',
                                                                                                                           'path_params': ['event_public_id',
@@ -6552,6 +6641,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                       'query_params': [],
                                                                                       'request_body': True,
                                                                                       'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards_award_public_id_resources': {'method': 'POST',
+                                                                                                                       'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-portal/awards/{award_public_id}/resources/',
+                                                                                                                       'path_params': ['award_public_id',
+                                                                                                                                       'event_public_id',
+                                                                                                                                       'workspace_public_id'],
+                                                                                                                       'query_params': [],
+                                                                                                                       'request_body': True,
+                                                                                                                       'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_stage_transitions': {'method': 'POST',
                                                                                          'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stage-transitions/',
                                                                                          'path_params': ['event_public_id',

@@ -18,9 +18,17 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 from workspaces.models import Role
 
-from .models import Award, PrizeFulfillment
+from .models import Award, AwardResource, PrizeFulfillment
 from .services import advance_fulfillment
-from .views import FulfillmentInput, FulfillmentOutput, award_data, fulfillment_data
+from .views import (
+    FulfillmentInput,
+    FulfillmentOutput,
+    ResourceInput,
+    ResourceOutput,
+    _resource_data,
+    award_data,
+    fulfillment_data,
+)
 
 
 class SponsorPortalBase(OrganizerView):
@@ -28,6 +36,16 @@ class SponsorPortalBase(OrganizerView):
 
     def is_organizer(self, request):
         return has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
+
+    def get_award(self, award_public_id):
+        return get_object_or_404(Award, event=self.get_event(), public_id=award_public_id)
+
+    def ensure_can_manage(self, request, award):
+        if (
+            not self.is_organizer(request)
+            and not award.sponsor_contacts.filter(pk=request.user.pk).exists()
+        ):
+            raise PermissionDenied("You are not a sponsor contact for this award.")
 
 
 def _eligible_projects(award):
@@ -75,12 +93,7 @@ class SponsorPortalFulfillmentView(SponsorPortalBase):
             public_id=fulfillment_public_id,
             winner__award__event=self.get_event(),
         )
-        award = fulfillment.winner.award
-        if (
-            not self.is_organizer(request)
-            and not award.sponsor_contacts.filter(pk=request.user.pk).exists()
-        ):
-            raise PermissionDenied("You are not a sponsor contact for this award.")
+        self.ensure_can_manage(request, fulfillment.winner.award)
         data = FulfillmentInput(data=request.data)
         data.is_valid(raise_exception=True)
         try:
@@ -95,3 +108,60 @@ class SponsorPortalFulfillmentView(SponsorPortalBase):
                 exc.message_dict if hasattr(exc, "message_dict") else exc.messages
             ) from exc
         return Response(fulfillment_data(updated))
+
+
+class SponsorPortalResourceListView(SponsorPortalBase):
+    """PVS09: challenge content (API docs, starter repos, contacts, FAQ,
+    workshop references) an award's sponsor -- or an organizer -- manages
+    for that award.
+    """
+
+    @extend_schema(request=ResourceInput, responses={201: ResourceOutput})
+    def post(self, request, workspace_public_id, event_public_id, award_public_id):
+        award = self.get_award(award_public_id)
+        self.ensure_can_manage(request, award)
+        data = ResourceInput(data=request.data)
+        data.is_valid(raise_exception=True)
+        resource = AwardResource(award=award, created_by=request.user, **data.validated_data)
+        try:
+            resource.full_clean()
+            resource.save()
+        except ModelValidationError as exc:
+            raise ValidationError(
+                exc.message_dict if hasattr(exc, "message_dict") else exc.messages
+            ) from exc
+        return Response(_resource_data(resource), status=201)
+
+
+class SponsorPortalResourceDetailView(SponsorPortalBase):
+    def get_resource(self, award, resource_public_id):
+        return get_object_or_404(AwardResource, award=award, public_id=resource_public_id)
+
+    @extend_schema(request=ResourceInput, responses=ResourceOutput)
+    def patch(
+        self, request, workspace_public_id, event_public_id, award_public_id, resource_public_id
+    ):
+        award = self.get_award(award_public_id)
+        self.ensure_can_manage(request, award)
+        resource = self.get_resource(award, resource_public_id)
+        data = ResourceInput(data=request.data, partial=True)
+        data.is_valid(raise_exception=True)
+        for field, value in data.validated_data.items():
+            setattr(resource, field, value)
+        try:
+            resource.full_clean()
+            resource.save()
+        except ModelValidationError as exc:
+            raise ValidationError(
+                exc.message_dict if hasattr(exc, "message_dict") else exc.messages
+            ) from exc
+        return Response(_resource_data(resource))
+
+    @extend_schema(responses={204: None})
+    def delete(
+        self, request, workspace_public_id, event_public_id, award_public_id, resource_public_id
+    ):
+        award = self.get_award(award_public_id)
+        self.ensure_can_manage(request, award)
+        self.get_resource(award, resource_public_id).delete()
+        return Response(status=204)

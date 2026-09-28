@@ -59,4 +59,21 @@ urlpatterns = [
         sponsor_portal.SponsorPortalFulfillmentView.as_view(),
         name="sponsor-portal-fulfillment",
     ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>"
+        "/sponsor-portal/awards/<uuid:award_public_id>/resources/",
+        sponsor_portal.SponsorPortalResourceListView.as_view(),
+        name="sponsor-portal-resource-list",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>"
+        "/sponsor-portal/awards/<uuid:award_public_id>/resources/<uuid:resource_public_id>/",
+        sponsor_portal.SponsorPortalResourceDetailView.as_view(),
+        name="sponsor-portal-resource-detail",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/challenges/",
+        views.ChallengeListView.as_view(),
+        name="challenge-list",
+    ),
 ]

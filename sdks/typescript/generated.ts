@@ -1064,6 +1064,24 @@ export type CategoryEnum =
 export type InputOfCategoryEnum =
   "contrast" | "heading" | "accessible-name" | "keyboard";
 
+export type ChallengeOutput = {
+  public_id: string;
+  name: string;
+  description: string;
+  eligibility_track: string | null;
+  components: ComponentOutput[];
+  resources: ResourceOutput[];
+};
+
+export type InputOfChallengeOutput = {
+  public_id: string;
+  name: string;
+  description: string;
+  eligibility_track: string | null;
+  components: InputOfComponentOutput[];
+  resources: InputOfResourceOutput[];
+};
+
 export type CheckIn = {
   public_id: string;
   participant: string;
@@ -2870,6 +2888,22 @@ export type InputOfPatchedProjectPatchInputSchema = {
   track?: string | null;
 };
 
+export type PatchedResourceInput = {
+  kind?: ResourceInputKindEnum;
+  title?: string;
+  url?: string;
+  body?: string;
+  position?: number;
+};
+
+export type InputOfPatchedResourceInput = {
+  kind?: InputOfResourceInputKindEnum;
+  title?: string;
+  url?: string;
+  body?: string;
+  position?: number;
+};
+
 export type PatchedStage = {
   public_id?: string;
   name?: string;
@@ -3588,6 +3622,46 @@ export type InputOfReminderSchema = {
 export type ResolutionInputSchema = { resolution_note: string };
 
 export type InputOfResolutionInputSchema = { resolution_note: string };
+
+export type ResourceInput = {
+  kind: ResourceInputKindEnum;
+  title: string;
+  url?: string;
+  body?: string;
+  position?: number;
+};
+
+export type InputOfResourceInput = {
+  kind: InputOfResourceInputKindEnum;
+  title: string;
+  url?: string;
+  body?: string;
+  position?: number;
+};
+
+export type ResourceInputKindEnum =
+  "api" | "starter_repo" | "contact" | "faq" | "workshop" | "other";
+
+export type InputOfResourceInputKindEnum =
+  "api" | "starter_repo" | "contact" | "faq" | "workshop" | "other";
+
+export type ResourceOutput = {
+  public_id: string;
+  kind: string;
+  title: string;
+  url: string;
+  body: string;
+  position: number;
+};
+
+export type InputOfResourceOutput = {
+  public_id: string;
+  kind: string;
+  title: string;
+  url: string;
+  body: string;
+  position: number;
+};
 
 export type RespondInput = { response: string };
 
@@ -5084,6 +5158,10 @@ export interface Operations {
     };
     response: null;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_challenges: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: ChallengeOutput[];
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_check_ins: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: CheckIn[];
@@ -6380,6 +6458,40 @@ export interface Operations {
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: null;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards_award_public_id_resources: {
+    request: {
+      path: {
+        award_public_id: string;
+        event_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfResourceInput;
+    };
+    response: ResourceOutput;
+  };
+  patch_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards_award_public_id_resources_resource_public_id: {
+    request: {
+      path: {
+        award_public_id: string;
+        event_public_id: string;
+        resource_public_id: string;
+        workspace_public_id: string;
+      };
+      body?: InputOfPatchedResourceInput;
+    };
+    response: ResourceOutput;
+  };
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards_award_public_id_resources_resource_public_id: {
+    request: {
+      path: {
+        award_public_id: string;
+        event_public_id: string;
+        resource_public_id: string;
+        workspace_public_id: string;
+      };
+    };
     response: null;
   };
   patch_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_fulfillments_fulfillment_public_id: {
@@ -8229,6 +8341,14 @@ export const operations = {
       request_body: false,
       response_kind: "none",
     },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_challenges: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/challenges/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_check_ins: {
     method: "GET",
     path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/check-ins/",
@@ -9953,6 +10073,47 @@ export const operations = {
       method: "GET",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-portal/awards/",
       path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards_award_public_id_resources:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-portal/awards/{award_public_id}/resources/",
+      path_params: [
+        "award_public_id",
+        "event_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  patch_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards_award_public_id_resources_resource_public_id:
+    {
+      method: "PATCH",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-portal/awards/{award_public_id}/resources/{resource_public_id}/",
+      path_params: [
+        "award_public_id",
+        "event_public_id",
+        "resource_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards_award_public_id_resources_resource_public_id:
+    {
+      method: "DELETE",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-portal/awards/{award_public_id}/resources/{resource_public_id}/",
+      path_params: [
+        "award_public_id",
+        "event_public_id",
+        "resource_public_id",
+        "workspace_public_id",
+      ],
       query_params: [],
       request_body: false,
       response_kind: "none",

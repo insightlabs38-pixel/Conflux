@@ -2732,6 +2732,41 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/challenges/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_challenges
+      description: |-
+        PVS09: a participant's own view of sponsor challenges -- what a
+        sponsor is offering (prize components, resources) and which track
+        entering it requires, without exposing sponsor_contacts, eligible
+        projects or judges (sponsor-portal-only).
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChallengeOutput'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/check-ins/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_check_ins
@@ -8903,6 +8938,142 @@ paths:
       - scopedBearer: []
       responses:
         '200':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-portal/awards/{award_public_id}/resources/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards_award_public_id_resources
+      description: |-
+        PVS09: challenge content (API docs, starter repos, contacts, FAQ,
+        workshop references) an award's sponsor -- or an organizer -- manages
+        for that award.
+      parameters:
+      - in: path
+        name: award_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResourceInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResourceInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceOutput'
+          description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-portal/awards/{award_public_id}/resources/{resource_public_id}/
+  : patch:
+      operationId: patch_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards_award_public_id_resources_resource_public_id
+      parameters:
+      - in: path
+        name: award_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: resource_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedResourceInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedResourceInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedResourceInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceOutput'
+          description: ''
+    delete:
+      operationId: delete_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards_award_public_id_resources_resource_public_id
+      parameters:
+      - in: path
+        name: award_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: resource_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '204':
           description: No response body
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-portal/fulfillments/{fulfillment_public_id}/:
     patch:
@@ -15732,6 +15903,35 @@ components:
         * `heading` - heading
         * `accessible-name` - accessible-name
         * `keyboard` - keyboard
+    ChallengeOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        eligibility_track:
+          type: string
+          format: uuid
+          nullable: true
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComponentOutput'
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceOutput'
+      required:
+      - components
+      - description
+      - eligibility_track
+      - name
+      - public_id
+      - resources
     CheckIn:
       type: object
       properties:
@@ -18637,6 +18837,23 @@ components:
           type: string
           format: uuid
           nullable: true
+    PatchedResourceInput:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/ResourceInputKindEnum'
+        title:
+          type: string
+          maxLength: 160
+        url:
+          type: string
+          format: uri
+        body:
+          type: string
+        position:
+          type: integer
+          maximum: 100000
+          minimum: 0
     PatchedStage:
       type: object
       properties:
@@ -19822,6 +20039,65 @@ components:
           minLength: 1
       required:
       - resolution_note
+    ResourceInput:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/ResourceInputKindEnum'
+        title:
+          type: string
+          maxLength: 160
+        url:
+          type: string
+          format: uri
+        body:
+          type: string
+        position:
+          type: integer
+          maximum: 100000
+          minimum: 0
+      required:
+      - kind
+      - title
+    ResourceInputKindEnum:
+      enum:
+      - api
+      - starter_repo
+      - contact
+      - faq
+      - workshop
+      - other
+      type: string
+      description: |-
+        * `api` - API documentation
+        * `starter_repo` - Starter repository
+        * `contact` - Contact
+        * `faq` - FAQ
+        * `workshop` - Workshop reference
+        * `other` - Other
+    ResourceOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+        title:
+          type: string
+        url:
+          type: string
+        body:
+          type: string
+        position:
+          type: integer
+      required:
+      - body
+      - kind
+      - position
+      - public_id
+      - title
+      - url
     RespondInput:
       type: object
       properties:

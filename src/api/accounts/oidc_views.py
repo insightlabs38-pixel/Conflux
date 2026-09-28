@@ -12,7 +12,6 @@ from . import oidc
 from .models import ExternalIdentity
 from .views import start_session
 
-
 BINDER_COOKIE = "oidc_binder"
 
 

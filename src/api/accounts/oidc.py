@@ -215,7 +215,10 @@ def exchange(request, code, state, binder):
     }
     headers = {"Accept": "application/json"}
     if settings.OIDC_CLIENT_SECRET:
-        credentials = f"{urllib.parse.quote(settings.OIDC_CLIENT_ID, safe='')}:{urllib.parse.quote(settings.OIDC_CLIENT_SECRET, safe='')}"
+        credentials = ":".join(
+            urllib.parse.quote(value, safe="")
+            for value in (settings.OIDC_CLIENT_ID, settings.OIDC_CLIENT_SECRET)
+        )
         headers["Authorization"] = "Basic " + base64.b64encode(credentials.encode()).decode()
     tokens = http_json(meta["token_endpoint"], data=form, headers=headers)
     id_token = tokens.get("id_token")

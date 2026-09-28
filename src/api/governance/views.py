@@ -19,16 +19,6 @@ from stages.models import Stage
 from workspaces.models import Membership, Role, Workspace
 
 from . import services
-from .schema import (
-    AssignmentResponseInput,
-    DecisionNoteInput,
-    ExceptionApprovalInput,
-    ExceptionRequestInput,
-    PublicationRequestInput,
-    RulesAcknowledgeInput,
-    ParticipantRulesInput,
-    SettingsInput,
-)
 from .models import (
     AssignmentResponse,
     DeadlineExceptionRequest,
@@ -37,6 +27,16 @@ from .models import (
     RequestStatus,
     ResultCorrection,
     RulesAcknowledgement,
+)
+from .schema import (
+    AssignmentResponseInput,
+    DecisionNoteInput,
+    ExceptionApprovalInput,
+    ExceptionRequestInput,
+    ParticipantRulesInput,
+    PublicationRequestInput,
+    RulesAcknowledgeInput,
+    SettingsInput,
 )
 
 

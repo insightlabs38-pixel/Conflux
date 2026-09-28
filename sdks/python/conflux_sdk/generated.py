@@ -1841,6 +1841,18 @@ class InputOfInstantiateInput(TypedDict):
     name: str
     slug: str
 
+class JsonRpcMessage(TypedDict):
+    jsonrpc: str
+    id: NotRequired[Any]
+    method: str
+    params: NotRequired[dict[str, Any]]
+
+class InputOfJsonRpcMessage(TypedDict):
+    jsonrpc: str
+    id: NotRequired[Any]
+    method: str
+    params: NotRequired[dict[str, Any]]
+
 class JudgeCOIRelationship(TypedDict):
     public_id: str
     judge: str
@@ -6583,6 +6595,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                             'query_params': [],
                                                                                             'request_body': True,
                                                                                             'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_mcp': {'method': 'POST',
+                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mcp/',
+                                                                           'path_params': ['event_public_id',
+                                                                                           'workspace_public_id'],
+                                                                           'query_params': [],
+                                                                           'request_body': True,
+                                                                           'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_request_public_id_cancel': {'method': 'POST',
                                                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mentor-requests/{request_public_id}/cancel/',
                                                                                                                 'path_params': ['event_public_id',

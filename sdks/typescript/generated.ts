@@ -2009,6 +2009,20 @@ export type InstantiateInput = { name: string; slug: string };
 
 export type InputOfInstantiateInput = { name: string; slug: string };
 
+export type JsonRpcMessage = {
+  jsonrpc: string;
+  id?: unknown;
+  method: string;
+  params?: Record<string, unknown>;
+};
+
+export type InputOfJsonRpcMessage = {
+  jsonrpc: string;
+  id?: unknown;
+  method: string;
+  params?: Record<string, unknown>;
+};
+
 export type JudgeCOIRelationship = {
   public_id: string;
   judge: string;
@@ -5734,6 +5748,13 @@ export interface Operations {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: MarketplaceProfileSchema[];
   };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_mcp: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfJsonRpcMessage;
+    };
+    response: JsonRpcMessage | null;
+  };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_request_public_id_cancel: {
     request: {
       path: {
@@ -9431,6 +9452,14 @@ export const operations = {
       request_body: false,
       response_kind: "json",
     },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_mcp: {
+    method: "POST",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mcp/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: true,
+    response_kind: "json",
+  },
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_request_public_id_cancel:
     {
       method: "POST",

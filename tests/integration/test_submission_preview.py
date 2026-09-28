@@ -103,11 +103,16 @@ def test_preview_shows_only_judge_visible_frozen_artifacts_to_owner_and_organize
         assert body["version"] == 1 and body["verified"] is True
         assert [a["id"] for a in body["artifacts"]] == [str(visible.public_id)]
         assert body["artifacts"][0]["drift"] is None
-        assert body["artifacts"][0]["download_url"] == "https://storage.test/k/visible?attachment=Notes"
+        assert (
+            body["artifacts"][0]["download_url"]
+            == "https://storage.test/k/visible?attachment=Notes"
+        )
 
     assert client_for(judge).get(base(project, stage)).status_code == 404
     outsider = User.objects.create_user(username="outsider", password="unused")
-    Membership.objects.create(workspace=project.event.workspace, user=outsider, role=Role.PARTICIPANT)
+    Membership.objects.create(
+        workspace=project.event.workspace, user=outsider, role=Role.PARTICIPANT
+    )
     assert client_for(outsider).get(base(project, stage)).status_code == 404
 
 

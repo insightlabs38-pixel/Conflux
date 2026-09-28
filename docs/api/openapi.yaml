@@ -5318,6 +5318,53 @@ paths:
                 items:
                   $ref: '#/components/schemas/MarketplaceProfileSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mcp/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_mcp
+      description: |-
+        Streamable-HTTP MCP endpoint (POST only, JSON responses, no server push).
+
+        Callable only with an API credential that allows `POST:mcp-endpoint`; a browser
+        session cookie is refused so a web page can never drive it.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonRpcMessage'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JsonRpcMessage'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JsonRpcMessage'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonRpcMessage'
+          description: ''
+        '202':
+          description: No response body
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mentor-requests/{request_public_id}/cancel/:
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_request_public_id_cancel
@@ -18671,6 +18718,20 @@ components:
       required:
       - name
       - slug
+    JsonRpcMessage:
+      type: object
+      properties:
+        jsonrpc:
+          type: string
+        id: {}
+        method:
+          type: string
+        params:
+          type: object
+          additionalProperties: {}
+      required:
+      - jsonrpc
+      - method
     JudgeCOIRelationship:
       type: object
       properties:

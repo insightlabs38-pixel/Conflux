@@ -10,7 +10,6 @@ from evaluations.models import (
     AssignmentVersion,
     Ballot,
     ConflictOfInterest,
-    NormalizationRun,
 )
 from events.models import Event
 from governance.models import ResultCorrection, SubmissionReceipt

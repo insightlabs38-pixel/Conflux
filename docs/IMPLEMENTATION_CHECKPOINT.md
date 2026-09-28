@@ -1,8 +1,8 @@
-# PVS12 — Sequential implementation checkpoint
+# PVS13 — Sequential implementation checkpoint
 
 ## Result
 
-Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS06–PVS10, PVS-H02, PVS11, PVS12 complete on `main`. Earliest unfinished batch: **PVS13**, then PVS14–PVS15, PVS-H03, PVS16–PVS17, PVS-H04, PVS-H05. PVS18 skipped: H02 found no throughput bottleneck (only the fixed connection-bound bug).
+Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS06–PVS10, PVS-H02, PVS11, PVS12, PVS13 complete on `main`. Earliest unfinished batch: **PVS14**, then PVS15, PVS-H03, PVS16–PVS17, PVS-H04, PVS-H05. PVS18 skipped: H02 found no throughput bottleneck (only the fixed connection-bound bug).
 
 ## Changes
 
@@ -13,12 +13,13 @@ Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS0
 - PVS10: new `mentorship` app (`MentorProfile`, `MentorRequest`, `OfficeHourSlot`/`OfficeHourSignup`); bounded per-project request queue with claim/reassign/resolve/cancel; office-hours signup with capacity checks. Registered in the v2 final-archive schema.
 - PVS11: `governance` app (rules/acks, opt-in two-organizer publication approval, `ResultCorrection` history, `SubmissionReceipt`, assignment accept/decline via `ConflictOfInterest`, deadline-exception requests → `ExceptionGrant`); `check_action` now picks the newest *active* grant. See `docs/operations/GOVERNANCE.md`.
 - PVS12: optional OIDC in `accounts.oidc`/`oidc_views` (env-driven, lazy, PKCE, browser-bound state); see `docs/operations/SSO.md`.
+- PVS13: `mcp_adapter` (credential-gated MCP over existing routes; `docs/operations/MCP.md`). Lint gate: `ruff check src/api tests scripts loadtests` must stay clean apart from owner's `tests/test_master_supervisor.py`.
 - Standing guards: `tests/security` (route/isolation/fuzz/CSRF/idempotency sweeps), `tests/integration/concurrency/test_pvs_races.py` (PostgreSQL), final-archive guard test that forces every new event-owned model to be archived or excluded.
 - Preserve unrelated owner dirt: `.gitignore`, `master.sh`, `master/`, `tests/test_master_supervisor.py`. Never `ruff format` the `tests/` root or add those files.
 
 ## Verification
 
-- Full suite: SQLite 1239 passed/23 skipped (PVS12) (`-n auto`); `test_evaluation_api.py::test_ballot_and_audit_commit_together_without_a_test_transaction` flakes only under parallel `-n auto` runs (passes standalone) — pre-existing, unrelated to PVS08–10, not yet root-caused.
+- Full suite: SQLite 1257 passed/23 skipped (PVS13) (`-n auto`); `test_evaluation_api.py::test_ballot_and_audit_commit_together_without_a_test_transaction` flakes only under parallel `-n auto` runs (passes standalone) — pre-existing, unrelated to PVS08–10, not yet root-caused.
 - PostgreSQL 17 (`DATABASE_URL=postgres://conflux:conflux@localhost:15432/conflux` from `COMPOSE_PROJECT_NAME=confluxh00 POSTGRES_PORT=15432 ... docker compose up -d db`, see `/tmp/h00-env.sh` pattern in docs/verification/PVS-H00) 1168 passed/5 skipped at PVS-H01; not rerun since (no migration/concurrency-sensitive change beyond additive migrations).
 - Env for tests: `DJANGO_SECRET_KEY=analytics-test-only RECORD_SIGNING_KEY_SEED=000…001 DJANGO_DEBUG=1`; run `.venv/bin/pytest tests -q -n auto -p no:logging`.
 - After any API change: `manage.py spectacular --validate --fail-on-warn --file docs/api/openapi.yaml`, `scripts/generate_sdks.py`, then `scripts/check_openapi_artifact.py` and `scripts/generate_sdks.py --check`. All clean at PVS10 (note: nullable `ChoiceField` breaks `generate_sdks.py`'s union handling — use nullable `CharField` for a nullable enum-like value instead).
@@ -34,4 +35,4 @@ Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS0
 
 ## Next
 
-PVS13 (permissioned MCP adapter over the existing API/service/authorization/audit layer). H02 evidence: `docs/batches/PVS-H02.md`, `docs/operations/CAPACITY.md`, `loadtests/h02/run.sh`. Full SQLite suite 1199 passed. Code freeze Tuesday 2026-09-29 18:00 UTC; stop new features at 08:00 UTC that day.
+PVS14 (workspace-level cross-event participant/project portfolio). H02 evidence: `docs/batches/PVS-H02.md`, `docs/operations/CAPACITY.md`, `loadtests/h02/run.sh`. Full SQLite suite 1199 passed. Code freeze Tuesday 2026-09-29 18:00 UTC; stop new features at 08:00 UTC that day.

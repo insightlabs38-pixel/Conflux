@@ -42,7 +42,9 @@ OIDC_REDIRECT_URI = os.environ.get("OIDC_REDIRECT_URI", "")
 OIDC_SCOPES = os.environ.get("OIDC_SCOPES", "openid email profile")
 OIDC_PROVIDER_NAME = os.environ.get("OIDC_PROVIDER_NAME", "Single sign-on")
 OIDC_ALLOWED_EMAIL_DOMAINS = [
-    d.strip().lower() for d in os.environ.get("OIDC_ALLOWED_EMAIL_DOMAINS", "").split(",") if d.strip()
+    domain.strip().lower()
+    for domain in os.environ.get("OIDC_ALLOWED_EMAIL_DOMAINS", "").split(",")
+    if domain.strip()
 ]
 OIDC_AUTO_CREATE_USERS = os.environ.get("OIDC_AUTO_CREATE_USERS", "1") == "1"
 # Linking an unknown provider identity to an existing local account by email is a takeover
@@ -82,6 +84,7 @@ INSTALLED_APPS = [
     "onsite",
     "mentorship",
     "governance",
+    "mcp_adapter",
 ]
 
 MIDDLEWARE = [

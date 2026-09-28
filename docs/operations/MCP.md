@@ -8,15 +8,15 @@
 2. `tools/list` shows only tools whose route action the credential allows; anything else is reported as an unknown tool. Even an allowed tool still fails (as an MCP tool error carrying the HTTP status) if the owner's workspace role does not permit the route, so demoting or removing the owner takes effect immediately.
 3. Browser session cookies are refused, and requests with a foreign `Origin` are rejected.
 
-| Tool | Route action | Notes |
-|---|---|---|
-| `list_stages`, `list_my_projects`, `get_project` | `GET:stage-list`, `GET:project-list`, `GET:project-detail` | project tools return the owner's own projects |
-| `plan_progress`, `plan_results` | `GET:evaluation-plan-progress`, `GET:evaluation-plan-results` | |
-| `voting_results`, `judge_workload`, `event_analytics` | `GET:voting-results`, `GET:judge-workload`, `GET:event-analytics` | |
-| `list_announcements`, `list_result_corrections`, `mentor_request_queue`, `list_exception_requests` | matching `GET:` routes | |
-| `create_announcement`, `add_mentor_note` | `POST:announcement-list`, `POST:mentor-note-list` | the only writes; both are ordinary audited mutations |
+| Tool                                                                                               | Route action                                                      | Notes                                                |
+| -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------- |
+| `list_stages`, `list_my_projects`, `get_project`                                                   | `GET:stage-list`, `GET:project-list`, `GET:project-detail`        | project tools return the owner's own projects        |
+| `plan_progress`, `plan_results`                                                                    | `GET:evaluation-plan-progress`, `GET:evaluation-plan-results`     |                                                      |
+| `voting_results`, `judge_workload`, `event_analytics`                                              | `GET:voting-results`, `GET:judge-workload`, `GET:event-analytics` |                                                      |
+| `list_announcements`, `list_result_corrections`, `mentor_request_queue`, `list_exception_requests` | matching `GET:` routes                                            |                                                      |
+| `create_announcement`, `add_mentor_note`                                                           | `POST:announcement-list`, `POST:mentor-note-list`                 | the only writes; both are ordinary audited mutations |
 
-Tool arguments are strict (UUIDs and enums are validated before any route is built; unknown arguments are rejected). Results larger than 64 KB are truncated, and tool descriptions warn that participant-written text is data, not instructions. Every call also writes an `mcp.tool_called` audit event naming the tool, HTTP status and argument *names* (never values).
+Tool arguments are strict (UUIDs and enums are validated before any route is built; unknown arguments are rejected). Results larger than 64 KB are truncated, and tool descriptions warn that participant-written text is data, not instructions. Every call also writes an `mcp.tool_called` audit event naming the tool, HTTP status and argument _names_ (never values).
 
 ## Connecting
 

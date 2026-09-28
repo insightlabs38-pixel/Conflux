@@ -4,15 +4,15 @@ Built-in username/password authentication is always available and is the only mo
 
 Register `https://<host>/api/v1/accounts/oidc/callback/` (or `OIDC_REDIRECT_URI`) at the provider.
 
-| Variable | Meaning |
-|---|---|
-| `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | Provider and client. The secret is optional (public PKCE client) and sent as HTTP Basic. |
-| `OIDC_SCOPES` | Default `openid email profile`. |
-| `OIDC_ALLOWED_EMAIL_DOMAINS` | Comma list; requires a *verified* email in an allowed domain. |
-| `OIDC_AUTO_CREATE_USERS` | Default `1`. When `0`, only already-linked identities can sign in. |
-| `OIDC_LINK_BY_VERIFIED_EMAIL` | Default `0`. When `1`, a first sign-in links to the single local account with that verified email. Enable only if the provider verifies addresses. |
-| `OIDC_DEFAULT_WORKSPACE_SLUG` | New accounts join this workspace as **participant** (elevated roles are never granted automatically). |
-| `OIDC_ALLOW_INSECURE_HTTP` | Development only; otherwise the provider must use https. |
+| Variable                                              | Meaning                                                                                                                                            |
+| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | Provider and client. The secret is optional (public PKCE client) and sent as HTTP Basic.                                                           |
+| `OIDC_SCOPES`                                         | Default `openid email profile`.                                                                                                                    |
+| `OIDC_ALLOWED_EMAIL_DOMAINS`                          | Comma list; requires a _verified_ email in an allowed domain.                                                                                      |
+| `OIDC_AUTO_CREATE_USERS`                              | Default `1`. When `0`, only already-linked identities can sign in.                                                                                 |
+| `OIDC_LINK_BY_VERIFIED_EMAIL`                         | Default `0`. When `1`, a first sign-in links to the single local account with that verified email. Enable only if the provider verifies addresses. |
+| `OIDC_DEFAULT_WORKSPACE_SLUG`                         | New accounts join this workspace as **participant** (elevated roles are never granted automatically).                                              |
+| `OIDC_ALLOW_INSECURE_HTTP`                            | Development only; otherwise the provider must use https.                                                                                           |
 
 Routes: `GET accounts/oidc/config/` (is SSO offered), `GET accounts/oidc/login/?next=/path`, `GET accounts/oidc/callback/`. Identities are keyed by (issuer, subject), never by email. New accounts have no usable password. Sign-ins produce the same session cookie as password login and an `auth.oidc_login` audit event.
 

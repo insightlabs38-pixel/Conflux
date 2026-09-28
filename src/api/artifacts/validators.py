@@ -116,6 +116,10 @@ def validate_artifact(artifact, *, storage=None):
             result = ValidationResult(
                 "artifact_state", "retry", "Artifact changed during validation; retry."
             )
+        if current.status == ArtifactStatus.PURGED:
+            result = ValidationResult(
+                "artifact_state", "retry", "Artifact content was purged by retention policy."
+            )
         evidence = ArtifactValidation.objects.create(
             artifact=current,
             validator=result.validator,

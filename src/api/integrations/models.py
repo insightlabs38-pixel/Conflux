@@ -20,6 +20,22 @@ class ArchiveRestoration(PublicIdModel):
         super().save(*args, **kwargs)
 
 
+class EventRetentionPolicy(PublicIdModel):
+    """Organizer-chosen retention windows, counted from `event.ends_at`. A null
+    window means "never automatically"; enforcement only runs on demand.
+    """
+
+    event = models.OneToOneField(
+        "events.Event", on_delete=models.CASCADE, related_name="retention_policy"
+    )
+    participant_data_days = models.PositiveIntegerField(null=True, blank=True)
+    private_artifact_days = models.PositiveIntegerField(null=True, blank=True)
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+
 class WebhookPlatform(models.TextChoices):
     """S23: what shape the delivered body should take. GENERIC is the
     signed Conflux envelope every subscription used before this batch;

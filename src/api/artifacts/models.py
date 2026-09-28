@@ -31,6 +31,7 @@ class ArtifactStatus(models.TextChoices):
     UPLOADED = "uploaded", "Uploaded"
     READY = "ready", "Ready"
     REJECTED = "rejected", "Rejected"
+    PURGED = "purged", "Purged by retention policy"
 
 
 EXTERNAL_KINDS = {ArtifactKind.EXTERNAL_VIDEO, ArtifactKind.REPOSITORY, ArtifactKind.LIVE_URL}

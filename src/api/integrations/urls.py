@@ -1,8 +1,37 @@
 from django.urls import path
 
-from . import archive_views, external_qualifier_views, template_views, views, webhook_views
+from . import (
+    archive_views,
+    external_qualifier_views,
+    privacy_views,
+    template_views,
+    views,
+    webhook_views,
+)
+
+_event = "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/"
 
 urlpatterns = [
+    path(
+        _event + "privacy/retention-policy/",
+        privacy_views.RetentionPolicyView.as_view(),
+        name="event-retention-policy",
+    ),
+    path(
+        _event + "privacy/retention/run/",
+        privacy_views.RetentionRunView.as_view(),
+        name="event-retention-run",
+    ),
+    path(
+        _event + "privacy/subjects/<uuid:user_public_id>/export/",
+        privacy_views.SubjectExportView.as_view(),
+        name="event-privacy-export",
+    ),
+    path(
+        _event + "privacy/subjects/<uuid:user_public_id>/erase/",
+        privacy_views.SubjectErasureView.as_view(),
+        name="event-privacy-erase",
+    ),
     path(
         "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/archive/",
         archive_views.EventArchiveExportView.as_view(),

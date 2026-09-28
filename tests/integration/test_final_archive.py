@@ -309,6 +309,7 @@ EXCLUDED_EVENT_MODELS = {
     "communications.message",
     "communications.reminder",
     "integrations.archiverestoration",
+    "integrations.eventretentionpolicy",
 }
 
 

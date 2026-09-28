@@ -1,10 +1,22 @@
 {
   "runtime": "isolated Django/SQLite on 127.0.0.1:8140; stopped after verification",
   "browser": "agent-browser 0.38.1 with cached Playwright ARM64 Chromium",
-  "award_desktop": {"viewport": [1280, 900], "card_loaded": true, "horizontal_overflow": false},
-  "project_mobile": {"viewport": [390, 844], "card_loaded": true, "horizontal_overflow": false},
-  "long_title_card": {"viewport": [1200, 630], "text_lines": 6, "text_overflow": false},
-  "service_worker": {"cached_results": [], "stale_result_cleared": true},
-  "publication_withdrawal": {"http_status": 404, "cached_result": false},
+  "award_desktop": {
+    "viewport": [1280, 900],
+    "card_loaded": true,
+    "horizontal_overflow": false
+  },
+  "project_mobile": {
+    "viewport": [390, 844],
+    "card_loaded": true,
+    "horizontal_overflow": false
+  },
+  "long_title_card": {
+    "viewport": [1200, 630],
+    "text_lines": 6,
+    "text_overflow": false
+  },
+  "service_worker": { "cached_results": [], "stale_result_cleared": true },
+  "publication_withdrawal": { "http_status": 404, "cached_result": false },
   "footage_impact": "unaffected; no existing recorded-scene manifest found"
 }

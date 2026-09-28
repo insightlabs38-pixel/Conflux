@@ -6,7 +6,11 @@ PUT or DELETE `.../{surface}/`, where surface is `gallery`, `finalists`,
 `feedback`, `winners`, or `archive`. PUT replaces the complete window:
 
 ```json
-{"opens_at":"2026-10-01T12:00:00Z","closes_at":null,"finalist_stage":null}
+{
+  "opens_at": "2026-10-01T12:00:00Z",
+  "closes_at": null,
+  "finalist_stage": null
+}
 ```
 
 Times require an explicit UTC offset and are normalized to UTC. Visibility is

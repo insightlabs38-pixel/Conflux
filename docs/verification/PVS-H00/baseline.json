@@ -1,0 +1,46 @@
+{
+  "date_utc": "2026-09-28",
+  "source_commit": "ec6713e",
+  "topology": "Isolated Compose project confluxh00 (fresh volumes): PostgreSQL 17, Valkey 8, RustFS, app (2 Uvicorn workers), Celery worker+beat, Caddy",
+  "cold_start_seconds": 45,
+  "restart_seconds": 8,
+  "migrations": {
+    "applied": 84,
+    "unapplied": 0
+  },
+  "claimed_tiers": ["T1", "T2"],
+  "verified_tiers": ["T1", "T2"],
+  "seed": {
+    "fixture_scores": 126,
+    "users": 4,
+    "idempotent_reseed": true,
+    "restart_persisted": true
+  },
+  "checks": {
+    "backup_restore_smoke": "PASS",
+    "cold_offline_smoke": "PASS",
+    "backend_tests": "1081 passed, 15 skipped",
+    "frontend_tests": "119 web + 7 embed passed",
+    "sdk_check": "PASS",
+    "openapi_check": "PASS",
+    "block_schema_check": "PASS"
+  },
+  "performance_baseline": {
+    "scenario": "gallery+health GET, 10 VUs, 200 requests, direct Caddy port",
+    "p95_ms": 51.6,
+    "median_ms": 42.0,
+    "max_ms": 276.8,
+    "requests_per_second": 260.1,
+    "http_failures": 0
+  },
+  "browser_smoke": {
+    "pages": ["event", "gallery", "results"],
+    "viewports": ["1280x900", "390x844"],
+    "console_or_http_errors": 0,
+    "horizontal_overflow": false
+  },
+  "accessibility": {
+    "pages_audited": 18,
+    "failed_checks": 0
+  }
+}

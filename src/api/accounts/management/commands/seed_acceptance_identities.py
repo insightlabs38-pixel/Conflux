@@ -37,9 +37,8 @@ class Command(BaseCommand):
 
             Membership.objects.get_or_create(user=user, workspace=workspace, role=role)
 
-            session, _ = Session.objects.get_or_create(
-                token=token, defaults={"user": user, "seed_label": username}
-            )
-            self.stdout.write(f"{username}: Cookie: session={session.token}")
+            if not Session.lookup(token).exists():
+                Session.issue(user, token=token, seed_label=username)
+            self.stdout.write(f"{username}: Cookie: session={token}")
 
         self.stdout.write(self.style.SUCCESS(f"Seeded acceptance workspace '{workspace.slug}'."))

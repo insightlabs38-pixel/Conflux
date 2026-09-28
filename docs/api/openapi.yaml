@@ -358,6 +358,20 @@ paths:
           type: string
           format: uuid
         required: true
+      - in: query
+        name: limit
+        schema:
+          type: integer
+        description: Page size, 1-100 (default 50).
+      - in: query
+        name: offset
+        schema:
+          type: integer
+        description: Rows to skip (default 0).
+      - in: query
+        name: q
+        schema:
+          type: string
       tags:
       - events
       security:
@@ -520,6 +534,17 @@ paths:
     get:
       operationId: get_api_v1_gallery
       description: 'Public project listing (T1: "a stranger can browse the gallery").'
+      parameters:
+      - in: query
+        name: limit
+        schema:
+          type: integer
+        description: Page size, 1-100 (default 50).
+      - in: query
+        name: offset
+        schema:
+          type: integer
+        description: Rows to skip (default 0).
       tags:
       - gallery
       security:

@@ -152,12 +152,12 @@ def test_session_cookie_flags_expiry_and_logout():
     token = cookie.value
     me = lambda: client.get("/api/v1/accounts/me/")  # noqa: E731
     assert me().status_code == 200
-    Session.objects.filter(token=token).update(expires_at=timezone.now() - timedelta(seconds=1))
+    Session.lookup(token).update(expires_at=timezone.now() - timedelta(seconds=1))
     assert me().status_code == 401
     session = Session.issue(organizer)
     client.cookies["session"] = session.token
     assert client.post("/api/v1/accounts/logout/").status_code == 204
-    assert not Session.objects.filter(token=session.token).exists()
+    assert not Session.lookup(session.token).exists()
     client.cookies["session"] = session.token
     assert me().status_code == 401
     organizer.is_active = False

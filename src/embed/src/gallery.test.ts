@@ -118,4 +118,41 @@ describe("conflux-gallery", () => {
     expect(el.shadowRoot?.querySelector("img")).toBeNull();
     expect(el.shadowRoot?.innerHTML).toContain("&lt;img");
   });
+
+  it("loads further pages until X-Total-Count is reached", async () => {
+    const item = (n: number) => ({
+      public_id: String(n),
+      name: `Project ${n}`,
+      description: "",
+      track: null,
+      team: null,
+      url: `/e/x/projects/${n}/`,
+    });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        headers: new Headers({ "X-Total-Count": "3" }),
+        json: async () => [item(1), item(2)],
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        headers: new Headers({ "X-Total-Count": "3" }),
+        json: async () => [item(3)],
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const el = document.createElement("conflux-gallery");
+    el.setAttribute("event", "abc-123");
+    document.body.appendChild(el);
+    await flush();
+    expect(el.shadowRoot?.textContent).toContain("Load more (2 of 3)");
+
+    (el.shadowRoot?.querySelector("button.more") as HTMLButtonElement).click();
+    await flush();
+
+    expect(fetchMock.mock.calls[1][0]).toContain("offset=2");
+    expect(el.shadowRoot?.textContent).toContain("Project 3");
+    expect(el.shadowRoot?.querySelector("button.more")).toBeNull();
+  });
 });

@@ -8,7 +8,7 @@ from datetime import timedelta
 from continuation.services import add_update, save_continuation
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
-from events.models import Announcement, Event
+from events.models import Announcement, Event, EventStatus
 from governance.services import acknowledge_rules, current_rules, publish_rules
 from onsite.models import AgendaSession, Location, ProjectLocation
 from presentation.models import Page, PageBlock
@@ -81,10 +81,15 @@ class Command(BaseCommand):
                 block.save()
 
         if not event.announcements.exists():
+            closed = event.status == EventStatus.CLOSED
             Announcement.objects.create(
                 event=event,
-                title="Results are published",
-                body="Thanks to everyone who built, judged and mentored. See the results page.",
+                title="Results are published" if closed else "Submissions are open",
+                body=(
+                    "Thanks to everyone who built, judged and mentored. See the results page."
+                    if closed
+                    else "Create your team, submit your project, and check the agenda."
+                ),
                 posted_by=organizer,
             )
 

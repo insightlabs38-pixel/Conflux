@@ -85,7 +85,7 @@ class ConfluxGallery extends HTMLElement {
     this.root.innerHTML = `<style>${STYLE}</style><div class="conflux-gallery">${inner}</div>`;
   }
 
-  private galleryUrl(eventId: string): string {
+  private galleryUrl(eventId: string, offset = 0): string {
     const apiBase = this.getAttribute("api-base") ?? "";
     const q = this.getAttribute("q") ?? "";
     const url = new URL(
@@ -93,7 +93,21 @@ class ConfluxGallery extends HTMLElement {
       window.location.href,
     );
     if (q) url.searchParams.set("q", q);
+    if (offset > 0) url.searchParams.set("offset", String(offset));
     return url.toString();
+  }
+
+  private async fetchPage(
+    eventId: string,
+    offset: number,
+  ): Promise<{ items: GalleryItem[]; total: number | null }> {
+    const response = await fetch(this.galleryUrl(eventId, offset));
+    if (!response.ok) {
+      throw new Error(`Gallery request failed with status ${response.status}.`);
+    }
+    const items: GalleryItem[] = await response.json();
+    const header = response.headers?.get("X-Total-Count") ?? null;
+    return { items, total: header === null ? null : Number(header) };
   }
 
   private async render() {
@@ -107,14 +121,9 @@ class ConfluxGallery extends HTMLElement {
     this.shell("<p>Loading projects&hellip;</p>");
 
     let items: GalleryItem[];
+    let total: number | null;
     try {
-      const response = await fetch(this.galleryUrl(eventId));
-      if (!response.ok) {
-        throw new Error(
-          `Gallery request failed with status ${response.status}.`,
-        );
-      }
-      items = await response.json();
+      ({ items, total } = await this.fetchPage(eventId, 0));
     } catch (error) {
       this.shell(
         `<p role="alert">Couldn't load the gallery: ${escapeHtml(String(error))}</p>`,
@@ -126,7 +135,43 @@ class ConfluxGallery extends HTMLElement {
       this.shell("<p>No projects match yet.</p>");
       return;
     }
-    this.shell(`<ul class="grid">${items.map(renderCard).join("")}</ul>`);
+    this.showItems(eventId, items, total);
+  }
+
+  private showItems(
+    eventId: string,
+    items: GalleryItem[],
+    total: number | null,
+  ) {
+    const more =
+      total !== null && items.length < total
+        ? `<p><button type="button" class="more">Load more (${items.length} of ${total})</button></p>`
+        : "";
+    this.shell(
+      `<ul class="grid">${items.map(renderCard).join("")}</ul>${more}`,
+    );
+    this.root.querySelector("button.more")?.addEventListener("click", () => {
+      void this.loadMore(eventId, items, total);
+    });
+  }
+
+  private async loadMore(
+    eventId: string,
+    items: GalleryItem[],
+    total: number | null,
+  ) {
+    try {
+      const next = await this.fetchPage(eventId, items.length);
+      if (next.items.length === 0) {
+        this.showItems(eventId, items, items.length);
+        return;
+      }
+      this.showItems(eventId, [...items, ...next.items], next.total ?? total);
+    } catch (error) {
+      this.shell(
+        `<p role="alert">Couldn't load more projects: ${escapeHtml(String(error))}</p>`,
+      );
+    }
   }
 }
 

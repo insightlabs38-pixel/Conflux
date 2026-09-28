@@ -7,6 +7,7 @@ accounts are only removed when they belong to no other workspace.
 """
 
 import random
+import uuid
 from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
@@ -17,6 +18,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import ProtectedError
 from django.test import Client
+from django.utils import timezone
 from events.models import EventStatus, RegistrationStatus
 from workspaces.models import Membership, Role, Workspace
 
@@ -25,6 +27,28 @@ from .final_archive import DEFERRED
 from .models import DemoScenario
 
 FIXED_AT = datetime(2026, 1, 10, 12, tzinfo=UTC)
+# Lifecycle checkpoints, in order. Each one includes everything before it:
+#   submitted  registered teams have finalized submissions; no ballots yet
+#   judged     every judge has scored every submitted project; results unpublished
+#   published  results normalized and published, awards decided, event closed
+# Everything before `published` leaves the event OPEN, with `live` participants
+# approved but not yet on a team, so create -> submit -> judge -> publish can be
+# performed on camera.
+CHECKPOINTS = ("submitted", "judged", "published")
+DEFAULT_LIVE_PARTICIPANTS = 2
+# Fixed namespace: the same scenario+seed always yields the same public event
+# and workspace ids, so demo links and runbooks survive every reset.
+DEMO_NAMESPACE = uuid.UUID("5d0f6c1e-7a43-4a37-9c52-0d6d0e6f0a11")
+
+
+def demo_public_ids(scenario, seed):
+    key = f"demo-{scenario}-{seed}"
+    return (
+        uuid.uuid5(DEMO_NAMESPACE, f"{key}:workspace"),
+        uuid.uuid5(DEMO_NAMESPACE, f"{key}:event"),
+    )
+
+
 MAX_PARTICIPANTS = 40
 MAX_JUDGES = 12
 
@@ -176,12 +200,28 @@ def _score(rng, quality, bias, low, high):
 
 @transaction.atomic
 def generate_demo_event(
-    *, scenario="hackathon", seed=1, participants=8, judges=4, password=None, public=False, at=None
+    *,
+    scenario="hackathon",
+    seed=1,
+    participants=8,
+    judges=4,
+    password=None,
+    public=False,
+    at=None,
+    checkpoint="published",
+    live=None,
 ):
     if not 3 <= participants <= MAX_PARTICIPANTS or not 2 <= judges <= MAX_JUDGES:
         raise ValidationError(
             {"scenario": f"Use 3-{MAX_PARTICIPANTS} participants and 2-{MAX_JUDGES} judges."}
         )
+    if checkpoint not in CHECKPOINTS:
+        raise ValidationError({"checkpoint": f"Use one of {', '.join(CHECKPOINTS)}."})
+    if live is None:
+        live = 0 if checkpoint == "published" else DEFAULT_LIVE_PARTICIPANTS
+    if not 0 <= live <= participants - 2 or (checkpoint == "published" and live):
+        raise ValidationError({"live": "Leave 0 (published) or up to participants-2 live."})
+    real_now = timezone.now()
     at = at or FIXED_AT
     if at.tzinfo is None:
         raise ValidationError({"at": "Include a timezone."})
@@ -189,7 +229,10 @@ def generate_demo_event(
     if Workspace.objects.filter(slug=slug).exists():
         raise ValidationError({"scenario": f"{slug} already exists; purge it first."})
     rng = random.Random(f"{scenario}:{seed}")
-    workspace = Workspace.objects.create(name=f"Demo {scenario} #{seed}", slug=slug)
+    workspace_id, event_id = demo_public_ids(scenario, seed)
+    workspace = Workspace.objects.create(
+        name=f"Demo {scenario} #{seed}", slug=slug, public_id=workspace_id
+    )
     DemoScenario.objects.create(
         workspace=workspace, scenario=scenario, seed=seed, participants=participants, judges=judges
     )
@@ -205,7 +248,8 @@ def generate_demo_event(
             workspace=workspace, archive=scenario_archive(scenario, at=at), name="Demo", slug="demo"
         )
         event.status = EventStatus.OPEN
-        event.save(update_fields=["status", "updated_at"])
+        event.public_id = event_id
+        event.save(update_fields=["status", "public_id", "updated_at"])
         replay = _Replay(event)
         organizer = account("organizer", Role.ORGANIZER)
         organizer_client = replay.client(organizer)
@@ -226,6 +270,8 @@ def generate_demo_event(
                     f"applications/{application['public_id']}/decide/",
                     {"decision": RegistrationStatus.APPROVED},
                 )
+            if index >= participants - live:
+                continue  # registered and approved; builds and submits on camera
             team = replay.call(
                 client, "post", "my-team/", {"name": f"Team {names[index]}"}, expected=201
             )
@@ -259,7 +305,7 @@ def generate_demo_event(
         for index in range(judges):
             judge = account(f"judge-{index + 1:02d}", Role.JUDGE)
             client, bias = replay.client(judge), rng.uniform(-1.5, 1.5)
-            for project in projects:
+            for project in projects if checkpoint != "submitted" else ():
                 replay.call(
                     client,
                     "post",
@@ -282,6 +328,10 @@ def generate_demo_event(
                     },
                     expected=201,
                 )
+        if checkpoint != "published":
+            _finish(event, public, real_now)
+            Session.objects.filter(user__username__startswith=prefix + "-").delete()
+            return event
         run = replay.call(organizer_client, "post", plan_path + "normalization-runs/", expected=201)
         replay.call(
             organizer_client,
@@ -311,6 +361,14 @@ def generate_demo_event(
         event.save(update_fields=["status", "is_public", "updated_at"])
     Session.objects.filter(user__username__startswith=prefix + "-").delete()
     return event
+
+
+def _finish(event, public, real_now):
+    """Open checkpoints run on the real clock so submissions are genuinely open."""
+    event.starts_at = real_now - timedelta(days=1)
+    event.ends_at = real_now + timedelta(days=2)
+    event.is_public = public
+    event.save(update_fields=["starts_at", "ends_at", "is_public", "updated_at"])
 
 
 def _delete_with_dependents(instance, *, budget=10000):

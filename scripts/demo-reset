@@ -2,11 +2,19 @@
 # Recreate the deterministic demo event from scratch (PVS-H05). Safe to run repeatedly:
 # it only ever purges the generated demo workspace (guarded by the DemoScenario marker).
 #
-#   scripts/demo-reset                 # against the stack in the current compose project
+#   scripts/demo-reset                 # checkpoint "submitted": open event, teams submitted, unjudged
+#   scripts/demo-reset judged          # every judge has scored; results not yet published
+#   scripts/demo-reset published       # closed archive with results and awards published
 #   DEMO_SEED=7 DEMO_PASSWORD=... DEMO_BASE_URL=http://localhost:8080 scripts/demo-reset
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+checkpoint=${1:-${DEMO_CHECKPOINT:-submitted}}
+case "$checkpoint" in submitted | judged | published) ;; *)
+  echo "usage: $0 [submitted|judged|published]" >&2
+  exit 2
+  ;;
+esac
 seed=${DEMO_SEED:-7}
 password=${DEMO_PASSWORD:-demo-pass-7}
 base=${DEMO_BASE_URL:-http://localhost:${CONFLUX_PORT:-8080}}
@@ -15,13 +23,13 @@ manage() { docker compose exec -T app python manage.py "$@"; }
 
 manage demo_scenario purge "$slug" >/dev/null 2>&1 || true
 out=$(manage demo_scenario create --seed "$seed" --participants 24 --judges 6 \
-  --password "$password" --public | tail -1)
+  --password "$password" --public --checkpoint "$checkpoint" | tail -1)
 event=$(printf '%s' "$out" | python3 -c 'import sys,json; print(json.load(sys.stdin)["event"])')
 manage demo_showcase "$slug" >/dev/null
 curl -fsS "$base/api/v1/health/" >/dev/null
 
 cat <<EOF
-Demo ready (seed $seed).
+Demo ready (seed $seed, checkpoint $checkpoint).
   Sign in:   $base/app/     (password for every demo account: $password)
   organizer  demo-hackathon-$seed-organizer
   judge      demo-hackathon-$seed-judge-01 .. 06

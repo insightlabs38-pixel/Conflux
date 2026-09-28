@@ -150,9 +150,7 @@ def test_successful_sign_in_creates_a_password_less_user_and_session(idp):
     assert user.email == "ada@example.test" and user.first_name == "Ada"
     assert ExternalIdentity.objects.get().subject == "subject-1"
     session_cookie = response.cookies["session"]
-    assert (
-        session_cookie["httponly"] and Session.objects.get(token=session_cookie.value).user == user
-    )
+    assert session_cookie["httponly"] and Session.lookup(session_cookie.value).get().user == user
     assert client.get("/api/v1/accounts/me/").json()["username"] == user.username
     assert AuditEvent.objects.filter(action="auth.oidc_login", actor=user).count() == 1
     assert not OidcLoginState.objects.exists()

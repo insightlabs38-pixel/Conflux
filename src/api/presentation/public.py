@@ -43,7 +43,7 @@ def public_projects(event, *, q=None, stage_public_id=None, track_public_id=None
         Project.objects.filter(**filters)
         .select_related("team", "track")
         .distinct()
-        .order_by("name")
+        .order_by("name", "public_id")
     )
     if q:
         projects = projects.filter(name__icontains=q)

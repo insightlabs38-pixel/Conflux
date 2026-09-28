@@ -1,4 +1,5 @@
 import hashlib
+import hmac
 import secrets
 
 from core.models import PublicIdModel
@@ -19,16 +20,29 @@ def _generate_token():
     return secrets.token_urlsafe(32)
 
 
+def digest_session_token(token):
+    """Keyed one-way digest used to look sessions up. Session tokens are
+    256-bit random values, so a fast HMAC (not a password hash) is sufficient;
+    the key means a leaked database row cannot be checked against guesses.
+    """
+    key = f"conflux-session-token:{settings.SECRET_KEY}".encode()
+    return hmac.new(key, token.encode(), hashlib.sha256).hexdigest()
+
+
 class Session(PublicIdModel):
     """A server-side, DB-backed login session addressed by an opaque cookie
     token. Deliberately not Django's contrib.sessions: acceptance credentials
     need a session that can be created out-of-band (seeded, with a fixed
     token) without ever exercising the password check, while an interactive
     login goes through the exact same table and cookie mechanism.
+
+    Only `token_digest` is persisted. The raw token exists once, as the
+    transient `token` attribute of the instance returned by `issue()`, and is
+    handed to the client in the cookie; a database reader cannot replay it.
     """
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sessions")
-    token = models.CharField(max_length=64, unique=True, db_index=True, default=_generate_token)
+    token_digest = models.CharField(max_length=64, unique=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True, blank=True)
     seed_label = models.CharField(max_length=64, blank=True, default="")
@@ -39,10 +53,19 @@ class Session(PublicIdModel):
     @classmethod
     def issue(cls, user, *, token=None, ttl=None, seed_label=""):
         expires_at = timezone.now() + ttl if ttl else None
-        kwargs = {"user": user, "expires_at": expires_at, "seed_label": seed_label}
-        if token:
-            kwargs["token"] = token
-        return cls.objects.create(**kwargs)
+        token = token or _generate_token()
+        session = cls.objects.create(
+            user=user,
+            token_digest=digest_session_token(token),
+            expires_at=expires_at,
+            seed_label=seed_label,
+        )
+        session.token = token  # transient: never saved
+        return session
+
+    @classmethod
+    def lookup(cls, token):
+        return cls.objects.filter(token_digest=digest_session_token(token))
 
 
 def digest_api_token(token):

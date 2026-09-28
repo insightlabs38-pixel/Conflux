@@ -45,6 +45,17 @@
       </li>
     {% endfor %}
   </ul>
+  {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="cx-pagination" aria-label="{% trans 'Gallery pages' %}">
+      {% if page_obj.has_previous %}
+        <a class="cx-button" rel="prev" href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">{% trans "Previous" %}</a>
+      {% endif %}
+      <span aria-live="polite">{% blocktrans with n=page_obj.number total=page_obj.paginator.num_pages count=total %}Page {{ n }} of {{ total }} ({{ count }} projects){% endblocktrans %}</span>
+      {% if page_obj.has_next %}
+        <a class="cx-button" rel="next" href="?{% if page_query %}{{ page_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}">{% trans "Next" %}</a>
+      {% endif %}
+    </nav>
+  {% endif %}
 {% else %}
   <p>{% trans "No projects match yet." %}</p>
 {% endif %}

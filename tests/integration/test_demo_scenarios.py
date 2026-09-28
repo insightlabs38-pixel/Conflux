@@ -148,3 +148,61 @@ def test_config_archive_round_trips_evaluation_sourced_awards():
     copy = import_archive(workspace=event.workspace, archive=archive, name="Copy", slug="copy")
     awards = {a.name: a.evaluation_plan.name for a in copy.awards.select_related("evaluation_plan")}
     assert awards["Grand Prize"] == "Main judging" and len(awards) == 4
+
+
+# --- Lifecycle checkpoints and stable public identities -----------------------
+
+
+def test_submitted_checkpoint_starts_the_live_lifecycle_unpublished_and_open():
+    event = generate_demo_event(
+        seed=12, participants=6, judges=3, password="p", public=True, checkpoint="submitted"
+    )
+    assert event.status == EventStatus.OPEN and event.is_public
+    assert event.ends_at > datetime.now(UTC)  # submissions genuinely open
+    assert Project.objects.filter(event=event).count() == 4  # 6 participants - 2 live
+    assert Ballot.objects.filter(project__event=event).count() == 0
+    assert not NormalizationRun.objects.filter(plan__stage__event=event).exists()
+    assert not AwardWinner.objects.filter(award__event=event).exists()
+    assert not any(a.published_at for a in event.awards.all())
+    live = User.objects.get(username="demo-hackathon-12-participant-06")
+    assert event.applications.filter(user=live, status="approved").exists()
+    assert not live.team_memberships.exists()
+    assert User.objects.filter(username__startswith="demo-hackathon-12-judge-").count() == 3
+
+
+def test_judged_checkpoint_has_ballots_but_unpublished_results():
+    event = generate_demo_event(seed=13, participants=5, judges=2, checkpoint="judged", live=1)
+    assert Ballot.objects.filter(project__event=event).count() == 4 * 2
+    assert not NormalizationRun.objects.filter(plan__stage__event=event).exists()
+    assert event.status == EventStatus.OPEN
+
+
+def test_checkpoints_are_deterministic_and_reject_bad_combinations():
+    a = generate_demo_event(seed=14, participants=6, judges=2, checkpoint="judged")
+    snapshot = sorted(a.projects.values_list("name", "track__name"))
+    purge_demo_scenario("demo-hackathon-14")
+    b = generate_demo_event(seed=14, participants=6, judges=2, checkpoint="judged")
+    assert sorted(b.projects.values_list("name", "track__name")) == snapshot
+    purge_demo_scenario("demo-hackathon-14")
+    for kwargs in ({"checkpoint": "nope"}, {"checkpoint": "published", "live": 1}, {"live": 5}):
+        with pytest.raises(ValidationError):
+            generate_demo_event(seed=14, participants=6, judges=2, **kwargs)
+    assert not Workspace.objects.exists()
+
+
+def test_public_ids_are_stable_across_resets_but_differ_per_seed():
+    first = generate_demo_event(seed=15, participants=3, judges=2, checkpoint="submitted", live=0)
+    ids = (first.public_id, first.workspace.public_id)
+    other = generate_demo_event(seed=16, participants=3, judges=2, checkpoint="submitted", live=0)
+    purge_demo_scenario("demo-hackathon-15")
+    again = generate_demo_event(seed=15, participants=3, judges=2, checkpoint="submitted", live=0)
+    assert (again.public_id, again.workspace.public_id) == ids
+    assert other.public_id != first.public_id
+
+
+def test_command_accepts_checkpoint_and_live(capsys):
+    call_command(
+        "demo_scenario", "create", "--seed", "17", "--participants", "4", "--judges", "2",
+        "--checkpoint", "submitted", "--live", "1",
+    )  # fmt: skip
+    assert Project.objects.filter(event__workspace__slug="demo-hackathon-17").count() == 3

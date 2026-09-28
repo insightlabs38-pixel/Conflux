@@ -79,7 +79,7 @@ def test_only_event_organizers_can_manage_schedules(case):
     assert client.get(other_url).status_code == 403
     Membership.objects.create(
         workspace=other_workspace,
-        user=Session.objects.get(token=client.cookies["session"].value).user,
+        user=Session.lookup(client.cookies["session"].value).get().user,
         role=Role.ORGANIZER,
     )
     assert client.get(other_url).status_code == 404

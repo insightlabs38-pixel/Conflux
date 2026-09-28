@@ -81,7 +81,7 @@ def start_session(request, user, response):
 def logout(request):
     token = request.COOKIES.get(COOKIE_NAME)
     if token:
-        Session.objects.filter(token=token).delete()
+        Session.lookup(token).delete()
     response = Response(status=204)
     response.delete_cookie(COOKIE_NAME)
     return response

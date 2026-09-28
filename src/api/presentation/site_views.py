@@ -2,8 +2,11 @@
 a raw HTTP GET (no JS) already contains real content -- see DECISIONS.md.
 """
 
+from urllib.parse import urlencode
+
 from awards.services import published_awards_for_public_display
 from django.contrib.staticfiles import finders
+from django.core.paginator import Paginator
 from django.http import HttpResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render
 
@@ -77,6 +80,9 @@ def event_landing(request, event_public_id):
     )
 
 
+GALLERY_PAGE_SIZE = 24
+
+
 def gallery(request, event_public_id):
     event = get_public_event(event_public_id)
     q = request.GET.get("q", "").strip()
@@ -86,13 +92,20 @@ def gallery(request, event_public_id):
         event, q=q or None, stage_public_id=stage_id or None, track_public_id=track_id or None
     )
     page = Page.objects.filter(event=event).first()
+    paginator = Paginator(projects, GALLERY_PAGE_SIZE)
+    # get_page tolerates junk/out-of-range numbers: page 1 / last page.
+    page_obj = paginator.get_page(request.GET.get("page"))
+    preserved = {k: v for k, v in (("q", q), ("stage", stage_id), ("track", track_id)) if v}
     return render(
         request,
         "presentation/gallery.html",
         {
             "event": event,
             "theme": page.theme if page else "default",
-            "projects": projects,
+            "projects": page_obj.object_list,
+            "page_obj": page_obj,
+            "total": paginator.count,
+            "page_query": urlencode(preserved),
             "stages": event.stages.order_by("position"),
             "tracks": event.tracks.order_by("position"),
             "q": q,

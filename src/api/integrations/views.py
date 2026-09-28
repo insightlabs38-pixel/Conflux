@@ -3,11 +3,12 @@ import csv
 from accounts.authentication import CookieSessionAuthentication
 from core.authz import has_any_role
 from core.csv_safety import safe_cell
+from core.pagination import page_params, paged_response
 from core.permissions import require_roles
 from django.http import HttpResponse
 from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -36,12 +37,23 @@ class GalleryView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny]
 
-    @extend_schema(responses=GalleryProjectSchema(many=True))
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("limit", int, description="Page size, 1-100 (default 50)."),
+            OpenApiParameter("offset", int, description="Rows to skip (default 0)."),
+        ],
+        responses=GalleryProjectSchema(many=True),
+    )
     def get(self, request):
+        limit, offset = page_params(request)
         fixture = _current_fixture()
-        projects = [] if fixture is None else fixture.projects.select_related("team", "track")
-        return Response(
-            [
+        if fixture is None:
+            return Response([], headers={"X-Total-Count": "0"})
+        projects = fixture.projects.select_related("team", "track").order_by("external_id")
+        return paged_response(
+            request,
+            projects,
+            lambda page: [
                 {
                     "id": p.external_id,
                     "title": p.title,
@@ -50,8 +62,10 @@ class GalleryView(APIView):
                     "track": p.track.name,
                     "repo_url": p.repo_url,
                 }
-                for p in projects
-            ]
+                for p in page
+            ],
+            limit=limit,
+            offset=offset,
         )
 
 

@@ -6,7 +6,7 @@ import re
 import uuid
 
 import pytest
-from accounts.models import Session, User
+from accounts.models import Session, User, digest_session_token
 from django.test import Client
 from django.urls import URLPattern, URLResolver, get_resolver
 from integrations.demo_scenarios import generate_demo_event
@@ -107,7 +107,9 @@ def sweep_world(django_db_setup, django_db_blocker):
             "user_public_id": participant.public_id,
         }
         yield tokens, values
-        Session.objects.filter(token__in=tokens.values()).delete()
+        Session.objects.filter(
+            token_digest__in=[digest_session_token(t) for t in tokens.values()]
+        ).delete()
 
 
 def client_for(tokens, name):

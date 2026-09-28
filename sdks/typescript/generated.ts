@@ -4973,7 +4973,10 @@ export interface Operations {
     response: GalleryItemOutput[];
   };
   get_api_v1_events_event_public_id_gallery: {
-    request: { path: { event_public_id: string } };
+    request: {
+      path: { event_public_id: string };
+      query?: { limit?: number; offset?: number; q?: string };
+    };
     response: GalleryItemOutput[];
   };
   get_api_v1_events_event_public_id_questions: {
@@ -5012,7 +5015,10 @@ export interface Operations {
     response: EventStateOutput;
   };
   get_api_v1_export_csv: { request: {}; response: string };
-  get_api_v1_gallery: { request: {}; response: GalleryProjectSchema[] };
+  get_api_v1_gallery: {
+    request: { query?: { limit?: number; offset?: number } };
+    response: GalleryProjectSchema[];
+  };
   get_api_v1_health: { request: {}; response: HealthResponse };
   get_api_v1_judge_scores: { request: {}; response: JudgeScoreSchema[] };
   get_api_v1_public_events_event_public_id_voting_candidates: {
@@ -8487,7 +8493,7 @@ export const operations = {
     method: "GET",
     path: "/api/v1/events/{event_public_id}/gallery/",
     path_params: ["event_public_id"],
-    query_params: [],
+    query_params: ["limit", "offset", "q"],
     request_body: false,
     response_kind: "json",
   },
@@ -8535,7 +8541,7 @@ export const operations = {
     method: "GET",
     path: "/api/v1/gallery/",
     path_params: [],
-    query_params: [],
+    query_params: ["limit", "offset"],
     request_body: false,
     response_kind: "json",
   },

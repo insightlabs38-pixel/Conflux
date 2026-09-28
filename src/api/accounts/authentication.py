@@ -42,7 +42,7 @@ class CookieOnlyAuthentication(BaseAuthentication):
         if not token:
             return None
         try:
-            session = Session.objects.select_related("user").get(token=token)
+            session = Session.lookup(token).select_related("user").get()
         except Session.DoesNotExist as exc:
             raise AuthenticationFailed("Invalid session.") from exc
         if session.is_expired():

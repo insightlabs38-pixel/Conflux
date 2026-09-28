@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.dateparse import parse_datetime
 
-from integrations.demo_scenarios import generate_demo_event, purge_demo_scenario
+from integrations.demo_scenarios import CHECKPOINTS, generate_demo_event, purge_demo_scenario
 from integrations.models import DemoScenario
 
 
@@ -22,6 +22,17 @@ class Command(BaseCommand):
             "--password", help="Shared login password; accounts are locked without."
         )
         create.add_argument("--public", action="store_true")
+        create.add_argument(
+            "--checkpoint",
+            choices=CHECKPOINTS,
+            default="published",
+            help="Lifecycle state to stop at (default: published, the closed archive).",
+        )
+        create.add_argument(
+            "--live",
+            type=int,
+            help="Participants left approved but unsubmitted (default 2 before `published`).",
+        )
         create.add_argument("--at", help="Timezone-aware ISO timestamp for the synthetic clock.")
         commands.add_parser("list")
         commands.add_parser("purge").add_argument("slug")
@@ -46,6 +57,8 @@ class Command(BaseCommand):
                     password=options["password"],
                     public=options["public"],
                     at=at,
+                    checkpoint=options["checkpoint"],
+                    live=options["live"],
                 )
                 self.stdout.write(
                     json.dumps(

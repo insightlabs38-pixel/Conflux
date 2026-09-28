@@ -120,3 +120,12 @@
     display: none;
   }
 }
+
+.cx-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}

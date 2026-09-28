@@ -1,5 +1,5 @@
 import pytest
-from accounts.models import Session, User
+from accounts.models import Session, User, digest_session_token
 from audit.models import AuditEvent, DomainEvent
 from core.authz import has_any_role, roles_for
 from core.models import IdempotencyKey
@@ -228,11 +228,85 @@ def test_seed_acceptance_identities_is_idempotent_and_grants_expected_roles():
         assert Membership.objects.filter(user=user, workspace=workspace, role=role).exists()
         assert Session.objects.filter(user=user, seed_label=username).count() == 1
 
-    judge_a = Session.objects.get(seed_label="judge_a")
-    judge_b = Session.objects.get(seed_label="judge_b")
     peer_scope_url = f"/api/v1/audit/{workspace.public_id}/"
-    assert cookie_client(judge_a.token).get(peer_scope_url).status_code in (401, 403)
-    assert cookie_client(judge_b.token).get(peer_scope_url).status_code in (401, 403)
+    assert cookie_client("acceptance-judge-a").get(peer_scope_url).status_code in (401, 403)
+    assert cookie_client("acceptance-judge-b").get(peer_scope_url).status_code in (401, 403)
+    assert cookie_client("acceptance-organizer").get(peer_scope_url).status_code == 200
 
-    organizer_session = Session.objects.get(seed_label="organizer")
-    assert cookie_client(organizer_session.token).get(peer_scope_url).status_code == 200
+
+# --- Session tokens are stored as digests, never as bearer secrets ------------
+
+
+def _all_persisted_text(session):
+    return " ".join(
+        str(value) for value in Session.objects.filter(pk=session.pk).values().get().values()
+    )
+
+
+def test_session_row_never_contains_the_presented_token():
+    user = User.objects.create_user("digest-user", password="pw-12345678")
+    session = Session.issue(user)
+    assert session.token not in _all_persisted_text(session)
+    assert "token" not in {f.name for f in Session._meta.get_fields()}
+    assert cookie_client(session.token).get("/api/v1/accounts/me/").status_code == 200
+
+
+def test_login_cookie_works_but_database_holds_only_its_digest():
+    User.objects.create_user("digest-login", password="pw-12345678")
+    client = Client()
+    response = client.post(
+        "/api/v1/accounts/login/",
+        {"username": "digest-login", "password": "pw-12345678"},
+    )
+    assert response.status_code == 200
+    raw = response.cookies["session"].value
+    session = Session.objects.get(user__username="digest-login")
+    assert raw not in _all_persisted_text(session)
+    assert session.token_digest == digest_session_token(raw)
+    assert client.get("/api/v1/accounts/me/").status_code == 200
+
+
+def test_presenting_a_stored_digest_as_the_token_does_not_authenticate():
+    user = User.objects.create_user("digest-replay", password="pw-12345678")
+    session = Session.issue(user)
+    assert cookie_client(session.token_digest).get("/api/v1/accounts/me/").status_code == 401
+
+
+def test_logout_revokes_the_session_by_digest():
+    user = User.objects.create_user("digest-logout", password="pw-12345678")
+    session = Session.issue(user)
+    client = cookie_client(session.token)
+    assert client.post("/api/v1/accounts/logout/").status_code == 204
+    assert not Session.objects.filter(pk=session.pk).exists()
+    assert cookie_client(session.token).get("/api/v1/accounts/me/").status_code == 401
+
+
+def test_seeded_sessions_persist_only_digests():
+    call_command("seed_acceptance_identities")
+    stored = " ".join(Session.objects.values_list("token_digest", flat=True))
+    assert "acceptance-organizer" not in stored
+    assert Session.lookup("acceptance-organizer").count() == 1
+
+
+@pytest.mark.django_db(transaction=True)
+def test_migration_hashes_existing_plaintext_sessions_in_place():
+    from django.db import connection
+    from django.db.migrations.executor import MigrationExecutor
+
+    executor = MigrationExecutor(connection)
+    executor.migrate([("accounts", "0004_oidc")])
+    old_apps = executor.loader.project_state([("accounts", "0004_oidc")]).apps
+    OldUser, OldSession = (
+        old_apps.get_model("accounts", "User"),
+        old_apps.get_model("accounts", "Session"),
+    )
+    user = OldUser.objects.create(username="legacy-user")
+    OldSession.objects.create(user=user, token="legacy-plain-token")
+
+    executor = MigrationExecutor(connection)
+    executor.migrate(executor.loader.graph.leaf_nodes())
+
+    assert Session.lookup("legacy-plain-token").count() == 1
+    assert "legacy-plain-token" not in " ".join(
+        Session.objects.values_list("token_digest", flat=True)
+    )

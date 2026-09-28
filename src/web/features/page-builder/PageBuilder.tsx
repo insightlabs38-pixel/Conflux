@@ -1,23 +1,14 @@
 import { useEffect, useState } from "react";
+import { blockTypes } from "./blockSchemas.generated";
+import { configDefaults, configError, type ConfigSchema } from "./configSchema";
+import { ConfigFields } from "./ConfigFields";
 import { Badge } from "../../components/Badge";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 
 type Theme = "default" | "dark" | "minimal";
-type Kind =
-  | "hero"
-  | "tracks"
-  | "prizes"
-  | "schedule"
-  | "sponsors"
-  | "faq"
-  | "resources"
-  | "gallery"
-  | "results"
-  | "announcements"
-  | "rich_text"
-  | "cta";
+type Kind = keyof typeof blockTypes;
 type Block = {
   public_id: string;
   kind: Kind;
@@ -32,32 +23,23 @@ type AuditWarning = {
   block_public_id: string | null;
 };
 
-const KIND_LABELS: Record<Kind, string> = {
-  hero: "Hero",
-  tracks: "Tracks (live)",
-  prizes: "Prizes (live)",
-  schedule: "Schedule (live)",
-  sponsors: "Sponsors",
-  faq: "FAQ",
-  resources: "Resources",
-  gallery: "Gallery preview (live)",
-  results: "Results (live)",
-  announcements: "Announcements (live)",
-  rich_text: "Rich text",
-  cta: "Call to action",
-};
-const LIVE_KINDS = new Set<Kind>([
-  "tracks",
-  "prizes",
-  "schedule",
-  "results",
-  "announcements",
-]);
-const LIST_FIELDS: Partial<Record<Kind, [string, string]>> = {
-  faq: ["question", "answer"],
-  sponsors: ["name", "url"],
-  resources: ["label", "url"],
-};
+const schemas = blockTypes as Record<
+  Kind,
+  { title: string; schema: ConfigSchema }
+>;
+const KIND_LABELS = Object.fromEntries(
+  Object.entries(schemas).map(([kind, definition]) => [kind, definition.title]),
+) as Record<Kind, string>;
+const LIST_FIELDS = Object.fromEntries(
+  Object.entries(schemas)
+    .filter(
+      ([, definition]) => definition.schema.properties?.items?.type === "array",
+    )
+    .map(([kind, definition]) => [
+      kind,
+      Object.keys(definition.schema.properties!.items.items!.properties!),
+    ]),
+);
 
 function message(value: unknown): string {
   if (typeof value === "string") return value;
@@ -96,13 +78,7 @@ async function request<T>(
 }
 
 function defaultConfig(kind: Kind): Record<string, unknown> {
-  if (kind === "hero")
-    return { title: "", subtitle: "", cta_label: "", cta_href: "" };
-  if (kind === "cta") return { label: "", href: "" };
-  if (kind === "rich_text") return { html: "" };
-  if (kind === "gallery") return { limit: 6 };
-  if (LIST_FIELDS[kind]) return { items: [] };
-  return {};
+  return configDefaults(schemas[kind].schema, true);
 }
 
 function summarize(block: Block): string {
@@ -116,61 +92,12 @@ function summarize(block: Block): string {
   return "";
 }
 
-function ListEditor({
-  fields,
-  items,
-  onChange,
-}: {
-  fields: [string, string];
-  items: Record<string, string>[];
-  onChange: (items: Record<string, string>[]) => void;
-}) {
-  return (
-    <div>
-      {items.map((item, index) => (
-        <div key={index}>
-          {fields.map((field) => (
-            <label key={field}>
-              {field}{" "}
-              <input
-                value={item[field] ?? ""}
-                onChange={(event) => {
-                  const next = items.slice();
-                  next[index] = { ...item, [field]: event.target.value };
-                  onChange(next);
-                }}
-              />
-            </label>
-          ))}
-          <Button
-            variant="secondary"
-            onClick={() => onChange(items.filter((_, i) => i !== index))}
-          >
-            Remove
-          </Button>
-        </div>
-      ))}
-      <Button
-        variant="secondary"
-        onClick={() =>
-          onChange([
-            ...items,
-            Object.fromEntries(fields.map((field) => [field, ""])),
-          ])
-        }
-      >
-        Add item
-      </Button>
-    </div>
-  );
-}
-
 function BlockEditor({
   block,
   onSave,
 }: {
   block: Block;
-  onSave: (config: Record<string, unknown>) => Promise<void>;
+  onSave: (config: Record<string, unknown>) => Promise<Record<string, unknown>>;
 }) {
   const [config, setConfig] = useState(block.config);
   const [saving, setSaving] = useState(false);
@@ -178,10 +105,15 @@ function BlockEditor({
   const dirty = JSON.stringify(config) !== JSON.stringify(block.config);
 
   async function save() {
+    const invalid = configError(schemas[block.kind].schema, config);
+    if (invalid) {
+      setError(invalid);
+      return;
+    }
     setSaving(true);
     setError("");
     try {
-      await onSave(config);
+      setConfig(await onSave(config));
     } catch (cause) {
       setError(message(cause));
     } finally {
@@ -189,99 +121,18 @@ function BlockEditor({
     }
   }
 
-  if (LIVE_KINDS.has(block.kind)) {
+  if (Object.keys(schemas[block.kind].schema.properties ?? {}).length === 0) {
     return <p>This block renders the event's live data automatically.</p>;
   }
 
   return (
     <div>
       {error && <p role="alert">{error}</p>}
-      {block.kind === "hero" && (
-        <>
-          <label>
-            Title{" "}
-            <input
-              value={String(config.title ?? "")}
-              onChange={(e) => setConfig({ ...config, title: e.target.value })}
-            />
-          </label>
-          <label>
-            Subtitle{" "}
-            <input
-              value={String(config.subtitle ?? "")}
-              onChange={(e) =>
-                setConfig({ ...config, subtitle: e.target.value })
-              }
-            />
-          </label>
-          <label>
-            CTA label{" "}
-            <input
-              value={String(config.cta_label ?? "")}
-              onChange={(e) =>
-                setConfig({ ...config, cta_label: e.target.value })
-              }
-            />
-          </label>
-          <label>
-            CTA link{" "}
-            <input
-              value={String(config.cta_href ?? "")}
-              onChange={(e) =>
-                setConfig({ ...config, cta_href: e.target.value })
-              }
-            />
-          </label>
-        </>
-      )}
-      {block.kind === "cta" && (
-        <>
-          <label>
-            Label{" "}
-            <input
-              value={String(config.label ?? "")}
-              onChange={(e) => setConfig({ ...config, label: e.target.value })}
-            />
-          </label>
-          <label>
-            Link{" "}
-            <input
-              value={String(config.href ?? "")}
-              onChange={(e) => setConfig({ ...config, href: e.target.value })}
-            />
-          </label>
-        </>
-      )}
-      {block.kind === "rich_text" && (
-        <label>
-          HTML (sanitized on save){" "}
-          <textarea
-            value={String(config.html ?? "")}
-            onChange={(e) => setConfig({ ...config, html: e.target.value })}
-          />
-        </label>
-      )}
-      {block.kind === "gallery" && (
-        <label>
-          Projects to preview{" "}
-          <input
-            type="number"
-            min={1}
-            max={24}
-            value={Number(config.limit ?? 6)}
-            onChange={(e) =>
-              setConfig({ ...config, limit: Number(e.target.value) })
-            }
-          />
-        </label>
-      )}
-      {LIST_FIELDS[block.kind] && (
-        <ListEditor
-          fields={LIST_FIELDS[block.kind]!}
-          items={(config.items as Record<string, string>[] | undefined) ?? []}
-          onChange={(items) => setConfig({ ...config, items })}
-        />
-      )}
+      <ConfigFields
+        schema={schemas[block.kind].schema}
+        config={config}
+        onChange={setConfig}
+      />
       <Button disabled={!dirty || saving} onClick={save}>
         {saving ? "Saving…" : "Save block"}
       </Button>
@@ -358,6 +209,7 @@ export function PageBuilder({
       ),
     );
     await refreshAudit();
+    return updated.config;
   }
 
   async function removeBlock(block: Block) {

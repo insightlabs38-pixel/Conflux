@@ -25,12 +25,19 @@ build:
 	uv run --frozen python src/api/manage.py check
 	pnpm build
 
-verify-fast: format-check lint test build sdk-check
+verify-fast: format-check lint test build sdk-check block-schema-check
 
 verify: verify-fast
 
 openapi-check:
 	uv run --frozen python scripts/check_openapi_artifact.py
+
+.PHONY: block-schema-generate block-schema-check
+block-schema-generate:
+	uv run --frozen python scripts/generate_block_schemas.py
+
+block-schema-check:
+	uv run --frozen python scripts/generate_block_schemas.py --check
 
 sdk-generate:
 	uv run --frozen python scripts/generate_sdks.py

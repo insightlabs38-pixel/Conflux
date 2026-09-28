@@ -1,0 +1,61 @@
+{
+  "width": 1440,
+  "scrollWidth": 1440,
+  "inputs": [
+    {
+      "label": "Title",
+      "type": "text",
+      "maxLength": 200,
+      "min": "",
+      "max": ""
+    },
+    {
+      "label": "Subtitle",
+      "type": "text",
+      "maxLength": 400,
+      "min": "",
+      "max": ""
+    },
+    {
+      "label": "CTA label",
+      "type": "text",
+      "maxLength": 60,
+      "min": "",
+      "max": ""
+    },
+    {
+      "label": "CTA link",
+      "type": "text",
+      "maxLength": 2000,
+      "min": "",
+      "max": ""
+    },
+    {
+      "label": "question",
+      "type": "text",
+      "maxLength": 500,
+      "min": "",
+      "max": ""
+    },
+    {
+      "label": "answer",
+      "type": "text",
+      "maxLength": 500,
+      "min": "",
+      "max": ""
+    },
+    {
+      "label": "Projects to preview",
+      "type": "number",
+      "maxLength": -1,
+      "min": "1",
+      "max": "24"
+    },
+    {
+      "label": "HTML (sanitized on save) <p>Event resources</p>",
+      "type": "textarea",
+      "maxLength": 20000
+    }
+  ],
+  "overlay": false
+}

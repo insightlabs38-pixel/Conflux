@@ -150,10 +150,37 @@ class Announcement(TypedDict):
     body: NotRequired[str]
     posted_by: str
     created_at: str
+    hidden_at: str | None
+    version: int
 
 class InputOfAnnouncement(TypedDict):
     title: str
     body: NotRequired[str]
+
+class AnnouncementReviewInput(TypedDict):
+    version: int
+    status: AnnouncementReviewInputStatusEnum
+    note: str
+
+class InputOfAnnouncementReviewInput(TypedDict):
+    version: int
+    status: InputOfAnnouncementReviewInputStatusEnum
+    note: str
+
+AnnouncementReviewInputStatusEnum = Literal['published', 'hidden']
+
+InputOfAnnouncementReviewInputStatusEnum = Literal['published', 'hidden']
+
+class AnnouncementReviewOutput(TypedDict):
+    public_id: str
+    title: str
+    body: str
+    created_at: str
+    version: int
+    hidden_at: str | None
+
+class InputOfAnnouncementReviewOutput(TypedDict):
+    pass
 
 class AppealDecisionInputSchema(TypedDict):
     status: AppealDecisionInputSchemaStatusEnum
@@ -1353,6 +1380,10 @@ class InputOfEventDashboardSchema(TypedDict):
     track_count: int
     base_prize_count: int
     configuration_checks: list[str]
+
+EventQuestionStatus = Literal['pending', 'published', 'hidden']
+
+InputOfEventQuestionStatus = Literal['pending', 'published', 'hidden']
 
 EventStatus = Literal['draft', 'open', 'closed', 'archived']
 
@@ -2707,6 +2738,15 @@ class InputOfProvenanceSchema(TypedDict):
     ballots: list[InputOfProvenanceBallotSchema] | None
     awards: list[InputOfProvenanceAwardSchema]
 
+class PublicAnnouncementOutput(TypedDict):
+    public_id: str
+    title: str
+    body: str
+    created_at: str
+
+class InputOfPublicAnnouncementOutput(TypedDict):
+    pass
+
 class PublicAwardOutput(TypedDict):
     public_id: str
     name: str
@@ -2806,6 +2846,36 @@ class InputOfQualifierImportOutput(TypedDict):
     entries: list[InputOfQualifierEntryOutput]
     advanced_count: int
     created_at: str
+
+class QuestionInput(TypedDict):
+    question: str
+
+class InputOfQuestionInput(TypedDict):
+    question: str
+
+class QuestionOutput(TypedDict):
+    public_id: str
+    question: str
+    answer: str
+    status: EventQuestionStatus
+    version: int
+    created_at: str
+    updated_at: str
+
+class InputOfQuestionOutput(TypedDict):
+    pass
+
+class QuestionReviewInput(TypedDict):
+    version: int
+    status: EventQuestionStatus
+    answer: NotRequired[str]
+    note: str
+
+class InputOfQuestionReviewInput(TypedDict):
+    version: int
+    status: InputOfEventQuestionStatus
+    answer: NotRequired[str]
+    note: str
 
 class RankedResultSchema(TypedDict):
     rank: int
@@ -3744,6 +3814,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                        'query_params': [],
                                        'request_body': False,
                                        'response_kind': 'json'},
+ 'get_api_v1_events_event_public_id_announcements': {'method': 'GET',
+                                                     'path': '/api/v1/events/{event_public_id}/announcements/',
+                                                     'path_params': ['event_public_id'],
+                                                     'query_params': ['offset'],
+                                                     'request_body': False,
+                                                     'response_kind': 'json'},
  'get_api_v1_events_event_public_id_awards': {'method': 'GET',
                                               'path': '/api/v1/events/{event_public_id}/awards/',
                                               'path_params': ['event_public_id'],
@@ -3756,6 +3832,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                'query_params': [],
                                                'request_body': False,
                                                'response_kind': 'json'},
+ 'get_api_v1_events_event_public_id_questions': {'method': 'GET',
+                                                 'path': '/api/v1/events/{event_public_id}/questions/',
+                                                 'path_params': ['event_public_id'],
+                                                 'query_params': ['offset'],
+                                                 'request_body': False,
+                                                 'response_kind': 'json'},
  'get_api_v1_export_csv': {'method': 'GET',
                            'path': '/api/v1/export.csv',
                            'path_params': [],
@@ -3939,6 +4021,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                               'query_params': [],
                                                                                               'request_body': False,
                                                                                               'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_questions': {'method': 'GET',
+                                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/questions/',
+                                                                                               'path_params': ['event_public_id',
+                                                                                                               'workspace_public_id'],
+                                                                                               'query_params': ['offset'],
+                                                                                               'request_body': False,
+                                                                                               'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_reminders': {'method': 'GET',
                                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/reminders/',
                                                                                                'path_params': ['event_public_id',
@@ -5048,6 +5137,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                          'query_params': [],
                                                                                          'request_body': True,
                                                                                          'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_announcements_source_public_id_review': {'method': 'POST',
+                                                                                                                            'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/announcements/{source_public_id}/review/',
+                                                                                                                            'path_params': ['event_public_id',
+                                                                                                                                            'source_public_id',
+                                                                                                                                            'workspace_public_id'],
+                                                                                                                            'query_params': [],
+                                                                                                                            'request_body': True,
+                                                                                                                            'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_audiences_preview': {'method': 'POST',
                                                                                                         'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/audiences/preview/',
                                                                                                         'path_params': ['event_public_id',
@@ -5062,6 +5159,21 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                'query_params': [],
                                                                                                'request_body': True,
                                                                                                'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_questions': {'method': 'POST',
+                                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/questions/',
+                                                                                                'path_params': ['event_public_id',
+                                                                                                                'workspace_public_id'],
+                                                                                                'query_params': [],
+                                                                                                'request_body': True,
+                                                                                                'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_questions_source_public_id_review': {'method': 'POST',
+                                                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/questions/{source_public_id}/review/',
+                                                                                                                        'path_params': ['event_public_id',
+                                                                                                                                        'source_public_id',
+                                                                                                                                        'workspace_public_id'],
+                                                                                                                        'query_params': [],
+                                                                                                                        'request_body': True,
+                                                                                                                        'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_reminders': {'method': 'POST',
                                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/reminders/',
                                                                                                 'path_params': ['event_public_id',

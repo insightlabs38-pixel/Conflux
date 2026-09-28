@@ -220,6 +220,8 @@ class Announcement(PublicIdModel):
     posted_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+"
     )
+    hidden_at = models.DateTimeField(null=True, blank=True)
+    version = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

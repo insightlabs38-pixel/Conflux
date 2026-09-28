@@ -107,8 +107,8 @@ class AnnouncementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Announcement
-        fields = ["public_id", "title", "body", "posted_by", "created_at"]
-        read_only_fields = ["public_id", "posted_by", "created_at"]
+        fields = ["public_id", "title", "body", "posted_by", "created_at", "hidden_at", "version"]
+        read_only_fields = ["public_id", "posted_by", "created_at", "hidden_at", "version"]
 
 
 class RegistrationSettingsSerializer(serializers.ModelSerializer):

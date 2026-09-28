@@ -162,9 +162,38 @@ export type Announcement = {
   body?: string;
   posted_by: string;
   created_at: string;
+  hidden_at: string | null;
+  version: number;
 };
 
 export type InputOfAnnouncement = { title: string; body?: string };
+
+export type AnnouncementReviewInput = {
+  version: number;
+  status: AnnouncementReviewInputStatusEnum;
+  note: string;
+};
+
+export type InputOfAnnouncementReviewInput = {
+  version: number;
+  status: InputOfAnnouncementReviewInputStatusEnum;
+  note: string;
+};
+
+export type AnnouncementReviewInputStatusEnum = "published" | "hidden";
+
+export type InputOfAnnouncementReviewInputStatusEnum = "published" | "hidden";
+
+export type AnnouncementReviewOutput = {
+  public_id: string;
+  title: string;
+  body: string;
+  created_at: string;
+  version: number;
+  hidden_at: string | null;
+};
+
+export type InputOfAnnouncementReviewOutput = {};
 
 export type AppealDecisionInputSchema = {
   status: AppealDecisionInputSchemaStatusEnum;
@@ -1484,6 +1513,10 @@ export type InputOfEventDashboardSchema = {
   base_prize_count: number;
   configuration_checks: string[];
 };
+
+export type EventQuestionStatus = "pending" | "published" | "hidden";
+
+export type InputOfEventQuestionStatus = "pending" | "published" | "hidden";
 
 export type EventStatus = "draft" | "open" | "closed" | "archived";
 
@@ -2955,6 +2988,15 @@ export type InputOfProvenanceSchema = {
   awards: InputOfProvenanceAwardSchema[];
 };
 
+export type PublicAnnouncementOutput = {
+  public_id: string;
+  title: string;
+  body: string;
+  created_at: string;
+};
+
+export type InputOfPublicAnnouncementOutput = {};
+
 export type PublicAwardOutput = {
   public_id: string;
   name: string;
@@ -3062,6 +3104,36 @@ export type InputOfQualifierImportOutput = {
   entries: InputOfQualifierEntryOutput[];
   advanced_count: number;
   created_at: string;
+};
+
+export type QuestionInput = { question: string };
+
+export type InputOfQuestionInput = { question: string };
+
+export type QuestionOutput = {
+  public_id: string;
+  question: string;
+  answer: string;
+  status: EventQuestionStatus;
+  version: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type InputOfQuestionOutput = {};
+
+export type QuestionReviewInput = {
+  version: number;
+  status: EventQuestionStatus;
+  answer?: string;
+  note: string;
+};
+
+export type InputOfQuestionReviewInput = {
+  version: number;
+  status: InputOfEventQuestionStatus;
+  answer?: string;
+  note: string;
 };
 
 export type RankedResultSchema = {
@@ -3879,6 +3951,10 @@ export interface Operations {
     request: { path: { event_public_id: string } };
     response: PublicEventSchema;
   };
+  get_api_v1_events_event_public_id_announcements: {
+    request: { path: { event_public_id: string }; query?: { offset?: number } };
+    response: PublicAnnouncementOutput[];
+  };
   get_api_v1_events_event_public_id_awards: {
     request: { path: { event_public_id: string } };
     response: PublicAwardOutput[];
@@ -3886,6 +3962,10 @@ export interface Operations {
   get_api_v1_events_event_public_id_gallery: {
     request: { path: { event_public_id: string } };
     response: GalleryItemOutput[];
+  };
+  get_api_v1_events_event_public_id_questions: {
+    request: { path: { event_public_id: string }; query?: { offset?: number } };
+    response: QuestionOutput[];
   };
   get_api_v1_export_csv: { request: {}; response: string };
   get_api_v1_gallery: { request: {}; response: GalleryProjectSchema[] };
@@ -4275,6 +4355,17 @@ export interface Operations {
     };
     response: COIRuleOutputSchema;
   };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_announcements_source_public_id_review: {
+    request: {
+      path: {
+        event_public_id: string;
+        source_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfAnnouncementReviewInput;
+    };
+    response: AnnouncementReviewOutput;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_audiences: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: AudienceKindSchema[];
@@ -4296,6 +4387,31 @@ export interface Operations {
       body: InputOfMessageInputSchema;
     };
     response: MessageSchema;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_questions: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      query?: { offset?: number };
+    };
+    response: QuestionOutput[];
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_questions: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfQuestionInput;
+    };
+    response: QuestionOutput;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_questions_source_public_id_review: {
+    request: {
+      path: {
+        event_public_id: string;
+        source_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfQuestionReviewInput;
+    };
+    response: QuestionOutput;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_reminders: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -6160,6 +6276,14 @@ export const operations = {
     request_body: false,
     response_kind: "json",
   },
+  get_api_v1_events_event_public_id_announcements: {
+    method: "GET",
+    path: "/api/v1/events/{event_public_id}/announcements/",
+    path_params: ["event_public_id"],
+    query_params: ["offset"],
+    request_body: false,
+    response_kind: "json",
+  },
   get_api_v1_events_event_public_id_awards: {
     method: "GET",
     path: "/api/v1/events/{event_public_id}/awards/",
@@ -6173,6 +6297,14 @@ export const operations = {
     path: "/api/v1/events/{event_public_id}/gallery/",
     path_params: ["event_public_id"],
     query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  get_api_v1_events_event_public_id_questions: {
+    method: "GET",
+    path: "/api/v1/events/{event_public_id}/questions/",
+    path_params: ["event_public_id"],
+    query_params: ["offset"],
     request_body: false,
     response_kind: "json",
   },
@@ -6768,6 +6900,19 @@ export const operations = {
     request_body: true,
     response_kind: "json",
   },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_announcements_source_public_id_review:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/announcements/{source_public_id}/review/",
+      path_params: [
+        "event_public_id",
+        "source_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_audiences:
     {
       method: "GET",
@@ -6800,6 +6945,37 @@ export const operations = {
       method: "POST",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/messages/",
       path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_questions:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/questions/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: ["offset"],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_questions:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/questions/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_questions_source_public_id_review:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/questions/{source_public_id}/review/",
+      path_params: [
+        "event_public_id",
+        "source_public_id",
+        "workspace_public_id",
+      ],
       query_params: [],
       request_body: true,
       response_kind: "json",

@@ -154,6 +154,7 @@ SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": r"/api/v1",
     "ENUM_NAME_OVERRIDES": {
         "EventStatus": "events.models.EventStatus",
+        "EventQuestionStatus": "communications.models.EventQuestion.Status",
         "CandidateQueueStatus": ["pending", "drafted", "submitted"],
         "BulkOperationAction": ["assign", "advance", "extend", "move", "send"],
         "ActionEnum": "policies.models.Action",

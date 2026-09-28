@@ -4,10 +4,38 @@ from . import views
 from .analytics_views import EventAnalyticsView
 from .bulk_views import BulkOperationsView
 from .moderation_views import ModerationQueueView, ModerationReviewsView
+from .public_qa import (
+    AnnouncementReviewView,
+    CommunicationReviewView,
+    PublicAnnouncementsView,
+    PublicQuestionsView,
+    QuestionsView,
+)
 
 _prefix = "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/"
 
 urlpatterns = [
+    path(
+        "events/<uuid:event_public_id>/questions/",
+        PublicQuestionsView.as_view(),
+        name="public-questions",
+    ),
+    path(
+        "events/<uuid:event_public_id>/announcements/",
+        PublicAnnouncementsView.as_view(),
+        name="public-announcements",
+    ),
+    path(_prefix + "communications/questions/", QuestionsView.as_view(), name="event-questions"),
+    path(
+        _prefix + "communications/questions/<uuid:source_public_id>/review/",
+        CommunicationReviewView.as_view(),
+        name="question-review",
+    ),
+    path(
+        _prefix + "communications/announcements/<uuid:source_public_id>/review/",
+        AnnouncementReviewView.as_view(),
+        name="announcement-review",
+    ),
     path(_prefix + "operations/analytics/", EventAnalyticsView.as_view(), name="event-analytics"),
     path(
         _prefix + "operations/moderation/", ModerationQueueView.as_view(), name="moderation-queue"

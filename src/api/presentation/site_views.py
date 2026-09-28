@@ -56,7 +56,9 @@ def _blocks_with_live_data(event, page):
         elif block.kind == PageBlockKind.RESULTS:
             block.live = published_awards_for_public_display(event)
         elif block.kind == PageBlockKind.ANNOUNCEMENTS:
-            block.live = list(event.announcements.select_related("posted_by")[:10])
+            block.live = list(
+                event.announcements.filter(hidden_at=None).select_related("posted_by")[:10]
+            )
     return blocks
 
 

@@ -5,6 +5,26 @@ from django.db import models
 from events.models import Event
 
 
+class EventQuestion(PublicIdModel):
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        PUBLISHED = "published", "Published"
+        HIDDEN = "hidden", "Hidden"
+
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="questions")
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    question = models.CharField(max_length=2000)
+    answer = models.CharField(max_length=4000, blank=True)
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
+    version = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        indexes = [models.Index(fields=["event", "status", "created_at"])]
+
+
 class ModerationReview(PublicIdModel):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="moderation_reviews")
     actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)

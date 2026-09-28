@@ -18,4 +18,24 @@ Routes: `GET accounts/oidc/config/` (is SSO offered), `GET accounts/oidc/login/?
 
 Checks on every sign-in: single-use `state` bound to the initiating browser by a short-lived cookie, `nonce`, PKCE S256, asymmetric signature verified against the provider's JWKS (`none`/HMAC refused), `iss`/`aud`/`exp`/`iat`/`sub` required, `azp` for multi-audience tokens, same-site `next` only, no redirects followed when talking to the provider.
 
+## What has been tested against what
+
+- **Automated suite (every run):** a deterministic local test provider
+  (`tests/integration/test_oidc.py`) covers the protocol checks above, error
+  paths and account linking rules.
+- **Real-provider smoke (`make oidc-smoke`, on demand):** `scripts/oidc-interop-smoke`
+  starts [Dex](https://dexidp.io) v2.41.1 in a throwaway Docker container
+  (`infra/oidc-smoke/dex.yaml`; needs the image and a working Docker, otherwise
+  it is simply not run) and drives discovery, the PKCE authorization redirect,
+  provider login, callback, first-login account creation, logout and a second
+  login that reuses the same account. It also checks that a provider account
+  named `admin` gets no staff, superuser or workspace role, that a wrong
+  provider password and a replayed callback are rejected, that the app boots
+  and password login still works with the provider unreachable, and that
+  disabled OIDC reports `enabled: false`. 18 checks, all passing when last run.
+- **Not tested:** any hosted provider (Google, Okta, Entra, Keycloak, ...),
+  refresh tokens, or logout propagation. Dex is one conforming provider;
+  passing it is evidence of standards compliance, not a compatibility
+  guarantee for others.
+
 Limitations: no logout propagation or refresh tokens; group/role claims are not mapped to roles.

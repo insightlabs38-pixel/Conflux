@@ -33,7 +33,8 @@ Demo ready (seed $seed, checkpoint $checkpoint).
   Sign in:   $base/app/     (password for every demo account: $password)
   organizer  demo-hackathon-$seed-organizer
   judge      demo-hackathon-$seed-judge-01 .. 06
-  team       demo-hackathon-$seed-participant-01 .. 24
+  team       demo-hackathon-$seed-participant-01 .. 24   (23, 24 start without a team)
+  staff      demo-hackathon-$seed-mentor / -volunteer / -sponsor
   Public:    $base/e/$event/            landing
              $base/e/$event/gallery/    gallery
              $base/e/$event/results/    results

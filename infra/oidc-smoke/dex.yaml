@@ -1,0 +1,28 @@
+# Throwaway Dex (https://dexidp.io) provider for scripts/oidc-interop-smoke.
+# A real, standards-compliant OpenID Provider (discovery, JWKS, PKCE, RS256) —
+# used only to check Conflux against something we did not write. Not deployed.
+issuer: http://localhost:5556/dex
+storage:
+  type: memory
+web:
+  http: 0.0.0.0:5556
+oauth2:
+  skipApprovalScreen: true
+  responseTypes: ["code"]
+enablePasswordDB: true
+staticClients:
+  - id: conflux-smoke
+    name: Conflux smoke test
+    secret: smoke-only-not-a-secret
+    redirectURIs:
+      - http://localhost:8765/api/v1/accounts/oidc/callback/
+staticPasswords:
+  # bcrypt("password"), the value used in Dex's own example configuration.
+  - email: ada@example.com
+    hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+    username: ada
+    userID: 08a8684b-db88-4b73-90a9-3cd1661f5466
+  - email: admin@example.com
+    hash: "$2a$10$2b2cU8CPhOTaGrs1HRQuAueS7JTT5ZHsHSzYiFPm1leZck7Mc8T4W"
+    username: admin
+    userID: 1c1a2f3e-5b6d-4e8f-9a0b-2d3c4e5f6a7b

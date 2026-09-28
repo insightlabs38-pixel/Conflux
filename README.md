@@ -81,4 +81,6 @@ Operational guides for the post-core capabilities live in `docs/operations/`:
 [event logistics](docs/operations/EVENT_LOGISTICS.md),
 [conveniences](docs/operations/CONVENIENCE.md),
 [capacity and load testing](docs/operations/CAPACITY.md) and
-[browser journeys](docs/operations/E2E.md).
+[browser journeys](docs/operations/E2E.md),
+[PVS in the UI](docs/operations/PVS_UI.md) and
+[final demo runbook](docs/operations/DEMO.md).

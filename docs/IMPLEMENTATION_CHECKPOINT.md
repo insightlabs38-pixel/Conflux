@@ -32,9 +32,9 @@ Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS0
 
 ## Limitations
 
-- PVS features are API/CLI only so far; UI, Playwright scenes and demo package are PVS-H03/H05. Public server-rendered pages lack font/link styling (H03 finding).
-- Session tokens unhashed at rest (documented in PVS-H01 findings).
-- PVS08 preview endpoint has no UI; drift detection compares recorded fields, not live storage bytes (that's `run_inspection`'s job).
+- Human-facing PVS workflows have UI (PVS-H06, [map](operations/PVS_UI.md)); technical/operator PVS features stay API/CLI-first by design.
+- Session tokens are stored as keyed digests (PVS-H06); the public gallery is paginated (PVS-H06).
+- Drift detection compares recorded fields, not live storage bytes (that's `run_inspection`'s job).
 - PVS09's `AwardResource` is not in the final-archive/event-as-code table set (see `docs/batches/PVS09.md`) — inconsistent with PVS10's mentorship tables, which are; worth reconciling in PVS-H04.
 - PVS10 has no reminder/notification integration for requests or office hours (deliberately, to avoid chat-clone scope).
 

@@ -29,4 +29,4 @@ Unbounded DB connections under bursts (500s) · IP-keyed vote throttle locking a
 
 ## Known limitations
 
-PVS01–PVS17 have no dedicated UI panels (API, API explorer, MCP); session tokens are unhashed at rest (H01 finding); gallery endpoint is unpaginated; SSO not exercised against a real provider (fake provider tests only).
+Superseded by PVS-H06 (see `docs/verification/PVS-H06/report.md`): human-facing PVS workflows now have UI, session tokens are hashed, the gallery is paginated, and SSO has a real-provider (Dex) smoke test in addition to the local test provider.

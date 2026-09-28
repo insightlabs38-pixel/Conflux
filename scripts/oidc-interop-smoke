@@ -1,0 +1,361 @@
+#!/usr/bin/env python3
+"""Interoperability smoke test: Conflux against a real OpenID Provider (Dex).
+
+    scripts/oidc-interop-smoke        # needs Docker and the ghcr.io/dexidp/dex image
+
+Walks discovery -> login redirect -> provider login -> callback -> account creation ->
+membership check -> logout -> second login, then the negative and offline cases.
+Everything is local (Dex in a throwaway container, Conflux on a temp SQLite DB); nothing
+here is part of the deployed stack and nothing contacts a hosted provider.
+"""
+
+import http.cookiejar
+import json
+import os
+import re
+import subprocess
+import sys
+import tempfile
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from html import unescape
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+APP = "http://localhost:8765"
+DEX = "http://localhost:5556/dex"
+IMAGE = "ghcr.io/dexidp/dex:v2.41.1"
+CONTAINER = "conflux-oidc-smoke-dex"
+results = []
+
+
+def check(name, ok, detail=""):
+    results.append((name, bool(ok), detail))
+    print(f"{'PASS' if ok else 'FAIL'}  {name}{f' — {detail}' if detail and not ok else ''}")
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, *args, **kwargs):
+        return None
+
+
+def client():
+    jar = http.cookiejar.CookieJar()
+    return urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar), NoRedirect), jar
+
+
+def fetch(opener, url, data=None, headers=None):
+    body = urllib.parse.urlencode(data).encode() if data is not None else None
+    request = urllib.request.Request(url, data=body, headers=headers or {})
+    try:
+        response = opener.open(request, timeout=15)
+    except urllib.error.HTTPError as error:
+        response = error
+    return response.status, dict(response.headers), response.read().decode(errors="replace")
+
+
+def follow(opener, url, data=None, until=None, limit=12):
+    """Follow redirects by hand so each hop can be inspected."""
+    hops = []
+    for _ in range(limit):
+        status, headers, body = fetch(opener, url, data)
+        hops.append((status, url))
+        data = None
+        location = headers.get("Location")
+        if status in (301, 302, 303, 307) and location:
+            url = urllib.parse.urljoin(url, location)
+            if until and url.startswith(until):
+                return status, headers, body, url, hops
+            continue
+        return status, headers, body, url, hops
+    raise RuntimeError("too many redirects")
+
+
+def login_at_provider(opener, authorize_url, email, password):
+    status, _, body, url, _ = follow(opener, authorize_url, until=APP)
+    if url.startswith(APP):
+        return url  # provider skipped its login (existing provider session)
+    action = re.search(r'<form[^>]*action="([^"]*)"', body)
+    if not action:
+        raise RuntimeError(f"no login form at {url} (status {status})")
+    form = urllib.parse.urljoin(url, unescape(action.group(1)))
+    status, headers, body, url, _ = follow(
+        opener, form, {"login": email, "password": password}, until=APP
+    )
+    return url if url.startswith(APP) else None
+
+
+def wait_http(url, seconds=40, ok=(200,)):
+    end = time.time() + seconds
+    while time.time() < end:
+        try:
+            with urllib.request.urlopen(url, timeout=3) as response:
+                if response.status in ok:
+                    return True
+        except Exception:
+            time.sleep(0.5)
+    return False
+
+
+def start_app(tmp, name, extra_env):
+    env = {
+        **os.environ,
+        "DJANGO_SECRET_KEY": "oidc-smoke-only",
+        "RECORD_SIGNING_KEY_SEED": "oidc-smoke-only",
+        "DATABASE_URL": f"sqlite:///{tmp}/{name}.sqlite3",
+        "DJANGO_ALLOWED_HOSTS": "localhost",
+        "ALLOWED_HOSTS": "localhost",
+        "DJANGO_DEBUG": "0",
+        **extra_env,
+    }
+    manage = [sys.executable, str(ROOT / "src/api/manage.py")]
+    subprocess.run([*manage, "migrate", "-v0"], env=env, check=True, cwd=ROOT / "src/api")
+    process = subprocess.Popen(
+        [*manage, "runserver", "127.0.0.1:8765", "--noreload"],
+        env=env,
+        cwd=ROOT / "src/api",
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    return process, env, manage
+
+
+def stop(process):
+    process.terminate()
+    try:
+        process.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        process.kill()
+
+
+OIDC_ENV = {
+    "OIDC_ISSUER": DEX,
+    "OIDC_CLIENT_ID": "conflux-smoke",
+    "OIDC_CLIENT_SECRET": "smoke-only-not-a-secret",
+    "OIDC_REDIRECT_URI": f"{APP}/api/v1/accounts/oidc/callback/",
+    "OIDC_ALLOW_INSECURE_HTTP": "1",
+    "OIDC_PROVIDER_NAME": "Dex (smoke)",
+}
+
+
+def sql(env, manage, code):
+    out = (
+        subprocess.run(
+            [*manage, "shell", "-c", code],
+            env=env,
+            cwd=ROOT / "src/api",
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        .stdout.strip()
+        .splitlines()
+    )
+    return out[-1] if out else ""
+
+
+def main():
+    subprocess.run(["docker", "rm", "-f", CONTAINER], capture_output=True)
+    tmp = tempfile.mkdtemp(prefix="oidc-smoke-")
+    dex_up = False
+    process = None
+    try:
+        # 1. Offline / no-IdP startup: OIDC configured, provider unreachable.
+        process, env, manage = start_app(tmp, "offline", OIDC_ENV)
+        check(
+            "app boots with OIDC configured and the provider unreachable",
+            wait_http(f"{APP}/api/v1/health/"),
+        )
+        opener, _ = client()
+        status, _, body = fetch(opener, f"{APP}/api/v1/accounts/oidc/login/")
+        check(
+            "unreachable provider fails clearly (no 500)",
+            status == 502 and "detail" in body,
+            f"{status} {body[:120]}",
+        )
+        sql(
+            env,
+            manage,
+            "from accounts.models import User; "
+            "User.objects.create_user('local', password='pw-12345678')",
+        )
+        status, headers, _ = fetch(
+            opener,
+            f"{APP}/api/v1/accounts/login/",
+            {"username": "local", "password": "pw-12345678"},
+        )
+        check(
+            "built-in password login works while the provider is down", status == 200, str(status)
+        )
+        stop(process)
+
+        # 2. Misconfiguration: OIDC off -> routes say so; local auth unaffected.
+        process, env, manage = start_app(tmp, "off", {"OIDC_ISSUER": ""})
+        wait_http(f"{APP}/api/v1/health/")
+        opener, _ = client()
+        status, _, body = fetch(opener, f"{APP}/api/v1/accounts/oidc/config/")
+        check("OIDC disabled reports enabled=false", json.loads(body) == {"enabled": False}, body)
+        status, _, _ = fetch(opener, f"{APP}/api/v1/accounts/oidc/login/")
+        check("OIDC login route refuses when disabled", status == 404, str(status))
+        stop(process)
+
+        # 3. Real provider.
+        run = subprocess.run(
+            [
+                "docker",
+                "run",
+                "-d",
+                "--rm",
+                "--name",
+                CONTAINER,
+                "-p",
+                "5556:5556",
+                "-v",
+                f"{ROOT}/infra/oidc-smoke/dex.yaml:/etc/dex/config.yaml:ro",
+                IMAGE,
+                "dex",
+                "serve",
+                "/etc/dex/config.yaml",
+            ],
+            capture_output=True,
+            text=True,
+        )
+        if run.returncode != 0:
+            print(run.stderr)
+            return 2
+        dex_up = True
+        check(
+            "provider discovery document is served",
+            wait_http(f"{DEX}/.well-known/openid-configuration"),
+        )
+
+        process, env, manage = start_app(tmp, "sso", OIDC_ENV)
+        wait_http(f"{APP}/api/v1/health/")
+        opener, jar = client()
+        _, _, body = fetch(opener, f"{APP}/api/v1/accounts/oidc/config/")
+        config = json.loads(body)
+        check(
+            "config advertises SSO", config.get("enabled") is True and config.get("login_url"), body
+        )
+
+        status, headers, _ = fetch(opener, f"{APP}{config['login_url']}?next=/app/")
+        location = headers.get("Location", "")
+        query = urllib.parse.parse_qs(urllib.parse.urlsplit(location).query)
+        check(
+            "login redirects to the provider with code+PKCE+state+nonce",
+            status == 302
+            and location.startswith(DEX)
+            and query.get("response_type") == ["code"]
+            and query.get("code_challenge_method") == ["S256"]
+            and query.get("state")
+            and query.get("nonce"),
+            location[:160],
+        )
+
+        landed = login_at_provider(opener, location, "ada@example.com", "password")
+        first_callback = landed
+        check(
+            "provider login redirects back to the callback",
+            landed and "/oidc/callback/" in landed,
+            str(landed),
+        )
+        status, headers, _ = fetch(opener, landed)
+        check(
+            "callback creates a session and returns to next",
+            status == 302
+            and headers.get("Location") == "/app/"
+            and any(c.name == "session" for c in jar),
+            str(headers),
+        )
+        _, _, body = fetch(opener, f"{APP}/api/v1/accounts/me/")
+        me = json.loads(body)
+        check(
+            "account created and signed in",
+            me.get("username") and me.get("memberships") == [],
+            body[:200],
+        )
+
+        first_user = me["username"]
+        # Authorization stays internal: provider identity != privilege.
+        priv = sql(
+            env,
+            manage,
+            "from workspaces.models import Membership; from accounts.models import User; "
+            f"u=User.objects.get(username={first_user!r}); print(u.is_staff, u.is_superuser, "
+            "Membership.objects.filter(user=u).count())",
+        )
+        check("SSO login grants no staff/superuser/membership", priv == "False False 0", priv)
+        status, _, _ = fetch(opener, f"{APP}/api/v1/workspaces/", None)
+        check("SSO user has no workspace access", status in (401, 403, 404, 405), str(status))
+
+        # Provider 'admin' account: still no privileges.
+        opener2, _ = client()
+        _, headers, _ = fetch(opener2, f"{APP}/api/v1/accounts/oidc/login/")
+        landed = login_at_provider(opener2, headers["Location"], "admin@example.com", "password")
+        fetch(opener2, landed)
+        _, _, body = fetch(opener2, f"{APP}/api/v1/accounts/me/")
+        admin_name = json.loads(body).get("username")
+        priv = sql(
+            env,
+            manage,
+            "from accounts.models import User; "
+            f"u=User.objects.get(username={admin_name!r}); "
+            "print(u.is_staff, u.is_superuser, u.memberships.count())",
+        )
+        check(
+            "a provider account named 'admin' is still an ordinary user",
+            priv == "False False 0",
+            priv,
+        )
+
+        # Logout and second login reuse the same identity.
+        status, _, _ = fetch(opener, f"{APP}/api/v1/accounts/logout/", {}, {"Origin": APP})
+        status_me, _, _ = fetch(opener, f"{APP}/api/v1/accounts/me/")
+        check(
+            "logout ends the local session",
+            status in (204, 200) and status_me in (401, 403),
+            f"{status}/{status_me}",
+        )
+        opener3, _ = client()
+        _, headers, _ = fetch(opener3, f"{APP}/api/v1/accounts/oidc/login/")
+        landed = login_at_provider(opener3, headers["Location"], "ada@example.com", "password")
+        fetch(opener3, landed)
+        _, _, body = fetch(opener3, f"{APP}/api/v1/accounts/me/")
+        count = sql(
+            env,
+            manage,
+            "from accounts.models import ExternalIdentity; print(ExternalIdentity.objects.count())",
+        )
+        check(
+            "second login maps to the same account (no duplicate)",
+            json.loads(body).get("username") == first_user and count == "2",
+            f"{body[:80]} count={count}",
+        )
+
+        # Negative: wrong password never reaches the callback; replayed callback rejected.
+        opener4, _ = client()
+        _, headers, _ = fetch(opener4, f"{APP}/api/v1/accounts/oidc/login/")
+        landed = login_at_provider(opener4, headers["Location"], "ada@example.com", "wrong")
+        check("wrong provider password does not sign in", landed is None, str(landed))
+        status, _, _ = fetch(client()[0], first_callback)
+        check(
+            "a replayed callback (used code, no binding cookie) is rejected",
+            status == 400,
+            str(status),
+        )
+    except Exception as exc:  # noqa: BLE001
+        check("smoke run completed", False, repr(exc))
+    finally:
+        if process:
+            stop(process)
+        if dex_up:
+            subprocess.run(["docker", "rm", "-f", CONTAINER], capture_output=True)
+    failed = [r for r in results if not r[1]]
+    print(f"\n{len(results) - len(failed)}/{len(results)} checks passed")
+    return 1 if failed else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

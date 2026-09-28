@@ -30,6 +30,16 @@ Critical threats and where each is controlled:
   credentials are scoped to one workspace (optionally one event) and an
   explicit `METHOD:route-name` allowlist (`accounts.authentication
 .CookieSessionAuthentication`).
+- **Session-token theft from the database** — login sessions are looked up by a
+  keyed SHA-256 digest (`accounts.models.digest_session_token`, HMAC under
+  `DJANGO_SECRET_KEY`); the raw token exists only in the client's cookie and as
+  a transient attribute at issue time, so a database read or backup cannot be
+  replayed as a session. Tokens are 256-bit random values, hence a fast keyed
+  hash rather than a password hash. Logout deletes the row; sessions still
+  expire after 12 h. Rotating `DJANGO_SECRET_KEY` signs everyone out (and
+  the seeded acceptance sessions are re-derived by `seed_acceptance_identities`).
+  Migration `accounts.0005` digests existing sessions in place, so a running
+  system keeps its logins across the upgrade.
 - **Malicious uploads/path/content-type tricks** — object keys are always
   server-generated (UUIDs + a random token, never a client-supplied
   filename); every download forces `Content-Disposition: attachment`, and

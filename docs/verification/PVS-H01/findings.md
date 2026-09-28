@@ -23,5 +23,5 @@ Webhook destinations (HTTPS-only, public addresses, resolved address pinned); ar
 
 ## Known limitations
 
-- Session tokens are stored unhashed (API credentials are digested). A database read exposes live sessions; sessions expire after 12 h.
+- ~~Session tokens are stored unhashed.~~ **Resolved in PVS-H06:** sessions are stored as keyed SHA-256 digests (see SECURITY.md); migration `accounts.0005` digests existing rows.
 - Per-account lockout can be triggered by an attacker against a known username (15 min); an operator can clear `accounts_loginfailure`.

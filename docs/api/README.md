@@ -39,3 +39,7 @@ The route returns an event JSON object. The bearer credential's owner must retai
 ## Revoke
 
 With an organizer session, call `POST /api/v1/workspaces/{workspace}/api-credentials/{credential}/revoke/`. Bearer credentials cannot call the management route. Issuance and revocation appear in the workspace audit log without the token value.
+
+## Paging public galleries
+
+`GET /api/v1/gallery/` and `GET /api/v1/events/{event}/gallery/` return a JSON array (unchanged) but are bounded: `limit` (1–100, default 50) and `offset` query parameters, `X-Total-Count` for the number of matching projects and `Link` headers with `rel="next"`/`"prev"`. Other values return 400. Results are ordered by name, then ID, so pages never overlap. The event gallery also accepts `q`.

@@ -4,10 +4,21 @@
 
 ```sh
 make up                       # or `docker compose up -d --build --wait`
-make demo-reset               # purge + recreate the deterministic demo event, prints URLs/logins
+make demo-reset               # purge + recreate the demo at the `submitted` checkpoint, prints URLs/logins
+scripts/demo-reset judged     # other checkpoints: submitted (default) | judged | published
 ```
 
-`scripts/demo-reset` only ever purges the generated `demo-hackathon-<seed>` workspace. It builds a synthetic hackathon (seed 7: 24 teams, 6 judges, blind rubric judging, normalization, published results, awards) through the real API, then `demo_showcase` adds a full landing page, agenda, expo tables, participant rules with acknowledgements and two post-event continuations. Same seed → same content (public IDs are fresh UUIDs each run, so use the printed URLs). Shared password: `demo-pass-7`.
+`scripts/demo-reset` only ever purges the generated `demo-hackathon-<seed>` workspace and rebuilds it through the real API. Same seed → same content **and the same event/workspace public IDs** (they are derived from the seed, so the printed URLs and the runbook links below survive every reset). Shared password: `demo-pass-7`.
+
+Checkpoints (each includes the previous):
+
+| Checkpoint            | State                                                                                                                                                                                                                                                                                                                       |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `submitted` (default) | Event **open**; 22 of 24 teams have finalized submissions; `participant-23` and `-24` are approved but have no team (they create → submit on camera); 6 judges, no ballots; results unpublished; agenda, expo tables, rules, sponsor resources, a mentor, a volunteer, one eligibility finding, RSVPs and check-ins seeded. |
+| `judged`              | Every judge has scored every submitted project; results still unpublished.                                                                                                                                                                                                                                                  |
+| `published`           | Closed archive: results normalized and published, awards decided, continuation listings (the previous default).                                                                                                                                                                                                             |
+
+Accounts: `demo-hackathon-7-organizer`, `-judge-01…06`, `-participant-01…24`, `-mentor`, `-volunteer`, `-sponsor`. Tests and scripts address people by username and the event by discovering it through the API (or the fixed ID); nothing depends on random IDs.
 
 Accounts: `demo-hackathon-7-organizer`, `-judge-01…06`, `-participant-01…24`.
 
@@ -18,7 +29,7 @@ Accounts: `demo-hackathon-7-organizer`, `-judge-01…06`, `-participant-01…24`
 3. **Organizer** — sign in at `/app/`: operator console, launch readiness, audit trail, templates/clone. Point out judging results, publication history and API explorer (`/app/?api=explorer`).
 4. **Judge** — sign in as `judge-01`: invitations/expertise, assigned queue, blind ballots. Explain peer-score isolation (a judge cannot read another judge's ballots).
 5. **Participant** — sign in as `participant-01`: team/project workspace; show the portfolio, rules, and receipt endpoints in the API explorer.
-6. **Differentiators (API/MCP)** — eligibility review, deliberation room, judging replay and the signed audit capsule, publication approval + correction history, maintenance mode (503 with message), MCP adapter (`docs/operations/MCP.md`) with a scoped credential.
+6. **Differentiators** — all in the workspaces now: eligibility review (organizer queue ↔ participant findings), deliberation room with finalist comparison, judge route and artifact inspector, rules acknowledgement, publication approval and correction history, mentor desk, check-in desk; then judging replay and the signed audit capsule and the MCP adapter (`docs/operations/MCP.md`) via the API explorer.
 7. **Ops** — `make backup`, `make backup-restore-smoke`, offline boot (`make cold-boot-smoke`).
 
 ## Assets
@@ -33,4 +44,8 @@ Accounts: `demo-hackathon-7-organizer`, `-judge-01…06`, `-participant-01…24`
 
 ## Known limits to avoid on stage
 
-PVS features (eligibility, deliberation, replay/capsule, governance, portfolio, continuation, agenda editing, MCP) are API-driven; use the API explorer or curl rather than looking for screens. The event is _closed_ with results published, so live submission is shown through the participant workspace and API rather than a running clock.
+Judging replay, the audit capsule, Event-as-Code, backup/restore, webhooks/MCP and maintenance mode remain CLI/API-first; use the API explorer or the scripts. Judges join deliberation (stances/notes) through the API only; the organizer sees the room and finalizes in the UI. Continuation opens once an event is closed, so show it from the `published` checkpoint.
+
+## Recording the live lifecycle
+
+`scripts/demo-reset submitted`, then follow `tests/e2e/lifecycle.spec.ts` as the script: participant-24 creates a team and project, submits and gets a signed receipt; organizer requests changes, participant remediates, organizer clears; judges 01–03 inspect and score; organizer publishes results, finalizes the Grand Prize in the deliberation room and publishes the award; the public results page shows it. `make demo-e2e` replays the whole thing headlessly (re-run the reset before repeating it).

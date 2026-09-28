@@ -276,6 +276,63 @@ paths:
                 items:
                   $ref: '#/components/schemas/QuestionOutput'
           description: ''
+  /api/v1/events/{event_public_id}/search/:
+    get:
+      operationId: get_api_v1_events_event_public_id_search
+      parameters:
+      - in: query
+        name: artifact_kind
+        schema:
+          type: string
+          enum:
+          - dataset
+          - document
+          - external_video
+          - file
+          - image
+          - live_url
+          - repository
+          - secret
+          - video
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: offset
+        schema:
+          type: integer
+      - in: query
+        name: q
+        schema:
+          type: string
+      - in: query
+        name: stage
+        schema:
+          type: string
+      - in: query
+        name: tags
+        schema:
+          type: array
+          items:
+            type: string
+      - in: query
+        name: track
+        schema:
+          type: string
+      tags:
+      - events
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchOutput'
+          description: ''
   /api/v1/export.csv:
     get:
       operationId: get_api_v1_export_csv
@@ -6375,6 +6432,85 @@ paths:
               schema:
                 $ref: '#/components/schemas/SubmissionSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/tags/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_tags
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagInput'
+          description: ''
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_tags
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TagInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TagInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TagInput'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/records/event/:
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_records_event
@@ -6647,6 +6783,142 @@ paths:
               schema:
                 $ref: '#/components/schemas/RegistrationSettings'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/saved-searches/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_saved_searches
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SavedSearchOutput'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_saved_searches
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavedSearchInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SavedSearchInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SavedSearchInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedSearchOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/saved-searches/{view_public_id}/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_saved_searches_view_public_id
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: offset
+        schema:
+          type: integer
+      - in: path
+        name: view_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchOutput'
+          description: ''
+    delete:
+      operationId: delete_api_v1_workspaces_workspace_public_id_events_event_public_id_saved_searches_view_public_id
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: view_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/sponsor-portal/awards/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards
@@ -11950,6 +12222,28 @@ components:
       - imported_count
       - section
       - source_count
+    ArtifactKindEnum:
+      enum:
+      - file
+      - image
+      - video
+      - external_video
+      - repository
+      - live_url
+      - document
+      - dataset
+      - secret
+      type: string
+      description: |-
+        * `file` - File
+        * `image` - Image
+        * `video` - Video
+        * `external_video` - External video
+        * `repository` - Repository
+        * `live_url` - Live URL
+        * `document` - Technical document
+        * `dataset` - Dataset
+        * `secret` - Secret evidence
     ArtifactSchema:
       type: object
       properties:
@@ -16732,6 +17026,110 @@ components:
       - number
       - public_id
       - published_at
+    SavedSearchInput:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 80
+        filters:
+          $ref: '#/components/schemas/SearchFilters'
+      required:
+      - filters
+      - name
+    SavedSearchOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        filters:
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - filters
+      - name
+      - public_id
+    SearchFilters:
+      type: object
+      properties:
+        q:
+          type: string
+          maxLength: 200
+        tags:
+          type: array
+          items:
+            type: string
+            maxLength: 30
+            pattern: ^[-a-zA-Z0-9_]+$
+          maxItems: 10
+        artifact_kind:
+          $ref: '#/components/schemas/ArtifactKindEnum'
+        track:
+          type: string
+          format: uuid
+        stage:
+          type: string
+          format: uuid
+    SearchItemOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        track:
+          type: string
+          nullable: true
+        team:
+          type: string
+          nullable: true
+        url:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        artifact_kinds:
+          type: array
+          items:
+            type: string
+      required:
+      - artifact_kinds
+      - description
+      - name
+      - public_id
+      - tags
+      - team
+      - track
+      - url
+    SearchOutput:
+      type: object
+      properties:
+        count:
+          type: integer
+        next_offset:
+          type: integer
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchItemOutput'
+      required:
+      - count
+      - items
+      - next_offset
     SelectionSourceEnum:
       enum:
       - manual
@@ -17093,6 +17491,18 @@ components:
       - platform
       - public_id
       - url
+    TagInput:
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            type: string
+            maxLength: 30
+            pattern: ^[-a-zA-Z0-9_]+$
+          maxItems: 10
+      required:
+      - tags
     Team:
       type: object
       properties:

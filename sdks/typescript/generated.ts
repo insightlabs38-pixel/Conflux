@@ -349,6 +349,28 @@ export type InputOfArchivePreviewSection = {
   imported_count: number;
 };
 
+export type ArtifactKindEnum =
+  | "file"
+  | "image"
+  | "video"
+  | "external_video"
+  | "repository"
+  | "live_url"
+  | "document"
+  | "dataset"
+  | "secret";
+
+export type InputOfArtifactKindEnum =
+  | "file"
+  | "image"
+  | "video"
+  | "external_video"
+  | "repository"
+  | "live_url"
+  | "document"
+  | "dataset"
+  | "secret";
+
 export type ArtifactSchema = {
   public_id: string;
   kind: string;
@@ -3339,6 +3361,72 @@ export type RubricVersion = {
 
 export type InputOfRubricVersion = { number: number; criteria: unknown };
 
+export type SavedSearchInput = { name: string; filters: SearchFilters };
+
+export type InputOfSavedSearchInput = {
+  name: string;
+  filters: InputOfSearchFilters;
+};
+
+export type SavedSearchOutput = {
+  public_id: string;
+  name: string;
+  filters: unknown;
+  created_at: string;
+};
+
+export type InputOfSavedSearchOutput = {};
+
+export type SearchFilters = {
+  q?: string;
+  tags?: string[];
+  artifact_kind?: ArtifactKindEnum;
+  track?: string;
+  stage?: string;
+};
+
+export type InputOfSearchFilters = {
+  q?: string;
+  tags?: string[];
+  artifact_kind?: InputOfArtifactKindEnum;
+  track?: string;
+  stage?: string;
+};
+
+export type SearchItemOutput = {
+  public_id: string;
+  name: string;
+  description: string;
+  track: string | null;
+  team: string | null;
+  url: string;
+  tags: string[];
+  artifact_kinds: string[];
+};
+
+export type InputOfSearchItemOutput = {
+  public_id: string;
+  name: string;
+  description: string;
+  track: string | null;
+  team: string | null;
+  url: string;
+  tags: string[];
+  artifact_kinds: string[];
+};
+
+export type SearchOutput = {
+  count: number;
+  next_offset: number | null;
+  items: SearchItemOutput[];
+};
+
+export type InputOfSearchOutput = {
+  count: number;
+  next_offset: number | null;
+  items: InputOfSearchItemOutput[];
+};
+
 export type SelectionSourceEnum = "manual" | "evaluation" | "community";
 
 export type InputOfSelectionSourceEnum = "manual" | "evaluation" | "community";
@@ -3575,6 +3663,10 @@ export type InputOfSubscriptionOutput = {
   enabled: boolean;
   created_at: string;
 };
+
+export type TagInput = { tags: string[] };
+
+export type InputOfTagInput = { tags: string[] };
 
 export type Team = {
   public_id: string;
@@ -3966,6 +4058,29 @@ export interface Operations {
   get_api_v1_events_event_public_id_questions: {
     request: { path: { event_public_id: string }; query?: { offset?: number } };
     response: QuestionOutput[];
+  };
+  get_api_v1_events_event_public_id_search: {
+    request: {
+      path: { event_public_id: string };
+      query?: {
+        artifact_kind?:
+          | "dataset"
+          | "document"
+          | "external_video"
+          | "file"
+          | "image"
+          | "live_url"
+          | "repository"
+          | "secret"
+          | "video";
+        offset?: number;
+        q?: string;
+        stage?: string;
+        tags?: string[];
+        track?: string;
+      };
+    };
+    response: SearchOutput;
   };
   get_api_v1_export_csv: { request: {}; response: string };
   get_api_v1_gallery: { request: {}; response: GalleryProjectSchema[] };
@@ -5170,6 +5285,27 @@ export interface Operations {
     };
     response: SubmissionSchema;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_tags: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: TagInput;
+  };
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_tags: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfTagInput;
+    };
+    response: TagInput;
+  };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_records_event: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: RecordOutput;
@@ -5219,6 +5355,38 @@ export interface Operations {
       body?: InputOfRegistrationSettings;
     };
     response: RegistrationSettings;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_saved_searches: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: SavedSearchOutput[];
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_saved_searches: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfSavedSearchInput;
+    };
+    response: SavedSearchOutput;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_saved_searches_view_public_id: {
+    request: {
+      path: {
+        event_public_id: string;
+        view_public_id: string;
+        workspace_public_id: string;
+      };
+      query?: { offset?: number };
+    };
+    response: SearchOutput;
+  };
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_saved_searches_view_public_id: {
+    request: {
+      path: {
+        event_public_id: string;
+        view_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: null;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -6305,6 +6473,14 @@ export const operations = {
     path: "/api/v1/events/{event_public_id}/questions/",
     path_params: ["event_public_id"],
     query_params: ["offset"],
+    request_body: false,
+    response_kind: "json",
+  },
+  get_api_v1_events_event_public_id_search: {
+    method: "GET",
+    path: "/api/v1/events/{event_public_id}/search/",
+    path_params: ["event_public_id"],
+    query_params: ["artifact_kind", "offset", "q", "stage", "tags", "track"],
     request_body: false,
     response_kind: "json",
   },
@@ -7996,6 +8172,32 @@ export const operations = {
       request_body: true,
       response_kind: "json",
     },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_tags:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/tags/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_tags:
+    {
+      method: "PUT",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/tags/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_records_event:
     {
       method: "POST",
@@ -8067,6 +8269,42 @@ export const operations = {
       query_params: [],
       request_body: true,
       response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_saved_searches:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/saved-searches/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_saved_searches:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/saved-searches/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_saved_searches_view_public_id:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/saved-searches/{view_public_id}/",
+      path_params: ["event_public_id", "view_public_id", "workspace_public_id"],
+      query_params: ["offset"],
+      request_body: false,
+      response_kind: "json",
+    },
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_saved_searches_view_public_id:
+    {
+      method: "DELETE",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/saved-searches/{view_public_id}/",
+      path_params: ["event_public_id", "view_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_sponsor_portal_awards:
     {

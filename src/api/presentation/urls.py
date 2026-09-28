@@ -2,8 +2,23 @@ from django.urls import path
 
 from . import record_views, views
 from .public_api import PublicGalleryView
+from .search import ProjectTagsView, PublicSearchView, SavedSearchDetailView, SavedSearchListView
+
+_prefix = "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/"
 
 urlpatterns = [
+    path("events/<uuid:event_public_id>/search/", PublicSearchView.as_view(), name="public-search"),
+    path(
+        _prefix + "projects/<uuid:project_public_id>/tags/",
+        ProjectTagsView.as_view(),
+        name="project-tags",
+    ),
+    path(_prefix + "saved-searches/", SavedSearchListView.as_view(), name="saved-search-list"),
+    path(
+        _prefix + "saved-searches/<uuid:view_public_id>/",
+        SavedSearchDetailView.as_view(),
+        name="saved-search-detail",
+    ),
     path(
         "events/<uuid:event_public_id>/gallery/",
         PublicGalleryView.as_view(),

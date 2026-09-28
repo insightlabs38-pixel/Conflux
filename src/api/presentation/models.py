@@ -1,4 +1,5 @@
 from core.models import PublicIdModel
+from django.conf import settings
 from django.db import models
 from events.models import Event
 
@@ -48,3 +49,33 @@ class PageBlock(PublicIdModel):
 
     def clean(self):
         self.config = clean_config(self.kind, self.config)
+
+
+class ProjectSearchTag(models.Model):
+    project = models.ForeignKey(
+        "projects.Project", on_delete=models.CASCADE, related_name="search_tags"
+    )
+    tag = models.SlugField(max_length=30)
+
+    class Meta:
+        ordering = ["tag"]
+        constraints = [
+            models.UniqueConstraint(fields=["project", "tag"], name="unique_project_search_tag")
+        ]
+        indexes = [models.Index(fields=["tag", "project"])]
+
+
+class SavedPublicSearch(PublicIdModel):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="saved_searches")
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    name = models.CharField(max_length=80)
+    filters = models.JSONField(default=dict)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event", "owner", "name"], name="unique_owner_event_search_name"
+            )
+        ]

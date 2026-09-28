@@ -140,6 +140,46 @@ class PolicyListView(OrganizerView):
 
 
 class PolicyDetailView(OrganizerView):
+    @extend_schema(request=PolicySerializer, responses=PolicySerializer)
+    @transaction.atomic
+    def patch(self, request, workspace_public_id, event_public_id, policy_public_id):
+        event = self.get_event()
+        self.ensure_mutable(event)
+        policy = get_object_or_404(
+            Policy.objects.select_for_update(), event=event, public_id=policy_public_id
+        )
+        serializer = PolicySerializer(policy, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        if "preset" in data:
+            try:
+                data["ast"] = build_preset_ast(data.pop("preset"), data.pop("preset_params", None))
+            except PolicyError as exc:
+                raise ValidationError({"preset": str(exc)}) from exc
+        fields = [field for field in ("name", "ast") if field in data]
+        before = snapshot_fields(policy, fields)
+        try:
+            with transaction.atomic():
+                for field in fields:
+                    setattr(policy, field, data[field])
+                policy.full_clean()
+                policy.save()
+                record_mutation(
+                    actor=request.user,
+                    workspace=self.get_workspace(),
+                    action="policy.updated",
+                    target=policy,
+                    event_type="policy.updated",
+                    payload={"event": str(event.public_id)},
+                    metadata={
+                        "event_id": str(event.public_id),
+                        "changes": diff_snapshots(before, snapshot_fields(policy, fields)),
+                    },
+                )
+        except ModelValidationError as exc:
+            raise _as_drf_validation_error(exc) from exc
+        return Response(PolicySerializer(policy).data)
+
     @extend_schema(responses={204: None})
     def delete(self, request, workspace_public_id, event_public_id, policy_public_id):
         policy = get_object_or_404(Policy, event=self.get_event(), public_id=policy_public_id)

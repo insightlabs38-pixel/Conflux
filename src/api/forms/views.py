@@ -1,6 +1,8 @@
 from accounts.authentication import CookieSessionAuthentication
+from audit.services import record_mutation
 from core.permissions import IsWorkspaceMember
 from django.core.exceptions import ValidationError as ModelValidationError
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from events.models import Event
@@ -144,6 +146,39 @@ class FormVersionListView(FormOrganizerView):
 
     def get(self, request, workspace_public_id, event_public_id, form_public_id):
         return Response([version_payload(version) for version in self.get_form().versions.all()])
+
+
+class FormVersionRestoreView(FormOrganizerView):
+    serializer_class = FormPayloadSchema
+
+    @extend_schema(request=None, responses=FormPayloadSchema)
+    @transaction.atomic
+    def post(
+        self, request, workspace_public_id, event_public_id, form_public_id, version_public_id
+    ):
+        event = Event.objects.select_for_update().get(pk=self.get_event().pk)
+        self.ensure_mutable(event)
+        form = self.get_form()
+        form = FormDefinition.objects.select_for_update().get(pk=form.pk)
+        version = get_object_or_404(FormVersion, definition=form, public_id=version_public_id)
+        try:
+            with transaction.atomic():
+                save_draft(form, version.schema)
+                record_mutation(
+                    actor=request.user,
+                    workspace=self.get_workspace(),
+                    action="form.draft_restored",
+                    target=form,
+                    metadata={
+                        "event_id": str(form.event.public_id),
+                        "restored_from_version": version.number,
+                    },
+                )
+        except ModelValidationError as exc:
+            raise ValidationError(
+                exc.message_dict if hasattr(exc, "message_dict") else exc.messages
+            ) from exc
+        return Response(form_payload(form))
 
 
 class FormPublishView(FormOrganizerView):

@@ -1009,6 +1009,20 @@ export type InputOfConfigHistoryEntrySchema = {
   created_at: string;
 };
 
+export type ConfigRestoreResultSchema = {
+  restored: boolean;
+  resource_type: string;
+  resource_id: string;
+  changes: unknown;
+};
+
+export type InputOfConfigRestoreResultSchema = {
+  restored: boolean;
+  resource_type: string;
+  resource_id: string;
+  changes: unknown;
+};
+
 export type ConflictOfInterest = {
   public_id: string;
   judge: string;
@@ -2301,6 +2315,23 @@ export type InputOfPatchedPageBlock = {
   kind?: InputOfPageBlockKindEnum;
   position?: number;
   config?: unknown;
+};
+
+export type PatchedPolicy = {
+  public_id?: string;
+  name?: string;
+  ast?: unknown;
+  preset?: string;
+  preset_params?: Record<string, unknown>;
+  created_at?: string;
+  updated_at?: string;
+};
+
+export type InputOfPatchedPolicy = {
+  name?: string;
+  ast?: unknown;
+  preset?: string;
+  preset_params?: Record<string, unknown>;
 };
 
 export type PatchedProjectPatchInputSchema = {
@@ -3617,6 +3648,16 @@ export interface Operations {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: ConfigHistoryEntrySchema[];
   };
+  post_api_v1_audit_workspace_public_id_events_event_public_id_config_history_audit_event_public_id_restore: {
+    request: {
+      path: {
+        audit_event_public_id: string;
+        event_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: ConfigRestoreResultSchema;
+  };
   get_api_v1_events_event_public_id: {
     request: { path: { event_public_id: string } };
     response: PublicEventSchema;
@@ -4174,6 +4215,17 @@ export interface Operations {
     };
     response: FormVersionSchema;
   };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_forms_form_public_id_versions_version_public_id_restore: {
+    request: {
+      path: {
+        event_public_id: string;
+        form_public_id: string;
+        version_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: FormPayloadSchema;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_calendar: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: JudgeCalendarSchema;
@@ -4397,6 +4449,17 @@ export interface Operations {
     request: {
       path: { event_public_id: string; workspace_public_id: string };
       body: InputOfPolicy;
+    };
+    response: Policy;
+  };
+  patch_api_v1_workspaces_workspace_public_id_events_event_public_id_policies_policy_public_id: {
+    request: {
+      path: {
+        event_public_id: string;
+        policy_public_id: string;
+        workspace_public_id: string;
+      };
+      body?: InputOfPatchedPolicy;
     };
     response: Policy;
   };
@@ -5430,6 +5493,18 @@ export interface Operations {
     };
     response: RubricLabSchema;
   };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_rubric_versions_rubric_version_public_id_restore: {
+    request: {
+      path: {
+        event_public_id: string;
+        plan_public_id: string;
+        rubric_version_public_id: string;
+        stage_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: EvaluationPlan;
+  };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_sensitivity: {
     request: {
       path: {
@@ -5790,6 +5865,19 @@ export const operations = {
     request_body: false,
     response_kind: "json",
   },
+  post_api_v1_audit_workspace_public_id_events_event_public_id_config_history_audit_event_public_id_restore:
+    {
+      method: "POST",
+      path: "/api/v1/audit/{workspace_public_id}/events/{event_public_id}/config-history/{audit_event_public_id}/restore/",
+      path_params: [
+        "audit_event_public_id",
+        "event_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
   get_api_v1_events_event_public_id: {
     method: "GET",
     path: "/api/v1/events/{event_public_id}/",
@@ -6610,6 +6698,20 @@ export const operations = {
       request_body: false,
       response_kind: "json",
     },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_forms_form_public_id_versions_version_public_id_restore:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/forms/{form_public_id}/versions/{version_public_id}/restore/",
+      path_params: [
+        "event_public_id",
+        "form_public_id",
+        "version_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_calendar:
     {
       method: "GET",
@@ -6970,6 +7072,19 @@ export const operations = {
     request_body: true,
     response_kind: "json",
   },
+  patch_api_v1_workspaces_workspace_public_id_events_event_public_id_policies_policy_public_id:
+    {
+      method: "PATCH",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/policies/{policy_public_id}/",
+      path_params: [
+        "event_public_id",
+        "policy_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
   delete_api_v1_workspaces_workspace_public_id_events_event_public_id_policies_policy_public_id:
     {
       method: "DELETE",
@@ -8280,6 +8395,21 @@ export const operations = {
       ],
       query_params: [],
       request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_rubric_versions_rubric_version_public_id_restore:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/rubric-versions/{rubric_version_public_id}/restore/",
+      path_params: [
+        "event_public_id",
+        "plan_public_id",
+        "rubric_version_public_id",
+        "stage_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
       response_kind: "json",
     },
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_sensitivity:

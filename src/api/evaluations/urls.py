@@ -74,6 +74,11 @@ urlpatterns = [
         views.RubricPublishView.as_view(),
         name="evaluation-plan-publish-rubric",
     ),
+    path(
+        f"{_PLAN}/rubric-versions/<uuid:rubric_version_public_id>/restore/",
+        views.RubricVersionRestoreView.as_view(),
+        name="evaluation-plan-rubric-restore",
+    ),
     path(f"{_PLAN}/ballots/", views.BallotListCreateView.as_view(), name="evaluation-plan-ballots"),
     path(
         f"{_PLAN}/candidates/",

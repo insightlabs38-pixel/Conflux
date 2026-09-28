@@ -16,7 +16,7 @@ class PolicySerializer(serializers.ModelSerializer):
         read_only_fields = ["created_at", "updated_at"]
 
     def validate(self, attrs):
-        if not attrs.get("ast") and not attrs.get("preset"):
+        if not attrs.get("ast", getattr(self.instance, "ast", None)) and not attrs.get("preset"):
             raise serializers.ValidationError({"ast": "Provide either 'ast' or 'preset'."})
         return attrs
 

@@ -121,6 +121,40 @@ paths:
                 items:
                   $ref: '#/components/schemas/ConfigHistoryEntrySchema'
           description: ''
+  /api/v1/audit/{workspace_public_id}/events/{event_public_id}/config-history/{audit_event_public_id}/restore/:
+    post:
+      operationId: post_api_v1_audit_workspace_public_id_events_event_public_id_config_history_audit_event_public_id_restore
+      parameters:
+      - in: path
+        name: audit_event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - audit
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigRestoreResultSchema'
+          description: ''
   /api/v1/events/{event_public_id}/:
     get:
       operationId: get_api_v1_events_event_public_id
@@ -3137,6 +3171,46 @@ paths:
               schema:
                 $ref: '#/components/schemas/FormVersionSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/forms/{form_public_id}/versions/{version_public_id}/restore/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_forms_form_public_id_versions_version_public_id_restore
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: form_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: version_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormPayloadSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-calendar/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_calendar
@@ -4477,6 +4551,50 @@ paths:
                 $ref: '#/components/schemas/Policy'
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/policies/{policy_public_id}/:
+    patch:
+      operationId: patch_api_v1_workspaces_workspace_public_id_events_event_public_id_policies_policy_public_id
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: policy_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPolicy'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPolicy'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPolicy'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Policy'
+          description: ''
     delete:
       operationId: delete_api_v1_workspaces_workspace_public_id_events_event_public_id_policies_policy_public_id
       parameters:
@@ -8913,6 +9031,52 @@ paths:
               schema:
                 $ref: '#/components/schemas/RubricLabSchema'
           description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/rubric-versions/{rubric_version_public_id}/restore/
+  : post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_rubric_versions_rubric_version_public_id_restore
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: rubric_version_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvaluationPlan'
+          description: ''
   ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/sensitivity/
   : post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_sensitivity
@@ -12301,6 +12465,21 @@ components:
       - public_id
       - resource_id
       - resource_type
+    ConfigRestoreResultSchema:
+      type: object
+      properties:
+        restored:
+          type: boolean
+        resource_type:
+          type: string
+        resource_id:
+          type: string
+        changes: {}
+      required:
+      - changes
+      - resource_id
+      - resource_type
+      - restored
     ConflictOfInterest:
       type: object
       properties:
@@ -14402,6 +14581,32 @@ components:
           minimum: 0
           format: int64
         config: {}
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedPolicy:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 120
+        ast: {}
+        preset:
+          type: string
+          writeOnly: true
+        preset_params:
+          type: object
+          additionalProperties: {}
+          writeOnly: true
         created_at:
           type: string
           format: date-time

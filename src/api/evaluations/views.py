@@ -14,6 +14,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, inline_serializer
+from events.models import Event
 from events.views import OrganizerView
 from participation.models import Team
 from projects.models import Project
@@ -444,6 +445,42 @@ class RubricPublishView(PlanMixin):
             else {"event_id": str(self.get_event().public_id)},
         )
         return Response(RubricVersionSerializer(version).data, status=201)
+
+
+class RubricVersionRestoreView(PlanMixin):
+    @extend_schema(request=None, responses={200: EvaluationPlanSerializer})
+    @transaction.atomic
+    def post(
+        self,
+        request,
+        workspace_public_id,
+        event_public_id,
+        stage_public_id,
+        plan_public_id,
+        rubric_version_public_id,
+    ):
+        event = Event.objects.select_for_update().get(pk=self.get_event().pk)
+        self.ensure_mutable(event)
+        plan = EvaluationPlan.objects.select_for_update().get(pk=self.get_plan().pk)
+        version = get_object_or_404(RubricVersion, plan=plan, public_id=rubric_version_public_id)
+        try:
+            with transaction.atomic():
+                plan.draft_criteria = version.criteria
+                plan.full_clean()
+                plan.save(update_fields=["draft_criteria", "updated_at"])
+                record_mutation(
+                    actor=request.user,
+                    workspace=self.get_workspace(),
+                    action="rubric.draft_restored",
+                    target=plan,
+                    metadata={
+                        "event_id": str(self.get_event().public_id),
+                        "restored_from_version": version.number,
+                    },
+                )
+        except ModelValidationError as exc:
+            raise _as_drf_validation_error(exc) from exc
+        return Response(EvaluationPlanSerializer(plan).data)
 
 
 class BallotListCreateView(PlanMixin):

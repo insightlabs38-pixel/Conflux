@@ -83,3 +83,67 @@ describe("form builder preview", () => {
     vi.unstubAllGlobals();
   });
 });
+
+it("restores a published form to draft without publishing", async () => {
+  const schema = {
+    fields: [
+      {
+        id: "pitch",
+        label: "Restored pitch",
+        type: "text",
+        required: false,
+        visible_to: ["participant"],
+      },
+    ],
+  };
+  const form = {
+    public_id: "f1",
+    name: "Application",
+    draft_schema: { fields: [] },
+  };
+  const fetchMock = vi.fn().mockImplementation(async (url: string) => ({
+    ok: true,
+    status: 200,
+    json: async () =>
+      url.endsWith("restore/")
+        ? { ...form, draft_schema: schema }
+        : url.endsWith("versions/")
+          ? [{ public_id: "v1", number: 1, schema }]
+          : [form],
+  }));
+  vi.stubGlobal("fetch", fetchMock);
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  await act(async () =>
+    root.render(<FormBuilder workspaceId="w" eventId="e" />),
+  );
+  await waitFor(() => container.querySelector("select") !== null);
+  await act(async () => {
+    const select = container.querySelector("select")!;
+    select.value = "f1";
+    select.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  await waitFor(
+    () => container.textContent?.includes("Restore to draft") ?? false,
+  );
+  await act(async () =>
+    Array.from(container.querySelectorAll("button"))
+      .find((b) => b.textContent === "Restore to draft")!
+      .click(),
+  );
+  await waitFor(
+    () => container.textContent?.includes("Publish to make it live") ?? false,
+  );
+  expect(container.textContent).toContain("Restored pitch");
+  expect(fetchMock).toHaveBeenCalledWith(
+    "/api/v1/workspaces/w/events/e/forms/f1/versions/v1/restore/",
+    expect.objectContaining({ method: "POST" }),
+  );
+  expect(fetchMock.mock.calls.some(([url]) => url.endsWith("publish/"))).toBe(
+    false,
+  );
+  act(() => root.unmount());
+  container.remove();
+  vi.unstubAllGlobals();
+});

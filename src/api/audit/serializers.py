@@ -19,3 +19,10 @@ class ConfigHistoryEntrySchema(serializers.Serializer):
     resource_id = serializers.CharField(allow_blank=True)
     changes = serializers.JSONField()
     created_at = serializers.DateTimeField()
+
+
+class ConfigRestoreResultSchema(serializers.Serializer):
+    restored = serializers.BooleanField()
+    resource_type = serializers.CharField()
+    resource_id = serializers.CharField()
+    changes = serializers.JSONField()

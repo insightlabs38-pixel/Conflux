@@ -922,6 +922,18 @@ class InputOfConfigHistoryEntrySchema(TypedDict):
     changes: Any
     created_at: str
 
+class ConfigRestoreResultSchema(TypedDict):
+    restored: bool
+    resource_type: str
+    resource_id: str
+    changes: Any
+
+class InputOfConfigRestoreResultSchema(TypedDict):
+    restored: bool
+    resource_type: str
+    resource_id: str
+    changes: Any
+
 class ConflictOfInterest(TypedDict):
     public_id: str
     judge: str
@@ -2132,6 +2144,21 @@ class InputOfPatchedPageBlock(TypedDict):
     kind: NotRequired[InputOfPageBlockKindEnum]
     position: NotRequired[int]
     config: NotRequired[Any]
+
+class PatchedPolicy(TypedDict):
+    public_id: NotRequired[str]
+    name: NotRequired[str]
+    ast: NotRequired[Any]
+    preset: NotRequired[str]
+    preset_params: NotRequired[dict[str, Any]]
+    created_at: NotRequired[str]
+    updated_at: NotRequired[str]
+
+class InputOfPatchedPolicy(TypedDict):
+    name: NotRequired[str]
+    ast: NotRequired[Any]
+    preset: NotRequired[str]
+    preset_params: NotRequired[dict[str, Any]]
 
 class PatchedProjectPatchInputSchema(TypedDict):
     name: NotRequired[str]
@@ -4542,6 +4569,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                     'query_params': [],
                                                                                                     'request_body': True,
                                                                                                     'response_kind': 'json'},
+ 'patch_api_v1_workspaces_workspace_public_id_events_event_public_id_policies_policy_public_id': {'method': 'PATCH',
+                                                                                                  'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/policies/{policy_public_id}/',
+                                                                                                  'path_params': ['event_public_id',
+                                                                                                                  'policy_public_id',
+                                                                                                                  'workspace_public_id'],
+                                                                                                  'query_params': [],
+                                                                                                  'request_body': True,
+                                                                                                  'response_kind': 'json'},
  'patch_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id': {'method': 'PATCH',
                                                                                                    'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/',
                                                                                                    'path_params': ['event_public_id',
@@ -4617,6 +4652,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                  'query_params': [],
                                  'request_body': False,
                                  'response_kind': 'none'},
+ 'post_api_v1_audit_workspace_public_id_events_event_public_id_config_history_audit_event_public_id_restore': {'method': 'POST',
+                                                                                                               'path': '/api/v1/audit/{workspace_public_id}/events/{event_public_id}/config-history/{audit_event_public_id}/restore/',
+                                                                                                               'path_params': ['audit_event_public_id',
+                                                                                                                               'event_public_id',
+                                                                                                                               'workspace_public_id'],
+                                                                                                               'query_params': [],
+                                                                                                               'request_body': False,
+                                                                                                               'response_kind': 'json'},
  'post_api_v1_public_events_event_public_id_voting_request_email_token': {'method': 'POST',
                                                                           'path': '/api/v1/public/events/{event_public_id}/voting/request-email-token/',
                                                                           'path_params': ['event_public_id'],
@@ -4858,6 +4901,15 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                     'query_params': [],
                                                                                                     'request_body': False,
                                                                                                     'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_forms_form_public_id_versions_version_public_id_restore': {'method': 'POST',
+                                                                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/forms/{form_public_id}/versions/{version_public_id}/restore/',
+                                                                                                                               'path_params': ['event_public_id',
+                                                                                                                                               'form_public_id',
+                                                                                                                                               'version_public_id',
+                                                                                                                                               'workspace_public_id'],
+                                                                                                                               'query_params': [],
+                                                                                                                               'request_body': False,
+                                                                                                                               'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_conflicts': {'method': 'POST',
                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-conflicts/',
                                                                                        'path_params': ['event_public_id',
@@ -5263,6 +5315,16 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                          'query_params': [],
                                                                                                                                          'request_body': True,
                                                                                                                                          'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_rubric_versions_rubric_version_public_id_restore': {'method': 'POST',
+                                                                                                                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/rubric-versions/{rubric_version_public_id}/restore/',
+                                                                                                                                                                               'path_params': ['event_public_id',
+                                                                                                                                                                                               'plan_public_id',
+                                                                                                                                                                                               'rubric_version_public_id',
+                                                                                                                                                                                               'stage_public_id',
+                                                                                                                                                                                               'workspace_public_id'],
+                                                                                                                                                                               'query_params': [],
+                                                                                                                                                                               'request_body': False,
+                                                                                                                                                                               'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_sensitivity': {'method': 'POST',
                                                                                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/sensitivity/',
                                                                                                                                           'path_params': ['event_public_id',

@@ -219,6 +219,22 @@ export function FormBuilder({
     setRequiredValue("");
   }
 
+  function restoreVersion(version: Version) {
+    void run(async () => {
+      const updated = await request<Form>(
+        base + `${selectedId}/versions/${version.public_id}/restore/`,
+        "POST",
+      );
+      setForms(
+        forms.map((form) => (form.public_id === selectedId ? updated : form)),
+      );
+      setFields(updated.draft_schema.fields);
+      setNotice(
+        `Version ${version.number} restored to draft. Publish to make it live.`,
+      );
+    });
+  }
+
   function save(publish: boolean) {
     void run(async () => {
       const updated = await request<Form>(base + `${selectedId}/`, "PUT", {
@@ -562,6 +578,9 @@ export function FormBuilder({
                 <li key={version.public_id}>
                   Version {version.number} ({version.schema.fields.length}{" "}
                   fields)
+                  <button type="button" onClick={() => restoreVersion(version)}>
+                    Restore to draft
+                  </button>
                 </li>
               ))}
             </ul>

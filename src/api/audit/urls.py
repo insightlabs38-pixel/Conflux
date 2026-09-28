@@ -13,4 +13,10 @@ urlpatterns = [
         views.EventConfigHistoryView.as_view(),
         name="event-config-history",
     ),
+    path(
+        "<uuid:workspace_public_id>/events/<uuid:event_public_id>"
+        "/config-history/<uuid:audit_event_public_id>/restore/",
+        views.EventConfigHistoryRestoreView.as_view(),
+        name="event-config-history-restore",
+    ),
 ]

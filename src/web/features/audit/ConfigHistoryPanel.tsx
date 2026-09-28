@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
@@ -32,6 +33,9 @@ export function ConfigHistoryPanel({
 }) {
   const [entries, setEntries] = useState<HistoryEntry[] | null>(null);
   const [error, setError] = useState("");
+  const [pending, setPending] = useState<string | null>(null);
+  const [restoring, setRestoring] = useState(false);
+  const [notice, setNotice] = useState("");
 
   function load() {
     setError("");
@@ -49,8 +53,31 @@ export function ConfigHistoryPanel({
   }
   useEffect(load, [workspaceId, eventId]);
 
+  async function restore(entry: HistoryEntry) {
+    setRestoring(true);
+    setError("");
+    setNotice("");
+    try {
+      const response = await fetch(
+        `/api/v1/audit/${workspaceId}/events/${eventId}/config-history/${entry.public_id}/restore/`,
+        { method: "POST", credentials: "include" },
+      );
+      if (!response.ok) throw new Error(`Restore failed (${response.status}).`);
+      setPending(null);
+      setNotice(
+        "Configuration restored. Reload its editor to see the current values.",
+      );
+      load();
+    } catch (cause) {
+      setError(message(cause));
+    } finally {
+      setRestoring(false);
+    }
+  }
+
   return (
     <Card title="Configuration history">
+      {notice && <p role="status">{notice}</p>}
       {error && <ErrorState message={error} onRetry={load} />}
       {!error && entries === null && (
         <LoadingState label="Loading configuration history…" />
@@ -80,6 +107,44 @@ export function ConfigHistoryPanel({
                   </div>
                 ))}
               </dl>
+              {[
+                "Stage",
+                "TemporalGate",
+                "Policy",
+                "Event",
+                "Track",
+                "BasePrize",
+              ].includes(entry.resource_type) &&
+                /\.(updated|restored)$/.test(entry.action) &&
+                (pending === entry.public_id ? (
+                  <div>
+                    <p>
+                      Restore the before values shown above? Other fields keep
+                      their current values.
+                    </p>
+                    <Button
+                      disabled={restoring}
+                      onClick={() => void restore(entry)}
+                    >
+                      Confirm restore
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      disabled={restoring}
+                      onClick={() => setPending(null)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    variant="secondary"
+                    disabled={restoring}
+                    onClick={() => setPending(entry.public_id)}
+                  >
+                    Restore before values
+                  </Button>
+                ))}
             </li>
           ))}
         </ul>

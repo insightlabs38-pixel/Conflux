@@ -299,6 +299,29 @@ paths:
                 items:
                   $ref: '#/components/schemas/QuestionOutput'
           description: ''
+  /api/v1/events/{event_public_id}/result-corrections/:
+    get:
+      operationId: get_api_v1_events_event_public_id_result_corrections
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - events
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+          description: ''
   /api/v1/events/{event_public_id}/search/:
     get:
       operationId: get_api_v1_events_event_public_id_search
@@ -4020,6 +4043,153 @@ paths:
               schema:
                 $ref: '#/components/schemas/ExceptionGrant'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/exception-requests/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_exception_requests
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/exception-requests/{request_public_id}/approve/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_exception_requests_request_public_id_approve
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: request_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExceptionApprovalInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExceptionApprovalInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExceptionApprovalInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/exception-requests/{request_public_id}/cancel/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_exception_requests_request_public_id_cancel
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: request_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExceptionApprovalInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExceptionApprovalInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExceptionApprovalInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/exception-requests/{request_public_id}/reject/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_exception_requests_request_public_id_reject
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: request_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExceptionApprovalInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExceptionApprovalInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExceptionApprovalInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/forms/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_forms
@@ -4274,6 +4444,65 @@ paths:
               schema:
                 $ref: '#/components/schemas/FormPayloadSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/governance/settings/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_governance_settings
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_events_event_public_id_governance_settings
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettingsInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SettingsInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SettingsInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-calendar/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_calendar
@@ -7864,6 +8093,77 @@ paths:
               schema:
                 $ref: '#/components/schemas/FindingOutput'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/exception-requests/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_exception_requests
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_exception_requests
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExceptionRequestInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ExceptionRequestInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ExceptionRequestInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/forms/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_forms
@@ -8611,6 +8911,42 @@ paths:
               schema:
                 $ref: '#/components/schemas/SubmissionPreviewSchema'
           description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/submissions/{stage_public_id}/receipt/
+  : get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions_stage_public_id_receipt
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
   ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/submissions/{stage_public_id}/reopen/
   : post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_submissions_stage_public_id_reopen
@@ -9137,6 +9473,359 @@ paths:
               schema:
                 $ref: '#/components/schemas/RegistrationSettings'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/result-corrections/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_result_corrections
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/result-publication-requests/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_result_publication_requests
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_result_publication_requests
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicationRequestInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PublicationRequestInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PublicationRequestInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/result-publication-requests/{request_public_id}/approve/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_result_publication_requests_request_public_id_approve
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: request_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecisionNoteInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DecisionNoteInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DecisionNoteInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/result-publication-requests/{request_public_id}/cancel/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_result_publication_requests_request_public_id_cancel
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: request_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecisionNoteInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DecisionNoteInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DecisionNoteInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/result-publication-requests/{request_public_id}/reject/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_result_publication_requests_request_public_id_reject
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: request_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecisionNoteInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DecisionNoteInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DecisionNoteInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/rules/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_rules
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_rules
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParticipantRulesInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ParticipantRulesInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ParticipantRulesInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/rules/{number}/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_rules_number
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: number
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/rules/acknowledge/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_rules_acknowledge
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RulesAcknowledgeInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RulesAcknowledgeInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RulesAcknowledgeInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/rules/acknowledgements/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_rules_acknowledgements
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/saved-searches/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_saved_searches
@@ -10304,6 +10993,42 @@ paths:
               schema:
                 $ref: '#/components/schemas/AppealSchema'
           description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignment-responses/
+  : get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignment_responses
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
   ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/assignments/
   : get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_assignments
@@ -11475,6 +12200,96 @@ paths:
                 items:
                   $ref: '#/components/schemas/FeedbackEntrySchema'
           description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/my-assignments/
+  : get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_my_assignments
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/my-assignments/{project_public_id}/respond/
+  : post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_my_assignments_project_public_id_respond
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: plan_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: stage_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignmentResponseInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AssignmentResponseInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssignmentResponseInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
   ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/my-route/
   : get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_my_route
@@ -15408,6 +16223,23 @@ components:
         coverage:
           type: integer
           minimum: 1
+    AssignmentResponseInput:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/AssignmentResponseInputStatusEnum'
+        reason:
+          type: string
+      required:
+      - status
+    AssignmentResponseInputStatusEnum:
+      enum:
+      - accepted
+      - declined
+      type: string
+      description: |-
+        * `accepted` - accepted
+        * `declined` - declined
     AssignmentVersion:
       type: object
       properties:
@@ -16752,6 +17584,11 @@ components:
         * `needs_remediation` - Needs remediation
         * `cleared` - Cleared
         * `ineligible` - Ineligible
+    DecisionNoteInput:
+      type: object
+      properties:
+        note:
+          type: string
     DeliveryInspection:
       type: object
       properties:
@@ -17358,6 +18195,14 @@ components:
       - public_id
       - sections
       - source_event_name
+    ExceptionApprovalInput:
+      type: object
+      properties:
+        note:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
     ExceptionGrant:
       type: object
       properties:
@@ -17392,6 +18237,13 @@ components:
       - public_id
       - subject_id
       - subject_type
+    ExceptionRequestInput:
+      type: object
+      properties:
+        reason:
+          type: string
+      required:
+      - reason
     ExpertiseInputSchema:
       type: object
       properties:
@@ -18931,6 +19783,17 @@ components:
       - public_id
       - schema
       - stage
+    ParticipantRulesInput:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+        body:
+          type: string
+      required:
+      - body
+      - title
     ParticipationModeEnum:
       enum:
       - individual
@@ -20080,6 +20943,24 @@ components:
       - opens_at
       - surface
       - updated_at
+    PublicationRequestInput:
+      type: object
+      properties:
+        plan:
+          type: string
+          format: uuid
+        normalization_run:
+          type: string
+          format: uuid
+        tie_breaks:
+          type: object
+          additionalProperties:
+            type: integer
+        reason:
+          type: string
+      required:
+      - normalization_run
+      - plan
     QualifierEntryInput:
       type: object
       properties:
@@ -20474,6 +21355,8 @@ components:
           type: object
           additionalProperties:
             type: integer
+        reason:
+          type: string
       required:
       - normalization_run
     RetentionPolicyInput:
@@ -20728,6 +21611,11 @@ components:
       - number
       - public_id
       - published_at
+    RulesAcknowledgeInput:
+      type: object
+      properties:
+        number:
+          type: integer
     RulesInput:
       type: object
       properties:
@@ -20933,6 +21821,13 @@ components:
             type: integer
             minimum: 1
           maxItems: 10
+    SettingsInput:
+      type: object
+      properties:
+        require_publication_approval:
+          type: boolean
+      required:
+      - require_publication_approval
     SeverityEnum:
       enum:
       - blocking

@@ -183,4 +183,16 @@ TABLES = {
         "",
     ),
     "mentorship.officehoursignup": ("slot__event", "slot project created_by created_at", ""),
+    "governance.rulesversion": ("event", "event number title body created_by created_at", ""),
+    "governance.rulesacknowledgement": ("version__event", "version user created_at", ""),
+    "governance.resultcorrection": (
+        "plan__stage__event",
+        "plan previous_run run reason published_by created_at",
+        "",
+    ),
+    "governance.submissionreceipt": (
+        "version__submission__project__event",
+        "version token issued_at",
+        "",
+    ),
 }

@@ -58,7 +58,8 @@ def handlers(entry):
 
 def fill(route, values):
     def replace(match):
-        return str(values.get(match.group(2), uuid.uuid4()))
+        default = 1 if match.group(1) == "int:" else uuid.uuid4()
+        return str(values.get(match.group(2), default))
 
     return "/api/v1/" + re.sub(r"<(\w+:)?(\w+)>", replace, route)
 

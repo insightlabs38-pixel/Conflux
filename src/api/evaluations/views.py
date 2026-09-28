@@ -1206,32 +1206,27 @@ class ResultsPublishView(PlanMixin):
     @extend_schema(request=ResultsPublishInputSchema, responses=EvaluationPlanSerializer)
     @transaction.atomic
     def post(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        from django.core.exceptions import ValidationError as ModelValidationError
+        from governance import services as governance
+
         plan = self.get_plan()
+        if governance.approval_required(self.get_event()):
+            raise ValidationError(
+                {"detail": "This event requires a second organizer's approval to publish results."}
+            )
         run = get_object_or_404(
             NormalizationRun, plan=plan, public_id=request.data.get("normalization_run")
         )
-        tie_breaks = request.data.get("tie_breaks", {})
-        if not isinstance(tie_breaks, dict) or not all(
-            isinstance(v, int) and not isinstance(v, bool) for v in tie_breaks.values()
-        ):
-            raise ValidationError({"tie_breaks": "Must map project public_id to an integer."})
-        resolved = {}
-        for project_public_id, value in tie_breaks.items():
-            project = get_object_or_404(
-                Project, event=self.get_event(), public_id=project_public_id
+        try:
+            governance.apply_publication(
+                plan,
+                run,
+                request.data.get("tie_breaks", {}),
+                request.user,
+                reason=str(request.data.get("reason", "")),
             )
-            resolved[str(project.id)] = value
-        plan.published_normalization_run = run
-        plan.tie_breaks = resolved
-        plan.full_clean()
-        plan.save(update_fields=["published_normalization_run", "tie_breaks", "updated_at"])
-        record_mutation(
-            actor=request.user,
-            workspace=self.get_workspace(),
-            action="results.published",
-            target=plan,
-            metadata={"normalization_run": run.number},
-        )
+        except ModelValidationError as exc:
+            raise ValidationError({"tie_breaks": exc.messages}) from exc
         return Response(EvaluationPlanSerializer(plan).data)
 
 

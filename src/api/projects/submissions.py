@@ -182,6 +182,9 @@ def finalize_submission(project, stage, actor, *, revision):
             "version": str(version.public_id),
         },
     )
+    from governance.services import issue_receipt
+
+    issue_receipt(version)
     return submission, version, True
 
 

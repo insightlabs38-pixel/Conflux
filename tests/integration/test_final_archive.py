@@ -338,6 +338,7 @@ EXCLUDED_EVENT_MODELS = {
     "integrations.externalqualifierbinding",
     "integrations.externalqualifierimport",
     "policies.exceptiongrant",
+    "governance.deadlineexceptionrequest",
     "participation.marketplaceprofile",
     "presentation.savedpublicsearch",
     "evaluations.judgecoirelationship",

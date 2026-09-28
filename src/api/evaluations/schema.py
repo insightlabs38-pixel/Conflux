@@ -125,6 +125,7 @@ class EvaluationProgressSchema(serializers.Serializer):
 class ResultsPublishInputSchema(serializers.Serializer):
     normalization_run = serializers.UUIDField()
     tie_breaks = serializers.DictField(child=serializers.IntegerField(), required=False)
+    reason = serializers.CharField(required=False, allow_blank=True)
 
 
 class RankedResultSchema(serializers.Serializer):

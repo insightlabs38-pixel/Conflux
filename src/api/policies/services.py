@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 
+from django.db.models import Q
 from django.utils import timezone
 
 from .evaluator import is_allowed
@@ -66,10 +67,16 @@ def explain_action(event, action, facts, *, subject_type=None, subject_id=None):
         )
 
     if subject_type and subject_id:
-        grant = ExceptionGrant.objects.filter(
-            event=event, action=action, subject_type=subject_type, subject_id=subject_id
-        ).first()
-        if grant and grant.is_active():
+        now = timezone.now()
+        grant = (
+            ExceptionGrant.objects.filter(
+                event=event, action=action, subject_type=subject_type, subject_id=subject_id
+            )
+            .filter(Q(expires_at__isnull=True) | Q(expires_at__gt=now))
+            .order_by("-granted_at")
+            .first()
+        )
+        if grant:
             grant_reason = grant.reason or "no reason given"
             return Decision(
                 action=action,

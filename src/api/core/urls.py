@@ -38,4 +38,5 @@ urlpatterns = [
     path("", include("deliberation.urls")),
     path("", include("onsite.urls")),
     path("", include("mentorship.urls")),
+    path("", include("governance.urls")),
 ]

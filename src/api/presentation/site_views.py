@@ -102,6 +102,23 @@ def gallery(request, event_public_id):
     )
 
 
+def finalists(request, event_public_id):
+    from .publication_views import finalist_projects
+
+    event = get_public_event(event_public_id)
+    page = Page.objects.filter(event=event).first()
+    return render(
+        request,
+        "presentation/gallery.html",
+        {
+            "event": event,
+            "theme": page.theme if page else "default",
+            "projects": finalist_projects(event),
+            "finalists": True,
+        },
+    )
+
+
 def project_detail(request, event_public_id, project_public_id):
     event = get_public_event(event_public_id)
     project = get_object_or_404(public_projects(event), public_id=project_public_id)

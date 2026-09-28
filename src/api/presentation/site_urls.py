@@ -3,6 +3,7 @@ from django.urls import path
 from . import site_views, stories
 
 urlpatterns = [
+    path("<uuid:event_public_id>/finalists/", site_views.finalists, name="site-finalists"),
     path("<uuid:event_public_id>/results/", stories.results, name="site-results"),
     path(
         "<uuid:event_public_id>/results/awards/<uuid:award_public_id>/",

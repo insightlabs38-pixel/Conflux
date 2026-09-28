@@ -1,8 +1,9 @@
 {% extends "presentation/base.html" %}
 {% load i18n %}
-{% block title %}{% trans "Gallery" %} &middot; {{ event.name }}{% endblock %}
+{% block title %}{% if finalists %}{% trans "Finalists" %}{% else %}{% trans "Gallery" %}{% endif %} &middot; {{ event.name }}{% endblock %}
 {% block content %}
-<h1>{% trans "Project gallery" %}</h1>
+<h1>{% if finalists %}{% trans "Finalists" %}{% else %}{% trans "Project gallery" %}{% endif %}</h1>
+{% if not finalists %}
 <form class="cx-search-form" method="get" role="search" aria-label="Search projects">
   <label>
     {% trans "Search" %}
@@ -32,6 +33,7 @@
   {% endif %}
   <button class="cx-button cx-button--primary" type="submit">{% trans "Search" %}</button>
 </form>
+{% endif %}
 {% if projects %}
   <ul class="cx-grid">
     {% for project in projects %}

@@ -2813,6 +2813,28 @@ class InputOfPublicWinnerOutput(TypedDict):
     project: str
     project_name: str
 
+class PublicationInput(TypedDict):
+    opens_at: str
+    closes_at: NotRequired[str | None]
+    finalist_stage: NotRequired[str | None]
+
+class InputOfPublicationInput(TypedDict):
+    opens_at: str
+    closes_at: NotRequired[str | None]
+    finalist_stage: NotRequired[str | None]
+
+class PublicationOutput(TypedDict):
+    surface: SurfaceEnum
+    opens_at: str
+    closes_at: str | None
+    finalist_stage: str | None
+    updated_at: str
+
+class InputOfPublicationOutput(TypedDict):
+    opens_at: str
+    closes_at: str | None
+    finalist_stage: str | None
+
 class QualifierEntryInput(TypedDict):
     external_ref: str
     project: NotRequired[str | None]
@@ -3342,6 +3364,10 @@ class InputOfSubscriptionOutput(TypedDict):
     enabled: bool
     created_at: str
 
+SurfaceEnum = Literal['gallery', 'finalists', 'feedback', 'winners', 'archive']
+
+InputOfSurfaceEnum = Literal['gallery', 'finalists', 'feedback', 'winners', 'archive']
+
 class TagInput(TypedDict):
     tags: list[str]
 
@@ -3802,6 +3828,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                            'query_params': [],
                                                                                                            'request_body': False,
                                                                                                            'response_kind': 'none'},
+ 'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_publication_schedules_surface': {'method': 'DELETE',
+                                                                                                       'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/publication-schedules/{surface}/',
+                                                                                                       'path_params': ['event_public_id',
+                                                                                                                       'surface',
+                                                                                                                       'workspace_public_id'],
+                                                                                                       'query_params': ['surface'],
+                                                                                                       'request_body': False,
+                                                                                                       'response_kind': 'none'},
  'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_invite_codes_code_public_id': {'method': 'DELETE',
                                                                                                                   'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/registration-invite-codes/{code_public_id}/',
                                                                                                                   'path_params': ['code_public_id',
@@ -3905,6 +3939,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                               'query_params': [],
                                               'request_body': False,
                                               'response_kind': 'json'},
+ 'get_api_v1_events_event_public_id_finalists': {'method': 'GET',
+                                                 'path': '/api/v1/events/{event_public_id}/finalists/',
+                                                 'path_params': ['event_public_id'],
+                                                 'query_params': [],
+                                                 'request_body': False,
+                                                 'response_kind': 'json'},
  'get_api_v1_events_event_public_id_gallery': {'method': 'GET',
                                                'path': '/api/v1/events/{event_public_id}/gallery/',
                                                'path_params': ['event_public_id'],
@@ -4470,6 +4510,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                       'query_params': [],
                                                                                                       'request_body': False,
                                                                                                       'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_publication_schedules': {'method': 'GET',
+                                                                                            'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/publication-schedules/',
+                                                                                            'path_params': ['event_public_id',
+                                                                                                            'workspace_public_id'],
+                                                                                            'query_params': [],
+                                                                                            'request_body': False,
+                                                                                            'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_invite_codes': {'method': 'GET',
                                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/registration-invite-codes/',
                                                                                                 'path_params': ['event_public_id',
@@ -5963,6 +6010,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                       'query_params': [],
                                                                                                       'request_body': True,
                                                                                                       'response_kind': 'json'},
+ 'put_api_v1_workspaces_workspace_public_id_events_event_public_id_publication_schedules_surface': {'method': 'PUT',
+                                                                                                    'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/publication-schedules/{surface}/',
+                                                                                                    'path_params': ['event_public_id',
+                                                                                                                    'surface',
+                                                                                                                    'workspace_public_id'],
+                                                                                                    'query_params': ['surface'],
+                                                                                                    'request_body': True,
+                                                                                                    'response_kind': 'json'},
  'put_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_settings': {'method': 'PUT',
                                                                                             'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/registration-settings/',
                                                                                             'path_params': ['event_public_id',

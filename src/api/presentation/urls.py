@@ -2,11 +2,15 @@ from django.urls import path
 
 from . import record_views, views
 from .public_api import PublicGalleryView
+from .publication_views import PublicationDetailView, PublicationListView, PublicFinalistsView
 from .search import ProjectTagsView, PublicSearchView, SavedSearchDetailView, SavedSearchListView
 
 _prefix = "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/"
 
 urlpatterns = [
+    path(_prefix + "publication-schedules/", PublicationListView.as_view()),
+    path(_prefix + "publication-schedules/<str:surface>/", PublicationDetailView.as_view()),
+    path("events/<uuid:event_public_id>/finalists/", PublicFinalistsView.as_view()),
     path("events/<uuid:event_public_id>/search/", PublicSearchView.as_view(), name="public-search"),
     path(
         _prefix + "projects/<uuid:project_public_id>/tags/",

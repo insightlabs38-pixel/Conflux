@@ -7,19 +7,30 @@ Django template renders directly -- no client-side fetch involved.
 
 from artifacts.models import Artifact, ArtifactStatus, ArtifactVisibility
 from artifacts.storage import S3Storage
+from django.http import Http404
 from django.shortcuts import get_object_or_404
-from events.models import PUBLICLY_VISIBLE_STATUSES, Event
+from events.models import PUBLICLY_VISIBLE_STATUSES, Event, EventStatus
 from projects.models import Project, SubmissionStatus
+
+from .models import PublicationSurface
+from .publication import publication_visible
 
 
 def get_public_event(event_public_id):
-    return get_object_or_404(
+    event = get_object_or_404(
         Event, public_id=event_public_id, is_public=True, status__in=PUBLICLY_VISIBLE_STATUSES
     )
+    if event.status == EventStatus.ARCHIVED and not publication_visible(
+        event, PublicationSurface.ARCHIVE
+    ):
+        raise Http404("Archive has not been released.")
+    return event
 
 
 def public_projects(event, *, q=None, stage_public_id=None, track_public_id=None):
     """Projects with at least one finalized submission for this event."""
+    if not publication_visible(event, PublicationSurface.GALLERY):
+        return Project.objects.none()
     filters = {"event": event, "submissions__status": SubmissionStatus.FINALIZED}
     if stage_public_id:
         filters["submissions__stage__public_id"] = stage_public_id

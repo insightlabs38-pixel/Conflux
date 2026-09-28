@@ -32,18 +32,20 @@ class PublicGalleryView(APIView):
         event = get_public_event(event_public_id)
         q = request.query_params.get("q", "").strip()
         projects = public_projects(event, q=q or None)
-        return Response(
-            [
-                {
-                    "public_id": str(project.public_id),
-                    "name": project.name,
-                    "description": project.description,
-                    "track": project.track.name if project.track else None,
-                    "team": project.team.name if project.team else None,
-                    "url": request.build_absolute_uri(
-                        f"/e/{event.public_id}/projects/{project.public_id}/"
-                    ),
-                }
-                for project in projects
-            ]
-        )
+        return Response(gallery_items(request, event, projects))
+
+
+def gallery_items(request, event, projects):
+    return [
+        {
+            "public_id": str(project.public_id),
+            "name": project.name,
+            "description": project.description,
+            "track": project.track.name if project.track else None,
+            "team": project.team.name if project.team else None,
+            "url": request.build_absolute_uri(
+                f"/e/{event.public_id}/projects/{project.public_id}/"
+            ),
+        }
+        for project in projects
+    ]

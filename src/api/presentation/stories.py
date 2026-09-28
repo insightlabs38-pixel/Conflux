@@ -11,12 +11,15 @@ from django.utils.html import strip_tags
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_safe
 
-from .models import Page
+from .models import Page, PublicationSurface
 from .public import get_public_event, public_projects
+from .publication import publication_visible
 from .technical import render_technical_description
 
 
 def visible_awards(event):
+    if not publication_visible(event, PublicationSurface.WINNERS):
+        return Award.objects.none()
     winners = AwardWinner.objects.filter(project__in=public_projects(event)).select_related(
         "project", "project__track"
     )

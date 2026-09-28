@@ -226,6 +226,29 @@ paths:
                 items:
                   $ref: '#/components/schemas/PublicAwardOutput'
           description: ''
+  /api/v1/events/{event_public_id}/finalists/:
+    get:
+      operationId: get_api_v1_events_event_public_id_finalists
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - events
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GalleryItemOutput'
+          description: ''
   /api/v1/events/{event_public_id}/gallery/:
     get:
       operationId: get_api_v1_events_event_public_id_gallery
@@ -6511,6 +6534,129 @@ paths:
               schema:
                 $ref: '#/components/schemas/TagInput'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/publication-schedules/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_publication_schedules
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicationOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/publication-schedules/{surface}/:
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_events_event_public_id_publication_schedules_surface
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: surface
+        schema:
+          type: string
+        required: true
+      - in: query
+        name: surface
+        schema:
+          type: string
+          enum:
+          - archive
+          - feedback
+          - finalists
+          - gallery
+          - winners
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicationInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PublicationInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PublicationInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicationOutput'
+          description: ''
+    delete:
+      operationId: delete_api_v1_workspaces_workspace_public_id_events_event_public_id_publication_schedules_surface
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: surface
+        schema:
+          type: string
+        required: true
+      - in: query
+        name: surface
+        schema:
+          type: string
+          enum:
+          - archive
+          - feedback
+          - finalists
+          - gallery
+          - winners
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/records/event/:
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_records_event
@@ -16564,6 +16710,50 @@ components:
       required:
       - project
       - project_name
+    PublicationInput:
+      type: object
+      properties:
+        opens_at:
+          type: string
+          format: date-time
+        closes_at:
+          type: string
+          format: date-time
+          nullable: true
+        finalist_stage:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - opens_at
+    PublicationOutput:
+      type: object
+      properties:
+        surface:
+          allOf:
+          - $ref: '#/components/schemas/SurfaceEnum'
+          readOnly: true
+        opens_at:
+          type: string
+          format: date-time
+        closes_at:
+          type: string
+          format: date-time
+          nullable: true
+        finalist_stage:
+          type: string
+          format: uuid
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - closes_at
+      - finalist_stage
+      - opens_at
+      - surface
+      - updated_at
     QualifierEntryInput:
       type: object
       properties:
@@ -17491,6 +17681,20 @@ components:
       - platform
       - public_id
       - url
+    SurfaceEnum:
+      enum:
+      - gallery
+      - finalists
+      - feedback
+      - winners
+      - archive
+      type: string
+      description: |-
+        * `gallery` - Gallery
+        * `finalists` - Finalists
+        * `feedback` - Participant feedback
+        * `winners` - Winners
+        * `archive` - Archived public event
     TagInput:
       type: object
       properties:

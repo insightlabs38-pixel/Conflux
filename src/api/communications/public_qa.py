@@ -6,8 +6,9 @@ from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, extend_schema
-from events.models import PUBLICLY_VISIBLE_STATUSES, Announcement, Event, EventStatus
+from events.models import Announcement, Event, EventStatus
 from events.views import OrganizerView
+from presentation.public import get_public_event
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
@@ -82,9 +83,7 @@ def page(request, queryset):
 
 
 def public_event(event_public_id):
-    return get_object_or_404(
-        Event, public_id=event_public_id, is_public=True, status__in=PUBLICLY_VISIBLE_STATUSES
-    )
+    return get_public_event(event_public_id)
 
 
 class PublicQuestionsView(APIView):

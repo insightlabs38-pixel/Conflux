@@ -3084,6 +3084,32 @@ export type InputOfPublicWinnerOutput = {
   project_name: string;
 };
 
+export type PublicationInput = {
+  opens_at: string;
+  closes_at?: string | null;
+  finalist_stage?: string | null;
+};
+
+export type InputOfPublicationInput = {
+  opens_at: string;
+  closes_at?: string | null;
+  finalist_stage?: string | null;
+};
+
+export type PublicationOutput = {
+  surface: SurfaceEnum;
+  opens_at: string;
+  closes_at: string | null;
+  finalist_stage: string | null;
+  updated_at: string;
+};
+
+export type InputOfPublicationOutput = {
+  opens_at: string;
+  closes_at: string | null;
+  finalist_stage: string | null;
+};
+
 export type QualifierEntryInput = {
   external_ref: string;
   project?: string | null;
@@ -3664,6 +3690,12 @@ export type InputOfSubscriptionOutput = {
   created_at: string;
 };
 
+export type SurfaceEnum =
+  "gallery" | "finalists" | "feedback" | "winners" | "archive";
+
+export type InputOfSurfaceEnum =
+  "gallery" | "finalists" | "feedback" | "winners" | "archive";
+
 export type TagInput = { tags: string[] };
 
 export type InputOfTagInput = { tags: string[] };
@@ -4050,6 +4082,10 @@ export interface Operations {
   get_api_v1_events_event_public_id_awards: {
     request: { path: { event_public_id: string } };
     response: PublicAwardOutput[];
+  };
+  get_api_v1_events_event_public_id_finalists: {
+    request: { path: { event_public_id: string } };
+    response: GalleryItemOutput[];
   };
   get_api_v1_events_event_public_id_gallery: {
     request: { path: { event_public_id: string } };
@@ -5306,6 +5342,37 @@ export interface Operations {
     };
     response: TagInput;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_publication_schedules: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: PublicationOutput[];
+  };
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_publication_schedules_surface: {
+    request: {
+      path: {
+        event_public_id: string;
+        surface: string;
+        workspace_public_id: string;
+      };
+      query?: {
+        surface?: "archive" | "feedback" | "finalists" | "gallery" | "winners";
+      };
+      body: InputOfPublicationInput;
+    };
+    response: PublicationOutput;
+  };
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_publication_schedules_surface: {
+    request: {
+      path: {
+        event_public_id: string;
+        surface: string;
+        workspace_public_id: string;
+      };
+      query?: {
+        surface?: "archive" | "feedback" | "finalists" | "gallery" | "winners";
+      };
+    };
+    response: null;
+  };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_records_event: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: RecordOutput;
@@ -6455,6 +6522,14 @@ export const operations = {
   get_api_v1_events_event_public_id_awards: {
     method: "GET",
     path: "/api/v1/events/{event_public_id}/awards/",
+    path_params: ["event_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  get_api_v1_events_event_public_id_finalists: {
+    method: "GET",
+    path: "/api/v1/events/{event_public_id}/finalists/",
     path_params: ["event_public_id"],
     query_params: [],
     request_body: false,
@@ -8197,6 +8272,33 @@ export const operations = {
       query_params: [],
       request_body: true,
       response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_publication_schedules:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/publication-schedules/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_publication_schedules_surface:
+    {
+      method: "PUT",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/publication-schedules/{surface}/",
+      path_params: ["event_public_id", "surface", "workspace_public_id"],
+      query_params: ["surface"],
+      request_body: true,
+      response_kind: "json",
+    },
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_publication_schedules_surface:
+    {
+      method: "DELETE",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/publication-schedules/{surface}/",
+      path_params: ["event_public_id", "surface", "workspace_public_id"],
+      query_params: ["surface"],
+      request_body: false,
+      response_kind: "none",
     },
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_records_event:
     {

@@ -15,6 +15,11 @@ def published_awards_for_public_display(event):
     narrower shape than the admin `_award_data` in awards.views -- no
     selection mechanics, evidence, or fulfillment state.
     """
+    from presentation.models import PublicationSurface
+    from presentation.publication import publication_visible
+
+    if not publication_visible(event, PublicationSurface.WINNERS):
+        return []
     return [
         {
             "public_id": str(award.public_id),

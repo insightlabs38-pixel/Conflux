@@ -2,12 +2,15 @@ from accounts.models import User
 from audit.services import record_mutation
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import transaction
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from evaluations.models import EvaluationPlan
-from events.models import Event, Track
+from events.models import Event, EventStatus, Track
 from events.views import OrganizerView
+from presentation.models import PublicationSurface
+from presentation.publication import publication_visible
 from projects.models import Project
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -455,6 +458,12 @@ class PublicAwardsView(APIView):
     @extend_schema(responses=PublicAwardOutput(many=True))
     def get(self, request, event_public_id):
         event = get_object_or_404(Event, public_id=event_public_id, is_public=True)
+        if event.status == EventStatus.ARCHIVED and not publication_visible(
+            event, PublicationSurface.ARCHIVE
+        ):
+            raise Http404("Archive has not been released.")
+        if not publication_visible(event, PublicationSurface.WINNERS):
+            return Response([])
         awards = []
         for award in Award.objects.filter(event=event, published_at__isnull=False).order_by("pk"):
             row = award_data(award)

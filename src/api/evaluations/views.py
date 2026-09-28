@@ -1607,7 +1607,12 @@ class ProjectFeedbackView(PlanMixin):
         project = get_object_or_404(Project, event=self.get_event(), public_id=project_public_id)
         is_organizer = has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
         if not is_organizer:
-            if not plan.feedback_visible_to_participants:
+            from presentation.models import PublicationSurface
+            from presentation.publication import publication_visible
+
+            if not plan.feedback_visible_to_participants or not publication_visible(
+                plan.stage.event, PublicationSurface.FEEDBACK
+            ):
                 raise PermissionDenied("Feedback has not been released for this plan.")
             if not project.memberships.filter(user=request.user).exists():
                 return Response(status=404)

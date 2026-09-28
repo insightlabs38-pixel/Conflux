@@ -96,6 +96,30 @@ def base(event):
     return f"/api/v1/workspaces/{event.workspace.public_id}/events/{event.public_id}/privacy/"
 
 
+def label(event, person):
+    from taxonomy.models import Taxonomy, TaxonomyAssignment, TaxonomyTerm
+
+    taxonomy, _ = Taxonomy.objects.get_or_create(
+        workspace=event.workspace, key="level", defaults={"name": "L", "applies_to": "person"}
+    )
+    term, _ = TaxonomyTerm.objects.get_or_create(taxonomy=taxonomy, key="novice", label="N")
+    TaxonomyAssignment.objects.create(event=event, term=term, subject_type="person", person=person)
+
+
+def test_person_labels_are_exported_and_erased_with_the_person():
+    _, event, people, _ = world()
+    label(event, people["alice"])
+    label(event, people["bob"])
+    exported = privacy.export_subject(event, people["alice"], actor=people["organizer"])
+    assert [row["term__key"] for row in exported["data"]["person_labels"]] == ["novice"]
+    privacy.erase_subject(
+        event, people["alice"], actor=people["organizer"], apply=True, storage=FakeStorage()
+    )
+    from taxonomy.models import TaxonomyAssignment
+
+    assert list(TaxonomyAssignment.objects.values_list("person__username", flat=True)) == ["bob"]
+
+
 def test_subject_export_is_scoped_audited_and_lists_retained_evidence():
     _, event, people, _ = world()
     url = base(event) + f"subjects/{people['alice'].public_id}/export/"

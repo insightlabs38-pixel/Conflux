@@ -411,6 +411,26 @@ class InputOfAssignmentCoveragePreviewSchema(TypedDict):
     conflict_count: int
     connectivity: dict[str, Any]
 
+class AssignmentInput(TypedDict):
+    taxonomy: str
+    subject: SubjectInput
+    terms: list[str]
+
+class InputOfAssignmentInput(TypedDict):
+    taxonomy: str
+    subject: InputOfSubjectInput
+    terms: list[str]
+
+class AssignmentOutput(TypedDict):
+    taxonomy: str
+    term: str
+    subject: dict[str, Any]
+
+class InputOfAssignmentOutput(TypedDict):
+    taxonomy: str
+    term: str
+    subject: dict[str, Any]
+
 class AssignmentPreviewInputSchema(TypedDict):
     coverage_options: NotRequired[list[int]]
 
@@ -2437,6 +2457,16 @@ class InputOfPatchedSubscriptionUpdate(TypedDict):
     enabled: NotRequired[bool]
     url: NotRequired[str]
 
+class PatchedTaxonomyPatchInput(TypedDict):
+    name: NotRequired[str]
+    allows_multiple: NotRequired[bool]
+    terms: NotRequired[list[TermInput]]
+
+class InputOfPatchedTaxonomyPatchInput(TypedDict):
+    name: NotRequired[str]
+    allows_multiple: NotRequired[bool]
+    terms: NotRequired[list[InputOfTermInput]]
+
 class PatchedTeamOpeningInput(TypedDict):
     title: NotRequired[str]
     description: NotRequired[str]
@@ -3308,6 +3338,14 @@ class InputOfSubjectExportOutput(TypedDict):
     retained_data: dict[str, Any]
     artifacts: list[dict[str, Any]]
 
+class SubjectInput(TypedDict):
+    type: TaxonomySubjectType
+    id: NotRequired[str]
+
+class InputOfSubjectInput(TypedDict):
+    type: InputOfTaxonomySubjectType
+    id: NotRequired[str]
+
 SubjectKindEnum = Literal['role', 'user']
 
 InputOfSubjectKindEnum = Literal['role', 'user']
@@ -3456,6 +3494,40 @@ class TagInput(TypedDict):
 class InputOfTagInput(TypedDict):
     tags: list[str]
 
+class TaxonomyCreateInput(TypedDict):
+    key: str
+    name: str
+    applies_to: TaxonomySubjectType
+    allows_multiple: NotRequired[bool]
+    terms: NotRequired[list[TermInput]]
+
+class InputOfTaxonomyCreateInput(TypedDict):
+    key: str
+    name: str
+    applies_to: InputOfTaxonomySubjectType
+    allows_multiple: NotRequired[bool]
+    terms: NotRequired[list[InputOfTermInput]]
+
+class TaxonomyOutput(TypedDict):
+    public_id: str
+    key: str
+    name: str
+    applies_to: str
+    allows_multiple: bool
+    terms: list[TermOutput]
+
+class InputOfTaxonomyOutput(TypedDict):
+    public_id: str
+    key: str
+    name: str
+    applies_to: str
+    allows_multiple: bool
+    terms: list[InputOfTermOutput]
+
+TaxonomySubjectType = Literal['project', 'person', 'event']
+
+InputOfTaxonomySubjectType = Literal['project', 'person', 'event']
+
 class Team(TypedDict):
     public_id: str
     name: str
@@ -3560,6 +3632,24 @@ class InputOfTemporalGate(TypedDict):
     name: str
     opens_at: NotRequired[str | None]
     closes_at: NotRequired[str | None]
+
+class TermInput(TypedDict):
+    key: str
+    label: str
+
+class InputOfTermInput(TypedDict):
+    key: str
+    label: str
+
+class TermOutput(TypedDict):
+    key: str
+    label: str
+    position: int
+
+class InputOfTermOutput(TypedDict):
+    key: str
+    label: str
+    position: int
 
 ThemeEnum = Literal['default', 'dark', 'minimal']
 
@@ -3984,6 +4074,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                 'query_params': [],
                                                                                                 'request_body': False,
                                                                                                 'response_kind': 'none'},
+ 'delete_api_v1_workspaces_workspace_public_id_taxonomies_taxonomy_public_id': {'method': 'DELETE',
+                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/taxonomies/{taxonomy_public_id}/',
+                                                                                'path_params': ['taxonomy_public_id',
+                                                                                                'workspace_public_id'],
+                                                                                'query_params': [],
+                                                                                'request_body': False,
+                                                                                'response_kind': 'none'},
  'get_api_v1_accounts_me': {'method': 'GET',
                             'path': '/api/v1/accounts/me/',
                             'path_params': [],
@@ -4945,6 +5042,15 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                  'query_params': [],
                                                                                                                  'request_body': False,
                                                                                                                  'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_taxonomy_assignments': {'method': 'GET',
+                                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/taxonomy-assignments/',
+                                                                                           'path_params': ['event_public_id',
+                                                                                                           'workspace_public_id'],
+                                                                                           'query_params': ['subject_type',
+                                                                                                            'taxonomy',
+                                                                                                            'term'],
+                                                                                           'request_body': False,
+                                                                                           'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_temporal_gates': {'method': 'GET',
                                                                                      'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/temporal-gates/',
                                                                                      'path_params': ['event_public_id',
@@ -5077,6 +5183,19 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                   'query_params': [],
                                                                   'request_body': False,
                                                                   'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_taxonomies': {'method': 'GET',
+                                                          'path': '/api/v1/workspaces/{workspace_public_id}/taxonomies/',
+                                                          'path_params': ['workspace_public_id'],
+                                                          'query_params': [],
+                                                          'request_body': False,
+                                                          'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_taxonomies_taxonomy_public_id': {'method': 'GET',
+                                                                             'path': '/api/v1/workspaces/{workspace_public_id}/taxonomies/{taxonomy_public_id}/',
+                                                                             'path_params': ['taxonomy_public_id',
+                                                                                             'workspace_public_id'],
+                                                                             'query_params': [],
+                                                                             'request_body': False,
+                                                                             'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_webhooks': {'method': 'GET',
                                                         'path': '/api/v1/workspaces/{workspace_public_id}/webhooks/',
                                                         'path_params': ['workspace_public_id'],
@@ -5209,6 +5328,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                     'query_params': [],
                                                                                     'request_body': True,
                                                                                     'response_kind': 'json'},
+ 'patch_api_v1_workspaces_workspace_public_id_taxonomies_taxonomy_public_id': {'method': 'PATCH',
+                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/taxonomies/{taxonomy_public_id}/',
+                                                                               'path_params': ['taxonomy_public_id',
+                                                                                               'workspace_public_id'],
+                                                                               'query_params': [],
+                                                                               'request_body': True,
+                                                                               'response_kind': 'json'},
  'patch_api_v1_workspaces_workspace_public_id_webhooks_subscription_public_id': {'method': 'PATCH',
                                                                                  'path': '/api/v1/workspaces/{workspace_public_id}/webhooks/{subscription_public_id}/',
                                                                                  'path_params': ['subscription_public_id',
@@ -6076,6 +6202,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                   'query_params': [],
                                                                                                   'request_body': True,
                                                                                                   'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_taxonomies': {'method': 'POST',
+                                                           'path': '/api/v1/workspaces/{workspace_public_id}/taxonomies/',
+                                                           'path_params': ['workspace_public_id'],
+                                                           'query_params': [],
+                                                           'request_body': True,
+                                                           'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_webhooks': {'method': 'POST',
                                                          'path': '/api/v1/workspaces/{workspace_public_id}/webhooks/',
                                                          'path_params': ['workspace_public_id'],
@@ -6188,6 +6320,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                                   'query_params': [],
                                                                                                                                                   'request_body': True,
                                                                                                                                                   'response_kind': 'json'},
+ 'put_api_v1_workspaces_workspace_public_id_events_event_public_id_taxonomy_assignments': {'method': 'PUT',
+                                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/taxonomy-assignments/',
+                                                                                           'path_params': ['event_public_id',
+                                                                                                           'workspace_public_id'],
+                                                                                           'query_params': [],
+                                                                                           'request_body': True,
+                                                                                           'response_kind': 'json'},
  'put_api_v1_workspaces_workspace_public_id_judge_expertise_judge_public_id': {'method': 'PUT',
                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/judge-expertise/{judge_public_id}/',
                                                                                'path_params': ['judge_public_id',

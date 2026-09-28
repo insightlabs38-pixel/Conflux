@@ -453,6 +453,30 @@ export type InputOfAssignmentCoveragePreviewSchema = {
   connectivity: Record<string, unknown>;
 };
 
+export type AssignmentInput = {
+  taxonomy: string;
+  subject: SubjectInput;
+  terms: string[];
+};
+
+export type InputOfAssignmentInput = {
+  taxonomy: string;
+  subject: InputOfSubjectInput;
+  terms: string[];
+};
+
+export type AssignmentOutput = {
+  taxonomy: string;
+  term: string;
+  subject: Record<string, unknown>;
+};
+
+export type InputOfAssignmentOutput = {
+  taxonomy: string;
+  term: string;
+  subject: Record<string, unknown>;
+};
+
 export type AssignmentPreviewInputSchema = { coverage_options?: number[] };
 
 export type InputOfAssignmentPreviewInputSchema = {
@@ -2670,6 +2694,18 @@ export type InputOfPatchedSubscriptionUpdate = {
   url?: string;
 };
 
+export type PatchedTaxonomyPatchInput = {
+  name?: string;
+  allows_multiple?: boolean;
+  terms?: TermInput[];
+};
+
+export type InputOfPatchedTaxonomyPatchInput = {
+  name?: string;
+  allows_multiple?: boolean;
+  terms?: InputOfTermInput[];
+};
+
 export type PatchedTeamOpeningInput = {
   title?: string;
   description?: string;
@@ -3628,6 +3664,13 @@ export type InputOfSubjectExportOutput = {
   artifacts: Record<string, unknown>[];
 };
 
+export type SubjectInput = { type: TaxonomySubjectType; id?: string };
+
+export type InputOfSubjectInput = {
+  type: InputOfTaxonomySubjectType;
+  id?: string;
+};
+
 export type SubjectKindEnum = "role" | "user";
 
 export type InputOfSubjectKindEnum = "role" | "user";
@@ -3790,6 +3833,44 @@ export type TagInput = { tags: string[] };
 
 export type InputOfTagInput = { tags: string[] };
 
+export type TaxonomyCreateInput = {
+  key: string;
+  name: string;
+  applies_to: TaxonomySubjectType;
+  allows_multiple?: boolean;
+  terms?: TermInput[];
+};
+
+export type InputOfTaxonomyCreateInput = {
+  key: string;
+  name: string;
+  applies_to: InputOfTaxonomySubjectType;
+  allows_multiple?: boolean;
+  terms?: InputOfTermInput[];
+};
+
+export type TaxonomyOutput = {
+  public_id: string;
+  key: string;
+  name: string;
+  applies_to: string;
+  allows_multiple: boolean;
+  terms: TermOutput[];
+};
+
+export type InputOfTaxonomyOutput = {
+  public_id: string;
+  key: string;
+  name: string;
+  applies_to: string;
+  allows_multiple: boolean;
+  terms: InputOfTermOutput[];
+};
+
+export type TaxonomySubjectType = "project" | "person" | "event";
+
+export type InputOfTaxonomySubjectType = "project" | "person" | "event";
+
 export type Team = {
   public_id: string;
   name: string;
@@ -3899,6 +3980,18 @@ export type InputOfTemporalGate = {
   name: string;
   opens_at?: string | null;
   closes_at?: string | null;
+};
+
+export type TermInput = { key: string; label: string };
+
+export type InputOfTermInput = { key: string; label: string };
+
+export type TermOutput = { key: string; label: string; position: number };
+
+export type InputOfTermOutput = {
+  key: string;
+  label: string;
+  position: number;
 };
 
 export type ThemeEnum = "default" | "dark" | "minimal";
@@ -6339,6 +6432,24 @@ export interface Operations {
     };
     response: Event;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_taxonomy_assignments: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      query?: {
+        subject_type?: "event" | "person" | "project";
+        taxonomy?: string;
+        term?: string;
+      };
+    };
+    response: AssignmentOutput[];
+  };
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_taxonomy_assignments: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfAssignmentInput;
+    };
+    response: AssignmentOutput[];
+  };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_team_invites_redeem: {
     request: {
       path: { event_public_id: string; workspace_public_id: string };
@@ -6559,6 +6670,36 @@ export interface Operations {
   get_api_v1_workspaces_workspace_public_id_participant_events: {
     request: { path: { workspace_public_id: string } };
     response: ParticipantEventSummary[];
+  };
+  get_api_v1_workspaces_workspace_public_id_taxonomies: {
+    request: { path: { workspace_public_id: string } };
+    response: TaxonomyOutput[];
+  };
+  post_api_v1_workspaces_workspace_public_id_taxonomies: {
+    request: {
+      path: { workspace_public_id: string };
+      body: InputOfTaxonomyCreateInput;
+    };
+    response: TaxonomyOutput;
+  };
+  get_api_v1_workspaces_workspace_public_id_taxonomies_taxonomy_public_id: {
+    request: {
+      path: { taxonomy_public_id: string; workspace_public_id: string };
+    };
+    response: TaxonomyOutput;
+  };
+  patch_api_v1_workspaces_workspace_public_id_taxonomies_taxonomy_public_id: {
+    request: {
+      path: { taxonomy_public_id: string; workspace_public_id: string };
+      body?: InputOfPatchedTaxonomyPatchInput;
+    };
+    response: TaxonomyOutput;
+  };
+  delete_api_v1_workspaces_workspace_public_id_taxonomies_taxonomy_public_id: {
+    request: {
+      path: { taxonomy_public_id: string; workspace_public_id: string };
+    };
+    response: null;
   };
   get_api_v1_workspaces_workspace_public_id_webhooks: {
     request: { path: { workspace_public_id: string } };
@@ -9524,6 +9665,24 @@ export const operations = {
     request_body: true,
     response_kind: "json",
   },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_taxonomy_assignments:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/taxonomy-assignments/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: ["subject_type", "taxonomy", "term"],
+      request_body: false,
+      response_kind: "json",
+    },
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_taxonomy_assignments:
+    {
+      method: "PUT",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/taxonomy-assignments/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_team_invites_redeem:
     {
       method: "POST",
@@ -9871,6 +10030,46 @@ export const operations = {
     query_params: [],
     request_body: false,
     response_kind: "json",
+  },
+  get_api_v1_workspaces_workspace_public_id_taxonomies: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/taxonomies/",
+    path_params: ["workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  post_api_v1_workspaces_workspace_public_id_taxonomies: {
+    method: "POST",
+    path: "/api/v1/workspaces/{workspace_public_id}/taxonomies/",
+    path_params: ["workspace_public_id"],
+    query_params: [],
+    request_body: true,
+    response_kind: "json",
+  },
+  get_api_v1_workspaces_workspace_public_id_taxonomies_taxonomy_public_id: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/taxonomies/{taxonomy_public_id}/",
+    path_params: ["taxonomy_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  patch_api_v1_workspaces_workspace_public_id_taxonomies_taxonomy_public_id: {
+    method: "PATCH",
+    path: "/api/v1/workspaces/{workspace_public_id}/taxonomies/{taxonomy_public_id}/",
+    path_params: ["taxonomy_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: true,
+    response_kind: "json",
+  },
+  delete_api_v1_workspaces_workspace_public_id_taxonomies_taxonomy_public_id: {
+    method: "DELETE",
+    path: "/api/v1/workspaces/{workspace_public_id}/taxonomies/{taxonomy_public_id}/",
+    path_params: ["taxonomy_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "none",
   },
   get_api_v1_workspaces_workspace_public_id_webhooks: {
     method: "GET",

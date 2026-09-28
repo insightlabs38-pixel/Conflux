@@ -10482,6 +10482,93 @@ paths:
               schema:
                 $ref: '#/components/schemas/Event'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/taxonomy-assignments/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_taxonomy_assignments
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: subject_type
+        schema:
+          type: string
+          enum:
+          - event
+          - person
+          - project
+      - in: query
+        name: taxonomy
+        schema:
+          type: string
+      - in: query
+        name: term
+        schema:
+          type: string
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AssignmentOutput'
+          description: ''
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_events_event_public_id_taxonomy_assignments
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignmentInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AssignmentInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AssignmentInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AssignmentOutput'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/team-invites/redeem/:
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_team_invites_redeem
@@ -11880,6 +11967,152 @@ paths:
                 items:
                   $ref: '#/components/schemas/ParticipantEventSummary'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/taxonomies/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_taxonomies
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaxonomyOutput'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_taxonomies
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaxonomyCreateInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TaxonomyCreateInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TaxonomyCreateInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaxonomyOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/taxonomies/{taxonomy_public_id}/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_taxonomies_taxonomy_public_id
+      parameters:
+      - in: path
+        name: taxonomy_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaxonomyOutput'
+          description: ''
+    patch:
+      operationId: patch_api_v1_workspaces_workspace_public_id_taxonomies_taxonomy_public_id
+      parameters:
+      - in: path
+        name: taxonomy_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTaxonomyPatchInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTaxonomyPatchInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTaxonomyPatchInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaxonomyOutput'
+          description: ''
+    delete:
+      operationId: delete_api_v1_workspaces_workspace_public_id_taxonomies_taxonomy_public_id
+      parameters:
+      - in: path
+        name: taxonomy_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/workspaces/{workspace_public_id}/webhooks/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_webhooks
@@ -12823,6 +13056,39 @@ components:
       - judge_count
       - load_by_judge
       - solver
+    AssignmentInput:
+      type: object
+      properties:
+        taxonomy:
+          type: string
+          format: uuid
+        subject:
+          $ref: '#/components/schemas/SubjectInput'
+        terms:
+          type: array
+          items:
+            type: string
+            maxLength: 50
+            pattern: ^[-a-zA-Z0-9_]+$
+          maxItems: 50
+      required:
+      - subject
+      - taxonomy
+      - terms
+    AssignmentOutput:
+      type: object
+      properties:
+        taxonomy:
+          type: string
+        term:
+          type: string
+        subject:
+          type: object
+          additionalProperties: {}
+      required:
+      - subject
+      - taxonomy
+      - term
     AssignmentPreviewInputSchema:
       type: object
       properties:
@@ -16326,6 +16592,18 @@ components:
           type: string
           format: uri
           maxLength: 2048
+    PatchedTaxonomyPatchInput:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 80
+        allows_multiple:
+          type: boolean
+        terms:
+          type: array
+          items:
+            $ref: '#/components/schemas/TermInput'
     PatchedTeamOpeningInput:
       type: object
       properties:
@@ -17909,6 +18187,16 @@ components:
       - event
       - retained_data
       - subject
+    SubjectInput:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/TaxonomySubjectType'
+        id:
+          type: string
+          format: uuid
+      required:
+      - type
     SubjectKindEnum:
       enum:
       - role
@@ -18153,6 +18441,64 @@ components:
           maxItems: 10
       required:
       - tags
+    TaxonomyCreateInput:
+      type: object
+      properties:
+        key:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          maxLength: 80
+        applies_to:
+          $ref: '#/components/schemas/TaxonomySubjectType'
+        allows_multiple:
+          type: boolean
+          default: false
+        terms:
+          type: array
+          items:
+            $ref: '#/components/schemas/TermInput'
+      required:
+      - applies_to
+      - key
+      - name
+    TaxonomyOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        key:
+          type: string
+        name:
+          type: string
+        applies_to:
+          type: string
+        allows_multiple:
+          type: boolean
+        terms:
+          type: array
+          items:
+            $ref: '#/components/schemas/TermOutput'
+      required:
+      - allows_multiple
+      - applies_to
+      - key
+      - name
+      - public_id
+      - terms
+    TaxonomySubjectType:
+      enum:
+      - project
+      - person
+      - event
+      type: string
+      description: |-
+        * `project` - Project
+        * `person` - Person
+        * `event` - Event
     Team:
       type: object
       properties:
@@ -18390,6 +18736,32 @@ components:
       - event_local_opens_at
       - name
       - public_id
+    TermInput:
+      type: object
+      properties:
+        key:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+          maxLength: 80
+      required:
+      - key
+      - label
+    TermOutput:
+      type: object
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        position:
+          type: integer
+      required:
+      - key
+      - label
+      - position
     ThemeEnum:
       enum:
       - default

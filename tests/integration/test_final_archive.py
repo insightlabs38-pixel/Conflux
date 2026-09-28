@@ -310,6 +310,7 @@ EXCLUDED_EVENT_MODELS = {
     "communications.reminder",
     "integrations.archiverestoration",
     "integrations.eventretentionpolicy",
+    "taxonomy.taxonomyassignment",
 }
 
 

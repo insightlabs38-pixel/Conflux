@@ -21,6 +21,7 @@ from participation.models import MarketplaceProfile, TeamMembership
 from presentation.models import SavedPublicSearch
 from projects.models import ProjectMembership, Submission, SubmissionVersion
 from rest_framework.utils.encoders import JSONEncoder
+from taxonomy.models import TaxonomyAssignment
 from workspaces.models import Membership
 
 from .models import EventRetentionPolicy
@@ -42,6 +43,9 @@ def _personal(event, user=None):
         "check_ins": only(ParticipantCheckIn.objects.filter(event=event), "participant"),
         "message_receipts": only(MessageRecipient.objects.filter(message__event=event), "user"),
         "comments": only(Comment.objects.filter(project__event=event), "author"),
+        "person_labels": only(
+            TaxonomyAssignment.objects.filter(event=event, subject_type="person"), "person"
+        ),
     }
 
 
@@ -106,6 +110,7 @@ def export_subject(event, user, *, actor):
         "check_ins": ("checked_in_at",),
         "message_receipts": ("message__subject", "read_at"),
         "comments": ("project__public_id", "body", "created_at", "hidden_at"),
+        "person_labels": ("term__taxonomy__key", "term__key", "created_at"),
     }
     retained = {
         "team_memberships": ("team__public_id", "role", "joined_at"),

@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "evaluations",
     "community",
     "communications",
+    "taxonomy",
 ]
 
 MIDDLEWARE = [
@@ -155,6 +156,7 @@ SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": r"/api/v1",
     "ENUM_NAME_OVERRIDES": {
         "EventStatus": "events.models.EventStatus",
+        "TaxonomySubjectType": "taxonomy.models.SubjectType",
         "EventQuestionStatus": "communications.models.EventQuestion.Status",
         "CandidateQueueStatus": ["pending", "drafted", "submitted"],
         "BulkOperationAction": ["assign", "advance", "extend", "move", "send"],

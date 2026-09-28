@@ -14,7 +14,7 @@ cp .env.example .env
 make up
 ```
 
-Open `http://localhost:8080` (or the `CONFLUX_PORT` in `.env`). Check
+Open `http://localhost:8080/app/` (or the `CONFLUX_PORT` in `.env`). Check
 `http://localhost:8080/api/v1/health/` if startup is still in progress.
 Compose builds the app image and applies database migrations at startup;
 `make down` stops the stack without deleting its volumes. See
@@ -26,9 +26,11 @@ createsuperuser`, then use `POST /api/v1/accounts/login/` with its username
 and password to obtain a session cookie. Authenticated users can create a
 workspace with `POST /api/v1/workspaces/`; the creator becomes its organizer.
 The [API guide](docs/api/README.md) and [OpenAPI schema](docs/api/openapi.yaml)
-cover the remaining routes. The browser workspace UI currently expects an
-existing session and does not include a sign-in form; API login is required
-before using its private pages.
+cover the remaining routes. The browser workspace app is served at
+`http://localhost:8080/app/` (`/` redirects there) with a sign-in form; sign in
+with an account created by `createsuperuser`/the API, or enable optional
+OpenID Connect ([SSO](docs/operations/SSO.md)). Password sign-in always works
+offline.
 
 For a disposable acceptance fixture, `make seed` imports the official data
 and deterministic test identities. Use it only in a test installation.
@@ -69,3 +71,14 @@ Use `make dev` for day-to-day edits: it only rebuilds the image if one doesn't
 exist yet. Run `make dev-build` after changing a Dockerfile or a
 dependency/lockfile. `make up` always rebuilds and remains the authoritative
 clean-build path for release verification.
+
+## Feature guides
+
+Operational guides for the post-core capabilities live in `docs/operations/`:
+[governance](docs/operations/GOVERNANCE.md), [SSO](docs/operations/SSO.md),
+[MCP adapter](docs/operations/MCP.md), [portfolio](docs/operations/PORTFOLIO.md),
+[continuation](docs/operations/CONTINUATION.md),
+[event logistics](docs/operations/EVENT_LOGISTICS.md),
+[conveniences](docs/operations/CONVENIENCE.md),
+[capacity and load testing](docs/operations/CAPACITY.md) and
+[browser journeys](docs/operations/E2E.md).

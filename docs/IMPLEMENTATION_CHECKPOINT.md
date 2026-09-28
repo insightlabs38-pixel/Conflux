@@ -1,8 +1,8 @@
-# PVS17 — Sequential implementation checkpoint
+# PVS-H04 — Sequential implementation checkpoint
 
 ## Result
 
-Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS06–PVS10, PVS-H02, PVS11, PVS12, PVS13, PVS14, PVS15, PVS-H03, PVS16, PVS17 complete on `main`. Earliest unfinished batch: **PVS-H04**, then PVS-H05 (PVS18 skipped, see below); PVS-H04, PVS-H05. PVS18 skipped: H02 found no throughput bottleneck (only the fixed connection-bound bug).
+Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS06–PVS10, PVS-H02, PVS11, PVS12, PVS13, PVS14, PVS15, PVS-H03, PVS16, PVS17, PVS-H04 complete on `main`. Earliest unfinished batch: **PVS-H05** (PVS18 skipped, see below); PVS-H04, PVS-H05. PVS18 skipped: H02 found no throughput bottleneck (only the fixed connection-bound bug).
 
 ## Changes
 
@@ -40,4 +40,4 @@ Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS0
 
 ## Next
 
-PVS-H04 (full release verification: official acceptance, rules evidence, tier claims, security/isolation, load, migrations/upgrade, backup/restore, offline cold start, browser journeys, lint/typecheck, docs), then PVS-H05 (demo package: deterministic seed + reset path + runbook + clips). Feature work is over; only fixes/verification/docs now. Code freeze Tue 2026-09-29 18:00 UTC. Browser stack: see PVS-H03 note (project `confluxh03`, port 28080).
+PVS-H05: deterministic seeded demo event, reproducible reset path, concise runbook, clean Playwright clips/screenshots, current evidence, docs synced; then create the campaign-complete signal and stop. Only fixes/verification/docs are allowed now (feature freeze 08:00 UTC Tue; code freeze 18:00 UTC).

@@ -1404,6 +1404,14 @@ paths:
           type: string
           format: uuid
         required: true
+      - in: query
+        name: mode
+        schema:
+          type: string
+          enum:
+          - config
+          - full
+          default: config
       - in: path
         name: workspace_public_id
         schema:
@@ -1438,6 +1446,14 @@ paths:
           type: string
           format: uuid
         required: true
+      - in: query
+        name: mode
+        schema:
+          type: string
+          enum:
+          - config
+          - full
+          default: config
       - in: path
         name: workspace_public_id
         schema:

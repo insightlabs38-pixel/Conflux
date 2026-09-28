@@ -3913,11 +3913,17 @@ export interface Operations {
     response: EventApplication;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive: {
-    request: { path: { event_public_id: string; workspace_public_id: string } };
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      query?: { mode?: "config" | "full" };
+    };
     response: ArchiveOutput;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_signed: {
-    request: { path: { event_public_id: string; workspace_public_id: string } };
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      query?: { mode?: "config" | "full" };
+    };
     response: SignedArchiveOutput;
   };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_authz_dry_run: {
@@ -6284,7 +6290,7 @@ export const operations = {
     method: "GET",
     path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/archive/",
     path_params: ["event_public_id", "workspace_public_id"],
-    query_params: [],
+    query_params: ["mode"],
     request_body: false,
     response_kind: "json",
   },
@@ -6293,7 +6299,7 @@ export const operations = {
       method: "GET",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/archive/signed/",
       path_params: ["event_public_id", "workspace_public_id"],
-      query_params: [],
+      query_params: ["mode"],
       request_body: false,
       response_kind: "json",
     },

@@ -5,7 +5,7 @@ from core.permissions import require_roles
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from events.models import Event
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -81,6 +81,9 @@ class SignedArchiveImportInput(serializers.Serializer):
     envelope = serializers.JSONField()
 
 
+ARCHIVE_MODE = OpenApiParameter("mode", str, enum=["config", "full"], default="config")
+
+
 class EventArchiveExportView(WorkspaceLookupMixin, APIView):
     authentication_classes = [CookieSessionAuthentication]
     permission_classes = [require_roles(Role.ORGANIZER, Role.ADMIN)]
@@ -90,7 +93,7 @@ class EventArchiveExportView(WorkspaceLookupMixin, APIView):
             Event, workspace=self.get_workspace(), public_id=self.kwargs["event_public_id"]
         )
 
-    @extend_schema(responses=ArchiveOutput)
+    @extend_schema(responses=ArchiveOutput, parameters=[ARCHIVE_MODE])
     def get(self, request, workspace_public_id, event_public_id):
         mode = request.query_params.get("mode", "config")
         if mode not in ("config", "full"):
@@ -99,7 +102,7 @@ class EventArchiveExportView(WorkspaceLookupMixin, APIView):
 
 
 class EventSignedArchiveExportView(EventArchiveExportView):
-    @extend_schema(responses=SignedArchiveOutput)
+    @extend_schema(responses=SignedArchiveOutput, parameters=[ARCHIVE_MODE])
     def get(self, request, workspace_public_id, event_public_id):
         mode = request.query_params.get("mode", "config")
         if mode not in ("config", "full"):

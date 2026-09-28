@@ -7,6 +7,7 @@ import { LoadingState } from "../components/LoadingState";
 import { EventDashboard } from "../features/event-builder/EventDashboard";
 import { JudgeWorkspace } from "../features/judging/JudgeWorkspace";
 import { TeamWorkspace } from "../features/teams/TeamWorkspace";
+import { StaffWorkspace } from "../features/pvs/StaffWorkspace";
 import { EventSite } from "../public/event-site/EventSite";
 import { WorkspaceSelector } from "./WorkspaceSelector";
 
@@ -64,6 +65,8 @@ export function App() {
         if (
           role === "participant" ||
           role === "judge" ||
+          role === "mentor" ||
+          role === "volunteer" ||
           role === "organizer" ||
           role === "admin"
         ) {
@@ -127,6 +130,12 @@ export function App() {
           <TeamWorkspace key={workspaceId} workspaceId={workspaceId} />
         ) : workspaceRole === "judge" ? (
           <JudgeWorkspace key={workspaceId} workspaceId={workspaceId} />
+        ) : workspaceRole === "mentor" || workspaceRole === "volunteer" ? (
+          <StaffWorkspace
+            key={workspaceId}
+            workspaceId={workspaceId}
+            role={workspaceRole}
+          />
         ) : workspaceRole === "organizer" || workspaceRole === "admin" ? (
           <EventDashboard key={workspaceId} workspaceId={workspaceId} />
         ) : (

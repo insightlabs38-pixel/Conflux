@@ -25,7 +25,7 @@ manage demo_scenario purge "$slug" >/dev/null 2>&1 || true
 out=$(manage demo_scenario create --seed "$seed" --participants 24 --judges 6 \
   --password "$password" --public --checkpoint "$checkpoint" | tail -1)
 event=$(printf '%s' "$out" | python3 -c 'import sys,json; print(json.load(sys.stdin)["event"])')
-manage demo_showcase "$slug" >/dev/null
+manage demo_showcase "$slug" --password "$password" >/dev/null
 curl -fsS "$base/api/v1/health/" >/dev/null
 
 cat <<EOF

@@ -4490,6 +4490,7 @@ class VotingStatusSchema(TypedDict):
     closes_at: str
     is_open: bool
     allow_comments: bool
+    results_published: bool
 
 class InputOfVotingStatusSchema(TypedDict):
     identity_mode: str
@@ -4497,6 +4498,7 @@ class InputOfVotingStatusSchema(TypedDict):
     closes_at: str
     is_open: bool
     allow_comments: bool
+    results_published: bool
 
 class WinnerInput(TypedDict):
     project: str

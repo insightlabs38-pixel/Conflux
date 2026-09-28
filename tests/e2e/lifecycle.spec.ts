@@ -1,0 +1,205 @@
+import { expect, test, type Page } from "@playwright/test";
+import {
+  account,
+  openWorkspace,
+  PASSWORD,
+  settled,
+  signIn,
+  watch,
+} from "./support";
+
+/**
+ * The recorded demo lifecycle — create → submit → judge → publish — driven only
+ * through the UI and addressed by semantic identities (usernames, names).
+ * Precondition: `scripts/demo-reset submitted` (participant-24 is a "live"
+ * participant: approved, no team). Re-run the reset before repeating.
+ */
+test.describe.configure({ mode: "serial" });
+test.skip(({ isMobile }) => isMobile, "desktop-only recorded journey");
+
+const LIVE = "participant-24";
+const PROJECT = "Live Wire";
+
+async function chooseEvent(page: Page) {
+  const select = page
+    .locator("select")
+    .filter({ has: page.locator("option", { hasText: "Choose an event" }) })
+    .first();
+  await select.selectOption({ index: 1 });
+}
+
+test("participant creates a team, submits, and receives a signed receipt", async ({
+  page,
+}) => {
+  await signIn(page, LIVE);
+  const problems = watch(page);
+  await openWorkspace(page);
+  await chooseEvent(page);
+  await expect(
+    page.getByRole("region", { name: "Sponsor challenges" }),
+  ).toContainText("Sponsor API documentation");
+  await page.getByLabel("Team name").fill("Team Live Wire");
+  await page.getByRole("button", { name: "Create team" }).click();
+  await expect(page.getByRole("region", { name: "My team" })).toContainText(
+    "Team Live Wire",
+  );
+  await page.getByLabel("Project name").fill(PROJECT);
+  await page.getByRole("button", { name: "Create project" }).click();
+
+  const submission = page.getByRole("region", { name: "Submission" });
+  await submission.getByLabel("Stage").selectOption({ index: 1 });
+  await submission
+    .getByLabel("Submission notes")
+    .fill("Built live during the demo.");
+  await expect(submission.getByText("Draft saved")).toBeVisible();
+  await submission.getByRole("button", { name: "Finalize submission" }).click();
+  await expect(submission.getByText(/Submission finalized/)).toBeVisible();
+  await expect(submission.getByText("Signed submission receipt")).toBeVisible();
+  await expect(submission.getByLabel("Receipt token")).toHaveValue(/.{20,}/);
+  // Not-yet-reviewed and deadline-exception surfaces are reachable from the project.
+  await expect(
+    page.getByRole("region", { name: "Deadline exception" }),
+  ).toBeVisible();
+  await expect(page.getByRole("region", { name: "Mentorship" })).toBeVisible();
+  await settled(page);
+  expect(problems.filter((p) => !p.includes("/accounts/me/"))).toEqual([]);
+});
+
+test("organizer requests changes; participant remediates; organizer approves", async ({
+  browser,
+}) => {
+  const org = await (await browser.newContext()).newPage();
+  await signIn(org, "organizer");
+  await openWorkspace(org);
+  await org.getByRole("button", { name: /^Demo \(open\)/ }).click();
+  const queue = org.getByRole("region", { name: "Eligibility review queue" });
+  await queue.getByLabel("Open a project").selectOption({ label: PROJECT });
+  await queue.getByLabel("Finding").fill("Describe what the project does.");
+  await queue.getByRole("button", { name: "Add finding" }).click();
+  await queue.getByLabel("Outcome").selectOption("needs_remediation");
+  await queue.getByRole("button", { name: "Record decision" }).click();
+  await expect(
+    queue.locator(".cx-badge", { hasText: "Changes requested" }).first(),
+  ).toBeVisible();
+
+  const part = await (await browser.newContext()).newPage();
+  await signIn(part, LIVE);
+  await openWorkspace(part);
+  await chooseEvent(part);
+  await part
+    .getByRole("region", { name: "My projects" })
+    .locator("select")
+    .filter({ has: part.locator("option", { hasText: "Choose a project" }) })
+    .selectOption({ label: PROJECT });
+  const findings = part.getByRole("region", { name: "Eligibility review" });
+  await expect(findings).toContainText("Describe what the project does.");
+  await findings
+    .getByLabel("What did you change?")
+    .fill("Added a description.");
+  await findings
+    .getByRole("button", { name: "Mark as fixed and resubmit for review" })
+    .click();
+  await expect(findings).toContainText("Pending review");
+
+  await org.reload(); // the workspace and event survive a refresh via the URL
+  await org.getByRole("button", { name: /^Demo \(open\)/ }).click();
+  const again = org.getByRole("region", { name: "Eligibility review queue" });
+  await again.getByRole("button", { name: `Review ${PROJECT}` }).click();
+  await again.getByRole("button", { name: "Mark resolved" }).click();
+  await expect(
+    again.locator(".cx-badge", { hasText: "resolved" }).first(),
+  ).toBeVisible();
+  await again.getByLabel("Outcome").selectOption("cleared");
+  await again.getByRole("button", { name: "Record decision" }).click();
+  await expect(
+    again.locator(".cx-badge", { hasText: "Cleared" }).first(),
+  ).toBeVisible();
+  await part.reload();
+  await chooseEvent(part);
+  await part
+    .getByRole("region", { name: "My projects" })
+    .locator("select")
+    .filter({ has: part.locator("option", { hasText: "Choose a project" }) })
+    .selectOption({ label: PROJECT });
+  await expect(
+    part.getByRole("region", { name: "Eligibility review" }),
+  ).toContainText("cleared", { ignoreCase: true });
+});
+
+for (const judge of ["judge-01", "judge-02", "judge-03"]) {
+  test(`${judge} inspects and scores ${PROJECT}`, async ({ page }) => {
+    await signIn(page, judge);
+    const problems = watch(page);
+    await openWorkspace(page);
+    const main = page.getByRole("region", { name: "Judging" });
+    await main.getByLabel("Event").selectOption({ index: 1 });
+    await main.getByLabel("Stage").selectOption({ index: 1 });
+    await expect(
+      page.getByRole("region", { name: "Your assignments" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("region", { name: "Your judging route" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: PROJECT }).click();
+    await expect(
+      page.getByRole("region", { name: "Submitted artifacts" }),
+    ).toBeVisible();
+    const scores = page.getByLabel("Score");
+    const count = await scores.count();
+    for (let i = 0; i < count; i++)
+      await scores.nth(i).fill(String(6 + (i % 3)));
+    await page.getByRole("button", { name: "Submit ballot" }).click();
+    await expect(page.getByText("submitted").first()).toBeVisible();
+    await settled(page);
+    expect(problems.filter((p) => !p.includes("/accounts/me/"))).toEqual([]);
+  });
+}
+
+test("organizer publishes results and the public results page shows them", async ({
+  page,
+}) => {
+  await signIn(page, "organizer");
+  await openWorkspace(page);
+  await page.getByRole("button", { name: /^Demo \(open\)/ }).click();
+  const judging = page.locator(".cx-card").filter({
+    has: page.getByRole("heading", { name: "Judging", exact: true }),
+  });
+  await judging.getByLabel("Stage").selectOption({ index: 1 });
+  const publish = page.getByRole("button", {
+    name: "Compute normalization and publish results",
+  });
+  await publish.scrollIntoViewIfNeeded();
+  await publish.click();
+  await expect(page.getByText("Results published.").first()).toBeVisible();
+
+  // Deliberation: finalist comparison → finalize the winner → publish the award.
+  const room = page.getByRole("region", {
+    name: "Deliberation and finalization",
+  });
+  await room.getByLabel("Award").selectOption({ label: "Grand Prize" });
+  await room.getByRole("button", { name: "Open deliberation room" }).click();
+  await expect(room.getByText("Finalist comparison")).toBeVisible();
+  await expect(room.getByText("Max judge disagreement")).toBeVisible();
+  await room.getByLabel(`Select ${PROJECT} as winner`).check();
+  await room
+    .getByLabel("Override reason")
+    .fill("Only project scored in the live demo.");
+  await room.getByRole("button", { name: "Finalize", exact: true }).click();
+  await expect(room.getByText(/Finalized/)).toBeVisible();
+  const awards = page.getByRole("region", { name: "Awards" }).first();
+  void awards;
+  await page.getByLabel("Manage award").selectOption({ label: "Grand Prize" });
+  await page.getByRole("button", { name: "Publish winners" }).click();
+  await expect(page.getByText(/Published/).first()).toBeVisible();
+  const { event } = await (async () => {
+    const me = await (await page.request.get("/api/v1/accounts/me/")).json();
+    const ws = me.memberships[0].workspace as string;
+    const events = await (
+      await page.request.get(`/api/v1/workspaces/${ws}/events/`)
+    ).json();
+    return { event: events[0].public_id as string };
+  })();
+  const results = await page.request.get(`/e/${event}/results/`);
+  expect(results.status()).toBe(200);
+  expect(await results.text()).toContain(PROJECT);
+});

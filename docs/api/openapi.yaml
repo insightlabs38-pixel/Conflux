@@ -24143,12 +24143,15 @@ components:
           type: boolean
         allow_comments:
           type: boolean
+        results_published:
+          type: boolean
       required:
       - allow_comments
       - closes_at
       - identity_mode
       - is_open
       - opens_at
+      - results_published
     WinnerInput:
       type: object
       properties:

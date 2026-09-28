@@ -3,6 +3,12 @@ import { TeamPanel } from "./TeamPanel";
 import { MarketplacePanel } from "./MarketplacePanel";
 import { ProjectWorkspace } from "../artifacts/ProjectWorkspace";
 import { Inbox } from "../communications/Inbox";
+import {
+  ChallengesPanel,
+  MyOnsitePanel,
+  PortfolioPanel,
+  RulesPanel,
+} from "../pvs";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 
@@ -65,6 +71,7 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
     <section aria-label="Participant events">
       <h2>Join an event team</h2>
       <Inbox workspaceId={workspaceId} />
+      <PortfolioPanel workspaceId={workspaceId} />
       {loading && <LoadingState label="Loading events…" />}
       {error && (
         <ErrorState
@@ -113,6 +120,22 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
             />
             <MarketplacePanel
               key={`marketplace-${selectedId}-${teamRevision}`}
+              workspaceId={workspaceId}
+              eventId={selectedId}
+            />
+            <RulesPanel
+              key={`rules-${selectedId}`}
+              workspaceId={workspaceId}
+              eventId={selectedId}
+              canPublish={false}
+            />
+            <ChallengesPanel
+              key={`challenges-${selectedId}`}
+              workspaceId={workspaceId}
+              eventId={selectedId}
+            />
+            <MyOnsitePanel
+              key={`onsite-${selectedId}`}
               workspaceId={workspaceId}
               eventId={selectedId}
             />

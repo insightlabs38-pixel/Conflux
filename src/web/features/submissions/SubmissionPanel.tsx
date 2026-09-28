@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { SubmissionReceipt } from "../pvs";
 
 type Version = {
   public_id: string;
@@ -268,6 +269,13 @@ export function SubmissionPanel({
             <p role="status">
               Submission finalized. Receipt: {submission.current_version}
             </p>
+          )}
+          {finalized && (
+            <SubmissionReceipt
+              key={submission?.current_version ?? "receipt"}
+              projectBase={base}
+              stageId={stageId}
+            />
           )}
           {submission?.versions.map((version) => (
             <div key={version.public_id}>

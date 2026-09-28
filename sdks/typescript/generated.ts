@@ -4855,6 +4855,7 @@ export type VotingStatusSchema = {
   closes_at: string;
   is_open: boolean;
   allow_comments: boolean;
+  results_published: boolean;
 };
 
 export type InputOfVotingStatusSchema = {
@@ -4863,6 +4864,7 @@ export type InputOfVotingStatusSchema = {
   closes_at: string;
   is_open: boolean;
   allow_comments: boolean;
+  results_published: boolean;
 };
 
 export type WinnerInput = { project: string; override_reason?: string };

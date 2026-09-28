@@ -261,3 +261,12 @@
 .cx-shell__main button:not([class]):hover:not(:disabled) {
   background: var(--color-surface);
 }
+
+/* Long option text (e.g. API endpoint pickers) must not widen the page: cap the
+   shrink-to-fit label so the select's own max-width has something to resolve against. */
+.cx-shell__main label:has(> select) {
+  max-width: 100%;
+}
+.cx-shell__main select {
+  text-overflow: ellipsis;
+}

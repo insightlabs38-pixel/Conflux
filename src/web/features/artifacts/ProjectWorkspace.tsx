@@ -2,6 +2,12 @@ import { useEffect, useState, type FormEvent } from "react";
 import { ArtifactPanel } from "./ArtifactPanel";
 import { SubmissionPanel } from "../submissions/SubmissionPanel";
 import { ProjectForms } from "../form-builder/ProjectForms";
+import {
+  ProjectContinuationPanel,
+  ProjectEligibilityPanel,
+  ProjectExceptionPanel,
+  ProjectMentorshipPanel,
+} from "../pvs";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 
@@ -198,6 +204,26 @@ export function ProjectWorkspace({
             projectId={selectedId}
           />
           <SubmissionPanel
+            workspaceId={workspaceId}
+            eventId={eventId}
+            projectId={selectedId}
+          />
+          <ProjectEligibilityPanel
+            workspaceId={workspaceId}
+            eventId={eventId}
+            projectId={selectedId}
+          />
+          <ProjectExceptionPanel
+            workspaceId={workspaceId}
+            eventId={eventId}
+            projectId={selectedId}
+          />
+          <ProjectMentorshipPanel
+            workspaceId={workspaceId}
+            eventId={eventId}
+            projectId={selectedId}
+          />
+          <ProjectContinuationPanel
             workspaceId={workspaceId}
             eventId={eventId}
             projectId={selectedId}

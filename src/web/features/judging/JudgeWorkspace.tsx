@@ -9,6 +9,11 @@ import { Inbox } from "../communications/Inbox";
 import { JudgeCalendarPanel } from "./JudgeCalendarPanel";
 import { JudgeExpertisePanel } from "./JudgeExpertisePanel";
 import { JudgeInvitationInbox } from "./JudgeInvitationInbox";
+import {
+  ArtifactInspector,
+  JudgeAssignmentsPanel,
+  JudgeRoutePanel,
+} from "../pvs";
 
 type Event = { public_id: string; name: string };
 type Stage = { public_id: string; name: string };
@@ -382,7 +387,15 @@ function BallotForm({
   );
 }
 
-function PlanQueue({ base }: { base: string }) {
+function PlanQueue({
+  base,
+  workspaceId,
+  eventId,
+}: {
+  base: string;
+  workspaceId: string;
+  eventId: string;
+}) {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [rubric, setRubric] = useState<RubricVersion | null>(null);
   const [selected, setSelected] = useState("");
@@ -500,6 +513,14 @@ function PlanQueue({ base }: { base: string }) {
           rubric={rubric}
           onSubmitted={refresh}
           onQueued={() => setQueuedCount(readOutbox(base).length)}
+        />
+      )}
+      {current && (
+        <ArtifactInspector
+          key={`inspect-${current.project}`}
+          workspaceId={workspaceId}
+          eventId={eventId}
+          projectId={current.project}
         />
       )}
     </section>
@@ -665,7 +686,21 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
           </select>
         </label>
       )}
-      {planBase && <PlanQueue key={planBase} base={planBase} />}
+      {planBase && (
+        <>
+          <JudgeAssignmentsPanel
+            key={`assign-${planBase}`}
+            planBase={planBase}
+          />
+          <JudgeRoutePanel key={`route-${planBase}`} planBase={planBase} />
+          <PlanQueue
+            key={planBase}
+            base={planBase}
+            workspaceId={workspaceId}
+            eventId={eventId}
+          />
+        </>
+      )}
     </section>
   );
 }

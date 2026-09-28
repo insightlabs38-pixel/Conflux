@@ -61,6 +61,7 @@ def _profile_data(profile):
     return {
         "public_id": str(profile.public_id),
         "mentor": profile.mentor.username,
+        "mentor_id": str(profile.mentor.public_id),
         "headline": profile.headline,
         "is_available": profile.is_available,
         "track_expertise": [str(t.public_id) for t in profile.track_expertise.all()],

@@ -16,6 +16,17 @@ import { ConfigHistoryPanel } from "../audit/ConfigHistoryPanel";
 import { EventTemplatesPanel } from "./EventTemplatesPanel";
 import { PermissionMatrixExplorer } from "./PermissionMatrixExplorer";
 import { RegistrationPanel } from "./RegistrationPanel";
+import {
+  ContinuationsAdminPanel,
+  DeliberationPanel,
+  EligibilityReviewPanel,
+  ExceptionRequestsPanel,
+  MentorDeskPanel,
+  OnsiteOperationsPanel,
+  OrganizerJudgingLogisticsPanel,
+  PublicationGovernancePanel,
+  RulesPanel,
+} from "../pvs";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 
@@ -93,6 +104,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
   const base = `/api/v1/workspaces/${workspaceId}/events/`;
   const [events, setEvents] = useState<Event[]>([]);
   const [selectedId, setSelectedId] = useState("");
+  const [awardsRevision, setAwardsRevision] = useState(0);
   const selectedRef = useRef("");
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -484,6 +496,23 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
             workspaceId={workspaceId}
             eventId={selected.public_id}
           />
+          <EligibilityReviewPanel
+            key={`EligibilityReviewPanel-${selected.public_id}`}
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+          />
+          <RulesPanel
+            key={`RulesPanel-${selected.public_id}`}
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+            canPublish
+          />
+          <OnsiteOperationsPanel
+            key={`OnsiteOperationsPanel-${selected.public_id}`}
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+            canManage
+          />
           <TeamPanel workspaceId={workspaceId} eventId={selected.public_id} />
           <FormBuilder workspaceId={workspaceId} eventId={selected.public_id} />
           <PageBuilder workspaceId={workspaceId} eventId={selected.public_id} />
@@ -493,6 +522,11 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
           />
           <JudgeWorkloadPanel
             key={`judge-workload-${selected.public_id}`}
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+          />
+          <OrganizerJudgingLogisticsPanel
+            key={`OrganizerJudgingLogisticsPanel-${selected.public_id}`}
             workspaceId={workspaceId}
             eventId={selected.public_id}
           />
@@ -506,12 +540,39 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
             eventId={selected.public_id}
           />
           <AwardsPanel
-            key={`awards-${selected.public_id}`}
+            key={`awards-${selected.public_id}-${awardsRevision}`}
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+          />
+          <DeliberationPanel
+            key={`DeliberationPanel-${selected.public_id}`}
+            onFinalized={() => setAwardsRevision((n) => n + 1)}
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+          />
+          <PublicationGovernancePanel
+            key={`PublicationGovernancePanel-${selected.public_id}`}
             workspaceId={workspaceId}
             eventId={selected.public_id}
           />
           <OperationsCenter
             key={`operations-${selected.public_id}`}
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+          />
+          <ExceptionRequestsPanel
+            key={`ExceptionRequestsPanel-${selected.public_id}`}
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+          />
+          <MentorDeskPanel
+            key={`MentorDeskPanel-${selected.public_id}`}
+            workspaceId={workspaceId}
+            eventId={selected.public_id}
+            isOrganizer
+          />
+          <ContinuationsAdminPanel
+            key={`ContinuationsAdminPanel-${selected.public_id}`}
             workspaceId={workspaceId}
             eventId={selected.public_id}
           />

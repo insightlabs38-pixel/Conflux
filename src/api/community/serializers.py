@@ -61,6 +61,7 @@ class VotingStatusSchema(serializers.Serializer):
     closes_at = serializers.DateTimeField()
     is_open = serializers.BooleanField()
     allow_comments = serializers.BooleanField()
+    results_published = serializers.BooleanField()
 
 
 class CandidateSchema(serializers.Serializer):

@@ -7,7 +7,7 @@ export function Card({
 }: {
   title?: string;
   children: ReactNode;
-  as?: "h2" | "h3" | "h4";
+  as?: "h2" | "h3" | "h4" | "h5";
 }) {
   return (
     <div className="cx-card">

@@ -221,6 +221,7 @@ export function PermissionMatrixExplorer({
       </label>
       {subjectKind === "role" ? (
         <select
+          aria-label="Hypothetical role"
           value={subjectRole}
           onChange={(e) => setSubjectRole(e.target.value)}
         >

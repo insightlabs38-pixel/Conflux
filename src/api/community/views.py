@@ -157,6 +157,7 @@ class PublicVotingStatusView(PublicVotingMixin):
                 "closes_at": plan.closes_at,
                 "is_open": plan.is_open(),
                 "allow_comments": plan.allow_comments,
+                "results_published": plan.results_published_at is not None,
             }
         )
 

@@ -5,7 +5,11 @@ import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 
 type IdentityMode = "authenticated" | "email_link" | "token";
-type Status = { identity_mode: IdentityMode; is_open: boolean } | null;
+type Status = {
+  identity_mode: IdentityMode;
+  is_open: boolean;
+  results_published?: boolean;
+} | null;
 type Candidate = { project: string; name: string };
 type Result = { project: string; name: string; votes: number };
 
@@ -93,7 +97,8 @@ export function CommunityVoting({ eventId }: { eventId: string }) {
   }, [base, retry]);
 
   useEffect(() => {
-    if (!status) return;
+    // Unpublished results are a guaranteed 403 for the public; don't ask.
+    if (!status || status.results_published === false) return;
     let active = true;
     fetch(base + "/results/", { credentials: "include" })
       .then(async (response) => {

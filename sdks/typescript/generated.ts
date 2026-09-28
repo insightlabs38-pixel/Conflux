@@ -1090,6 +1090,17 @@ export type InputOfCloseCallsSchema = {
   projects: string[];
 };
 
+export type CloseInput = { state: CloseInputStateEnum; note?: string };
+
+export type InputOfCloseInput = {
+  state: InputOfCloseInputStateEnum;
+  note?: string;
+};
+
+export type CloseInputStateEnum = "resolved" | "waived";
+
+export type InputOfCloseInputStateEnum = "resolved" | "waived";
+
 export type Comment = {
   public_id: string;
   author: string;
@@ -1293,6 +1304,22 @@ export type InputOfCredentialReadSchema = {
   expires_at: string;
   revoked_at: string | null;
 };
+
+export type DecisionInput = {
+  decision: DecisionInputDecisionEnum;
+  note?: string;
+};
+
+export type InputOfDecisionInput = {
+  decision: InputOfDecisionInputDecisionEnum;
+  note?: string;
+};
+
+export type DecisionInputDecisionEnum =
+  "pending" | "needs_remediation" | "cleared" | "ineligible";
+
+export type InputOfDecisionInputDecisionEnum =
+  "pending" | "needs_remediation" | "cleared" | "ineligible";
 
 export type DeliveryInspection = {
   public_id: string;
@@ -1694,6 +1721,41 @@ export type InputOfFeedbackEntrySchema = {
   submitted_at: string;
 };
 
+export type FindingInput = { message: string; severity?: SeverityEnum };
+
+export type InputOfFindingInput = {
+  message: string;
+  severity?: InputOfSeverityEnum;
+};
+
+export type FindingOutput = {
+  public_id: string;
+  code: string;
+  automated: boolean;
+  severity: string;
+  message: string;
+  state: string;
+  participant_response: string;
+  resolution_note: string;
+  opened_at: string;
+  addressed_at: string | null;
+  closed_at: string | null;
+};
+
+export type InputOfFindingOutput = {
+  public_id: string;
+  code: string;
+  automated: boolean;
+  severity: string;
+  message: string;
+  state: string;
+  participant_response: string;
+  resolution_note: string;
+  opened_at: string;
+  addressed_at: string | null;
+  closed_at: string | null;
+};
+
 export type FormAnswersInputSchema = { answers: unknown };
 
 export type InputOfFormAnswersInputSchema = { answers: unknown };
@@ -1737,6 +1799,12 @@ export type InputOfFormVersionSchema = {
   schema: unknown;
   published_at: string;
 };
+
+export type FulfillmentInputStateEnum =
+  "pending" | "contacted" | "verified" | "sent" | "claimed" | "failed";
+
+export type InputOfFulfillmentInputStateEnum =
+  "pending" | "contacted" | "verified" | "sent" | "claimed" | "failed";
 
 export type FulfillmentOutput = {
   public_id: string;
@@ -2611,10 +2679,13 @@ export type InputOfPatchedEvent = {
   is_public?: boolean;
 };
 
-export type PatchedFulfillmentInput = { state?: StateEnum; note?: string };
+export type PatchedFulfillmentInput = {
+  state?: FulfillmentInputStateEnum;
+  note?: string;
+};
 
 export type InputOfPatchedFulfillmentInput = {
-  state?: InputOfStateEnum;
+  state?: InputOfFulfillmentInputStateEnum;
   note?: string;
 };
 
@@ -3386,6 +3457,10 @@ export type ResolutionInputSchema = { resolution_note: string };
 
 export type InputOfResolutionInputSchema = { resolution_note: string };
 
+export type RespondInput = { response: string };
+
+export type InputOfRespondInput = { response: string };
+
 export type ResultsPublishInputSchema = {
   normalization_run: string;
   tie_breaks?: Record<string, number>;
@@ -3416,6 +3491,42 @@ export type InputOfRetentionPolicyOutput = {
   participant_data_days: number | null;
   private_artifact_days: number | null;
   updated_at: string | null;
+};
+
+export type ReviewOutput = {
+  project: string;
+  status: string;
+  decision_note: string;
+  revision: number;
+  decided_at: string | null;
+  findings: FindingOutput[];
+};
+
+export type InputOfReviewOutput = {
+  project: string;
+  status: string;
+  decision_note: string;
+  revision: number;
+  decided_at: string | null;
+  findings: InputOfFindingOutput[];
+};
+
+export type ReviewSummaryOutput = {
+  project: string;
+  project_name: string;
+  status: string;
+  open_findings: number;
+  addressed_findings: number;
+  revision: number;
+};
+
+export type InputOfReviewSummaryOutput = {
+  project: string;
+  project_name: string;
+  status: string;
+  open_findings: number;
+  addressed_findings: number;
+  revision: number;
 };
 
 export type RubricLabCriterionSchema = {
@@ -3497,6 +3608,44 @@ export type RubricVersion = {
 
 export type InputOfRubricVersion = { number: number; criteria: unknown };
 
+export type RulesInput = {
+  min_team_size: number | null;
+  max_team_size: number | null;
+  required_artifact_kinds: string[];
+  require_finalized_submission: boolean;
+  require_track: boolean;
+  require_clearance: boolean;
+};
+
+export type InputOfRulesInput = {
+  min_team_size: number | null;
+  max_team_size: number | null;
+  required_artifact_kinds: string[];
+  require_finalized_submission: boolean;
+  require_track: boolean;
+  require_clearance: boolean;
+};
+
+export type RulesOutput = {
+  min_team_size: number | null;
+  max_team_size: number | null;
+  required_artifact_kinds: string[];
+  require_finalized_submission: boolean;
+  require_track: boolean;
+  require_clearance: boolean;
+  updated_at: string | null;
+};
+
+export type InputOfRulesOutput = {
+  min_team_size: number | null;
+  max_team_size: number | null;
+  required_artifact_kinds: string[];
+  require_finalized_submission: boolean;
+  require_track: boolean;
+  require_clearance: boolean;
+  updated_at: string | null;
+};
+
 export type SavedSearchInput = { name: string; filters: SearchFilters };
 
 export type InputOfSavedSearchInput = {
@@ -3577,6 +3726,10 @@ export type InputOfSensitivityInputSchema = {
   holdout_counts?: number[];
 };
 
+export type SeverityEnum = "blocking" | "advisory";
+
+export type InputOfSeverityEnum = "blocking" | "advisory";
+
 export type SignedArchiveImportInput = {
   name: string;
   slug: string;
@@ -3641,12 +3794,6 @@ export type StageTransition = {
 };
 
 export type InputOfStageTransition = { from_stage: string; to_stage: string };
-
-export type StateEnum =
-  "pending" | "contacted" | "verified" | "sent" | "claimed" | "failed";
-
-export type InputOfStateEnum =
-  "pending" | "contacted" | "verified" | "sent" | "claimed" | "failed";
 
 export type SubjectExportOutput = {
   subject: Record<string, unknown>;
@@ -4800,6 +4947,26 @@ export interface Operations {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: EventDashboardSchema;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_eligibility_reviews: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      query?: {
+        status?: "cleared" | "ineligible" | "needs_remediation" | "pending";
+      };
+    };
+    response: ReviewSummaryOutput[];
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_eligibility_rules: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: RulesOutput;
+  };
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_eligibility_rules: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfRulesInput;
+    };
+    response: RulesOutput;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_evaluation_pools: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: EvaluationPool;
@@ -5437,6 +5604,72 @@ export interface Operations {
       };
     };
     response: Comment;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: ReviewOutput;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_checks: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: ReviewOutput;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_decision: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfDecisionInput;
+    };
+    response: ReviewOutput;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_findings: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfFindingInput;
+    };
+    response: FindingOutput;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_findings_finding_public_id_close: {
+    request: {
+      path: {
+        event_public_id: string;
+        finding_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfCloseInput;
+    };
+    response: FindingOutput;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_findings_finding_public_id_respond: {
+    request: {
+      path: {
+        event_public_id: string;
+        finding_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfRespondInput;
+    };
+    response: FindingOutput;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_forms: {
     request: {
@@ -7595,6 +7828,33 @@ export const operations = {
     request_body: false,
     response_kind: "json",
   },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_eligibility_reviews:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/eligibility-reviews/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: ["status"],
+      request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_eligibility_rules:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/eligibility-rules/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_eligibility_rules:
+    {
+      method: "PUT",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/eligibility-rules/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_evaluation_pools:
     {
       method: "GET",
@@ -8452,6 +8712,86 @@ export const operations = {
       ],
       query_params: [],
       request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_checks:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/checks/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_decision:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/decision/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_findings:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/findings/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_findings_finding_public_id_close:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/findings/{finding_public_id}/close/",
+      path_params: [
+        "event_public_id",
+        "finding_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_findings_finding_public_id_respond:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/findings/{finding_public_id}/respond/",
+      path_params: [
+        "event_public_id",
+        "finding_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
       response_kind: "json",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_forms:

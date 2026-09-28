@@ -132,4 +132,21 @@ TABLES = {
         "event surface opens_at closes_at finalist_stage updated_at",
         "",
     ),
+    "eligibility.eligibilityrules": (
+        "event",
+        "event min_team_size max_team_size required_artifact_kinds require_finalized_submission "
+        "require_track require_clearance updated_at",
+        "",
+    ),
+    "eligibility.eligibilityreview": (
+        "project__event",
+        "project status decision_note decided_by decided_at revision created_at updated_at",
+        "",
+    ),
+    "eligibility.eligibilityfinding": (
+        "review__project__event",
+        "review code automated severity message state participant_response responded_by "
+        "resolution_note closed_by opened_at addressed_at closed_at",
+        "",
+    ),
 }

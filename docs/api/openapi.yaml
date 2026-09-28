@@ -3115,6 +3115,112 @@ paths:
               schema:
                 $ref: '#/components/schemas/EventDashboardSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/eligibility-reviews/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_eligibility_reviews
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - cleared
+          - ineligible
+          - needs_remediation
+          - pending
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReviewSummaryOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/eligibility-rules/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_eligibility_rules
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RulesOutput'
+          description: ''
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_events_event_public_id_eligibility_rules
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RulesInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RulesInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RulesInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RulesOutput'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/evaluation-pools/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_evaluation_pools
@@ -6231,6 +6337,270 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comment'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/checks/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_checks
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/decision/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_decision
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecisionInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DecisionInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DecisionInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/findings/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_findings
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FindingInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FindingInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FindingInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FindingOutput'
+          description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/findings/{finding_public_id}/close/
+  : post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_findings_finding_public_id_close
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: finding_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloseInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CloseInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CloseInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FindingOutput'
+          description: ''
+  ? /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/findings/{finding_public_id}/respond/
+  : post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_findings_finding_public_id_respond
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: finding_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RespondInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RespondInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RespondInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FindingOutput'
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/forms/:
     get:
@@ -14026,6 +14396,25 @@ components:
       required:
       - normalization_run
       - projects
+    CloseInput:
+      type: object
+      properties:
+        state:
+          $ref: '#/components/schemas/CloseInputStateEnum'
+        note:
+          type: string
+          default: ''
+          maxLength: 500
+      required:
+      - state
+    CloseInputStateEnum:
+      enum:
+      - resolved
+      - waived
+      type: string
+      description: |-
+        * `resolved` - resolved
+        * `waived` - waived
     Comment:
       type: object
       properties:
@@ -14364,6 +14753,29 @@ components:
       - public_id
       - revoked_at
       - workspace
+    DecisionInput:
+      type: object
+      properties:
+        decision:
+          $ref: '#/components/schemas/DecisionInputDecisionEnum'
+        note:
+          type: string
+          default: ''
+          maxLength: 1000
+      required:
+      - decision
+    DecisionInputDecisionEnum:
+      enum:
+      - pending
+      - needs_remediation
+      - cleared
+      - ineligible
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `needs_remediation` - Needs remediation
+        * `cleared` - Cleared
+        * `ineligible` - Ineligible
     DeliveryInspection:
       type: object
       properties:
@@ -15041,6 +15453,61 @@ components:
       - comment
       - judge
       - submitted_at
+    FindingInput:
+      type: object
+      properties:
+        message:
+          type: string
+          maxLength: 500
+        severity:
+          allOf:
+          - $ref: '#/components/schemas/SeverityEnum'
+          default: blocking
+      required:
+      - message
+    FindingOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        code:
+          type: string
+        automated:
+          type: boolean
+        severity:
+          type: string
+        message:
+          type: string
+        state:
+          type: string
+        participant_response:
+          type: string
+        resolution_note:
+          type: string
+        opened_at:
+          type: string
+          format: date-time
+        addressed_at:
+          type: string
+          format: date-time
+          nullable: true
+        closed_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - addressed_at
+      - automated
+      - closed_at
+      - code
+      - message
+      - opened_at
+      - participant_response
+      - public_id
+      - resolution_note
+      - severity
+      - state
     FormAnswersInputSchema:
       type: object
       properties:
@@ -15105,6 +15572,22 @@ components:
       - public_id
       - published_at
       - schema
+    FulfillmentInputStateEnum:
+      enum:
+      - pending
+      - contacted
+      - verified
+      - sent
+      - claimed
+      - failed
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `contacted` - Contacted
+        * `verified` - Verified
+        * `sent` - Sent
+        * `claimed` - Claimed
+        * `failed` - Failed
     FulfillmentOutput:
       type: object
       properties:
@@ -16480,7 +16963,7 @@ components:
       type: object
       properties:
         state:
-          $ref: '#/components/schemas/StateEnum'
+          $ref: '#/components/schemas/FulfillmentInputStateEnum'
         note:
           type: string
     PatchedPage:
@@ -17736,6 +18219,14 @@ components:
           minLength: 1
       required:
       - resolution_note
+    RespondInput:
+      type: object
+      properties:
+        response:
+          type: string
+          maxLength: 1000
+      required:
+      - response
     ResultsPublishInputSchema:
       type: object
       properties:
@@ -17781,6 +18272,56 @@ components:
       - participant_data_days
       - private_artifact_days
       - updated_at
+    ReviewOutput:
+      type: object
+      properties:
+        project:
+          type: string
+          format: uuid
+        status:
+          type: string
+        decision_note:
+          type: string
+        revision:
+          type: integer
+        decided_at:
+          type: string
+          format: date-time
+          nullable: true
+        findings:
+          type: array
+          items:
+            $ref: '#/components/schemas/FindingOutput'
+      required:
+      - decided_at
+      - decision_note
+      - findings
+      - project
+      - revision
+      - status
+    ReviewSummaryOutput:
+      type: object
+      properties:
+        project:
+          type: string
+          format: uuid
+        project_name:
+          type: string
+        status:
+          type: string
+        open_findings:
+          type: integer
+        addressed_findings:
+          type: integer
+        revision:
+          type: integer
+      required:
+      - addressed_findings
+      - open_findings
+      - project
+      - project_name
+      - revision
+      - status
     RubricLabCriterionSchema:
       type: object
       properties:
@@ -17914,6 +18455,73 @@ components:
       - number
       - public_id
       - published_at
+    RulesInput:
+      type: object
+      properties:
+        min_team_size:
+          type: integer
+          maximum: 100
+          minimum: 1
+          nullable: true
+        max_team_size:
+          type: integer
+          maximum: 100
+          minimum: 1
+          nullable: true
+        required_artifact_kinds:
+          type: array
+          items:
+            type: string
+          maxItems: 20
+        require_finalized_submission:
+          type: boolean
+        require_track:
+          type: boolean
+        require_clearance:
+          type: boolean
+      required:
+      - max_team_size
+      - min_team_size
+      - require_clearance
+      - require_finalized_submission
+      - require_track
+      - required_artifact_kinds
+    RulesOutput:
+      type: object
+      properties:
+        min_team_size:
+          type: integer
+          maximum: 100
+          minimum: 1
+          nullable: true
+        max_team_size:
+          type: integer
+          maximum: 100
+          minimum: 1
+          nullable: true
+        required_artifact_kinds:
+          type: array
+          items:
+            type: string
+          maxItems: 20
+        require_finalized_submission:
+          type: boolean
+        require_track:
+          type: boolean
+        require_clearance:
+          type: boolean
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - max_team_size
+      - min_team_size
+      - require_clearance
+      - require_finalized_submission
+      - require_track
+      - required_artifact_kinds
+      - updated_at
     SavedSearchInput:
       type: object
       properties:
@@ -18044,6 +18652,14 @@ components:
             type: integer
             minimum: 1
           maxItems: 10
+    SeverityEnum:
+      enum:
+      - blocking
+      - advisory
+      type: string
+      description: |-
+        * `blocking` - Blocking
+        * `advisory` - Advisory
     SignedArchiveImportInput:
       type: object
       properties:
@@ -18145,22 +18761,6 @@ components:
       - from_stage
       - public_id
       - to_stage
-    StateEnum:
-      enum:
-      - pending
-      - contacted
-      - verified
-      - sent
-      - claimed
-      - failed
-      type: string
-      description: |-
-        * `pending` - Pending
-        * `contacted` - Contacted
-        * `verified` - Verified
-        * `sent` - Sent
-        * `claimed` - Claimed
-        * `failed` - Failed
     SubjectExportOutput:
       type: object
       properties:

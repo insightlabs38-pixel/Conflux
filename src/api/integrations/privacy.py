@@ -15,6 +15,7 @@ from audit.services import record_mutation
 from communications.models import MessageRecipient
 from community.models import Comment
 from django.db import transaction
+from eligibility.models import EligibilityFinding
 from evaluations.models import Appeal, AppealStatus, Assignment, Ballot, PairwiseComparison
 from events.models import EventApplication, ParticipantCheckIn
 from participation.models import MarketplaceProfile, TeamMembership
@@ -63,6 +64,9 @@ def _retained(event, user):
             plan__stage__event=event, judge=user
         ),
         "appeals": Appeal.objects.filter(project__event=event, submitted_by=user),
+        "eligibility_responses": EligibilityFinding.objects.filter(
+            review__project__event=event, responded_by=user
+        ),
     }
 
 
@@ -121,6 +125,7 @@ def export_subject(event, user, *, actor):
         "assignments": ("project__public_id",),
         "pairwise_comparisons": ("project_a__public_id", "project_b__public_id", "submitted_at"),
         "appeals": ("project__public_id", "status", "body", "created_at"),
+        "eligibility_responses": ("code", "participant_response", "addressed_at"),
     }
     with transaction.atomic():
         data = {

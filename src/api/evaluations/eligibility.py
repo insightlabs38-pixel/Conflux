@@ -1,4 +1,5 @@
 from awards.models import Award, SelectionSource
+from eligibility.services import judgeable
 from projects.models import Project, SubmissionStatus
 
 
@@ -29,4 +30,4 @@ def eligible_projects(plan):
             candidates = candidates.filter(track_id=award.eligibility_track_id)
         if award.require_finalized_submission:
             candidates = candidates.filter(submissions__status=SubmissionStatus.FINALIZED)
-    return candidates.distinct()
+    return judgeable(candidates.distinct(), plan.stage.event)

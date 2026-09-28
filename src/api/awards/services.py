@@ -3,6 +3,7 @@ from community.models import VotingPlan
 from community.results import tally
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from eligibility.services import ensure_project_eligible
 from evaluations.results import ranked_results
 from projects.models import Project, SubmissionStatus
 
@@ -97,6 +98,7 @@ def select_winner(*, award, project, actor, override_reason=""):
             and not project.submissions.filter(status=SubmissionStatus.FINALIZED).exists()
         ):
             raise ValidationError("Project needs a finalized submission.")
+        ensure_project_eligible(project)
         if AwardWinner.objects.filter(award=award, project=project).exists():
             raise ValidationError("Project has already won this award.")
         if award.winners.count() >= award.winner_count:

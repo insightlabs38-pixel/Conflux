@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "community",
     "communications",
     "taxonomy",
+    "eligibility",
 ]
 
 MIDDLEWARE = [

@@ -11,6 +11,7 @@ from awards.models import Award, AwardWinner
 from django.core.exceptions import ValidationError
 from django.test import Client
 from django.utils import timezone
+from eligibility.models import EligibilityFinding, EligibilityReview, EligibilityRules
 from evaluations.assignment import activate
 from evaluations.models import (
     Ballot,
@@ -132,6 +133,15 @@ def source():
             "rank": 1,
         },
     )
+    rules = EligibilityRules.objects.create(event=event, min_team_size=1, require_clearance=True)
+    review = EligibilityReview.objects.create(
+        project=project, status="cleared", decided_by=owner, decision_note="ok"
+    )
+    EligibilityFinding.objects.create(
+        review=review, code="manual", severity="blocking", message="m", state="waived",
+        closed_by=owner, resolution_note="fine",
+    )  # fmt: skip
+    assert rules.pk
     return workspace, event, owner, judge, project, plan
 
 
@@ -168,6 +178,10 @@ def test_restore_live_evidence_results_privacy_and_provenance_without_recomputat
     assert winner.evidence["normalization_run"] == str(
         copied_plan.published_normalization_run.public_id
     )
+    copied_review = copied_project.eligibility_review
+    assert (copied_review.status, copied_review.decided_by.username) == ("cleared", "restore-owner")
+    assert copied_review.findings.get().state == "waived"
+    assert copied.eligibility_rules.require_clearance
     entry = StageEntry.objects.get(stage__event=copied)
     assert entry.subject_id == str(copied_project.team.public_id)
     version = copied_project.submissions.get().current_version

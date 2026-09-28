@@ -979,6 +979,18 @@ class InputOfCloseCallsSchema(TypedDict):
     normalization_run: int | None
     projects: list[str]
 
+class CloseInput(TypedDict):
+    state: CloseInputStateEnum
+    note: NotRequired[str]
+
+class InputOfCloseInput(TypedDict):
+    state: InputOfCloseInputStateEnum
+    note: NotRequired[str]
+
+CloseInputStateEnum = Literal['resolved', 'waived']
+
+InputOfCloseInputStateEnum = Literal['resolved', 'waived']
+
 class Comment(TypedDict):
     public_id: str
     author: str
@@ -1166,6 +1178,18 @@ class InputOfCredentialReadSchema(TypedDict):
     created_at: str
     expires_at: str
     revoked_at: str | None
+
+class DecisionInput(TypedDict):
+    decision: DecisionInputDecisionEnum
+    note: NotRequired[str]
+
+class InputOfDecisionInput(TypedDict):
+    decision: InputOfDecisionInputDecisionEnum
+    note: NotRequired[str]
+
+DecisionInputDecisionEnum = Literal['pending', 'needs_remediation', 'cleared', 'ineligible']
+
+InputOfDecisionInputDecisionEnum = Literal['pending', 'needs_remediation', 'cleared', 'ineligible']
 
 class DeliveryInspection(TypedDict):
     public_id: str
@@ -1529,6 +1553,40 @@ class InputOfFeedbackEntrySchema(TypedDict):
     comment: str
     submitted_at: str
 
+class FindingInput(TypedDict):
+    message: str
+    severity: NotRequired[SeverityEnum]
+
+class InputOfFindingInput(TypedDict):
+    message: str
+    severity: NotRequired[InputOfSeverityEnum]
+
+class FindingOutput(TypedDict):
+    public_id: str
+    code: str
+    automated: bool
+    severity: str
+    message: str
+    state: str
+    participant_response: str
+    resolution_note: str
+    opened_at: str
+    addressed_at: str | None
+    closed_at: str | None
+
+class InputOfFindingOutput(TypedDict):
+    public_id: str
+    code: str
+    automated: bool
+    severity: str
+    message: str
+    state: str
+    participant_response: str
+    resolution_note: str
+    opened_at: str
+    addressed_at: str | None
+    closed_at: str | None
+
 class FormAnswersInputSchema(TypedDict):
     answers: Any
 
@@ -1578,6 +1636,10 @@ class InputOfFormVersionSchema(TypedDict):
     number: int
     schema: Any
     published_at: str
+
+FulfillmentInputStateEnum = Literal['pending', 'contacted', 'verified', 'sent', 'claimed', 'failed']
+
+InputOfFulfillmentInputStateEnum = Literal['pending', 'contacted', 'verified', 'sent', 'claimed', 'failed']
 
 class FulfillmentOutput(TypedDict):
     public_id: str
@@ -2381,11 +2443,11 @@ class InputOfPatchedEvent(TypedDict):
     is_public: NotRequired[bool]
 
 class PatchedFulfillmentInput(TypedDict):
-    state: NotRequired[StateEnum]
+    state: NotRequired[FulfillmentInputStateEnum]
     note: NotRequired[str]
 
 class InputOfPatchedFulfillmentInput(TypedDict):
-    state: NotRequired[InputOfStateEnum]
+    state: NotRequired[InputOfFulfillmentInputStateEnum]
     note: NotRequired[str]
 
 class PatchedPage(TypedDict):
@@ -3091,6 +3153,12 @@ class ResolutionInputSchema(TypedDict):
 class InputOfResolutionInputSchema(TypedDict):
     resolution_note: str
 
+class RespondInput(TypedDict):
+    response: str
+
+class InputOfRespondInput(TypedDict):
+    response: str
+
 class ResultsPublishInputSchema(TypedDict):
     normalization_run: str
     tie_breaks: NotRequired[dict[str, int]]
@@ -3116,6 +3184,38 @@ class InputOfRetentionPolicyOutput(TypedDict):
     participant_data_days: int | None
     private_artifact_days: int | None
     updated_at: str | None
+
+class ReviewOutput(TypedDict):
+    project: str
+    status: str
+    decision_note: str
+    revision: int
+    decided_at: str | None
+    findings: list[FindingOutput]
+
+class InputOfReviewOutput(TypedDict):
+    project: str
+    status: str
+    decision_note: str
+    revision: int
+    decided_at: str | None
+    findings: list[InputOfFindingOutput]
+
+class ReviewSummaryOutput(TypedDict):
+    project: str
+    project_name: str
+    status: str
+    open_findings: int
+    addressed_findings: int
+    revision: int
+
+class InputOfReviewSummaryOutput(TypedDict):
+    project: str
+    project_name: str
+    status: str
+    open_findings: int
+    addressed_findings: int
+    revision: int
 
 class RubricLabCriterionSchema(TypedDict):
     criterion_id: str
@@ -3188,6 +3288,40 @@ class RubricVersion(TypedDict):
 class InputOfRubricVersion(TypedDict):
     number: int
     criteria: Any
+
+class RulesInput(TypedDict):
+    min_team_size: int | None
+    max_team_size: int | None
+    required_artifact_kinds: list[str]
+    require_finalized_submission: bool
+    require_track: bool
+    require_clearance: bool
+
+class InputOfRulesInput(TypedDict):
+    min_team_size: int | None
+    max_team_size: int | None
+    required_artifact_kinds: list[str]
+    require_finalized_submission: bool
+    require_track: bool
+    require_clearance: bool
+
+class RulesOutput(TypedDict):
+    min_team_size: int | None
+    max_team_size: int | None
+    required_artifact_kinds: list[str]
+    require_finalized_submission: bool
+    require_track: bool
+    require_clearance: bool
+    updated_at: str | None
+
+class InputOfRulesOutput(TypedDict):
+    min_team_size: int | None
+    max_team_size: int | None
+    required_artifact_kinds: list[str]
+    require_finalized_submission: bool
+    require_track: bool
+    require_clearance: bool
+    updated_at: str | None
 
 class SavedSearchInput(TypedDict):
     name: str
@@ -3262,6 +3396,10 @@ class InputOfSensitivityInputSchema(TypedDict):
     ridge_lambdas: NotRequired[list[float]]
     holdout_counts: NotRequired[list[int]]
 
+SeverityEnum = Literal['blocking', 'advisory']
+
+InputOfSeverityEnum = Literal['blocking', 'advisory']
+
 class SignedArchiveImportInput(TypedDict):
     name: str
     slug: str
@@ -3319,10 +3457,6 @@ class StageTransition(TypedDict):
 class InputOfStageTransition(TypedDict):
     from_stage: str
     to_stage: str
-
-StateEnum = Literal['pending', 'contacted', 'verified', 'sent', 'claimed', 'failed']
-
-InputOfStateEnum = Literal['pending', 'contacted', 'verified', 'sent', 'claimed', 'failed']
 
 class SubjectExportOutput(TypedDict):
     subject: dict[str, Any]
@@ -4376,6 +4510,20 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                 'query_params': [],
                                                                                 'request_body': False,
                                                                                 'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_eligibility_reviews': {'method': 'GET',
+                                                                                          'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/eligibility-reviews/',
+                                                                                          'path_params': ['event_public_id',
+                                                                                                          'workspace_public_id'],
+                                                                                          'query_params': ['status'],
+                                                                                          'request_body': False,
+                                                                                          'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_eligibility_rules': {'method': 'GET',
+                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/eligibility-rules/',
+                                                                                        'path_params': ['event_public_id',
+                                                                                                        'workspace_public_id'],
+                                                                                        'query_params': [],
+                                                                                        'request_body': False,
+                                                                                        'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_evaluation_pools': {'method': 'GET',
                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/evaluation-pools/',
                                                                                        'path_params': ['event_public_id',
@@ -4662,6 +4810,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                           'query_params': [],
                                                                                                           'request_body': False,
                                                                                                           'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility': {'method': 'GET',
+                                                                                                             'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/',
+                                                                                                             'path_params': ['event_public_id',
+                                                                                                                             'project_public_id',
+                                                                                                                             'workspace_public_id'],
+                                                                                                             'query_params': [],
+                                                                                                             'request_body': False,
+                                                                                                             'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_forms': {'method': 'GET',
                                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/forms/',
                                                                                                        'path_params': ['event_public_id',
@@ -5831,6 +5987,48 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                   'query_params': [],
                                                                                                                                   'request_body': False,
                                                                                                                                   'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_checks': {'method': 'POST',
+                                                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/checks/',
+                                                                                                                     'path_params': ['event_public_id',
+                                                                                                                                     'project_public_id',
+                                                                                                                                     'workspace_public_id'],
+                                                                                                                     'query_params': [],
+                                                                                                                     'request_body': False,
+                                                                                                                     'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_decision': {'method': 'POST',
+                                                                                                                       'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/decision/',
+                                                                                                                       'path_params': ['event_public_id',
+                                                                                                                                       'project_public_id',
+                                                                                                                                       'workspace_public_id'],
+                                                                                                                       'query_params': [],
+                                                                                                                       'request_body': True,
+                                                                                                                       'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_findings': {'method': 'POST',
+                                                                                                                       'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/findings/',
+                                                                                                                       'path_params': ['event_public_id',
+                                                                                                                                       'project_public_id',
+                                                                                                                                       'workspace_public_id'],
+                                                                                                                       'query_params': [],
+                                                                                                                       'request_body': True,
+                                                                                                                       'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_findings_finding_public_id_close': {'method': 'POST',
+                                                                                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/findings/{finding_public_id}/close/',
+                                                                                                                                               'path_params': ['event_public_id',
+                                                                                                                                                               'finding_public_id',
+                                                                                                                                                               'project_public_id',
+                                                                                                                                                               'workspace_public_id'],
+                                                                                                                                               'query_params': [],
+                                                                                                                                               'request_body': True,
+                                                                                                                                               'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_eligibility_findings_finding_public_id_respond': {'method': 'POST',
+                                                                                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/eligibility/findings/{finding_public_id}/respond/',
+                                                                                                                                                 'path_params': ['event_public_id',
+                                                                                                                                                                 'finding_public_id',
+                                                                                                                                                                 'project_public_id',
+                                                                                                                                                                 'workspace_public_id'],
+                                                                                                                                                 'query_params': [],
+                                                                                                                                                 'request_body': True,
+                                                                                                                                                 'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_members': {'method': 'POST',
                                                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/members/',
                                                                                                           'path_params': ['event_public_id',
@@ -6238,6 +6436,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                 'query_params': [],
                                                                                 'request_body': True,
                                                                                 'response_kind': 'json'},
+ 'put_api_v1_workspaces_workspace_public_id_events_event_public_id_eligibility_rules': {'method': 'PUT',
+                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/eligibility-rules/',
+                                                                                        'path_params': ['event_public_id',
+                                                                                                        'workspace_public_id'],
+                                                                                        'query_params': [],
+                                                                                        'request_body': True,
+                                                                                        'response_kind': 'json'},
  'put_api_v1_workspaces_workspace_public_id_events_event_public_id_forms_form_public_id': {'method': 'PUT',
                                                                                            'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/forms/{form_public_id}/',
                                                                                            'path_params': ['event_public_id',

@@ -1,28 +1,29 @@
-# VS33 — Sequential implementation checkpoint
+# VS34 — Sequential implementation checkpoint
 
 ## Result
 
-VS33 complete at `354a146` on canonical `main`; next is VS34-01. Git/artifacts support BOOT-B00, Core, S01–S24 and VS01–VS32; owner decision X015 promoted STRETCH-GATE.
+VS34 complete at `155b623db85ea30a741ec704c1b1762044e4efde` on canonical `main`; next is VS35-01. Git/artifacts support BOOT-B00, Core, S01–S24 and VS01–VS33; owner decision X015 promoted STRETCH-GATE.
 
 ## Changes
 
-- Self-hosted operator API explorer with live schema, seeded examples and explicit same-origin sending; see `docs/batches/VS33.md` and `docs/api/EXPLORER.md`.
-- VS32 signed attempt inspection/replay history remains verified; see `docs/batches/VS32.md`.
+- Local SDK-backed event CLI; see `docs/batches/VS34.md`, `docs/api/CLI.md` and `scripts/conflux-admin`.
+- This session also completed VS32 inspection/replay (`1e6116e`) and VS33 explorer (`354a146`); generated SDK follow-up `f0755f9`.
 - Owner dirt preserved: `.gitignore`, `master.sh`, `master/`, `tests/test_master_supervisor.py`; supervisor untouched.
 
 ## Verification
 
-- VS33: explorer contract/UI → 13 passed; full web → 115 passed; typecheck/build, scoped Ruff/format and diff checks passed.
-- VS33 live examples/schema/credentials/routes → 10 passed; agent-browser isolated Django → 288 operations, create 201/read 200, DB verified.
-- VS32 backend scope → 27 passed; panel → 5 passed. Captures for both in `docs/verification/`; no recorded-scene manifest, footage unaffected.
+- VS34 CLI/SDK/archive/preview/signature/schema → 31 passed; real isolated HTTP CLI export/preview/apply and DB checks passed.
+- VS34 `make sdk-check`, scoped Ruff/format, wrapper shell syntax and diff checks passed; no visual changes, footage unaffected.
+- VS33 explorer → 13 passed; full web → 115 passed; typecheck/build passed; backend scope → 10 passed; actual browser create/read/DB passed.
+- VS32 backend → 27 passed; panel → 5 passed; SDK transport → 4 passed. Captures in `docs/verification/vs32/` and `vs33/`; no recorded-scene manifest.
 - Test env: `DJANGO_SECRET_KEY=copy-test-only`, `RECORD_SIGNING_KEY_SEED=0000000000000000000000000000000000000000000000000000000000000001`, `DJANGO_DEBUG=1`.
 
 ## Limitations
 
-- Explorer sends JSON/path/scalar-array queries; other formats require SDK. No token/response persistence; timeout cannot undo accepted writes.
-- Shared runtime untouched. Existing C-B33 release limitations remain.
+- CLI uses plain canonical archives; signed envelopes/other domains use SDK/API. Preview does not reserve identity; timeout cannot undo accepted writes.
+- Explorer supports JSON/path/scalar-array queries. Shared runtime untouched; isolated review servers stopped and resources removed. C-B33 release limitations remain.
 
 ## Next
 
-VS34-01 then VS34-02: local CLI create/import/export/manage events; no VS34 code started.
-Read TASKS.yaml:8694–8751, BATCHES.yaml:1433–1447 and post-spec VS34 heading:104. Inspect existing Python SDK, archive/event views and focused tests narrowly. Continue VS35–VS50 sequentially.
+VS35-01 then VS35-02: mass assign/advance/extend/move/send with preview/audit; no VS35 code started.
+Read TASKS.yaml:8751–8807, BATCHES.yaml:1446–1459 and post-spec VS35 heading:107. Search existing assignment/advancement, temporal-gate/exception, participation and communication action services/views/tests before designing bounded transactional preview/apply. Continue VS36–VS50 sequentially.

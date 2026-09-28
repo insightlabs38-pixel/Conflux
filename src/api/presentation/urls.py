@@ -1,6 +1,7 @@
 from django.urls import path
 
 from . import record_views, views
+from .conformance_views import ConformanceReportView
 from .public_api import PublicGalleryView
 from .publication_views import PublicationDetailView, PublicationListView, PublicFinalistsView
 from .search import ProjectTagsView, PublicSearchView, SavedSearchDetailView, SavedSearchListView
@@ -8,9 +9,26 @@ from .search import ProjectTagsView, PublicSearchView, SavedSearchDetailView, Sa
 _prefix = "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/"
 
 urlpatterns = [
-    path(_prefix + "publication-schedules/", PublicationListView.as_view()),
-    path(_prefix + "publication-schedules/<str:surface>/", PublicationDetailView.as_view()),
-    path("events/<uuid:event_public_id>/finalists/", PublicFinalistsView.as_view()),
+    path(
+        _prefix + "publication-schedules/",
+        PublicationListView.as_view(),
+        name="publication-schedule-list",
+    ),
+    path(
+        _prefix + "publication-schedules/<str:surface>/",
+        PublicationDetailView.as_view(),
+        name="publication-schedule-detail",
+    ),
+    path(
+        "events/<uuid:event_public_id>/finalists/",
+        PublicFinalistsView.as_view(),
+        name="public-finalists",
+    ),
+    path(
+        _prefix + "accessibility-conformance/",
+        ConformanceReportView.as_view(),
+        name="accessibility-conformance",
+    ),
     path("events/<uuid:event_public_id>/search/", PublicSearchView.as_view(), name="public-search"),
     path(
         _prefix + "projects/<uuid:project_public_id>/tags/",

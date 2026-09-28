@@ -1061,6 +1061,26 @@ class ConflictOfInterest(TypedDict):
 class InputOfConflictOfInterest(TypedDict):
     reason: NotRequired[str]
 
+class ConformanceReportOutput(TypedDict):
+    event: str
+    generated_at: str
+    conformance_claimed: bool
+    standard: str
+    theme: dict[str, Any]
+    summary: dict[str, int]
+    pages: list[dict[str, Any]]
+    manual_review: list[dict[str, Any]]
+
+class InputOfConformanceReportOutput(TypedDict):
+    event: str
+    generated_at: str
+    conformance_claimed: bool
+    standard: str
+    theme: dict[str, Any]
+    summary: dict[str, int]
+    pages: list[dict[str, Any]]
+    manual_review: list[dict[str, Any]]
+
 class CreateTeamInput(TypedDict):
     name: str
 
@@ -2605,6 +2625,26 @@ class InputOfPreflightSchema(TypedDict):
     status: str
     checks: list[InputOfPreflightCheckSchema]
 
+class PrivacyApplyInput(TypedDict):
+    apply: NotRequired[bool]
+
+class InputOfPrivacyApplyInput(TypedDict):
+    apply: NotRequired[bool]
+
+class PrivacyReportOutput(TypedDict):
+    applied: bool
+    erased: dict[str, Any]
+    retained: NotRequired[dict[str, Any]]
+    retained_reason: NotRequired[str]
+    due: NotRequired[dict[str, Any]]
+
+class InputOfPrivacyReportOutput(TypedDict):
+    applied: bool
+    erased: dict[str, Any]
+    retained: NotRequired[dict[str, Any]]
+    retained_reason: NotRequired[str]
+    due: NotRequired[dict[str, Any]]
+
 class Project(TypedDict):
     public_id: str
     name: str
@@ -3029,6 +3069,24 @@ class InputOfResultsPublishInputSchema(TypedDict):
     normalization_run: str
     tie_breaks: NotRequired[dict[str, int]]
 
+class RetentionPolicyInput(TypedDict):
+    participant_data_days: int | None
+    private_artifact_days: int | None
+
+class InputOfRetentionPolicyInput(TypedDict):
+    participant_data_days: int | None
+    private_artifact_days: int | None
+
+class RetentionPolicyOutput(TypedDict):
+    participant_data_days: int | None
+    private_artifact_days: int | None
+    updated_at: str | None
+
+class InputOfRetentionPolicyOutput(TypedDict):
+    participant_data_days: int | None
+    private_artifact_days: int | None
+    updated_at: str | None
+
 class RubricLabCriterionSchema(TypedDict):
     criterion_id: str
     name: str
@@ -3235,6 +3293,20 @@ class InputOfStageTransition(TypedDict):
 StateEnum = Literal['pending', 'contacted', 'verified', 'sent', 'claimed', 'failed']
 
 InputOfStateEnum = Literal['pending', 'contacted', 'verified', 'sent', 'claimed', 'failed']
+
+class SubjectExportOutput(TypedDict):
+    subject: dict[str, Any]
+    event: str
+    data: dict[str, Any]
+    retained_data: dict[str, Any]
+    artifacts: list[dict[str, Any]]
+
+class InputOfSubjectExportOutput(TypedDict):
+    subject: dict[str, Any]
+    event: str
+    data: dict[str, Any]
+    retained_data: dict[str, Any]
+    artifacts: list[dict[str, Any]]
 
 SubjectKindEnum = Literal['role', 'user']
 
@@ -4063,6 +4135,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                       'query_params': [],
                                                                       'request_body': False,
                                                                       'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_accessibility_conformance': {'method': 'GET',
+                                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/accessibility-conformance/',
+                                                                                                'path_params': ['event_public_id',
+                                                                                                                'workspace_public_id'],
+                                                                                                'query_params': [],
+                                                                                                'request_body': False,
+                                                                                                'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements': {'method': 'GET',
                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/announcements/',
                                                                                     'path_params': ['event_public_id',
@@ -4413,6 +4492,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                      'query_params': [],
                                                                                      'request_body': False,
                                                                                      'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_retention_policy': {'method': 'GET',
+                                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/privacy/retention-policy/',
+                                                                                               'path_params': ['event_public_id',
+                                                                                                               'workspace_public_id'],
+                                                                                               'query_params': [],
+                                                                                               'request_body': False,
+                                                                                               'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects': {'method': 'GET',
                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/',
                                                                                'path_params': ['event_public_id',
@@ -5510,6 +5596,29 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                     'query_params': [],
                                                                                     'request_body': True,
                                                                                     'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_retention_run': {'method': 'POST',
+                                                                                             'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/privacy/retention/run/',
+                                                                                             'path_params': ['event_public_id',
+                                                                                                             'workspace_public_id'],
+                                                                                             'query_params': [],
+                                                                                             'request_body': True,
+                                                                                             'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_subjects_user_public_id_erase': {'method': 'POST',
+                                                                                                             'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/privacy/subjects/{user_public_id}/erase/',
+                                                                                                             'path_params': ['event_public_id',
+                                                                                                                             'user_public_id',
+                                                                                                                             'workspace_public_id'],
+                                                                                                             'query_params': [],
+                                                                                                             'request_body': True,
+                                                                                                             'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_subjects_user_public_id_export': {'method': 'POST',
+                                                                                                              'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/privacy/subjects/{user_public_id}/export/',
+                                                                                                              'path_params': ['event_public_id',
+                                                                                                                              'user_public_id',
+                                                                                                                              'workspace_public_id'],
+                                                                                                              'query_params': [],
+                                                                                                              'request_body': False,
+                                                                                                              'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects': {'method': 'POST',
                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/',
                                                                                 'path_params': ['event_public_id',
@@ -5994,6 +6103,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                           'query_params': [],
                                                                                           'request_body': True,
                                                                                           'response_kind': 'json'},
+ 'put_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_retention_policy': {'method': 'PUT',
+                                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/privacy/retention-policy/',
+                                                                                               'path_params': ['event_public_id',
+                                                                                                               'workspace_public_id'],
+                                                                                               'query_params': [],
+                                                                                               'request_body': True,
+                                                                                               'response_kind': 'json'},
  'put_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_forms_version_public_id_response': {'method': 'PUT',
                                                                                                                                   'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/forms/{version_public_id}/response/',
                                                                                                                                   'path_params': ['event_public_id',

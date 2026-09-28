@@ -1180,6 +1180,28 @@ export type ConflictOfInterest = {
 
 export type InputOfConflictOfInterest = { reason?: string };
 
+export type ConformanceReportOutput = {
+  event: string;
+  generated_at: string;
+  conformance_claimed: boolean;
+  standard: string;
+  theme: Record<string, unknown>;
+  summary: Record<string, number>;
+  pages: Record<string, unknown>[];
+  manual_review: Record<string, unknown>[];
+};
+
+export type InputOfConformanceReportOutput = {
+  event: string;
+  generated_at: string;
+  conformance_claimed: boolean;
+  standard: string;
+  theme: Record<string, unknown>;
+  summary: Record<string, number>;
+  pages: Record<string, unknown>[];
+  manual_review: Record<string, unknown>[];
+};
+
 export type CreateTeamInput = { name: string };
 
 export type InputOfCreateTeamInput = { name: string };
@@ -2860,6 +2882,26 @@ export type InputOfPreflightSchema = {
   checks: InputOfPreflightCheckSchema[];
 };
 
+export type PrivacyApplyInput = { apply?: boolean };
+
+export type InputOfPrivacyApplyInput = { apply?: boolean };
+
+export type PrivacyReportOutput = {
+  applied: boolean;
+  erased: Record<string, unknown>;
+  retained?: Record<string, unknown>;
+  retained_reason?: string;
+  due?: Record<string, unknown>;
+};
+
+export type InputOfPrivacyReportOutput = {
+  applied: boolean;
+  erased: Record<string, unknown>;
+  retained?: Record<string, unknown>;
+  retained_reason?: string;
+  due?: Record<string, unknown>;
+};
+
 export type Project = {
   public_id: string;
   name: string;
@@ -3318,6 +3360,28 @@ export type InputOfResultsPublishInputSchema = {
   tie_breaks?: Record<string, number>;
 };
 
+export type RetentionPolicyInput = {
+  participant_data_days: number | null;
+  private_artifact_days: number | null;
+};
+
+export type InputOfRetentionPolicyInput = {
+  participant_data_days: number | null;
+  private_artifact_days: number | null;
+};
+
+export type RetentionPolicyOutput = {
+  participant_data_days: number | null;
+  private_artifact_days: number | null;
+  updated_at: string | null;
+};
+
+export type InputOfRetentionPolicyOutput = {
+  participant_data_days: number | null;
+  private_artifact_days: number | null;
+  updated_at: string | null;
+};
+
 export type RubricLabCriterionSchema = {
   criterion_id: string;
   name: string;
@@ -3547,6 +3611,22 @@ export type StateEnum =
 
 export type InputOfStateEnum =
   "pending" | "contacted" | "verified" | "sent" | "claimed" | "failed";
+
+export type SubjectExportOutput = {
+  subject: Record<string, unknown>;
+  event: string;
+  data: Record<string, unknown>;
+  retained_data: Record<string, unknown>;
+  artifacts: Record<string, unknown>[];
+};
+
+export type InputOfSubjectExportOutput = {
+  subject: Record<string, unknown>;
+  event: string;
+  data: Record<string, unknown>;
+  retained_data: Record<string, unknown>;
+  artifacts: Record<string, unknown>[];
+};
 
 export type SubjectKindEnum = "role" | "user";
 
@@ -4270,6 +4350,10 @@ export interface Operations {
   delete_api_v1_workspaces_workspace_public_id_events_event_public_id: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: null;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_accessibility_conformance: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: ConformanceReportOutput;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -5045,6 +5129,45 @@ export interface Operations {
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_policy_presets: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: Record<string, { label: string; params: string[] }>;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_retention_policy: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: RetentionPolicyOutput;
+  };
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_retention_policy: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfRetentionPolicyInput;
+    };
+    response: RetentionPolicyOutput;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_retention_run: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body?: InputOfPrivacyApplyInput;
+    };
+    response: PrivacyReportOutput;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_subjects_user_public_id_erase: {
+    request: {
+      path: {
+        event_public_id: string;
+        user_public_id: string;
+        workspace_public_id: string;
+      };
+      body?: InputOfPrivacyApplyInput;
+    };
+    response: PrivacyReportOutput;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_subjects_user_public_id_export: {
+    request: {
+      path: {
+        event_public_id: string;
+        user_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: SubjectExportOutput;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -6821,6 +6944,15 @@ export const operations = {
     request_body: false,
     response_kind: "none",
   },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_accessibility_conformance:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/accessibility-conformance/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements:
     {
       method: "GET",
@@ -7899,6 +8031,51 @@ export const operations = {
       method: "GET",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/policy-presets/",
       path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_retention_policy:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/privacy/retention-policy/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_retention_policy:
+    {
+      method: "PUT",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/privacy/retention-policy/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_retention_run:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/privacy/retention/run/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_subjects_user_public_id_erase:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/privacy/subjects/{user_public_id}/erase/",
+      path_params: ["event_public_id", "user_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_subjects_user_public_id_export:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/privacy/subjects/{user_public_id}/export/",
+      path_params: ["event_public_id", "user_public_id", "workspace_public_id"],
       query_params: [],
       request_body: false,
       response_kind: "json",

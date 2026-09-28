@@ -1349,6 +1349,34 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/accessibility-conformance/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_accessibility_conformance
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConformanceReportOutput'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/announcements/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements
@@ -5316,6 +5344,191 @@ paths:
                   required:
                   - label
                   - params
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/privacy/retention-policy/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_retention_policy
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetentionPolicyOutput'
+          description: ''
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_retention_policy
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RetentionPolicyInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RetentionPolicyInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RetentionPolicyInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RetentionPolicyOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/privacy/retention/run/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_retention_run
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrivacyApplyInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PrivacyApplyInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PrivacyApplyInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacyReportOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/privacy/subjects/{user_public_id}/erase/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_subjects_user_public_id_erase
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: user_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrivacyApplyInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PrivacyApplyInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PrivacyApplyInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacyReportOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/privacy/subjects/{user_public_id}/export/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_privacy_subjects_user_public_id_export
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: user_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubjectExportOutput'
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/:
     get:
@@ -13634,6 +13847,45 @@ components:
       - judge
       - project
       - public_id
+    ConformanceReportOutput:
+      type: object
+      properties:
+        event:
+          type: string
+          format: uuid
+        generated_at:
+          type: string
+          format: date-time
+        conformance_claimed:
+          type: boolean
+        standard:
+          type: string
+        theme:
+          type: object
+          additionalProperties: {}
+        summary:
+          type: object
+          additionalProperties:
+            type: integer
+        pages:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        manual_review:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+      required:
+      - conformance_claimed
+      - event
+      - generated_at
+      - manual_review
+      - pages
+      - standard
+      - summary
+      - theme
     CreateTeamInput:
       type: object
       properties:
@@ -16315,6 +16567,31 @@ components:
       required:
       - checks
       - status
+    PrivacyApplyInput:
+      type: object
+      properties:
+        apply:
+          type: boolean
+          default: false
+    PrivacyReportOutput:
+      type: object
+      properties:
+        applied:
+          type: boolean
+        erased:
+          type: object
+          additionalProperties: {}
+        retained:
+          type: object
+          additionalProperties: {}
+        retained_reason:
+          type: string
+        due:
+          type: object
+          additionalProperties: {}
+      required:
+      - applied
+      - erased
     Project:
       type: object
       properties:
@@ -17097,6 +17374,39 @@ components:
             type: integer
       required:
       - normalization_run
+    RetentionPolicyInput:
+      type: object
+      properties:
+        participant_data_days:
+          type: integer
+          maximum: 36500
+          minimum: 0
+          nullable: true
+        private_artifact_days:
+          type: integer
+          maximum: 36500
+          minimum: 0
+          nullable: true
+      required:
+      - participant_data_days
+      - private_artifact_days
+    RetentionPolicyOutput:
+      type: object
+      properties:
+        participant_data_days:
+          type: integer
+          nullable: true
+        private_artifact_days:
+          type: integer
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - participant_data_days
+      - private_artifact_days
+      - updated_at
     RubricLabCriterionSchema:
       type: object
       properties:
@@ -17477,6 +17787,32 @@ components:
         * `sent` - Sent
         * `claimed` - Claimed
         * `failed` - Failed
+    SubjectExportOutput:
+      type: object
+      properties:
+        subject:
+          type: object
+          additionalProperties: {}
+        event:
+          type: string
+          format: uuid
+        data:
+          type: object
+          additionalProperties: {}
+        retained_data:
+          type: object
+          additionalProperties: {}
+        artifacts:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+      required:
+      - artifacts
+      - data
+      - event
+      - retained_data
+      - subject
     SubjectKindEnum:
       enum:
       - role

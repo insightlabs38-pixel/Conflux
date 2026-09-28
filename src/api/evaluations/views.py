@@ -14,19 +14,20 @@ from django.db import IntegrityError, transaction
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, inline_serializer
+from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
 from events.models import Event
 from events.views import OrganizerView
 from participation.models import Team
 from projects.models import Project
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.response import Response
 from stages.serializers import StageSerializer
 from stages.views import StageEventMixin
 from workspaces.models import Role
 
-from . import agreement, anonymize, normalization, pairwise
+from . import agreement, anonymize, capsule, normalization, pairwise, replay
+from . import explain as explain_module
 from .assignment import activate, rebalance, simulate_dropout
 from .assignment import preview as preview_assignment
 from .candidates import judge_candidates
@@ -2215,3 +2216,94 @@ class AgreementSummaryView(PlanMixin):
                 ],
             }
         )
+
+
+class RunReplayView(PlanMixin):
+    """PVS06: organizer-only replay of a normalization or pairwise run."""
+
+    permission_classes = [require_roles(Role.ORGANIZER, Role.ADMIN)]
+
+    @extend_schema(parameters=[OpenApiParameter("timeline", bool)], responses=OpenApiTypes.OBJECT)
+    def get(
+        self,
+        request,
+        workspace_public_id,
+        event_public_id,
+        stage_public_id,
+        plan_public_id,
+        run_public_id,
+    ):
+        plan = self.get_plan()
+        timeline = request.query_params.get("timeline", "false").lower()
+        if timeline not in ("true", "false"):
+            raise ValidationError({"timeline": "Use true or false."})
+        run = plan.normalization_runs.filter(public_id=run_public_id).first()
+        if run is not None:
+            return Response(replay.replay_normalization(plan, run, timeline=timeline == "true"))
+        pairwise_run = plan.pairwise_runs.filter(public_id=run_public_id).first()
+        if pairwise_run is None:
+            raise NotFound("No such run for this plan.")
+        return Response(replay.replay_pairwise(plan, pairwise_run))
+
+
+class AuditCapsuleView(PlanMixin):
+    """PVS07: signed, portable audit capsule of a published rubric result."""
+
+    permission_classes = [require_roles(Role.ORGANIZER, Role.ADMIN)]
+
+    @extend_schema(responses=OpenApiTypes.OBJECT)
+    def get(self, request, workspace_public_id, event_public_id, stage_public_id, plan_public_id):
+        plan = self.get_plan()
+        try:
+            envelope = capsule.build_capsule(plan)
+        except capsule.CapsuleUnavailable as exc:
+            raise NotFound(str(exc)) from exc
+        self._audit(request, plan, envelope)
+        return Response(envelope)
+
+    def _audit(self, request, plan, envelope):
+        with transaction.atomic():
+            record_mutation(
+                actor=request.user,
+                workspace=self.get_workspace(),
+                action="judging.capsule_exported",
+                target=plan,
+                metadata={
+                    "plan": str(plan.public_id),
+                    "archive_sha256": envelope["manifest"]["archive_sha256"],
+                },
+            )
+
+
+class DecisionExplanationView(PlanMixin):
+    """PVS07: why a project ranked where it did. Organizers see judge lines and
+    neighbours; a project's own members see an aggregated account once results
+    are visible to participants.
+    """
+
+    permission_classes = [require_roles(Role.ORGANIZER, Role.ADMIN, Role.PARTICIPANT)]
+
+    @extend_schema(responses=OpenApiTypes.OBJECT)
+    def get(
+        self,
+        request,
+        workspace_public_id,
+        event_public_id,
+        stage_public_id,
+        plan_public_id,
+        project_public_id,
+    ):
+        plan = self.get_plan()
+        project = get_object_or_404(Project, event=self.get_event(), public_id=project_public_id)
+        organizer = has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
+        if not organizer:
+            if not project.memberships.filter(user=request.user).exists():
+                raise NotFound()
+            if not plan.results_visible_to_participants:
+                raise PermissionDenied("Results are not visible to participants yet.")
+        if plan.mode != EvaluationMode.RUBRIC or plan.published_normalization_run_id is None:
+            raise NotFound("No rubric results have been published.")
+        run = plan.published_normalization_run
+        if str(project.pk) not in run.evidence.get("projects", {}):
+            raise NotFound("Project is absent from the published run.")
+        return Response(explain_module.explain(plan, project, detailed=organizer))

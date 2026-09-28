@@ -167,6 +167,21 @@ urlpatterns = [
     ),
     path(f"{_EVENT}/coi-rules/", views.COIRuleView.as_view(), name="coi-rules"),
     path(
+        f"{_PLAN}/audit-capsule/",
+        views.AuditCapsuleView.as_view(),
+        name="evaluation-plan-audit-capsule",
+    ),
+    path(
+        f"{_PLAN}/explain/<uuid:project_public_id>/",
+        views.DecisionExplanationView.as_view(),
+        name="evaluation-plan-explain",
+    ),
+    path(
+        f"{_PLAN}/runs/<uuid:run_public_id>/replay/",
+        views.RunReplayView.as_view(),
+        name="evaluation-plan-run-replay",
+    ),
+    path(
         f"{_PLAN}/normalization-runs/",
         views.NormalizationRunListView.as_view(),
         name="evaluation-plan-normalization-runs",

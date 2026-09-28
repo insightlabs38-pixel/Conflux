@@ -6569,6 +6569,17 @@ export interface Operations {
     };
     response: AssignmentVersion;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_audit_capsule: {
+    request: {
+      path: {
+        event_public_id: string;
+        plan_public_id: string;
+        stage_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: Record<string, unknown>;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_ballots: {
     request: {
       path: {
@@ -6718,6 +6729,18 @@ export interface Operations {
       };
     };
     response: CloseCallsSchema;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_explain_project_public_id: {
+    request: {
+      path: {
+        event_public_id: string;
+        plan_public_id: string;
+        project_public_id: string;
+        stage_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: Record<string, unknown>;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_feedback_project_public_id: {
     request: {
@@ -6971,6 +6994,19 @@ export interface Operations {
       };
     };
     response: EvaluationPlan;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_runs_run_public_id_replay: {
+    request: {
+      path: {
+        event_public_id: string;
+        plan_public_id: string;
+        run_public_id: string;
+        stage_public_id: string;
+        workspace_public_id: string;
+      };
+      query?: { timeline?: boolean };
+    };
+    response: Record<string, unknown>;
   };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_sensitivity: {
     request: {
@@ -10105,6 +10141,20 @@ export const operations = {
       request_body: true,
       response_kind: "json",
     },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_audit_capsule:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/audit-capsule/",
+      path_params: [
+        "event_public_id",
+        "plan_public_id",
+        "stage_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_ballots:
     {
       method: "GET",
@@ -10283,6 +10333,21 @@ export const operations = {
       path_params: [
         "event_public_id",
         "plan_public_id",
+        "stage_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_explain_project_public_id:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/explain/{project_public_id}/",
+      path_params: [
+        "event_public_id",
+        "plan_public_id",
+        "project_public_id",
         "stage_public_id",
         "workspace_public_id",
       ],
@@ -10598,6 +10663,21 @@ export const operations = {
         "workspace_public_id",
       ],
       query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans_plan_public_id_runs_run_public_id_replay:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/stages/{stage_public_id}/evaluation-plans/{plan_public_id}/runs/{run_public_id}/replay/",
+      path_params: [
+        "event_public_id",
+        "plan_public_id",
+        "run_public_id",
+        "stage_public_id",
+        "workspace_public_id",
+      ],
+      query_params: ["timeline"],
       request_body: false,
       response_kind: "json",
     },

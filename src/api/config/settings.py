@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     "eligibility",
     "deliberation",
     "onsite",
+    "mentorship",
 ]
 
 MIDDLEWARE = [

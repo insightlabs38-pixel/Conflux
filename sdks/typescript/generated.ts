@@ -5604,6 +5604,58 @@ export interface Operations {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: MarketplaceProfileSchema[];
   };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_request_public_id_cancel: {
+    request: {
+      path: {
+        event_public_id: string;
+        request_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: null;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_request_public_id_claim: {
+    request: {
+      path: {
+        event_public_id: string;
+        request_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: null;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_request_public_id_reassign: {
+    request: {
+      path: {
+        event_public_id: string;
+        request_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: null;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_request_public_id_resolve: {
+    request: {
+      path: {
+        event_public_id: string;
+        request_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: null;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_queue: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: null;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_mentors: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: null;
+  };
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_mentors_me: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: null;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_application: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: MyEventApplicationResponse;
@@ -5676,6 +5728,34 @@ export interface Operations {
       body: InputOfTransferCaptainInput;
     };
     response: Team;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_office_hours: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: null;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_office_hours: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: null;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_office_hours_slot_public_id_signups: {
+    request: {
+      path: {
+        event_public_id: string;
+        slot_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: null;
+  };
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_office_hours_signups_signup_public_id: {
+    request: {
+      path: {
+        event_public_id: string;
+        signup_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: null;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_onsite_summary: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -6210,6 +6290,26 @@ export interface Operations {
       body: InputOfMentorNoteInputSchema;
     };
     response: MentorNote;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_mentor_requests: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: null;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_mentor_requests: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: null;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_review_artifacts: {
     request: {
@@ -8956,6 +9056,83 @@ export const operations = {
       request_body: false,
       response_kind: "json",
     },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_request_public_id_cancel:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mentor-requests/{request_public_id}/cancel/",
+      path_params: [
+        "event_public_id",
+        "request_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_request_public_id_claim:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mentor-requests/{request_public_id}/claim/",
+      path_params: [
+        "event_public_id",
+        "request_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_request_public_id_reassign:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mentor-requests/{request_public_id}/reassign/",
+      path_params: [
+        "event_public_id",
+        "request_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_request_public_id_resolve:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mentor-requests/{request_public_id}/resolve/",
+      path_params: [
+        "event_public_id",
+        "request_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_queue:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mentor-requests/queue/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_mentors: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mentors/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "none",
+  },
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_mentors_me: {
+    method: "PUT",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mentors/me/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "none",
+  },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_application:
     {
       method: "GET",
@@ -9072,6 +9249,46 @@ export const operations = {
       query_params: [],
       request_body: true,
       response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_office_hours:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/office-hours/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_office_hours:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/office-hours/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_office_hours_slot_public_id_signups:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/office-hours/{slot_public_id}/signups/",
+      path_params: ["event_public_id", "slot_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_office_hours_signups_signup_public_id:
+    {
+      method: "DELETE",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/office-hours/signups/{signup_public_id}/",
+      path_params: [
+        "event_public_id",
+        "signup_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_onsite_summary:
     {
@@ -9768,6 +9985,32 @@ export const operations = {
       query_params: [],
       request_body: true,
       response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_mentor_requests:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/mentor-requests/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_mentor_requests:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/mentor-requests/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_review_artifacts:
     {

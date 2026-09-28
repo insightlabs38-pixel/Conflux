@@ -37,4 +37,5 @@ urlpatterns = [
     path("", include("eligibility.urls")),
     path("", include("deliberation.urls")),
     path("", include("onsite.urls")),
+    path("", include("mentorship.urls")),
 ]

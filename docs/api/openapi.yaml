@@ -5036,6 +5036,198 @@ paths:
                 items:
                   $ref: '#/components/schemas/MarketplaceProfileSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mentor-requests/{request_public_id}/cancel/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_request_public_id_cancel
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: request_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mentor-requests/{request_public_id}/claim/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_request_public_id_claim
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: request_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mentor-requests/{request_public_id}/reassign/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_request_public_id_reassign
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: request_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mentor-requests/{request_public_id}/resolve/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_request_public_id_resolve
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: request_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mentor-requests/queue/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_mentor_requests_queue
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mentors/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_mentors
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/mentors/me/:
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_events_event_public_id_mentors_me
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-application/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_application
@@ -5487,6 +5679,113 @@ paths:
               schema:
                 $ref: '#/components/schemas/Team'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/office-hours/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_office_hours
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_office_hours
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/office-hours/{slot_public_id}/signups/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_office_hours_slot_public_id_signups
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: slot_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/office-hours/signups/{signup_public_id}/:
+    delete:
+      operationId: delete_api_v1_workspaces_workspace_public_id_events_event_public_id_office_hours_signups_signup_public_id
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: signup_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/onsite-summary/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_onsite_summary
@@ -7866,6 +8165,65 @@ paths:
               schema:
                 $ref: '#/components/schemas/MentorNote'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/mentor-requests/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_mentor_requests
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_mentor_requests
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          description: No response body
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/review-artifacts/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_review_artifacts

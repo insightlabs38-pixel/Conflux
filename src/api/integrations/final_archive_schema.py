@@ -166,4 +166,21 @@ TABLES = {
     ),
     "onsite.location": ("event", "event kind name parent capacity x y notes position", ""),
     "onsite.projectlocation": ("project__event", "project location assigned_at", ""),
+    "mentorship.mentorprofile": (
+        "event",
+        "event mentor headline is_available created_at updated_at",
+        "track_expertise",
+    ),
+    "mentorship.mentorrequest": (
+        "event",
+        "event project track topic urgency status created_by claimed_by claimed_at resolved_at "
+        "resolution_note created_at updated_at",
+        "",
+    ),
+    "mentorship.officehourslot": (
+        "event",
+        "event mentor track starts_at ends_at location capacity created_at",
+        "",
+    ),
+    "mentorship.officehoursignup": ("slot__event", "slot project created_by created_at", ""),
 }

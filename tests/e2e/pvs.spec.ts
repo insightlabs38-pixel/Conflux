@@ -18,7 +18,7 @@ import {
 
 test.beforeEach(({ isMobile }, info) => {
   // Workflows mutate state and are recorded on desktop; mobile only checks layout.
-  test.skip(isMobile && !info.title.includes("never overflow"));
+  test.skip(isMobile && !/never overflow/.test(info.title));
 });
 
 const quiet = (problems: string[]) =>
@@ -234,3 +234,40 @@ test("organizer operations panels load, are labelled, and never overflow", async
   expect(quiet(problems)).toEqual([]);
   void PASSWORD;
 });
+
+for (const role of ["participant-01", "judge-01", "mentor", "volunteer"]) {
+  test(`${role}: PVS panels never overflow and are accessible`, async ({
+    page,
+  }) => {
+    await signIn(page, role);
+    const problems = watch(page);
+    await openWorkspace(page);
+    await chooseEvent(page);
+    if (role === "participant-01") {
+      await page
+        .getByRole("region", { name: "My projects" })
+        .locator("select")
+        .filter({
+          has: page.locator("option", { hasText: "Choose a project" }),
+        })
+        .selectOption({ index: 1 });
+      await expect(
+        page.getByRole("region", { name: "Mentorship" }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("region", { name: "After the event" }),
+      ).toBeVisible();
+    }
+    if (role === "judge-01") {
+      const main = page.getByRole("region", { name: "Judging" });
+      await main.getByLabel("Stage").selectOption({ index: 1 });
+      await expect(
+        page.getByRole("region", { name: "Your judging route" }),
+      ).toBeVisible();
+    }
+    await settled(page);
+    await noHorizontalOverflow(page);
+    await accessible(page);
+    expect(quiet(problems)).toEqual([]);
+  });
+}

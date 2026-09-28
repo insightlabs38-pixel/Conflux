@@ -1,0 +1,20 @@
+PASS  app boots with OIDC configured and the provider unreachable
+PASS  unreachable provider fails clearly (no 500)
+PASS  built-in password login works while the provider is down
+PASS  OIDC disabled reports enabled=false
+PASS  OIDC login route refuses when disabled
+PASS  provider discovery document is served
+PASS  config advertises SSO
+PASS  login redirects to the provider with code+PKCE+state+nonce
+PASS  provider login redirects back to the callback
+PASS  callback creates a session and returns to next
+PASS  account created and signed in
+PASS  SSO login grants no staff/superuser/membership
+PASS  SSO user has no workspace access
+PASS  a provider account named 'admin' is still an ordinary user
+PASS  logout ends the local session
+PASS  second login maps to the same account (no duplicate)
+PASS  wrong provider password does not sign in
+PASS  a replayed callback (used code, no binding cookie) is rejected
+
+18/18 checks passed

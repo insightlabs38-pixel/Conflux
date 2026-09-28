@@ -18,7 +18,7 @@ import django  # noqa: E402
 
 django.setup()
 
-from accounts.models import Session, User  # noqa: E402
+from accounts.models import Session, User, digest_session_token  # noqa: E402
 from audit.models import AuditEvent, DomainEvent  # noqa: E402
 from community.models import Vote, VotingPlan  # noqa: E402
 from django.db import connection  # noqa: E402
@@ -60,7 +60,10 @@ def seed(args):
         + [Membership(user=u, workspace=workspace, role=Role.PARTICIPANT) for u in parts]
     )
     Session.objects.bulk_create(
-        [Session(user=u, token=f"{u.username}-token") for u in users]
+        [
+            Session(user=u, token_digest=digest_session_token(f"{u.username}-token"))
+            for u in users
+        ]
     )
     event = Event.objects.create(
         workspace=workspace,

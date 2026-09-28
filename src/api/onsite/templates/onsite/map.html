@@ -1,0 +1,24 @@
+{% extends "presentation/base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Expo map" %} &middot; {{ event.name }}{% endblock %}
+{% block content %}
+<h1>{% trans "Expo map" %}</h1>
+<p class="cx-print-hide"><button type="button" class="cx-button cx-button--secondary" onclick="window.print()">{% trans "Print" %}</button></p>
+{% if places %}
+  <table class="cx-map">
+    <caption class="cx-visually-hidden">{% trans "Tables and booths with their projects" %}</caption>
+    <thead><tr><th scope="col">{% trans "Place" %}</th><th scope="col">{% trans "Room" %}</th><th scope="col">{% trans "Projects" %}</th></tr></thead>
+    <tbody>
+      {% for place in places %}
+        <tr>
+          <th scope="row">{{ place.location.get_kind_display }} {{ place.location.name }}</th>
+          <td>{{ place.location.parent.name|default:"" }}</td>
+          <td>{% for project in place.projects %}<a href="{% url 'site-project' event.public_id project.public_id %}">{{ project.name }}</a>{% if not forloop.last %}, {% endif %}{% empty %}&mdash;{% endfor %}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>{% trans "Tables and booths have not been published yet." %}</p>
+{% endif %}
+{% endblock %}

@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import route_views, views
+from . import agenda_views, public_views, route_views, views
 
 _e = "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/"
 
@@ -37,5 +37,21 @@ urlpatterns = [
         _e + "stages/<uuid:stage_public_id>/evaluation-plans/<uuid:plan_public_id>/my-route/",
         route_views.MyRouteView.as_view(),
         name="onsite-my-route",
+    ),
+    path(_e + "agenda/", agenda_views.AgendaListView.as_view(), name="onsite-agenda"),
+    path(
+        _e + "agenda/<uuid:session_public_id>/",
+        agenda_views.AgendaDetailView.as_view(),
+        name="onsite-agenda-detail",
+    ),
+    path(
+        "events/<uuid:event_public_id>/agenda/",
+        public_views.PublicAgendaView.as_view(),
+        name="public-agenda",
+    ),
+    path(
+        "events/<uuid:event_public_id>/state/",
+        public_views.EventStateView.as_view(),
+        name="public-event-state",
     ),
 ]

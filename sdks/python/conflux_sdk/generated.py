@@ -1549,6 +1549,28 @@ EventQuestionStatus = Literal['pending', 'published', 'hidden']
 
 InputOfEventQuestionStatus = Literal['pending', 'published', 'hidden']
 
+class EventStateOutput(TypedDict):
+    name: str
+    status: str
+    phase: PhaseEnum
+    starts_at: str | None
+    ends_at: str | None
+    now: str
+    live_sessions: list[str]
+    next_session: NextSession | None
+    projects: int
+
+class InputOfEventStateOutput(TypedDict):
+    name: str
+    status: str
+    phase: InputOfPhaseEnum
+    starts_at: str | None
+    ends_at: str | None
+    now: str
+    live_sessions: list[str]
+    next_session: InputOfNextSession | None
+    projects: int
+
 EventStatus = Literal['draft', 'open', 'closed', 'archived']
 
 InputOfEventStatus = Literal['draft', 'open', 'closed', 'archived']
@@ -2294,6 +2316,14 @@ class InputOfMyTeamResponse(TypedDict):
     team: InputOfTeam | None
     my_role: str | None
 
+class NextSession(TypedDict):
+    title: str
+    starts_at: str
+
+class InputOfNextSession(TypedDict):
+    title: str
+    starts_at: str
+
 class NormalizationInputSchema(TypedDict):
     ridge_lambda: NotRequired[float]
 
@@ -2737,6 +2767,28 @@ class InputOfPatchedResourceInput(TypedDict):
     body: NotRequired[str]
     position: NotRequired[int]
 
+class PatchedSessionPatchInput(TypedDict):
+    title: NotRequired[str]
+    description: NotRequired[str]
+    starts_at: NotRequired[str]
+    ends_at: NotRequired[str]
+    location: NotRequired[str | None]
+    track: NotRequired[str | None]
+    speakers: NotRequired[str]
+    stream_url: NotRequired[str]
+    is_public: NotRequired[bool]
+
+class InputOfPatchedSessionPatchInput(TypedDict):
+    title: NotRequired[str]
+    description: NotRequired[str]
+    starts_at: NotRequired[str]
+    ends_at: NotRequired[str]
+    location: NotRequired[str | None]
+    track: NotRequired[str | None]
+    speakers: NotRequired[str]
+    stream_url: NotRequired[str]
+    is_public: NotRequired[bool]
+
 class PatchedStage(TypedDict):
     public_id: NotRequired[str]
     name: NotRequired[str]
@@ -2850,6 +2902,10 @@ class InputOfPermissionMatrixEntrySchema(TypedDict):
     access: InputOfAccessEnum
     roles: list[str]
     unrecognized: bool
+
+PhaseEnum = Literal['upcoming', 'live', 'ended']
+
+InputOfPhaseEnum = Literal['upcoming', 'live', 'ended']
 
 class PlacementInput(TypedDict):
     location: str | None
@@ -3192,6 +3248,28 @@ class InputOfPublicEventSchema(TypedDict):
     status: str
     tracks: list[InputOfTrack]
     base_prizes: list[InputOfBasePrize]
+
+class PublicSessionOutput(TypedDict):
+    title: str
+    description: str
+    starts_at: str
+    ends_at: str
+    location: str | None
+    track: str | None
+    speakers: str
+    stream_url: str
+    embed_url: str | None
+
+class InputOfPublicSessionOutput(TypedDict):
+    title: str
+    description: str
+    starts_at: str
+    ends_at: str
+    location: str | None
+    track: str | None
+    speakers: str
+    stream_url: str
+    embed_url: str | None
 
 class PublicWinnerOutput(TypedDict):
     project: str
@@ -3723,6 +3801,52 @@ class SensitivityInputSchema(TypedDict):
 class InputOfSensitivityInputSchema(TypedDict):
     ridge_lambdas: NotRequired[list[float]]
     holdout_counts: NotRequired[list[int]]
+
+class SessionInput(TypedDict):
+    title: str
+    description: NotRequired[str]
+    starts_at: str
+    ends_at: str
+    location: NotRequired[str | None]
+    track: NotRequired[str | None]
+    speakers: NotRequired[str]
+    stream_url: NotRequired[str]
+    is_public: NotRequired[bool]
+
+class InputOfSessionInput(TypedDict):
+    title: str
+    description: NotRequired[str]
+    starts_at: str
+    ends_at: str
+    location: NotRequired[str | None]
+    track: NotRequired[str | None]
+    speakers: NotRequired[str]
+    stream_url: NotRequired[str]
+    is_public: NotRequired[bool]
+
+class SessionOutput(TypedDict):
+    public_id: str
+    title: str
+    description: str
+    starts_at: str
+    ends_at: str
+    location: str | None
+    track: str | None
+    speakers: str
+    stream_url: str
+    is_public: bool
+
+class InputOfSessionOutput(TypedDict):
+    public_id: str
+    title: str
+    description: str
+    starts_at: str
+    ends_at: str
+    location: str | None
+    track: str | None
+    speakers: str
+    stream_url: str
+    is_public: bool
 
 class SettingsInput(TypedDict):
     require_publication_approval: bool
@@ -4422,6 +4546,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                          'query_params': [],
                                                                          'request_body': False,
                                                                          'response_kind': 'none'},
+ 'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_agenda_session_public_id': {'method': 'DELETE',
+                                                                                                  'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/agenda/{session_public_id}/',
+                                                                                                  'path_params': ['event_public_id',
+                                                                                                                  'session_public_id',
+                                                                                                                  'workspace_public_id'],
+                                                                                                  'query_params': [],
+                                                                                                  'request_body': False,
+                                                                                                  'response_kind': 'none'},
  'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements_announcement_public_id': {'method': 'DELETE',
                                                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/announcements/{announcement_public_id}/',
                                                                                                               'path_params': ['announcement_public_id',
@@ -4661,6 +4793,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                        'query_params': [],
                                        'request_body': False,
                                        'response_kind': 'json'},
+ 'get_api_v1_events_event_public_id_agenda': {'method': 'GET',
+                                              'path': '/api/v1/events/{event_public_id}/agenda/',
+                                              'path_params': ['event_public_id'],
+                                              'query_params': [],
+                                              'request_body': False,
+                                              'response_kind': 'json'},
  'get_api_v1_events_event_public_id_announcements': {'method': 'GET',
                                                      'path': '/api/v1/events/{event_public_id}/announcements/',
                                                      'path_params': ['event_public_id'],
@@ -4714,6 +4852,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                'track'],
                                               'request_body': False,
                                               'response_kind': 'json'},
+ 'get_api_v1_events_event_public_id_state': {'method': 'GET',
+                                             'path': '/api/v1/events/{event_public_id}/state/',
+                                             'path_params': ['event_public_id'],
+                                             'query_params': [],
+                                             'request_body': False,
+                                             'response_kind': 'json'},
  'get_api_v1_export_csv': {'method': 'GET',
                            'path': '/api/v1/export.csv',
                            'path_params': [],
@@ -4806,6 +4950,21 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                 'query_params': [],
                                                                                                 'request_body': False,
                                                                                                 'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_agenda': {'method': 'GET',
+                                                                             'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/agenda/',
+                                                                             'path_params': ['event_public_id',
+                                                                                             'workspace_public_id'],
+                                                                             'query_params': [],
+                                                                             'request_body': False,
+                                                                             'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_agenda_session_public_id': {'method': 'GET',
+                                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/agenda/{session_public_id}/',
+                                                                                               'path_params': ['event_public_id',
+                                                                                                               'session_public_id',
+                                                                                                               'workspace_public_id'],
+                                                                                               'query_params': [],
+                                                                                               'request_body': False,
+                                                                                               'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements': {'method': 'GET',
                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/announcements/',
                                                                                     'path_params': ['event_public_id',
@@ -6128,6 +6287,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                         'query_params': [],
                                                                         'request_body': True,
                                                                         'response_kind': 'json'},
+ 'patch_api_v1_workspaces_workspace_public_id_events_event_public_id_agenda_session_public_id': {'method': 'PATCH',
+                                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/agenda/{session_public_id}/',
+                                                                                                 'path_params': ['event_public_id',
+                                                                                                                 'session_public_id',
+                                                                                                                 'workspace_public_id'],
+                                                                                                 'query_params': [],
+                                                                                                 'request_body': True,
+                                                                                                 'response_kind': 'json'},
  'patch_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_fulfillments_fulfillment_public_id': {'method': 'PATCH',
                                                                                                                                   'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/fulfillments/{fulfillment_public_id}/',
                                                                                                                                   'path_params': ['award_public_id',
@@ -6370,6 +6537,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                        'query_params': [],
                                                        'request_body': True,
                                                        'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_agenda': {'method': 'POST',
+                                                                              'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/agenda/',
+                                                                              'path_params': ['event_public_id',
+                                                                                              'workspace_public_id'],
+                                                                              'query_params': [],
+                                                                              'request_body': True,
+                                                                              'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements': {'method': 'POST',
                                                                                      'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/announcements/',
                                                                                      'path_params': ['event_public_id',

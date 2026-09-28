@@ -1712,6 +1712,30 @@ export type EventQuestionStatus = "pending" | "published" | "hidden";
 
 export type InputOfEventQuestionStatus = "pending" | "published" | "hidden";
 
+export type EventStateOutput = {
+  name: string;
+  status: string;
+  phase: PhaseEnum;
+  starts_at: string | null;
+  ends_at: string | null;
+  now: string;
+  live_sessions: string[];
+  next_session: NextSession | null;
+  projects: number;
+};
+
+export type InputOfEventStateOutput = {
+  name: string;
+  status: string;
+  phase: InputOfPhaseEnum;
+  starts_at: string | null;
+  ends_at: string | null;
+  now: string;
+  live_sessions: string[];
+  next_session: InputOfNextSession | null;
+  projects: number;
+};
+
 export type EventStatus = "draft" | "open" | "closed" | "archived";
 
 export type InputOfEventStatus = "draft" | "open" | "closed" | "archived";
@@ -2484,6 +2508,10 @@ export type InputOfMyTeamResponse = {
   my_role: string | null;
 };
 
+export type NextSession = { title: string; starts_at: string };
+
+export type InputOfNextSession = { title: string; starts_at: string };
+
 export type NormalizationInputSchema = { ridge_lambda?: number };
 
 export type InputOfNormalizationInputSchema = { ridge_lambda?: number };
@@ -2981,6 +3009,30 @@ export type InputOfPatchedResourceInput = {
   position?: number;
 };
 
+export type PatchedSessionPatchInput = {
+  title?: string;
+  description?: string;
+  starts_at?: string;
+  ends_at?: string;
+  location?: string | null;
+  track?: string | null;
+  speakers?: string;
+  stream_url?: string;
+  is_public?: boolean;
+};
+
+export type InputOfPatchedSessionPatchInput = {
+  title?: string;
+  description?: string;
+  starts_at?: string;
+  ends_at?: string;
+  location?: string | null;
+  track?: string | null;
+  speakers?: string;
+  stream_url?: string;
+  is_public?: boolean;
+};
+
 export type PatchedStage = {
   public_id?: string;
   name?: string;
@@ -3107,6 +3159,10 @@ export type InputOfPermissionMatrixEntrySchema = {
   roles: string[];
   unrecognized: boolean;
 };
+
+export type PhaseEnum = "upcoming" | "live" | "ended";
+
+export type InputOfPhaseEnum = "upcoming" | "live" | "ended";
 
 export type PlacementInput = { location: string | null };
 
@@ -3477,6 +3533,30 @@ export type InputOfPublicEventSchema = {
   status: string;
   tracks: InputOfTrack[];
   base_prizes: InputOfBasePrize[];
+};
+
+export type PublicSessionOutput = {
+  title: string;
+  description: string;
+  starts_at: string;
+  ends_at: string;
+  location: string | null;
+  track: string | null;
+  speakers: string;
+  stream_url: string;
+  embed_url: string | null;
+};
+
+export type InputOfPublicSessionOutput = {
+  title: string;
+  description: string;
+  starts_at: string;
+  ends_at: string;
+  location: string | null;
+  track: string | null;
+  speakers: string;
+  stream_url: string;
+  embed_url: string | null;
 };
 
 export type PublicWinnerOutput = { project: string; project_name: string };
@@ -4057,6 +4137,56 @@ export type SensitivityInputSchema = {
 export type InputOfSensitivityInputSchema = {
   ridge_lambdas?: number[];
   holdout_counts?: number[];
+};
+
+export type SessionInput = {
+  title: string;
+  description?: string;
+  starts_at: string;
+  ends_at: string;
+  location?: string | null;
+  track?: string | null;
+  speakers?: string;
+  stream_url?: string;
+  is_public?: boolean;
+};
+
+export type InputOfSessionInput = {
+  title: string;
+  description?: string;
+  starts_at: string;
+  ends_at: string;
+  location?: string | null;
+  track?: string | null;
+  speakers?: string;
+  stream_url?: string;
+  is_public?: boolean;
+};
+
+export type SessionOutput = {
+  public_id: string;
+  title: string;
+  description: string;
+  starts_at: string;
+  ends_at: string;
+  location: string | null;
+  track: string | null;
+  speakers: string;
+  stream_url: string;
+  is_public: boolean;
+};
+
+export type InputOfSessionOutput = {
+  public_id: string;
+  title: string;
+  description: string;
+  starts_at: string;
+  ends_at: string;
+  location: string | null;
+  track: string | null;
+  speakers: string;
+  stream_url: string;
+  is_public: boolean;
 };
 
 export type SettingsInput = { require_publication_approval: boolean };
@@ -4796,6 +4926,10 @@ export interface Operations {
     request: { path: { event_public_id: string } };
     response: PublicEventSchema;
   };
+  get_api_v1_events_event_public_id_agenda: {
+    request: { path: { event_public_id: string } };
+    response: PublicSessionOutput[];
+  };
   get_api_v1_events_event_public_id_announcements: {
     request: { path: { event_public_id: string }; query?: { offset?: number } };
     response: PublicAnnouncementOutput[];
@@ -4846,6 +4980,10 @@ export interface Operations {
       };
     };
     response: SearchOutput;
+  };
+  get_api_v1_events_event_public_id_state: {
+    request: { path: { event_public_id: string } };
+    response: EventStateOutput;
   };
   get_api_v1_export_csv: { request: {}; response: string };
   get_api_v1_gallery: { request: {}; response: GalleryProjectSchema[] };
@@ -4993,6 +5131,48 @@ export interface Operations {
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_accessibility_conformance: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: ConformanceReportOutput;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_agenda: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: SessionOutput[];
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_agenda: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfSessionInput;
+    };
+    response: SessionOutput;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_agenda_session_public_id: {
+    request: {
+      path: {
+        event_public_id: string;
+        session_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: SessionOutput;
+  };
+  patch_api_v1_workspaces_workspace_public_id_events_event_public_id_agenda_session_public_id: {
+    request: {
+      path: {
+        event_public_id: string;
+        session_public_id: string;
+        workspace_public_id: string;
+      };
+      body?: InputOfPatchedSessionPatchInput;
+    };
+    response: SessionOutput;
+  };
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_agenda_session_public_id: {
+    request: {
+      path: {
+        event_public_id: string;
+        session_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: null;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -8194,6 +8374,14 @@ export const operations = {
     request_body: false,
     response_kind: "json",
   },
+  get_api_v1_events_event_public_id_agenda: {
+    method: "GET",
+    path: "/api/v1/events/{event_public_id}/agenda/",
+    path_params: ["event_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
   get_api_v1_events_event_public_id_announcements: {
     method: "GET",
     path: "/api/v1/events/{event_public_id}/announcements/",
@@ -8255,6 +8443,14 @@ export const operations = {
     path: "/api/v1/events/{event_public_id}/search/",
     path_params: ["event_public_id"],
     query_params: ["artifact_kind", "offset", "q", "stage", "tags", "track"],
+    request_body: false,
+    response_kind: "json",
+  },
+  get_api_v1_events_event_public_id_state: {
+    method: "GET",
+    path: "/api/v1/events/{event_public_id}/state/",
+    path_params: ["event_public_id"],
+    query_params: [],
     request_body: false,
     response_kind: "json",
   },
@@ -8518,6 +8714,61 @@ export const operations = {
       query_params: [],
       request_body: false,
       response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_agenda: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/agenda/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_agenda: {
+    method: "POST",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/agenda/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: true,
+    response_kind: "json",
+  },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_agenda_session_public_id:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/agenda/{session_public_id}/",
+      path_params: [
+        "event_public_id",
+        "session_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  patch_api_v1_workspaces_workspace_public_id_events_event_public_id_agenda_session_public_id:
+    {
+      method: "PATCH",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/agenda/{session_public_id}/",
+      path_params: [
+        "event_public_id",
+        "session_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_agenda_session_public_id:
+    {
+      method: "DELETE",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/agenda/{session_public_id}/",
+      path_params: [
+        "event_public_id",
+        "session_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements:
     {

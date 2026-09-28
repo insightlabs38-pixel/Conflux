@@ -206,4 +206,10 @@ TABLES = {
         "continuation body created_by created_at",
         "",
     ),
+    "onsite.agendasession": (
+        "event",
+        "event title description starts_at ends_at location track speakers stream_url "
+        "is_public created_by created_at updated_at",
+        "",
+    ),
 }

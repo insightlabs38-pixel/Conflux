@@ -53,6 +53,9 @@ OIDC_LINK_BY_VERIFIED_EMAIL = os.environ.get("OIDC_LINK_BY_VERIFIED_EMAIL", "0")
 OIDC_DEFAULT_WORKSPACE_SLUG = os.environ.get("OIDC_DEFAULT_WORKSPACE_SLUG", "")
 OIDC_ALLOW_INSECURE_HTTP = os.environ.get("OIDC_ALLOW_INSECURE_HTTP", "0") == "1"
 
+# Extra hosts whose stream URLs may be framed on the public agenda (YouTube and Vimeo are built in).
+EMBED_HOSTS = [h.strip() for h in os.environ.get("CONFLUX_EMBED_HOSTS", "").split(",") if h.strip()]
+
 ROOT_URLCONF = "config.urls"
 
 INSTALLED_APPS = [

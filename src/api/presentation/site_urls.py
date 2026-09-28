@@ -1,4 +1,5 @@
 from django.urls import path
+from onsite import public_views as onsite_public
 
 from . import site_views, stories
 
@@ -25,6 +26,10 @@ urlpatterns = [
         stories.project_card,
         name="site-project-card",
     ),
+    path("<uuid:event_public_id>/agenda/", onsite_public.agenda_page, name="site-agenda"),
+    path("<uuid:event_public_id>/agenda.ics", onsite_public.agenda_ics, name="site-agenda-ics"),
+    path("<uuid:event_public_id>/map/", onsite_public.expo_map, name="site-expo-map"),
+    path("<uuid:event_public_id>/badge.svg", onsite_public.badge, name="site-badge"),
     path("sw.js", site_views.service_worker, name="site-service-worker"),
     path("verify/", site_views.verify, name="site-verify"),
     path("<uuid:event_public_id>/", site_views.event_landing, name="site-event"),

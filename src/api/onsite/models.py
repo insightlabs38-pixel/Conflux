@@ -82,3 +82,55 @@ class ProjectLocation(PublicIdModel):
             raise ValidationError({"location": "Location belongs to a different event."})
         if self.location.kind == LocationKind.ROOM:
             raise ValidationError({"location": "Projects are placed at a table or booth."})
+
+
+class AgendaSession(PublicIdModel):
+    """A scheduled session (talk, workshop, ceremony) on the public agenda. It may
+    sit in a room and point at a livestream; the stream is only ever embedded when
+    its host is on the embed allow-list (see agenda.embed_url).
+    """
+
+    event = models.ForeignKey(
+        "events.Event", on_delete=models.CASCADE, related_name="agenda_sessions"
+    )
+    title = models.CharField(max_length=200)
+    description = models.CharField(max_length=2000, blank=True)
+    starts_at = models.DateTimeField()
+    ends_at = models.DateTimeField()
+    location = models.ForeignKey(
+        Location, null=True, blank=True, on_delete=models.SET_NULL, related_name="sessions"
+    )
+    track = models.ForeignKey(
+        "events.Track", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    speakers = models.CharField(max_length=300, blank=True)
+    stream_url = models.URLField(blank=True)
+    is_public = models.BooleanField(default=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["starts_at", "title", "pk"]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(ends_at__gt=models.F("starts_at")),
+                name="agenda_session_ends_after_start",
+            )
+        ]
+
+    def clean(self):
+        if self.location_id and self.location.event_id != self.event_id:
+            raise ValidationError({"location": "Location belongs to a different event."})
+        if self.track_id and self.track.event_id != self.event_id:
+            raise ValidationError({"track": "Track belongs to a different event."})
+        if self.starts_at and self.ends_at and self.ends_at <= self.starts_at:
+            raise ValidationError({"ends_at": "Must be after the start."})
+        if self.stream_url:
+            from urllib.parse import urlsplit
+
+            parts = urlsplit(self.stream_url)
+            if parts.scheme != "https" or parts.username or "@" in parts.netloc:
+                raise ValidationError({"stream_url": "Use a plain https:// address."})

@@ -1,0 +1,30 @@
+{% extends "presentation/base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Agenda" %} &middot; {{ event.name }}{% endblock %}
+{% block content %}
+<h1>{% trans "Agenda" %}</h1>
+<p><a href="{% url 'site-agenda-ics' event.public_id %}">{% trans "Subscribe (iCalendar)" %}</a></p>
+{% if sessions %}
+  <ol class="cx-agenda">
+    {% for session in sessions %}
+      <li class="cx-card">
+        <h2 class="cx-card__title">{{ session.title }}</h2>
+        <p><time datetime="{{ session.starts_at|date:'c' }}">{{ session.starts_at|date:"D j M, H:i" }}</time>
+          &ndash; <time datetime="{{ session.ends_at|date:'c' }}">{{ session.ends_at|date:"H:i" }}</time> UTC
+          {% if session.location %}&middot; {{ session.location.name }}{% endif %}
+          {% if session.speakers %}&middot; {{ session.speakers }}{% endif %}</p>
+        {% if session.description %}<p>{{ session.description }}</p>{% endif %}
+        {% if session.embed %}
+          <iframe class="cx-embed" src="{{ session.embed }}" title="{{ session.title }}" loading="lazy"
+                  referrerpolicy="no-referrer" allowfullscreen
+                  sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
+        {% elif session.stream_url %}
+          <p><a href="{{ session.stream_url }}" rel="noopener noreferrer">{% trans "Watch stream" %}</a></p>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+{% else %}
+  <p>{% trans "No sessions have been scheduled yet." %}</p>
+{% endif %}
+{% endblock %}

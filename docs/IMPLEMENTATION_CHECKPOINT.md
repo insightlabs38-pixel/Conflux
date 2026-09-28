@@ -1,8 +1,8 @@
-# PVS-H03 — Sequential implementation checkpoint
+# PVS16 — Sequential implementation checkpoint
 
 ## Result
 
-Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS06–PVS10, PVS-H02, PVS11, PVS12, PVS13, PVS14, PVS15, PVS-H03 complete on `main`. Earliest unfinished batch: **PVS16**, then PVS17, PVS-H04, PVS-H05. PVS18 skipped: H02 found no throughput bottleneck (only the fixed connection-bound bug).
+Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS06–PVS10, PVS-H02, PVS11, PVS12, PVS13, PVS14, PVS15, PVS-H03, PVS16 complete on `main`. Earliest unfinished batch: **PVS17**, then PVS-H04, PVS-H05. PVS18 skipped: H02 found no throughput bottleneck (only the fixed connection-bound bug).
 
 ## Changes
 
@@ -17,6 +17,7 @@ Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS0
 - PVS14: read-only `portfolio` app (`docs/operations/PORTFOLIO.md`).
 - PVS15: `continuation` app (`docs/operations/CONTINUATION.md`).
 - PVS-H03: SPA now built into the image and served at `/app/`; sign-in form; Playwright suite in `tests/e2e` (needs a demo-seeded stack; `docs/operations/E2E.md`). Browser stack used: `COMPOSE_PROJECT_NAME=confluxh03 CONFLUX_PORT=28080 POSTGRES_PORT=25432 VALKEY_PORT=26379 S3_PORT=29000 S3_CONSOLE_PORT=29001`.
+- PVS16: `onsite.AgendaSession`, public agenda/ICS/state/badge/map (`docs/operations/EVENT_LOGISTICS.md`).
 - Standing guards: `tests/security` (route/isolation/fuzz/CSRF/idempotency sweeps), `tests/integration/concurrency/test_pvs_races.py` (PostgreSQL), final-archive guard test that forces every new event-owned model to be archived or excluded.
 - Preserve unrelated owner dirt: `.gitignore`, `master.sh`, `master/`, `tests/test_master_supervisor.py`. Never `ruff format` the `tests/` root or add those files.
 

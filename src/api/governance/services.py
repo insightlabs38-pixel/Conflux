@@ -429,3 +429,51 @@ def normalization_run_or_none(plan, public_id):
         return NormalizationRun.objects.get(plan=plan, public_id=public_id)
     except (NormalizationRun.DoesNotExist, ValueError, ValidationError):
         return None
+
+
+@transaction.atomic
+def set_read_only(event, actor, *, read_only, message=""):
+    row, _ = GovernanceSettings.objects.select_for_update().get_or_create(event=event)
+    row.read_only = bool(read_only)
+    row.read_only_message = message.strip()[:300]
+    row.save()
+    record_mutation(
+        actor=actor,
+        workspace=event.workspace,
+        action="event.read_only_enabled" if row.read_only else "event.read_only_disabled",
+        target=row,
+        metadata={"message": row.read_only_message},
+    )
+    return row
+
+
+@transaction.atomic
+def set_visibility(project, actor, *, gallery_visible=None, blocked=None, reason=""):
+    project = (
+        Project.objects.select_for_update(of=("self",)).select_related("event").get(pk=project.pk)
+    )
+    workspace = project.event.workspace
+    organizer = _is_organizer(actor, workspace)
+    if blocked is not None:
+        if not organizer:
+            raise ValidationError("Only an organizer can block a project from the gallery.")
+        if blocked and not reason.strip():
+            raise ValidationError("A reason is required to block a project.")
+        project.gallery_blocked = blocked
+    if gallery_visible is not None:
+        if not (organizer or project.memberships.filter(user=actor).exists()):
+            raise ValidationError("Only a project member can change its gallery visibility.")
+        project.gallery_visible = gallery_visible
+    project.save(update_fields=["gallery_visible", "gallery_blocked", "updated_at"])
+    record_mutation(
+        actor=actor,
+        workspace=workspace,
+        action="project.visibility_changed",
+        target=project,
+        metadata={
+            "gallery_visible": project.gallery_visible,
+            "gallery_blocked": project.gallery_blocked,
+            "reason": reason.strip()[:300],
+        },
+    )
+    return project

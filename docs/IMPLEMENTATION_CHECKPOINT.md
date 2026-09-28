@@ -1,8 +1,8 @@
-# PVS16 — Sequential implementation checkpoint
+# PVS17 — Sequential implementation checkpoint
 
 ## Result
 
-Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS06–PVS10, PVS-H02, PVS11, PVS12, PVS13, PVS14, PVS15, PVS-H03, PVS16 complete on `main`. Earliest unfinished batch: **PVS17**, then PVS-H04, PVS-H05. PVS18 skipped: H02 found no throughput bottleneck (only the fixed connection-bound bug).
+Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS06–PVS10, PVS-H02, PVS11, PVS12, PVS13, PVS14, PVS15, PVS-H03, PVS16, PVS17 complete on `main`. Earliest unfinished batch: **PVS-H04**, then PVS-H05 (PVS18 skipped, see below); PVS-H04, PVS-H05. PVS18 skipped: H02 found no throughput bottleneck (only the fixed connection-bound bug).
 
 ## Changes
 
@@ -18,6 +18,7 @@ Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS0
 - PVS15: `continuation` app (`docs/operations/CONTINUATION.md`).
 - PVS-H03: SPA now built into the image and served at `/app/`; sign-in form; Playwright suite in `tests/e2e` (needs a demo-seeded stack; `docs/operations/E2E.md`). Browser stack used: `COMPOSE_PROJECT_NAME=confluxh03 CONFLUX_PORT=28080 POSTGRES_PORT=25432 VALKEY_PORT=26379 S3_PORT=29000 S3_CONSOLE_PORT=29001`.
 - PVS16: `onsite.AgendaSession`, public agenda/ICS/state/badge/map (`docs/operations/EVENT_LOGISTICS.md`).
+- PVS17: read-only maintenance guard (`governance.maintenance`, monkeypatches `APIView.check_permissions` in `GovernanceConfig.ready`), `Project.gallery_visible/blocked`, CSV preview, self-export (`docs/operations/CONVENIENCE.md`).
 - Standing guards: `tests/security` (route/isolation/fuzz/CSRF/idempotency sweeps), `tests/integration/concurrency/test_pvs_races.py` (PostgreSQL), final-archive guard test that forces every new event-owned model to be archived or excluded.
 - Preserve unrelated owner dirt: `.gitignore`, `master.sh`, `master/`, `tests/test_master_supervisor.py`. Never `ruff format` the `tests/` root or add those files.
 
@@ -39,4 +40,4 @@ Core, Stretch, Very-Stretch (VS01–VS50), PVS-H00, PVS01–PVS05, PVS-H01, PVS0
 
 ## Next
 
-PVS-H03 (frontend/UX/accessibility/responsive hardening + deterministic Playwright scenes; see src/web and tests/e2e). Feature freeze at 08:00 UTC Tue; PVS16/PVS17 still owed before that if time allows. H02 evidence: `docs/batches/PVS-H02.md`, `docs/operations/CAPACITY.md`, `loadtests/h02/run.sh`. Full SQLite suite 1199 passed. Code freeze Tuesday 2026-09-29 18:00 UTC; stop new features at 08:00 UTC that day.
+PVS-H04 (full release verification: official acceptance, rules evidence, tier claims, security/isolation, load, migrations/upgrade, backup/restore, offline cold start, browser journeys, lint/typecheck, docs), then PVS-H05 (demo package: deterministic seed + reset path + runbook + clips). Feature work is over; only fixes/verification/docs now. Code freeze Tue 2026-09-29 18:00 UTC. Browser stack: see PVS-H03 note (project `confluxh03`, port 28080).

@@ -4829,6 +4829,46 @@ paths:
       responses:
         '200':
           description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/imports/projects-csv/preview/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_imports_projects_csv_preview
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CsvPreviewInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CsvPreviewInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CsvPreviewInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/judge-calendar/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_calendar
@@ -5256,6 +5296,73 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/maintenance/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_maintenance
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_events_event_public_id_maintenance
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MaintenanceInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MaintenanceInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/marketplace/matches/:
     get:
@@ -5974,6 +6081,34 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-data/export/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_data_export
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-pass/:
     get:
@@ -9665,6 +9800,84 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TagInput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/visibility/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_visibility
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_visibility
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VisibilityInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VisibilityInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VisibilityInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/publication-schedules/:
     get:
@@ -18295,6 +18508,17 @@ components:
       - public_id
       - revoked_at
       - workspace
+    CsvPreviewInput:
+      type: object
+      properties:
+        csv_text:
+          type: string
+        mapping:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+      - csv_text
     DecisionInput:
       type: object
       properties:
@@ -19793,6 +20017,16 @@ components:
           $ref: '#/components/schemas/UserSummarySchema'
       required:
       - user
+    MaintenanceInput:
+      type: object
+      properties:
+        read_only:
+          type: boolean
+        message:
+          type: string
+          maxLength: 300
+      required:
+      - read_only
     MarketplaceProfileInput:
       type: object
       properties:
@@ -23760,6 +23994,16 @@ components:
           type: string
       required:
       - valid
+    VisibilityInput:
+      type: object
+      properties:
+        gallery_visible:
+          type: boolean
+        blocked:
+          type: boolean
+        reason:
+          type: string
+          maxLength: 300
     VoteInputSchema:
       type: object
       properties:

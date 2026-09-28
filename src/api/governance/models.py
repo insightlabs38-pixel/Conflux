@@ -27,6 +27,8 @@ class ImmutableMixin(models.Model):
 class GovernanceSettings(PublicIdModel):
     event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name="governance")
     require_publication_approval = models.BooleanField(default=False)
+    read_only = models.BooleanField(default=False)
+    read_only_message = models.CharField(max_length=300, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
 

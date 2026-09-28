@@ -9,7 +9,8 @@ TABLES = {
     "participation.teammembership": ("team__event", "team user role joined_at", ""),
     "projects.project": (
         "event",
-        "event team track name description created_by created_at updated_at",
+        "event team track name description gallery_visible gallery_blocked created_by "
+        "created_at updated_at",
         "",
     ),
     "projects.projectmembership": ("project__event", "project user role joined_at", ""),

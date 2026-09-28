@@ -11,6 +11,14 @@ urlpatterns = [
         views.GovernanceSettingsView.as_view(),
         name="governance-settings",
     ),
+    path(
+        _e + "projects/<uuid:project_public_id>/visibility/",
+        views.ProjectVisibilityView.as_view(),
+        name="project-visibility",
+    ),
+    path(_e + "imports/projects-csv/preview/", views.CsvPreviewView.as_view(), name="csv-preview"),
+    path(_e + "my-data/export/", views.MyDataExportView.as_view(), name="my-data-export"),
+    path(_e + "maintenance/", views.MaintenanceView.as_view(), name="event-maintenance"),
     path(_e + "rules/", views.RulesView.as_view(), name="rules"),
     path(_e + "rules/acknowledge/", views.RulesAcknowledgeView.as_view(), name="rules-acknowledge"),
     path(

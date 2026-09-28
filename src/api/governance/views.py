@@ -30,13 +30,16 @@ from .models import (
 )
 from .schema import (
     AssignmentResponseInput,
+    CsvPreviewInput,
     DecisionNoteInput,
     ExceptionApprovalInput,
     ExceptionRequestInput,
+    MaintenanceInput,
     ParticipantRulesInput,
     PublicationRequestInput,
     RulesAcknowledgeInput,
     SettingsInput,
+    VisibilityInput,
 )
 
 
@@ -537,3 +540,83 @@ class ExceptionRequestActionView(EventView):
             )
         item.refresh_from_db()
         return Response(_exception_data(item))
+
+
+class MaintenanceView(EventView):
+    @extend_schema(responses={200: {"type": "object"}})
+    def get(self, request, workspace_public_id, event_public_id):
+        row = GovernanceSettings.objects.filter(event=self.get_event()).first()
+        return Response(
+            {
+                "read_only": bool(row and row.read_only),
+                "message": row.read_only_message if row and row.read_only else "",
+            }
+        )
+
+    @extend_schema(request=MaintenanceInput, responses={200: {"type": "object"}})
+    @guarded
+    def put(self, request, workspace_public_id, event_public_id):
+        if not self.is_organizer(request):
+            self.permission_denied(request)
+        flag = request.data.get("read_only")
+        message = request.data.get("message", "")
+        if not isinstance(flag, bool) or not isinstance(message, str):
+            raise ValidationError({"read_only": "Must be a boolean; message must be text."})
+        row = services.set_read_only(
+            self.get_event(), request.user, read_only=flag, message=message
+        )
+        return Response({"read_only": row.read_only, "message": row.read_only_message})
+
+
+class ProjectVisibilityView(EventView):
+    def state(self, project, request):
+        data = {"gallery_visible": project.gallery_visible}
+        if project.gallery_blocked:
+            data["blocked_by_organizer"] = True
+        return data
+
+    @extend_schema(responses={200: {"type": "object"}})
+    def get(self, request, workspace_public_id, event_public_id, project_public_id):
+        return Response(self.state(self.member_project(request), request))
+
+    @extend_schema(request=VisibilityInput, responses={200: {"type": "object"}})
+    @guarded
+    def put(self, request, workspace_public_id, event_public_id, project_public_id):
+        project = self.member_project(request)
+        gallery_visible = request.data.get("gallery_visible")
+        blocked = request.data.get("blocked")
+        for name, value in (("gallery_visible", gallery_visible), ("blocked", blocked)):
+            if value is not None and not isinstance(value, bool):
+                raise ValidationError({name: "Must be a boolean."})
+        if gallery_visible is None and blocked is None:
+            raise ValidationError({"gallery_visible": "Provide gallery_visible or blocked."})
+        project = services.set_visibility(
+            project,
+            request.user,
+            gallery_visible=gallery_visible,
+            blocked=blocked,
+            reason=str(request.data.get("reason", "")),
+        )
+        return Response(self.state(project, request))
+
+
+class CsvPreviewView(OrganizerEventView):
+    @extend_schema(request=CsvPreviewInput, responses={200: {"type": "object"}})
+    @guarded
+    def post(self, request, workspace_public_id, event_public_id):
+        from .csv_preview import preview
+
+        return Response(
+            preview(self.get_event(), request.data.get("csv_text"), request.data.get("mapping"))
+        )
+
+
+class MyDataExportView(EventView):
+    @extend_schema(responses={200: {"type": "object"}})
+    def get(self, request, workspace_public_id, event_public_id):
+        from integrations.privacy import export_subject, subject_exists
+
+        event = self.get_event()
+        if not subject_exists(event, request.user):
+            return Response({"detail": "You have no data in this event."}, status=404)
+        return Response(export_subject(event, request.user, actor=request.user))

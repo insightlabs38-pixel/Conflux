@@ -1371,6 +1371,16 @@ export type InputOfCredentialReadSchema = {
   revoked_at: string | null;
 };
 
+export type CsvPreviewInput = {
+  csv_text: string;
+  mapping?: Record<string, string>;
+};
+
+export type InputOfCsvPreviewInput = {
+  csv_text: string;
+  mapping?: Record<string, string>;
+};
+
 export type DecisionInput = {
   decision: DecisionInputDecisionEnum;
   note?: string;
@@ -2296,6 +2306,10 @@ export type InputOfLoginInputSchema = { username: string; password: string };
 export type LoginResponseSchema = { user: UserSummarySchema };
 
 export type InputOfLoginResponseSchema = { user: InputOfUserSummarySchema };
+
+export type MaintenanceInput = { read_only: boolean; message?: string };
+
+export type InputOfMaintenanceInput = { read_only: boolean; message?: string };
 
 export type MarketplaceProfileInput = {
   skills: string[];
@@ -4770,6 +4784,18 @@ export type InputOfVerifyRecordOutput = {
   error?: string;
 };
 
+export type VisibilityInput = {
+  gallery_visible?: boolean;
+  blocked?: boolean;
+  reason?: string;
+};
+
+export type InputOfVisibilityInput = {
+  gallery_visible?: boolean;
+  blocked?: boolean;
+  reason?: string;
+};
+
 export type VoteInputSchema = { project: string; token?: string };
 
 export type InputOfVoteInputSchema = { project: string; token?: string };
@@ -5830,6 +5856,13 @@ export interface Operations {
     };
     response: null;
   };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_imports_projects_csv_preview: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfCsvPreviewInput;
+    };
+    response: Record<string, unknown>;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_calendar: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: JudgeCalendarSchema;
@@ -5906,6 +5939,17 @@ export interface Operations {
     request: {
       path: { event_public_id: string; workspace_public_id: string };
       body?: InputOfApplyInput;
+    };
+    response: Record<string, unknown>;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_maintenance: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: Record<string, unknown>;
+  };
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_maintenance: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfMaintenanceInput;
     };
     response: Record<string, unknown>;
   };
@@ -6043,6 +6087,10 @@ export interface Operations {
       path: { event_public_id: string; workspace_public_id: string };
       body: InputOfAttendanceInput;
     };
+    response: Record<string, unknown>;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_data_export: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
     response: Record<string, unknown>;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_pass: {
@@ -6895,6 +6943,27 @@ export interface Operations {
       body: InputOfTagInput;
     };
     response: TagInput;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_visibility: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: Record<string, unknown>;
+  };
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_visibility: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+      body?: InputOfVisibilityInput;
+    };
+    response: Record<string, unknown>;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_publication_schedules: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -9631,6 +9700,15 @@ export const operations = {
       request_body: true,
       response_kind: "none",
     },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_imports_projects_csv_preview:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/imports/projects-csv/preview/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_judge_calendar:
     {
       method: "GET",
@@ -9744,6 +9822,24 @@ export const operations = {
     {
       method: "POST",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/locations/auto-assign/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_maintenance:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/maintenance/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_maintenance:
+    {
+      method: "PUT",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/maintenance/",
       path_params: ["event_public_id", "workspace_public_id"],
       query_params: [],
       request_body: true,
@@ -9957,6 +10053,15 @@ export const operations = {
       path_params: ["event_public_id", "workspace_public_id"],
       query_params: [],
       request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_data_export:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-data/export/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
       response_kind: "json",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_pass: {
@@ -11062,6 +11167,32 @@ export const operations = {
     {
       method: "PUT",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/tags/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_visibility:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/visibility/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_visibility:
+    {
+      method: "PUT",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/visibility/",
       path_params: [
         "event_public_id",
         "project_public_id",

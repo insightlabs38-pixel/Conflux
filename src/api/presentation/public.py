@@ -28,10 +28,15 @@ def get_public_event(event_public_id):
 
 
 def public_projects(event, *, q=None, stage_public_id=None, track_public_id=None):
-    """Projects with at least one finalized submission for this event."""
+    """Finalized projects the team has not hidden and no organizer has blocked."""
     if not publication_visible(event, PublicationSurface.GALLERY):
         return Project.objects.none()
-    filters = {"event": event, "submissions__status": SubmissionStatus.FINALIZED}
+    filters = {
+        "event": event,
+        "submissions__status": SubmissionStatus.FINALIZED,
+        "gallery_visible": True,
+        "gallery_blocked": False,
+    }
     if stage_public_id:
         filters["submissions__stage__public_id"] = stage_public_id
     projects = (

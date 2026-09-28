@@ -49,7 +49,7 @@ def test_worker_dies_after_remote_acceptance_and_retries_same_event(outbox):
     stage_deliveries()
     accepted = []
 
-    def accept_then_die(subscription, event, body):
+    def accept_then_die(subscription, event, body, *, headers):
         accepted.append((event.public_id, body))
         raise SystemExit("worker killed before recording acknowledgement")
 
@@ -60,11 +60,12 @@ def test_worker_dies_after_remote_acceptance_and_retries_same_event(outbox):
     assert delivery.status == WebhookDelivery.Status.PENDING
     assert delivery.attempts == 1
     assert delivery.completed_at is None
+    assert delivery.history.get().completed_at is None
     with patch("integrations.webhooks.send_delivery") as sender:
         assert deliver_pending() == 0
         sender.assert_not_called()
 
-    def accept(subscription, event, body):
+    def accept(subscription, event, body, *, headers):
         accepted.append((event.public_id, body))
         return 204
 
@@ -77,6 +78,7 @@ def test_worker_dies_after_remote_acceptance_and_retries_same_event(outbox):
     assert delivery.status == WebhookDelivery.Status.SUCCEEDED
     assert delivery.attempts == 2
     assert accepted[0] == accepted[1]
+    assert delivery.history.count() == 2
 
 
 @pytest.mark.parametrize("failure", [TimeoutError("response lost"), 503])

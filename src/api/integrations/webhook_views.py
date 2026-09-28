@@ -1,3 +1,4 @@
+import hashlib
 import re
 
 from accounts.authentication import CookieOnlyAuthentication
@@ -15,7 +16,7 @@ from rest_framework.views import APIView
 from workspaces.models import Role
 
 from .models import WebhookDelivery, WebhookPlatform, WebhookSubscription
-from .webhooks import signing_secret, validate_destination
+from .webhooks import delivery_body, signing_secret, validate_destination
 
 EVENT_TYPE = re.compile(r"^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+$")
 
@@ -42,7 +43,18 @@ class SubscriptionIssued(SubscriptionOutput):
 
 
 class SubscriptionUpdate(serializers.Serializer):
-    enabled = serializers.BooleanField()
+    enabled = serializers.BooleanField(required=False)
+    url = serializers.URLField(max_length=2048, required=False)
+
+    def validate(self, attrs):
+        if not attrs:
+            raise serializers.ValidationError("Provide enabled or url.")
+        if "url" in attrs:
+            try:
+                validate_destination(attrs["url"])
+            except ValueError as exc:
+                raise serializers.ValidationError({"url": str(exc)}) from exc
+        return attrs
 
 
 class DeliveryOutput(serializers.Serializer):
@@ -56,6 +68,36 @@ class DeliveryOutput(serializers.Serializer):
     next_attempt_at = serializers.DateTimeField(allow_null=True)
     created_at = serializers.DateTimeField()
     completed_at = serializers.DateTimeField(allow_null=True)
+
+
+class AttemptOutput(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    destination = serializers.URLField()
+    body = serializers.CharField()
+    headers = serializers.DictField(child=serializers.CharField())
+    started_at = serializers.DateTimeField()
+    completed_at = serializers.DateTimeField(allow_null=True)
+    status_code = serializers.IntegerField(allow_null=True)
+    error = serializers.CharField()
+
+
+class DeliveryInspection(DeliveryOutput):
+    destination = serializers.URLField()
+    next_body = serializers.CharField()
+    body_sha256 = serializers.CharField()
+    signature_scheme = serializers.CharField()
+    history = AttemptOutput(many=True)
+    history_has_more = serializers.BooleanField()
+
+
+def history_offset(request):
+    try:
+        offset = int(request.query_params.get("offset", "0"))
+    except ValueError as exc:
+        raise ValidationError({"offset": "Must be a nonnegative integer."}) from exc
+    if offset < 0:
+        raise ValidationError({"offset": "Must be a nonnegative integer."})
+    return offset
 
 
 def subscription_data(item):
@@ -151,14 +193,18 @@ class WebhookSubscriptionView(WebhookBase):
         data.is_valid(raise_exception=True)
         with transaction.atomic():
             item = self.get_subscription(subscription_public_id)
-            item.enabled = data.validated_data["enabled"]
-            item.save(update_fields=["enabled"])
+            for field, value in data.validated_data.items():
+                setattr(item, field, value)
+            item.save(update_fields=list(data.validated_data))
             record_mutation(
                 actor=request.user,
                 workspace=self.get_workspace(),
                 action="webhook.updated",
                 target=item,
-                metadata={"enabled": item.enabled},
+                metadata={
+                    "enabled": item.enabled,
+                    "destination_changed": "url" in data.validated_data,
+                },
             )
         return Response(subscription_data(item))
 
@@ -167,18 +213,38 @@ class WebhookDeliveriesView(WebhookBase):
     @extend_schema(responses=DeliveryOutput(many=True))
     def get(self, request, workspace_public_id, subscription_public_id):
         item = self.get_subscription(subscription_public_id)
-        try:
-            offset = int(request.query_params.get("offset", "0"))
-        except ValueError as exc:
-            raise ValidationError({"offset": "Must be a nonnegative integer."}) from exc
-        if offset < 0:
-            raise ValidationError({"offset": "Must be a nonnegative integer."})
+        offset = history_offset(request)
         deliveries = (
             WebhookDelivery.objects.filter(subscription=item)
             .select_related("domain_event")
             .order_by("-created_at", "-pk")[offset : offset + 100]
         )
         return Response([delivery_data(row) for row in deliveries])
+
+
+class WebhookInspectionView(WebhookBase):
+    @extend_schema(responses=DeliveryInspection)
+    def get(self, request, workspace_public_id, subscription_public_id, delivery_public_id):
+        item = self.get_subscription(subscription_public_id)
+        delivery = get_object_or_404(
+            WebhookDelivery.objects.select_related("domain_event", "domain_event__workspace"),
+            public_id=delivery_public_id,
+            subscription=item,
+        )
+        body = delivery_body(item, delivery.domain_event)
+        offset = history_offset(request)
+        history = list(delivery.history.order_by("-started_at", "-pk")[offset : offset + 101])
+        return Response(
+            {
+                **delivery_data(delivery),
+                "destination": item.url,
+                "next_body": body.decode(),
+                "body_sha256": hashlib.sha256(body).hexdigest(),
+                "signature_scheme": "v1=HMAC-SHA256(secret, timestamp + '.' + exact UTF-8 body)",
+                "history": AttemptOutput(history[:100], many=True).data,
+                "history_has_more": len(history) > 100,
+            }
+        )
 
 
 class WebhookReplayView(WebhookBase):

@@ -12,7 +12,7 @@ from django.conf import settings
 from django.db import models, transaction
 from django.utils import timezone
 
-from .models import WebhookDelivery, WebhookPlatform, WebhookSubscription
+from .models import WebhookAttempt, WebhookDelivery, WebhookPlatform, WebhookSubscription
 
 ENVELOPE_VERSION = "1"
 MAX_ATTEMPTS = 5
@@ -100,7 +100,13 @@ def signed_headers(subscription, domain_event, body, now=None):
     }
 
 
-def send_delivery(subscription, domain_event, body):
+def delivery_body(subscription, domain_event):
+    return json.dumps(
+        payload_for(subscription, domain_event), separators=(",", ":"), sort_keys=True
+    ).encode()
+
+
+def send_delivery(subscription, domain_event, body, *, headers=None):
     parts, address = validate_destination(subscription.url)
     host = parts.hostname
     connection = http.client.HTTPSConnection(host, 443, timeout=5)
@@ -114,7 +120,9 @@ def send_delivery(subscription, domain_event, body):
             "POST",
             (parts.path or "/") + ("?" + parts.query if parts.query else ""),
             body=body,
-            headers=signed_headers(subscription, domain_event, body),
+            headers=headers
+            if headers is not None
+            else signed_headers(subscription, domain_event, body),
         )
         response = connection.getresponse()
         response.read(4096)
@@ -180,19 +188,31 @@ def deliver_pending(limit=100):
             delivery.attempts += 1
             delivery.next_attempt_at = timezone.now() + timedelta(minutes=10)
             delivery.save(update_fields=["attempts", "next_attempt_at"])
+            body = delivery_body(delivery.subscription, delivery.domain_event)
+            headers = signed_headers(delivery.subscription, delivery.domain_event, body)
+            attempt = WebhookAttempt.objects.create(
+                delivery=delivery,
+                destination=delivery.subscription.url,
+                body=body.decode(),
+                headers=headers,
+            )
         try:
-            body = json.dumps(
-                payload_for(delivery.subscription, delivery.domain_event),
-                separators=(",", ":"),
-                sort_keys=True,
-            ).encode()
-            status = send_delivery(delivery.subscription, delivery.domain_event, body)
+            status = send_delivery(
+                delivery.subscription, delivery.domain_event, body, headers=headers
+            )
             error = "" if 200 <= status < 300 else f"HTTP {status}"
         except (OSError, ValueError, TimeoutError, http.client.HTTPException) as exc:
             status = None
             error = str(exc)[:200]
         with transaction.atomic():
             delivery = WebhookDelivery.objects.select_for_update().get(pk=pk)
+            attempt.status_code = status
+            attempt.error = error
+            attempt.completed_at = timezone.now()
+            attempt.save(update_fields=["status_code", "error", "completed_at"])
+            # An expired claim can finish after a newer attempt has taken over.
+            if delivery.history.filter(pk__gt=attempt.pk).exists():
+                continue
             delivery.last_status_code = status
             delivery.last_error = error
             if not error:

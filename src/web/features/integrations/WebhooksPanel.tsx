@@ -1,5 +1,6 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Card } from "../../components/Card";
+import "./webhooks.css";
 
 type Platform = "generic" | "discord" | "slack";
 type Subscription = {
@@ -20,6 +21,23 @@ type Delivery = {
   last_error: string;
   next_attempt_at: string | null;
   created_at: string;
+};
+type Inspection = Delivery & {
+  destination: string;
+  next_body: string;
+  body_sha256: string;
+  signature_scheme: string;
+  history_has_more: boolean;
+  history: {
+    public_id: string;
+    destination: string;
+    body: string;
+    headers: Record<string, string>;
+    started_at: string;
+    completed_at: string | null;
+    status_code: number | null;
+    error: string;
+  }[];
 };
 
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
@@ -50,19 +68,35 @@ export function WebhooksPanel({
   const [platform, setPlatform] = useState<Platform>("generic");
   const [secret, setSecret] = useState("");
   const [error, setError] = useState("");
+  const [inspection, setInspection] = useState<Inspection | null>(null);
+  const [destination, setDestination] = useState("");
+  const selection = useRef(0);
+  const inspectionRequest = useRef(0);
 
   async function refresh() {
-    setSubscriptions(await request<Subscription[]>(base));
+    const version = selection.current;
+    const items = await request<Subscription[]>(base);
+    if (version !== selection.current) return;
+    setSubscriptions(items);
     if (selectedId) {
       const rows = await request<Delivery[]>(
         `${base}${selectedId}/deliveries/`,
       );
+      if (version !== selection.current) return;
       setDeliveries(rows);
       setHasMore(rows.length === 100);
     }
   }
   useEffect(() => {
     let active = true;
+    ++selection.current;
+    ++inspectionRequest.current;
+    setSubscriptions([]);
+    setSelectedId("");
+    setInspection(null);
+    setDeliveries([]);
+    setSecret("");
+    setError("");
     request<Subscription[]>(base)
       .then((items) => {
         if (active) setSubscriptions(items);
@@ -73,7 +107,7 @@ export function WebhooksPanel({
     return () => {
       active = false;
     };
-  }, [base]);
+  }, [base, eventId]);
 
   async function create(event: FormEvent) {
     event.preventDefault();
@@ -101,14 +135,72 @@ export function WebhooksPanel({
   }
 
   async function select(id: string) {
+    const version = ++selection.current;
+    ++inspectionRequest.current;
     setSelectedId(id);
+    setInspection(null);
+    setDeliveries([]);
+    setHasMore(false);
+    setDestination(
+      subscriptions.find((item) => item.public_id === id)?.url ?? "",
+    );
     setError("");
     try {
       const rows = await request<Delivery[]>(`${base}${id}/deliveries/`);
+      if (version !== selection.current) return;
       setDeliveries(rows);
       setHasMore(rows.length === 100);
     } catch (cause) {
-      setError((cause as Error).message);
+      if (version === selection.current) setError((cause as Error).message);
+    }
+  }
+
+  async function inspect(id: string, older = false) {
+    const version = selection.current;
+    const requestId = ++inspectionRequest.current;
+    const offset = older ? (inspection?.history.length ?? 0) : 0;
+    setError("");
+    if (!older) setInspection(null);
+    try {
+      const detail = await request<Inspection>(
+        `${base}${selectedId}/deliveries/${id}/?offset=${offset}`,
+      );
+      if (
+        version !== selection.current ||
+        requestId !== inspectionRequest.current
+      )
+        return;
+      setInspection((current) => ({
+        ...detail,
+        history: older
+          ? [...(current?.history ?? []), ...detail.history]
+          : detail.history,
+      }));
+    } catch (cause) {
+      if (
+        version === selection.current &&
+        requestId === inspectionRequest.current
+      )
+        setError((cause as Error).message);
+    }
+  }
+
+  async function changeDestination(event: FormEvent) {
+    event.preventDefault();
+    const version = selection.current;
+    setError("");
+    try {
+      await request(`${base}${selectedId}/`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: destination }),
+      });
+      if (version !== selection.current) return;
+      ++inspectionRequest.current;
+      setInspection(null);
+      await refresh();
+    } catch (cause) {
+      if (version === selection.current) setError((cause as Error).message);
     }
   }
 
@@ -127,27 +219,30 @@ export function WebhooksPanel({
   }
 
   async function replay(deliveryId: string) {
+    const version = selection.current;
     setError("");
     try {
       await request(`${base}${selectedId}/deliveries/${deliveryId}/replay/`, {
         method: "POST",
       });
-      await select(selectedId);
+      if (version === selection.current) await select(selectedId);
     } catch (cause) {
-      setError((cause as Error).message);
+      if (version === selection.current) setError((cause as Error).message);
     }
   }
 
   async function loadOlder() {
+    const version = selection.current;
     setError("");
     try {
       const rows = await request<Delivery[]>(
         `${base}${selectedId}/deliveries/?offset=${deliveries.length}`,
       );
+      if (version !== selection.current) return;
       setDeliveries((current) => [...current, ...rows]);
       setHasMore(rows.length === 100);
     } catch (cause) {
-      setError((cause as Error).message);
+      if (version === selection.current) setError((cause as Error).message);
     }
   }
 
@@ -214,8 +309,28 @@ export function WebhooksPanel({
           ))}
       </ul>
       {selectedId && (
-        <section aria-label="Webhook delivery history">
+        <section
+          aria-label="Webhook delivery history"
+          className="cx-webhook-history"
+        >
           <h3>Delivery history</h3>
+          <form onSubmit={changeDestination}>
+            <label>
+              Replay destination{" "}
+              <input
+                type="url"
+                value={destination}
+                onChange={(event) => setDestination(event.target.value)}
+                required
+              />
+            </label>
+            <button type="submit">Save destination</button>
+          </form>
+          <p>
+            Saved destinations apply to future attempts and replays. An attempt
+            already sending keeps its original destination. Replays keep the
+            event ID; receivers must deduplicate it.
+          </p>
           <ul>
             {deliveries.map((item) => (
               <li key={item.public_id}>
@@ -223,11 +338,21 @@ export function WebhooksPanel({
                 {new Date(item.created_at).toLocaleString()}
                 {item.last_status_code && ` · HTTP ${item.last_status_code}`}
                 {item.last_error && ` · ${item.last_error}`}
-                {item.status !== "pending" && (
-                  <button type="button" onClick={() => replay(item.public_id)}>
-                    Replay
-                  </button>
-                )}
+                {item.next_attempt_at &&
+                  ` · Next attempt ${new Date(item.next_attempt_at).toLocaleString()}`}
+                <button type="button" onClick={() => inspect(item.public_id)}>
+                  Inspect
+                </button>
+                {item.status !== "pending" &&
+                  subscriptions.find((row) => row.public_id === selectedId)
+                    ?.enabled && (
+                    <button
+                      type="button"
+                      onClick={() => replay(item.public_id)}
+                    >
+                      Replay
+                    </button>
+                  )}
               </li>
             ))}
           </ul>
@@ -235,6 +360,49 @@ export function WebhooksPanel({
             <button type="button" onClick={loadOlder}>
               Load older deliveries
             </button>
+          )}
+          {inspection && (
+            <section aria-label="Webhook inspection">
+              <h4>Payload and signature</h4>
+              <p>Next attempt destination: {inspection.destination}</p>
+              <p>Next attempt body (UTF-8):</p>
+              <pre>{inspection.next_body}</pre>
+              <p>
+                SHA-256: <code>{inspection.body_sha256}</code>
+              </p>
+              <p>{inspection.signature_scheme}</p>
+              <p>
+                Signatures below cover the exact saved body bytes and timestamp.
+                Inspection sends nothing. Older deliveries may have no retained
+                attempt details.
+              </p>
+              <ol>
+                {inspection.history.map((attempt) => (
+                  <li key={attempt.public_id}>
+                    <p>
+                      {attempt.destination} ·{" "}
+                      {new Date(attempt.started_at).toLocaleString()} ·{" "}
+                      {attempt.completed_at
+                        ? attempt.status_code
+                          ? `HTTP ${attempt.status_code}`
+                          : "Failed"
+                        : "Outcome unknown"}{" "}
+                      {attempt.error}
+                    </p>
+                    <pre>{attempt.body}</pre>
+                    <pre>{JSON.stringify(attempt.headers, null, 2)}</pre>
+                  </li>
+                ))}
+              </ol>
+              {inspection.history_has_more && (
+                <button
+                  type="button"
+                  onClick={() => inspect(inspection.public_id, true)}
+                >
+                  Load older attempts
+                </button>
+              )}
+            </section>
           )}
         </section>
       )}

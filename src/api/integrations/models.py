@@ -55,6 +55,17 @@ class WebhookDelivery(PublicIdModel):
         ]
 
 
+class WebhookAttempt(PublicIdModel):
+    delivery = models.ForeignKey(WebhookDelivery, on_delete=models.CASCADE, related_name="history")
+    destination = models.URLField(max_length=2048)
+    body = models.TextField()
+    headers = models.JSONField()
+    started_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    status_code = models.PositiveSmallIntegerField(null=True, blank=True)
+    error = models.CharField(max_length=200, blank=True)
+
+
 class EventTemplate(PublicIdModel):
     """A named, reusable configuration snapshot (TPL-001): the same
     organizer-authored-config shape `archive.build_archive` produces, saved

@@ -11,13 +11,14 @@ from django.db import transaction
 from django.test import Client
 from django.utils import timezone
 from events.models import Event
-from integrations.models import WebhookDelivery, WebhookSubscription
+from integrations.models import WebhookAttempt, WebhookDelivery, WebhookSubscription
 from integrations.webhooks import (
     MAX_ATTEMPTS,
     deliver_pending,
     envelope,
     send_delivery,
     signed_headers,
+    signing_secret,
     stage_deliveries,
     validate_destination,
 )
@@ -167,8 +168,9 @@ def test_outbox_filter_signing_retry_and_replay(monkeypatch):
         != headers["X-Conflux-Signature"][3:]
     )
 
-    def failed_send(*_args):
+    def failed_send(*_args, headers):
         assert not transaction.get_connection().in_atomic_block
+        assert headers["X-Conflux-Event-Id"] == str(matching.public_id)
         return 503
 
     with patch("integrations.webhooks.send_delivery", side_effect=failed_send) as sender:
@@ -232,3 +234,206 @@ def test_delivery_pins_resolved_address_and_does_not_follow_redirect(monkeypatch
     assert captured[0] == ("receiver.example", 443, 5)
     assert captured[1] == ("93.184.215.14", 443)
     assert captured[2][0:2] == ("POST", "/hook?source=conflux")
+
+
+def inspected_delivery():
+    workspace, event, client = fixture()
+    subscription = WebhookSubscription.objects.create(
+        workspace=workspace,
+        event=event,
+        url="https://receiver.example/hook",
+        event_types=["event.status_changed"],
+    )
+    domain_event = DomainEvent.objects.create(
+        workspace=workspace,
+        event_type="event.status_changed",
+        payload={"event": str(event.public_id), "name": "Café <script>"},
+    )
+    delivery = WebhookDelivery.objects.create(subscription=subscription, domain_event=domain_event)
+    url = base(workspace) + f"{subscription.public_id}/deliveries/{delivery.public_id}/"
+    return workspace, client, subscription, delivery, url
+
+
+def test_inspector_retains_exact_wire_attempts_across_replay_and_destination_change(monkeypatch):
+    workspace, client, subscription, delivery, url = inspected_delivery()
+    monkeypatch.setattr(socket, "getaddrinfo", public_dns)
+    captured = []
+
+    def send(sub, event, body, *, headers):
+        attempt = delivery.history.latest("pk")
+        assert attempt.completed_at is None
+        assert attempt.body.encode() == body
+        assert attempt.headers == headers
+        assert attempt.destination == sub.url
+        captured.append((body, headers))
+        return 204
+
+    with patch("integrations.webhooks.send_delivery", side_effect=send):
+        assert deliver_pending() == 1
+    detail = client.get(url).json()
+    assert detail["next_body"].encode() == captured[0][0]
+    assert detail["body_sha256"] == hashlib.sha256(captured[0][0]).hexdigest()
+    attempt = detail["history"][0]
+    expected = hmac.new(
+        signing_secret(subscription).encode(),
+        attempt["headers"]["X-Conflux-Timestamp"].encode() + b"." + attempt["body"].encode(),
+        hashlib.sha256,
+    ).hexdigest()
+    assert attempt["headers"]["X-Conflux-Signature"] == "v1=" + expected
+    assert "secret" not in detail
+    assert attempt["status_code"] == 204 and attempt["completed_at"]
+    assert (
+        client.patch(
+            base(workspace) + f"{subscription.public_id}/",
+            {"url": "https://new.example/hook"},
+            content_type="application/json",
+        ).status_code
+        == 200
+    )
+    assert client.post(url + "replay/").status_code == 200
+    assert client.post(url + "replay/").status_code == 400
+    with patch("integrations.webhooks.send_delivery", side_effect=send):
+        assert deliver_pending() == 1
+    detail = client.get(url).json()
+    assert [row["destination"] for row in detail["history"]] == [
+        "https://new.example/hook",
+        "https://receiver.example/hook",
+    ]
+    assert detail["destination"] == "https://new.example/hook"
+    assert detail["attempts"] == 1
+    assert detail["history"][0]["headers"]["X-Conflux-Event-Id"] == detail["event_id"]
+    assert detail["history"][1] == attempt
+
+
+@pytest.mark.parametrize("role", [Role.PARTICIPANT, Role.JUDGE])
+def test_inspector_and_destination_changes_require_organizer(role):
+    workspace, _, subscription, delivery, url = inspected_delivery()
+    user = User.objects.create_user(username="reader")
+    Membership.objects.create(workspace=workspace, user=user, role=role)
+    client = Client()
+    client.cookies["session"] = Session.issue(user).token
+    assert client.get(url).status_code == 403
+    assert client.post(url + "replay/").status_code == 403
+    assert (
+        client.patch(
+            base(workspace) + f"{subscription.public_id}/",
+            {"enabled": False},
+            content_type="application/json",
+        ).status_code
+        == 403
+    )
+    assert Client().get(url).status_code in (401, 403)
+    assert delivery.history.count() == 0
+
+
+def test_inspector_scopes_ids_and_is_read_only():
+    workspace, client, subscription, delivery, url = inspected_delivery()
+    other = WebhookSubscription.objects.create(workspace=workspace, url="https://other.example/")
+    assert (
+        client.get(url.replace(str(subscription.public_id), str(other.public_id))).status_code
+        == 404
+    )
+    other_workspace = Workspace.objects.create(name="Other", slug="other-inspection")
+    organizer = User.objects.get(username="webhook-organizer")
+    Membership.objects.create(workspace=other_workspace, user=organizer, role=Role.ORGANIZER)
+    assert (
+        client.get(
+            url.replace(str(workspace.public_id), str(other_workspace.public_id))
+        ).status_code
+        == 404
+    )
+    with patch("integrations.webhooks.send_delivery") as sender:
+        detail = client.get(url).json()
+    sender.assert_not_called()
+    assert detail["history"] == [] and not detail["history_has_more"]
+    delivery.refresh_from_db()
+    assert delivery.attempts == 0 and delivery.status == "pending"
+    assert client.get(url + "?offset=-1").status_code == 400
+    assert client.get(url + "?offset=no").status_code == 400
+
+
+def test_invalid_destination_update_and_disabled_replay_fail_closed(monkeypatch):
+    workspace, client, subscription, delivery, url = inspected_delivery()
+    monkeypatch.setattr(
+        socket,
+        "getaddrinfo",
+        lambda *a, **k: [(socket.AF_INET, socket.SOCK_STREAM, 6, "", ("127.0.0.1", 443))],
+    )
+    assert (
+        client.patch(
+            base(workspace) + f"{subscription.public_id}/",
+            {"url": "https://internal.example/", "enabled": False},
+            content_type="application/json",
+        ).status_code
+        == 400
+    )
+    subscription.refresh_from_db()
+    assert subscription.enabled and subscription.url == "https://receiver.example/hook"
+    subscription.enabled = False
+    subscription.save()
+    delivery.status = "dead"
+    delivery.save()
+    assert client.post(url + "replay/").status_code == 400
+    assert deliver_pending() == 0
+
+
+def test_attempt_history_paginates_without_losing_prior_attempts():
+    _, client, _, delivery, url = inspected_delivery()
+    WebhookAttempt.objects.bulk_create(
+        [
+            WebhookAttempt(
+                delivery=delivery, destination="https://receiver.example/", body=str(i), headers={}
+            )
+            for i in range(105)
+        ]
+    )
+    first = client.get(url).json()
+    second = client.get(url + "?offset=100").json()
+    assert len(first["history"]) == 100 and first["history_has_more"]
+    assert len(second["history"]) == 5 and not second["history_has_more"]
+    ids = [row["public_id"] for row in first["history"] + second["history"]]
+    assert len(set(ids)) == 105
+
+
+def test_failed_attempt_and_stale_claim_outcomes_are_preserved():
+    _, client, _, delivery, url = inspected_delivery()
+    with patch("integrations.webhooks.send_delivery", side_effect=TimeoutError("Timed out")):
+        assert deliver_pending() == 1
+    detail = client.get(url).json()
+    assert detail["history"][0]["error"] == "Timed out"
+    assert detail["history"][0]["status_code"] is None
+    assert detail["next_attempt_at"] and detail["status"] == "pending"
+    WebhookDelivery.objects.filter(pk=delivery.pk).update(next_attempt_at=timezone.now())
+
+    def stale_send(*args, **kwargs):
+        WebhookDelivery.objects.filter(pk=delivery.pk).update(next_attempt_at=timezone.now())
+        with patch("integrations.webhooks.send_delivery", return_value=204):
+            assert deliver_pending() == 1
+        return 503
+
+    with patch("integrations.webhooks.send_delivery", side_effect=stale_send):
+        deliver_pending()
+    detail = client.get(url).json()
+    assert detail["status"] == "succeeded" and detail["last_status_code"] == 204
+    assert [row["status_code"] for row in detail["history"]] == [204, 503, None]
+
+
+def test_inspector_rejects_bearer_only_credentials():
+    workspace, client, subscription, _, url = inspected_delivery()
+    issued = client.post(
+        f"/api/v1/workspaces/{workspace.public_id}/api-credentials/",
+        {"name": "Event reader", "allowed_actions": ["GET:event-list"]},
+        content_type="application/json",
+    )
+    assert issued.status_code == 201
+    bearer = Client(HTTP_AUTHORIZATION=f"Bearer {issued.json()['token']}")
+    assert bearer.get(url).status_code == 401
+    assert bearer.post(url + "replay/").status_code == 401
+    assert (
+        bearer.patch(
+            base(workspace) + f"{subscription.public_id}/",
+            {"enabled": False},
+            content_type="application/json",
+        ).status_code
+        == 401
+    )

@@ -10863,6 +10863,45 @@ paths:
                 items:
                   $ref: '#/components/schemas/DeliveryOutput'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/webhooks/{subscription_public_id}/deliveries/{delivery_public_id}/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_webhooks_subscription_public_id_deliveries_delivery_public_id
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: delivery_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: subscription_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - humanSessionCookie: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryInspection'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/webhooks/{subscription_public_id}/deliveries/{delivery_public_id}/replay/:
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_webhooks_subscription_public_id_deliveries_delivery_public_id_replay
@@ -11572,6 +11611,42 @@ components:
       - created_at
       - number
       - public_id
+    AttemptOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        destination:
+          type: string
+          format: uri
+        body:
+          type: string
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        status_code:
+          type: integer
+          nullable: true
+        error:
+          type: string
+      required:
+      - body
+      - completed_at
+      - destination
+      - error
+      - headers
+      - public_id
+      - started_at
+      - status_code
     AudienceKindSchema:
       type: object
       properties:
@@ -12622,6 +12697,69 @@ components:
       - public_id
       - revoked_at
       - workspace
+    DeliveryInspection:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        event_id:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+        status:
+          type: string
+        attempts:
+          type: integer
+        last_status_code:
+          type: integer
+          nullable: true
+        last_error:
+          type: string
+        next_attempt_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        destination:
+          type: string
+          format: uri
+        next_body:
+          type: string
+        body_sha256:
+          type: string
+        signature_scheme:
+          type: string
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttemptOutput'
+        history_has_more:
+          type: boolean
+      required:
+      - attempts
+      - body_sha256
+      - completed_at
+      - created_at
+      - destination
+      - event_id
+      - event_type
+      - history
+      - history_has_more
+      - last_error
+      - last_status_code
+      - next_attempt_at
+      - next_body
+      - public_id
+      - signature_scheme
+      - status
     DeliveryOutput:
       type: object
       properties:
@@ -14654,6 +14792,10 @@ components:
       properties:
         enabled:
           type: boolean
+        url:
+          type: string
+          format: uri
+          maxLength: 2048
     PatchedTeamOpeningInput:
       type: object
       properties:

@@ -86,6 +86,11 @@ urlpatterns = [
         webhook_views.WebhookReplayView.as_view(),
         name="webhook-replay",
     ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/webhooks/<uuid:subscription_public_id>/deliveries/<uuid:delivery_public_id>/",
+        webhook_views.WebhookInspectionView.as_view(),
+        name="webhook-inspection",
+    ),
     path("gallery/", views.GalleryView.as_view(), name="integrations-gallery"),
     path("submit/", views.SubmitView.as_view(), name="integrations-submit"),
     path("judge/scores/", views.JudgeScoresView.as_view(), name="integrations-judge-scores"),

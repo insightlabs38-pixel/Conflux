@@ -4130,6 +4130,46 @@ paths:
               schema:
                 $ref: '#/components/schemas/Team'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/bulk/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_bulk
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BulkRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BulkRequest'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkResponse'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/checklist/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_checklist
@@ -12056,6 +12096,104 @@ components:
         * `mentorship` - Mentorship
         * `swag` - Swag
         * `other` - Other
+    BulkOperationAction:
+      enum:
+      - assign
+      - advance
+      - extend
+      - move
+      - send
+      type: string
+      description: |-
+        * `assign` - assign
+        * `advance` - advance
+        * `extend` - extend
+        * `move` - move
+        * `send` - send
+    BulkOperationInput:
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/BulkOperationAction'
+        plan:
+          type: string
+          format: uuid
+        coverage:
+          type: integer
+          maximum: 100
+          minimum: 1
+        stage:
+          type: string
+          format: uuid
+        to_stage:
+          type: string
+          format: uuid
+        entries:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 100
+        gates:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 100
+        seconds:
+          type: integer
+          maximum: 31622400
+          minimum: 1
+        projects:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 100
+        track:
+          type: string
+          format: uuid
+        subject:
+          type: string
+          maxLength: 200
+        body:
+          type: string
+          maxLength: 10000
+        audience_kind:
+          type: string
+          maxLength: 40
+        audience_params:
+          type: object
+          additionalProperties: {}
+      required:
+      - action
+    BulkRequest:
+      type: object
+      properties:
+        operations:
+          type: array
+          items:
+            $ref: '#/components/schemas/BulkOperationInput'
+        preview_token:
+          type: string
+          maxLength: 4096
+      required:
+      - operations
+    BulkResponse:
+      type: object
+      properties:
+        applied:
+          type: boolean
+        effects:
+          type: array
+          items: {}
+        preview_token:
+          type: string
+        expires_in:
+          type: integer
+      required:
+      - applied
+      - effects
     COIRelationshipKind:
       enum:
       - team

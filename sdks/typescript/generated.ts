@@ -717,6 +717,70 @@ export type InputOfBasePrizeKind =
   | "swag"
   | "other";
 
+export type BulkOperationAction =
+  "assign" | "advance" | "extend" | "move" | "send";
+
+export type InputOfBulkOperationAction =
+  "assign" | "advance" | "extend" | "move" | "send";
+
+export type BulkOperationInput = {
+  action: BulkOperationAction;
+  plan?: string;
+  coverage?: number;
+  stage?: string;
+  to_stage?: string;
+  entries?: string[];
+  gates?: string[];
+  seconds?: number;
+  projects?: string[];
+  track?: string;
+  subject?: string;
+  body?: string;
+  audience_kind?: string;
+  audience_params?: Record<string, unknown>;
+};
+
+export type InputOfBulkOperationInput = {
+  action: InputOfBulkOperationAction;
+  plan?: string;
+  coverage?: number;
+  stage?: string;
+  to_stage?: string;
+  entries?: string[];
+  gates?: string[];
+  seconds?: number;
+  projects?: string[];
+  track?: string;
+  subject?: string;
+  body?: string;
+  audience_kind?: string;
+  audience_params?: Record<string, unknown>;
+};
+
+export type BulkRequest = {
+  operations: BulkOperationInput[];
+  preview_token?: string;
+};
+
+export type InputOfBulkRequest = {
+  operations: InputOfBulkOperationInput[];
+  preview_token?: string;
+};
+
+export type BulkResponse = {
+  applied: boolean;
+  effects: unknown[];
+  preview_token?: string;
+  expires_in?: number;
+};
+
+export type InputOfBulkResponse = {
+  applied: boolean;
+  effects: unknown[];
+  preview_token?: string;
+  expires_in?: number;
+};
+
 export type COIRelationshipKind = "team" | "institution" | "domain";
 
 export type InputOfCOIRelationshipKind = "team" | "institution" | "domain";
@@ -4444,6 +4508,13 @@ export interface Operations {
     };
     response: Team;
   };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_bulk: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfBulkRequest;
+    };
+    response: BulkResponse;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_checklist: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: LaunchChecklistSchema;
@@ -7025,6 +7096,15 @@ export const operations = {
     {
       method: "POST",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-team/transfer-captain/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_bulk:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/bulk/",
       path_params: ["event_public_id", "workspace_public_id"],
       query_params: [],
       request_body: true,

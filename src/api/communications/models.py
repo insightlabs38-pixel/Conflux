@@ -5,6 +5,14 @@ from django.db import models
 from events.models import Event
 
 
+class BulkReceipt(PublicIdModel):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="bulk_receipts")
+    actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    token_digest = models.CharField(max_length=64, unique=True)
+    result = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 class Message(PublicIdModel):
     """One organizer broadcast to a dynamically-resolved audience (OPS-002/
     OPS-003). The audience is never stored as a frozen recipient list at

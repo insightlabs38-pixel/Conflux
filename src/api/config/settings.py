@@ -155,6 +155,8 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "EventStatus": "events.models.EventStatus",
         "CandidateQueueStatus": ["pending", "drafted", "submitted"],
+        "BulkOperationAction": ["assign", "advance", "extend", "move", "send"],
+        "ActionEnum": "policies.models.Action",
         "BasePrizeKind": "events.models.BasePrize.Kind",
         "COIRelationshipKind": "evaluations.models.COIRelationshipKind",
         "COIRuleKind": "evaluations.models.COIRuleKind",

@@ -650,6 +650,62 @@ BasePrizeKind = Literal['cash', 'credit', 'discount', 'subscription', 'hardware'
 
 InputOfBasePrizeKind = Literal['cash', 'credit', 'discount', 'subscription', 'hardware', 'travel', 'service', 'mentorship', 'swag', 'other']
 
+BulkOperationAction = Literal['assign', 'advance', 'extend', 'move', 'send']
+
+InputOfBulkOperationAction = Literal['assign', 'advance', 'extend', 'move', 'send']
+
+class BulkOperationInput(TypedDict):
+    action: BulkOperationAction
+    plan: NotRequired[str]
+    coverage: NotRequired[int]
+    stage: NotRequired[str]
+    to_stage: NotRequired[str]
+    entries: NotRequired[list[str]]
+    gates: NotRequired[list[str]]
+    seconds: NotRequired[int]
+    projects: NotRequired[list[str]]
+    track: NotRequired[str]
+    subject: NotRequired[str]
+    body: NotRequired[str]
+    audience_kind: NotRequired[str]
+    audience_params: NotRequired[dict[str, Any]]
+
+class InputOfBulkOperationInput(TypedDict):
+    action: InputOfBulkOperationAction
+    plan: NotRequired[str]
+    coverage: NotRequired[int]
+    stage: NotRequired[str]
+    to_stage: NotRequired[str]
+    entries: NotRequired[list[str]]
+    gates: NotRequired[list[str]]
+    seconds: NotRequired[int]
+    projects: NotRequired[list[str]]
+    track: NotRequired[str]
+    subject: NotRequired[str]
+    body: NotRequired[str]
+    audience_kind: NotRequired[str]
+    audience_params: NotRequired[dict[str, Any]]
+
+class BulkRequest(TypedDict):
+    operations: list[BulkOperationInput]
+    preview_token: NotRequired[str]
+
+class InputOfBulkRequest(TypedDict):
+    operations: list[InputOfBulkOperationInput]
+    preview_token: NotRequired[str]
+
+class BulkResponse(TypedDict):
+    applied: bool
+    effects: list[Any]
+    preview_token: NotRequired[str]
+    expires_in: NotRequired[int]
+
+class InputOfBulkResponse(TypedDict):
+    applied: bool
+    effects: list[Any]
+    preview_token: NotRequired[str]
+    expires_in: NotRequired[int]
+
 COIRelationshipKind = Literal['team', 'institution', 'domain']
 
 InputOfCOIRelationshipKind = Literal['team', 'institution', 'domain']
@@ -5032,6 +5088,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                 'query_params': [],
                                                                                                 'request_body': True,
                                                                                                 'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_bulk': {'method': 'POST',
+                                                                                       'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/bulk/',
+                                                                                       'path_params': ['event_public_id',
+                                                                                                       'workspace_public_id'],
+                                                                                       'query_params': [],
+                                                                                       'request_body': True,
+                                                                                       'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_page_blocks': {'method': 'POST',
                                                                                    'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/page/blocks/',
                                                                                    'path_params': ['event_public_id',

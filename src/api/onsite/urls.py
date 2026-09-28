@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import route_views, views
 
 _e = "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/"
 
@@ -28,4 +28,14 @@ urlpatterns = [
     path(_e + "my-pass/qr/", views.MyPassQrView.as_view(), name="onsite-my-pass-qr"),
     path(_e + "checkins/scan/", views.ScanView.as_view(), name="onsite-scan"),
     path(_e + "onsite-summary/", views.SummaryView.as_view(), name="onsite-summary"),
+    path(
+        _e + "stages/<uuid:stage_public_id>/evaluation-plans/<uuid:plan_public_id>/routes/",
+        route_views.RoutesView.as_view(),
+        name="onsite-routes",
+    ),
+    path(
+        _e + "stages/<uuid:stage_public_id>/evaluation-plans/<uuid:plan_public_id>/my-route/",
+        route_views.MyRouteView.as_view(),
+        name="onsite-my-route",
+    ),
 ]

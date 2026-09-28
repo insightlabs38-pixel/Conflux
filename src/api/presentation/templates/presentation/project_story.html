@@ -1,0 +1,21 @@
+{% extends "presentation/base.html" %}
+{% load i18n %}
+{% block title %}{{ project.name }} &middot; {{ event.name }}{% endblock %}
+{% block extra_head %}{% include "presentation/story_meta.html" %}{% endblock %}
+{% block content %}
+<article aria-label="Project highlight">
+  <p><a href="{% url 'site-results' event.public_id %}">&larr; {% trans "Published results" %}</a></p>
+  <h1>{{ project.name }}</h1>
+  {% if project.track %}<p><span class="cx-badge cx-badge--info">{{ project.track.name }}</span></p>{% endif %}
+  {% if project.team %}<p>{{ project.team.name }}</p>{% endif %}
+  {% if project.description %}<div class="cx-technical-description">{{ description_html|safe }}</div>{% endif %}
+  <section class="cx-block" aria-label="Published awards">
+    <h2>{% trans "Published awards" %}</h2>
+    <ul>
+      {% for award in awards %}<li><a href="{% url 'site-award-story' event.public_id award.public_id %}">{{ award.name }}</a></li>{% endfor %}
+    </ul>
+  </section>
+  <p><a href="{% url 'site-project' event.public_id project.public_id %}">{% trans "View project and public artifacts" %}</a></p>
+  {% include "presentation/story_share.html" %}
+</article>
+{% endblock %}

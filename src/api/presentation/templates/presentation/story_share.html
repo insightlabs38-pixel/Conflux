@@ -1,0 +1,6 @@
+{% load i18n %}
+<section class="cx-block" aria-label="Share result">
+  <h2>{% trans "Share this result" %}</h2>
+  <p><a href="{{ story_url }}">{% trans "Result permalink" %}</a> &middot; <a href="{{ card_path }}?download=1" download>{% trans "Download result card (SVG)" %}</a></p>
+  <img src="{{ card_path }}" alt="{{ story_title }} — {{ event.name }}" width="1200" height="630" class="cx-result-card">
+</section>

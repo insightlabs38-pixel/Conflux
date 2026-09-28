@@ -1,0 +1,29 @@
+{% extends "presentation/base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Results" %} &middot; {{ event.name }}{% endblock %}
+{% block content %}
+<section aria-label="Published results" class="cx-block">
+  <h1>{% trans "Published results" %}</h1>
+  {% if awards_page %}
+    <ul class="cx-grid">
+      {% for award in awards_page %}
+        <li class="cx-card">
+          <h2 class="cx-card__title"><a href="{% url 'site-award-story' event.public_id award.public_id %}">{{ award.name }}</a></h2>
+          <ul>
+            {% for winner in award.public_winners %}
+              <li><a href="{% url 'site-project-story' event.public_id winner.project.public_id %}">{{ winner.project.name }}</a></li>
+            {% empty %}<li>{% trans "No public project highlights available." %}</li>{% endfor %}
+          </ul>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}<p>{% trans "Results will be announced after judging." %}</p>{% endif %}
+</section>
+{% if awards_page.has_other_pages %}
+<nav aria-label="Results pages">
+  {% if awards_page.has_previous %}<a href="?page={{ awards_page.previous_page_number }}">{% trans "Previous" %}</a>{% endif %}
+  <span>{{ awards_page.number }} / {{ awards_page.paginator.num_pages }}</span>
+  {% if awards_page.has_next %}<a href="?page={{ awards_page.next_page_number }}">{% trans "Next" %}</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

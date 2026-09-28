@@ -1,8 +1,29 @@
 from django.urls import path
 
-from . import site_views
+from . import site_views, stories
 
 urlpatterns = [
+    path("<uuid:event_public_id>/results/", stories.results, name="site-results"),
+    path(
+        "<uuid:event_public_id>/results/awards/<uuid:award_public_id>/",
+        stories.award_story,
+        name="site-award-story",
+    ),
+    path(
+        "<uuid:event_public_id>/results/awards/<uuid:award_public_id>/card.svg",
+        stories.award_card,
+        name="site-award-card",
+    ),
+    path(
+        "<uuid:event_public_id>/results/projects/<uuid:project_public_id>/",
+        stories.project_story,
+        name="site-project-story",
+    ),
+    path(
+        "<uuid:event_public_id>/results/projects/<uuid:project_public_id>/card.svg",
+        stories.project_card,
+        name="site-project-card",
+    ),
     path("sw.js", site_views.service_worker, name="site-service-worker"),
     path("verify/", site_views.verify, name="site-verify"),
     path("<uuid:event_public_id>/", site_views.event_landing, name="site-event"),

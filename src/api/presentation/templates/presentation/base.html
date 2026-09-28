@@ -11,6 +11,7 @@
   <link rel="icon" href="{% static 'icon.svg' %}" type="image/svg+xml">
   <link rel="apple-touch-icon" href="{% static 'icon.svg' %}">
   <meta name="theme-color" content="#2952cc">
+  {% block extra_head %}{% endblock %}
 </head>
 <body class="cx-shell{% if theme == "minimal" %} theme-minimal{% endif %}">
   <a class="cx-skip-link" href="#main-content">{% trans "Skip to main content" %}</a>

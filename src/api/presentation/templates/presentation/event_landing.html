@@ -119,7 +119,7 @@
           <ul class="cx-grid">
             {% for award in block.live %}
               <li class="cx-card">
-                <h3 class="cx-card__title">{{ award.name }}</h3>
+                <h3 class="cx-card__title"><a href="{% url 'site-award-story' event.public_id award.public_id %}">{{ award.name }}</a></h3>
                 <ul>
                   {% for winner in award.winners %}
                     <li><a href="{% url 'site-project' event.public_id winner.project_public_id %}">{{ winner.project_name }}</a></li>

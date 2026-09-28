@@ -71,3 +71,37 @@ class LoginFailure(models.Model):
 
     username = models.CharField(max_length=150, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+
+class ExternalIdentity(PublicIdModel):
+    """A user's stable identity at an external OpenID Connect provider,
+    keyed by (issuer, subject) -- never by email, which providers may reuse.
+    """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="external_identities"
+    )
+    issuer = models.CharField(max_length=300)
+    subject = models.CharField(max_length=255)
+    email = models.CharField(max_length=254, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_login_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["issuer", "subject"], name="unique_external_identity")
+        ]
+
+
+class OidcLoginState(models.Model):
+    """One in-flight sign-in. Single use: the callback deletes the row before
+    doing anything else, so a replayed `state` finds nothing. `browser_hash`
+    ties the attempt to the browser that started it (login-CSRF defence).
+    """
+
+    state_hash = models.CharField(max_length=64, unique=True)
+    browser_hash = models.CharField(max_length=64)
+    nonce = models.CharField(max_length=64)
+    code_verifier = models.CharField(max_length=128)
+    next_path = models.CharField(max_length=500, default="/")
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)

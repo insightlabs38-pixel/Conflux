@@ -57,8 +57,11 @@ def login(request):
         LoginFailure.objects.filter(created_at__lt=cutoff - LOGIN_FAILURE_WINDOW).delete()
         return Response({"detail": "Invalid credentials."}, status=401)
     LoginFailure.objects.filter(username=key).delete()
+    return start_session(request, user, Response({"user": _serialize_user(user)}))
+
+
+def start_session(request, user, response):
     session = Session.issue(user, ttl=SESSION_TTL)
-    response = Response({"user": _serialize_user(user)})
     secure = request.is_secure() or request.META.get("HTTP_X_FORWARDED_PROTO") == "https"
     response.set_cookie(
         COOKIE_NAME,

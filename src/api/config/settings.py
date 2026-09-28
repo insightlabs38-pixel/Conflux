@@ -32,6 +32,25 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
+# Optional OpenID Connect sign-in. Everything is off unless OIDC_ISSUER is set, and the
+# provider is only contacted when someone signs in, never at startup, so the stack still
+# boots and runs fully offline with built-in password authentication.
+OIDC_ISSUER = os.environ.get("OIDC_ISSUER", "").strip().rstrip("/")
+OIDC_CLIENT_ID = os.environ.get("OIDC_CLIENT_ID", "")
+OIDC_CLIENT_SECRET = os.environ.get("OIDC_CLIENT_SECRET", "")
+OIDC_REDIRECT_URI = os.environ.get("OIDC_REDIRECT_URI", "")
+OIDC_SCOPES = os.environ.get("OIDC_SCOPES", "openid email profile")
+OIDC_PROVIDER_NAME = os.environ.get("OIDC_PROVIDER_NAME", "Single sign-on")
+OIDC_ALLOWED_EMAIL_DOMAINS = [
+    d.strip().lower() for d in os.environ.get("OIDC_ALLOWED_EMAIL_DOMAINS", "").split(",") if d.strip()
+]
+OIDC_AUTO_CREATE_USERS = os.environ.get("OIDC_AUTO_CREATE_USERS", "1") == "1"
+# Linking an unknown provider identity to an existing local account by email is a takeover
+# vector if the provider does not verify addresses, so it is opt-in.
+OIDC_LINK_BY_VERIFIED_EMAIL = os.environ.get("OIDC_LINK_BY_VERIFIED_EMAIL", "0") == "1"
+OIDC_DEFAULT_WORKSPACE_SLUG = os.environ.get("OIDC_DEFAULT_WORKSPACE_SLUG", "")
+OIDC_ALLOW_INSECURE_HTTP = os.environ.get("OIDC_ALLOW_INSECURE_HTTP", "0") == "1"
+
 ROOT_URLCONF = "config.urls"
 
 INSTALLED_APPS = [

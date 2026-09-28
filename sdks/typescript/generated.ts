@@ -2492,6 +2492,18 @@ export type NoteInput = { body: string; project?: string };
 
 export type InputOfNoteInput = { body: string; project?: string };
 
+export type OidcConfigSchema = {
+  enabled: boolean;
+  provider_name?: string;
+  login_url?: string;
+};
+
+export type InputOfOidcConfigSchema = {
+  enabled: boolean;
+  provider_name?: string;
+  login_url?: string;
+};
+
 export type OpenInput = { quorum?: number };
 
 export type InputOfOpenInput = { quorum?: number };
@@ -4711,6 +4723,15 @@ export interface Operations {
   };
   post_api_v1_accounts_logout: { request: {}; response: null };
   get_api_v1_accounts_me: { request: {}; response: UserSummarySchema };
+  get_api_v1_accounts_oidc_callback: {
+    request: { query?: { code?: string; error?: string; state?: string } };
+    response: never;
+  };
+  get_api_v1_accounts_oidc_config: { request: {}; response: OidcConfigSchema };
+  get_api_v1_accounts_oidc_login: {
+    request: { query?: { next?: string } };
+    response: never;
+  };
   get_api_v1_audit_workspace_public_id: {
     request: { path: { workspace_public_id: string } };
     response: AuditEventSchema[];
@@ -7972,6 +7993,30 @@ export const operations = {
     query_params: [],
     request_body: false,
     response_kind: "json",
+  },
+  get_api_v1_accounts_oidc_callback: {
+    method: "GET",
+    path: "/api/v1/accounts/oidc/callback/",
+    path_params: [],
+    query_params: ["code", "error", "state"],
+    request_body: false,
+    response_kind: "none",
+  },
+  get_api_v1_accounts_oidc_config: {
+    method: "GET",
+    path: "/api/v1/accounts/oidc/config/",
+    path_params: [],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  get_api_v1_accounts_oidc_login: {
+    method: "GET",
+    path: "/api/v1/accounts/oidc/login/",
+    path_params: [],
+    query_params: ["next"],
+    request_body: false,
+    response_kind: "none",
   },
   get_api_v1_audit_workspace_public_id: {
     method: "GET",

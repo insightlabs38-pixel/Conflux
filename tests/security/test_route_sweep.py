@@ -28,6 +28,7 @@ TENANT_OPEN = ("my-application/",)  # anyone signed in may apply to an event
 PUBLIC_ROUTES = {
     "health/",  # liveness probe
     "schema/",  # OpenAPI document
+    "accounts/oidc/config/",  # whether SSO is offered; exposes no data
     "gallery/",  # official checker gallery
     "submit/",  # official checker closed-event probe
     "events/<uuid:event_public_id>/gallery/",

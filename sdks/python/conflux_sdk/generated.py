@@ -2306,6 +2306,16 @@ class InputOfNoteInput(TypedDict):
     body: str
     project: NotRequired[str]
 
+class OidcConfigSchema(TypedDict):
+    enabled: bool
+    provider_name: NotRequired[str]
+    login_url: NotRequired[str]
+
+class InputOfOidcConfigSchema(TypedDict):
+    enabled: bool
+    provider_name: NotRequired[str]
+    login_url: NotRequired[str]
+
 class OpenInput(TypedDict):
     quorum: NotRequired[int]
 
@@ -4574,6 +4584,24 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                             'query_params': [],
                             'request_body': False,
                             'response_kind': 'json'},
+ 'get_api_v1_accounts_oidc_callback': {'method': 'GET',
+                                       'path': '/api/v1/accounts/oidc/callback/',
+                                       'path_params': [],
+                                       'query_params': ['code', 'error', 'state'],
+                                       'request_body': False,
+                                       'response_kind': 'none'},
+ 'get_api_v1_accounts_oidc_config': {'method': 'GET',
+                                     'path': '/api/v1/accounts/oidc/config/',
+                                     'path_params': [],
+                                     'query_params': [],
+                                     'request_body': False,
+                                     'response_kind': 'json'},
+ 'get_api_v1_accounts_oidc_login': {'method': 'GET',
+                                    'path': '/api/v1/accounts/oidc/login/',
+                                    'path_params': [],
+                                    'query_params': ['next'],
+                                    'request_body': False,
+                                    'response_kind': 'none'},
  'get_api_v1_audit_workspace_public_id': {'method': 'GET',
                                           'path': '/api/v1/audit/{workspace_public_id}/',
                                           'path_params': ['workspace_public_id'],

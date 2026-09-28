@@ -1,12 +1,14 @@
 from django.urls import path
 
 from . import views
+from .analytics_views import EventAnalyticsView
 from .bulk_views import BulkOperationsView
 from .moderation_views import ModerationQueueView, ModerationReviewsView
 
 _prefix = "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/"
 
 urlpatterns = [
+    path(_prefix + "operations/analytics/", EventAnalyticsView.as_view(), name="event-analytics"),
     path(
         _prefix + "operations/moderation/", ModerationQueueView.as_view(), name="moderation-queue"
     ),

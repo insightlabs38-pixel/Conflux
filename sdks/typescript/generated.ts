@@ -1431,6 +1431,26 @@ export type InputOfEvent = {
   is_public?: boolean;
 };
 
+export type EventAnalyticsResponse = {
+  event: string;
+  generated_at: string;
+  registration: unknown;
+  teams: unknown;
+  submissions: unknown;
+  judging: unknown;
+  voting: unknown;
+};
+
+export type InputOfEventAnalyticsResponse = {
+  event: string;
+  generated_at: string;
+  registration: unknown;
+  teams: unknown;
+  submissions: unknown;
+  judging: unknown;
+  voting: unknown;
+};
+
 export type EventApplication = {
   public_id: string;
   user: string;
@@ -4578,6 +4598,13 @@ export interface Operations {
     };
     response: Team;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_analytics: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      query?: { plan_offset?: number };
+    };
+    response: EventAnalyticsResponse;
+  };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_bulk: {
     request: {
       path: { event_public_id: string; workspace_public_id: string };
@@ -7196,6 +7223,15 @@ export const operations = {
       path_params: ["event_public_id", "workspace_public_id"],
       query_params: [],
       request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_analytics:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/analytics/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: ["plan_offset"],
+      request_body: false,
       response_kind: "json",
     },
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_bulk:

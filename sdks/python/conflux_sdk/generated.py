@@ -1306,6 +1306,24 @@ class InputOfEvent(TypedDict):
     ends_at: NotRequired[str | None]
     is_public: NotRequired[bool]
 
+class EventAnalyticsResponse(TypedDict):
+    event: str
+    generated_at: str
+    registration: Any
+    teams: Any
+    submissions: Any
+    judging: Any
+    voting: Any
+
+class InputOfEventAnalyticsResponse(TypedDict):
+    event: str
+    generated_at: str
+    registration: Any
+    teams: Any
+    submissions: Any
+    judging: Any
+    voting: Any
+
 class EventApplication(TypedDict):
     public_id: str
     user: str
@@ -4080,6 +4098,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                       'query_params': [],
                                                                                       'request_body': False,
                                                                                       'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_analytics': {'method': 'GET',
+                                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/analytics/',
+                                                                                           'path_params': ['event_public_id',
+                                                                                                           'workspace_public_id'],
+                                                                                           'query_params': ['plan_offset'],
+                                                                                           'request_body': False,
+                                                                                           'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_checklist': {'method': 'GET',
                                                                                            'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/checklist/',
                                                                                            'path_params': ['event_public_id',

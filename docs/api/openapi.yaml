@@ -4130,6 +4130,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/Team'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/analytics/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_analytics
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: plan_offset
+        schema:
+          type: integer
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventAnalyticsResponse'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/bulk/:
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_bulk
@@ -13390,6 +13422,28 @@ components:
       - slug
       - status
       - updated_at
+    EventAnalyticsResponse:
+      type: object
+      properties:
+        event:
+          type: string
+          format: uuid
+        generated_at:
+          type: string
+          format: date-time
+        registration: {}
+        teams: {}
+        submissions: {}
+        judging: {}
+        voting: {}
+      required:
+      - event
+      - generated_at
+      - judging
+      - registration
+      - submissions
+      - teams
+      - voting
     EventApplication:
       type: object
       properties:

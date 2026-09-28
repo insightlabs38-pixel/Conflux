@@ -1634,6 +1634,35 @@ paths:
               schema:
                 $ref: '#/components/schemas/SignedArchiveOutput'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/attendance/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_attendance
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/authz-dry-run/:
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_authz_dry_run
@@ -2618,6 +2647,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CheckIn'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/checkins/scan/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_checkins_scan
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScanInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ScanInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ScanInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/clone/:
     post:
@@ -4261,6 +4331,189 @@ paths:
                 items:
                   $ref: '#/components/schemas/JudgeWorkloadRowSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/locations/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_locations
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LocationOutput'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_locations
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LocationInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LocationInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LocationInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationOutput'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/locations/{location_public_id}/:
+    patch:
+      operationId: patch_api_v1_workspaces_workspace_public_id_events_event_public_id_locations_location_public_id
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: location_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedLocationPatchInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedLocationPatchInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedLocationPatchInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocationOutput'
+          description: ''
+    delete:
+      operationId: delete_api_v1_workspaces_workspace_public_id_events_event_public_id_locations_location_public_id
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: location_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/locations/auto-assign/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_locations_auto_assign
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplyInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ApplyInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ApplyInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/marketplace/matches/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_marketplace_matches
@@ -4671,6 +4924,133 @@ paths:
               schema:
                 $ref: '#/components/schemas/EventApplication'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-attendance/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_attendance
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_events_event_public_id_my_attendance
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttendanceInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AttendanceInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AttendanceInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-pass/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_pass
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-pass/qr/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_pass_qr
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-team/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_team
@@ -4918,6 +5298,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Team'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/onsite-summary/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_onsite_summary
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/analytics/:
     get:
@@ -5988,6 +6397,35 @@ paths:
               schema:
                 $ref: '#/components/schemas/SubjectExportOutput'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/project-locations/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_project_locations
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects
@@ -6984,6 +7422,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FormResponseSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/location/:
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_location
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: project_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlacementInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PlacementInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PlacementInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/members/:
     post:
@@ -13378,6 +13863,24 @@ components:
         * `approved` - approved
         * `waitlisted` - waitlisted
         * `rejected` - rejected
+    ApplyInput:
+      type: object
+      properties:
+        apply:
+          type: boolean
+          default: false
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/ApplyInputKindEnum'
+          default: table
+    ApplyInputKindEnum:
+      enum:
+      - table
+      - booth
+      type: string
+      description: |-
+        * `table` - table
+        * `booth` - booth
     ApplyToEventInputSchema:
       type: object
       properties:
@@ -13803,6 +14306,23 @@ components:
       - public_id
       - started_at
       - status_code
+    AttendanceInput:
+      type: object
+      properties:
+        mode:
+          $ref: '#/components/schemas/AttendanceInputModeEnum'
+      required:
+      - mode
+    AttendanceInputModeEnum:
+      enum:
+      - in_person
+      - remote
+      - not_attending
+      type: string
+      description: |-
+        * `in_person` - In person
+        * `remote` - Remote
+        * `not_attending` - Not attending
     AudienceKindSchema:
       type: object
       properties:
@@ -16305,6 +16825,93 @@ components:
       - slug
       - stages
       - tracks
+    LocationInput:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/LocationKind'
+        name:
+          type: string
+          maxLength: 80
+        parent:
+          type: string
+          format: uuid
+          nullable: true
+        capacity:
+          type: integer
+          maximum: 1000
+          minimum: 1
+          nullable: true
+        x:
+          type: number
+          format: double
+          nullable: true
+        y:
+          type: number
+          format: double
+          nullable: true
+        notes:
+          type: string
+          maxLength: 200
+        position:
+          type: integer
+          maximum: 100000
+          minimum: 0
+      required:
+      - kind
+      - name
+    LocationKind:
+      enum:
+      - room
+      - table
+      - booth
+      type: string
+      description: |-
+        * `room` - Room
+        * `table` - Table
+        * `booth` - Booth
+    LocationOutput:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+        name:
+          type: string
+        parent:
+          type: string
+          format: uuid
+          nullable: true
+        capacity:
+          type: integer
+          nullable: true
+        x:
+          type: number
+          format: double
+          nullable: true
+        y:
+          type: number
+          format: double
+          nullable: true
+        notes:
+          type: string
+        position:
+          type: integer
+        assigned:
+          type: integer
+      required:
+      - assigned
+      - capacity
+      - kind
+      - name
+      - notes
+      - parent
+      - position
+      - public_id
+      - x
+      - y
     LoginInputSchema:
       type: object
       properties:
@@ -17256,6 +17863,38 @@ components:
           $ref: '#/components/schemas/FulfillmentInputStateEnum'
         note:
           type: string
+    PatchedLocationPatchInput:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/LocationKind'
+        name:
+          type: string
+          maxLength: 80
+        parent:
+          type: string
+          format: uuid
+          nullable: true
+        capacity:
+          type: integer
+          maximum: 1000
+          minimum: 1
+          nullable: true
+        x:
+          type: number
+          format: double
+          nullable: true
+        y:
+          type: number
+          format: double
+          nullable: true
+        notes:
+          type: string
+          maxLength: 200
+        position:
+          type: integer
+          maximum: 100000
+          minimum: 0
     PatchedPage:
       type: object
       properties:
@@ -17522,6 +18161,15 @@ components:
       - roles
       - unrecognized
       - view
+    PlacementInput:
+      type: object
+      properties:
+        location:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - location
     PlatformEnum:
       enum:
       - generic
@@ -18880,6 +19528,14 @@ components:
       - filters
       - name
       - public_id
+    ScanInput:
+      type: object
+      properties:
+        token:
+          type: string
+          maxLength: 200
+      required:
+      - token
     SearchFilters:
       type: object
       properties:

@@ -36,4 +36,5 @@ urlpatterns = [
     path("", include("taxonomy.urls")),
     path("", include("eligibility.urls")),
     path("", include("deliberation.urls")),
+    path("", include("onsite.urls")),
 ]

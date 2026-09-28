@@ -30,6 +30,7 @@ from integrations.final_archive import canonical_bytes
 from integrations.migration_preview import preview_archive_import
 from integrations.models import ArchiveRestoration
 from integrations.signed_archive import sign_archive, verify_signed_archive
+from onsite.models import Location, ProjectLocation
 from participation.models import Team
 from projects.models import Project, Submission, SubmissionVersion
 from stages.models import Stage, StageEntry
@@ -156,6 +157,9 @@ def source():
         closed_by=owner, resolution_note="fine",
     )  # fmt: skip
     assert rules.pk
+    hall = Location.objects.create(event=event, kind="room", name="Hall", x=0, y=0)
+    table = Location.objects.create(event=event, kind="table", name="T1", parent=hall, x=1, y=2)
+    ProjectLocation.objects.create(project=project, location=table)
     return workspace, event, owner, judge, project, plan
 
 
@@ -197,6 +201,8 @@ def test_restore_live_evidence_results_privacy_and_provenance_without_recomputat
     assert copied_room.finalization["winners"] == [str(copied_project.public_id)]
     assert copied_room.finalization["tally"][0]["project"] == str(copied_project.public_id)
     assert copied_room.stances.get().judge.username == "restore-judge"
+    placed = copied_project.location_assignment.location
+    assert (placed.name, placed.parent.name, placed.event_id) == ("T1", "Hall", copied.pk)
     copied_review = copied_project.eligibility_review
     assert (copied_review.status, copied_review.decided_by.username) == ("cleared", "restore-owner")
     assert copied_review.findings.get().state == "waived"
@@ -344,6 +350,7 @@ EXCLUDED_EVENT_MODELS = {
     "integrations.archiverestoration",
     "integrations.eventretentionpolicy",
     "taxonomy.taxonomyassignment",
+    "onsite.attendance",
 }
 
 

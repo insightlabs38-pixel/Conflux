@@ -164,4 +164,6 @@ TABLES = {
         "room judge project stance rationale updated_at",
         "",
     ),
+    "onsite.location": ("event", "event kind name parent capacity x y notes position", ""),
+    "onsite.projectlocation": ("project__event", "project location assigned_at", ""),
 }

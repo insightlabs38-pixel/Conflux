@@ -18,6 +18,7 @@ from django.db import transaction
 from eligibility.models import EligibilityFinding
 from evaluations.models import Appeal, AppealStatus, Assignment, Ballot, PairwiseComparison
 from events.models import EventApplication, ParticipantCheckIn
+from onsite.models import Attendance
 from participation.models import MarketplaceProfile, TeamMembership
 from presentation.models import SavedPublicSearch
 from projects.models import ProjectMembership, Submission, SubmissionVersion
@@ -42,6 +43,7 @@ def _personal(event, user=None):
         "marketplace_profiles": only(MarketplaceProfile.objects.filter(event=event), "user"),
         "saved_searches": only(SavedPublicSearch.objects.filter(event=event), "owner"),
         "check_ins": only(ParticipantCheckIn.objects.filter(event=event), "participant"),
+        "attendance": only(Attendance.objects.filter(event=event), "user"),
         "message_receipts": only(MessageRecipient.objects.filter(message__event=event), "user"),
         "comments": only(Comment.objects.filter(project__event=event), "author"),
         "person_labels": only(
@@ -112,6 +114,7 @@ def export_subject(event, user, *, actor):
         ),
         "saved_searches": ("name", "filters", "created_at"),
         "check_ins": ("checked_in_at",),
+        "attendance": ("mode", "updated_at"),
         "message_receipts": ("message__subject", "read_at"),
         "comments": ("project__public_id", "body", "created_at", "hidden_at"),
         "person_labels": ("term__taxonomy__key", "term__key", "created_at"),

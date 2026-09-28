@@ -257,6 +257,17 @@ export type ApplicationDecisionInputSchemaDecisionEnum =
 export type InputOfApplicationDecisionInputSchemaDecisionEnum =
   "approved" | "waitlisted" | "rejected";
 
+export type ApplyInput = { apply?: boolean; kind?: ApplyInputKindEnum };
+
+export type InputOfApplyInput = {
+  apply?: boolean;
+  kind?: InputOfApplyInputKindEnum;
+};
+
+export type ApplyInputKindEnum = "table" | "booth";
+
+export type InputOfApplyInputKindEnum = "table" | "booth";
+
 export type ApplyToEventInputSchema = { note?: string; code?: string };
 
 export type InputOfApplyToEventInputSchema = { note?: string; code?: string };
@@ -529,6 +540,15 @@ export type InputOfAttemptOutput = {
   status_code: number | null;
   error: string;
 };
+
+export type AttendanceInput = { mode: AttendanceInputModeEnum };
+
+export type InputOfAttendanceInput = { mode: InputOfAttendanceInputModeEnum };
+
+export type AttendanceInputModeEnum = "in_person" | "remote" | "not_attending";
+
+export type InputOfAttendanceInputModeEnum =
+  "in_person" | "remote" | "not_attending";
 
 export type AudienceKindSchema = {
   key: string;
@@ -2099,6 +2119,58 @@ export type InputOfLibraryTemplateOutput = {
   stages: string[];
 };
 
+export type LocationInput = {
+  kind: LocationKind;
+  name: string;
+  parent?: string | null;
+  capacity?: number | null;
+  x?: number | null;
+  y?: number | null;
+  notes?: string;
+  position?: number;
+};
+
+export type InputOfLocationInput = {
+  kind: InputOfLocationKind;
+  name: string;
+  parent?: string | null;
+  capacity?: number | null;
+  x?: number | null;
+  y?: number | null;
+  notes?: string;
+  position?: number;
+};
+
+export type LocationKind = "room" | "table" | "booth";
+
+export type InputOfLocationKind = "room" | "table" | "booth";
+
+export type LocationOutput = {
+  public_id: string;
+  kind: string;
+  name: string;
+  parent: string | null;
+  capacity: number | null;
+  x: number | null;
+  y: number | null;
+  notes: string;
+  position: number;
+  assigned: number;
+};
+
+export type InputOfLocationOutput = {
+  public_id: string;
+  kind: string;
+  name: string;
+  parent: string | null;
+  capacity: number | null;
+  x: number | null;
+  y: number | null;
+  notes: string;
+  position: number;
+  assigned: number;
+};
+
 export type LoginInputSchema = { username: string; password: string };
 
 export type InputOfLoginInputSchema = { username: string; password: string };
@@ -2704,6 +2776,28 @@ export type InputOfPatchedFulfillmentInput = {
   note?: string;
 };
 
+export type PatchedLocationPatchInput = {
+  kind?: LocationKind;
+  name?: string;
+  parent?: string | null;
+  capacity?: number | null;
+  x?: number | null;
+  y?: number | null;
+  notes?: string;
+  position?: number;
+};
+
+export type InputOfPatchedLocationPatchInput = {
+  kind?: InputOfLocationKind;
+  name?: string;
+  parent?: string | null;
+  capacity?: number | null;
+  x?: number | null;
+  y?: number | null;
+  notes?: string;
+  position?: number;
+};
+
 export type PatchedPage = {
   public_id?: string;
   theme?: ThemeEnum;
@@ -2883,6 +2977,10 @@ export type InputOfPermissionMatrixEntrySchema = {
   roles: string[];
   unrecognized: boolean;
 };
+
+export type PlacementInput = { location: string | null };
+
+export type InputOfPlacementInput = { location: string | null };
 
 export type PlatformEnum = "generic" | "discord" | "slack";
 
@@ -3696,6 +3794,10 @@ export type SavedSearchOutput = {
 };
 
 export type InputOfSavedSearchOutput = {};
+
+export type ScanInput = { token: string };
+
+export type InputOfScanInput = { token: string };
 
 export type SearchFilters = {
   q?: string;
@@ -4691,6 +4793,10 @@ export interface Operations {
     };
     response: SignedArchiveOutput;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_attendance: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: Record<string, unknown>;
+  };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_authz_dry_run: {
     request: {
       path: { event_public_id: string; workspace_public_id: string };
@@ -4914,6 +5020,13 @@ export interface Operations {
       body: InputOfCheckInInputSchema;
     };
     response: CheckIn;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_checkins_scan: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfScanInput;
+    };
+    response: Record<string, unknown>;
   };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_clone: {
     request: {
@@ -5245,6 +5358,45 @@ export interface Operations {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: JudgeWorkloadRowSchema[];
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_locations: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: LocationOutput[];
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_locations: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfLocationInput;
+    };
+    response: LocationOutput;
+  };
+  patch_api_v1_workspaces_workspace_public_id_events_event_public_id_locations_location_public_id: {
+    request: {
+      path: {
+        event_public_id: string;
+        location_public_id: string;
+        workspace_public_id: string;
+      };
+      body?: InputOfPatchedLocationPatchInput;
+    };
+    response: LocationOutput;
+  };
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_locations_location_public_id: {
+    request: {
+      path: {
+        event_public_id: string;
+        location_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: null;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_locations_auto_assign: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body?: InputOfApplyInput;
+    };
+    response: Record<string, unknown>;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_marketplace_matches: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: TeamOpeningSchema[];
@@ -5311,6 +5463,25 @@ export interface Operations {
     };
     response: EventApplication;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_attendance: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: Record<string, unknown>;
+  };
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_my_attendance: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfAttendanceInput;
+    };
+    response: Record<string, unknown>;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_pass: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: Record<string, unknown>;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_pass_qr: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: string;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_team: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: MyTeamResponse;
@@ -5353,6 +5524,10 @@ export interface Operations {
       body: InputOfTransferCaptainInput;
     };
     response: Team;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_onsite_summary: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: Record<string, unknown>;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_analytics: {
     request: {
@@ -5563,6 +5738,10 @@ export interface Operations {
       };
     };
     response: SubjectExportOutput;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_project_locations: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: Record<string, unknown>;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -5814,6 +5993,17 @@ export interface Operations {
       body: InputOfFormAnswersInputSchema;
     };
     response: FormResponseSchema;
+  };
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_location: {
+    request: {
+      path: {
+        event_public_id: string;
+        project_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfPlacementInput;
+    };
+    response: Record<string, unknown>;
   };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_members: {
     request: {
@@ -7532,6 +7722,14 @@ export const operations = {
       request_body: false,
       response_kind: "json",
     },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_attendance: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/attendance/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_authz_dry_run:
     {
       method: "POST",
@@ -7813,6 +8011,15 @@ export const operations = {
     request_body: true,
     response_kind: "json",
   },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_checkins_scan:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/checkins/scan/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_clone: {
     method: "POST",
     path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/clone/",
@@ -8255,6 +8462,57 @@ export const operations = {
       request_body: false,
       response_kind: "json",
     },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_locations: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/locations/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_locations: {
+    method: "POST",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/locations/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: true,
+    response_kind: "json",
+  },
+  patch_api_v1_workspaces_workspace_public_id_events_event_public_id_locations_location_public_id:
+    {
+      method: "PATCH",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/locations/{location_public_id}/",
+      path_params: [
+        "event_public_id",
+        "location_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_locations_location_public_id:
+    {
+      method: "DELETE",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/locations/{location_public_id}/",
+      path_params: [
+        "event_public_id",
+        "location_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_locations_auto_assign:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/locations/auto-assign/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_marketplace_matches:
     {
       method: "GET",
@@ -8362,6 +8620,40 @@ export const operations = {
       request_body: true,
       response_kind: "json",
     },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_attendance:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-attendance/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_my_attendance:
+    {
+      method: "PUT",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-attendance/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_pass: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-pass/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_pass_qr: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-pass/qr/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "text",
+  },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_team: {
     method: "GET",
     path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-team/",
@@ -8425,6 +8717,15 @@ export const operations = {
       path_params: ["event_public_id", "workspace_public_id"],
       query_params: [],
       request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_onsite_summary:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/onsite-summary/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
       response_kind: "json",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_analytics:
@@ -8709,6 +9010,15 @@ export const operations = {
       method: "POST",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/privacy/subjects/{user_public_id}/export/",
       path_params: ["event_public_id", "user_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_project_locations:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/project-locations/",
+      path_params: ["event_public_id", "workspace_public_id"],
       query_params: [],
       request_body: false,
       response_kind: "json",
@@ -9019,6 +9329,19 @@ export const operations = {
         "event_public_id",
         "project_public_id",
         "version_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_location:
+    {
+      method: "PUT",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/location/",
+      path_params: [
+        "event_public_id",
+        "project_public_id",
         "workspace_public_id",
       ],
       query_params: [],

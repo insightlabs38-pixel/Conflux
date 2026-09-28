@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "taxonomy",
     "eligibility",
     "deliberation",
+    "onsite",
 ]
 
 MIDDLEWARE = [
@@ -159,6 +160,7 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "EventStatus": "events.models.EventStatus",
         "TaxonomySubjectType": "taxonomy.models.SubjectType",
+        "LocationKind": "onsite.models.LocationKind",
         "EventQuestionStatus": "communications.models.EventQuestion.Status",
         "CandidateQueueStatus": ["pending", "drafted", "submitted"],
         "BulkOperationAction": ["assign", "advance", "extend", "move", "send"],

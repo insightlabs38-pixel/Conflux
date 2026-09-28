@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('projects', '0004_mentornote'),
+        ("projects", "0004_mentornote"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='project',
-            name='gallery_blocked',
+            model_name="project",
+            name="gallery_blocked",
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
-            model_name='project',
-            name='gallery_visible',
+            model_name="project",
+            name="gallery_visible",
             field=models.BooleanField(default=True),
         ),
     ]

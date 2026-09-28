@@ -225,3 +225,38 @@
     padding: var(--space-4) var(--space-3);
   }
 }
+
+/* Form polish for feature markup that predates the design system (H03): visible
+   control boundaries, label/control spacing, and consistent unclassed buttons. */
+.cx-shell__main
+  :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface-raised);
+  color: inherit;
+}
+.cx-shell__main
+  label:has(
+    > :is(input:not([type="checkbox"]):not([type="radio"]), select, textarea)
+  ) {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0 var(--space-3) var(--space-3) 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+.cx-shell__main button:not([class]) {
+  font-weight: 600;
+  padding: var(--space-2) var(--space-4);
+  min-height: 2.5rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  cursor: pointer;
+}
+.cx-shell__main button:not([class]):hover:not(:disabled) {
+  background: var(--color-surface);
+}

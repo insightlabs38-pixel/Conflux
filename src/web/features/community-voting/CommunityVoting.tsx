@@ -87,6 +87,14 @@ export function CommunityVoting({ eventId }: { eventId: string }) {
           setStatusState("error");
         }
       });
+    return () => {
+      active = false;
+    };
+  }, [base, retry]);
+
+  useEffect(() => {
+    if (!status) return;
+    let active = true;
     fetch(base + "/results/", { credentials: "include" })
       .then(async (response) => {
         if (response.status === 403 || response.status === 404) return null;
@@ -105,7 +113,7 @@ export function CommunityVoting({ eventId }: { eventId: string }) {
     return () => {
       active = false;
     };
-  }, [base, retry]);
+  }, [base, status, retry]);
 
   useEffect(() => {
     if (!status) return;

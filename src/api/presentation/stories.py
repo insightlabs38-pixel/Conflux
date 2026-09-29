@@ -14,6 +14,7 @@ from django.views.decorators.http import require_safe
 from .models import Page, PublicationSurface
 from .public import get_public_event, public_projects
 from .publication import publication_visible
+from .showcase import prepare_showcase
 from .technical import render_technical_description
 
 
@@ -21,7 +22,7 @@ def visible_awards(event):
     if not publication_visible(event, PublicationSurface.WINNERS):
         return Award.objects.none()
     winners = AwardWinner.objects.filter(project__in=public_projects(event)).select_related(
-        "project", "project__track"
+        "project", "project__track", "project__team"
     )
     return (
         Award.objects.filter(event=event, published_at__isnull=False)
@@ -65,13 +66,17 @@ def results(request, event_public_id):
     paginator = Paginator(visible_awards(event), 50)
     if number > paginator.num_pages:
         raise Http404("Results page does not exist.")
+    awards_page = paginator.page(number)
+    prepare_showcase(
+        [winner.project for award in awards_page for winner in award.public_winners], event
+    )
     return render(
         request,
         "presentation/results.html",
         {
             "event": event,
             "theme": page.theme if page else "default",
-            "awards_page": paginator.page(number),
+            "awards_page": awards_page,
         },
     )
 
@@ -81,6 +86,7 @@ def results(request, event_public_id):
 def award_story(request, event_public_id, award_public_id):
     event = get_public_event(event_public_id)
     award = get_object_or_404(visible_awards(event), public_id=award_public_id)
+    prepare_showcase([winner.project for winner in award.public_winners], event)
     context = _context(
         request,
         event,
@@ -98,6 +104,7 @@ def award_story(request, event_public_id, award_public_id):
 def project_story(request, event_public_id, project_public_id):
     event = get_public_event(event_public_id)
     project = get_object_or_404(public_projects(event), public_id=project_public_id)
+    prepare_showcase([project], event)
     awards = visible_awards(event).filter(winners__project=project).distinct()
     if not awards.exists():
         raise Http404("No published awards for this project.")

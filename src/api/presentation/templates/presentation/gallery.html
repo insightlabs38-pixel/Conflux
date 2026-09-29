@@ -2,7 +2,9 @@
 {% load i18n %}
 {% block title %}{% if finalists %}{% trans "Finalists" %}{% else %}{% trans "Gallery" %}{% endif %} &middot; {{ event.name }}{% endblock %}
 {% block content %}
+<header class="cx-showcase-header"><p class="cx-event-kicker">{{ event.name }}</p>
 <h1>{% if finalists %}{% trans "Finalists" %}{% else %}{% trans "Project gallery" %}{% endif %}</h1>
+<p>{% trans "Explore what the teams built, meet the people, and discover the evidence behind each submission." %}</p></header>
 {% if not finalists %}
 <form class="cx-search-form" method="get" role="search" aria-label="Search projects">
   <label>
@@ -34,15 +36,12 @@
   <button class="cx-button cx-button--primary" type="submit">{% trans "Search" %}</button>
 </form>
 {% endif %}
+<div class="cx-gallery-state" role="status">{% if finalists %}{{ projects|length }} {% trans "finalist projects" %}{% else %}{{ total }} {% trans "projects" %} · {% trans "Name A–Z" %}{% endif %}
+{% if q or selected_stage or selected_track %}<span>{% trans "Filters active" %}{% if q %}: “{{ q }}”{% endif %}</span><a href="{% url 'site-gallery' event.public_id %}">{% trans "Clear filters" %}</a>{% endif %}</div>
 {% if projects %}
   <ul class="cx-grid">
     {% for project in projects %}
-      <li class="cx-card">
-        <h2 class="cx-card__title"><a href="{% url 'site-project' event.public_id project.public_id %}">{{ project.name }}</a></h2>
-        {% if project.description %}<p>{{ project.description|truncatewords:24 }}</p>{% endif %}
-        {% if project.track %}<p><span class="cx-badge cx-badge--info">{{ project.track.name }}</span></p>{% endif %}
-        {% if project.team %}<p>{{ project.team.name }}</p>{% endif %}
-      </li>
+      <li>{% include "presentation/project_card.html" with heading="h2" %}</li>
     {% endfor %}
   </ul>
   {% if page_obj.paginator.num_pages > 1 %}
@@ -57,6 +56,6 @@
     </nav>
   {% endif %}
 {% else %}
-  <p>{% trans "No projects match yet." %}</p>
+  <div class="cx-empty-state"><h2>{% trans "No projects match yet." %}</h2><p>{% trans "Try another project name or clear the filters." %}</p><a class="cx-button cx-button--secondary" href="{% url 'site-gallery' event.public_id %}">{% trans "Browse all projects" %}</a></div>
 {% endif %}
 {% endblock %}

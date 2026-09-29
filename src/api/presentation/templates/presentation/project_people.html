@@ -1,0 +1,7 @@
+{% load i18n %}
+<section class="cx-project-people" aria-label="{% trans 'Project team' %}">
+  <h2>{% trans "The team" %}</h2>
+  {% if project.team %}<p class="cx-project-team-name">{{ project.team.name }}</p>{% endif %}
+  {% if project.showcase.people %}<ul class="cx-grid">{% for person in project.showcase.people %}<li class="cx-person"><span class="cx-avatar" aria-hidden="true">{{ person.initials }}{% if person.avatar_url %}<img src="{{ person.avatar_url }}" alt="" loading="lazy">{% endif %}</span><div><h3><a href="{{ person.profile_url }}">{{ person.display_name }}</a></h3>{% if person.bio %}<p>{{ person.bio }}</p>{% endif %}</div></li>{% endfor %}</ul>{% endif %}
+  {% if project.showcase.private_people %}<p class="cx-metadata">{% trans "Some team members have not shared a public profile." %}</p>{% endif %}
+</section>

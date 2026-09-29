@@ -395,3 +395,263 @@
   font: inherit;
   padding: var(--space-2);
 }
+
+/* Showcase hierarchy: browsing, storytelling and technical evidence have
+   deliberately different densities, with the same event-derived tokens. */
+.cx-showcase-header {
+  max-width: 48rem;
+  margin: var(--space-6) 0 var(--space-8);
+}
+.cx-showcase-header h1,
+.cx-project-header h1 {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: var(--line-height-tight);
+  margin: var(--space-2) 0 var(--space-4);
+  overflow-wrap: anywhere;
+}
+.cx-showcase-header > p:last-child,
+.cx-project-lede {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+}
+.cx-search-form {
+  align-items: end;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-subtle);
+}
+.cx-search-form label {
+  display: grid;
+  gap: var(--space-2);
+  flex: 1 1 10rem;
+  min-width: 0;
+  font-weight: var(--font-weight-medium);
+}
+.cx-search-form input,
+.cx-search-form select {
+  width: 100%;
+  min-width: 0;
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  min-height: var(--control-height);
+}
+.cx-gallery-state {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: space-between;
+  margin: var(--space-4) 0;
+  color: var(--color-text-secondary);
+}
+.cx-project-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+.cx-project-card:focus-within,
+.cx-project-card:hover {
+  border-color: var(--color-accent);
+}
+.cx-project-card__cover,
+.cx-project-cover {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  overflow: hidden;
+  font-size: clamp(3rem, 6vw, 5rem);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.06em;
+  border-bottom: 1px solid var(--color-border);
+}
+.cx-project-card__cover img,
+.cx-project-cover img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cx-project-card__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  min-width: 0;
+}
+.cx-project-card h2,
+.cx-project-card h3,
+.cx-project-card p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.cx-project-card h2,
+.cx-project-card h3 {
+  font-size: var(--font-size-lg);
+}
+.cx-project-card h2 a,
+.cx-project-card h3 a {
+  color: var(--color-text);
+  text-decoration: none;
+}
+.cx-project-card h2 a:hover,
+.cx-project-card h3 a:hover {
+  text-decoration: underline;
+}
+.cx-project-card__summary {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--color-text-secondary);
+}
+.cx-project-card__metadata,
+.cx-project-card__people,
+.cx-project-actions,
+.cx-breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.cx-project-card__metadata,
+.cx-project-card__people {
+  font-size: var(--font-size-sm);
+}
+.cx-project-card__people {
+  margin-top: auto !important;
+}
+.cx-project-card__people .cx-avatar {
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: var(--font-size-xs);
+}
+.cx-project-card__award {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-accent);
+}
+.cx-event-site[data-project-card="compact"] .cx-project-card__cover {
+  aspect-ratio: 5 / 1;
+  font-size: var(--font-size-xl);
+}
+.cx-project-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: var(--space-8);
+  align-items: center;
+  padding: var(--space-8) 0;
+}
+.cx-project-actions {
+  margin-top: var(--space-5);
+}
+.cx-project-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
+  gap: var(--space-12);
+}
+.cx-project-story > section {
+  padding: var(--space-6) 0;
+  border-top: 1px solid var(--color-border);
+}
+.cx-project-evidence {
+  background: var(--color-surface-subtle);
+  padding: var(--space-5);
+  align-self: start;
+  border: 1px solid var(--color-border);
+}
+.cx-project-evidence section + section {
+  border-top: 1px solid var(--color-border);
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+}
+.cx-project-evidence h2 {
+  font-size: var(--font-size-lg);
+}
+.cx-code-value {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
+  margin: var(--space-2) 0 var(--space-4);
+}
+.cx-project-media figure {
+  margin: var(--space-6) 0;
+}
+.cx-project-media img,
+.cx-project-media video {
+  display: block;
+  width: 100%;
+  max-height: 32rem;
+  object-fit: contain;
+  background: var(--color-surface);
+}
+.cx-project-media figcaption {
+  padding-top: var(--space-2);
+  color: var(--color-text-secondary);
+}
+.cx-project-awards {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-block: 1px solid var(--color-border);
+}
+.cx-project-awards h2 {
+  font-size: var(--font-size-md);
+  margin: 0;
+}
+.cx-project-awards ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  margin: 0;
+}
+.cx-results {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: var(--space-10);
+}
+.cx-award-section {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) minmax(0, 2fr);
+  gap: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 2px solid var(--color-border-strong);
+}
+.cx-award-section h2 {
+  font-size: var(--font-size-xl);
+  overflow-wrap: anywhere;
+}
+.cx-award-section header > p {
+  color: var(--color-text-secondary);
+}
+.cx-award-winner {
+  padding: var(--space-6);
+  background: var(--color-surface-subtle);
+  border-left: 3px solid var(--color-accent);
+}
+@media (max-width: 48rem) {
+  .cx-project-header,
+  .cx-project-layout,
+  .cx-award-section {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+  .cx-project-header {
+    padding-top: var(--space-5);
+  }
+  .cx-project-evidence {
+    padding: var(--space-4);
+  }
+  .cx-search-form button {
+    flex: 1 1 100%;
+  }
+}

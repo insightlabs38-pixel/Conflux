@@ -1976,7 +1976,7 @@ batches:
   task_ids:
   - UIV2-B05-01
   - UIV2-B05-02
-  status: BLOCKED
+  status: DONE
   completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
     receipt and commit recorded before advancing.
 - id: UIV2-B06
@@ -1993,7 +1993,7 @@ batches:
   task_ids:
   - UIV2-B06-01
   - UIV2-B06-02
-  status: BLOCKED
+  status: IN_PROGRESS
   completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
     receipt and commit recorded before advancing.
 - id: UIV2-B07

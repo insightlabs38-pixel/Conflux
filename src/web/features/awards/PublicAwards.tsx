@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Card } from "../../components/Card";
+import { ButtonLink } from "../../components/Foundation";
 import { ErrorState } from "../../components/ErrorState";
 
 type Award = {
@@ -48,17 +48,29 @@ export function PublicAwards({ eventId }: { eventId: string }) {
   return (
     <section aria-label="Awards">
       <h2>Awards</h2>
-      <ul>
+      <ul className="cx-results">
         {awards.map((award) => (
           <li key={award.public_id}>
-            <Card title={award.name}>
-              {award.description && <p>{award.description}</p>}
-              <ul>
+            <article className="cx-award-section">
+              <header>
+                <p className="cx-event-kicker">Award</p>
+                <h3>{award.name}</h3>
+                {award.description && <p>{award.description}</p>}
+              </header>
+              <ul className="cx-grid">
                 {award.winners.map((winner) => (
-                  <li key={winner.project}>{winner.project_name}</li>
+                  <li key={winner.project} className="cx-award-winner">
+                    <h4>{winner.project_name}</h4>
+                    <ButtonLink
+                      href={`/e/${eventId}/results/projects/${winner.project}/`}
+                      variant="secondary"
+                    >
+                      Project highlight
+                    </ButtonLink>
+                  </li>
                 ))}
               </ul>
-            </Card>
+            </article>
           </li>
         ))}
       </ul>

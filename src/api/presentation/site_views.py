@@ -18,6 +18,7 @@ from .public import (
     public_projects,
 )
 from .records import RecordVerificationError, verify_record
+from .showcase import prepare_showcase
 from .technical import render_technical_description
 
 
@@ -55,7 +56,9 @@ def _blocks_with_live_data(event, page):
         elif block.kind == PageBlockKind.SCHEDULE:
             block.live = list(event.stages.order_by("position"))
         elif block.kind == PageBlockKind.GALLERY:
-            block.live = list(public_projects(event)[: block.config.get("limit", 6)])
+            block.live = prepare_showcase(
+                public_projects(event)[: block.config.get("limit", 6)], event
+            )
         elif block.kind == PageBlockKind.RESULTS:
             block.live = published_awards_for_public_display(event)
         elif block.kind == PageBlockKind.ANNOUNCEMENTS:
@@ -103,7 +106,7 @@ def gallery(request, event_public_id):
         {
             "event": event,
             "theme": page.theme if page else "default",
-            "projects": page_obj.object_list,
+            "projects": prepare_showcase(page_obj.object_list, event),
             "page_obj": page_obj,
             "total": paginator.count,
             "page_query": urlencode(preserved),
@@ -127,7 +130,7 @@ def finalists(request, event_public_id):
         {
             "event": event,
             "theme": page.theme if page else "default",
-            "projects": finalist_projects(event),
+            "projects": prepare_showcase(finalist_projects(event), event),
             "finalists": True,
         },
     )
@@ -136,6 +139,7 @@ def finalists(request, event_public_id):
 def project_detail(request, event_public_id, project_public_id):
     event = get_public_event(event_public_id)
     project = get_object_or_404(public_projects(event), public_id=project_public_id)
+    prepare_showcase([project], event)
     page = Page.objects.filter(event=event).first()
     return render(
         request,

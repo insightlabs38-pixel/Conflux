@@ -3,32 +3,20 @@
 {% block title %}{{ project.name }} &middot; {{ event.name }}{% endblock %}
 {% block content %}
 <article aria-label="{{ project.name }} project page">
-  <p><a href="{% url 'site-gallery' event.public_id %}">&larr; {% trans "Back to gallery" %}</a></p>
-  <h1>{{ project.name }}</h1>
-  {% if project.track %}<p><span class="cx-badge cx-badge--info">{{ project.track.name }}</span></p>{% endif %}
-  {% if project.team %}<p>{{ project.team.name }}</p>{% endif %}
-  {% if project.description %}<div class="cx-technical-description">{{ description_html|safe }}</div>{% endif %}
-
-  <section aria-label="Artifacts">
-    <h2>{% trans "Artifacts" %}</h2>
-    {% if artifacts %}
-      <ul class="cx-artifact-list">
-        {% for artifact in artifacts %}
-          <li>{% if artifact.url %}<a href="{{ artifact.url }}">{{ artifact.title }}</a>{% else %}{{ artifact.title }}{% endif %} <span class="cx-badge cx-badge--neutral">{{ artifact.kind }}</span></li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>{% trans "No public artifacts." %}</p>
-    {% endif %}
-  </section>
-
-  <section aria-label="Submissions">
-    <h2>{% trans "Submissions" %}</h2>
-    <ul>
-      {% for submission in submissions %}
-        <li>{{ submission.stage.name }} &mdash; {% blocktrans with finalized_at=submission.current_version.finalized_at receipt=submission.current_version.public_id %}finalized {{ finalized_at }} (receipt {{ receipt }}){% endblocktrans %}</li>
-      {% endfor %}
-    </ul>
-  </section>
+  <nav class="cx-breadcrumbs" aria-label="{% trans 'Breadcrumbs' %}"><a href="{% url 'site-event' event.public_id %}">{{ event.name }}</a><span aria-hidden="true">/</span><a href="{% url 'site-gallery' event.public_id %}">{% trans "Back to gallery" %}</a></nav>
+  <header class="cx-project-header"><div><p class="cx-event-kicker">{% if project.track %}{{ project.track.name }} · {% endif %}{% trans "Submitted project" %}</p><h1>{{ project.name }}</h1>{% if project.showcase.summary %}<p class="cx-project-lede">{{ project.showcase.summary|truncatewords:40 }}</p>{% endif %}
+    {% if project.team %}<p>{{ project.team.name }}</p>{% endif %}
+    {% if project.showcase.tags %}<ul class="cx-tags" aria-label="{% trans 'Project tags' %}">{% for tag in project.showcase.tags %}<li><span class="cx-badge cx-badge--neutral">{{ tag }}</span></li>{% endfor %}</ul>{% endif %}
+    <div class="cx-project-actions">{% for artifact in project.showcase.artifacts %}{% if artifact.kind == "repository" or artifact.kind == "live_url" or artifact.kind == "external_video" %}<a class="cx-button{% if artifact.kind == 'live_url' %} cx-button--primary{% else %} cx-button--secondary{% endif %}" href="{{ artifact.url }}" rel="noopener noreferrer" target="_blank">{{ artifact.title }}</a>{% endif %}{% endfor %}</div>
+  </div><div class="cx-project-cover" aria-hidden="true"><span>{{ project.showcase.initials }}</span>{% if project.showcase.cover %}<img src="{{ project.showcase.cover.url }}" alt="" decoding="async">{% endif %}</div></header>
+  {% if project.showcase.awards %}<section class="cx-project-awards" aria-label="{% trans 'Published awards' %}"><h2>{% trans "Recognition" %}</h2><ul>{% for award in project.showcase.awards %}<li><a href="{% url 'site-award-story' event.public_id award.public_id %}">{{ award.name }}</a></li>{% endfor %}</ul></section>{% endif %}
+  <div class="cx-project-layout"><div class="cx-project-story">
+    <section aria-label="{% trans 'Project story' %}"><h2>{% trans "About the project" %}</h2>{% if project.description %}<div class="cx-technical-description">{{ description_html|safe }}</div>{% else %}<p>{% trans "The team has not added a project story yet." %}</p>{% endif %}</section>
+    {% if project.showcase.media %}<section class="cx-project-media" aria-label="{% trans 'Project media' %}"><h2>{% trans "See it in action" %}</h2>{% for artifact in project.showcase.media %}<figure>{% if artifact.preview == "image" %}<img src="{{ artifact.url }}" alt="{{ artifact.title }}" loading="lazy" decoding="async">{% elif artifact.preview == "video" %}<video controls preload="metadata"><source src="{{ artifact.url }}" type="{{ artifact.content_type }}"><a href="{{ artifact.url }}">{{ artifact.title }}</a></video>{% endif %}<figcaption>{{ artifact.title }} · <a href="{{ artifact.url }}">{% trans "Download" %}</a></figcaption></figure>{% endfor %}</section>{% endif %}
+    {% include "presentation/project_people.html" %}
+  </div><aside class="cx-project-evidence" aria-label="{% trans 'Submission and artifacts' %}">
+    <section aria-label="Artifacts"><h2>{% trans "Artifacts" %}</h2>{% if project.showcase.artifacts %}<ul class="cx-artifact-list">{% for artifact in project.showcase.artifacts %}<li>{% if artifact.url %}<a href="{{ artifact.url }}" rel="noopener noreferrer">{{ artifact.title }}</a>{% else %}{{ artifact.title }}{% endif %}<p class="cx-metadata">{{ artifact.kind }}{% if artifact.byte_size %} · {{ artifact.byte_size|filesizeformat }}{% endif %} · {% trans "Public / ready" %}</p>{% if artifact.sha256 %}<details><summary>{% trans "Artifact evidence" %}</summary><dl><dt>SHA-256</dt><dd class="cx-code-value">{{ artifact.sha256 }}</dd><dt>{% trans "Reference" %}</dt><dd class="cx-code-value">{{ artifact.public_id }}</dd></dl></details>{% endif %}</li>{% endfor %}</ul>{% else %}<p>{% trans "No public artifacts." %}</p>{% endif %}</section>
+    <section aria-label="Submissions"><h2>{% trans "Submission evidence" %}</h2><p>{% trans "Finalized versions record what was submitted for each stage." %}</p>{% for submission in submissions %}<article class="cx-submission-proof"><h3>{{ submission.stage.name }}</h3><p><span class="cx-badge cx-badge--success">{% trans "Finalized" %}</span> · v{{ submission.current_version.number }}</p><p>{{ submission.current_version.finalized_at }}</p><details><summary>{% trans "Version and integrity reference" %}</summary><dl><dt>{% trans "Receipt" %}</dt><dd class="cx-code-value">{{ submission.current_version.public_id }}</dd><dt>{% trans "Digest" %}</dt><dd class="cx-code-value">{{ submission.current_version.digest }}</dd></dl></details></article>{% empty %}<p>{% trans "No finalized stage evidence." %}</p>{% endfor %}</section>
+  </aside></div>
 </article>
 {% endblock %}

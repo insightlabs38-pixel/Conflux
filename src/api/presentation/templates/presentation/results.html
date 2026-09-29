@@ -2,22 +2,13 @@
 {% load i18n %}
 {% block title %}{% trans "Results" %} &middot; {{ event.name }}{% endblock %}
 {% block content %}
-<section aria-label="Published results" class="cx-block">
-  <h1>{% trans "Published results" %}</h1>
-  {% if awards_page %}
-    <ul class="cx-grid">
-      {% for award in awards_page %}
-        <li class="cx-card">
-          <h2 class="cx-card__title"><a href="{% url 'site-award-story' event.public_id award.public_id %}">{{ award.name }}</a></h2>
-          <ul>
-            {% for winner in award.public_winners %}
-              <li><a href="{% url 'site-project-story' event.public_id winner.project.public_id %}">{{ winner.project.name }}</a></li>
-            {% empty %}<li>{% trans "No public project highlights available." %}</li>{% endfor %}
-          </ul>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}<p>{% trans "Results will be announced after judging." %}</p>{% endif %}
+<header class="cx-showcase-header"><p class="cx-event-kicker">{{ event.name }}</p><h1>{% trans "Published results" %}</h1><p>{% trans "Recognizing the projects and people behind this event." %}</p></header>
+<section aria-label="Published results" class="cx-results">
+{% for award in awards_page %}
+  <article class="cx-award-section"><header><p class="cx-event-kicker">{% trans "Award" %}</p><h2><a href="{% url 'site-award-story' event.public_id award.public_id %}">{{ award.name }}</a></h2>{% if award.description %}<p>{{ award.description|linebreaksbr }}</p>{% endif %}</header>
+    <ul class="cx-grid">{% for winner in award.public_winners %}<li>{% include "presentation/project_card.html" with project=winner.project heading="h3" story=True %}</li>{% empty %}<li>{% trans "No public project highlights available." %}</li>{% endfor %}</ul>
+  </article>
+{% empty %}<div class="cx-empty-state"><h2>{% trans "The results are on their way." %}</h2><p>{% trans "Results will be announced after judging." %}</p><a class="cx-button cx-button--secondary" href="{% url 'site-gallery' event.public_id %}">{% trans "Explore projects" %}</a></div>{% endfor %}
 </section>
 {% if awards_page.has_other_pages %}
 <nav aria-label="Results pages">

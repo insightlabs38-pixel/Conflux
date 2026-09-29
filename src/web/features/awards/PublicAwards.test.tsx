@@ -29,6 +29,9 @@ it("shows published winners without internal selection evidence", async () => {
   expect(fetchMock).toHaveBeenCalledWith("/api/v1/events/e1/awards/");
   expect(container.textContent).toContain("Best project");
   expect(container.textContent).toContain("Project One");
+  expect(container.querySelector("a")?.getAttribute("href")).toBe(
+    "/e/e1/results/projects/p1/",
+  );
   act(() => root.unmount());
   container.remove();
 });

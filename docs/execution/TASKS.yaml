@@ -11372,7 +11372,7 @@ tasks:
   batch: UIV2-B05
   phase: ui-v2
   title: 'Implement: Gallery, project detail, results/showcase'
-  status: READY
+  status: DONE
   batch_dependencies:
   - UIV2-B04
   task_dependencies:
@@ -11408,7 +11408,7 @@ tasks:
   batch: UIV2-B05
   phase: ui-v2
   title: 'Verify and checkpoint: Gallery, project detail, results/showcase'
-  status: BLOCKED
+  status: DONE
   batch_dependencies:
   - UIV2-B04
   task_dependencies:
@@ -11444,7 +11444,7 @@ tasks:
   batch: UIV2-B06
   phase: ui-v2
   title: 'Implement: Participant event/team/submission experience'
-  status: BLOCKED
+  status: ACTIVE
   batch_dependencies:
   - UIV2-B05
   task_dependencies:

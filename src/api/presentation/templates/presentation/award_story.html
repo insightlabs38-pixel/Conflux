@@ -3,18 +3,15 @@
 {% block title %}{{ award.name }} &middot; {{ event.name }}{% endblock %}
 {% block extra_head %}{% include "presentation/story_meta.html" %}{% endblock %}
 {% block content %}
-<article aria-label="Award highlight">
+<article class="cx-award-story" aria-label="Award highlight">
   <p><a href="{% url 'site-results' event.public_id %}">&larr; {% trans "Published results" %}</a></p>
-  <h1>{{ award.name }}</h1>
+  <header class="cx-showcase-header"><p class="cx-event-kicker">{{ event.name }} · {% trans "Award" %}</p><h1>{{ award.name }}</h1></header>
   {% if award.description %}<p>{{ award.description|linebreaksbr }}</p>{% endif %}
   <section class="cx-block" aria-label="Award winners">
     <h2>{% trans "Project highlights" %}</h2>
     <ul class="cx-grid">
       {% for winner in award.public_winners %}
-        <li class="cx-card">
-          <h3><a href="{% url 'site-project-story' event.public_id winner.project.public_id %}">{{ winner.project.name }}</a></h3>
-          {% if winner.project.track %}<p><span class="cx-badge cx-badge--info">{{ winner.project.track.name }}</span></p>{% endif %}
-        </li>
+        <li>{% include "presentation/project_card.html" with project=winner.project heading="h3" story=True %}</li>
       {% empty %}<li>{% trans "No public project highlights available." %}</li>{% endfor %}
     </ul>
   </section>

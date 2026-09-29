@@ -16,3 +16,7 @@ tests/e2e/artifacts
 src/api/onsite/templates
 
 artifacts/
+
+# Authoritative queue preserves imported completed history and its YAML schema style.
+# Validate this queue with its schemas; avoid bulk reformatting historical records.
+docs/execution/*.yaml

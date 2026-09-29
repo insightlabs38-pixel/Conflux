@@ -1,0 +1,15 @@
+{% load i18n %}
+<article class="cx-project-card">
+  <div class="cx-project-card__cover" aria-hidden="true">
+    <span>{{ project.showcase.initials }}</span>
+    {% if project.showcase.cover %}<img src="{{ project.showcase.cover.url }}" alt="" loading="lazy" decoding="async">{% endif %}
+  </div>
+  <div class="cx-project-card__body">
+    {% if project.showcase.awards %}<p class="cx-project-card__award">{% for award in project.showcase.awards %}{{ award.name }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>{% endif %}
+    {% if heading == "h3" %}<h3 class="cx-card__title"><a href="{% if story %}{% url 'site-project-story' event.public_id project.public_id %}{% else %}{% url 'site-project' event.public_id project.public_id %}{% endif %}">{{ project.name }}</a></h3>{% else %}<h2 class="cx-card__title"><a href="{% if story %}{% url 'site-project-story' event.public_id project.public_id %}{% else %}{% url 'site-project' event.public_id project.public_id %}{% endif %}">{{ project.name }}</a></h2>{% endif %}
+    {% if project.showcase.summary %}<p class="cx-project-card__summary">{{ project.showcase.summary|truncatewords:24 }}</p>{% endif %}
+    <div class="cx-project-card__metadata">{% if project.track %}<span class="cx-badge cx-badge--info">{{ project.track.name }}</span>{% endif %}{% if project.team %}<span>{{ project.team.name }}</span>{% endif %}</div>
+    {% if project.showcase.tags %}<ul class="cx-tags" aria-label="{% trans 'Project tags' %}">{% for tag in project.showcase.tags %}<li><span class="cx-badge cx-badge--neutral">{{ tag }}</span></li>{% endfor %}</ul>{% endif %}
+    {% if project.showcase.people %}<p class="cx-project-card__people">{% for person in project.showcase.people %}<span class="cx-avatar" aria-hidden="true">{{ person.initials }}{% if person.avatar_url %}<img src="{{ person.avatar_url }}" alt="" loading="lazy">{% endif %}</span><span>{{ person.display_name }}</span>{% if not forloop.last %}<span aria-hidden="true">·</span>{% endif %}{% endfor %}</p>{% endif %}
+  </div>
+</article>

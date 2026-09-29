@@ -2,31 +2,51 @@
 {% load i18n tz %}
 {% block title %}{% trans "Agenda" %} &middot; {{ event.name }}{% endblock %}
 {% block content %}
-<h1>{% trans "Agenda" %}</h1>
-<p><a href="{% url 'site-agenda-ics' event.public_id %}">{% trans "Subscribe (iCalendar)" %}</a></p>
+<header class="cx-page-head">
+  <div>
+    <p class="cx-eyebrow">{{ event.name }}</p>
+    <h1>{% trans "Agenda" %}</h1>
+    <p class="cx-page-head__lead">{% trans "Times are shown in UTC." %}</p>
+  </div>
+  <p class="cx-print-hide"><a class="cx-button cx-button--secondary" href="{% url 'site-agenda-ics' event.public_id %}">{% trans "Subscribe (iCalendar)" %}</a></p>
+</header>
 {% if sessions %}
   {% timezone "UTC" %}
-  <ol class="cx-agenda">
-    {% for session in sessions %}
-      <li class="cx-card">
-        <h2 class="cx-card__title">{{ session.title }}</h2>
-        <p><time datetime="{{ session.starts_at|date:'c' }}">{{ session.starts_at|date:"D j M, H:i" }}</time>
-          &ndash; <time datetime="{{ session.ends_at|date:'c' }}">{{ session.ends_at|date:"H:i" }}</time> UTC
-          {% if session.location %}&middot; {{ session.location.name }}{% endif %}
-          {% if session.speakers %}&middot; {{ session.speakers }}{% endif %}</p>
-        {% if session.description %}<p>{{ session.description }}</p>{% endif %}
-        {% if session.embed %}
-          <iframe class="cx-embed" src="{{ session.embed }}" title="{{ session.title }}" loading="lazy"
-                  referrerpolicy="no-referrer" allowfullscreen
-                  sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
-        {% elif session.stream_url %}
-          <p><a href="{{ session.stream_url }}" rel="noopener noreferrer">{% trans "Watch stream" %}</a></p>
-        {% endif %}
-      </li>
-    {% endfor %}
-  </ol>
+  {% regroup sessions by starts_at.date as days %}
+  {% for day in days %}
+    <section class="cx-agenda-day" aria-labelledby="day-{{ forloop.counter }}">
+      <h2 id="day-{{ forloop.counter }}" class="cx-agenda-day__title">{{ day.grouper|date:"l, j F Y" }}</h2>
+      <ol class="cx-agenda">
+        {% for session in day.list %}
+          <li class="cx-agenda-session">
+            <p class="cx-agenda-session__time">
+              <time datetime="{{ session.starts_at|date:'c' }}">{{ session.starts_at|date:"H:i" }}</time>
+              <span aria-hidden="true">&ndash;</span><span class="cx-visually-hidden">{% trans "to" %}</span>
+              <time datetime="{{ session.ends_at|date:'c' }}">{{ session.ends_at|date:"H:i" }}</time>
+            </p>
+            <div class="cx-agenda-session__body">
+              <h3 class="cx-agenda-session__title">{{ session.title }}</h3>
+              <p class="cx-agenda-session__meta">
+                {% if session.location %}<span class="cx-chip">{{ session.location.name }}</span>{% endif %}
+                {% if session.track %}<span class="cx-chip">{{ session.track.name }}</span>{% endif %}
+                {% if session.speakers %}<span>{{ session.speakers }}</span>{% endif %}
+              </p>
+              {% if session.description %}<p>{{ session.description }}</p>{% endif %}
+              {% if session.embed %}
+                <iframe class="cx-embed" src="{{ session.embed }}" title="{{ session.title }}" loading="lazy"
+                        referrerpolicy="no-referrer" allowfullscreen
+                        sandbox="allow-scripts allow-same-origin allow-presentation"></iframe>
+              {% elif session.stream_url %}
+                <p><a class="cx-button cx-button--secondary" href="{{ session.stream_url }}" rel="noopener noreferrer">{% trans "Watch stream" %}</a></p>
+              {% endif %}
+            </div>
+          </li>
+        {% endfor %}
+      </ol>
+    </section>
+  {% endfor %}
   {% endtimezone %}
 {% else %}
-  <p>{% trans "No sessions have been scheduled yet." %}</p>
+  <p class="cx-empty-note">{% trans "No sessions have been scheduled yet." %}</p>
 {% endif %}
 {% endblock %}

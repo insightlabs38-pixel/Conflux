@@ -2066,9 +2066,13 @@ batches:
   - tests/integration/**
   - docs/verification/**
   - docs/ui-v2/**
+  - src/web/**
+  - src/api/onsite/templates/**
+  - scripts/e2e-fast
+  - Makefile
   task_ids:
   - UIV2-B10-01
   - UIV2-B10-02
-  status: IN_PROGRESS
+  status: DONE
   completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
     receipt and commit recorded before advancing.

@@ -263,21 +263,23 @@ function EvidencePanel({
                         ? `${stance.endorse} endorse · ${stance.object} object · ${stance.abstain} abstain`
                         : "–"}
                     </td>
-                    <td className="cx-flags">
-                      {row.project && close.has(row.project) && (
-                        <Badge tone="warning">Close call</Badge>
-                      )}
-                      {stance?.recommended && (
-                        <Badge tone="success">Recommended</Badge>
-                      )}
-                      {stance && !stance.recommended && (
-                        <Badge>Not recommended</Badge>
-                      )}
-                      {other.map((name) => (
-                        <Badge key={name} tone="warning">
-                          Also wins {name}
-                        </Badge>
-                      ))}
+                    <td>
+                      <div className="cx-flags">
+                        {row.project && close.has(row.project) && (
+                          <Badge tone="warning">Close call</Badge>
+                        )}
+                        {stance?.recommended && (
+                          <Badge tone="success">Recommended</Badge>
+                        )}
+                        {stance && !stance.recommended && (
+                          <Badge>Not recommended</Badge>
+                        )}
+                        {other.map((name) => (
+                          <Badge key={name} tone="warning">
+                            Also wins {name}
+                          </Badge>
+                        ))}
+                      </div>
                     </td>
                     {selectable && (
                       <td>

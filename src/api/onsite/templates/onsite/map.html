@@ -2,23 +2,33 @@
 {% load i18n %}
 {% block title %}{% trans "Expo map" %} &middot; {{ event.name }}{% endblock %}
 {% block content %}
-<h1>{% trans "Expo map" %}</h1>
-<p class="cx-print-hide"><button type="button" class="cx-button cx-button--secondary" onclick="window.print()">{% trans "Print" %}</button></p>
+<header class="cx-page-head">
+  <div>
+    <p class="cx-eyebrow">{{ event.name }}</p>
+    <h1>{% trans "Expo map" %}</h1>
+    <p class="cx-page-head__lead">{% trans "Find every table and booth, and the projects showing there." %}</p>
+  </div>
+  <p class="cx-print-hide"><button type="button" class="cx-button cx-button--secondary" onclick="window.print()">{% trans "Print" %}</button></p>
+</header>
 {% if places %}
-  <table class="cx-map">
-    <caption class="cx-visually-hidden">{% trans "Tables and booths with their projects" %}</caption>
-    <thead><tr><th scope="col">{% trans "Place" %}</th><th scope="col">{% trans "Room" %}</th><th scope="col">{% trans "Projects" %}</th></tr></thead>
-    <tbody>
-      {% for place in places %}
-        <tr>
-          <th scope="row">{{ place.location.get_kind_display }} {{ place.location.name }}</th>
-          <td>{{ place.location.parent.name|default:"" }}</td>
-          <td>{% for project in place.projects %}<a href="{% url 'site-project' event.public_id project.public_id %}">{{ project.name }}</a>{% if not forloop.last %}, {% endif %}{% empty %}&mdash;{% endfor %}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <ul class="cx-expo" aria-label="{% trans 'Tables and booths with their projects' %}">
+    {% for place in places %}
+      <li class="cx-expo__place">
+        {% if place.location.parent.name %}<p class="cx-expo__where"><span class="cx-chip">{{ place.location.parent.name }}</span></p>{% endif %}
+        <h2 class="cx-expo__name">{{ place.location.get_kind_display }} {{ place.location.name }}</h2>
+        {% if place.projects %}
+          <ul class="cx-expo__projects">
+            {% for project in place.projects %}
+              <li><a href="{% url 'site-project' event.public_id project.public_id %}">{{ project.name }}</a></li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="cx-expo__empty">{% trans "No project placed here yet." %}</p>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
 {% else %}
-  <p>{% trans "Tables and booths have not been published yet." %}</p>
+  <p class="cx-empty-note">{% trans "Tables and booths have not been published yet." %}</p>
 {% endif %}
 {% endblock %}

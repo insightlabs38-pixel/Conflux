@@ -329,6 +329,8 @@ function BallotForm({
     (criterion) => (scores[criterion.id] ?? "") !== "",
   ).length;
   const locked = !loaded || finalized || queued;
+  // A submitted ballot's draft is cleared server-side; do not show empty fields as if unscored.
+  const recordedOnly = finalized && loaded && scored === 0;
 
   return (
     <div className="cx-judge-scoring" id="judge-scoring" tabIndex={-1}>
@@ -346,10 +348,18 @@ function BallotForm({
         </p>
         {error && <p role="alert">{error}</p>}
         <form onSubmit={submit}>
-          <p className="cx-muted">
-            {scored} of {rubric.criteria.length} criteria scored
-          </p>
-          {rubric.criteria.map((criterion) => (
+          {!recordedOnly && (
+            <p className="cx-muted">
+              {scored} of {rubric.criteria.length} criteria scored
+            </p>
+          )}
+          {recordedOnly && (
+            <p className="cx-muted">
+              Your scores for this project are recorded and locked. Peer scores
+              are never shown.
+            </p>
+          )}
+          {(recordedOnly ? [] : rubric.criteria).map((criterion) => (
             <fieldset
               key={criterion.id}
               className="cx-criterion"
@@ -380,7 +390,7 @@ function BallotForm({
               </label>
             </fieldset>
           ))}
-          <label className="cx-judge-comment">
+          <label className="cx-judge-comment" hidden={recordedOnly}>
             Comment{" "}
             <textarea
               disabled={locked}

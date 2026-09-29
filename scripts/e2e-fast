@@ -2,12 +2,12 @@
 # Faster e2e: three file groups run concurrently against the same seeded stack.
 #   read-only  auth/navigation/axe checks that never change server state (4 workers)
 #   public     theme + public-site checks (serial: event-themes mutates the event brand)
-#   stateful   ordered participant/pvs/lifecycle chain (serial; order matters)
+#   stateful   ordered participant/pvs/lifecycle chain, then the final-states check (serial)
 # Run `./scripts/demo-reset` first. `make demo-e2e` remains the authoritative serial run.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 cfg=tests/e2e/playwright.config.ts
-logs=tests/e2e/artifacts
+logs=artifacts/e2e-fast
 mkdir -p "$logs"
 
 run() { # name workers files...
@@ -18,13 +18,17 @@ run() { # name workers files...
   echo $? >"$logs/fast-$name.status"
 }
 
-run read-only 4 workspace-shell roles signin extended-embed uiv2-surfaces &
+run read-only 4 workspace-shell roles signin extended-embed uiv2-surfaces uiv2-gate &
 run public 1 event-themes public showcase foundations &
-run stateful 1 participant-workflow profiles pvs uiv2-judge uiv2-organizer lifecycle scenes &
+(
+  run stateful 1 participant-workflow profiles pvs uiv2-judge uiv2-organizer lifecycle scenes
+  # Needs the finalized/published state that lifecycle creates.
+  run final 1 uiv2-final-states
+) &
 wait
 
 status=0
-for name in read-only public stateful; do
+for name in read-only public stateful final; do
   echo "== $name (exit $(cat "$logs/fast-$name.status")) =="
   grep -E "✘|[0-9]+ (passed|failed|skipped|flaky|did not run)" "$logs/fast-$name.log" || true
   [ "$(cat "$logs/fast-$name.status")" = 0 ] || status=1

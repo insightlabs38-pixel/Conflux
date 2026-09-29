@@ -118,7 +118,12 @@ export function JudgeAssignmentsPanel({ planBase }: { planBase: string }) {
       )}
       {problem && <p role="alert">{problem}</p>}
       {rows.data && rows.data.length === 0 && (
-        <EmptyState title="No projects are assigned to you for this plan." />
+        <EmptyState title="No projects are assigned to you for this plan.">
+          <p>
+            Nothing needs an accept or decline response. Projects you can score
+            appear in your review queue.
+          </p>
+        </EmptyState>
       )}
       {rows.data && rows.data.length > 0 && (
         <ul className="cx-assignments">

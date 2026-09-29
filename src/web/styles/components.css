@@ -20,6 +20,14 @@
 .cx-skip-link:focus {
   left: 0;
 }
+/* Beat generic shell link colours so the revealed link keeps AA contrast. */
+.cx-shell a.cx-skip-link,
+.cx-shell a.cx-skip-link:visited {
+  color: var(--color-accent-contrast);
+  background: var(--color-accent);
+  text-decoration: none;
+  font-weight: var(--font-weight-semibold);
+}
 
 .cx-visually-hidden {
   position: absolute;
@@ -2250,4 +2258,40 @@
 }
 .cx-api-sidebar input[type="search"] {
   width: 100%;
+}
+
+/* WCAG 2.4.11: keyboard focus must scroll clear of sticky bars (judge actions). */
+html {
+  scroll-padding-block: var(--space-4);
+}
+@media (max-width: 48rem) {
+  html {
+    scroll-padding-bottom: 10rem;
+  }
+}
+.cx-shell__main .cx-decision-table thead th {
+  white-space: normal;
+  vertical-align: bottom;
+}
+.cx-decision-table td,
+.cx-decision-table th {
+  padding-inline: var(--space-2);
+}
+.cx-decision-table {
+  min-width: 44rem;
+}
+.cx-shell__main .cx-decision-table thead th {
+  text-transform: none;
+  letter-spacing: 0;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+}
+.cx-decision-table td {
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+.cx-decision-table td:has(.cx-flags) {
+  white-space: normal;
 }

@@ -48,71 +48,73 @@ function stubDesk() {
     "fetch",
     vi.fn().mockImplementation(async (input: unknown) => {
       const url = String(input);
-      const body = url.endsWith("judge-events/")
-        ? [{ public_id: "e1", name: "First" }]
-        : url.endsWith("judge-calendar/")
-          ? { windows: [], assignments: [] }
-          : url.endsWith("/e1/stages/")
-            ? [{ public_id: "s1", name: "Final" }]
-            : url.endsWith("/s1/evaluation-plans/")
-              ? [{ public_id: "p1", name: "Review" }]
-              : url.endsWith("candidates/")
-                ? [
-                    { project: "a", name: "Alpha", status: "submitted" },
-                    { project: "b", name: "Bravo", status: "pending" },
-                    { project: "c", name: "Charlie", status: "drafted" },
-                  ]
-                : url.endsWith("publish-rubric/")
-                  ? {
-                      number: 1,
-                      criteria: [
-                        {
-                          id: "k",
-                          name: "Impact",
-                          weight: 3,
-                          min_score: 1,
-                          max_score: 10,
-                          anchors: { "10": "Outstanding" },
-                        },
-                      ],
-                    }
-                  : url.endsWith("my-assignments/")
-                    ? [
-                        {
-                          project: "a",
-                          name: "Alpha",
-                          status: "accepted",
-                          reason: "",
-                        },
-                        {
-                          project: "b",
-                          name: "Bravo",
-                          status: "declined",
-                          reason: "COI",
-                        },
-                        {
-                          project: "c",
-                          name: "Charlie",
-                          status: "pending",
-                          reason: "",
-                        },
-                      ]
-                    : url.includes("my-route/")
-                      ? {
-                          stops: [
-                            {
-                              project: "b",
-                              project_name: "Bravo",
-                              location_name: "Table 4",
-                              room: "Hall A",
-                            },
-                          ],
-                          total_distance: 0,
-                          baseline_distance: 0,
-                          unplaced: [],
-                          already_evaluated: 1,
-                        }
-                      : [];
+      const body = url.endsWith("/draft/")
+        ? null
+        : url.endsWith("judge-events/")
+          ? [{ public_id: "e1", name: "First" }]
+          : url.endsWith("judge-calendar/")
+            ? { windows: [], assignments: [] }
+            : url.endsWith("/e1/stages/")
+              ? [{ public_id: "s1", name: "Final" }]
+              : url.endsWith("/s1/evaluation-plans/")
+                ? [{ public_id: "p1", name: "Review" }]
+                : url.endsWith("candidates/")
+                  ? [
+                      { project: "a", name: "Alpha", status: "submitted" },
+                      { project: "b", name: "Bravo", status: "pending" },
+                      { project: "c", name: "Charlie", status: "drafted" },
+                    ]
+                  : url.endsWith("publish-rubric/")
+                    ? {
+                        number: 1,
+                        criteria: [
+                          {
+                            id: "k",
+                            name: "Impact",
+                            weight: 3,
+                            min_score: 1,
+                            max_score: 10,
+                            anchors: { "10": "Outstanding" },
+                          },
+                        ],
+                      }
+                    : url.endsWith("my-assignments/")
+                      ? [
+                          {
+                            project: "a",
+                            name: "Alpha",
+                            status: "accepted",
+                            reason: "",
+                          },
+                          {
+                            project: "b",
+                            name: "Bravo",
+                            status: "declined",
+                            reason: "COI",
+                          },
+                          {
+                            project: "c",
+                            name: "Charlie",
+                            status: "pending",
+                            reason: "",
+                          },
+                        ]
+                      : url.includes("my-route/")
+                        ? {
+                            stops: [
+                              {
+                                project: "b",
+                                project_name: "Bravo",
+                                location_name: "Table 4",
+                                room: "Hall A",
+                              },
+                            ],
+                            total_distance: 0,
+                            baseline_distance: 0,
+                            unplaced: [],
+                            already_evaluated: 1,
+                          }
+                        : [];
       return { ok: true, status: 200, json: async () => body };
     }),
   );
@@ -167,5 +169,19 @@ describe("judge desk", () => {
     await waitFor(
       () => container.textContent?.includes("Project 2 of 3") ?? false,
     );
+  });
+
+  it("shows a submitted ballot as recorded and locked, not as empty scores", async () => {
+    stubDesk();
+    await openPlan();
+    await act(async () => button("Alpha")!.click());
+    await waitFor(
+      () => container.textContent?.includes("recorded and locked") ?? false,
+    );
+    expect(
+      container.querySelector('#judge-scoring input[type="number"]'),
+    ).toBeNull();
+    expect(container.textContent).not.toContain("criteria scored");
+    expect(button("Submit ballot")).toBeUndefined();
   });
 });

@@ -65,7 +65,7 @@ export async function noHorizontalOverflow(page: Page) {
 
 export async function accessible(page: Page) {
   const { violations } = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
     .analyze();
   expect(
     violations.map(

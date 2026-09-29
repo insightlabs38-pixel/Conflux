@@ -1,4 +1,4 @@
-.PHONY: oidc-smoke demo-reset demo-e2e format format-check lint test build verify-fast verify openapi-check sdk-generate sdk-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance backup restore backup-restore-smoke
+.PHONY: oidc-smoke demo-reset demo-e2e e2e-fast format format-check lint test build verify-fast verify openapi-check sdk-generate sdk-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance backup restore backup-restore-smoke
 
 # Local checks use disposable keys; runtime deployments must supply their own.
 export DJANGO_SECRET_KEY ?= bootstrap-checks-only
@@ -121,6 +121,10 @@ demo-reset:
 # Regenerate demo screenshots and clips into tests/e2e/artifacts/ (needs a running, demo-reset stack).
 demo-e2e:
 	npx playwright test -c tests/e2e/playwright.config.ts
+
+# Same suite, ~2x faster: concurrent file groups (see scripts/e2e-fast). demo-reset first.
+e2e-fast:
+	./scripts/e2e-fast
 
 # Real-provider OIDC interoperability smoke (Dex in Docker; see docs/operations/SSO.md).
 oidc-smoke:

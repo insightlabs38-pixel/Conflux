@@ -37,6 +37,11 @@ type ResponseSummary = {
   declined: { judge: string; name: string; reason: string }[];
 };
 type Named = { public_id: string; name: string };
+type Simulation = {
+  pending_removed: number;
+  assignments_added: number;
+  coverage_gaps: { project: string; missing: number }[];
+};
 
 function saving(route: {
   total_distance: number;
@@ -233,6 +238,51 @@ export function OrganizerJudgingLogisticsPanel({
   const responses = useLoad<ResponseSummary>(
     planBase ? `${planBase}assignment-responses/` : null,
   );
+  const [dropped, setDropped] = useState<string[]>([]);
+  const [simulation, setSimulation] = useState<Simulation | null>(null);
+  const [confirmed, setConfirmed] = useState(false);
+  const [rebalanceProblem, setRebalanceProblem] = useState("");
+  const [rebalanceStatus, setRebalanceStatus] = useState("");
+
+  function toggleDropped(judge: string, chosen: boolean) {
+    setDropped((current) =>
+      chosen ? [...current, judge] : current.filter((id) => id !== judge),
+    );
+    setSimulation(null);
+    setConfirmed(false);
+  }
+
+  async function simulate() {
+    setRebalanceProblem("");
+    setRebalanceStatus("");
+    try {
+      const result = await api<{ scenarios: Simulation[] }>(
+        `${planBase}assignments/dropout-simulation/`,
+        "POST",
+        { drop_scenarios: [dropped] },
+      );
+      setSimulation(result.scenarios[0] ?? null);
+    } catch (cause) {
+      setRebalanceProblem(messageOf(cause));
+    }
+  }
+
+  async function rebalance() {
+    setRebalanceProblem("");
+    try {
+      await api(`${planBase}assignments/rebalance/`, "POST", {
+        drop_judges: dropped,
+      });
+      setRebalanceStatus("Assignments rebalanced; a new version is active.");
+      setDropped([]);
+      setSimulation(null);
+      setConfirmed(false);
+      routes.reload();
+      responses.reload();
+    } catch (cause) {
+      setRebalanceProblem(messageOf(cause));
+    }
+  }
 
   return (
     <section aria-label="Judging logistics">
@@ -273,11 +323,44 @@ export function OrganizerJudgingLogisticsPanel({
         </label>
       )}
       {responses.data && (
-        <p>
-          Assignment responses: {responses.data.counts.accepted} accepted,{" "}
-          {responses.data.counts.pending} pending,{" "}
-          {responses.data.counts.declined} declined.
-        </p>
+        <>
+          <dl className="cx-decision-facts" aria-label="Assignment health">
+            <div>
+              <dt>Accepted</dt>
+              <dd>{responses.data.counts.accepted}</dd>
+            </div>
+            <div>
+              <dt>Pending</dt>
+              <dd>{responses.data.counts.pending}</dd>
+            </div>
+            <div>
+              <dt>Declined or recused</dt>
+              <dd>
+                {responses.data.counts.declined > 0 ? (
+                  <Badge tone="warning">{responses.data.counts.declined}</Badge>
+                ) : (
+                  0
+                )}
+              </dd>
+            </div>
+            {routes.data && (
+              <div>
+                <dt>Projects without a table</dt>
+                <dd>
+                  {routes.data.judges.reduce(
+                    (sum, judge) => sum + judge.unplaced.length,
+                    0,
+                  )}
+                </dd>
+              </div>
+            )}
+          </dl>
+          <p className="cx-visually-hidden">
+            Assignment responses: {responses.data.counts.accepted} accepted,{" "}
+            {responses.data.counts.pending} pending,{" "}
+            {responses.data.counts.declined} declined.
+          </p>
+        </>
       )}
       {responses.data && responses.data.declined.length > 0 && (
         <ul aria-label="Declined assignments">
@@ -339,6 +422,71 @@ export function OrganizerJudgingLogisticsPanel({
             </tbody>
           </table>
         </div>
+      )}
+      {routes.data && routes.data.judges.length > 0 && (
+        <Card title="Rebalance judge workload" as="h4">
+          <p>
+            If judges drop out, simulate the impact and reassign only their
+            pending projects. Submitted ballots keep their pairings and the
+            current assignment version is preserved.
+          </p>
+          <fieldset>
+            <legend>Judges to remove from pending work</legend>
+            {routes.data.judges.map((judge) => (
+              <label key={judge.judge} className="cx-check-row">
+                <input
+                  type="checkbox"
+                  checked={dropped.includes(judge.judge)}
+                  onChange={(event) =>
+                    toggleDropped(judge.judge, event.target.checked)
+                  }
+                />{" "}
+                {judge.username} ({judge.stops.length} stops left)
+              </label>
+            ))}
+          </fieldset>
+          {rebalanceProblem && <p role="alert">{rebalanceProblem}</p>}
+          {rebalanceStatus && <p role="status">{rebalanceStatus}</p>}
+          <Button
+            variant="secondary"
+            disabled={dropped.length === 0}
+            onClick={() => void simulate()}
+          >
+            Simulate dropout
+          </Button>
+          {simulation && (
+            <div role="status">
+              <p>
+                {simulation.pending_removed} pending assignments would move;{" "}
+                {simulation.assignments_added} added;{" "}
+                {simulation.coverage_gaps.length === 0 ? (
+                  "no coverage gaps."
+                ) : (
+                  <strong>
+                    {simulation.coverage_gaps.length} project
+                    {simulation.coverage_gaps.length === 1 ? "" : "s"} would be
+                    under-covered.
+                  </strong>
+                )}
+              </p>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={confirmed}
+                  onChange={(event) => setConfirmed(event.target.checked)}
+                />{" "}
+                I understand this freezes a new assignment version
+              </label>{" "}
+              <Button
+                variant="danger"
+                disabled={!confirmed}
+                onClick={() => void rebalance()}
+              >
+                Apply rebalance
+              </Button>
+            </div>
+          )}
+        </Card>
       )}
     </section>
   );

@@ -11602,7 +11602,7 @@ tasks:
   batch: UIV2-B08
   phase: ui-v2
   title: 'Implement: Organizer, deliberation, eligibility, onsite operations'
-  status: ACTIVE
+  status: DONE
   batch_dependencies:
   - UIV2-B07
   task_dependencies:
@@ -11616,6 +11616,10 @@ tasks:
   - src/web/features/event-builder/**
   - src/web/features/pvs/**
   - src/api/onsite/templates/**
+  - src/web/styles/components.css
+  - tests/e2e/**
+  - scripts/e2e-fast
+  - Makefile
   required_reading:
   - docs/execution/README.md
   - docs/ui-v2/SURFACE_CENSUS.md
@@ -11638,7 +11642,7 @@ tasks:
   batch: UIV2-B08
   phase: ui-v2
   title: 'Verify and checkpoint: Organizer, deliberation, eligibility, onsite operations'
-  status: BLOCKED
+  status: DONE
   batch_dependencies:
   - UIV2-B07
   task_dependencies:
@@ -11652,6 +11656,10 @@ tasks:
   - src/web/features/event-builder/**
   - src/web/features/pvs/**
   - src/api/onsite/templates/**
+  - src/web/styles/components.css
+  - tests/e2e/**
+  - scripts/e2e-fast
+  - Makefile
   required_reading:
   - docs/execution/README.md
   - docs/ui-v2/SURFACE_CENSUS.md
@@ -11674,7 +11682,7 @@ tasks:
   batch: UIV2-B09
   phase: ui-v2
   title: 'Implement: Secondary surfaces + API/developer experience'
-  status: BLOCKED
+  status: ACTIVE
   batch_dependencies:
   - UIV2-B08
   task_dependencies:

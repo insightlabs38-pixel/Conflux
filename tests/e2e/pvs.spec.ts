@@ -173,6 +173,7 @@ test("participant requests a deadline exception and the organizer decides it", a
 
   const org = await (await browser.newContext()).newPage();
   await organizerEvent(org);
+  await goToTask(org, "Deadline exceptions");
   const queue = org.getByRole("region", {
     name: "Deadline exception requests",
   });
@@ -249,6 +250,16 @@ test("organizer operations panels load, are labelled, and never overflow", async
       } as Record<string, string>
     )[name];
     await goToDestination(page, destination);
+    const task = (
+      {
+        "Judging logistics": "Logistics",
+        "Publication approval and corrections": "Publication",
+        "Deadline exception requests": "Deadline exceptions",
+        "Mentor desk": "Mentors",
+        "Post-event continuation": "Continuations",
+      } as Record<string, string>
+    )[name];
+    if (task) await goToTask(page, task);
     const panel = page.getByRole("region", { name });
     await panel.scrollIntoViewIfNeeded();
     await expect(panel).toBeVisible();

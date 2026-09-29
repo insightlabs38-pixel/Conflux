@@ -1,10 +1,11 @@
 import { ProfilePanel } from "../profile/ProfilePanel";
+import { WorkflowSections } from "../../components/WorkflowSections";
+import { OrganizerOverview } from "./OrganizerOverview";
 import {
   Destination,
-  DestinationLink,
   WorkspaceViewTitle,
 } from "../../components/WorkspaceNavigation";
-import { PageHeader, Grid } from "../../components/Foundation";
+import { PageHeader } from "../../components/Foundation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { PolicyBuilder } from "../policy-builder/PolicyBuilder";
 import { StageBuilder } from "../stage-builder/StageBuilder";
@@ -340,60 +341,27 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
             {selected.is_public ? "Public" : "Private"}
           </p>
           <Destination id="overview">
-            <section
-              className="cx-workspace-overview"
-              aria-label="Event overview"
-            >
-              <h3>Event at a glance</h3>
-              <dl className="cx-facts">
-                <div>
-                  <dt>Event state</dt>
-                  <dd>{selected.status}</dd>
-                </div>
-                <div>
-                  <dt>Tracks</dt>
-                  <dd>{dashboard.track_count}</dd>
-                </div>
-                <div>
-                  <dt>Base prizes</dt>
-                  <dd>{dashboard.base_prize_count}</dd>
-                </div>
-                <div>
-                  <dt>Configuration checks</dt>
-                  <dd>{dashboard.configuration_checks.length}</dd>
-                </div>
-              </dl>
-              <Grid>
-                <DestinationLink id="eligibility">
-                  <strong>Review eligibility</strong>
-                  <span>
-                    Findings, participant responses, and deadline exceptions.
-                  </span>
-                </DestinationLink>
-                <DestinationLink id="judging">
-                  <strong>Manage judging</strong>
-                  <span>
-                    Rubrics, workload, coverage, and assignment logistics.
-                  </span>
-                </DestinationLink>
-                <DestinationLink id="results">
-                  <strong>Finalize and publish</strong>
-                  <span>
-                    Compare finalists, deliberate, and control publication.
-                  </span>
-                </DestinationLink>
-              </Grid>
-            </section>
+            <OrganizerOverview
+              key={`overview-${selected.public_id}`}
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+              starts={selected.starts_at}
+              ends={selected.ends_at}
+              status={selected.status}
+              checks={dashboard.configuration_checks}
+            />
           </Destination>
           {dashboard.configuration_checks.length > 0 && (
-            <section aria-label="Configuration checks">
-              <h3>Configuration checks</h3>
-              <ul>
-                {dashboard.configuration_checks.map((check) => (
-                  <li key={check}>{check}</li>
-                ))}
-              </ul>
-            </section>
+            <Destination id="setup">
+              <section aria-label="Configuration checks">
+                <h3>Configuration checks</h3>
+                <ul>
+                  {dashboard.configuration_checks.map((check) => (
+                    <li key={check}>{check}</li>
+                  ))}
+                </ul>
+              </section>
+            </Destination>
           )}
           <Destination id="setup">
             <form
@@ -565,17 +533,77 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
             />
           </Destination>
           <Destination id="participants">
-            <RegistrationPanel
-              key={`registration-${selected.public_id}`}
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
+            <WorkflowSections
+              label="Participant tools"
+              sections={[
+                {
+                  id: "RegistrationPanel",
+                  label: "Registration",
+                  description: "Applications and invitations",
+                  content: (
+                    <RegistrationPanel
+                      key={`registration-${selected.public_id}`}
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+                {
+                  id: "TeamPanel",
+                  label: "Teams",
+                  description: "Rosters and matching",
+                  content: (
+                    <TeamPanel
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+                {
+                  id: "MentorDeskPanel",
+                  label: "Mentors",
+                  description: "Availability and help requests",
+                  content: (
+                    <MentorDeskPanel
+                      key={`MentorDeskPanel-${selected.public_id}`}
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                      isOrganizer
+                    />
+                  ),
+                },
+              ]}
             />
           </Destination>
           <Destination id="eligibility">
-            <EligibilityReviewPanel
-              key={`EligibilityReviewPanel-${selected.public_id}`}
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
+            <WorkflowSections
+              label="Eligibility tools"
+              sections={[
+                {
+                  id: "EligibilityReviewPanel",
+                  label: "Review queue",
+                  description: "Findings and decisions",
+                  content: (
+                    <EligibilityReviewPanel
+                      key={`EligibilityReviewPanel-${selected.public_id}`}
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+                {
+                  id: "ExceptionRequestsPanel",
+                  label: "Deadline exceptions",
+                  description: "Requests and decisions",
+                  content: (
+                    <ExceptionRequestsPanel
+                      key={`ExceptionRequestsPanel-${selected.public_id}`}
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+              ]}
             />
           </Destination>
           <Destination id="setup">
@@ -594,9 +622,6 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
               canManage
             />
           </Destination>
-          <Destination id="participants">
-            <TeamPanel workspaceId={workspaceId} eventId={selected.public_id} />
-          </Destination>
           <Destination id="setup">
             <FormBuilder
               workspaceId={workspaceId}
@@ -610,29 +635,56 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
             />
           </Destination>
           <Destination id="judging">
-            <EvaluationBuilder
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
-            />
-          </Destination>
-          <Destination id="judging">
-            <JudgeWorkloadPanel
-              key={`judge-workload-${selected.public_id}`}
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
-            />
-          </Destination>
-          <Destination id="judging">
-            <OrganizerJudgingLogisticsPanel
-              key={`OrganizerJudgingLogisticsPanel-${selected.public_id}`}
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
-            />
-          </Destination>
-          <Destination id="judging">
-            <CommunityVotingBuilder
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
+            <WorkflowSections
+              label="Judging tools"
+              sections={[
+                {
+                  id: "EvaluationBuilder",
+                  label: "Rubrics and plans",
+                  description: "Criteria and evaluation plans",
+                  content: (
+                    <EvaluationBuilder
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+                {
+                  id: "JudgeWorkloadPanel",
+                  label: "Judge workload",
+                  description: "Who is behind",
+                  content: (
+                    <JudgeWorkloadPanel
+                      key={`judge-workload-${selected.public_id}`}
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+                {
+                  id: "OrganizerJudgingLogisticsPanel",
+                  label: "Logistics",
+                  description: "Assignments, coverage and routes",
+                  content: (
+                    <OrganizerJudgingLogisticsPanel
+                      key={`OrganizerJudgingLogisticsPanel-${selected.public_id}`}
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+                {
+                  id: "CommunityVotingBuilder",
+                  label: "Community voting",
+                  description: "Public voting",
+                  content: (
+                    <CommunityVotingBuilder
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+              ]}
             />
           </Destination>
           <Destination id="integrations">
@@ -643,73 +695,107 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
             />
           </Destination>
           <Destination id="results">
-            <AwardsPanel
-              key={`awards-${selected.public_id}-${awardsRevision}`}
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
-            />
-          </Destination>
-          <Destination id="results">
-            <DeliberationPanel
-              key={`DeliberationPanel-${selected.public_id}`}
-              onFinalized={() => setAwardsRevision((n) => n + 1)}
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
-            />
-          </Destination>
-          <Destination id="results">
-            <PublicationGovernancePanel
-              key={`PublicationGovernancePanel-${selected.public_id}`}
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
+            <WorkflowSections
+              label="Results tools"
+              sections={[
+                {
+                  id: "DeliberationPanel",
+                  label: "Deliberation",
+                  description: "Finalists, evidence and decisions",
+                  content: (
+                    <DeliberationPanel
+                      key={`DeliberationPanel-${selected.public_id}`}
+                      onFinalized={() => setAwardsRevision((n) => n + 1)}
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+                {
+                  id: "PublicationGovernancePanel",
+                  label: "Publication",
+                  description: "Approval, schedule and corrections",
+                  content: (
+                    <PublicationGovernancePanel
+                      key={`PublicationGovernancePanel-${selected.public_id}`}
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+                {
+                  id: "AwardsPanel",
+                  label: "Awards",
+                  description: "Award definitions",
+                  content: (
+                    <AwardsPanel
+                      key={`awards-${selected.public_id}-${awardsRevision}`}
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+              ]}
             />
           </Destination>
           <Destination id="operations">
-            <OperationsCenter
-              key={`operations-${selected.public_id}`}
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
-            />
-          </Destination>
-          <Destination id="eligibility">
-            <ExceptionRequestsPanel
-              key={`ExceptionRequestsPanel-${selected.public_id}`}
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
-            />
-          </Destination>
-          <Destination id="participants">
-            <MentorDeskPanel
-              key={`MentorDeskPanel-${selected.public_id}`}
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
-              isOrganizer
-            />
-          </Destination>
-          <Destination id="operations">
-            <ContinuationsAdminPanel
-              key={`ContinuationsAdminPanel-${selected.public_id}`}
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
+            <WorkflowSections
+              label="Operations tools"
+              sections={[
+                {
+                  id: "OperationsCenter",
+                  label: "Operations",
+                  description: "Health and jobs",
+                  content: (
+                    <OperationsCenter
+                      key={`operations-${selected.public_id}`}
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+                {
+                  id: "ContinuationsAdminPanel",
+                  label: "Continuations",
+                  description: "Post-event",
+                  content: (
+                    <ContinuationsAdminPanel
+                      key={`ContinuationsAdminPanel-${selected.public_id}`}
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+                {
+                  id: "ConfigHistoryPanel",
+                  label: "Configuration history",
+                  description: "Audit of changes",
+                  content: (
+                    <ConfigHistoryPanel
+                      key={`config-history-${selected.public_id}`}
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+                {
+                  id: "PermissionMatrixExplorer",
+                  label: "Permissions",
+                  description: "Role matrix",
+                  content: (
+                    <PermissionMatrixExplorer
+                      key={`permission-matrix-${selected.public_id}`}
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+              ]}
             />
           </Destination>
           <Destination id="communications">
             <CommunicationsPanel
               key={`communications-${selected.public_id}`}
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
-            />
-          </Destination>
-          <Destination id="operations">
-            <ConfigHistoryPanel
-              key={`config-history-${selected.public_id}`}
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
-            />
-          </Destination>
-          <Destination id="operations">
-            <PermissionMatrixExplorer
-              key={`permission-matrix-${selected.public_id}`}
               workspaceId={workspaceId}
               eventId={selected.public_id}
             />

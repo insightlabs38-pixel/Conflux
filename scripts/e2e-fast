@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Faster e2e: three file groups run concurrently against the same seeded stack.
+#   read-only  auth/navigation/axe checks that never change server state (4 workers)
+#   public     theme + public-site checks (serial: event-themes mutates the event brand)
+#   stateful   ordered participant/pvs/lifecycle chain (serial; order matters)
+# Run `./scripts/demo-reset` first. `make demo-e2e` remains the authoritative serial run.
+set -uo pipefail
+cd "$(dirname "$0")/.."
+cfg=tests/e2e/playwright.config.ts
+logs=tests/e2e/artifacts
+mkdir -p "$logs"
+
+run() { # name workers files...
+  local name=$1 workers=$2
+  shift 2
+  E2E_GROUP=$name npx playwright test -c "$cfg" --workers="$workers" "$@" \
+    >"$logs/fast-$name.log" 2>&1
+  echo $? >"$logs/fast-$name.status"
+}
+
+run read-only 4 workspace-shell roles signin extended-embed &
+run public 1 event-themes public showcase foundations &
+run stateful 1 participant-workflow profiles pvs uiv2-judge uiv2-organizer lifecycle scenes &
+wait
+
+status=0
+for name in read-only public stateful; do
+  echo "== $name (exit $(cat "$logs/fast-$name.status")) =="
+  grep -E "✘|[0-9]+ (passed|failed|skipped|flaky|did not run)" "$logs/fast-$name.log" || true
+  [ "$(cat "$logs/fast-$name.status")" = 0 ] || status=1
+done
+exit $status

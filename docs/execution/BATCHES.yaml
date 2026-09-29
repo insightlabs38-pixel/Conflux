@@ -2028,10 +2028,14 @@ batches:
   - src/web/features/event-builder/**
   - src/web/features/pvs/**
   - src/api/onsite/templates/**
+  - src/web/styles/components.css
+  - tests/e2e/**
+  - scripts/e2e-fast
+  - Makefile
   task_ids:
   - UIV2-B08-01
   - UIV2-B08-02
-  status: IN_PROGRESS
+  status: DONE
   completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
     receipt and commit recorded before advancing.
 - id: UIV2-B09
@@ -2046,7 +2050,7 @@ batches:
   task_ids:
   - UIV2-B09-01
   - UIV2-B09-02
-  status: BLOCKED
+  status: IN_PROGRESS
   completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
     receipt and commit recorded before advancing.
 - id: UIV2-B10

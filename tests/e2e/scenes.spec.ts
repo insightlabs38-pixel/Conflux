@@ -1,4 +1,4 @@
-import { chooseWorkspaceEvent } from "./support";
+import { chooseWorkspaceEvent, goToTask } from "./support";
 import { expect, test } from "@playwright/test";
 import path from "node:path";
 import {
@@ -61,6 +61,7 @@ for (const [n, role] of [
         .getByRole("heading", { name: "Main judging", exact: true })
         .evaluate((heading) => heading.scrollIntoView({ block: "start" }));
       await page.screenshot({ path: shot(`${n}-workspace`) });
+      await goToTask(page, "Logistics");
       await page
         .getByRole("region", { name: "Judging logistics" })
         .getByLabel("Stage")
@@ -81,6 +82,7 @@ for (const [n, role] of [
         ["organizer-judging-logistics", "Judging logistics", "judging"],
       ]) {
         await goToDestination(page, destination);
+        if (region === "Judging logistics") await goToTask(page, "Logistics");
         await page
           .getByRole("region", { name: region })
           .screenshot({ path: shot(name) });

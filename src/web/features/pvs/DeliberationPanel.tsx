@@ -5,7 +5,7 @@ import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
-import { api, eventBase, messageOf, useLoad } from "./http";
+import { api, eventBase, messageOf, useLoad, type Loaded } from "./http";
 
 type Award = {
   public_id: string;
@@ -104,43 +104,98 @@ function usePlanBase(base: string, planId: string | null) {
   return path;
 }
 
+const STEPS = [
+  "Evidence",
+  "Panel discussion",
+  "Discussion closed",
+  "Decision final",
+];
+
+function DecisionSteps({ status }: { status: Room["status"] | null }) {
+  const current =
+    status === null ? 0 : { open: 1, closed: 2, finalized: 3 }[status];
+  return (
+    <ol className="cx-steps" aria-label="Deliberation progress">
+      {STEPS.map((label, index) => (
+        <li
+          key={label}
+          aria-current={index === current ? "step" : undefined}
+          data-state={
+            index < current ? "done" : index === current ? "current" : "todo"
+          }
+        >
+          <span className="cx-steps__mark" aria-hidden="true">
+            {index < current ? "✓" : index + 1}
+          </span>
+          {label}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
 function EvidencePanel({
   planBase,
+  results,
   selectable,
   winners,
+  tally,
+  otherAwards,
   onToggle,
 }: {
   planBase: string;
+  results: Loaded<Result[]>;
   selectable: boolean;
   winners: string[];
+  tally: Tally[];
+  otherAwards: Map<string, string[]>;
   onToggle: (project: string, chosen: boolean) => void;
 }) {
-  const results = useLoad<Result[]>(`${planBase}results/`);
   const agreement = useLoad<Agreement>(`${planBase}agreement/`);
   const closeCalls = useLoad<CloseCalls>(`${planBase}close-calls/`);
   const progress = useLoad<Progress>(`${planBase}progress/`);
   const close = new Set(closeCalls.data?.projects ?? []);
+  const panel = new Map(tally.map((row) => [row.project, row]));
   const spread = new Map<string, number>();
   for (const row of agreement.data?.criteria ?? [])
     spread.set(
       row.project,
       Math.max(spread.get(row.project) ?? 0, row.range ?? 0),
     );
+  const widest = Math.max(1, ...spread.values());
 
   return (
     <Card title="Evidence" as="h4">
       {progress.data && (
-        <p>
-          Coverage: {progress.data.submitted_ballots}
-          {progress.data.expected_ballots == null
-            ? " submitted ballots"
-            : ` of ${progress.data.expected_ballots} expected ballots`}
-          {progress.data.pool_judge_count > 0
-            ? ` from ${progress.data.pool_judge_count} judges`
-            : ""}{" "}
-          across {progress.data.candidate_count} candidates. Conflicts excluded:{" "}
-          {progress.data.conflict_count}.
-        </p>
+        <dl className="cx-decision-facts">
+          <div>
+            <dt>Ballots</dt>
+            <dd>
+              {progress.data.submitted_ballots}
+              {progress.data.expected_ballots == null
+                ? ""
+                : ` of ${progress.data.expected_ballots}`}
+            </dd>
+          </div>
+          <div>
+            <dt>Judges</dt>
+            <dd>{progress.data.pool_judge_count}</dd>
+          </div>
+          <div>
+            <dt>Candidates</dt>
+            <dd>{progress.data.candidate_count}</dd>
+          </div>
+          <div>
+            <dt>Conflicts excluded</dt>
+            <dd>
+              {progress.data.conflict_count > 0 ? (
+                <Badge tone="warning">{progress.data.conflict_count}</Badge>
+              ) : (
+                0
+              )}
+            </dd>
+          </div>
+        </dl>
       )}
       {results.loading && <LoadingState label="Loading results…" />}
       {results.error && (
@@ -158,7 +213,7 @@ function EvidencePanel({
           aria-label="Finalist comparison table"
           tabIndex={0}
         >
-          <table>
+          <table className="cx-decision-table">
             <caption>
               Finalist comparison (raw mean vs. normalized score)
             </caption>
@@ -169,42 +224,81 @@ function EvidencePanel({
                 <th scope="col">Raw</th>
                 <th scope="col">Normalized</th>
                 <th scope="col">Max judge disagreement</th>
+                <th scope="col">Panel</th>
                 <th scope="col">Flags</th>
                 {selectable && <th scope="col">Winner</th>}
               </tr>
             </thead>
             <tbody>
-              {results.data.map((row) => (
-                <tr key={`${row.rank}-${row.project}`}>
-                  <td>{row.rank}</td>
-                  <th scope="row">{row.project_name ?? row.project}</th>
-                  <td>{fixed(row.raw_score)}</td>
-                  <td>{fixed(row.final_score)}</td>
-                  <td>{row.project ? fixed(spread.get(row.project)) : "–"}</td>
-                  <td>
-                    {row.project && close.has(row.project) && (
-                      <Badge tone="warning">Close call</Badge>
-                    )}
-                  </td>
-                  {selectable && (
+              {results.data.map((row) => {
+                const stance = row.project ? panel.get(row.project) : undefined;
+                const other = row.project
+                  ? (otherAwards.get(row.project) ?? [])
+                  : [];
+                const gap = row.project ? spread.get(row.project) : undefined;
+                return (
+                  <tr
+                    key={`${row.rank}-${row.project}`}
+                    data-selected={
+                      (row.project && winners.includes(row.project)) ||
+                      undefined
+                    }
+                  >
+                    <td>{row.rank}</td>
+                    <th scope="row">{row.project_name ?? row.project}</th>
+                    <td>{fixed(row.raw_score)}</td>
+                    <td>{fixed(row.final_score)}</td>
                     <td>
-                      {row.project && (
-                        <input
-                          type="checkbox"
-                          aria-label={`Select ${row.project_name ?? row.project} as winner`}
-                          checked={winners.includes(row.project)}
-                          onChange={(event) =>
-                            onToggle(
-                              row.project as string,
-                              event.target.checked,
-                            )
-                          }
+                      {fixed(gap)}
+                      {gap !== undefined && (
+                        <span
+                          className="cx-meter"
+                          aria-hidden="true"
+                          style={{ width: `${(gap / widest) * 100}%` }}
                         />
                       )}
                     </td>
-                  )}
-                </tr>
-              ))}
+                    <td>
+                      {stance
+                        ? `${stance.endorse} endorse · ${stance.object} object · ${stance.abstain} abstain`
+                        : "–"}
+                    </td>
+                    <td className="cx-flags">
+                      {row.project && close.has(row.project) && (
+                        <Badge tone="warning">Close call</Badge>
+                      )}
+                      {stance?.recommended && (
+                        <Badge tone="success">Recommended</Badge>
+                      )}
+                      {stance && !stance.recommended && (
+                        <Badge>Not recommended</Badge>
+                      )}
+                      {other.map((name) => (
+                        <Badge key={name} tone="warning">
+                          Also wins {name}
+                        </Badge>
+                      ))}
+                    </td>
+                    {selectable && (
+                      <td>
+                        {row.project && (
+                          <input
+                            type="checkbox"
+                            aria-label={`Select ${row.project_name ?? row.project} as winner`}
+                            checked={winners.includes(row.project)}
+                            onChange={(event) =>
+                              onToggle(
+                                row.project as string,
+                                event.target.checked,
+                              )
+                            }
+                          />
+                        )}
+                      </td>
+                    )}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -231,6 +325,7 @@ export function DeliberationPanel({
   const roomUrl = awardId ? `${base}awards/${awardId}/deliberation/` : null;
   const room = useLoad<Room>(roomUrl);
   const planBase = usePlanBase(base, award?.evaluation_plan ?? null);
+  const results = useLoad<Result[]>(planBase ? `${planBase}results/` : null);
   const [quorum, setQuorum] = useState("2");
   const [problem, setProblem] = useState("");
   const [winners, setWinners] = useState<string[]>([]);
@@ -255,8 +350,27 @@ export function DeliberationPanel({
 
   const data = room.data;
   const evaluated = new Map<string, string>();
+  for (const row of results.data ?? [])
+    if (row.project)
+      evaluated.set(row.project, row.project_name ?? row.project);
   for (const row of data?.tally ?? [])
     evaluated.set(row.project, row.project_name);
+  const otherAwards = new Map<string, string[]>();
+  for (const other of awards.data ?? [])
+    if (other.public_id !== awardId)
+      for (const winner of other.winners)
+        otherAwards.set(winner.project, [
+          ...(otherAwards.get(winner.project) ?? []),
+          other.name,
+        ]);
+  const recommended = new Set(
+    (data?.tally ?? []).filter((r) => r.recommended).map((r) => r.project),
+  );
+  const needsReason = winners.some((project) => !recommended.has(project));
+  const wanted = award?.winner_count ?? 0;
+  const finalNames = (data?.finalization.winners ?? []).map(
+    (project) => evaluated.get(project) ?? project,
+  );
 
   return (
     <section aria-label="Deliberation and finalization">
@@ -291,12 +405,25 @@ export function DeliberationPanel({
           </label>
         )}
       </>
+      {award && (
+        <>
+          <p className="cx-muted">
+            {award.name}: {award.winner_count} winner
+            {award.winner_count === 1 ? "" : "s"}
+            {award.published_at ? " · published" : ""}
+          </p>
+          <DecisionSteps status={data?.status ?? null} />
+        </>
+      )}
       {problem && <p role="alert">{problem}</p>}
       {award && planBase && (
         <EvidencePanel
           planBase={planBase}
+          results={results}
           selectable={data?.status === "open" || data?.status === "closed"}
           winners={winners}
+          tally={data?.tally ?? []}
+          otherAwards={otherAwards}
           onToggle={(project, chosen) =>
             setWinners((current) =>
               chosen
@@ -388,18 +515,20 @@ export function DeliberationPanel({
             </div>
           )}
           {data.stances.length > 0 && (
-            <ul aria-label="Stances">
+            <ul aria-label="Stances" className="cx-evidence-list">
               {data.stances.map((stance) => (
                 <li key={`${stance.project}-${stance.judge}`}>
-                  {evaluated.get(stance.project) ?? stance.project} ·{" "}
-                  {stance.judge}: {stance.stance}
-                  {stance.rationale && ` — ${stance.rationale}`}
+                  <strong>
+                    {evaluated.get(stance.project) ?? stance.project}
+                  </strong>{" "}
+                  · {stance.judge}: <Badge>{stance.stance}</Badge>
+                  {stance.rationale && <p>{stance.rationale}</p>}
                 </li>
               ))}
             </ul>
           )}
           {data.notes.length > 0 && (
-            <ul aria-label="Discussion notes">
+            <ul aria-label="Discussion notes" className="cx-evidence-list">
               {data.notes.map((item) => (
                 <li key={item.public_id}>
                   <strong>{item.author}</strong>: {item.body}
@@ -408,13 +537,16 @@ export function DeliberationPanel({
             </ul>
           )}
           {data.status === "finalized" && (
-            <p role="status">
-              Finalized
-              {data.finalization.override_reason
-                ? ` (override: ${data.finalization.override_reason})`
-                : ""}
-              .
-            </p>
+            <div className="cx-final-banner" role="status">
+              <p>
+                <strong>Finalized</strong> — this decision is immutable
+                {data.finalization.override_reason
+                  ? ` (override: ${data.finalization.override_reason})`
+                  : ""}
+                .
+              </p>
+              {finalNames.length > 0 && <p>Winners: {finalNames.join(", ")}</p>}
+            </div>
           )}
           {data.status === "open" && (
             <Button
@@ -426,6 +558,7 @@ export function DeliberationPanel({
           )}
           {data.status !== "finalized" && (
             <form
+              className="cx-decision-form"
               onSubmit={(event) => {
                 event.preventDefault();
                 void act(
@@ -446,6 +579,24 @@ export function DeliberationPanel({
                 comparison table above. Choosing a project the panel did not
                 recommend requires a reason.
               </p>
+              <p role="status">
+                Selected {winners.length}
+                {wanted ? ` of ${wanted}` : ""}:{" "}
+                {winners.length === 0
+                  ? "none yet"
+                  : winners
+                      .map((project) => evaluated.get(project) ?? project)
+                      .join(", ")}
+                {winners.length > 0 && !needsReason
+                  ? " · all recommended by the panel"
+                  : ""}
+              </p>
+              {needsReason && (
+                <p className="cx-warning-text">
+                  A selected project was not recommended by the panel — give an
+                  override reason.
+                </p>
+              )}
               <label>
                 Override reason{" "}
                 <input

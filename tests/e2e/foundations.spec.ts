@@ -41,6 +41,10 @@ for (const width of [390, 768, 1440]) {
         await page.evaluate((theme) => {
           document.documentElement.dataset.theme = theme;
           document.body.classList.toggle("theme-minimal", theme === "minimal");
+          // Public pages carry a server-computed inline brand palette (UIV2-B03) that
+          // wins over the foundation tokens; real dark events are covered by
+          // event-themes.spec. Drop it so this checks the foundation token palette.
+          document.body.removeAttribute("style");
         }, theme);
         await accessible(page);
         await noHorizontalOverflow(page);

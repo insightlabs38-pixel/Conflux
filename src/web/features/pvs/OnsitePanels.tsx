@@ -76,6 +76,10 @@ export function OnsiteOperationsPanel({
   const [kind, setKind] = useState("table");
   const [capacity, setCapacity] = useState("");
   const [plan, setPlan] = useState<AutoAssign | null>(null);
+  const [search, setSearch] = useState("");
+  const [attendFilter, setAttendFilter] = useState<"all" | "waiting" | "in">(
+    "all",
+  );
 
   function refresh() {
     summary.reload();
@@ -142,6 +146,14 @@ export function OnsiteOperationsPanel({
       }
     });
 
+  const needle = search.trim().toLowerCase();
+  const shownAttendance = (attendance.data ?? []).filter(
+    (row) =>
+      (!needle || row.username.toLowerCase().includes(needle)) &&
+      (attendFilter === "all" ||
+        (attendFilter === "in" ? row.checked_in : !row.checked_in)),
+  );
+
   const nameOf = (id: string) =>
     placements.data?.find((row) => row.project === id)?.project_name ??
     locations.data?.find((row) => row.public_id === id)?.name ??
@@ -157,16 +169,46 @@ export function OnsiteOperationsPanel({
         <ErrorState message={summary.error.message} onRetry={summary.reload} />
       )}
       {summary.data && (
-        <p>
-          {summary.data.checked_in} of {summary.data.participants} participants
-          checked in · RSVP: {summary.data.rsvp.in_person} in person,{" "}
-          {summary.data.rsvp.remote} remote, {summary.data.rsvp.not_attending}{" "}
-          not attending, {summary.data.no_response} no response ·{" "}
-          {summary.data.projects_placed} of {summary.data.projects} projects
-          placed ({summary.data.slots_free} slots free)
-        </p>
+        <>
+          <dl className="cx-decision-facts">
+            <div>
+              <dt>Checked in</dt>
+              <dd>
+                {summary.data.checked_in} of {summary.data.participants}
+              </dd>
+            </div>
+            <div>
+              <dt>Projects placed</dt>
+              <dd>
+                {summary.data.projects_placed} of {summary.data.projects}
+              </dd>
+            </div>
+            <div>
+              <dt>Slots free</dt>
+              <dd>{summary.data.slots_free}</dd>
+            </div>
+            <div>
+              <dt>No RSVP</dt>
+              <dd>{summary.data.no_response}</dd>
+            </div>
+          </dl>
+          <progress
+            className="cx-onsite-progress"
+            max={Math.max(summary.data.participants, 1)}
+            value={summary.data.checked_in}
+            aria-label="Check-in progress"
+          />
+          <p className="cx-muted">
+            {summary.data.checked_in} of {summary.data.participants}{" "}
+            participants checked in · RSVP: {summary.data.rsvp.in_person} in
+            person, {summary.data.rsvp.remote} remote,{" "}
+            {summary.data.rsvp.not_attending} not attending,{" "}
+            {summary.data.no_response} no response.
+          </p>
+        </>
       )}
       <form
+        className="cx-checkin-desk"
         onSubmit={(event) => {
           event.preventDefault();
           void scan();
@@ -175,6 +217,7 @@ export function OnsiteOperationsPanel({
         <label>
           Scan or paste a participant pass{" "}
           <input
+            className="cx-checkin-desk__input"
             required
             value={token}
             onChange={(event) => setToken(event.target.value)}
@@ -188,46 +231,83 @@ export function OnsiteOperationsPanel({
           {attendance.data.length === 0 ? (
             <EmptyState title="Nobody has RSVP'd yet." />
           ) : (
-            <div
-              className="cx-scroll-region"
-              role="region"
-              aria-label="Attendance table"
-              tabIndex={0}
-            >
-              <table>
-                <caption>Attendance and manual check-in</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">Participant</th>
-                    <th scope="col">RSVP</th>
-                    <th scope="col">Checked in</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {attendance.data.map((row) => (
-                    <tr key={row.person}>
-                      <th scope="row">{row.username}</th>
-                      <td>{MODE_LABEL[row.mode] ?? row.mode}</td>
-                      <td>
-                        {row.checked_in ? (
-                          <Badge tone="success">Checked in</Badge>
-                        ) : (
-                          <Button
-                            variant="secondary"
-                            onClick={() =>
-                              void manualCheckIn(row.person, row.username)
-                            }
-                            aria-label={`Check in ${row.username}`}
-                          >
-                            Check in
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
+            <>
+              <div className="cx-attendance-tools">
+                <label>
+                  Search participants{" "}
+                  <input
+                    type="search"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                  />
+                </label>
+                <div
+                  className="cx-queue-filters"
+                  role="group"
+                  aria-label="Filter attendance"
+                >
+                  {(
+                    [
+                      ["all", "Everyone"],
+                      ["waiting", "Not checked in"],
+                      ["in", "Checked in"],
+                    ] as const
+                  ).map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      aria-pressed={attendFilter === value}
+                      onClick={() => setAttendFilter(value)}
+                    >
+                      {label}
+                    </button>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </div>
+              </div>
+              {shownAttendance.length === 0 && (
+                <p className="cx-muted">No participants match.</p>
+              )}
+              <div
+                className="cx-scroll-region"
+                role="region"
+                aria-label="Attendance table"
+                tabIndex={0}
+              >
+                <table className="cx-touch-table">
+                  <caption>Attendance and manual check-in</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Participant</th>
+                      <th scope="col">RSVP</th>
+                      <th scope="col">Checked in</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {shownAttendance.map((row) => (
+                      <tr key={row.person}>
+                        <th scope="row">{row.username}</th>
+                        <td>{MODE_LABEL[row.mode] ?? row.mode}</td>
+                        <td>
+                          {row.checked_in ? (
+                            <Badge tone="success">Checked in</Badge>
+                          ) : (
+                            <Button
+                              variant="secondary"
+                              onClick={() =>
+                                void manualCheckIn(row.person, row.username)
+                              }
+                              aria-label={`Check in ${row.username}`}
+                            >
+                              Check in
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </>
       )}

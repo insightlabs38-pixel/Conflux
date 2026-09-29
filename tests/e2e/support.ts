@@ -56,7 +56,13 @@ export async function accessible(page: Page) {
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
     .analyze();
   expect(
-    violations.map((v) => `${v.id}: ${v.nodes.length} node(s) — ${v.help}`),
+    violations.map(
+      (v) =>
+        `${v.id}: ${v.nodes.length} node(s) — ${v.help} [${v.nodes
+          .slice(0, 3)
+          .map((n) => n.target.join(" "))
+          .join("; ")}]`,
+    ),
     "axe violations",
   ).toEqual([]);
 }

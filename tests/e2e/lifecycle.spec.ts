@@ -319,8 +319,7 @@ test("organizer publishes results and the public results page shows them", async
   await shot(page, "organizer-deliberation", "Deliberation and finalization");
   await room.getByRole("button", { name: "Finalize", exact: true }).click();
   await expect(room.getByText(/Finalized/)).toBeVisible();
-  const awards = page.getByRole("region", { name: "Awards" }).first();
-  void awards;
+  await goToTask(page, "Awards");
   await page.getByLabel("Manage award").selectOption({ label: "Grand Prize" });
   await page.getByRole("button", { name: "Publish winners" }).click();
   await expect(

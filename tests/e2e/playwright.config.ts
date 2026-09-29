@@ -1,14 +1,20 @@
 import { defineConfig, devices } from "@playwright/test";
 
 // Runs against a live stack seeded by `scripts/demo-reset` (see docs/operations/DEMO.md).
+// `scripts/e2e-fast` sets E2E_GROUP so concurrent groups keep separate outputs, and
+// drops per-test video (lifecycle/scenes still record their own demo clips).
+const group = process.env.E2E_GROUP ? `-${process.env.E2E_GROUP}` : "";
 export default defineConfig({
   testDir: ".",
   testMatch: /.*\.spec\.ts/,
-  outputDir: "artifacts/results",
+  outputDir: `artifacts/results${group}`,
   fullyParallel: false,
   workers: 1,
   retries: 0,
-  reporter: [["list"], ["json", { outputFile: "artifacts/report.json" }]],
+  reporter: [
+    ["list"],
+    ["json", { outputFile: `artifacts/report${group}.json` }],
+  ],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? "http://localhost:8080",
     locale: "en-US",
@@ -16,7 +22,7 @@ export default defineConfig({
     reducedMotion: "reduce",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
-    video: "retain-on-failure",
+    video: group ? "off" : "retain-on-failure",
   },
   projects: [
     {

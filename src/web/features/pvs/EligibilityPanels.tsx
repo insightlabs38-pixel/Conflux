@@ -200,10 +200,12 @@ export function ProjectEligibilityPanel({
 function ReviewDetail({
   base,
   projectId,
+  projectName,
   onChanged,
 }: {
   base: string;
   projectId: string;
+  projectName: string;
   onChanged: () => void;
 }) {
   const url = `${base}projects/${projectId}/eligibility/`;
@@ -232,13 +234,23 @@ function ReviewDetail({
   return (
     <Card title="Review detail" as="h4">
       {problem && <p role="alert">{problem}</p>}
-      <p>
-        <StatusBadge status={review.status} /> revision {review.revision}
-        {review.decision_note && <> · {review.decision_note}</>}
-      </p>
-      <Button variant="secondary" onClick={() => void act("checks/")}>
-        Run automated checks
-      </Button>
+      <header className="cx-review-header">
+        {projectName && <strong>{projectName}</strong>}
+        <StatusBadge status={review.status} />
+        <span className="cx-muted">Revision {review.revision}</span>
+        <Button variant="secondary" onClick={() => void act("checks/")}>
+          Run automated checks
+        </Button>
+      </header>
+      {review.decision_note && (
+        <p>
+          <strong>Latest decision:</strong> {review.decision_note}
+        </p>
+      )}
+      <h5>
+        Findings and evidence ({review.findings.length};{" "}
+        {review.findings.filter((f) => f.state === "open").length} open)
+      </h5>
       <FindingList findings={review.findings}>
         {(item) =>
           (item.state === "open" || item.state === "addressed") && (
@@ -273,63 +285,67 @@ function ReviewDetail({
           )
         }
       </FindingList>
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          void act("findings/", { message: finding, severity }).then(() =>
-            setFinding(""),
-          );
-        }}
-      >
-        <h5>Request changes</h5>
-        <label>
-          Finding{" "}
-          <input
-            required
-            value={finding}
-            onChange={(event) => setFinding(event.target.value)}
-          />
-        </label>{" "}
-        <label>
-          Severity{" "}
-          <select
-            value={severity}
-            onChange={(event) => setSeverity(event.target.value)}
-          >
-            <option value="blocking">Blocking</option>
-            <option value="advisory">Advisory</option>
-          </select>
-        </label>{" "}
-        <button>Add finding</button>
-      </form>
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          void act("decision/", { decision, note });
-        }}
-      >
-        <h5>Decision</h5>
-        <label>
-          Outcome{" "}
-          <select
-            value={decision}
-            onChange={(event) => setDecision(event.target.value)}
-          >
-            <option value="cleared">Approve (cleared)</option>
-            <option value="needs_remediation">Request changes</option>
-            <option value="ineligible">Reject (ineligible)</option>
-            <option value="pending">Return to pending</option>
-          </select>
-        </label>{" "}
-        <label>
-          Note{" "}
-          <input
-            value={note}
-            onChange={(event) => setNote(event.target.value)}
-          />
-        </label>{" "}
-        <button>Record decision</button>
-      </form>
+      <div className="cx-review-actions">
+        <form
+          className="cx-review-action"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void act("findings/", { message: finding, severity }).then(() =>
+              setFinding(""),
+            );
+          }}
+        >
+          <h5>Request changes</h5>
+          <label>
+            Finding{" "}
+            <input
+              required
+              value={finding}
+              onChange={(event) => setFinding(event.target.value)}
+            />
+          </label>{" "}
+          <label>
+            Severity{" "}
+            <select
+              value={severity}
+              onChange={(event) => setSeverity(event.target.value)}
+            >
+              <option value="blocking">Blocking</option>
+              <option value="advisory">Advisory</option>
+            </select>
+          </label>{" "}
+          <button>Add finding</button>
+        </form>
+        <form
+          className="cx-review-action"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void act("decision/", { decision, note });
+          }}
+        >
+          <h5>Decision</h5>
+          <label>
+            Outcome{" "}
+            <select
+              value={decision}
+              onChange={(event) => setDecision(event.target.value)}
+            >
+              <option value="cleared">Approve (cleared)</option>
+              <option value="needs_remediation">Request changes</option>
+              <option value="ineligible">Reject (ineligible)</option>
+              <option value="pending">Return to pending</option>
+            </select>
+          </label>{" "}
+          <label>
+            Note{" "}
+            <input
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+            />
+          </label>{" "}
+          <button>Record decision</button>
+        </form>
+      </div>
     </Card>
   );
 }
@@ -344,48 +360,62 @@ export function EligibilityReviewPanel({
 }) {
   const base = eventBase(workspaceId, eventId);
   const [filter, setFilter] = useState("");
-  const reviews = useLoad<ReviewRow[]>(
-    `${base}eligibility-reviews/${filter ? `?status=${filter}` : ""}`,
-  );
+  const reviews = useLoad<ReviewRow[]>(`${base}eligibility-reviews/`);
   const projects = useLoad<Page<PortfolioProject>>(
     `/api/v1/workspaces/${workspaceId}/portfolio/projects/?event=${eventId}&limit=100`,
   );
   const [selected, setSelected] = useState("");
+  const all = Array.isArray(reviews.data) ? reviews.data : [];
+  const visible = filter ? all.filter((row) => row.status === filter) : all;
+  const counts = (status: string) =>
+    all.filter((row) => row.status === status).length;
 
   return (
     <section aria-label="Eligibility review queue">
       <h3>Eligibility review</h3>
-      <label>
-        Show{" "}
-        <select
-          value={filter}
-          onChange={(event) => setFilter(event.target.value)}
+      <div
+        className="cx-queue-filters"
+        role="group"
+        aria-label="Filter reviews by status"
+      >
+        <button
+          type="button"
+          aria-pressed={filter === ""}
+          onClick={() => setFilter("")}
         >
-          <option value="">All reviews</option>
-          {Object.entries(STATUS_LABEL).map(([value, label]) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </label>
+          All <span>{all.length}</span>
+        </button>
+        {Object.entries(STATUS_LABEL).map(([value, label]) => (
+          <button
+            key={value}
+            type="button"
+            aria-pressed={filter === value}
+            onClick={() => setFilter(value)}
+          >
+            {label} <span>{counts(value)}</span>
+          </button>
+        ))}
+      </div>
       {reviews.loading && <LoadingState label="Loading reviews…" />}
       {reviews.error && (
         <ErrorState message={reviews.error.message} onRetry={reviews.reload} />
       )}
-      {reviews.data && reviews.data.length === 0 && (
+      {reviews.data && all.length === 0 && (
         <EmptyState title="No eligibility reviews yet.">
           <p>Pick a project below to run its first check.</p>
         </EmptyState>
       )}
-      {reviews.data && reviews.data.length > 0 && (
+      {all.length > 0 && visible.length === 0 && (
+        <p className="cx-muted">No reviews match this filter.</p>
+      )}
+      {visible.length > 0 && (
         <div
           className="cx-scroll-region"
           role="region"
           aria-label="Eligibility reviews table"
           tabIndex={0}
         >
-          <table>
+          <table className="cx-queue-table">
             <thead>
               <tr>
                 <th scope="col">Project</th>
@@ -398,8 +428,11 @@ export function EligibilityReviewPanel({
               </tr>
             </thead>
             <tbody>
-              {reviews.data.map((row) => (
-                <tr key={row.project}>
+              {visible.map((row) => (
+                <tr
+                  key={row.project}
+                  data-current={selected === row.project || undefined}
+                >
                   <th scope="row">{row.project_name}</th>
                   <td>
                     <StatusBadge status={row.status} />
@@ -442,6 +475,11 @@ export function EligibilityReviewPanel({
           key={selected}
           base={base}
           projectId={selected}
+          projectName={
+            all.find((row) => row.project === selected)?.project_name ??
+            projects.data?.results.find((p) => p.project === selected)?.name ??
+            ""
+          }
           onChanged={reviews.reload}
         />
       )}

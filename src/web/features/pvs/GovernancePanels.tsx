@@ -202,6 +202,25 @@ export function PublicationGovernancePanel({
   const [problem, setProblem] = useState("");
   const [status, setStatus] = useState("");
   const approval = settings.data?.require_publication_approval ?? false;
+  const awards = useLoad<{ published_at: string | null }[]>(`${base}awards/`);
+  const published =
+    Array.isArray(awards.data) && awards.data.some((a) => a.published_at);
+  const requestList = Array.isArray(requests.data) ? requests.data : [];
+  const correctionList = Array.isArray(corrections.data)
+    ? corrections.data
+    : [];
+  const calculated =
+    (Array.isArray(runs.data) && runs.data.length > 0) ||
+    requestList.length > 0 ||
+    published;
+  const approved =
+    published || requestList.some((r) => r.status === "approved");
+  const steps = [
+    { label: "Results calculated", done: calculated },
+    ...(approval ? [{ label: "Approval", done: approved }] : []),
+    { label: "Published", done: published },
+  ];
+  const currentStep = steps.findIndex((step) => !step.done);
 
   async function run(action: () => Promise<unknown>, message = "") {
     setProblem("");
@@ -220,6 +239,31 @@ export function PublicationGovernancePanel({
   return (
     <section aria-label="Publication approval and corrections">
       <h3>Publication approval and corrections</h3>
+      <ol className="cx-steps" aria-label="Publication pipeline">
+        {steps.map((step, index) => (
+          <li
+            key={step.label}
+            aria-current={index === currentStep ? "step" : undefined}
+            data-state={
+              step.done ? "done" : index === currentStep ? "current" : "todo"
+            }
+          >
+            <span className="cx-steps__mark" aria-hidden="true">
+              {step.done ? "✓" : index + 1}
+            </span>
+            {step.label}
+          </li>
+        ))}
+      </ol>
+      <p className="cx-muted">
+        Result version {correctionList.length + 1}
+        {correctionList.length > 0
+          ? ` · corrected ${correctionList.length} time${correctionList.length === 1 ? "" : "s"}`
+          : published
+            ? " · original publication"
+            : " · not yet published"}
+        .
+      </p>
       {problem && <p role="alert">{problem}</p>}
       {status && <p role="status">{status}</p>}
       {settings.data && (

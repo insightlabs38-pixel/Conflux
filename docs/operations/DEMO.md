@@ -32,7 +32,7 @@ Accounts: `demo-hackathon-7-organizer`, `-judge-01…06`, `-participant-01…24`
 
 ## Assets
 
-`make demo-reset && make demo-e2e` runs the submitted checkpoint journeys,
+`make demo-reset && make e2e-fast` runs the same suite about twice as fast by running three file groups concurrently (`scripts/e2e-fast`; read-only navigation, theme/public checks, and the ordered stateful chain, each with its own output directory and no per-test video). `make demo-reset && make demo-e2e` is the authoritative serial run and runs the submitted checkpoint journeys,
 including create → submit → remediate → judge → publish. Successful scene
 and lifecycle clips are recorded, with screenshots in
 `tests/e2e/artifacts/scenes/` and clips under `tests/e2e/artifacts/results/`.

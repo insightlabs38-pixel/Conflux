@@ -1929,10 +1929,12 @@ class InputOfJudgeCalendarSchema(TypedDict):
     assignments: list[InputOfCalendarAssignmentSchema]
 
 class JudgeDirectorySchema(TypedDict):
+    identity: Any
     judge: str
     username: str
 
 class InputOfJudgeDirectorySchema(TypedDict):
+    identity: Any
     judge: str
     username: str
 
@@ -2149,6 +2151,7 @@ class InputOfMarketplaceProfileInput(TypedDict):
     visible: bool
 
 class MarketplaceProfileSchema(TypedDict):
+    identity: Any
     public_id: str
     user: str
     username: str
@@ -2164,6 +2167,7 @@ class MarketplaceProfileSchema(TypedDict):
     availability_compatible: NotRequired[bool | None]
 
 class InputOfMarketplaceProfileSchema(TypedDict):
+    identity: Any
     public_id: str
     user: str
     username: str
@@ -2887,6 +2891,29 @@ class InputOfPatchedTrack(TypedDict):
     description: NotRequired[str]
     position: NotRequired[int]
 
+class PatchedUserProfile(TypedDict):
+    display_name: NotRequired[str]
+    avatar_url: NotRequired[str]
+    bio: NotRequired[str]
+    location: NotRequired[str]
+    links: NotRequired[list[ProfileLinkSchema]]
+    visibility: NotRequired[VisibilityEnum]
+    skills: NotRequired[list[str]]
+    interests: NotRequired[list[str]]
+    preferred_roles: NotRequired[list[str]]
+    updated_at: NotRequired[str]
+
+class InputOfPatchedUserProfile(TypedDict):
+    display_name: NotRequired[str]
+    avatar_url: NotRequired[str]
+    bio: NotRequired[str]
+    location: NotRequired[str]
+    links: NotRequired[list[InputOfProfileLinkSchema]]
+    visibility: NotRequired[InputOfVisibilityEnum]
+    skills: NotRequired[list[str]]
+    interests: NotRequired[list[str]]
+    preferred_roles: NotRequired[list[str]]
+
 class PatchedVotingPlan(TypedDict):
     public_id: NotRequired[str]
     identity_mode: NotRequired[IdentityModeEnum]
@@ -3058,6 +3085,14 @@ class InputOfPrivacyReportOutput(TypedDict):
     retained: NotRequired[dict[str, Any]]
     retained_reason: NotRequired[str]
     due: NotRequired[dict[str, Any]]
+
+class ProfileLinkSchema(TypedDict):
+    label: str
+    url: str
+
+class InputOfProfileLinkSchema(TypedDict):
+    label: str
+    url: str
 
 class Project(TypedDict):
     public_id: str
@@ -4204,6 +4239,7 @@ class InputOfTeamInvite(TypedDict):
 class TeamMembership(TypedDict):
     user_public_id: str
     username: str
+    identity: Any
     role: NotRequired[TeamMembershipRoleEnum]
     joined_at: str
 
@@ -4421,6 +4457,10 @@ class InputOfVerifyRecordOutput(TypedDict):
     valid: bool
     claims: NotRequired[dict[str, Any]]
     error: NotRequired[str]
+
+VisibilityEnum = Literal['private', 'members', 'public']
+
+InputOfVisibilityEnum = Literal['private', 'members', 'public']
 
 class VisibilityInput(TypedDict):
     gallery_visible: NotRequired[bool]
@@ -4808,6 +4848,18 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                     'query_params': ['next'],
                                     'request_body': False,
                                     'response_kind': 'none'},
+ 'get_api_v1_accounts_people_user_public_id': {'method': 'GET',
+                                               'path': '/api/v1/accounts/people/{user_public_id}/',
+                                               'path_params': ['user_public_id'],
+                                               'query_params': [],
+                                               'request_body': False,
+                                               'response_kind': 'json'},
+ 'get_api_v1_accounts_profile': {'method': 'GET',
+                                 'path': '/api/v1/accounts/profile/',
+                                 'path_params': [],
+                                 'query_params': [],
+                                 'request_body': False,
+                                 'response_kind': 'json'},
  'get_api_v1_audit_workspace_public_id': {'method': 'GET',
                                           'path': '/api/v1/audit/{workspace_public_id}/',
                                           'path_params': ['workspace_public_id'],
@@ -6336,6 +6388,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                              'query_params': [],
                                                                                                              'request_body': False,
                                                                                                              'response_kind': 'json'},
+ 'patch_api_v1_accounts_profile': {'method': 'PATCH',
+                                   'path': '/api/v1/accounts/profile/',
+                                   'path_params': [],
+                                   'query_params': [],
+                                   'request_body': True,
+                                   'response_kind': 'json'},
  'patch_api_v1_workspaces_workspace_public_id_events_event_public_id': {'method': 'PATCH',
                                                                         'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/',
                                                                         'path_params': ['event_public_id',

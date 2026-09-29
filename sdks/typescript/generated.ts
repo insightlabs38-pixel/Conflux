@@ -2110,9 +2110,17 @@ export type InputOfJudgeCalendarSchema = {
   assignments: InputOfCalendarAssignmentSchema[];
 };
 
-export type JudgeDirectorySchema = { judge: string; username: string };
+export type JudgeDirectorySchema = {
+  identity: unknown;
+  judge: string;
+  username: string;
+};
 
-export type InputOfJudgeDirectorySchema = { judge: string; username: string };
+export type InputOfJudgeDirectorySchema = {
+  identity: unknown;
+  judge: string;
+  username: string;
+};
 
 export type JudgeEventSummary = { public_id: string; name: string };
 
@@ -2330,6 +2338,7 @@ export type InputOfMarketplaceProfileInput = {
 };
 
 export type MarketplaceProfileSchema = {
+  identity: unknown;
   public_id: string;
   user: string;
   username: string;
@@ -2346,6 +2355,7 @@ export type MarketplaceProfileSchema = {
 };
 
 export type InputOfMarketplaceProfileSchema = {
+  identity: unknown;
   public_id: string;
   user: string;
   username: string;
@@ -3139,6 +3149,31 @@ export type InputOfPatchedTrack = {
   position?: number;
 };
 
+export type PatchedUserProfile = {
+  display_name?: string;
+  avatar_url?: string;
+  bio?: string;
+  location?: string;
+  links?: ProfileLinkSchema[];
+  visibility?: VisibilityEnum;
+  skills?: string[];
+  interests?: string[];
+  preferred_roles?: string[];
+  updated_at?: string;
+};
+
+export type InputOfPatchedUserProfile = {
+  display_name?: string;
+  avatar_url?: string;
+  bio?: string;
+  location?: string;
+  links?: InputOfProfileLinkSchema[];
+  visibility?: InputOfVisibilityEnum;
+  skills?: string[];
+  interests?: string[];
+  preferred_roles?: string[];
+};
+
 export type PatchedVotingPlan = {
   public_id?: string;
   identity_mode?: IdentityModeEnum;
@@ -3326,6 +3361,10 @@ export type InputOfPrivacyReportOutput = {
   retained_reason?: string;
   due?: Record<string, unknown>;
 };
+
+export type ProfileLinkSchema = { label: string; url: string };
+
+export type InputOfProfileLinkSchema = { label: string; url: string };
 
 export type Project = {
   public_id: string;
@@ -4571,6 +4610,7 @@ export type InputOfTeamInvite = {};
 export type TeamMembership = {
   user_public_id: string;
   username: string;
+  identity: unknown;
   role?: TeamMembershipRoleEnum;
   joined_at: string;
 };
@@ -4791,6 +4831,10 @@ export type InputOfVerifyRecordOutput = {
   error?: string;
 };
 
+export type VisibilityEnum = "private" | "members" | "public";
+
+export type InputOfVisibilityEnum = "private" | "members" | "public";
+
 export type VisibilityInput = {
   gallery_visible?: boolean;
   blocked?: boolean;
@@ -4938,6 +4982,18 @@ export interface Operations {
   get_api_v1_accounts_oidc_login: {
     request: { query?: { next?: string } };
     response: never;
+  };
+  get_api_v1_accounts_people_user_public_id: {
+    request: { path: { user_public_id: string } };
+    response: Record<string, unknown>;
+  };
+  get_api_v1_accounts_profile: {
+    request: {};
+    response: Record<string, unknown>;
+  };
+  patch_api_v1_accounts_profile: {
+    request: { body?: InputOfPatchedUserProfile };
+    response: Record<string, unknown>;
   };
   get_api_v1_audit_workspace_public_id: {
     request: { path: { workspace_public_id: string } };
@@ -8420,6 +8476,30 @@ export const operations = {
     query_params: ["next"],
     request_body: false,
     response_kind: "none",
+  },
+  get_api_v1_accounts_people_user_public_id: {
+    method: "GET",
+    path: "/api/v1/accounts/people/{user_public_id}/",
+    path_params: ["user_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  get_api_v1_accounts_profile: {
+    method: "GET",
+    path: "/api/v1/accounts/profile/",
+    path_params: [],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  patch_api_v1_accounts_profile: {
+    method: "PATCH",
+    path: "/api/v1/accounts/profile/",
+    path_params: [],
+    query_params: [],
+    request_body: true,
+    response_kind: "json",
   },
   get_api_v1_audit_workspace_public_id: {
     method: "GET",

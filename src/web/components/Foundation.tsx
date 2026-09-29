@@ -150,7 +150,18 @@ export function Avatar({
       .toLocaleUpperCase() || "?";
   return (
     <span className={`cx-avatar cx-avatar--${size}`} aria-hidden="true">
-      {src ? <img src={src} alt="" loading="lazy" /> : initials}
+      {initials}
+      {src && (
+        <img
+          key={src}
+          src={src}
+          alt=""
+          loading="lazy"
+          onError={(event) => {
+            event.currentTarget.hidden = true;
+          }}
+        />
+      )}
     </span>
   );
 }
@@ -160,19 +171,21 @@ export function PersonCard({
   role,
   description,
   avatar,
+  href,
   children,
 }: {
   name: string;
   role?: string;
   description?: string;
   avatar?: string;
+  href?: string;
   children?: ReactNode;
 }) {
   return (
     <article className="cx-person">
       <Avatar name={name} src={avatar} />
       <div>
-        <h3>{name}</h3>
+        <h3>{href ? <a href={href}>{name}</a> : name}</h3>
         {role && <p className="cx-person__role">{role}</p>}
         {description && <p>{description}</p>}
         {children}

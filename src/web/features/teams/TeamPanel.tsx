@@ -1,6 +1,12 @@
+import { PersonRow, type PersonIdentity } from "../../components/Person";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
-type Member = { user_public_id: string; username: string; role: string };
+type Member = {
+  user_public_id: string;
+  username: string;
+  role: string;
+  identity?: PersonIdentity;
+};
 type Team = { public_id: string; name: string; members: Member[] };
 type Status = { team: Team | null; my_role: string | null };
 type Invite = {
@@ -189,16 +195,22 @@ export function TeamPanel({
           <ul aria-label="Team members">
             {status.team.members.map((member) => (
               <li key={member.user_public_id}>
-                {member.username} ({member.role})
-                {status.my_role === "captain" && member.role !== "captain" && (
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => transferCaptain(member.user_public_id)}
-                  >
-                    Make captain
-                  </button>
-                )}
+                <PersonRow
+                  person={member.identity}
+                  fallback={member.username}
+                  role={member.role}
+                >
+                  {status.my_role === "captain" &&
+                    member.role !== "captain" && (
+                      <button
+                        type="button"
+                        disabled={busy}
+                        onClick={() => transferCaptain(member.user_public_id)}
+                      >
+                        Make captain
+                      </button>
+                    )}
+                </PersonRow>
               </li>
             ))}
           </ul>

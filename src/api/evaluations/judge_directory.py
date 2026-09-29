@@ -1,5 +1,6 @@
 from accounts.authentication import CookieSessionAuthentication
 from accounts.models import User
+from accounts.profile import identity_for
 from audit.services import record_mutation
 from core.mixins import WorkspaceLookupMixin
 from core.permissions import require_roles
@@ -48,11 +49,21 @@ class JudgeDirectoryView(WorkspaceLookupMixin, APIView):
             User.objects.filter(
                 memberships__workspace=self.get_workspace(), memberships__role=Role.JUDGE
             )
+            .select_related("profile")
             .distinct()
             .order_by("username", "id")
         )
         return Response(
-            [{"judge": str(user.public_id), "username": user.username} for user in judges]
+            [
+                {
+                    "judge": str(user.public_id),
+                    "username": user.username,
+                    "identity": identity_for(
+                        user, viewer=request.user, workspace=self.get_workspace()
+                    ),
+                }
+                for user in judges
+            ]
         )
 
 

@@ -1,7 +1,8 @@
+import { PersonRow, type PersonIdentity } from "../../components/Person";
 import { useEffect, useState } from "react";
 import { Button } from "../../components/Button";
 
-type Judge = { judge: string; username: string };
+type Judge = { judge: string; username: string; identity?: PersonIdentity };
 type Invitation = {
   public_id: string;
   pool: string;
@@ -95,7 +96,7 @@ export function JudgeDirectoryPanel({
           <option value="">Choose a judge</option>
           {judges.map((judge) => (
             <option key={judge.judge} value={judge.judge}>
-              {judge.username}
+              {judge.identity?.display_name || judge.username}
             </option>
           ))}
         </select>
@@ -103,6 +104,17 @@ export function JudgeDirectoryPanel({
       <Button disabled={!judgeId} onClick={() => void invite()}>
         Send invitation
       </Button>
+      {judgeId &&
+        judges
+          .filter((item) => item.judge === judgeId)
+          .map((item) => (
+            <PersonRow
+              key={item.judge}
+              person={item.identity}
+              fallback={item.username}
+              role="Judge"
+            />
+          ))}
       {poolInvitations.length > 0 && (
         <ul>
           {poolInvitations.map((invitation) => (

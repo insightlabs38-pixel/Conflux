@@ -1,3 +1,4 @@
+import { ProfilePanel } from "../profile/ProfilePanel";
 import {
   Destination,
   WorkspaceViewTitle,
@@ -33,48 +34,53 @@ export function StaffWorkspace({
         title={role === "mentor" ? "Mentoring" : "Event desk"}
       />
       <WorkspaceViewTitle role={role} />
+      <Destination id="profile" lazy>
+        <ProfilePanel />
+      </Destination>
       <Destination id="messages">
         <Inbox workspaceId={workspaceId} />
       </Destination>
-      {events.loading && <LoadingState label="Loading events…" />}
-      {events.error && (
-        <ErrorState message={events.error.message} onRetry={events.reload} />
-      )}
-      {events.data && events.data.length === 0 && (
-        <EmptyState title="No events are open right now." />
-      )}
-      {events.data && events.data.length > 0 && (
-        <label>
-          Event{" "}
-          <select
-            value={eventId}
-            onChange={(event) => setEventId(event.target.value)}
-          >
-            <option value="">Choose an event</option>
-            {events.data.map((event) => (
-              <option key={event.public_id} value={event.public_id}>
-                {event.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
-      {eventId &&
-        (role === "mentor" ? (
-          <MentorDeskPanel
-            key={eventId}
-            workspaceId={workspaceId}
-            eventId={eventId}
-            isOrganizer={false}
-          />
-        ) : (
-          <OnsiteOperationsPanel
-            key={eventId}
-            workspaceId={workspaceId}
-            eventId={eventId}
-            canManage={false}
-          />
-        ))}
+      <Destination id="overview">
+        {events.loading && <LoadingState label="Loading events…" />}
+        {events.error && (
+          <ErrorState message={events.error.message} onRetry={events.reload} />
+        )}
+        {events.data && events.data.length === 0 && (
+          <EmptyState title="No events are open right now." />
+        )}
+        {events.data && events.data.length > 0 && (
+          <label>
+            Event{" "}
+            <select
+              value={eventId}
+              onChange={(event) => setEventId(event.target.value)}
+            >
+              <option value="">Choose an event</option>
+              {events.data.map((event) => (
+                <option key={event.public_id} value={event.public_id}>
+                  {event.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        {eventId &&
+          (role === "mentor" ? (
+            <MentorDeskPanel
+              key={eventId}
+              workspaceId={workspaceId}
+              eventId={eventId}
+              isOrganizer={false}
+            />
+          ) : (
+            <OnsiteOperationsPanel
+              key={eventId}
+              workspaceId={workspaceId}
+              eventId={eventId}
+              canManage={false}
+            />
+          ))}
+      </Destination>
     </section>
   );
 }

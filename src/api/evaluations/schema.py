@@ -14,6 +14,7 @@ class PoolMembershipInputSchema(serializers.Serializer):
 
 
 class JudgeDirectorySchema(serializers.Serializer):
+    identity = serializers.JSONField()
     judge = serializers.UUIDField()
     username = serializers.CharField()
 

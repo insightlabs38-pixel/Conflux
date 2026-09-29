@@ -108,6 +108,69 @@ paths:
       responses:
         '302':
           description: No response body
+  /api/v1/accounts/people/{user_public_id}/:
+    get:
+      operationId: get_api_v1_accounts_people_user_public_id
+      parameters:
+      - in: path
+        name: user_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - accounts
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/v1/accounts/profile/:
+    get:
+      operationId: get_api_v1_accounts_profile
+      tags:
+      - accounts
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+    patch:
+      operationId: patch_api_v1_accounts_profile
+      tags:
+      - accounts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserProfile'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserProfile'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserProfile'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
   /api/v1/audit/{workspace_public_id}/:
     get:
       operationId: get_api_v1_audit_workspace_public_id
@@ -19724,12 +19787,14 @@ components:
     JudgeDirectorySchema:
       type: object
       properties:
+        identity: {}
         judge:
           type: string
           format: uuid
         username:
           type: string
       required:
+      - identity
       - judge
       - username
     JudgeEventSummary:
@@ -20086,6 +20151,7 @@ components:
     MarketplaceProfileSchema:
       type: object
       properties:
+        identity: {}
         public_id:
           type: string
           format: uuid
@@ -20131,6 +20197,7 @@ components:
       required:
       - availability_hours_per_week
       - bio
+      - identity
       - interests
       - public_id
       - roles
@@ -21313,6 +21380,49 @@ components:
           maximum: 9223372036854775807
           minimum: 0
           format: int64
+    PatchedUserProfile:
+      type: object
+      properties:
+        display_name:
+          type: string
+          maxLength: 120
+        avatar_url:
+          type: string
+          maxLength: 2048
+        bio:
+          type: string
+          maxLength: 500
+        location:
+          type: string
+          maxLength: 120
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProfileLinkSchema'
+        visibility:
+          $ref: '#/components/schemas/VisibilityEnum'
+        skills:
+          type: array
+          items:
+            type: string
+            maxLength: 40
+          maxItems: 12
+        interests:
+          type: array
+          items:
+            type: string
+            maxLength: 40
+          maxItems: 12
+        preferred_roles:
+          type: array
+          items:
+            type: string
+            maxLength: 40
+          maxItems: 12
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
     PatchedVotingPlan:
       type: object
       properties:
@@ -21608,6 +21718,19 @@ components:
       required:
       - applied
       - erased
+    ProfileLinkSchema:
+      type: object
+      properties:
+        label:
+          type: string
+          maxLength: 50
+        url:
+          type: string
+          format: uri
+          maxLength: 2048
+      required:
+      - label
+      - url
     Project:
       type: object
       properties:
@@ -23655,6 +23778,8 @@ components:
         username:
           type: string
           readOnly: true
+        identity:
+          readOnly: true
         role:
           $ref: '#/components/schemas/TeamMembershipRoleEnum'
         joined_at:
@@ -23662,6 +23787,7 @@ components:
           format: date-time
           readOnly: true
       required:
+      - identity
       - joined_at
       - user_public_id
       - username
@@ -24023,6 +24149,16 @@ components:
           type: string
       required:
       - valid
+    VisibilityEnum:
+      enum:
+      - private
+      - members
+      - public
+      type: string
+      description: |-
+        * `private` - Private
+        * `members` - Shared workspace members
+        * `public` - Public
     VisibilityInput:
       type: object
       properties:

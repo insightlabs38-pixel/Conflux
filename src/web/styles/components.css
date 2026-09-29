@@ -1039,3 +1039,129 @@
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
 }
+
+.cx-avatar {
+  position: relative;
+}
+.cx-avatar img {
+  position: absolute;
+  inset: 0;
+}
+.cx-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: var(--space-3) 0;
+  padding: 0;
+}
+.cx-person-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding-block: var(--space-3);
+}
+.cx-person-row > div {
+  flex: 1;
+  min-width: 8rem;
+}
+.cx-person-row p {
+  margin: var(--space-1) 0 0;
+}
+.cx-profile-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-6);
+  padding-block: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+.cx-profile-header h3 {
+  font-size: var(--font-size-2xl);
+  margin: 0;
+}
+.cx-profile-header > div {
+  min-width: 0;
+  max-width: 48rem;
+  overflow-wrap: anywhere;
+}
+.cx-profile-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  list-style: none;
+  padding: 0;
+}
+.cx-profile-editor {
+  margin-block: var(--space-6);
+  border: 1px solid var(--color-border-strong);
+  padding: var(--space-4);
+  background: var(--color-surface-raised);
+}
+.cx-profile-editor summary {
+  cursor: pointer;
+  min-height: var(--control-height-compact);
+  font-weight: var(--font-weight-semibold);
+}
+.cx-profile-editor form {
+  display: grid;
+  gap: var(--space-4);
+  margin-block: var(--space-4);
+}
+.cx-profile-editor fieldset {
+  border: 0;
+  padding: 0;
+  min-width: 0;
+}
+.cx-profile-editor legend {
+  font-weight: var(--font-weight-semibold);
+  margin-block: var(--space-3);
+}
+.cx-profile-link-editor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-3);
+  margin-block: var(--space-4);
+}
+.cx-profile-link-editor .cx-field {
+  flex: 1 1 12rem;
+}
+.cx-profile > section {
+  margin-block: var(--space-6);
+}
+.cx-profile-event {
+  border-left: 3px solid var(--color-border-strong);
+  padding: var(--space-3) var(--space-4);
+}
+.cx-profile-event h4 {
+  margin: 0;
+}
+@media (max-width: 30rem) {
+  .cx-profile-header {
+    gap: var(--space-3);
+  }
+  .cx-profile-header h3 {
+    font-size: var(--font-size-xl);
+  }
+  .cx-profile-header .cx-avatar--large {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+}
+
+.cx-profile-editor fieldset > .cx-field,
+.cx-profile-editor fieldset > .cx-grid,
+.cx-profile-editor fieldset > fieldset {
+  margin-block: var(--space-4);
+}
+.cx-profile-editor form > .cx-button {
+  justify-self: start;
+}
+.cx-person > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.cx-person-row > div {
+  overflow-wrap: anywhere;
+}

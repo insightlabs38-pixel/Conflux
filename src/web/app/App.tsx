@@ -1,3 +1,4 @@
+import { PersonProfilePage } from "../features/profile/PersonProfilePage";
 import { useCallback, useEffect, useState } from "react";
 import { WorkspaceNavigationProvider } from "../components/WorkspaceNavigation";
 import { AppShell } from "../components/AppShell";
@@ -127,6 +128,12 @@ export function App() {
     backToWorkspaces();
     setSigningOut(false);
   }, [backToWorkspaces]);
+
+  const personId =
+    typeof window === "undefined"
+      ? null
+      : new URLSearchParams(window.location.search).get("person");
+  if (personId) return <PersonProfilePage personId={personId} />;
 
   if (publicEventId) {
     return <EventSite eventId={publicEventId} />;

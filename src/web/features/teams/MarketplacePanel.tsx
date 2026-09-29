@@ -1,3 +1,8 @@
+import {
+  IdentityCard,
+  SkillTags,
+  type PersonIdentity,
+} from "../../components/Person";
 import { useEffect, useState, type FormEvent } from "react";
 
 type TeamStatus = {
@@ -6,6 +11,7 @@ type TeamStatus = {
 };
 type Project = { public_id: string; name: string; team: string | null };
 type Profile = {
+  identity?: PersonIdentity;
   public_id: string;
   username: string;
   skills: string[];
@@ -246,6 +252,28 @@ export function MarketplacePanel({
       </button>
       <form onSubmit={saveProfile}>
         <h3>Your skills profile</h3>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() =>
+            void run(async () => {
+              const account = await request<{
+                skills?: string[];
+                interests?: string[];
+                preferred_roles?: string[];
+              }>("/api/v1/accounts/profile/");
+              setProfileSkills((account.skills || []).join(", "));
+              setProfileInterests((account.interests || []).join(", "));
+              setProfileRoles((account.preferred_roles || []).join(", "));
+            })
+          }
+        >
+          Use account skills and interests
+        </button>
+        <p>
+          Review these event preferences before saving. Availability and
+          marketplace visibility stay event-specific.
+        </p>
         <label>
           Skills, separated by commas{" "}
           <input
@@ -398,8 +426,22 @@ export function MarketplacePanel({
               <ul>
                 {candidates.map((item) => (
                   <li key={item.public_id}>
-                    {item.username} · {item.skills.join(", ")} · matching:{" "}
-                    {matchSummary(item)}
+                    <IdentityCard
+                      person={item.identity}
+                      fallback={item.username}
+                      role={item.roles?.join(" · ")}
+                      description={item.bio}
+                    >
+                      <SkillTags
+                        values={[...item.skills, ...(item.interests || [])]}
+                      />
+                      <p className="cx-metadata">
+                        Matching: {matchSummary(item)}
+                      </p>
+                      {item.availability_hours_per_week != null && (
+                        <p>{item.availability_hours_per_week} hours/week</p>
+                      )}
+                    </IdentityCard>
                   </li>
                 ))}
               </ul>

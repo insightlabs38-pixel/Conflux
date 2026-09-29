@@ -37,13 +37,16 @@ export const roleDestinations: Record<
     { id: "onsite", label: "On-site" },
     { id: "integrations", label: "Integrations", group: "Advanced" },
     { id: "operations", label: "Operations & audit" },
+    { id: "profile", label: "Profile", group: "Account" },
   ],
   mentor: [
     { id: "overview", label: "Mentor desk" },
+    { id: "profile", label: "Profile" },
     { id: "messages", label: "Messages" },
   ],
   volunteer: [
     { id: "overview", label: "Check-in desk" },
+    { id: "profile", label: "Profile" },
     { id: "messages", label: "Messages" },
   ],
 };
@@ -100,7 +103,9 @@ export function useWorkspaceNavigation() {
 export function Destination({
   id,
   children,
+  lazy = false,
 }: {
+  lazy?: boolean;
   id: string | string[];
   children: ReactNode;
 }) {
@@ -108,6 +113,12 @@ export function Destination({
   const visible =
     !navigation ||
     (Array.isArray(id) ? id.includes(navigation.view) : id === navigation.view);
+  const eligible = navigation ? visible : !lazy;
+  const [activated, setActivated] = useState(!lazy || eligible);
+  useEffect(() => {
+    if (eligible) setActivated(true);
+  }, [eligible]);
+  if (lazy && !activated) return null;
   return (
     <div className="cx-destination" hidden={!visible}>
       {children}

@@ -1944,10 +1944,23 @@ batches:
   - src/api/portfolio/**
   - src/web/features/profile/**
   - src/web/components/**
+  - src/web/app/App.tsx
+  - src/web/features/teams/**
+  - src/web/features/judging/**
+  - src/web/features/event-builder/EventDashboard.tsx
+  - src/web/features/pvs/StaffWorkspace.tsx
+  - src/web/styles/components.css
+  - src/api/evaluations/judge_directory.py
+  - src/api/evaluations/schema.py
+  - src/api/integrations/management/commands/demo_showcase.py
+  - tests/integration/**
+  - tests/e2e/**
+  - docs/api/openapi.yaml
+  - sdks/**
   task_ids:
   - UIV2-B04-01
   - UIV2-B04-02
-  status: BLOCKED
+  status: DONE
   completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
     receipt and commit recorded before advancing.
 - id: UIV2-B05

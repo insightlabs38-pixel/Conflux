@@ -86,7 +86,7 @@ export function AppShell({
               <span>{username || "My account"}</span>
             </summary>
             <div className="cx-account__panel">
-              {(role === "participant" || role === "judge") && (
+              {destinations.some((item) => item.id === "profile") && (
                 <DestinationLink id="profile" className="cx-account__link">
                   View profile
                 </DestinationLink>

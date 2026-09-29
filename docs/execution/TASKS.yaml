@@ -11270,7 +11270,7 @@ tasks:
   batch: UIV2-B04
   phase: ui-v2
   title: 'Implement: Identity/profile system + reusable person UI'
-  status: READY
+  status: DONE
   batch_dependencies:
   - UIV2-B03
   task_dependencies:
@@ -11286,6 +11286,19 @@ tasks:
   - src/api/portfolio/**
   - src/web/features/profile/**
   - src/web/components/**
+  - src/web/app/App.tsx
+  - src/web/features/teams/**
+  - src/web/features/judging/**
+  - src/web/features/event-builder/EventDashboard.tsx
+  - src/web/features/pvs/StaffWorkspace.tsx
+  - src/web/styles/components.css
+  - src/api/evaluations/judge_directory.py
+  - src/api/evaluations/schema.py
+  - src/api/integrations/management/commands/demo_showcase.py
+  - tests/integration/**
+  - tests/e2e/**
+  - docs/api/openapi.yaml
+  - sdks/**
   required_reading:
   - docs/execution/README.md
   - docs/ui-v2/SURFACE_CENSUS.md
@@ -11308,7 +11321,7 @@ tasks:
   batch: UIV2-B04
   phase: ui-v2
   title: 'Verify and checkpoint: Identity/profile system + reusable person UI'
-  status: BLOCKED
+  status: DONE
   batch_dependencies:
   - UIV2-B03
   task_dependencies:
@@ -11324,6 +11337,19 @@ tasks:
   - src/api/portfolio/**
   - src/web/features/profile/**
   - src/web/components/**
+  - src/web/app/App.tsx
+  - src/web/features/teams/**
+  - src/web/features/judging/**
+  - src/web/features/event-builder/EventDashboard.tsx
+  - src/web/features/pvs/StaffWorkspace.tsx
+  - src/web/styles/components.css
+  - src/api/evaluations/judge_directory.py
+  - src/api/evaluations/schema.py
+  - src/api/integrations/management/commands/demo_showcase.py
+  - tests/integration/**
+  - tests/e2e/**
+  - docs/api/openapi.yaml
+  - sdks/**
   required_reading:
   - docs/execution/README.md
   - docs/ui-v2/SURFACE_CENSUS.md
@@ -11346,7 +11372,7 @@ tasks:
   batch: UIV2-B05
   phase: ui-v2
   title: 'Implement: Gallery, project detail, results/showcase'
-  status: BLOCKED
+  status: READY
   batch_dependencies:
   - UIV2-B04
   task_dependencies:

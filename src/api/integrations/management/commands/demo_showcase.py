@@ -5,7 +5,7 @@ post-event continuation. Idempotent: re-running on an enriched event changes not
 
 from datetime import timedelta
 
-from accounts.models import User
+from accounts.models import User, UserProfile
 from awards.models import AwardResource
 from continuation.services import add_update, save_continuation
 from django.core.management.base import BaseCommand, CommandError
@@ -85,6 +85,33 @@ class Command(BaseCommand):
             .first()
             .user
         )
+
+        # Synthetic opt-in identities only; real accounts are never touched.
+        for membership in Membership.objects.filter(
+            workspace=workspace, user__username__startswith=prefix
+        ).select_related("user"):
+            suffix = membership.user.username.removeprefix(prefix)
+            if suffix.startswith("participant-"):
+                name = f"Builder {suffix.split('-')[-1]}"
+                visibility = "public"
+            elif suffix.startswith("judge-"):
+                name = f"Reviewer {suffix.split('-')[-1]}"
+                visibility = "members"
+            else:
+                name = suffix.title()
+                visibility = "members"
+            UserProfile.objects.get_or_create(
+                user=membership.user,
+                defaults={
+                    "display_name": name,
+                    "bio": "Synthetic Conflux demo identity.",
+                    "skills": ["Python", "Prototyping"]
+                    if membership.role == Role.PARTICIPANT
+                    else [],
+                    "interests": ["Open systems"] if membership.role == Role.PARTICIPANT else [],
+                    "visibility": visibility,
+                },
+            )
 
         page, _ = Page.objects.get_or_create(event=event)
         if not page.blocks.filter(kind="gallery").exists():

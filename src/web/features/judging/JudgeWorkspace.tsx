@@ -1,3 +1,4 @@
+import { ProfilePanel } from "../profile/ProfilePanel";
 import {
   Destination,
   DestinationLink,
@@ -642,10 +643,11 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
       <Destination id="messages">
         <Inbox workspaceId={workspaceId} />
       </Destination>
-      <Destination id="profile">
+      <Destination id="profile" lazy>
+        <ProfilePanel />
         <JudgeInvitationInbox workspaceId={workspaceId} />
       </Destination>
-      <Destination id="profile">
+      <Destination id="profile" lazy>
         <JudgeExpertisePanel workspaceId={workspaceId} />
       </Destination>
       {error && <p role="alert">{error}</p>}

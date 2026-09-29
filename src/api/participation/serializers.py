@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .models import Team, TeamInvite, TeamMembership
@@ -6,10 +7,17 @@ from .models import Team, TeamInvite, TeamMembership
 class TeamMembershipSerializer(serializers.ModelSerializer):
     user_public_id = serializers.UUIDField(source="user.public_id", read_only=True)
     username = serializers.CharField(source="user.username", read_only=True)
+    identity = serializers.SerializerMethodField()
+
+    @extend_schema_field(serializers.JSONField())
+    def get_identity(self, obj):
+        from accounts.profile import identity_for
+
+        return identity_for(obj.user, workspace=obj.team.event.workspace)
 
     class Meta:
         model = TeamMembership
-        fields = ["user_public_id", "username", "role", "joined_at"]
+        fields = ["user_public_id", "username", "identity", "role", "joined_at"]
 
 
 class TeamSerializer(serializers.ModelSerializer):
@@ -50,6 +58,7 @@ class MarketplaceProfileInput(serializers.Serializer):
 
 
 class MarketplaceProfileSchema(serializers.Serializer):
+    identity = serializers.JSONField()
     public_id = serializers.UUIDField()
     user = serializers.UUIDField()
     username = serializers.CharField()

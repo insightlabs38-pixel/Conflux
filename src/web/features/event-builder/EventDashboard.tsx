@@ -1,3 +1,4 @@
+import { ProfilePanel } from "../profile/ProfilePanel";
 import {
   Destination,
   DestinationLink,
@@ -278,6 +279,9 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
         description="Manage the event, review what needs attention, and bring the results to publication."
       />
       <WorkspaceViewTitle role="organizer" />
+      <Destination id="profile" lazy>
+        <ProfilePanel />
+      </Destination>
       {error && <p role="alert">{error}</p>}
       {loadingEvents && <LoadingState label="Loading events…" />}
       {loadError && (

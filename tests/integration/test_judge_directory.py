@@ -45,7 +45,23 @@ def test_directory_and_invitation_acceptance_are_workspace_and_event_scoped():
     invite = url(workspace, f"events/{event.public_id}/judge-invitations/")
 
     assert organizer_client.get(directory).json() == [
-        {"judge": str(judge.public_id), "username": "judge"}
+        {
+            "judge": str(judge.public_id),
+            "username": "judge",
+            "identity": {
+                "user_public_id": str(judge.public_id),
+                "username": "judge",
+                "display_name": "judge",
+                "avatar_url": "",
+                "bio": "",
+                "location": "",
+                "links": [],
+                "profile_url": "",
+                "skills": [],
+                "interests": [],
+                "preferred_roles": [],
+            },
+        }
     ]
     assert judge_client.get(directory).status_code == 403
     assert (

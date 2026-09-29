@@ -65,7 +65,10 @@ def _availability_compatible(candidate_hours, required_hours):
 
 
 def profile_data(profile):
+    from accounts.profile import identity_for
+
     return {
+        "identity": identity_for(profile.user, workspace=profile.event.workspace),
         "public_id": str(profile.public_id),
         "user": str(profile.user.public_id),
         "username": profile.user.username,

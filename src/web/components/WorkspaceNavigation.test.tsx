@@ -119,3 +119,48 @@ describe("workspace destinations", () => {
     act(() => root.unmount());
   });
 });
+
+it("loads optional profile content only when visited and retains its draft afterwards", async () => {
+  window.history.replaceState({}, "", "/app/?workspace=w");
+  vi.stubGlobal("requestAnimationFrame", (fn: () => void) => {
+    fn();
+    return 0;
+  });
+  const host = document.createElement("div");
+  document.body.appendChild(host);
+  const root = createRoot(host);
+  await act(async () =>
+    root.render(
+      <WorkspaceNavigationProvider role="participant">
+        <AppShell role="participant">
+          <Destination id="profile" lazy>
+            <input aria-label="Profile draft" defaultValue="" />
+          </Destination>
+        </AppShell>
+      </WorkspaceNavigationProvider>,
+    ),
+  );
+  expect(host.querySelector("input")).toBeNull();
+  const link = host.querySelector<HTMLAnchorElement>(
+    'nav[aria-label="Primary"] a[href*="view=profile"]',
+  )!;
+  await act(async () =>
+    link.dispatchEvent(new MouseEvent("click", { bubbles: true, button: 0 })),
+  );
+  const input = host.querySelector<HTMLInputElement>("input")!;
+  input.value = "Unsaved bio";
+  await act(async () =>
+    host
+      .querySelector<HTMLAnchorElement>(
+        'nav[aria-label="Primary"] a[href*="view=overview"]',
+      )!
+      .dispatchEvent(new MouseEvent("click", { bubbles: true, button: 0 })),
+  );
+  await act(async () =>
+    link.dispatchEvent(new MouseEvent("click", { bubbles: true, button: 0 })),
+  );
+  expect(host.querySelector("input")).toBe(input);
+  expect(input.value).toBe("Unsaved bio");
+  await act(async () => root.unmount());
+  host.remove();
+});

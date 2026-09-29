@@ -128,3 +128,37 @@ class OidcLoginState(models.Model):
     code_verifier = models.CharField(max_length=128)
     next_path = models.CharField(max_length=500, default="/")
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+
+class UserProfile(PublicIdModel):
+    """Reusable opt-in identity; event matching and expertise stay in their domain models."""
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile"
+    )
+    display_name = models.CharField(max_length=120, blank=True)
+    avatar_url = models.CharField(max_length=2048, blank=True)
+    bio = models.CharField(max_length=500, blank=True)
+    location = models.CharField(max_length=120, blank=True)
+    links = models.JSONField(default=list, blank=True)
+    skills = models.JSONField(default=list, blank=True)
+    interests = models.JSONField(default=list, blank=True)
+    preferred_roles = models.JSONField(default=list, blank=True)
+    visibility = models.CharField(
+        max_length=10,
+        choices=(
+            ("private", "Private"),
+            ("members", "Shared workspace members"),
+            ("public", "Public"),
+        ),
+        default="private",
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        from .profile import clean_links, clean_tags, safe_profile_url
+
+        self.links = clean_links(self.links)
+        for name in ("skills", "interests", "preferred_roles"):
+            setattr(self, name, clean_tags(getattr(self, name)))
+        safe_profile_url(self.avatar_url, allow_blank=True)

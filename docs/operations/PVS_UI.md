@@ -48,8 +48,9 @@ form drafts and the judge's offline buffers. Direct links use `view` in the URL.
 | Organizer        | Integrations / Operations & audit | Webhooks / console, health, continuation moderation, config history, permissions                            |
 | Mentor/volunteer | Mentor desk / Check-in desk       | Existing staff workflows; Messages is separate                                                              |
 
-The account disclosure provides sign-out; participants/judges can open profile
-history from it. Reusable identity is added in B04; a portfolio remains history.
+The account disclosure provides sign-out and profile navigation for every supported
+role. Reusable identity and privacy controls are in Profile; portfolio remains
+workspace-scoped history. [Identity behavior](../ui-v2/IDENTITY_PROFILES.md).
 
 ## Intentionally API/CLI-first
 

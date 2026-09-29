@@ -1,3 +1,4 @@
+import { ProfilePanel } from "../profile/ProfilePanel";
 import {
   Destination,
   DestinationLink,
@@ -88,7 +89,8 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
       <Destination id="messages">
         <Inbox workspaceId={workspaceId} />
       </Destination>
-      <Destination id="profile">
+      <Destination id="profile" lazy>
+        <ProfilePanel />
         <PortfolioPanel workspaceId={workspaceId} />
       </Destination>
       {loading && <LoadingState label="Loading events…" />}

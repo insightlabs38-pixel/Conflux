@@ -1,5 +1,7 @@
 # Final targeted Conflux pass
 
+Implementation source: `d7c6d87` (full SHA in the extended receipt).
+
 The PVS-H06 release remains closed. This pass fixes pairwise evaluation
 awards and sponsor-resource portability, adds independent evidence and
 refreshes the demo/README. The vendor checker remains byte-identical:
@@ -34,7 +36,7 @@ refreshes the demo/README. The vendor checker remains byte-identical:
 | Affected PostgreSQL suites after resource ordering refinement | 70 passed                                                                                                   |
 | Final `make verify-fast`                                      | 1373 backend passed, 23 skipped; 137 web + 8 embed passed; format/lint/build/OpenAPI/SDK/block-schema clean |
 | Untouched official acceptance                                 | 7/7; claims T1–T4, verifies T1/T2                                                                           |
-| Conflux extended verifier                                     | PASS; linked below with source commit and exact test sources                                                |
+| Conflux extended verifier                                     | PASS; 320 regression tests, OpenAPI/SDK and live embed; exact sources linked below                          |
 | Submitted Playwright suite                                    | 60 passed, 11 desktop-only mobile skips                                                                     |
 | Final lifecycle with uploaded brief and safe inspector        | 6/6 passed                                                                                                  |
 | Published Playwright suite                                    | 39/39 passed                                                                                                |

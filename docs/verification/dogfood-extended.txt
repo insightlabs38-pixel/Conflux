@@ -1,0 +1,50 @@
+Conflux DOGFOOD extended verification
+source commit: d7c6d872b7ef8658cbf5b8e5239b9c281dd5ac98
+Scope: disposable regression DB plus live official checker and gallery embed.
+Source worktree (excluding generated receipts): clean
+T3/T4 are manually judged by organizers; PASS below is Conflux evidence only.
+Anti-abuse: single-use/duplicate controls, throttling and audit signals; no claim of Sybil-proof identity.
+Records: Ed25519 event/project/judge records; no claim of a PDF certificate designer.
+
+OFFICIAL (untouched organizer-supplied checker; automated T1/T2 only)
+Official checker execution............ PASS — scripts/run-acceptance (log: artifacts/final-pass/official-checker-execution.log)
+T1 official........................... PASS — acceptance-report.txt
+T2 official........................... PASS — acceptance-report.txt
+
+MANUAL TIERS / CONFLUX REGRESSION EVIDENCE + DIFFERENTIATORS
+Official checker integrity............ PASS — 2/2 tests; tests/acceptance/test_acceptance_report.py
+T3 community voting................... PASS — 13/13 tests; tests/integration/community/test_voting_plan_api.py, tests/integration/community/test_voting_flows.py
+T3 comments........................... PASS — 6/6 tests; tests/integration/community/test_comments_and_results.py
+T3 hidden results..................... PASS — 6/6 tests; tests/integration/community/test_comments_and_results.py
+T3 randomized ballots................. PASS — 12/12 tests; tests/integration/community/test_ordering.py, tests/integration/community/test_voting_flows.py
+T3 abuse controls..................... PASS — 12/12 tests; tests/integration/community/test_abuse_controls.py, tests/integration/community/test_fraud_review.py
+T4 certificates / records............. PASS — 13/13 tests; tests/integration/test_records_api.py, tests/integration/test_verifiable_records.py
+T4 signed judge records............... PASS — 13/13 tests; tests/integration/test_verifiable_records.py, tests/integration/test_records_api.py
+T4 webhooks........................... PASS — 12/12 tests; tests/integration/test_webhooks.py
+T4 bulk import/export................. PASS — 30/30 tests; tests/compatibility/test_canonical_archive.py, tests/integration/test_final_archive.py, tests/integration/test_signed_archive.py
+Normalization proof................... PASS — 18/18 tests; tests/integration/normalization/test_fixture_proof.py, tests/integration/normalization/test_fixture_mutations.py, tests/integration/normalization/test_normalization_api.py
+Pairwise Bradley-Terry................ PASS — 18/18 tests; tests/integration/test_pairwise_estimator.py, tests/integration/test_pairwise_judging_api.py
+Pairwise → awards..................... PASS — 25/25 tests; tests/integration/test_award_selection.py, tests/integration/test_final_archive.py
+Threat model / isolation.............. PASS — 8/8 tests; tests/integration/test_permission_matrix.py, tests/integration/test_blind_judging_api.py
+API-first SDK / CLI................... PASS — 18/18 tests; tests/test_generated_sdks.py, tests/test_admin_cli.py, tests/integration/test_api_explorer_examples.py
+Judging replay........................ PASS — 7/7 tests; tests/integration/test_judging_replay.py
+Event-as-Code......................... PASS — 18/18 tests; tests/integration/test_event_as_code.py
+Audit capsule......................... PASS — 9/9 tests; tests/integration/test_audit_capsule.py
+OIDC.................................. PASS — 28/28 tests; tests/integration/test_oidc.py
+MCP adapter........................... PASS — 18/18 tests; tests/integration/test_mcp_adapter.py
+Hybrid / on-site...................... PASS — 52/52 tests; tests/integration/test_hybrid_evaluation.py, tests/integration/test_onsite.py, tests/integration/test_event_logistics.py, tests/integration/test_judge_routes.py
+Governance............................ PASS — 12/12 tests; tests/integration/test_governance.py
+Portfolio............................. PASS — 14/14 tests; tests/integration/test_portfolio.py
+T4 REST/OpenAPI....................... PASS — make openapi-check (log: artifacts/final-pass/t4-rest-openapi.log)
+SDK consistency....................... PASS — make sdk-check (log: artifacts/final-pass/sdk-consistency.log)
+T4 gallery embed...................... PASS — npx playwright test -c tests/e2e/playwright.config.ts extended-embed --project=desktop (log: artifacts/final-pass/t4-gallery-embed.log)
+Threat model document................. PASS — SECURITY.md; representative isolation tests above
+Dex real-provider OIDC................ MANUAL-EVIDENCE — docs/verification/PVS-H06/oidc-dex-smoke.txt (18/18; prior release receipt)
+Cold/offline self-hosting............. MANUAL-EVIDENCE — docs/verification/PVS-H06/report.md (prior release receipt; make cold-boot-smoke)
+Backup/restore........................ MANUAL-EVIDENCE — docs/verification/PVS-H06/report.md (prior release receipt; make backup-restore-smoke)
+Load integrity........................ MANUAL-EVIDENCE — docs/verification/PVS-H06/saturated-workers2.json and unsaturated-workers4.json (prior release receipts)
+Human PVS workspaces.................. MANUAL-EVIDENCE — docs/operations/PVS_UI.md; make demo-reset && make demo-e2e
+
+Overall: PASS
+Reproduce: make up; make demo-reset; make verify-dogfood-extended
+SKIP and MANUAL-EVIDENCE are not machine PASS. Logs are generated, not committed.

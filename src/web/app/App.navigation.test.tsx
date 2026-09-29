@@ -100,9 +100,17 @@ describe("App navigation", () => {
     act(() => {
       root.render(<App />);
     });
-    await waitFor(() => container.querySelector("button") !== null);
+    await waitFor(
+      () =>
+        container.querySelector('[aria-label="Your workspaces"] button') !==
+        null,
+    );
     act(() => {
-      container.querySelector("button")?.click();
+      container
+        .querySelector<HTMLButtonElement>(
+          '[aria-label="Your workspaces"] button',
+        )
+        ?.click();
     });
     await waitFor(
       () =>
@@ -141,9 +149,15 @@ describe("App navigation", () => {
     act(() => {
       root.render(<App />);
     });
-    await waitFor(() => container.querySelectorAll("button").length > 0);
+    await waitFor(
+      () =>
+        container.querySelectorAll('[aria-label="Your workspaces"] button')
+          .length > 0,
+    );
 
-    const selectButton = container.querySelector("button");
+    const selectButton = container.querySelector(
+      '[aria-label="Your workspaces"] button',
+    );
     expect(selectButton?.textContent).toContain("Regionals");
     act(() => {
       (selectButton as HTMLButtonElement).click();
@@ -178,9 +192,17 @@ describe("App navigation", () => {
     act(() => {
       root.render(<App />);
     });
-    await waitFor(() => container.querySelectorAll("button").length > 0);
+    await waitFor(
+      () =>
+        container.querySelectorAll('[aria-label="Your workspaces"] button')
+          .length > 0,
+    );
     act(() => {
-      (container.querySelector("button") as HTMLButtonElement).click();
+      (
+        container.querySelector(
+          '[aria-label="Your workspaces"] button',
+        ) as HTMLButtonElement
+      ).click();
     });
     await waitFor(
       () => container.querySelector('[aria-label="Judging"]') !== null,

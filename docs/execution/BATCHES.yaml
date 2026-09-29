@@ -1877,10 +1877,13 @@ batches:
   - src/web/styles/**
   - src/web/app/SignIn.tsx
   - src/web/app/WorkspaceSelector.tsx
+  - src/api/presentation/accessibility.py
+  - tests/integration/test_accessibility_audit.py
+  - tests/e2e/foundations.spec.ts
   task_ids:
   - UIV2-B01-01
   - UIV2-B01-02
-  status: BLOCKED
+  status: DONE
   completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
     receipt and commit recorded before advancing.
 - id: UIV2-B02

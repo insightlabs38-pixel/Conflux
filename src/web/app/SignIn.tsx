@@ -1,5 +1,6 @@
 import { useEffect, useId, useState, type FormEvent } from "react";
 import { Button } from "../components/Button";
+import { Alert, ButtonLink, Field, TextInput } from "../components/Foundation";
 
 type SsoConfig = {
   enabled: boolean;
@@ -26,7 +27,7 @@ function failureMessage(status: number): string {
 }
 
 export function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
-  const ids = { user: useId(), password: useId() };
+  const titleId = useId();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -74,46 +75,65 @@ export function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
   );
 
   return (
-    <section aria-labelledby={`${ids.user}-title`} className="cx-signin">
-      <h2 id={`${ids.user}-title`}>Sign in to see your workspaces.</h2>
-      <form onSubmit={submit} noValidate={false}>
-        <p>
-          <label htmlFor={ids.user}>Username</label>
-          <br />
-          <input
-            id={ids.user}
-            name="username"
-            autoComplete="username"
-            required
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-          />
+    <div className="cx-entry">
+      <aside className="cx-entry__intro" aria-label="Welcome to Conflux">
+        <div>
+          <p className="cx-eyebrow">Build · Review · Celebrate</p>
+          <h2>Good ideas deserve a great event.</h2>
+          <p>
+            Your team, your project, and every step from the first draft to the
+            final showcase.
+          </p>
+        </div>
+        <p className="cx-entry__rule">
+          One place for participants, judges, and the people bringing it all
+          together.
         </p>
-        <p>
-          <label htmlFor={ids.password}>Password</label>
-          <br />
-          <input
-            id={ids.password}
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </p>
-        {error && <p role="alert">{error}</p>}
-        <Button type="submit" disabled={pending || !username || !password}>
-          {pending ? "Signing in…" : "Sign in"}
-        </Button>
-      </form>
-      {sso.enabled && sso.login_url && (
-        <p>
-          <a href={`${sso.login_url}?next=${next}`}>
-            Sign in with {sso.provider_name ?? "single sign-on"}
-          </a>
-        </p>
-      )}
-    </section>
+      </aside>
+      <section aria-labelledby={titleId} className="cx-signin">
+        <h2 id={titleId}>Sign in to see your workspaces.</h2>
+        <form onSubmit={submit} noValidate={false}>
+          <Field label="Username">
+            {(props) => (
+              <TextInput
+                {...props}
+                name="username"
+                autoComplete="username"
+                required
+                value={username}
+                onChange={(event) => setUsername(event.target.value)}
+              />
+            )}
+          </Field>
+          <Field label="Password">
+            {(props) => (
+              <TextInput
+                {...props}
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
+            )}
+          </Field>
+          {error && <Alert tone="danger">{error}</Alert>}
+          <Button type="submit" disabled={pending || !username || !password}>
+            {pending ? "Signing in…" : "Sign in"}
+          </Button>
+        </form>
+        {sso.enabled && sso.login_url && (
+          <p>
+            <ButtonLink
+              variant="secondary"
+              href={`${sso.login_url}?next=${next}`}
+            >
+              Sign in with {sso.provider_name ?? "single sign-on"}
+            </ButtonLink>
+          </p>
+        )}
+      </section>
+    </div>
   );
 }

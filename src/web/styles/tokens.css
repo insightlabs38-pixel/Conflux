@@ -1,18 +1,53 @@
-/* Semantic design tokens (UI-001). Components read these custom properties
-   rather than hard-coding colors/spacing, so the palette can change in one
-   place. Values are deliberately plain (no dark mode): nothing downstream
-   has asked for a theme switch yet, and the post-spec plan doesn't require
-   one. */
+/* Shared semantic foundation; React and server-rendered public templates. */
 :root {
-  --color-bg: #ffffff;
-  --color-surface: #f6f7f9;
+  --color-surface-subtle: #f7f9f8;
+  --color-text-tertiary: #65736d;
+  --color-accent-active: #083e35;
+  --color-accent-subtle: #e1efe9;
+  --color-divider: var(--color-border);
+  --font-mono:
+    ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  --font-size-xs: 0.75rem;
+  --font-size-2xl: 2.25rem;
+  --font-size-display: clamp(2.5rem, 5vw, 4.5rem);
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-tight: 1.15;
+  --line-height-body: 1.55;
+  --line-height-code: 1.65;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --control-height: 2.75rem;
+  --control-height-compact: 2.25rem;
+  --content-narrow: 32rem;
+  --content-reading: 48rem;
+  --content-app: 82rem;
+  --content-public: 76rem;
+  /* CSS media queries use 40/64/90rem; custom properties cannot be query inputs. */
+  --breakpoint-mobile: 40rem;
+  --breakpoint-desktop: 64rem;
+  --breakpoint-wide: 90rem;
+  --motion-fast: 120ms;
+  --motion-normal: 200ms;
+  --motion-ease: cubic-bezier(0.2, 0, 0, 1);
+  --z-navigation: 20;
+  --z-menu: 40;
+  --z-dialog: 60;
+  --z-toast: 80;
+  --z-skip-link: 100;
+
+  --color-bg: #f4f6f5;
+  --color-surface: #edf1ef;
   --color-surface-raised: #ffffff;
   --color-border: #d7dce2;
-  --color-border-strong: #aeb7c2;
+  --color-border-strong: #7c8982;
   --color-text: #16202b;
   --color-text-muted: #56626d;
-  --color-accent: #2952cc;
-  --color-accent-strong: #1d3d99;
+  --color-accent: #126454;
+  --color-accent-strong: #0b4c40;
   --color-accent-contrast: #ffffff;
 
   --color-success: #146c43;
@@ -24,7 +59,7 @@
   --color-info: #2952cc;
   --color-info-bg: #eaf0ff;
 
-  --color-focus-ring: #2952cc;
+  --color-focus-ring: #126454;
 
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -35,8 +70,8 @@
   --space-8: 2rem;
 
   --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
 
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-size-sm: 0.875rem;
@@ -54,11 +89,25 @@
    via `data-theme="dark"` / `.theme-minimal` on <html>/<body>. The React
    app never sets these today, so it keeps the default palette above. */
 :root[data-theme="dark"] {
+  --color-surface-subtle: #171e23;
+  --color-text-tertiary: #a7b0bb;
+  --color-accent-subtle: #25344b;
+  --color-accent-active: #afc1ff;
+  --color-success: #81d7a7;
+  --color-success-bg: #193a2a;
+  --color-warning: #f4ca7c;
+  --color-warning-bg: #3d3019;
+  --color-danger: #ffa9a3;
+  --color-danger-bg: #442420;
+  --color-info: #adc1ff;
+  --color-info-bg: #25344b;
+  --color-focus-ring: #adc1ff;
+
   --color-bg: #12161c;
   --color-surface: #1b2028;
   --color-surface-raised: #1b2028;
   --color-border: #2c333d;
-  --color-border-strong: #3d4551;
+  --color-border-strong: #7e8996;
   --color-text: #e8ecf1;
   --color-text-muted: #a7b0bb;
   --color-accent: #6d8fff;

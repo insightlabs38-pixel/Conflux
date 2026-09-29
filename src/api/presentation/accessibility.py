@@ -14,17 +14,17 @@ import re
 # if tokens.css's palette changes.
 THEME_COLORS = {
     "default": {
-        "bg": "#ffffff",
+        "bg": "#f4f6f5",
         "text": "#16202b",
         "text_muted": "#56626d",
-        "accent": "#2952cc",
+        "accent": "#126454",
     },
     "minimal": {
         # .theme-minimal only changes shadows/radius, not the palette.
-        "bg": "#ffffff",
+        "bg": "#f4f6f5",
         "text": "#16202b",
         "text_muted": "#56626d",
-        "accent": "#2952cc",
+        "accent": "#126454",
     },
     "dark": {
         "bg": "#12161c",

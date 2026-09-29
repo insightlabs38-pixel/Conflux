@@ -136,3 +136,24 @@ def test_participant_cannot_read_the_audit():
     client = cookie_client(Session.issue(participant).token)
 
     assert client.get(page_url(workspace, event, "accessibility-audit/")).status_code == 403
+
+
+def test_fixed_theme_audit_tracks_shared_css_tokens():
+    """The server audit must measure the palette actually served to browsers."""
+    import re
+    from pathlib import Path
+
+    from presentation.accessibility import THEME_COLORS
+
+    css = (Path(__file__).parents[2] / "src/web/styles/tokens.css").read_text()
+    default = re.search(r":root \{(.*?)\n\}", css, re.S).group(1)
+    dark = re.search(r':root\[data-theme="dark"\] \{(.*?)\n\}', css, re.S).group(1)
+    for theme, section in (("default", default), ("minimal", default), ("dark", dark)):
+        for key, token in (
+            ("bg", "bg"),
+            ("text", "text"),
+            ("text_muted", "text-muted"),
+            ("accent", "accent"),
+        ):
+            value = re.search(rf"--color-{token}: (#[0-9a-f]{{6}});", section).group(1)
+            assert THEME_COLORS[theme][key] == value

@@ -11018,7 +11018,7 @@ tasks:
   batch: UIV2-B01
   phase: ui-v2
   title: 'Implement: Design system v2 foundations'
-  status: READY
+  status: DONE
   batch_dependencies:
   - UIV2-B00
   task_dependencies:
@@ -11033,6 +11033,9 @@ tasks:
   - src/web/styles/**
   - src/web/app/SignIn.tsx
   - src/web/app/WorkspaceSelector.tsx
+  - src/api/presentation/accessibility.py
+  - tests/integration/test_accessibility_audit.py
+  - tests/e2e/foundations.spec.ts
   required_reading:
   - docs/execution/README.md
   - docs/ui-v2/SURFACE_CENSUS.md
@@ -11055,7 +11058,7 @@ tasks:
   batch: UIV2-B01
   phase: ui-v2
   title: 'Verify and checkpoint: Design system v2 foundations'
-  status: BLOCKED
+  status: DONE
   batch_dependencies:
   - UIV2-B00
   task_dependencies:
@@ -11070,6 +11073,9 @@ tasks:
   - src/web/styles/**
   - src/web/app/SignIn.tsx
   - src/web/app/WorkspaceSelector.tsx
+  - src/api/presentation/accessibility.py
+  - tests/integration/test_accessibility_audit.py
+  - tests/e2e/foundations.spec.ts
   required_reading:
   - docs/execution/README.md
   - docs/ui-v2/SURFACE_CENSUS.md
@@ -11092,7 +11098,7 @@ tasks:
   batch: UIV2-B02
   phase: ui-v2
   title: 'Implement: Authenticated app shell + navigation IA'
-  status: BLOCKED
+  status: READY
   batch_dependencies:
   - UIV2-B01
   task_dependencies:

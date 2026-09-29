@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "../components/Button";
+import { Avatar, PageHeader } from "../components/Foundation";
+import { LoadingState } from "../components/LoadingState";
+import { ErrorState } from "../components/ErrorState";
+import { EmptyState } from "../components/EmptyState";
 import { SignIn } from "./SignIn";
 
 type Membership = {
@@ -84,33 +88,60 @@ export function WorkspaceSelector({
     };
   }, [attempt]);
 
-  if (state === "loading") return <p>Loading your workspaces…</p>;
+  if (state === "loading")
+    return <LoadingState label="Loading your workspaces…" />;
   if (state === "signed-out") return <SignIn onSignedIn={reload} />;
-  if (state === "error") return <p role="alert">{error}</p>;
+  if (state === "error") return <ErrorState message={error} onRetry={reload} />;
   if (workspaces.length === 0)
-    return <p>You are not a member of any workspace yet.</p>;
+    return (
+      <EmptyState title="You are not a member of any workspace yet.">
+        <p>Ask your event organizer for an invitation to get started.</p>
+      </EmptyState>
+    );
 
   return (
-    <>
+    <section className="cx-workspaces">
+      <PageHeader
+        eyebrow="Your Conflux"
+        title="Choose your workspace"
+        description="Pick an event workspace to continue with your team, reviews, or event operations."
+        actions={
+          <Button variant="secondary" onClick={signOut}>
+            Sign out
+          </Button>
+        }
+      />
       <nav aria-label="Your workspaces">
-        <ul>
+        <ul className="cx-workspace-list">
           {workspaces.map((membership) => (
             <li key={membership.workspace}>
               <button
                 type="button"
+                className="cx-workspace-choice"
+                aria-label={`${membership.workspace_name} (${membership.role})`}
                 onClick={() => onSelect(membership.workspace, membership.role)}
               >
-                {membership.workspace_name} ({membership.role})
+                <Avatar
+                  name={
+                    membership.workspace_name ||
+                    membership.workspace_slug ||
+                    "Workspace"
+                  }
+                />
+                <span className="cx-workspace-choice__text">
+                  <strong>{membership.workspace_name}</strong>
+                  <span className="cx-workspace-choice__role">
+                    {membership.role}
+                  </span>
+                </span>
+                <span className="cx-workspace-choice__arrow" aria-hidden="true">
+                  →
+                </span>
               </button>
             </li>
           ))}
         </ul>
       </nav>
-      <p>
-        <Button variant="secondary" onClick={signOut}>
-          Sign out
-        </Button>
-      </p>
-    </>
+    </section>
   );
 }

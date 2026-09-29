@@ -2010,6 +2010,8 @@ batches:
   owned_paths:
   - src/web/features/judging/**
   - src/web/features/pvs/JudgingLogisticsPanels.tsx
+  - src/web/styles/components.css
+  - tests/e2e/**
   task_ids:
   - UIV2-B07-01
   - UIV2-B07-02

@@ -16,6 +16,7 @@ import { Inbox } from "../communications/Inbox";
 import { JudgeCalendarPanel } from "./JudgeCalendarPanel";
 import { JudgeExpertisePanel } from "./JudgeExpertisePanel";
 import { JudgeInvitationInbox } from "./JudgeInvitationInbox";
+import { JudgeSummary, ProgressMeter, progressOf } from "./JudgeSummary";
 import {
   ArtifactInspector,
   JudgeAssignmentsPanel,
@@ -166,15 +167,24 @@ function BallotForm({
   base,
   candidate,
   rubric,
+  position,
+  onPrevious,
+  onNext,
+  onRecuse,
   onSubmitted,
   onQueued,
 }: {
   base: string;
   candidate: Candidate;
   rubric: RubricVersion;
-  onSubmitted: () => void;
-  onQueued: () => void;
+  position: string;
+  onPrevious: (() => void) | null;
+  onNext: (() => void) | null;
+  onRecuse: () => void;
+  onSubmitted: (continueToNext: boolean) => void;
+  onQueued: (continueToNext: boolean) => void;
 }) {
+  const advance = useRef(false);
   const [scores, setScores] = useState<Record<string, string>>({});
   const [comment, setComment] = useState("");
   const [saving, setSaving] = useState(false);
@@ -265,6 +275,8 @@ function BallotForm({
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
+    const continueToNext = advance.current;
+    advance.current = false;
     setSubmitting(true);
     setError("");
     const responses = rubric.criteria.map((criterion) => ({
@@ -296,12 +308,12 @@ function BallotForm({
         comment,
         responses,
       });
-      onSubmitted();
+      onSubmitted(continueToNext);
     } catch (cause) {
       if (isNetworkFailure(cause)) {
         queueBallot(base, { project: candidate.project, comment, responses });
         setError("");
-        onQueued();
+        onQueued(continueToNext);
       } else {
         setError(message(cause));
       }
@@ -313,84 +325,152 @@ function BallotForm({
   const finalized = candidate.status === "submitted";
   const queued = candidate.status === "queued";
 
+  const scored = rubric.criteria.filter(
+    (criterion) => (scores[criterion.id] ?? "") !== "",
+  ).length;
+  const locked = !loaded || finalized || queued;
+
   return (
-    <Card title={candidate.name}>
-      {error && <p role="alert">{error}</p>}
-      <form onSubmit={submit}>
-        {rubric.criteria.map((criterion) => (
-          <fieldset
-            key={criterion.id}
-            disabled={!loaded || finalized || queued}
-          >
-            <legend>
-              {criterion.name} ({criterion.min_score}–{criterion.max_score})
-            </legend>
-            <label>
-              Score{" "}
-              <input
-                type="number"
-                min={criterion.min_score}
-                max={criterion.max_score}
-                required
-                value={scores[criterion.id] ?? ""}
-                onChange={(event) => setScore(criterion.id, event.target.value)}
-              />
-            </label>
-            {Object.entries(criterion.anchors).map(([level, text]) => (
-              <p key={level}>
-                <strong>{level}:</strong> {text}
-              </p>
-            ))}
-          </fieldset>
-        ))}
-        <label>
-          Comment{" "}
-          <textarea
-            disabled={!loaded || finalized || queued}
-            value={comment}
-            onChange={(event) => {
-              setComment(event.target.value);
-              latest.current = {
-                ...latest.current,
-                comment: event.target.value,
-              };
-              setDirty(true);
-            }}
-          />
-        </label>
-        {!finalized && !queued && (
-          <>
-            <p role="status">
-              {!loaded
-                ? "Draft unavailable"
-                : saving
-                  ? "Saving draft…"
-                  : dirty
-                    ? "Unsaved changes"
-                    : "Draft saved"}
-            </p>
-            {error && dirty && loaded && (
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => void saveDraft().catch(() => undefined)}
-              >
-                Retry draft save
-              </Button>
-            )}
-            <Button type="submit" disabled={!loaded || submitting || saving}>
-              {submitting ? "Submitting…" : "Submit ballot"}
+    <div className="cx-judge-scoring" id="judge-scoring" tabIndex={-1}>
+      <Card title={candidate.name}>
+        <p className="cx-judge-scoring__meta">
+          <span>{position}</span>
+          <Badge tone={finalized ? "success" : queued ? "warning" : "info"}>
+            {candidate.status}
+          </Badge>
+          {!finalized && !queued && (
+            <Button type="button" variant="secondary" onClick={onRecuse}>
+              Recuse or report a conflict
             </Button>
-          </>
-        )}
-        {finalized && <p role="status">Ballot submitted.</p>}
-        {queued && (
-          <p role="status">
-            Queued offline — will submit automatically once you're back online.
+          )}
+        </p>
+        {error && <p role="alert">{error}</p>}
+        <form onSubmit={submit}>
+          <p className="cx-muted">
+            {scored} of {rubric.criteria.length} criteria scored
           </p>
-        )}
-      </form>
-    </Card>
+          {rubric.criteria.map((criterion) => (
+            <fieldset
+              key={criterion.id}
+              className="cx-criterion"
+              disabled={locked}
+            >
+              <legend>
+                {criterion.name} ({criterion.min_score}–{criterion.max_score})
+              </legend>
+              <p className="cx-criterion__weight">Weight {criterion.weight}</p>
+              {Object.entries(criterion.anchors).map(([level, text]) => (
+                <p key={level} className="cx-criterion__anchor">
+                  <strong>{level}:</strong> {text}
+                </p>
+              ))}
+              <label>
+                Score{" "}
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={criterion.min_score}
+                  max={criterion.max_score}
+                  required
+                  value={scores[criterion.id] ?? ""}
+                  onChange={(event) =>
+                    setScore(criterion.id, event.target.value)
+                  }
+                />
+              </label>
+            </fieldset>
+          ))}
+          <label className="cx-judge-comment">
+            Comment{" "}
+            <textarea
+              disabled={locked}
+              rows={4}
+              value={comment}
+              onChange={(event) => {
+                setComment(event.target.value);
+                latest.current = {
+                  ...latest.current,
+                  comment: event.target.value,
+                };
+                setDirty(true);
+              }}
+            />
+          </label>
+          <div className="cx-judge-actions">
+            {!finalized && !queued && (
+              <p role="status" className="cx-judge-actions__status">
+                {!loaded
+                  ? "Draft unavailable"
+                  : saving
+                    ? "Saving draft…"
+                    : dirty
+                      ? "Unsaved changes"
+                      : "Draft saved"}
+              </p>
+            )}
+            {finalized && (
+              <p role="status" className="cx-judge-actions__status">
+                Ballot submitted.
+              </p>
+            )}
+            {queued && (
+              <p role="status" className="cx-judge-actions__status">
+                Queued offline — will submit automatically once you're back
+                online.
+              </p>
+            )}
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={!onPrevious}
+              onClick={() => onPrevious?.()}
+            >
+              Previous project
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={!onNext}
+              onClick={() => onNext?.()}
+            >
+              Next project
+            </Button>
+            {!finalized && !queued && (
+              <>
+                {error && dirty && loaded && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => void saveDraft().catch(() => undefined)}
+                  >
+                    Retry draft save
+                  </Button>
+                )}
+                <Button
+                  type="submit"
+                  disabled={!loaded || submitting || saving}
+                  onClick={() => {
+                    advance.current = false;
+                  }}
+                >
+                  {submitting ? "Submitting…" : "Submit ballot"}
+                </Button>
+                <Button
+                  type="submit"
+                  variant="secondary"
+                  disabled={!loaded || submitting || saving}
+                  onClick={() => {
+                    advance.current = true;
+                  }}
+                >
+                  Submit and continue
+                </Button>
+              </>
+            )}
+          </div>
+        </form>
+      </Card>
+    </div>
   );
 }
 
@@ -472,10 +552,41 @@ function PlanQueue({
       ? { ...candidate, status: "queued" as const }
       : candidate,
   );
-  const current = displayCandidates.find((c) => c.project === selected);
+  const currentIndex = displayCandidates.findIndex(
+    (c) => c.project === selected,
+  );
+  const current = currentIndex >= 0 ? displayCandidates[currentIndex] : null;
+  const progress = progressOf(displayCandidates);
+
+  function choose(project: string) {
+    setSelected(project);
+    window.setTimeout(
+      () =>
+        document
+          .getElementById("judge-scoring")
+          ?.scrollIntoView?.({ block: "start" }),
+      0,
+    );
+  }
+
+  function afterSubmit(continueToNext: boolean) {
+    if (continueToNext) {
+      const following = [
+        ...displayCandidates.slice(currentIndex + 1),
+        ...displayCandidates.slice(0, currentIndex),
+      ].find((c) => c.status !== "submitted" && c.status !== "queued");
+      if (following) choose(following.project);
+    }
+  }
+
+  function recuse() {
+    const target = document.getElementById("judge-assignments");
+    target?.scrollIntoView?.({ block: "start" });
+    target?.focus();
+  }
 
   return (
-    <section aria-label="Review queue">
+    <section aria-label="Review queue" className="cx-judge-desk">
       {offline && (
         <p role="status">
           You're offline — showing your last cached assignments and rubric.
@@ -487,49 +598,88 @@ function PlanQueue({
           sync.
         </p>
       )}
-      <ul>
-        {displayCandidates.map((candidate) => (
-          <li key={candidate.project}>
-            <button
-              type="button"
-              onClick={() => setSelected(candidate.project)}
+      <ProgressMeter progress={progress} />
+      <div className="cx-judge-desk__layout">
+        <ul className="cx-judge-list" aria-label="Assigned projects">
+          {displayCandidates.map((candidate) => (
+            <li
+              key={candidate.project}
+              data-current={candidate.project === selected || undefined}
             >
-              {candidate.name}
-            </button>{" "}
-            <Badge
-              tone={
-                candidate.status === "submitted"
-                  ? "success"
-                  : candidate.status === "queued"
-                    ? "warning"
-                    : candidate.status === "drafted"
-                      ? "info"
-                      : "neutral"
+              <button
+                className="cx-judge-list__button"
+                type="button"
+                onClick={() => choose(candidate.project)}
+              >
+                {candidate.name}
+              </button>
+              {progress.next?.project === candidate.project && (
+                <Badge tone="info">Next</Badge>
+              )}
+              <Badge
+                tone={
+                  candidate.status === "submitted"
+                    ? "success"
+                    : candidate.status === "queued"
+                      ? "warning"
+                      : candidate.status === "drafted"
+                        ? "info"
+                        : "neutral"
+                }
+              >
+                {candidate.status}
+              </Badge>
+            </li>
+          ))}
+        </ul>
+        {current ? (
+          <div className="cx-judge-workarea">
+            <a className="cx-judge-jump" href="#judge-scoring">
+              Jump to scoring
+            </a>
+            <div className="cx-judge-evidence">
+              <ArtifactInspector
+                key={`inspect-${current.project}`}
+                workspaceId={workspaceId}
+                eventId={eventId}
+                projectId={current.project}
+              />
+            </div>
+            <BallotForm
+              key={current.project}
+              base={base}
+              candidate={current}
+              rubric={rubric}
+              position={`Project ${currentIndex + 1} of ${displayCandidates.length}`}
+              onPrevious={
+                currentIndex > 0
+                  ? () => choose(displayCandidates[currentIndex - 1].project)
+                  : null
               }
-            >
-              {candidate.status}
-            </Badge>
-          </li>
-        ))}
-      </ul>
-      {current && (
-        <BallotForm
-          key={current.project}
-          base={base}
-          candidate={current}
-          rubric={rubric}
-          onSubmitted={refresh}
-          onQueued={() => setQueuedCount(readOutbox(base).length)}
-        />
-      )}
-      {current && (
-        <ArtifactInspector
-          key={`inspect-${current.project}`}
-          workspaceId={workspaceId}
-          eventId={eventId}
-          projectId={current.project}
-        />
-      )}
+              onNext={
+                currentIndex < displayCandidates.length - 1
+                  ? () => choose(displayCandidates[currentIndex + 1].project)
+                  : null
+              }
+              onRecuse={recuse}
+              onSubmitted={(next) => {
+                refresh();
+                afterSubmit(next);
+              }}
+              onQueued={(next) => {
+                setQueuedCount(readOutbox(base).length);
+                afterSubmit(next);
+              }}
+            />
+          </div>
+        ) : (
+          <p className="cx-muted">
+            {progress.next
+              ? `Choose a project to begin — ${progress.next.name} is next.`
+              : "Choose a project to review."}
+          </p>
+        )}
+      </div>
     </section>
   );
 }
@@ -655,17 +805,62 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
       {!loadingEvents && !error && events.length === 0 && (
         <EmptyState title="No events are available for judging." />
       )}
-      <label>
-        Event{" "}
-        <select value={eventId} onChange={(e) => chooseEvent(e.target.value)}>
-          <option value="">Choose an event</option>
-          {events.map((event) => (
-            <option key={event.public_id} value={event.public_id}>
-              {event.name}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div
+        className="cx-judge-context"
+        role="group"
+        aria-label="Judging context"
+      >
+        <label>
+          Event{" "}
+          <select value={eventId} onChange={(e) => chooseEvent(e.target.value)}>
+            <option value="">Choose an event</option>
+            {events.map((event) => (
+              <option key={event.public_id} value={event.public_id}>
+                {event.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        {stages.length > 0 && (
+          <label>
+            Stage{" "}
+            <select
+              value={stageId}
+              onChange={(e) => chooseStage(e.target.value)}
+            >
+              <option value="">Choose a stage</option>
+              {stages.map((stage) => (
+                <option key={stage.public_id} value={stage.public_id}>
+                  {stage.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        {plans.length > 1 && (
+          <label>
+            Plan{" "}
+            <select value={planId} onChange={(e) => setPlanId(e.target.value)}>
+              <option value="">Choose a plan</option>
+              {plans.map((plan) => (
+                <option key={plan.public_id} value={plan.public_id}>
+                  {plan.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+      </div>
+      {eventId && loadingStages && <LoadingState label="Loading stages…" />}
+      {eventId && !loadingStages && !error && stages.length === 0 && (
+        <EmptyState title="This event has no stages yet." />
+      )}
+      {stageId && loadingPlans && (
+        <LoadingState label="Loading evaluation plans…" />
+      )}
+      {stageId && !loadingPlans && !error && plans.length === 0 && (
+        <EmptyState title="This stage has no evaluation plans yet." />
+      )}
       {eventId && (
         <Destination id={["overview", "schedule"]}>
           <JudgeCalendarPanel
@@ -675,45 +870,17 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
           />
         </Destination>
       )}
-      {eventId && loadingStages && <LoadingState label="Loading stages…" />}
-      {eventId && !loadingStages && !error && stages.length === 0 && (
-        <EmptyState title="This event has no stages yet." />
-      )}
-      {stages.length > 0 && (
-        <label>
-          Stage{" "}
-          <select value={stageId} onChange={(e) => chooseStage(e.target.value)}>
-            <option value="">Choose a stage</option>
-            {stages.map((stage) => (
-              <option key={stage.public_id} value={stage.public_id}>
-                {stage.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
-      {stageId && loadingPlans && (
-        <LoadingState label="Loading evaluation plans…" />
-      )}
-      {stageId && !loadingPlans && !error && plans.length === 0 && (
-        <EmptyState title="This stage has no evaluation plans yet." />
-      )}
-      {plans.length > 1 && (
-        <label>
-          Plan{" "}
-          <select value={planId} onChange={(e) => setPlanId(e.target.value)}>
-            <option value="">Choose a plan</option>
-            {plans.map((plan) => (
-              <option key={plan.public_id} value={plan.public_id}>
-                {plan.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      )}
       <Destination id="overview">
         <section className="cx-workspace-overview" aria-label="Judge overview">
-          <h2>Review with confidence</h2>
+          <h2>Your judging</h2>
+          {planBase ? (
+            <JudgeSummary key={`summary-${planBase}`} planBase={planBase} />
+          ) : (
+            <p className="cx-muted">
+              Choose an event, stage and plan to see what is assigned, what
+              remains and what is next.
+            </p>
+          )}
           <Grid>
             <DestinationLink id="queue">
               <strong>Open your review queue</strong>

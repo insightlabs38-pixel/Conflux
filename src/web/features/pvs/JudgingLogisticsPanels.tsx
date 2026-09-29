@@ -61,11 +61,20 @@ function StopList({ route }: { route: Route }) {
       </p>
     );
   return (
-    <ol>
-      {route.stops.map((stop) => (
-        <li key={stop.project}>
-          {stop.project_name} — {stop.room ? `${stop.room} / ` : ""}
-          {stop.location_name}
+    <ol className="cx-route">
+      {route.stops.map((stop, index) => (
+        <li key={stop.project} className="cx-route__stop">
+          <span className="cx-route__number" aria-hidden="true">
+            {index + 1}
+          </span>
+          <span className="cx-route__project">
+            {index === 0 && <Badge tone="info">Next stop</Badge>}{" "}
+            <strong>{stop.project_name}</strong>
+          </span>
+          <span className="cx-route__place">
+            {stop.room ? `${stop.room} / ` : ""}
+            {stop.location_name}
+          </span>
         </li>
       ))}
     </ol>
@@ -92,8 +101,12 @@ export function JudgeAssignmentsPanel({ planBase }: { planBase: string }) {
   }
 
   return (
-    <section aria-label="Your assignments">
+    <section aria-label="Your assignments" id="judge-assignments" tabIndex={-1}>
       <h3>Your assignments</h3>
+      <p className="cx-muted">
+        Accept the projects you will score. Decline (recuse) a project if you
+        have a conflict of interest; add a reason so organizers can reassign it.
+      </p>
       {rows.loading && <LoadingState label="Loading assignments…" />}
       {rows.error && (
         <ErrorState message={rows.error.message} onRetry={rows.reload} />
@@ -103,10 +116,10 @@ export function JudgeAssignmentsPanel({ planBase }: { planBase: string }) {
         <EmptyState title="No projects are assigned to you for this plan." />
       )}
       {rows.data && rows.data.length > 0 && (
-        <ul>
+        <ul className="cx-assignments">
           {rows.data.map((row) => (
-            <li key={row.project}>
-              {row.name}{" "}
+            <li key={row.project} className="cx-assignment">
+              <strong className="cx-assignment__name">{row.name}</strong>
               <Badge
                 tone={
                   row.status === "accepted"
@@ -118,8 +131,10 @@ export function JudgeAssignmentsPanel({ planBase }: { planBase: string }) {
               >
                 {row.status}
               </Badge>
-              {row.reason && <> · {row.reason}</>}{" "}
-              <label>
+              {row.reason && (
+                <span className="cx-assignment__reason">{row.reason}</span>
+              )}
+              <label className="cx-assignment__reason-field">
                 <span className="cx-visually-hidden">
                   Reason for {row.name}
                 </span>
@@ -133,21 +148,23 @@ export function JudgeAssignmentsPanel({ planBase }: { planBase: string }) {
                     }))
                   }
                 />
-              </label>{" "}
-              <Button
-                variant="secondary"
-                onClick={() => void respond(row, "accepted")}
-                aria-label={`Accept ${row.name}`}
-              >
-                Accept
-              </Button>{" "}
-              <Button
-                variant="danger"
-                onClick={() => void respond(row, "declined")}
-                aria-label={`Decline ${row.name}`}
-              >
-                Decline
-              </Button>
+              </label>
+              <span className="cx-assignment__actions">
+                <Button
+                  variant="secondary"
+                  onClick={() => void respond(row, "accepted")}
+                  aria-label={`Accept ${row.name}`}
+                >
+                  Accept
+                </Button>{" "}
+                <Button
+                  variant="danger"
+                  onClick={() => void respond(row, "declined")}
+                  aria-label={`Decline ${row.name}`}
+                >
+                  Decline
+                </Button>
+              </span>
             </li>
           ))}
         </ul>
@@ -400,9 +417,14 @@ export function ArtifactInspector({
           <p>No artifacts have been shared with reviewers.</p>
         )}
         {artifacts.data?.map((artifact) => (
-          <div key={artifact.public_id}>
-            <h5>
-              {artifact.title} <Badge>{artifact.kind}</Badge>{" "}
+          <article
+            key={artifact.public_id}
+            className="cx-artifact"
+            aria-label={artifact.title}
+          >
+            <header className="cx-artifact__header">
+              <h5>{artifact.title}</h5>
+              <Badge>{artifact.kind}</Badge>
               {artifact.inspection && (
                 <Badge
                   tone={VERDICT_TONE[artifact.inspection.verdict] ?? "info"}
@@ -410,24 +432,31 @@ export function ArtifactInspector({
                   {artifact.inspection.verdict}
                 </Badge>
               )}
-            </h5>
-            {artifact.external_url && isWebUrl(artifact.external_url) && (
-              <p>
+            </header>
+            <div className="cx-artifact__links">
+              {artifact.external_url && isWebUrl(artifact.external_url) && (
                 <a
+                  className="cx-button cx-button--secondary"
                   href={artifact.external_url}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   Open {artifact.external_url}
                 </a>
-              </p>
-            )}
-            {artifact.download_url && (
-              <p>
-                <a href={artifact.download_url} rel="noopener noreferrer">
+              )}
+              {artifact.download_url && (
+                <a
+                  className="cx-button cx-button--secondary"
+                  href={artifact.download_url}
+                  rel="noopener noreferrer"
+                >
                   Download file
-                </a>{" "}
-                (inspected as untrusted content — open with care)
+                </a>
+              )}
+            </div>
+            {artifact.download_url && (
+              <p className="cx-muted">
+                Files are inspected as untrusted content — open with care.
               </p>
             )}
             {artifact.inspection ? (
@@ -437,7 +466,10 @@ export function ArtifactInspector({
                   {artifact.inspection.detected_type || "unknown"}
                 </p>
                 {artifact.inspection.findings.length > 0 && (
-                  <ul aria-label={`Findings for ${artifact.title}`}>
+                  <ul
+                    className="cx-artifact__findings"
+                    aria-label={`Findings for ${artifact.title}`}
+                  >
                     {artifact.inspection.findings.map((finding, index) => (
                       <li key={`${finding.code}-${index}`}>
                         <Badge
@@ -457,7 +489,7 @@ export function ArtifactInspector({
                   </ul>
                 )}
                 {Object.keys(artifact.inspection.facts).length > 0 && (
-                  <dl>
+                  <dl className="cx-artifact__facts">
                     {Object.entries(artifact.inspection.facts).map(
                       ([key, value]) => (
                         <div key={key}>
@@ -475,7 +507,7 @@ export function ArtifactInspector({
                 )}
                 {artifact.inspection.preview && (
                   <pre
-                    className="cx-scroll-region"
+                    className="cx-scroll-region cx-artifact__preview"
                     aria-label={`Preview of ${artifact.title}`}
                     tabIndex={0}
                   >
@@ -493,7 +525,7 @@ export function ArtifactInspector({
             >
               {artifact.inspection ? "Re-run inspection" : "Inspect safely"}
             </Button>
-          </div>
+          </article>
         ))}
       </Card>
     </section>

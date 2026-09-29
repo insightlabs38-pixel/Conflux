@@ -3,18 +3,27 @@
 {% block title %}{{ event.name }}{% endblock %}
 {% block content %}
 <article aria-label="{{ event.name }} event page">
-  {% if not blocks %}
-    <h1>{{ event.name }}</h1>
-    {% if event.description %}<p>{{ event.description }}</p>{% endif %}
+  {% if not has_hero %}
+    <section class="cx-block cx-hero" aria-label="Event introduction">
+      <div class="cx-hero__story"><p class="cx-event-kicker">{{ event.timezone }} · Conflux</p>
+        <h1>{{ event.name }}</h1>
+        {% if event.description %}<p>{{ event.description }}</p>{% endif %}
+        <p><a class="cx-button cx-button--primary" href="{% url 'site-gallery' event.public_id %}">{% trans "Browse the projects" %}</a></p>
+      </div>
+      {% if event_brand.banner_url %}<img class="cx-hero__image" src="{{ event_brand.banner_url }}" alt="" width="960" height="640">{% else %}<div class="cx-hero__identity" aria-hidden="true"><span>{{ event.name|slice:":1" }}</span><small>{{ event.starts_at|date:"Y" }}</small></div>{% endif %}
+    </section>
   {% endif %}
   {% for block in blocks %}
     {% if block.kind == "hero" %}
       <section class="cx-block cx-hero" aria-label="Hero">
+        <div class="cx-hero__story"><p class="cx-event-kicker">{{ event.name }} · {{ event.timezone }}</p>
         <h1>{{ block.config.title }}</h1>
         {% if block.config.subtitle %}<p>{{ block.config.subtitle }}</p>{% endif %}
         {% if block.config.cta_label and block.config.cta_href %}
           <p><a class="cx-button cx-button--primary" href="{{ block.config.cta_href }}">{{ block.config.cta_label }}</a></p>
         {% endif %}
+        </div>
+        {% if event_brand.banner_url %}<img class="cx-hero__image" src="{{ event_brand.banner_url }}" alt="" width="960" height="640">{% else %}<div class="cx-hero__identity" aria-hidden="true"><span>{{ event.name|slice:":1" }}</span><small>{{ event.starts_at|date:"Y" }}</small></div>{% endif %}
       </section>
     {% elif block.kind == "tracks" %}
       <section class="cx-block" aria-label="Tracks">
@@ -53,8 +62,8 @@
         <h2>{% trans "Schedule" %}</h2>
         <p>{{ event.starts_at }} &ndash; {{ event.ends_at }} ({{ event.timezone }})</p>
         {% if block.live %}
-          <ol>
-            {% for stage in block.live %}<li>{{ stage.name }}</li>{% endfor %}
+          <ol class="cx-event-schedule">
+            {% for stage in block.live %}<li><span class="cx-event-schedule__number">{{ forloop.counter }}</span><div><h3>{{ stage.name }}</h3>{% if stage.description %}<p>{{ stage.description }}</p>{% endif %}</div></li>{% endfor %}
           </ol>
         {% endif %}
       </section>
@@ -71,15 +80,14 @@
       <section class="cx-block" aria-label="FAQ">
         <h2>{% trans "FAQ" %}</h2>
         {% for item in block.config.items %}
-          <h3>{{ item.question }}</h3>
-          <p>{{ item.answer }}</p>
+          <details class="cx-event-faq"><summary>{{ item.question }}</summary><p>{{ item.answer }}</p></details>
         {% endfor %}
       </section>
     {% elif block.kind == "resources" %}
       <section class="cx-block" aria-label="Resources">
         <h2>{% trans "Resources" %}</h2>
-        <ul>
-          {% for item in block.config.items %}<li><a href="{{ item.url }}">{{ item.label }}</a></li>{% endfor %}
+        <ul class="cx-grid cx-event-resources">
+          {% for item in block.config.items %}<li><a href="{{ item.url }}">{{ item.label }} <span aria-hidden="true">↗</span></a></li>{% endfor %}
         </ul>
       </section>
     {% elif block.kind == "gallery" %}
@@ -100,10 +108,10 @@
       <section class="cx-block" aria-label="Announcements">
         <h2>{% trans "Announcements" %}</h2>
         {% if block.live %}
-          <ul>
+          <ul class="cx-event-announcements">
             {% for item in block.live %}
               <li>
-                <strong>{{ item.title }}</strong>
+                <h3>{{ item.title }}</h3><p class="cx-metadata">{{ item.created_at }}</p>
                 {% if item.body %}<p>{{ item.body }}</p>{% endif %}
               </li>
             {% endfor %}

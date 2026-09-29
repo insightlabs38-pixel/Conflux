@@ -78,7 +78,7 @@ describe("EventSite", () => {
     expect(container.textContent).toContain("Best AI");
     expect(container.querySelector("h1")?.textContent).toBe("Regionals");
     expect(
-      container.querySelector('a[href="/e/e1/gallery/"]')?.textContent,
+      container.querySelector('main a[href="/e/e1/gallery/"]')?.textContent,
     ).toBe("Browse project gallery");
   });
 

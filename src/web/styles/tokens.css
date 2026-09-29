@@ -87,8 +87,9 @@
 
 /* Organizer-selectable presets (PAGE-001), applied to the public event site
    via `data-theme="dark"` / `.theme-minimal` on <html>/<body>. The React
-   app never sets these today, so it keeps the default palette above. */
-:root[data-theme="dark"] {
+   public React root uses the same palette without changing the authenticated app. */
+:root[data-theme="dark"],
+.cx-event-site[data-theme="dark"] {
   --color-surface-subtle: #171e23;
   --color-text-tertiary: #a7b0bb;
   --color-accent-subtle: #25344b;

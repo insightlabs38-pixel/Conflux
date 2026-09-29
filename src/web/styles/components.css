@@ -1029,3 +1029,13 @@
     max-width: 6rem;
   }
 }
+
+.cx-theme-editor fieldset {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+}
+.cx-theme-editor legend {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}

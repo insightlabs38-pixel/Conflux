@@ -11,6 +11,7 @@ class EventDashboardSchema(serializers.Serializer):
 
 
 class PublicEventSchema(serializers.Serializer):
+    presentation = serializers.JSONField()
     public_id = serializers.UUIDField()
     name = serializers.CharField()
     slug = serializers.SlugField()

@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
+import "../../styles/presentation.css";
+import { ButtonLink } from "../../components/Foundation";
 import { AppShell } from "../../components/AppShell";
 import { Badge } from "../../components/Badge";
 import { Card } from "../../components/Card";
@@ -26,6 +28,19 @@ type PublicEvent = {
   starts_at: string | null;
   ends_at: string | null;
   status: string;
+  presentation?: {
+    mode: string;
+    typography: string;
+    personality: string;
+    density: string;
+    width: string;
+    hero: string;
+    background: string;
+    project_card: string;
+    logo_url?: string;
+    banner_url?: string;
+    variables: Record<string, string>;
+  };
   tracks: Track[];
   base_prizes: BasePrize[];
 };
@@ -80,58 +95,103 @@ export function EventSite({ eventId }: { eventId: string }) {
   const schedule = event ? formatSchedule(event) : null;
 
   return (
-    <AppShell brandAs="p">
-      {loading && <LoadingState label="Loading event…" />}
-      {!loading && error && <ErrorState message={error} onRetry={load} />}
-      {!loading && !error && event && (
-        <article aria-label={`${event.name} event page`}>
-          <h1>{event.name}</h1>
-          <Badge tone="info">{event.status}</Badge>
-          {schedule && <p>{schedule}</p>}
-          {event.description && <p>{event.description}</p>}
-          <p>
-            <a href={`/e/${eventId}/gallery/`}>Browse project gallery</a>
-          </p>
-          <PublicAwards eventId={eventId} />
+    <div
+      className="cx-event-site"
+      data-theme={event?.presentation?.mode}
+      data-typography={event?.presentation?.typography}
+      data-personality={event?.presentation?.personality}
+      data-density={event?.presentation?.density}
+      data-width={event?.presentation?.width}
+      data-hero={event?.presentation?.hero}
+      data-background={event?.presentation?.background}
+      style={event?.presentation?.variables as CSSProperties}
+    >
+      <AppShell
+        brandAs="p"
+        brand={event?.name || "Conflux"}
+        nav={
+          <>
+            <a href={`/e/${eventId}/`}>Event site</a>
+            <a href={`/e/${eventId}/gallery/`}>Gallery</a>
+            <a href={`/e/${eventId}/results/`}>Results</a>
+          </>
+        }
+      >
+        {loading && <LoadingState label="Loading event…" />}
+        {!loading && error && <ErrorState message={error} onRetry={load} />}
+        {!loading && !error && event && (
+          <article aria-label={`${event.name} event page`}>
+            <section
+              className="cx-block cx-hero"
+              aria-label="Event introduction"
+            >
+              <div className="cx-hero__story">
+                <p className="cx-event-kicker">{event.timezone} · Conflux</p>
+                <h1>{event.name}</h1>
+                <Badge tone="info">{event.status}</Badge>
+                {schedule && <p>{schedule}</p>}
+                {event.description && <p>{event.description}</p>}
+                <p>
+                  <ButtonLink href={`/e/${eventId}/gallery/`}>
+                    Browse project gallery
+                  </ButtonLink>
+                </p>
+              </div>
+              {event.presentation?.banner_url ? (
+                <img
+                  className="cx-hero__image"
+                  src={event.presentation.banner_url}
+                  alt=""
+                  width={960}
+                  height={640}
+                />
+              ) : (
+                <div className="cx-hero__identity" aria-hidden="true">
+                  <span>{Array.from(event.name)[0]}</span>
+                </div>
+              )}
+            </section>
+            <PublicAwards eventId={eventId} />
 
-          <section aria-label="Tracks">
-            <h2>Tracks</h2>
-            {event.tracks.length === 0 ? (
-              <EmptyState title="Tracks will be announced soon." />
-            ) : (
-              <ul>
-                {event.tracks.map((track) => (
-                  <li key={track.public_id}>
-                    <Card title={track.name}>
-                      {track.description && <p>{track.description}</p>}
-                    </Card>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+            <section className="cx-block" aria-label="Tracks">
+              <h2>Tracks</h2>
+              {event.tracks.length === 0 ? (
+                <EmptyState title="Tracks will be announced soon." />
+              ) : (
+                <ul className="cx-grid">
+                  {event.tracks.map((track) => (
+                    <li key={track.public_id}>
+                      <Card title={track.name}>
+                        {track.description && <p>{track.description}</p>}
+                      </Card>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
 
-          <section aria-label="Prizes">
-            <h2>Prizes</h2>
-            {event.base_prizes.length === 0 ? (
-              <EmptyState title="Prizes will be announced soon." />
-            ) : (
-              <ul>
-                {event.base_prizes.map((prize) => (
-                  <li key={prize.public_id}>
-                    <Card title={prize.name}>
-                      <p>{formatPrize(prize)}</p>
-                      {prize.description && <p>{prize.description}</p>}
-                    </Card>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
+            <section className="cx-block" aria-label="Prizes">
+              <h2>Prizes</h2>
+              {event.base_prizes.length === 0 ? (
+                <EmptyState title="Prizes will be announced soon." />
+              ) : (
+                <ul className="cx-grid">
+                  {event.base_prizes.map((prize) => (
+                    <li key={prize.public_id}>
+                      <Card title={prize.name}>
+                        <p>{formatPrize(prize)}</p>
+                        {prize.description && <p>{prize.description}</p>}
+                      </Card>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
 
-          <CommunityVoting eventId={event.public_id} />
-        </article>
-      )}
-    </AppShell>
+            <CommunityVoting eventId={event.public_id} />
+          </article>
+        )}
+      </AppShell>
+    </div>
   );
 }

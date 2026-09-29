@@ -11180,7 +11180,7 @@ tasks:
   batch: UIV2-B03
   phase: ui-v2
   title: 'Implement: Event theming + public event shell'
-  status: READY
+  status: DONE
   batch_dependencies:
   - UIV2-B02
   task_dependencies:
@@ -11195,6 +11195,14 @@ tasks:
   - src/web/features/page-builder/**
   - src/web/public/**
   - src/api/integrations/**
+  - src/api/events/schema.py
+  - src/api/events/views.py
+  - src/web/styles/**
+  - tests/integration/**
+  - tests/compatibility/**
+  - tests/e2e/event-themes.spec.ts
+  - docs/api/openapi.yaml
+  - sdks/**
   required_reading:
   - docs/execution/README.md
   - docs/ui-v2/SURFACE_CENSUS.md
@@ -11217,7 +11225,7 @@ tasks:
   batch: UIV2-B03
   phase: ui-v2
   title: 'Verify and checkpoint: Event theming + public event shell'
-  status: BLOCKED
+  status: DONE
   batch_dependencies:
   - UIV2-B02
   task_dependencies:
@@ -11232,6 +11240,14 @@ tasks:
   - src/web/features/page-builder/**
   - src/web/public/**
   - src/api/integrations/**
+  - src/api/events/schema.py
+  - src/api/events/views.py
+  - src/web/styles/**
+  - tests/integration/**
+  - tests/compatibility/**
+  - tests/e2e/event-themes.spec.ts
+  - docs/api/openapi.yaml
+  - sdks/**
   required_reading:
   - docs/execution/README.md
   - docs/ui-v2/SURFACE_CENSUS.md
@@ -11254,7 +11270,7 @@ tasks:
   batch: UIV2-B04
   phase: ui-v2
   title: 'Implement: Identity/profile system + reusable person UI'
-  status: BLOCKED
+  status: READY
   batch_dependencies:
   - UIV2-B03
   task_dependencies:

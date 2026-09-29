@@ -13,12 +13,14 @@ def preview_archive_import(*, workspace, archive, name, slug):
         FORMAT_VERSION,
         2,
         3,
+        4,
     ):
         raise ValidationError(
             {
                 "format_version": (
                     f"Unsupported archive format_version: {archive.get('format_version')!r}. "
-                    "This build reads v1 config/full and v2/v3 final; v2 re-exports as v3; "
+                    "This build reads v1 config/full and v2/v3/v4 final; "
+                    "older final archives re-export as v4; "
                     "no migration path for other versions."
                 )
             }
@@ -30,10 +32,10 @@ def preview_archive_import(*, workspace, archive, name, slug):
         transaction.set_rollback(True)
 
     source_event = (
-        archive["event"]["fields"] if archive["format_version"] in (2, 3) else archive["event"]
+        archive["event"]["fields"] if archive["format_version"] in (2, 3, 4) else archive["event"]
     )
     imported_event = (
-        imported["event"]["fields"] if archive["format_version"] in (2, 3) else imported["event"]
+        imported["event"]["fields"] if archive["format_version"] in (2, 3, 4) else imported["event"]
     )
     event_changes = [
         {"field": field, "source": source_event.get(field), "imported": imported_event[field]}
@@ -52,7 +54,7 @@ def preview_archive_import(*, workspace, archive, name, slug):
     ignored_sections = sorted(
         set(archive) - {"format_version", "mode", "event", *SECTION_KEYS, "projects"}
     )
-    if archive["format_version"] in (2, 3):
+    if archive["format_version"] in (2, 3, 4):
         sections = [
             {
                 "section": label,
@@ -65,9 +67,14 @@ def preview_archive_import(*, workspace, archive, name, slug):
     return {
         "format_version": archive["format_version"],
         "mode": archive["mode"],
-        "migration_steps": ["v2 → v3: add empty award-resource table"]
-        if archive["format_version"] == 2
-        else [],
+        "migration_steps": (
+            ["v2 → v3: add empty award-resource table"] if archive["format_version"] == 2 else []
+        )
+        + (
+            ["v3 → v4: add default event theme settings"]
+            if archive["format_version"] in (2, 3)
+            else []
+        ),
         "deprecations": [],
         "event_changes": event_changes,
         "sections": sections,

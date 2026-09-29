@@ -33,8 +33,14 @@ class Page(PublicIdModel):
 
     event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name="page")
     theme = models.CharField(max_length=10, choices=PageTheme.choices, default=PageTheme.DEFAULT)
+    theme_config = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def clean(self):
+        from .themes import clean_theme_config
+
+        self.theme_config = clean_theme_config(self.theme_config, self.theme)
 
 
 class PageBlock(PublicIdModel):

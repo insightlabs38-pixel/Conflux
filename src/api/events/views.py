@@ -401,7 +401,9 @@ class PublicEventView(APIView):
 
     @extend_schema(responses=PublicEventSchema)
     def get(self, request, event_public_id):
+        from presentation.models import Page
         from presentation.public import get_public_event
+        from presentation.themes import resolved_theme
 
         event = get_public_event(event_public_id)
         data = EventSerializer(event).data
@@ -420,6 +422,7 @@ class PublicEventView(APIView):
                         "status",
                     )
                 },
+                "presentation": resolved_theme(Page.objects.filter(event=event).first()),
                 "tracks": TrackSerializer(event.tracks.all(), many=True).data,
                 "base_prizes": BasePrizeSerializer(
                     event.base_prizes.select_related("track"), many=True

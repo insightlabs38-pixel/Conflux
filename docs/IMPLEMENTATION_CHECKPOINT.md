@@ -1,7 +1,7 @@
 # Conflux — current implementation checkpoint
 
 UI-v2 is active on canonical `main`; authoritative [queue](execution/README.md)
-and [surface census](ui-v2/SURFACE_CENSUS.md). One sequential worker; B00–B02 complete; B03 event theming/public shell is next. PVS-H06 remains a completed historical release.
+and [surface census](ui-v2/SURFACE_CENSUS.md). One sequential worker; B00–B03 complete; B04 reusable identity/profile is next. PVS-H06 remains a completed historical release.
 
 PVS-H06 is complete on `main`; the prior release campaign is closed. Its final
 targeted pass closes the pairwise-to-awards and sponsor-resource portability
@@ -17,9 +17,9 @@ gaps and refreshes presentation/evidence. UI-v2 extends this completed baseline 
   files no longer apply.
 - Evaluation awards consume published normalization or pairwise runs according
   to plan mode, preserving track ranking, overrides and run-specific evidence.
-- Canonical final archive v3 restores AwardResource content and creator
+- Canonical final archive v4 restores AwardResource content and creator
   attribution, rewrites pairwise award references, and remains able to read
-  the frozen v2 contract. Use `mode=final` for sponsor-content portability.
+  the frozen v2/v3 contracts. Use `mode=final` for sponsor-content portability.
 - Conflux claims T1–T4 under the organizer clarification: the unchanged official
   checker automatically verifies T1/T2; T3/T4 are manually judged and backed
   by [Conflux's extended verifier](verification/dogfood-extended.txt).

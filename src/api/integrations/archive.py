@@ -224,6 +224,7 @@ def build_archive(event, mode=None, sections=None):
             [
                 {
                     "theme": event.page.theme,
+                    "theme_config": event.page.theme_config,
                     "blocks": [
                         {"kind": b.kind, "position": b.position, "config": b.config}
                         for b in event.page.blocks.order_by("position", "id")
@@ -278,7 +279,7 @@ def import_archive(*, workspace, archive, name, slug):
     """
     if not isinstance(archive, dict):
         raise ValidationError({"archive": "Archive must be an object."})
-    if archive.get("format_version") in (2, 3):
+    if archive.get("format_version") in (2, 3, 4):
         from .final_archive import restore_final_archive
 
         return restore_final_archive(workspace=workspace, archive=archive, name=name, slug=slug)
@@ -477,7 +478,11 @@ def import_archive(*, workspace, archive, name, slug):
                 component.save()
 
     for page_data in archive.get("pages", []):
-        page = Page(event=event, theme=page_data.get("theme", "default"))
+        page = Page(
+            event=event,
+            theme=page_data.get("theme", "default"),
+            theme_config=page_data.get("theme_config", {}),
+        )
         page.full_clean()
         page.save()
         for block in page_data.get("blocks", []):

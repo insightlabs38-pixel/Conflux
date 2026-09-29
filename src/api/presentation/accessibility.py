@@ -196,6 +196,14 @@ def audit_page(page) -> list[dict]:
     this audit.
     """
     warnings = list(audit_theme(page.theme))
+    from django.core.exceptions import ValidationError
+
+    from .themes import clean_theme_config
+
+    try:
+        clean_theme_config(page.theme_config, page.theme)
+    except ValidationError as exc:
+        warnings.append(_warning("contrast", " ".join(exc.messages)))
     hero_count = 0
     for block in page.blocks.all():
         if block.kind == "hero":

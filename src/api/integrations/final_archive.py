@@ -1,4 +1,4 @@
-"""Canonical v3 snapshots restored atomically into fresh, private event-owned rows."""
+"""Canonical v4 snapshots restored atomically into fresh, private event-owned rows."""
 
 import hashlib
 import json
@@ -14,7 +14,7 @@ from django.db.models import JSONField
 from events.models import Event
 
 from .final_archive_json import remap_json
-from .final_archive_schema import TABLES, V2_TABLES
+from .final_archive_schema import TABLES, V2_TABLES, V3_TABLES
 from .models import ArchiveRestoration
 
 EVENT_FIELDS = (
@@ -172,7 +172,7 @@ def build_final_archive(event):
             }
         )
     archive = {
-        "format_version": 3,
+        "format_version": 4,
         "mode": "final",
         "event": {
             "ref": reference(event),
@@ -199,13 +199,12 @@ def _validate_shape(archive):
         _error("A final archive needs exactly the final-archive contract keys.")
     if (
         type(archive["format_version"]) is not int
-        or archive["format_version"] not in (2, 3)
+        or archive["format_version"] not in (2, 3, 4)
         or archive["mode"] != "final"
     ):
-        _error("Expected format_version 2 or 3 and mode final.")
-    if not isinstance(archive["tables"], dict) or set(archive["tables"]) != set(
-        V2_TABLES if archive["format_version"] == 2 else TABLES
-    ):
+        _error("Expected format_version 2, 3 or 4 and mode final.")
+    contract = {2: V2_TABLES, 3: V3_TABLES, 4: TABLES}[archive["format_version"]]
+    if not isinstance(archive["tables"], dict) or set(archive["tables"]) != set(contract):
         _error("Final archives require every known table, including empty tables.")
     if not isinstance(archive["event"], dict) or set(archive["event"]) != {"ref", "fields"}:
         _error("Invalid event envelope.")
@@ -226,7 +225,7 @@ def _validate_shape(archive):
         _uuid(item["source_event_ref"])
         if (
             type(item["source_format_version"]) is not int
-            or item["source_format_version"] not in (2, 3)
+            or item["source_format_version"] not in (2, 3, 4)
             or not isinstance(item["source_sha256"], str)
             or len(item["source_sha256"]) != 64
         ):
@@ -239,16 +238,19 @@ def _validate_shape(archive):
                 _error(f"Invalid {label} row.")
             _uuid(row["ref"])
             if not isinstance(row["fields"], dict) or set(row["fields"]) != set(
-                TABLES[label][1].split()
+                contract[label][1].split()
             ):
                 _error(f"Invalid {label} fields.")
-            if not isinstance(row["m2m"], dict) or set(row["m2m"]) != set(TABLES[label][2].split()):
+            if not isinstance(row["m2m"], dict) or set(row["m2m"]) != set(
+                contract[label][2].split()
+            ):
                 _error(f"Invalid {label} many-to-many fields.")
 
 
 @transaction.atomic
 def restore_final_archive(*, workspace, archive, name, slug):
     _validate_shape(archive)
+    contract = {2: V2_TABLES, 3: V3_TABLES, 4: TABLES}[archive["format_version"]]
     digest = hashlib.sha256(canonical_bytes(archive)).hexdigest()
     event_data = archive["event"]["fields"]
     event = Event(
@@ -315,7 +317,7 @@ def restore_final_archive(*, workspace, archive, name, slug):
             for key, row in list(pending.items()):
                 label, _ = key
                 obj = refs[key]
-                fields = _fields(type(obj), TABLES[label][1])
+                fields = _fields(type(obj), contract[label][1])
                 dependencies = [
                     resolve(field.remote_field.model._meta.label_lower, row["fields"][field.name])
                     for field in fields

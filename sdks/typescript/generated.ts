@@ -2669,11 +2669,12 @@ export type InputOfOperatorTemplateSchema = {
 export type Page = {
   public_id: string;
   theme?: ThemeEnum;
+  theme_config?: unknown;
   created_at: string;
   updated_at: string;
 };
 
-export type InputOfPage = { theme?: InputOfThemeEnum };
+export type InputOfPage = { theme?: InputOfThemeEnum; theme_config?: unknown };
 
 export type PageBlock = {
   public_id: string;
@@ -2957,11 +2958,15 @@ export type InputOfPatchedLocationPatchInput = {
 export type PatchedPage = {
   public_id?: string;
   theme?: ThemeEnum;
+  theme_config?: unknown;
   created_at?: string;
   updated_at?: string;
 };
 
-export type InputOfPatchedPage = { theme?: InputOfThemeEnum };
+export type InputOfPatchedPage = {
+  theme?: InputOfThemeEnum;
+  theme_config?: unknown;
+};
 
 export type PatchedPageBlock = {
   public_id?: string;
@@ -3524,6 +3529,7 @@ export type InputOfPublicAwardOutput = {
 };
 
 export type PublicEventSchema = {
+  presentation: unknown;
   public_id: string;
   name: string;
   slug: string;
@@ -3537,6 +3543,7 @@ export type PublicEventSchema = {
 };
 
 export type InputOfPublicEventSchema = {
+  presentation: unknown;
   public_id: string;
   name: string;
   slug: string;

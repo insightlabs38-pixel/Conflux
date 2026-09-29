@@ -20,8 +20,8 @@ Preview runs the same importer in a transaction that is rolled back. It
 reports event-field changes, per-section source/imported counts, and ignored
 top-level sections without leaving a new event or configuration rows. It
 does not reserve the requested slug: another import can create that slug
-between preview and import. Preview supports v1 config/full and v2/v3 final archives. A v2 final archive
-reports its explicit upgrade to v3; unsupported versions fail by name.
+between preview and import. Preview supports v1 config/full and v2/v3/v4 final archives. Older final archives
+report their explicit upgrade to v4; unsupported versions fail by name.
 
 ## Signed portable envelope
 
@@ -46,7 +46,7 @@ records; version 1 has no key rotation or revocation support.
 
 ## `format_version`
 
-The archive's top-level `format_version` (`1` for config/full, `3` for final) is the compatibility
+The archive's top-level `format_version` (`1` for config/full, `4` for final) is the compatibility
 contract. A build only ever reads the versions it was written to understand:
 importing a document with any other `format_version` is an explicit, named
 error — never a best-effort reinterpretation. Raising the number is reserved
@@ -150,16 +150,16 @@ went through a template.
 `POST /api/v1/workspaces/<workspace>/events/<event>/clone/` — body
 `{name, slug, sections?}`
 
-## Final archive v3 (`mode: final`, `format_version: 3`)
+## Final archive v4 (`mode: final`, `format_version: 4`)
 
 `GET .../archive/?mode=final` exports a frozen table contract
 (`integrations/final_archive_schema.py`) covering configuration, teams,
 projects, form responses, submissions and frozen versions, assignments,
 ballots, normalization/pairwise runs, awards, winners, fulfillment, votes
-and presentation, including award resources. Every row carries a stable `ref` (the source public id),
+and presentation, including award resources and constrained event theme settings. Every row carries a stable `ref` (the source public id),
 and evidence JSON is remapped on restore; free-text answers stay opaque.
 
-Restoration is deterministic and never recomputes: `import_archive` on a v2 or v3
+Restoration is deterministic and never recomputes: `import_archive` on a v2, v3 or v4
 document builds a **new private draft event** (`is_public=False`) atomically
 inside the caller's transaction, stores immutable `ArchiveRestoration`
 provenance (source SHA-256, identity map) and rejects any missing table,
@@ -197,3 +197,7 @@ Pairwise winner evidence rewrites `pairwise_run` to the restored run, just
 as rubric evidence rewrites `normalization_run`. Comparison pairs use stable
 reference order in the document and fresh primary-key order on restore,
 so allocation order cannot invalidate or change their meaning.
+
+The exact v2/v3 table and field contracts remain readable. v4 adds `theme_config`
+to `presentation.page`; older pages restore with empty configuration and the
+original theme preset. Signed source archive bytes and provenance are preserved.

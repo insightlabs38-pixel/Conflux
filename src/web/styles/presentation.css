@@ -129,3 +129,269 @@
   gap: 1rem;
   margin: 1.5rem 0;
 }
+
+/* One public component system, with constrained layout and density presets. */
+.cx-event-site {
+  color: var(--color-text);
+  background: var(--color-bg);
+  --event-section-space: clamp(3rem, 6vw, 6rem);
+  --event-content-width: 72rem;
+}
+.cx-event-site .cx-shell__main,
+.cx-event-site .cx-shell__header,
+.cx-event-footer {
+  width: min(100%, var(--event-content-width));
+  margin-inline: auto;
+}
+.cx-event-site .cx-shell__header {
+  padding-block: var(--space-5);
+  border-bottom: 1px solid var(--color-border-strong);
+  gap: var(--space-5);
+}
+.cx-event-site .cx-shell__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--font-size-lg);
+  text-decoration: none;
+  max-width: 32rem;
+}
+.cx-event-logo {
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.cx-event-site .cx-shell__nav a {
+  padding: var(--space-3) var(--space-2);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+}
+.cx-event-site .cx-shell__nav a[aria-current="page"] {
+  color: var(--color-accent);
+  border-bottom-color: currentColor;
+  font-weight: var(--font-weight-semibold);
+}
+.cx-event-site .cx-block {
+  margin-block: var(--event-section-space);
+}
+.cx-event-site .cx-block > h2 {
+  font-size: var(--font-size-2xl);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+.cx-event-site .cx-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: var(--space-8);
+  align-items: center;
+  padding: clamp(1.5rem, 4vw, 4rem);
+  text-align: left;
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+}
+.cx-event-site .cx-hero h1 {
+  font-size: clamp(2.25rem, 5vw, 4.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  overflow-wrap: anywhere;
+}
+.cx-hero__story > p {
+  max-width: 42rem;
+}
+.cx-event-kicker {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-5);
+}
+.cx-hero__image {
+  width: 100%;
+  height: auto;
+  max-height: 30rem;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
+.cx-hero__identity {
+  min-height: 18rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: var(--color-accent-contrast);
+  background: var(--color-accent);
+  border-radius: var(--radius-md);
+}
+.cx-hero__identity span {
+  font-size: clamp(6rem, 15vw, 12rem);
+  line-height: 1;
+}
+.cx-hero__identity small {
+  font-family: var(--font-mono);
+  margin-block: var(--space-4);
+}
+.cx-event-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border-top: 1px solid var(--color-border-strong);
+  color: var(--color-text-muted);
+}
+.cx-event-site[data-typography="technical"] .cx-event-kicker,
+.cx-event-site[data-typography="technical"] h1,
+.cx-event-site[data-typography="technical"] h2 {
+  font-family: var(--font-mono);
+  letter-spacing: -0.04em;
+}
+.cx-event-site[data-typography="editorial"] h1,
+.cx-event-site[data-typography="editorial"] h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 500;
+}
+.cx-event-site[data-personality="square"] {
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+}
+.cx-event-site[data-personality="expressive"] {
+  --radius-lg: 20px;
+  --radius-md: 12px;
+}
+.cx-event-site[data-width="wide"] {
+  --event-content-width: 86rem;
+}
+.cx-event-site[data-density="compact"] {
+  --event-section-space: clamp(2rem, 4vw, 4rem);
+}
+.cx-event-site[data-background="paper"] {
+  background: var(--color-surface-raised);
+}
+.cx-event-site[data-hero="poster"] .cx-hero {
+  grid-template-columns: minmax(0, 1fr);
+  border: 2px solid var(--color-accent);
+  text-align: center;
+}
+.cx-event-site[data-hero="poster"] .cx-hero__story > p {
+  margin-inline: auto;
+}
+.cx-event-site[data-hero="poster"] .cx-hero__identity {
+  min-height: 8rem;
+  flex-direction: row;
+  gap: var(--space-6);
+}
+.cx-event-site[data-hero="poster"] .cx-hero__identity span {
+  font-size: 6rem;
+}
+.cx-event-site[data-hero="editorial"] .cx-hero {
+  grid-template-columns: minmax(0, 1fr);
+  padding-inline: 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-border-strong);
+  border-radius: 0;
+  background: transparent;
+}
+.cx-event-site[data-hero="editorial"] .cx-hero__identity {
+  display: none;
+}
+.cx-theme-editor fieldset {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+}
+.cx-theme-editor legend {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+}
+@media (max-width: 48rem) {
+  .cx-event-site .cx-shell__header {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    padding-inline: var(--space-4);
+  }
+  .cx-event-site .cx-shell__brand {
+    width: 100%;
+    font-size: var(--font-size-md);
+  }
+  .cx-event-site .cx-shell__nav {
+    flex: 1;
+    gap: var(--space-2);
+  }
+  .cx-event-site .cx-shell__language {
+    margin-left: 0;
+  }
+  .cx-event-site .cx-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cx-hero__identity {
+    min-height: 10rem;
+  }
+  .cx-event-site .cx-block > h2 {
+    font-size: var(--font-size-xl);
+  }
+}
+
+.cx-event-schedule {
+  list-style: none;
+  padding: 0;
+}
+.cx-event-schedule li {
+  display: flex;
+  gap: var(--space-5);
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.cx-event-schedule h3 {
+  margin: 0;
+}
+.cx-event-schedule__number {
+  font: var(--font-size-lg) var(--font-mono);
+  color: var(--color-accent);
+  padding-top: var(--space-1);
+}
+.cx-event-faq {
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-4) 0;
+}
+.cx-event-faq summary {
+  padding-block: var(--space-2);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+}
+.cx-event-resources a {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border-strong);
+  text-decoration: none;
+}
+.cx-event-resources a:hover {
+  text-decoration: underline;
+}
+.cx-event-announcements {
+  list-style: none;
+  padding: 0;
+}
+.cx-event-announcements li {
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+.cx-event-announcements h3 {
+  margin: 0;
+}
+
+.cx-event-site .cx-shell__language label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+}
+.cx-event-site .cx-shell__language select {
+  min-height: var(--control-height-compact);
+  color: var(--color-text);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  padding: var(--space-2);
+}

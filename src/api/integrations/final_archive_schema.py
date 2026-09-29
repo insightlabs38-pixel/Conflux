@@ -222,3 +222,7 @@ TABLES["awards.awardresource"] = (
     "award kind title url body position created_by created_at",
     "",
 )
+
+# v3 remains frozen, including its exact page fields. v4 adds constrained themes.
+V3_TABLES = dict(TABLES)
+TABLES["presentation.page"] = ("event", "event theme theme_config created_at updated_at", "")

@@ -207,6 +207,7 @@ def _page_doc(event):
         return None
     return {
         "theme": page.theme,
+        "theme_config": page.theme_config,
         "blocks": [
             {"kind": b.kind, "position": b.position, "config": b.config}
             for b in page.blocks.order_by("position", "pk")
@@ -319,7 +320,7 @@ def schema_errors(document):
     page = document.get("page")
     if page is not None and (
         not isinstance(page, dict)
-        or set(page) - {"theme", "blocks"}
+        or set(page) - {"theme", "theme_config", "blocks"}
         or not isinstance(page.get("blocks", []), list)
     ):
         errors.append({"section": "page", "key": "", "message": "Page needs theme and blocks."})
@@ -761,6 +762,7 @@ def _sync_page(result, event, desired, prune):
 
     target = {
         "theme": desired.get("theme", "default"),
+        "theme_config": desired.get("theme_config", {}),
         "blocks": [
             {"kind": b["kind"], "position": b.get("position", i), "config": b.get("config", {})}
             for i, b in enumerate(desired.get("blocks", []))
@@ -773,6 +775,7 @@ def _sync_page(result, event, desired, prune):
             return
         row = page or Page(event=event)
         row.theme = target["theme"]
+        row.theme_config = target["theme_config"]
         row.full_clean()
         row.save()
         row.blocks.all().delete()

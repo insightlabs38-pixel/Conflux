@@ -23,6 +23,9 @@ class Command(BaseCommand):
         )
         create.add_argument("--public", action="store_true")
         create.add_argument(
+            "--theme-preset", choices=("technical", "student", "conference"), default="technical"
+        )
+        create.add_argument(
             "--checkpoint",
             choices=CHECKPOINTS,
             default="published",
@@ -59,6 +62,7 @@ class Command(BaseCommand):
                     at=at,
                     checkpoint=options["checkpoint"],
                     live=options["live"],
+                    theme_preset=options["theme_preset"],
                 )
                 self.stdout.write(
                     json.dumps(

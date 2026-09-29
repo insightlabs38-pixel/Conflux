@@ -2475,11 +2475,13 @@ class InputOfOperatorTemplateSchema(TypedDict):
 class Page(TypedDict):
     public_id: str
     theme: NotRequired[ThemeEnum]
+    theme_config: NotRequired[Any]
     created_at: str
     updated_at: str
 
 class InputOfPage(TypedDict):
     theme: NotRequired[InputOfThemeEnum]
+    theme_config: NotRequired[Any]
 
 class PageBlock(TypedDict):
     public_id: str
@@ -2725,11 +2727,13 @@ class InputOfPatchedLocationPatchInput(TypedDict):
 class PatchedPage(TypedDict):
     public_id: NotRequired[str]
     theme: NotRequired[ThemeEnum]
+    theme_config: NotRequired[Any]
     created_at: NotRequired[str]
     updated_at: NotRequired[str]
 
 class InputOfPatchedPage(TypedDict):
     theme: NotRequired[InputOfThemeEnum]
+    theme_config: NotRequired[Any]
 
 class PatchedPageBlock(TypedDict):
     public_id: NotRequired[str]
@@ -3242,6 +3246,7 @@ class InputOfPublicAwardOutput(TypedDict):
     winners: list[InputOfPublicWinnerOutput]
 
 class PublicEventSchema(TypedDict):
+    presentation: Any
     public_id: str
     name: str
     slug: str
@@ -3254,6 +3259,7 @@ class PublicEventSchema(TypedDict):
     base_prizes: list[BasePrize]
 
 class InputOfPublicEventSchema(TypedDict):
+    presentation: Any
     public_id: str
     name: str
     slug: str

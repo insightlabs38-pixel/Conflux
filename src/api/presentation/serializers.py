@@ -10,8 +10,21 @@ class PageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Page
-        fields = ["public_id", "theme", "created_at", "updated_at"]
+        fields = ["public_id", "theme", "theme_config", "created_at", "updated_at"]
         read_only_fields = ["created_at", "updated_at"]
+
+    def validate(self, attrs):
+        from .themes import clean_theme_config
+
+        try:
+            config = clean_theme_config(
+                attrs.get("theme_config", getattr(self.instance, "theme_config", {})),
+                attrs.get("theme", getattr(self.instance, "theme", "default")),
+            )
+        except ModelValidationError as exc:
+            raise serializers.ValidationError(exc.message_dict) from exc
+        attrs["theme_config"] = config
+        return attrs
 
 
 class PageBlockSerializer(serializers.ModelSerializer):

@@ -1918,10 +1918,18 @@ batches:
   - src/web/features/page-builder/**
   - src/web/public/**
   - src/api/integrations/**
+  - src/api/events/schema.py
+  - src/api/events/views.py
+  - src/web/styles/**
+  - tests/integration/**
+  - tests/compatibility/**
+  - tests/e2e/event-themes.spec.ts
+  - docs/api/openapi.yaml
+  - sdks/**
   task_ids:
   - UIV2-B03-01
   - UIV2-B03-02
-  status: BLOCKED
+  status: DONE
   completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
     receipt and commit recorded before advancing.
 - id: UIV2-B04

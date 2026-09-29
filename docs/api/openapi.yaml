@@ -20600,6 +20600,7 @@ components:
           readOnly: true
         theme:
           $ref: '#/components/schemas/ThemeEnum'
+        theme_config: {}
         created_at:
           type: string
           format: date-time
@@ -21065,6 +21066,7 @@ components:
           readOnly: true
         theme:
           $ref: '#/components/schemas/ThemeEnum'
+        theme_config: {}
         created_at:
           type: string
           format: date-time
@@ -21963,6 +21965,7 @@ components:
     PublicEventSchema:
       type: object
       properties:
+        presentation: {}
         public_id:
           type: string
           format: uuid
@@ -21998,6 +22001,7 @@ components:
       - description
       - ends_at
       - name
+      - presentation
       - public_id
       - slug
       - starts_at

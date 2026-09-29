@@ -7,6 +7,8 @@ import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 
+import { ThemeSettings, type ThemeConfig } from "./ThemeSettings";
+
 type Theme = "default" | "dark" | "minimal";
 type Kind = keyof typeof blockTypes;
 type Block = {
@@ -15,7 +17,7 @@ type Block = {
   position: number;
   config: Record<string, unknown>;
 };
-type Page = { public_id: string; theme: Theme };
+type Page = { public_id: string; theme: Theme; theme_config?: ThemeConfig };
 type AuditWarning = {
   category: "contrast" | "heading" | "accessible-name" | "keyboard";
   severity: string;
@@ -173,14 +175,17 @@ export function PageBuilder({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspaceId, eventId]);
 
-  async function setTheme(theme: Theme) {
-    try {
-      const updated = await request<Page>(base, "PATCH", { theme });
-      setPage(updated);
-      await refreshAudit();
-    } catch (cause) {
-      setError(message(cause));
-    }
+  async function setAppearance(theme: Theme, theme_config: ThemeConfig) {
+    const cleaned = Object.fromEntries(
+      Object.entries(theme_config).filter(([, value]) => value !== ""),
+    );
+    const updated = await request<Page>(base, "PATCH", {
+      theme,
+      theme_config: cleaned,
+    });
+    setPage(updated);
+    setError("");
+    await refreshAudit();
   }
 
   async function addBlock() {
@@ -237,17 +242,13 @@ export function PageBuilder({
     <Card title="Public page">
       {error && <p role="alert">{error}</p>}
       {page && (
-        <label>
-          Theme{" "}
-          <select
-            value={page.theme}
-            onChange={(e) => void setTheme(e.target.value as Theme)}
-          >
-            <option value="default">Default</option>
-            <option value="dark">Dark</option>
-            <option value="minimal">Minimal</option>
-          </select>
-        </label>
+        <ThemeSettings
+          key={page.public_id}
+          theme={page.theme}
+          config={page.theme_config || {}}
+          eventId={eventId}
+          onSave={setAppearance}
+        />
       )}
       {warnings.length > 0 && (
         <div role="status" aria-label="Accessibility warnings">

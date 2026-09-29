@@ -1,5 +1,5 @@
-{% load static i18n %}{% get_current_language as LANGUAGE_CODE %}<!doctype html>
-<html lang="{{ LANGUAGE_CODE }}"{% if theme == "dark" %} data-theme="dark"{% endif %}>
+{% load static i18n presentation_tags %}{% event_theme event as event_brand %}{% get_current_language as LANGUAGE_CODE %}<!doctype html>
+<html lang="{{ LANGUAGE_CODE }}"{% if event_brand.mode == "dark" %} data-theme="dark"{% endif %}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,17 +10,18 @@
   <link rel="manifest" href="{% static 'manifest.webmanifest' %}">
   <link rel="icon" href="{% static 'icon.svg' %}" type="image/svg+xml">
   <link rel="apple-touch-icon" href="{% static 'icon.svg' %}">
-  <meta name="theme-color" content="#2952cc">
+  <meta name="theme-color" content="{{ event_brand.accent }}">
   {% block extra_head %}{% endblock %}
 </head>
-<body class="cx-shell{% if theme == "minimal" %} theme-minimal{% endif %}">
+<body class="cx-shell cx-event-site{% if event_brand.mode == "minimal" %} theme-minimal{% endif %}" style="{{ event_brand.style }}" data-typography="{{ event_brand.typography }}" data-personality="{{ event_brand.personality }}" data-density="{{ event_brand.density }}" data-width="{{ event_brand.width }}" data-hero="{{ event_brand.hero }}" data-background="{{ event_brand.background }}" data-project-card="{{ event_brand.project_card }}">
   <a class="cx-skip-link" href="#main-content">{% trans "Skip to main content" %}</a>
   {% if event %}
   <header class="cx-shell__header">
-    <a class="cx-shell__brand" href="{% url 'site-event' event.public_id %}">{{ event.name }}</a>
+    <a class="cx-shell__brand" href="{% url 'site-event' event.public_id %}">{% if event_brand.logo_url %}<img class="cx-event-logo" src="{{ event_brand.logo_url }}" alt="" width="40" height="40">{% endif %}{{ event.name }}</a>
     <nav class="cx-shell__nav" aria-label="Primary">
-      <a href="{% url 'site-event' event.public_id %}">{% trans "Overview" %}</a>
-      <a href="{% url 'site-gallery' event.public_id %}">{% trans "Gallery" %}</a>
+      <a href="{% url 'site-event' event.public_id %}"{% if request.resolver_match.url_name == "site-event" %} aria-current="page"{% endif %}>{% trans "Overview" %}</a>
+      <a href="{% url 'site-gallery' event.public_id %}"{% if request.resolver_match.url_name == "site-gallery" %} aria-current="page"{% endif %}>{% trans "Gallery" %}</a>
+      <a href="{% url 'site-results' event.public_id %}"{% if request.resolver_match.url_name == "site-results" %} aria-current="page"{% endif %}>{% trans "Results" %}</a>
     </nav>
     <form action="{% url 'set_language' %}" method="post" class="cx-shell__language">
       {% csrf_token %}
@@ -42,6 +43,7 @@
   <main id="main-content" class="cx-shell__main" tabindex="-1">
     {% block content %}{% endblock %}
   </main>
+  {% if event %}<footer class="cx-event-footer"><p>{{ event.name }}</p><p>{{ event.timezone }} · {% trans "Powered by Conflux" %}</p><a href="/">{% trans "Participant sign in" %}</a></footer>{% endif %}
   <script>
     // Optional: an offline shell (VS22). Registration failure (unsupported
     // browser, blocked by policy) is silently ignored -- the site already

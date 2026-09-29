@@ -147,7 +147,9 @@ def test_fixed_theme_audit_tracks_shared_css_tokens():
 
     css = (Path(__file__).parents[2] / "src/web/styles/tokens.css").read_text()
     default = re.search(r":root \{(.*?)\n\}", css, re.S).group(1)
-    dark = re.search(r':root\[data-theme="dark"\] \{(.*?)\n\}', css, re.S).group(1)
+    dark = re.search(
+        r':root\[data-theme="dark"\],\n\.cx-event-site\[data-theme="dark"\] \{(.*?)\n\}', css, re.S
+    ).group(1)
     for theme, section in (("default", default), ("minimal", default), ("dark", dark)):
         for key, token in (
             ("bg", "bg"),

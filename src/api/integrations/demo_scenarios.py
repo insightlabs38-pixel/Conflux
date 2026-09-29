@@ -20,6 +20,7 @@ from django.db.models import ProtectedError
 from django.test import Client
 from django.utils import timezone
 from events.models import EventStatus, RegistrationStatus
+from presentation.themes import PRESETS
 from workspaces.models import Membership, Role, Workspace
 
 from .archive import import_archive
@@ -51,6 +52,11 @@ def demo_public_ids(scenario, seed):
 
 MAX_PARTICIPANTS = 40
 MAX_JUDGES = 12
+THEME_TITLES = {
+    "technical": "Conflux Builders",
+    "student": "Campus Build Weekend",
+    "conference": "Open Systems Forum",
+}
 
 TRACKS = ["AI for Good", "Developer Tools", "Open Data"]
 ADJECTIVES = "Swift Quiet Bright Rugged Curious Modular Gentle Lucid Nimble Patient".split()
@@ -62,14 +68,16 @@ CRITERIA = [
 ]
 
 
-def scenario_archive(key, *, at):
+def scenario_archive(key, *, at, theme_preset="technical"):
+    if theme_preset not in PRESETS:
+        raise ValidationError({"theme_preset": "Choose technical, student or conference."})
     if key != "hackathon":
         raise ValidationError({"scenario": f"Unknown scenario {key!r}."})
     return {
         "format_version": 1,
         "mode": "config",
         "event": {
-            "name": "Demo Hackathon",
+            "name": THEME_TITLES[theme_preset],
             "slug": "demo-hackathon",
             "description": "Synthetic event generated for training and demos.",
             "timezone": "UTC",
@@ -152,11 +160,15 @@ def scenario_archive(key, *, at):
         "pages": [
             {
                 "theme": "default",
+                "theme_config": dict(PRESETS[theme_preset]),
                 "blocks": [
                     {
                         "kind": "hero",
                         "position": 0,
-                        "config": {"title": "Demo Hackathon", "subtitle": "Synthetic data"},
+                        "config": {
+                            "title": THEME_TITLES[theme_preset],
+                            "subtitle": "Synthetic demonstration event",
+                        },
                     }
                 ],
             }
@@ -210,6 +222,7 @@ def generate_demo_event(
     at=None,
     checkpoint="published",
     live=None,
+    theme_preset="technical",
 ):
     if not 3 <= participants <= MAX_PARTICIPANTS or not 2 <= judges <= MAX_JUDGES:
         raise ValidationError(
@@ -245,7 +258,10 @@ def generate_demo_event(
 
     with patch("django.utils.timezone.now", return_value=at):
         event = import_archive(
-            workspace=workspace, archive=scenario_archive(scenario, at=at), name="Demo", slug="demo"
+            workspace=workspace,
+            archive=scenario_archive(scenario, at=at, theme_preset=theme_preset),
+            name=THEME_TITLES[theme_preset],
+            slug="demo",
         )
         event.status = EventStatus.OPEN
         event.public_id = event_id

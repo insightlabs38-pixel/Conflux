@@ -234,7 +234,7 @@ def test_default_reexport_preserves_final_state_and_supports_multiple_restoratio
     copied = restore(workspace, build_archive(event, mode="final"))
     exported = build_archive(copied)
     assert exported == build_archive(copied)
-    assert exported["format_version"] == 3 and exported["mode"] == "final"
+    assert exported["format_version"] == 4 and exported["mode"] == "final"
     assert exported["provenance"][0]["source_sha256"] == copied.archive_restoration.source_sha256
     again = restore(workspace, exported, slug="again")
     reexported = build_archive(again)
@@ -305,7 +305,7 @@ def test_preview_and_signed_api_preserve_scope_audit_and_rollback():
     preview = preview_archive_import(
         workspace=workspace, archive=archive, name="Preview", slug="preview"
     )
-    assert preview["format_version"] == 3 and preview["ignored_sections"] == []
+    assert preview["format_version"] == 4 and preview["ignored_sections"] == []
     assert not Event.objects.filter(slug="preview").exists()
     assert not ArchiveRestoration.objects.exists()
     envelope = sign_archive(archive)
@@ -394,7 +394,7 @@ def test_award_resources_restore_content_order_actor_and_portable_references():
             created_by=owner,
         )
     archive = build_archive(event, mode="final")
-    assert archive["format_version"] == 3
+    assert archive["format_version"] == 4
     rows = archive["tables"]["awards.awardresource"]
     assert len(rows) == 5
     assert {row["fields"]["award"] for row in rows} == {str(award.public_id)}
@@ -416,13 +416,18 @@ def test_original_v2_contract_remains_readable_and_upgrades_explicitly():
     with pytest.raises(ValidationError, match="every known table"):
         restore(workspace, archive)
     archive["format_version"] = 2
+    for row in archive["tables"]["presentation.page"]:
+        del row["fields"]["theme_config"]
     preview = preview_archive_import(
         workspace=workspace, archive=archive, name="Preview", slug="preview"
     )
-    assert preview["migration_steps"] == ["v2 → v3: add empty award-resource table"]
+    assert preview["migration_steps"] == [
+        "v2 → v3: add empty award-resource table",
+        "v3 → v4: add default event theme settings",
+    ]
     copied = restore(workspace, archive)
     exported = build_archive(copied)
-    assert exported["format_version"] == 3
+    assert exported["format_version"] == 4
     assert exported["tables"]["awards.awardresource"] == []
     assert exported["provenance"][0]["source_format_version"] == 2
     assert copied.archive_restoration.source_archive == archive
@@ -466,3 +471,32 @@ def test_pairwise_award_evidence_remaps_to_restored_run():
     )
     assert restored.evidence["pairwise_run"] != winner.evidence["pairwise_run"]
     assert restored.evidence["plan"] == str(restored.award.evaluation_plan.public_id)
+
+
+def test_frozen_v3_page_contract_restores_with_default_theme_settings():
+    from presentation.models import Page
+
+    workspace, event, *_ = source()
+    Page.objects.get_or_create(event=event)
+    archive = build_archive(event, mode="final")
+    archive["format_version"] = 3
+    for row in archive["tables"]["presentation.page"]:
+        del row["fields"]["theme_config"]
+    copied = restore(workspace, archive)
+    assert copied.page.theme_config == {}
+    assert build_archive(copied)["format_version"] == 4
+    assert copied.archive_restoration.source_archive == archive
+
+
+def test_v4_theme_settings_round_trip_without_mutating_source_evidence():
+    from presentation.models import Page
+    from presentation.themes import PRESETS
+
+    workspace, event, *_ = source()
+    page, _ = Page.objects.get_or_create(event=event)
+    page.theme_config = PRESETS["student"]
+    page.save()
+    archive = build_archive(event, mode="final")
+    copied = restore(workspace, archive)
+    assert copied.page.theme_config == PRESETS["student"]
+    assert copied.archive_restoration.source_archive == archive

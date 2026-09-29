@@ -1,7 +1,9 @@
+import { chooseWorkspaceEvent } from "./support";
 import { expect, test, type Page } from "@playwright/test";
 import {
   account,
   goToDestination,
+  goToTask,
   accessible,
   noHorizontalOverflow,
   openWorkspace,
@@ -36,7 +38,7 @@ async function chooseEvent(page: Page) {
 async function organizerEvent(page: Page) {
   await signIn(page, "organizer");
   await openWorkspace(page);
-  await page.getByRole("button", { name: /^Demo \(/ }).click();
+  await chooseWorkspaceEvent(page);
   await goToDestination(page, "eligibility");
   await expect(
     page.getByRole("region", { name: "Eligibility review queue" }),
@@ -115,6 +117,7 @@ test("participant RSVPs, books office hours and asks for a mentor", async ({
   await openWorkspace(page);
   await chooseEvent(page);
   await goToDestination(page, "resources");
+  await goToTask(page, "On-site participation");
   const attending = page.getByRole("region", { name: "Attending in person" });
   await attending.getByLabel("Your RSVP").selectOption("remote");
   await expect(attending.getByText("RSVP saved: Remote.")).toBeVisible();
@@ -127,6 +130,7 @@ test("participant RSVPs, books office hours and asks for a mentor", async ({
     .locator("select")
     .filter({ has: page.locator("option", { hasText: "Choose a project" }) })
     .selectOption({ index: 1 });
+  await goToTask(page, "Support");
   const mentorship = page.getByRole("region", { name: "Mentorship" });
   await mentorship
     .getByLabel("What do you need help with?")
@@ -157,6 +161,7 @@ test("participant requests a deadline exception and the organizer decides it", a
     .locator("select")
     .filter({ has: page.locator("option", { hasText: "Choose a project" }) })
     .selectOption({ index: 1 });
+  await goToTask(page, "Support");
   const exception = page.getByRole("region", { name: "Deadline exception" });
   await exception
     .getByLabel("Why do you need more time?")
@@ -207,7 +212,7 @@ test("organizer publishes rules, participants acknowledge, counts update", async
   await expect(part.getByText("Acknowledged", { exact: true })).toBeVisible();
 
   await page.reload();
-  await page.getByRole("button", { name: /^Demo \(/ }).click();
+  await chooseWorkspaceEvent(page);
   await expect(
     page
       .getByRole("region", { name: "Event rules" })
@@ -272,9 +277,11 @@ for (const role of ["participant-01", "judge-01", "mentor", "volunteer"]) {
           has: page.locator("option", { hasText: "Choose a project" }),
         })
         .selectOption({ index: 1 });
+      await goToTask(page, "Support");
       await expect(
         page.getByRole("region", { name: "Mentorship" }),
       ).toBeVisible();
+      await goToTask(page, "After the event");
       await expect(
         page.getByRole("region", { name: "After the event" }),
       ).toBeVisible();

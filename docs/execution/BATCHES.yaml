@@ -1987,13 +1987,18 @@ batches:
   - UIV2-B05
   owned_paths:
   - src/web/features/teams/**
+  - src/web/components/WorkflowSections*
+  - src/web/styles/components.css
+  - tests/e2e/**
+  - .gitignore
+  - .prettierignore
   - src/web/features/artifacts/**
   - src/web/features/submissions/**
   - src/web/features/pvs/**
   task_ids:
   - UIV2-B06-01
   - UIV2-B06-02
-  status: IN_PROGRESS
+  status: DONE
   completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
     receipt and commit recorded before advancing.
 - id: UIV2-B07
@@ -2008,7 +2013,7 @@ batches:
   task_ids:
   - UIV2-B07-01
   - UIV2-B07-02
-  status: BLOCKED
+  status: IN_PROGRESS
   completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
     receipt and commit recorded before advancing.
 - id: UIV2-B08

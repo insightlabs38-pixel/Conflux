@@ -1,4 +1,5 @@
-import { goToDestination } from "./support";
+import { chooseWorkspaceEvent } from "./support";
+import { goToDestination, goToTask } from "./support";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 import {
@@ -47,6 +48,7 @@ test("participant creates a team, submits, and receives a signed receipt", async
   await openWorkspace(page);
   await chooseEvent(page);
   await goToDestination(page, "resources");
+  await goToTask(page, "Sponsor challenges");
   await expect(
     page.getByRole("region", { name: "Sponsor challenges" }),
   ).toContainText("Sponsor API documentation");
@@ -60,6 +62,7 @@ test("participant creates a team, submits, and receives a signed receipt", async
   await page.getByLabel("Project name").fill(PROJECT);
   await page.getByRole("button", { name: "Create project" }).click();
 
+  await goToTask(page, "Evidence & checks");
   const evidence = page.getByRole("region", { name: "Project artifacts" });
   await evidence
     .getByLabel("Title", { exact: true })
@@ -93,6 +96,7 @@ test("participant creates a team, submits, and receives a signed receipt", async
     });
   await projects.selectOption("");
   await projects.selectOption({ label: PROJECT });
+  await goToTask(page, "Submission");
   const submission = page.getByRole("region", {
     name: "Submission",
     exact: true,
@@ -106,12 +110,25 @@ test("participant creates a team, submits, and receives a signed receipt", async
   await submission.getByRole("button", { name: "Finalize submission" }).click();
   await expect(submission.getByText(/Submission finalized/)).toBeVisible();
   await expect(submission.getByText("Signed submission receipt")).toBeVisible();
-  await expect(submission.getByLabel("Receipt token")).toHaveValue(/.{20,}/);
-  // Not-yet-reviewed and deadline-exception surfaces are reachable from the project.
+  await submission
+    .getByText("Signature and technical proof", { exact: true })
+    .click();
+  await expect(
+    submission.getByRole("textbox", { name: "Receipt token", exact: true }),
+  ).toBeVisible();
+  await expect(
+    submission.getByRole("textbox", { name: "Receipt token", exact: true }),
+  ).toHaveValue(/.{20,}/);
+  await submission
+    .getByText("Signature and technical proof", { exact: true })
+    .click();
+  // Support workflows stay reachable through the project task navigation.
+  await goToTask(page, "Support");
   await expect(
     page.getByRole("region", { name: "Deadline exception" }),
   ).toBeVisible();
   await expect(page.getByRole("region", { name: "Mentorship" })).toBeVisible();
+  await goToTask(page, "Submission");
   await shot(page, "participant-submission-receipt", "Submission");
   await settled(page);
   expect(problems.filter((p) => !p.includes("/accounts/me/"))).toEqual([]);
@@ -127,7 +144,7 @@ test("organizer requests changes; participant remediates; organizer approves", a
   ).newPage();
   await signIn(org, "organizer");
   await openWorkspace(org);
-  await org.getByRole("button", { name: /^Demo \(open\)/ }).click();
+  await chooseWorkspaceEvent(org);
   await goToDestination(org, "eligibility");
   const queue = org.getByRole("region", { name: "Eligibility review queue" });
   await queue.getByLabel("Open a project").selectOption({ label: PROJECT });
@@ -153,6 +170,19 @@ test("organizer requests changes; participant remediates; organizer approves", a
     .locator("select")
     .filter({ has: part.locator("option", { hasText: "Choose a project" }) })
     .selectOption({ label: PROJECT });
+  await goToTask(part, "Project story");
+  await part
+    .getByLabel("Project description", { exact: true })
+    .fill(
+      "Live Wire connects local volunteers with neighborhood needs. Built with a Django REST API and an accessible web client.",
+    );
+  await part
+    .getByRole("button", { name: "Save project story", exact: true })
+    .click();
+  await expect(
+    part.getByText("Project story saved.", { exact: true }),
+  ).toBeVisible();
+  await goToTask(part, "Eligibility");
   const findings = part.getByRole("region", { name: "Eligibility review" });
   await expect(findings).toContainText("Describe what the project does.");
   await findings
@@ -164,7 +194,7 @@ test("organizer requests changes; participant remediates; organizer approves", a
   await expect(findings).toContainText("Pending review");
 
   await org.reload(); // the workspace and event survive a refresh via the URL
-  await org.getByRole("button", { name: /^Demo \(open\)/ }).click();
+  await chooseWorkspaceEvent(org);
   const again = org.getByRole("region", { name: "Eligibility review queue" });
   await again.getByRole("button", { name: `Review ${PROJECT}` }).click();
   await again.getByRole("button", { name: "Mark resolved" }).click();
@@ -186,6 +216,7 @@ test("organizer requests changes; participant remediates; organizer approves", a
     .locator("select")
     .filter({ has: part.locator("option", { hasText: "Choose a project" }) })
     .selectOption({ label: PROJECT });
+  await goToTask(part, "Eligibility");
   await expect(
     part.getByRole("region", { name: "Eligibility review" }),
   ).toContainText("cleared", { ignoreCase: true });
@@ -259,7 +290,7 @@ test("organizer publishes results and the public results page shows them", async
 }) => {
   await signIn(page, "organizer");
   await openWorkspace(page);
-  await page.getByRole("button", { name: /^Demo \(open\)/ }).click();
+  await chooseWorkspaceEvent(page);
   await goToDestination(page, "judging");
   const judging = page.locator(".cx-card").filter({
     has: page.getByRole("heading", { name: "Judging", exact: true }),

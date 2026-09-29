@@ -22,4 +22,5 @@ __pycache__/
 coverage/
 
 # Generated media and local verification logs are handoff assets.
-artifacts/
+/artifacts/
+/tests/e2e/artifacts/

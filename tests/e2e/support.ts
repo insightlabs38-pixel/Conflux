@@ -67,7 +67,12 @@ export async function eventIds(page: Page) {
   const events = await (
     await page.request.get(`/api/v1/workspaces/${workspace}/events/`)
   ).json();
-  return { workspace, event: events[0].public_id as string };
+  return {
+    workspace,
+    event: events[0].public_id as string,
+    name: events[0].name as string,
+    status: events[0].status as string,
+  };
 }
 
 /** Waits until every loading indicator has resolved into content or an error. */
@@ -85,4 +90,22 @@ export async function goToDestination(page: Page, id: string) {
     await page.getByRole("button", { name: "Navigation", exact: true }).click();
   await link.click();
   await expect(link).toHaveAttribute("aria-current", "page");
+}
+
+/** Open a retained workflow task using its accessible tab, not hidden panel content. */
+export async function goToTask(page: Page, label: string) {
+  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const tab = page.getByRole("tab", {
+    name: new RegExp(`^${escaped}(?:\\s|$)`),
+  });
+  await tab.click();
+  await expect(tab).toHaveAttribute("aria-selected", "true");
+}
+
+/** Select the real configured event identity; theme presets may rename seed events. */
+export async function chooseWorkspaceEvent(page: Page) {
+  const { name, status } = await eventIds(page);
+  await page
+    .getByRole("button", { name: `${name} (${status})`, exact: true })
+    .click();
 }

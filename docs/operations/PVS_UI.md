@@ -52,6 +52,20 @@ The account disclosure provides sign-out and profile navigation for every suppor
 role. Reusable identity and privacy controls are in Profile; portfolio remains
 workspace-scoped history. [Identity behavior](../ui-v2/IDENTITY_PROFILES.md).
 
+## Participant task flow (UIV2-B06)
+
+Overview derives team, project, finalized-stage and eligibility states from the
+participant's authorized records. The event deadline comes from the configured
+public event window; server policy decisions remain authoritative.
+
+Team uses **Your team / Find teammates**; resources use **Rules / Sponsor challenges /
+On-site participation**. Project task navigation uses **Project story / Evidence &
+checks / Event forms / Submission / Eligibility / Support / After the event**.
+Task switches retain drafts. Submission autosave/finalization/reopen semantics are
+unchanged. The readable signed receipt includes frozen judge-visible evidence;
+signatures, digests and version history remain in native disclosures. Artifact
+drift removes download affordances, using the existing preview API.
+
 ## Intentionally API/CLI-first
 
 PVS05/06/07/12/13 are technical/operator features (for example judging replay and the audit capsule, SSO configuration and the MCP adapter) better served by the CLI, scripts and API explorer. Also API-only by design: judges' deliberation stances and notes (there is no judge-facing way to discover an award's room, and peer ballots are never shown), mentor reassignment targets beyond available mentors, sponsor portal writes, and eligibility rule configuration.

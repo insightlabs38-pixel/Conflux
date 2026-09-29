@@ -217,92 +217,94 @@ export function ArtifactPanel({
       {error && <p role="alert">{error}</p>}
       {progress && <p role="status">{progress}</p>}
       {notice && <p role="status">{notice}</p>}
-      <form onSubmit={upload}>
-        <h4>Upload evidence</h4>
-        <label>
-          Title{" "}
-          <input
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            required
-          />
-        </label>
-        <label>
-          Kind{" "}
-          <select
-            value={kind}
-            onChange={(event) => {
-              setKind(event.target.value);
-              if (event.target.value === "secret") setVisibility("judge");
-            }}
-          >
-            {["file", "image", "video", "document", "dataset", "secret"].map(
-              (value) => (
+      <div className="cx-evidence-entry">
+        <form onSubmit={upload}>
+          <h4>Upload evidence</h4>
+          <label>
+            Title{" "}
+            <input
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              required
+            />
+          </label>
+          <label>
+            Kind{" "}
+            <select
+              value={kind}
+              onChange={(event) => {
+                setKind(event.target.value);
+                if (event.target.value === "secret") setVisibility("judge");
+              }}
+            >
+              {["file", "image", "video", "document", "dataset", "secret"].map(
+                (value) => (
+                  <option key={value}>{value}</option>
+                ),
+              )}
+            </select>
+          </label>
+          <label>
+            Visibility{" "}
+            <select
+              value={visibility}
+              onChange={(event) => setVisibility(event.target.value)}
+            >
+              {(kind === "secret"
+                ? ["judge", "organizer"]
+                : ["participant", "public", "judge", "organizer"]
+              ).map((value) => (
                 <option key={value}>{value}</option>
-              ),
-            )}
-          </select>
-        </label>
-        <label>
-          Visibility{" "}
-          <select
-            value={visibility}
-            onChange={(event) => setVisibility(event.target.value)}
-          >
-            {(kind === "secret"
-              ? ["judge", "organizer"]
-              : ["participant", "public", "judge", "organizer"]
-            ).map((value) => (
-              <option key={value}>{value}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          File{" "}
-          <input
-            type="file"
-            onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-            required
-          />
-        </label>
-        <button disabled={busy}>Upload</button>
-      </form>
-      <form onSubmit={addExternal}>
-        <h4>Add link</h4>
-        <label>
-          Title{" "}
-          <input
-            value={linkTitle}
-            onChange={(event) => setLinkTitle(event.target.value)}
-            required
-          />
-        </label>
-        <label>
-          Kind{" "}
-          <select
-            value={linkKind}
-            onChange={(event) => setLinkKind(event.target.value)}
-          >
-            {["repository", "live_url", "external_video"].map((value) => (
-              <option key={value}>{value}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          URL{" "}
-          <input
-            type="url"
-            value={linkUrl}
-            onChange={(event) => setLinkUrl(event.target.value)}
-            required
-          />
-        </label>
-        <button disabled={busy}>Add link</button>
-      </form>
+              ))}
+            </select>
+          </label>
+          <label>
+            File{" "}
+            <input
+              type="file"
+              onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+              required
+            />
+          </label>
+          <button disabled={busy}>Upload</button>
+        </form>
+        <form onSubmit={addExternal}>
+          <h4>Add link</h4>
+          <label>
+            Title{" "}
+            <input
+              value={linkTitle}
+              onChange={(event) => setLinkTitle(event.target.value)}
+              required
+            />
+          </label>
+          <label>
+            Kind{" "}
+            <select
+              value={linkKind}
+              onChange={(event) => setLinkKind(event.target.value)}
+            >
+              {["repository", "live_url", "external_video"].map((value) => (
+                <option key={value}>{value}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            URL{" "}
+            <input
+              type="url"
+              value={linkUrl}
+              onChange={(event) => setLinkUrl(event.target.value)}
+              required
+            />
+          </label>
+          <button disabled={busy}>Add link</button>
+        </form>
+      </div>
       {artifacts.length === 0 ? (
         <p>No evidence yet.</p>
       ) : (
-        <ul>
+        <ul className="cx-evidence-list">
           {artifacts.map((artifact) => (
             <li key={artifact.public_id}>
               {artifact.title} ({artifact.kind}, {artifact.status})

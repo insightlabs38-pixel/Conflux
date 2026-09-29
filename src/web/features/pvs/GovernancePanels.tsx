@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FrozenSubmissionPreview } from "../submissions/FrozenSubmissionPreview";
 import { Badge } from "../../components/Badge";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
@@ -629,9 +630,11 @@ type Receipt = {
 export function SubmissionReceipt({
   projectBase,
   stageId,
+  stageName,
 }: {
   projectBase: string;
   stageId: string;
+  stageName?: string;
 }) {
   const receipt = useLoad<Receipt>(
     `${projectBase}submissions/${stageId}/receipt/`,
@@ -644,6 +647,14 @@ export function SubmissionReceipt({
     );
   if (!receipt.data) return null;
   const { token, claims, issued_at } = receipt.data;
+  const subject =
+    claims?.subject && typeof claims.subject === "object"
+      ? (claims.subject as Record<string, unknown>)
+      : {};
+  const event =
+    claims?.event && typeof claims.event === "object"
+      ? (claims.event as Record<string, unknown>)
+      : {};
 
   async function copy() {
     try {
@@ -656,35 +667,57 @@ export function SubmissionReceipt({
 
   return (
     <Card title="Signed submission receipt" as="h4">
-      <p>
-        Issued {formatWhen(issued_at)}. Keep this as proof of what you
-        submitted.
-      </p>
-      <dl>
-        {Object.entries(claims ?? {}).map(([key, value]) => (
-          <div key={key}>
-            <dt>{key}</dt>
-            <dd>
-              {typeof value === "object"
-                ? JSON.stringify(value)
-                : String(value)}
-            </dd>
-          </div>
-        ))}
-      </dl>
-      <label>
-        Receipt token{" "}
-        <textarea
-          readOnly
-          value={token}
-          rows={3}
-          onFocus={(e) => e.target.select()}
-        />
-      </label>{" "}
-      <Button variant="secondary" onClick={() => void copy()}>
-        Copy receipt
-      </Button>
-      {copied && <p role="status">{copied}</p>}
+      <div className="cx-human-receipt">
+        <p className="cx-eyebrow">Finalized submission</p>
+        <h5>{String(subject.project_name ?? "Your project")}</h5>
+        <p>
+          {String(event.name ?? "Event")} ·{" "}
+          {stageName ?? String(subject.stage ?? "Stage")} · Version{" "}
+          {String(subject.version ?? "—")}
+        </p>
+        <p>
+          Finalized{" "}
+          {formatWhen(
+            typeof subject.finalized_at === "string"
+              ? subject.finalized_at
+              : issued_at,
+          )}
+        </p>
+        <p>
+          Receipt reference:{" "}
+          <strong>{String(subject.receipt_id ?? "—")}</strong>
+        </p>
+        <p>Keep this signed receipt as proof of the submitted version.</p>
+      </div>
+      <FrozenSubmissionPreview base={projectBase} stageId={stageId} />
+      <details className="cx-receipt-proof">
+        <summary>Signature and technical proof</summary>
+        <dl>
+          {Object.entries(claims ?? {}).map(([key, value]) => (
+            <div key={key}>
+              <dt>{key}</dt>
+              <dd>
+                {typeof value === "object"
+                  ? JSON.stringify(value)
+                  : String(value)}
+              </dd>
+            </div>
+          ))}
+        </dl>
+        <label>
+          Receipt token{" "}
+          <textarea
+            readOnly
+            value={token}
+            rows={3}
+            onFocus={(e) => e.target.select()}
+          />
+        </label>{" "}
+        <Button variant="secondary" onClick={() => void copy()}>
+          Copy receipt
+        </Button>
+        {copied && <p role="status">{copied}</p>}
+      </details>
     </Card>
   );
 }

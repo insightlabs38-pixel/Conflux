@@ -67,19 +67,28 @@ function FindingList({
 }) {
   if (findings.length === 0) return <p>No findings.</p>;
   return (
-    <ul>
+    <ul className="cx-findings">
       {findings.map((finding) => (
-        <li key={finding.public_id}>
+        <li key={finding.public_id} className="cx-finding">
+          <p className="cx-eyebrow">
+            {finding.automated ? "Automated check" : "Organizer finding"} ·{" "}
+            {finding.code}
+          </p>
           <Badge tone={finding.severity === "blocking" ? "danger" : "neutral"}>
             {finding.severity}
           </Badge>{" "}
           <Badge tone={STATE_TONE[finding.state]}>{finding.state}</Badge>{" "}
-          {finding.message}
+          <p className="cx-finding__message">{finding.message}</p>
           {finding.participant_response && (
-            <p>Team response: {finding.participant_response}</p>
+            <blockquote>
+              <strong>Team response</strong>
+              <p>{finding.participant_response}</p>
+            </blockquote>
           )}
           {finding.resolution_note && (
-            <p>Organizer note: {finding.resolution_note}</p>
+            <p>
+              <strong>Organizer decision:</strong> {finding.resolution_note}
+            </p>
           )}
           {children?.(finding)}
         </li>
@@ -123,13 +132,18 @@ export function ProjectEligibilityPanel({
   return (
     <section aria-label="Eligibility review">
       <h3>Eligibility review</h3>
+      <p>
+        Review each finding, make the requested change, and describe your
+        response. The organizers then decide whether to resolve or waive it.
+      </p>
       {loading && <LoadingState label="Loading eligibility review…" />}
       {error && <ErrorState message={error.message} onRetry={reload} />}
       {problem && <p role="alert">{problem}</p>}
       {review && (
         <>
           <p>
-            <StatusBadge status={review.status} />
+            <StatusBadge status={review.status} /> · Review revision{" "}
+            {review.revision}
             {review.decision_note && <> {review.decision_note}</>}
           </p>
           {review.status === "cleared" && (

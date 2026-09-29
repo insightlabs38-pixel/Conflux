@@ -1,3 +1,4 @@
+import { chooseWorkspaceEvent } from "./support";
 import { expect, test } from "@playwright/test";
 import path from "node:path";
 import {
@@ -45,7 +46,7 @@ for (const [n, role] of [
     await openWorkspace(page);
     await settled(page);
     if (role === "organizer") {
-      await page.getByRole("button", { name: /^Demo \(/ }).click();
+      await chooseWorkspaceEvent(page);
       await settled(page);
       await goToDestination(page, "judging");
       const judging = page.locator(".cx-card").filter({

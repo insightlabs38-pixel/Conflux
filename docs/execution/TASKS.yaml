@@ -11444,7 +11444,7 @@ tasks:
   batch: UIV2-B06
   phase: ui-v2
   title: 'Implement: Participant event/team/submission experience'
-  status: ACTIVE
+  status: DONE
   batch_dependencies:
   - UIV2-B05
   task_dependencies:
@@ -11456,6 +11456,11 @@ tasks:
   risk: medium
   owned_paths:
   - src/web/features/teams/**
+  - src/web/components/WorkflowSections*
+  - src/web/styles/components.css
+  - tests/e2e/**
+  - .gitignore
+  - .prettierignore
   - src/web/features/artifacts/**
   - src/web/features/submissions/**
   - src/web/features/pvs/**
@@ -11481,7 +11486,7 @@ tasks:
   batch: UIV2-B06
   phase: ui-v2
   title: 'Verify and checkpoint: Participant event/team/submission experience'
-  status: BLOCKED
+  status: DONE
   batch_dependencies:
   - UIV2-B05
   task_dependencies:
@@ -11493,6 +11498,11 @@ tasks:
   risk: medium
   owned_paths:
   - src/web/features/teams/**
+  - src/web/components/WorkflowSections*
+  - src/web/styles/components.css
+  - tests/e2e/**
+  - .gitignore
+  - .prettierignore
   - src/web/features/artifacts/**
   - src/web/features/submissions/**
   - src/web/features/pvs/**
@@ -11518,7 +11528,7 @@ tasks:
   batch: UIV2-B07
   phase: ui-v2
   title: 'Implement: Judge workflow + scoring experience'
-  status: BLOCKED
+  status: ACTIVE
   batch_dependencies:
   - UIV2-B06
   task_dependencies:

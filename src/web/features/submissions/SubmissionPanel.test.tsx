@@ -88,7 +88,9 @@ describe("participant submission", () => {
       notes.dispatchEvent(new Event("input", { bubbles: true }));
     });
     await act(async () => {
-      (container.querySelector("button") as HTMLButtonElement).click();
+      Array.from(container.querySelectorAll("button"))
+        .find((button) => button.textContent === "Finalize submission")!
+        .click();
     });
     await waitFor(
       () => container.textContent?.includes("Receipt: receipt-1") ?? false,

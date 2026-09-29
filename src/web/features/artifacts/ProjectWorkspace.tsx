@@ -1,4 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { WorkflowSections } from "../../components/WorkflowSections";
+import { ProjectStoryEditor } from "./ProjectStoryEditor";
 import { ArtifactPanel } from "./ArtifactPanel";
 import { SubmissionPanel } from "../submissions/SubmissionPanel";
 import { ProjectForms } from "../form-builder/ProjectForms";
@@ -14,6 +16,7 @@ import { LoadingState } from "../../components/LoadingState";
 type Project = {
   public_id: string;
   name: string;
+  description?: string;
   team: string | null;
   track: string | null;
 };
@@ -146,33 +149,36 @@ export function ProjectWorkspace({
     <section aria-label="My projects">
       <h2>My projects</h2>
       {error && <p role="alert">{error}</p>}
-      <form onSubmit={create}>
-        <label>
-          Project name{" "}
-          <input
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            required
-          />
-        </label>
-        {tracks.length > 0 && (
+      <details open={projects.length === 0} className="cx-project-create">
+        <summary>Create a new project</summary>
+        <form onSubmit={create}>
           <label>
-            Track{" "}
-            <select
-              value={trackId}
-              onChange={(event) => setTrackId(event.target.value)}
-            >
-              <option value="">No track</option>
-              {tracks.map((track) => (
-                <option key={track.public_id} value={track.public_id}>
-                  {track.name}
-                </option>
-              ))}
-            </select>
+            Project name{" "}
+            <input
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              required
+            />
           </label>
-        )}
-        <button disabled={busy}>Create project</button>
-      </form>
+          {tracks.length > 0 && (
+            <label>
+              Track{" "}
+              <select
+                value={trackId}
+                onChange={(event) => setTrackId(event.target.value)}
+              >
+                <option value="">No track</option>
+                {tracks.map((track) => (
+                  <option key={track.public_id} value={track.public_id}>
+                    {track.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          <button disabled={busy}>Create project</button>
+        </form>
+      </details>
       {projects.length === 0 ? (
         <p>No projects yet.</p>
       ) : (
@@ -191,45 +197,127 @@ export function ProjectWorkspace({
           </select>
         </label>
       )}
-      {selectedId && (
-        <div key={selectedId}>
-          <ArtifactPanel
-            workspaceId={workspaceId}
-            eventId={eventId}
-            projectId={selectedId}
-          />
-          <ProjectForms
-            workspaceId={workspaceId}
-            eventId={eventId}
-            projectId={selectedId}
-          />
-          <SubmissionPanel
-            workspaceId={workspaceId}
-            eventId={eventId}
-            projectId={selectedId}
-          />
-          <ProjectEligibilityPanel
-            workspaceId={workspaceId}
-            eventId={eventId}
-            projectId={selectedId}
-          />
-          <ProjectExceptionPanel
-            workspaceId={workspaceId}
-            eventId={eventId}
-            projectId={selectedId}
-          />
-          <ProjectMentorshipPanel
-            workspaceId={workspaceId}
-            eventId={eventId}
-            projectId={selectedId}
-          />
-          <ProjectContinuationPanel
-            workspaceId={workspaceId}
-            eventId={eventId}
-            projectId={selectedId}
-          />
-        </div>
-      )}
+      {selectedId &&
+        projects.some((project) => project.public_id === selectedId) && (
+          <div key={selectedId} className="cx-project-workspace">
+            <header className="cx-project-workspace__header">
+              <h3>
+                {
+                  projects.find((project) => project.public_id === selectedId)
+                    ?.name
+                }
+              </h3>
+              <p>
+                Prepare the story and evidence, complete the event forms, then
+                finalize a stage submission.
+              </p>
+            </header>
+            <WorkflowSections
+              label="Project tasks"
+              sections={[
+                {
+                  id: "story",
+                  label: "Project story",
+                  description: "Title and description",
+                  content: (
+                    <ProjectStoryEditor
+                      project={projects.find(
+                        (project) => project.public_id === selectedId,
+                      )!}
+                      base={base}
+                      onSaved={(next) =>
+                        setProjects((items) =>
+                          items.map((item) =>
+                            item.public_id === next.public_id ? next : item,
+                          ),
+                        )
+                      }
+                    />
+                  ),
+                },
+                {
+                  id: "evidence",
+                  label: "Evidence & checks",
+                  description: "Artifacts and preflight",
+                  content: (
+                    <ArtifactPanel
+                      workspaceId={workspaceId}
+                      eventId={eventId}
+                      projectId={selectedId}
+                    />
+                  ),
+                },
+                {
+                  id: "forms",
+                  label: "Event forms",
+                  description: "Required project information",
+                  content: (
+                    <ProjectForms
+                      workspaceId={workspaceId}
+                      eventId={eventId}
+                      projectId={selectedId}
+                    />
+                  ),
+                },
+                {
+                  id: "submission",
+                  label: "Submission",
+                  description: "Draft, finalize and receipt",
+                  content: (
+                    <SubmissionPanel
+                      workspaceId={workspaceId}
+                      eventId={eventId}
+                      projectId={selectedId}
+                    />
+                  ),
+                },
+                {
+                  id: "eligibility",
+                  label: "Eligibility",
+                  description: "Resolve requested changes",
+                  content: (
+                    <ProjectEligibilityPanel
+                      workspaceId={workspaceId}
+                      eventId={eventId}
+                      projectId={selectedId}
+                    />
+                  ),
+                },
+                {
+                  id: "support",
+                  label: "Support",
+                  description: "Exceptions and mentorship",
+                  content: (
+                    <>
+                      <ProjectExceptionPanel
+                        workspaceId={workspaceId}
+                        eventId={eventId}
+                        projectId={selectedId}
+                      />
+                      <ProjectMentorshipPanel
+                        workspaceId={workspaceId}
+                        eventId={eventId}
+                        projectId={selectedId}
+                      />
+                    </>
+                  ),
+                },
+                {
+                  id: "continuation",
+                  label: "After the event",
+                  description: "Continue your project",
+                  content: (
+                    <ProjectContinuationPanel
+                      workspaceId={workspaceId}
+                      eventId={eventId}
+                      projectId={selectedId}
+                    />
+                  ),
+                },
+              ]}
+            />
+          </div>
+        )}
     </section>
   );
 }

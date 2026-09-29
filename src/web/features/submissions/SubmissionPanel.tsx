@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { Button } from "../../components/Button";
+import { Badge } from "../../components/Badge";
 import { SubmissionReceipt } from "../pvs";
 
 type Version = {
@@ -190,8 +192,25 @@ export function SubmissionPanel({
 
   const finalized = submission?.status === "finalized";
   return (
-    <section aria-label="Submission">
+    <section aria-label="Submission" className="cx-submission-workflow">
       <h3>Submission</h3>
+      <p>
+        Select the stage, choose ready artifacts and finalize the version. Your
+        draft autosaves; finalization records immutable evidence.
+      </p>
+      <ol className="cx-submission-steps" aria-label="Submission progress">
+        <li>
+          <Badge tone={stageId ? "success" : "neutral"}>1</Badge> Choose a stage
+        </li>
+        <li>
+          <Badge tone={stageId ? "info" : "neutral"}>2</Badge> Prepare notes &
+          artifacts
+        </li>
+        <li>
+          <Badge tone={finalized ? "success" : "neutral"}>3</Badge> Finalize &
+          keep receipt
+        </li>
+      </ol>
       {error && <p role="alert">{error}</p>}
       {stages.length === 0 ? (
         <p>No submission stages yet.</p>
@@ -226,8 +245,22 @@ export function SubmissionPanel({
               }}
             />
           </label>
-          <fieldset disabled={finalized}>
+          <Button
+            variant="secondary"
+            onClick={() =>
+              void request<Artifact[]>(base + "artifacts/")
+                .then(setArtifacts)
+                .catch((cause: unknown) => setError(message(cause)))
+            }
+          >
+            Refresh included artifacts
+          </Button>
+          <fieldset disabled={finalized} className="cx-artifact-picker">
             <legend>Include artifacts</legend>
+            <p>
+              Only ready evidence can be selected. The server validates the
+              complete submission when finalizing.
+            </p>
             {artifacts
               .filter((artifact) => artifact.status === "ready")
               .map((artifact) => (
@@ -257,12 +290,12 @@ export function SubmissionPanel({
                     ? "Unsaved changes"
                     : "Draft saved"}
               </p>
-              <button
+              <Button
                 disabled={finalizing || saving}
                 onClick={() => void finalize()}
               >
                 {finalizing ? "Finalizing…" : "Finalize submission"}
-              </button>
+              </Button>
             </>
           )}
           {finalized && (
@@ -275,16 +308,24 @@ export function SubmissionPanel({
               key={submission?.current_version ?? "receipt"}
               projectBase={base}
               stageId={stageId}
+              stageName={
+                stages.find((stage) => stage.public_id === stageId)?.name
+              }
             />
           )}
-          {submission?.versions.map((version) => (
-            <div key={version.public_id}>
-              <h4>Version {version.number}</h4>
-              <p>Finalized {new Date(version.finalized_at).toLocaleString()}</p>
-              <p>Receipt: {version.public_id}</p>
-              <p>SHA-256: {version.digest}</p>
-            </div>
-          ))}
+          <details>
+            <summary>Version history and integrity references</summary>
+            {submission?.versions.map((version) => (
+              <div key={version.public_id}>
+                <h4>Version {version.number}</h4>
+                <p>
+                  Finalized {new Date(version.finalized_at).toLocaleString()}
+                </p>
+                <p>Receipt: {version.public_id}</p>
+                <p>SHA-256: {version.digest}</p>
+              </div>
+            ))}
+          </details>
         </>
       )}
     </section>

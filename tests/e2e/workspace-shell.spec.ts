@@ -1,3 +1,4 @@
+import { chooseWorkspaceEvent } from "./support";
 import { expect, test } from "@playwright/test";
 import {
   accessible,
@@ -40,8 +41,7 @@ for (const width of [390, 768, 1024, 1440]) {
       await signIn(page, role);
       const problems = watch(page);
       await openWorkspace(page);
-      if (role === "organizer")
-        await page.getByRole("button", { name: /^Demo \(/ }).click();
+      if (role === "organizer") await chooseWorkspaceEvent(page);
       else {
         await page
           .getByRole("combobox", { name: "Event", exact: true })

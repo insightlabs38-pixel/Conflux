@@ -189,10 +189,10 @@ export function TeamPanel({
       {!status ? (
         <p>Loading…</p>
       ) : status.team ? (
-        <article>
+        <article className="cx-team-workspace">
           <h3>{status.team.name}</h3>
           <p>Your role: {status.my_role}</p>
-          <ul aria-label="Team members">
+          <ul className="cx-team-roster" aria-label="Team members">
             {status.team.members.map((member) => (
               <li key={member.user_public_id}>
                 <PersonRow
@@ -219,7 +219,7 @@ export function TeamPanel({
           </button>
 
           {status.my_role === "captain" && (
-            <section aria-label="Invite links">
+            <section className="cx-team-invites" aria-label="Invite links">
               <h4>Invite links</h4>
               <ul>
                 {invites.map((invite) => (
@@ -245,7 +245,7 @@ export function TeamPanel({
           )}
         </article>
       ) : (
-        <section aria-label="No team yet">
+        <section className="cx-team-empty" aria-label="No team yet">
           <p>You are not on a team for this event yet.</p>
           <form onSubmit={createTeam}>
             <h3>Create a team</h3>

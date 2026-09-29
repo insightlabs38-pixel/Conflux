@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { AppShell } from "../../components/AppShell";
-import { Card } from "../../components/Card";
 import { Button } from "../../components/Button";
 import { LoadingState } from "../../components/LoadingState";
 import { ErrorState } from "../../components/ErrorState";
@@ -127,23 +126,41 @@ export default function ApiExplorer() {
     }
   }
 
+  const shown = matches.slice(0, 200);
+  const pretty = result ? formatBody(result) : "";
+
   return (
     <AppShell nav={<a href="/">Back to Conflux</a>}>
       <div className="cx-api-explorer">
-        <Card title="API explorer" as="h2">
+        <header className="cx-api-header">
+          <h2>API explorer</h2>
           <p>
             Browse this server's API and send requests using your current
             session or a scoped bearer token.
           </p>
-          {loadError ? (
-            <ErrorState
-              message={loadError}
-              onRetry={() => setRetry((count) => count + 1)}
-            />
-          ) : !document ? (
-            <LoadingState label="Loading API schema…" />
-          ) : (
-            <>
+        </header>
+        {loadError ? (
+          <ErrorState
+            message={loadError}
+            onRetry={() => setRetry((count) => count + 1)}
+          />
+        ) : !document ? (
+          <LoadingState label="Loading API schema…" />
+        ) : (
+          <div className="cx-api-layout">
+            <aside className="cx-api-sidebar" aria-label="Operations">
+              <label>
+                Search operations
+                <input
+                  type="search"
+                  value={filter}
+                  onChange={(event) => setFilter(event.target.value)}
+                />
+              </label>
+              <p className="cx-muted" role="status">
+                {matches.length} matching operations.{" "}
+                <a href="/api/v1/schema/">Download schema</a>
+              </p>
               <fieldset disabled={sending}>
                 <legend>Built-in examples</legend>
                 {examples.map((seed) => {
@@ -166,48 +183,53 @@ export default function ApiExplorer() {
                   );
                 })}
               </fieldset>
-              <label>
-                Search operations
-                <input
-                  value={filter}
-                  onChange={(event) => setFilter(event.target.value)}
-                />
-              </label>
-              <label>
-                Operation
-                <select
-                  value={selected}
-                  disabled={sending}
-                  onChange={(event) => {
-                    const item = entries.find(
-                      (row) => row.key === event.target.value,
-                    );
-                    if (item) choose(item);
-                  }}
-                >
-                  <option value="">Choose an operation</option>
-                  {entry && !matches.includes(entry) && (
-                    <option value={entry.key}>
-                      {entry.method.toUpperCase()} {entry.path}
-                    </option>
-                  )}
-                  {matches.map((item) => (
-                    <option key={item.key} value={item.key}>
-                      {item.method.toUpperCase()} {item.path}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <p>
-                {matches.length} matching operations.{" "}
-                <a href="/api/v1/schema/">Download schema</a>
-              </p>
+              <ul className="cx-api-operations" aria-label="Operation list">
+                {shown.map((item) => (
+                  <li key={item.key}>
+                    <button
+                      type="button"
+                      className="cx-api-operation"
+                      aria-current={item.key === selected ? "true" : undefined}
+                      disabled={sending}
+                      onClick={() => choose(item)}
+                    >
+                      <MethodChip method={item.method} />
+                      <code>{item.path}</code>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+              {matches.length > shown.length && (
+                <p className="cx-muted">
+                  Showing the first {shown.length}; refine the search to narrow
+                  the list.
+                </p>
+              )}
+            </aside>
+            <div className="cx-api-main">
+              {!entry && (
+                <p className="cx-muted">
+                  Choose an operation or a built-in example to prepare a
+                  request.
+                </p>
+              )}
               {entry && (
                 <>
-                  <h3>
-                    {entry.method.toUpperCase()} {entry.path}
-                  </h3>
-                  {entry.summary && <p>{entry.summary}</p>}
+                  <div className="cx-api-endpoint">
+                    <MethodChip method={entry.method} />
+                    <code>{entry.path}</code>
+                    <span
+                      className="cx-api-auth"
+                      data-mode={auth === "bearer" ? "bearer" : "session"}
+                    >
+                      {auth === "bearer"
+                        ? token
+                          ? "Bearer token set"
+                          : "Bearer token needed"
+                        : "Session cookie"}
+                    </span>
+                  </div>
+                  <h3>{entry.summary ?? entry.operationId}</h3>
                   {entry.description && <p>{entry.description}</p>}
                   <form onSubmit={send}>
                     <fieldset disabled={sending}>
@@ -242,6 +264,7 @@ export default function ApiExplorer() {
                         <label>
                           JSON request body
                           <textarea
+                            className="cx-code-input"
                             rows={9}
                             value={body}
                             onChange={(event) => {
@@ -280,12 +303,12 @@ export default function ApiExplorer() {
                           />
                         </label>
                       )}
-                      <p>
+                      <p className="cx-muted">
                         Credentials stay in page memory. Bearer mode sends no
                         session cookie. Some operations require a human session.
                       </p>
                       {writes && (
-                        <label>
+                        <label className="cx-api-confirm">
                           <input
                             type="checkbox"
                             checked={confirmed}
@@ -305,9 +328,30 @@ export default function ApiExplorer() {
                       </Button>
                     </fieldset>
                   </form>
+                  {error && <p role="alert">{error}</p>}
+                  {result && (
+                    <section
+                      aria-label="API response"
+                      className="cx-api-response"
+                    >
+                      <h3>HTTP {result.status}</h3>
+                      <p>
+                        <span
+                          className="cx-api-status"
+                          data-class={`${Math.floor(result.status / 100)}xx`}
+                        >
+                          {statusText(result.status)}
+                        </span>{" "}
+                        <span className="cx-muted">{result.contentType}</span>
+                      </p>
+                      <pre className="cx-code" tabIndex={0}>
+                        {pretty}
+                      </pre>
+                    </section>
+                  )}
                   <details>
                     <summary>Request schema and authentication</summary>
-                    <pre>
+                    <pre className="cx-code" tabIndex={0}>
                       {JSON.stringify(
                         {
                           body: requestSchema(entry, document),
@@ -321,22 +365,45 @@ export default function ApiExplorer() {
                   </details>
                   <details>
                     <summary>Response contract</summary>
-                    <pre>{JSON.stringify(entry.responses, null, 2)}</pre>
+                    <pre className="cx-code" tabIndex={0}>
+                      {JSON.stringify(entry.responses, null, 2)}
+                    </pre>
                   </details>
                 </>
               )}
-              {error && <p role="alert">{error}</p>}
-              {result && (
-                <section aria-label="API response">
-                  <h3>HTTP {result.status}</h3>
-                  <p>{result.contentType}</p>
-                  <pre>{result.text}</pre>
-                </section>
-              )}
-            </>
-          )}
-        </Card>
+            </div>
+          </div>
+        )}
       </div>
     </AppShell>
   );
+}
+
+function MethodChip({ method }: { method: string }) {
+  return (
+    <span className="cx-method" data-method={method}>
+      {method.toUpperCase()}
+    </span>
+  );
+}
+
+function statusText(status: number): string {
+  if (status < 200) return "Informational";
+  if (status < 300) return "Success";
+  if (status < 400) return "Redirect";
+  if (status < 500) return "Client error";
+  return "Server error";
+}
+
+/** Pretty-prints JSON objects/arrays; everything else stays literal text. */
+function formatBody(result: { contentType: string; text: string }): string {
+  if (!/json/i.test(result.contentType)) return result.text;
+  try {
+    const parsed: unknown = JSON.parse(result.text);
+    return parsed !== null && typeof parsed === "object"
+      ? JSON.stringify(parsed, null, 2)
+      : result.text;
+  } catch {
+    return result.text;
+  }
 }

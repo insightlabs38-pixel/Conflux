@@ -6,6 +6,7 @@ import { Badge } from "../../components/Badge";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
+import { WorkflowSections } from "../../components/WorkflowSections";
 
 import { ThemeSettings, type ThemeConfig } from "./ThemeSettings";
 
@@ -128,16 +129,21 @@ function BlockEditor({
   }
 
   return (
-    <div>
+    <div className="cx-block-form">
       {error && <p role="alert">{error}</p>}
       <ConfigFields
         schema={schemas[block.kind].schema}
         config={config}
         onChange={setConfig}
       />
-      <Button disabled={!dirty || saving} onClick={save}>
-        {saving ? "Saving…" : "Save block"}
-      </Button>
+      <div className="cx-block-form__actions">
+        <Button disabled={!dirty || saving} onClick={save}>
+          {saving ? "Saving…" : "Save block"}
+        </Button>
+        <span role="status" className="cx-muted">
+          {saving ? "Saving…" : dirty ? "Unsaved changes" : "All changes saved"}
+        </span>
+      </div>
     </div>
   );
 }
@@ -155,6 +161,8 @@ export function PageBuilder({
   const [addKind, setAddKind] = useState<Kind>("hero");
   const [warnings, setWarnings] = useState<AuditWarning[]>([]);
   const [error, setError] = useState("");
+  const [selectedId, setSelectedId] = useState("");
+  const [confirmingId, setConfirmingId] = useState("");
 
   async function refreshAudit() {
     setWarnings(await request<AuditWarning[]>(base + "accessibility-audit/"));
@@ -190,11 +198,12 @@ export function PageBuilder({
 
   async function addBlock() {
     try {
-      await request<Block>(base + "blocks/", "POST", {
+      const created = await request<Block>(base + "blocks/", "POST", {
         kind: addKind,
         config: defaultConfig(addKind),
       });
       await refresh();
+      setSelectedId(created.public_id);
     } catch (cause) {
       setError(message(cause));
     }
@@ -218,8 +227,14 @@ export function PageBuilder({
   }
 
   async function removeBlock(block: Block) {
-    await request(base + `blocks/${block.public_id}/`, "DELETE");
-    await refresh();
+    setConfirmingId("");
+    try {
+      await request(base + `blocks/${block.public_id}/`, "DELETE");
+      setSelectedId("");
+      await refresh();
+    } catch (cause) {
+      setError(message(cause));
+    }
   }
 
   async function move(index: number, direction: -1 | 1) {
@@ -238,78 +253,182 @@ export function PageBuilder({
     }
   }
 
-  return (
-    <Card title="Public page">
-      {error && <p role="alert">{error}</p>}
-      {page && (
-        <ThemeSettings
-          key={page.public_id}
-          theme={page.theme}
-          config={page.theme_config || {}}
-          eventId={eventId}
-          onSave={setAppearance}
-        />
-      )}
-      {warnings.length > 0 && (
-        <div role="status" aria-label="Accessibility warnings">
-          <h4>Accessibility warnings</h4>
-          <ul>
-            {warnings.map((warning, index) => (
-              <li key={index}>
-                <Badge tone="warning">{warning.category}</Badge>{" "}
-                {warning.message}
+  const selected =
+    blocks.find((block) => block.public_id === selectedId) ?? blocks[0];
+
+  const content = (
+    <div className="cx-block-editor">
+      <div className="cx-block-outline">
+        {blocks.length === 0 ? (
+          <EmptyState title="This event's public page has no blocks yet." />
+        ) : (
+          <ol aria-label="Page blocks">
+            {blocks.map((block, index) => (
+              <li
+                key={block.public_id}
+                data-current={
+                  block.public_id === selected?.public_id || undefined
+                }
+              >
+                <button
+                  type="button"
+                  className="cx-block-outline__select"
+                  aria-current={
+                    block.public_id === selected?.public_id ? "true" : undefined
+                  }
+                  onClick={() => setSelectedId(block.public_id)}
+                >
+                  <span className="cx-block-outline__index">{index + 1}</span>
+                  <span>
+                    <strong>{KIND_LABELS[block.kind]}</strong>
+                    <small>{summarize(block)}</small>
+                  </span>
+                </button>
+                <span className="cx-block-outline__move">
+                  <Button
+                    variant="secondary"
+                    disabled={index === 0}
+                    aria-label={`Move ${KIND_LABELS[block.kind]} up`}
+                    onClick={() => void move(index, -1)}
+                  >
+                    Move up
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    disabled={index === blocks.length - 1}
+                    aria-label={`Move ${KIND_LABELS[block.kind]} down`}
+                    onClick={() => void move(index, 1)}
+                  >
+                    Move down
+                  </Button>
+                </span>
               </li>
             ))}
-          </ul>
+          </ol>
+        )}
+        <div className="cx-block-add">
+          <label>
+            Add block{" "}
+            <select
+              value={addKind}
+              onChange={(e) => setAddKind(e.target.value as Kind)}
+            >
+              {Object.entries(KIND_LABELS).map(([kind, label]) => (
+                <option key={kind} value={kind}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <Button onClick={() => void addBlock()}>Add</Button>
         </div>
-      )}
-      {blocks.length === 0 ? (
-        <EmptyState title="This event's public page has no blocks yet." />
-      ) : (
-        <ol aria-label="Page blocks">
-          {blocks.map((block, index) => (
-            <li key={block.public_id}>
-              <Badge tone="info">{KIND_LABELS[block.kind]}</Badge>{" "}
-              {summarize(block)}
-              <div>
-                <Button
-                  variant="secondary"
-                  onClick={() => void move(index, -1)}
-                >
-                  Move up
-                </Button>
-                <Button variant="secondary" onClick={() => void move(index, 1)}>
-                  Move down
-                </Button>
+      </div>
+      {selected && (
+        <section
+          className="cx-block-detail"
+          aria-label={`Edit ${KIND_LABELS[selected.kind]} block`}
+        >
+          <header>
+            <h4>{KIND_LABELS[selected.kind]}</h4>
+            {confirmingId === selected.public_id ? (
+              <span
+                className="cx-block-confirm"
+                role="group"
+                aria-label="Confirm removal"
+              >
+                <span>Remove this block from the public page?</span>
                 <Button
                   variant="danger"
-                  onClick={() => void removeBlock(block)}
+                  onClick={() => void removeBlock(selected)}
                 >
-                  Remove
+                  Confirm remove
                 </Button>
-              </div>
-              <BlockEditor
-                block={block}
-                onSave={(config) => saveBlock(block, config)}
-              />
-            </li>
-          ))}
-        </ol>
+                <Button variant="secondary" onClick={() => setConfirmingId("")}>
+                  Keep block
+                </Button>
+              </span>
+            ) : (
+              <Button
+                variant="secondary"
+                onClick={() => setConfirmingId(selected.public_id)}
+              >
+                Remove
+              </Button>
+            )}
+          </header>
+          <BlockEditor
+            key={selected.public_id}
+            block={selected}
+            onSave={(config) => saveBlock(selected, config)}
+          />
+        </section>
       )}
-      <label>
-        Add block{" "}
-        <select
-          value={addKind}
-          onChange={(e) => setAddKind(e.target.value as Kind)}
-        >
-          {Object.entries(KIND_LABELS).map(([kind, label]) => (
-            <option key={kind} value={kind}>
-              {label}
-            </option>
-          ))}
-        </select>
-      </label>
-      <Button onClick={() => void addBlock()}>Add</Button>
+    </div>
+  );
+
+  return (
+    <Card title="Public page">
+      <p className="cx-block-intro">
+        Compose the public event page from blocks, set its appearance, and check
+        accessibility.{" "}
+        <a href={`/e/${eventId}/`} target="_blank" rel="noopener noreferrer">
+          Preview public page
+        </a>
+      </p>
+      {error && <p role="alert">{error}</p>}
+      <WorkflowSections
+        label="Page editor"
+        sections={[
+          {
+            id: "content",
+            label: "Content",
+            description: `${blocks.length} block${blocks.length === 1 ? "" : "s"}`,
+            content,
+          },
+          {
+            id: "appearance",
+            label: "Appearance",
+            description: "Theme and brand",
+            content: page ? (
+              <ThemeSettings
+                key={page.public_id}
+                theme={page.theme}
+                config={page.theme_config || {}}
+                eventId={eventId}
+                onSave={setAppearance}
+              />
+            ) : (
+              <p className="cx-muted">Loading appearance…</p>
+            ),
+          },
+          {
+            id: "accessibility",
+            label: "Accessibility",
+            description:
+              warnings.length > 0
+                ? `${warnings.length} to review`
+                : "All clear",
+            content:
+              warnings.length > 0 ? (
+                <div role="status" aria-label="Accessibility warnings">
+                  <h4>Accessibility warnings</h4>
+                  <ul>
+                    {warnings.map((warning, index) => (
+                      <li key={index}>
+                        <Badge tone="warning">{warning.category}</Badge>{" "}
+                        {warning.message}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p className="cx-muted">
+                  The automated audit found no issues with this page.
+                </p>
+              ),
+          },
+        ]}
+      />
     </Card>
   );
 }

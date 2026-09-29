@@ -65,6 +65,9 @@ for (const width of [390, 768, 1024, 1440]) {
       }
       if (role === "organizer") {
         await goToDestination(page, "setup");
+        await page
+          .getByText("Create a new event or start from a template")
+          .click();
         const form = page.locator("form").filter({
           has: page.getByRole("heading", {
             name: "Create event",

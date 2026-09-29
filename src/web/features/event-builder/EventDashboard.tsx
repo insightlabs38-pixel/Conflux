@@ -292,26 +292,30 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
         />
       )}
       <Destination id="setup">
-        <form onSubmit={createEvent}>
-          <h2>Create event</h2>
-          <label>
-            Name{" "}
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </label>
-          <label>
-            Slug{" "}
-            <input
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              required
-            />
-          </label>
-          <button disabled={busy}>Create event</button>
-        </form>
+        <details className="cx-create-event" open={events.length === 0}>
+          <summary>Create a new event or start from a template</summary>
+          <form onSubmit={createEvent}>
+            <h2>Create event</h2>
+            <label>
+              Name{" "}
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </label>
+            <label>
+              Slug{" "}
+              <input
+                value={slug}
+                onChange={(e) => setSlug(e.target.value)}
+                required
+              />
+            </label>
+            <button disabled={busy}>Create event</button>
+          </form>
+          <EventTemplatesPanel workspaceId={workspaceId} onCreated={choose} />
+        </details>
       </Destination>
       <nav aria-label="Workspace events">
         {events.map((item) => (
@@ -331,9 +335,6 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
       <Destination id="operations">
         <OperatorConsole workspaceId={workspaceId} onChooseEvent={choose} />
       </Destination>
-      <Destination id="setup">
-        <EventTemplatesPanel workspaceId={workspaceId} onCreated={choose} />
-      </Destination>
       {selected && (
         <article>
           <p>
@@ -351,185 +352,262 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
               checks={dashboard.configuration_checks}
             />
           </Destination>
-          {dashboard.configuration_checks.length > 0 && (
-            <Destination id="setup">
-              <section aria-label="Configuration checks">
-                <h3>Configuration checks</h3>
-                <ul>
-                  {dashboard.configuration_checks.map((check) => (
-                    <li key={check}>{check}</li>
-                  ))}
-                </ul>
-              </section>
-            </Destination>
-          )}
           <Destination id="setup">
-            <form
-              onSubmit={saveSettings}
-              key={selected.public_id + selected.updated_at}
-            >
-              <h3>Settings</h3>
-              <label>
-                Name <input name="name" defaultValue={selected.name} required />
-              </label>
-              <label>
-                Timezone{" "}
-                <input
-                  name="timezone"
-                  defaultValue={selected.timezone}
-                  required
-                />
-              </label>
-              <label>
-                Start{" "}
-                <input
-                  name="starts_at"
-                  type="datetime-local"
-                  defaultValue={localDateTime(selected.starts_at)}
-                />
-              </label>
-              <label>
-                End{" "}
-                <input
-                  name="ends_at"
-                  type="datetime-local"
-                  defaultValue={localDateTime(selected.ends_at)}
-                />
-              </label>
-              <label>
-                Public{" "}
-                <input
-                  name="is_public"
-                  type="checkbox"
-                  defaultChecked={selected.is_public}
-                />
-              </label>
-              <button disabled={busy || selected.status === "archived"}>
-                Save settings
-              </button>
-            </form>
-            {nextStatus && (
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => transition(nextStatus)}
-              >
-                Move to {nextStatus}
-              </button>
-            )}
-            <section>
-              <h3>Tracks ({dashboard.track_count})</h3>
-              <ul>
-                {tracks.map((track) => (
-                  <li key={track.public_id}>{track.name}</li>
-                ))}
-              </ul>
-              <form onSubmit={addTrack}>
-                <label>
-                  Track name{" "}
-                  <input
-                    value={trackName}
-                    onChange={(e) => setTrackName(e.target.value)}
-                    required
-                  />
-                </label>
-                <button disabled={busy}>Add track</button>
-              </form>
-            </section>
-            <section>
-              <h3>Base prizes ({dashboard.base_prize_count})</h3>
-              <ul>
-                {prizes.map((prize) => (
-                  <li key={prize.public_id}>
-                    {prize.name} ({prize.kind})
-                  </li>
-                ))}
-              </ul>
-              <form onSubmit={addPrize}>
-                <label>
-                  Prize name{" "}
-                  <input
-                    value={prizeName}
-                    onChange={(e) => setPrizeName(e.target.value)}
-                    required
-                  />
-                </label>
-                <label>
-                  Type{" "}
-                  <select
-                    value={prizeKind}
-                    onChange={(e) => setPrizeKind(e.target.value)}
-                  >
-                    {[
-                      "cash",
-                      "credit",
-                      "discount",
-                      "subscription",
-                      "hardware",
-                      "travel",
-                      "service",
-                      "mentorship",
-                      "swag",
-                      "other",
-                    ].map((kind) => (
-                      <option key={kind} value={kind}>
-                        {kind}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Track{" "}
-                  <select
-                    value={prizeTrack}
-                    onChange={(e) => setPrizeTrack(e.target.value)}
-                  >
-                    <option value="">All tracks</option>
-                    {tracks.map((track) => (
-                      <option key={track.public_id} value={track.public_id}>
-                        {track.name}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                {prizeKind === "cash" && (
-                  <>
-                    <label>
-                      Amount{" "}
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={prizeAmount}
-                        onChange={(e) => setPrizeAmount(e.target.value)}
-                        required
+            <WorkflowSections
+              label="Event setup"
+              sections={[
+                {
+                  id: "settings",
+                  label: "Settings",
+                  description: "Details, status, tracks and prizes",
+                  content: (
+                    <>
+                      {dashboard.configuration_checks.length > 0 && (
+                        <section aria-label="Configuration checks">
+                          <h3>Configuration checks</h3>
+                          <ul>
+                            {dashboard.configuration_checks.map((check) => (
+                              <li key={check}>{check}</li>
+                            ))}
+                          </ul>
+                        </section>
+                      )}
+                      <form
+                        onSubmit={saveSettings}
+                        key={selected.public_id + selected.updated_at}
+                      >
+                        <h3>Settings</h3>
+                        <label>
+                          Name{" "}
+                          <input
+                            name="name"
+                            defaultValue={selected.name}
+                            required
+                          />
+                        </label>
+                        <label>
+                          Timezone{" "}
+                          <input
+                            name="timezone"
+                            defaultValue={selected.timezone}
+                            required
+                          />
+                        </label>
+                        <label>
+                          Start{" "}
+                          <input
+                            name="starts_at"
+                            type="datetime-local"
+                            defaultValue={localDateTime(selected.starts_at)}
+                          />
+                        </label>
+                        <label>
+                          End{" "}
+                          <input
+                            name="ends_at"
+                            type="datetime-local"
+                            defaultValue={localDateTime(selected.ends_at)}
+                          />
+                        </label>
+                        <label>
+                          Public{" "}
+                          <input
+                            name="is_public"
+                            type="checkbox"
+                            defaultChecked={selected.is_public}
+                          />
+                        </label>
+                        <button
+                          disabled={busy || selected.status === "archived"}
+                        >
+                          Save settings
+                        </button>
+                      </form>
+                      {nextStatus && (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => transition(nextStatus)}
+                        >
+                          Move to {nextStatus}
+                        </button>
+                      )}
+                      <section>
+                        <h3>Tracks ({dashboard.track_count})</h3>
+                        <ul>
+                          {tracks.map((track) => (
+                            <li key={track.public_id}>{track.name}</li>
+                          ))}
+                        </ul>
+                        <form onSubmit={addTrack}>
+                          <label>
+                            Track name{" "}
+                            <input
+                              value={trackName}
+                              onChange={(e) => setTrackName(e.target.value)}
+                              required
+                            />
+                          </label>
+                          <button disabled={busy}>Add track</button>
+                        </form>
+                      </section>
+                      <section>
+                        <h3>Base prizes ({dashboard.base_prize_count})</h3>
+                        <ul>
+                          {prizes.map((prize) => (
+                            <li key={prize.public_id}>
+                              {prize.name} ({prize.kind})
+                            </li>
+                          ))}
+                        </ul>
+                        <form onSubmit={addPrize}>
+                          <label>
+                            Prize name{" "}
+                            <input
+                              value={prizeName}
+                              onChange={(e) => setPrizeName(e.target.value)}
+                              required
+                            />
+                          </label>
+                          <label>
+                            Type{" "}
+                            <select
+                              value={prizeKind}
+                              onChange={(e) => setPrizeKind(e.target.value)}
+                            >
+                              {[
+                                "cash",
+                                "credit",
+                                "discount",
+                                "subscription",
+                                "hardware",
+                                "travel",
+                                "service",
+                                "mentorship",
+                                "swag",
+                                "other",
+                              ].map((kind) => (
+                                <option key={kind} value={kind}>
+                                  {kind}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <label>
+                            Track{" "}
+                            <select
+                              value={prizeTrack}
+                              onChange={(e) => setPrizeTrack(e.target.value)}
+                            >
+                              <option value="">All tracks</option>
+                              {tracks.map((track) => (
+                                <option
+                                  key={track.public_id}
+                                  value={track.public_id}
+                                >
+                                  {track.name}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          {prizeKind === "cash" && (
+                            <>
+                              <label>
+                                Amount{" "}
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  value={prizeAmount}
+                                  onChange={(e) =>
+                                    setPrizeAmount(e.target.value)
+                                  }
+                                  required
+                                />
+                              </label>
+                              <label>
+                                Currency{" "}
+                                <input
+                                  maxLength={3}
+                                  value={prizeCurrency}
+                                  onChange={(e) =>
+                                    setPrizeCurrency(e.target.value)
+                                  }
+                                  required
+                                />
+                              </label>
+                            </>
+                          )}
+                          <button disabled={busy}>Add prize</button>
+                        </form>
+                      </section>
+                    </>
+                  ),
+                },
+                {
+                  id: "stages",
+                  label: "Stages",
+                  description: "Timeline and transitions",
+                  content: (
+                    <StageBuilder
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+                {
+                  id: "policies",
+                  label: "Policies",
+                  description: "Rules of entry, gates and debugging",
+                  content: (
+                    <PolicyBuilder
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+                {
+                  id: "rules",
+                  label: "Rules",
+                  description: "Event rules and acknowledgements",
+                  content: (
+                    <>
+                      <RulesPanel
+                        key={`RulesPanel-${selected.public_id}`}
+                        workspaceId={workspaceId}
+                        eventId={selected.public_id}
+                        canPublish
                       />
-                    </label>
-                    <label>
-                      Currency{" "}
-                      <input
-                        maxLength={3}
-                        value={prizeCurrency}
-                        onChange={(e) => setPrizeCurrency(e.target.value)}
-                        required
+                    </>
+                  ),
+                },
+                {
+                  id: "forms",
+                  label: "Forms",
+                  description: "Registration and project forms",
+                  content: (
+                    <>
+                      <FormBuilder
+                        workspaceId={workspaceId}
+                        eventId={selected.public_id}
                       />
-                    </label>
-                  </>
-                )}
-                <button disabled={busy}>Add prize</button>
-              </form>
-            </section>
-          </Destination>
-          <Destination id="setup">
-            <StageBuilder
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
-            />
-          </Destination>
-          <Destination id="setup">
-            <PolicyBuilder
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
+                    </>
+                  ),
+                },
+                {
+                  id: "page",
+                  label: "Public page",
+                  description: "Blocks, appearance and accessibility",
+                  content: (
+                    <>
+                      <PageBuilder
+                        workspaceId={workspaceId}
+                        eventId={selected.public_id}
+                      />
+                    </>
+                  ),
+                },
+              ]}
             />
           </Destination>
           <Destination id="participants">
@@ -606,32 +684,12 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
               ]}
             />
           </Destination>
-          <Destination id="setup">
-            <RulesPanel
-              key={`RulesPanel-${selected.public_id}`}
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
-              canPublish
-            />
-          </Destination>
           <Destination id="onsite">
             <OnsiteOperationsPanel
               key={`OnsiteOperationsPanel-${selected.public_id}`}
               workspaceId={workspaceId}
               eventId={selected.public_id}
               canManage
-            />
-          </Destination>
-          <Destination id="setup">
-            <FormBuilder
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
-            />
-          </Destination>
-          <Destination id="setup">
-            <PageBuilder
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
             />
           </Destination>
           <Destination id="judging">

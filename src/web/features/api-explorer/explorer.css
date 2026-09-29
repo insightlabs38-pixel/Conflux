@@ -1,6 +1,24 @@
 .cx-api-explorer {
   min-width: 0;
 }
+.cx-api-header h2 {
+  margin-bottom: var(--space-1);
+}
+.cx-api-layout {
+  display: grid;
+  grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+  margin-top: var(--space-4);
+}
+.cx-api-sidebar {
+  min-width: 0;
+  position: sticky;
+  top: var(--space-4);
+}
+.cx-api-main {
+  min-width: 0;
+}
 .cx-api-explorer label {
   display: block;
   margin-block: var(--space-3);
@@ -17,7 +35,123 @@
 .cx-api-explorer fieldset > button {
   margin: var(--space-1);
 }
-.cx-api-explorer pre {
-  overflow-x: auto;
+.cx-api-operations {
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  max-height: 28rem;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+}
+.cx-api-operation {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  border-left: 3px solid transparent;
+  color: var(--color-text);
+  font: inherit;
+  cursor: pointer;
+}
+.cx-api-operation[aria-current="true"] {
+  background: var(--color-accent-subtle);
+  border-left-color: var(--color-accent);
+}
+.cx-api-operation code,
+.cx-api-endpoint code {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm, 0.875rem);
+  overflow-wrap: anywhere;
+}
+.cx-method {
+  flex: none;
+  min-width: 3.75rem;
+  padding: 0.1rem var(--space-2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  text-align: center;
+  color: var(--color-info);
+  background: var(--color-info-bg);
+}
+.cx-method[data-method="post"] {
+  color: var(--color-success);
+  background: var(--color-success-bg);
+}
+.cx-method[data-method="put"],
+.cx-method[data-method="patch"] {
+  color: var(--color-warning);
+  background: var(--color-warning-bg);
+}
+.cx-method[data-method="delete"] {
+  color: var(--color-danger);
+  background: var(--color-danger-bg);
+}
+.cx-api-endpoint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+}
+.cx-api-auth {
+  margin-left: auto;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+.cx-api-auth[data-mode="bearer"] {
+  color: var(--color-warning);
+}
+.cx-api-confirm {
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--color-warning);
+  background: var(--color-warning-bg);
+}
+.cx-api-status {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-success);
+}
+.cx-api-status[data-class="4xx"] {
+  color: var(--color-warning);
+}
+.cx-api-status[data-class="5xx"] {
+  color: var(--color-danger);
+}
+.cx-code,
+.cx-code-input {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm, 0.875rem);
+  line-height: var(--line-height-code);
+}
+.cx-code {
+  overflow: auto;
   max-width: 100%;
+  max-height: 30rem;
+  padding: var(--space-3);
+  background: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+@media (max-width: 64rem) {
+  .cx-api-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cx-api-sidebar {
+    position: static;
+  }
+  .cx-api-operations {
+    max-height: 14rem;
+  }
 }

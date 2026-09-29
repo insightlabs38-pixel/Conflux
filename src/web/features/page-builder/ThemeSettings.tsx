@@ -90,73 +90,124 @@ export function ThemeSettings({
           Choose a layout and brand treatment. Changes apply to the public event
           site. Images are optional; initials provide a deterministic fallback.
         </p>
-        <div className="cx-grid">
-          <Field label="Theme">
-            {(props) => (
-              <Select
-                {...props}
-                value={mode}
-                onChange={(event) => {
-                  setMode(event.target.value as typeof mode);
-                  setSaved(false);
-                }}
-              >
-                <option value="default">Default / light</option>
-                <option value="dark">Dark</option>
-                <option value="minimal">Minimal</option>
-              </Select>
-            )}
-          </Field>
-          <Field
-            label="Accent color"
-            hint="Six-digit hex; at least 4.5:1 contrast is required. Leave blank for the theme default."
-          >
-            {(props) => (
-              <TextInput
-                {...props}
-                value={draft.accent || ""}
-                placeholder="#126454"
-                onChange={(event) => update("accent", event.target.value)}
-              />
-            )}
-          </Field>
-          {Object.entries(choices).map(([key, values]) => (
-            <Field key={key} label={labels[key]}>
-              {(props) => (
-                <Select
-                  {...props}
-                  value={draft[key as keyof ThemeConfig] || values[0]}
-                  onChange={(event) => update(key, event.target.value)}
-                >
-                  {values.map((value) => (
-                    <option key={value} value={value}>
-                      {value}
-                    </option>
-                  ))}
-                </Select>
-              )}
-            </Field>
-          ))}
-          {(["logo_url", "banner_url"] as const).map((key) => (
+        <fieldset className="cx-theme-group" disabled={saving}>
+          <legend>Brand</legend>
+          <div className="cx-grid">
             <Field
-              key={key}
-              label={key === "logo_url" ? "Logo image URL" : "Hero image URL"}
-              hint="Absolute HTTP(S) image URL; no scripts or embedded markup."
+              label="Accent color"
+              hint="Six-digit hex; at least 4.5:1 contrast is required. Leave blank for the theme default."
             >
               {(props) => (
                 <TextInput
                   {...props}
-                  type="url"
-                  value={draft[key] || ""}
-                  onChange={(event) => update(key, event.target.value)}
+                  value={draft.accent || ""}
+                  placeholder="#126454"
+                  onChange={(event) => update("accent", event.target.value)}
                 />
               )}
             </Field>
-          ))}
-        </div>
+            {(["logo_url", "banner_url"] as const).map((key) => (
+              <Field
+                key={key}
+                label={key === "logo_url" ? "Logo image URL" : "Hero image URL"}
+                hint="Absolute HTTP(S) image URL; no scripts or embedded markup."
+              >
+                {(props) => (
+                  <TextInput
+                    {...props}
+                    type="url"
+                    value={draft[key] || ""}
+                    onChange={(event) => update(key, event.target.value)}
+                  />
+                )}
+              </Field>
+            ))}
+          </div>
+          {/^#[0-9a-fA-F]{6}$/.test(draft.accent ?? "") && (
+            <p className="cx-theme-swatch" aria-hidden="true">
+              <span style={{ background: draft.accent }} />
+              Accent preview
+            </p>
+          )}
+        </fieldset>
+        <fieldset className="cx-theme-group" disabled={saving}>
+          <legend>Style</legend>
+          <div className="cx-grid">
+            <Field label="Theme">
+              {(props) => (
+                <Select
+                  {...props}
+                  value={mode}
+                  onChange={(event) => {
+                    setMode(event.target.value as typeof mode);
+                    setSaved(false);
+                  }}
+                >
+                  <option value="default">Default / light</option>
+                  <option value="dark">Dark</option>
+                  <option value="minimal">Minimal</option>
+                </Select>
+              )}
+            </Field>
+            {(["typography", "personality"] as const).map((key) => (
+              <Field key={key} label={labels[key]}>
+                {(props) => (
+                  <Select
+                    {...props}
+                    value={draft[key] || choices[key][0]}
+                    onChange={(event) => update(key, event.target.value)}
+                  >
+                    {choices[key].map((value) => (
+                      <option key={value} value={value}>
+                        {value}
+                      </option>
+                    ))}
+                  </Select>
+                )}
+              </Field>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset className="cx-theme-group" disabled={saving}>
+          <legend>Layout</legend>
+          <div className="cx-grid">
+            {(
+              [
+                "hero",
+                "width",
+                "density",
+                "background",
+                "project_card",
+              ] as const
+            ).map((key) => (
+              <Field key={key} label={labels[key]}>
+                {(props) => (
+                  <Select
+                    {...props}
+                    value={draft[key] || choices[key][0]}
+                    onChange={(event) => update(key, event.target.value)}
+                  >
+                    {choices[key].map((value) => (
+                      <option key={value} value={value}>
+                        {value}
+                      </option>
+                    ))}
+                  </Select>
+                )}
+              </Field>
+            ))}
+          </div>
+        </fieldset>
       </fieldset>
       {error && <p role="alert">{error}</p>}
       {saved && <p role="status">Event appearance saved.</p>}
+      {!saved &&
+        !saving &&
+        JSON.stringify(draft) !== JSON.stringify(config) && (
+          <p role="status" className="cx-muted">
+            Unsaved changes
+          </p>
+        )}
       <div className="cx-stack cx-stack--horizontal">
         <Button type="submit" disabled={saving}>
           {saving ? "Saving…" : "Save appearance"}

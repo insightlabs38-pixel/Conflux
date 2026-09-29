@@ -7,6 +7,7 @@ const group = process.env.E2E_GROUP ? `-${process.env.E2E_GROUP}` : "";
 export default defineConfig({
   testDir: ".",
   testMatch: /.*\.spec\.ts/,
+  testIgnore: ["artifacts/**"], // concurrent groups write here while others discover tests
   outputDir: `artifacts/results${group}`,
   fullyParallel: false,
   workers: 1,

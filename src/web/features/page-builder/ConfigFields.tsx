@@ -19,9 +19,10 @@ export function ConfigFields({
         if (field.type === "array") {
           const items = value as Record<string, unknown>[];
           return (
-            <div key={key}>
+            <div key={key} className="cx-config-list">
               {items.map((item, index) => (
-                <div key={index}>
+                <div key={index} className="cx-config-item">
+                  <p className="cx-config-item__title">Item {index + 1}</p>
                   <ConfigFields
                     schema={field.items!}
                     config={item}

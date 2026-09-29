@@ -2047,10 +2047,12 @@ batches:
   owned_paths:
   - src/web/features/**
   - src/web/styles/**
+  - tests/e2e/**
+  - scripts/e2e-fast
   task_ids:
   - UIV2-B09-01
   - UIV2-B09-02
-  status: IN_PROGRESS
+  status: DONE
   completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
     receipt and commit recorded before advancing.
 - id: UIV2-B10
@@ -2067,6 +2069,6 @@ batches:
   task_ids:
   - UIV2-B10-01
   - UIV2-B10-02
-  status: BLOCKED
+  status: IN_PROGRESS
   completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
     receipt and commit recorded before advancing.

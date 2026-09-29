@@ -147,7 +147,7 @@ export function OperationsCenter({
         </section>
       )}
       {summary && (
-        <>
+        <div className="cx-ops-sections">
           <section>
             <h4>Participants &amp; teams</h4>
             <p>
@@ -273,7 +273,7 @@ export function OperationsCenter({
               </p>
             )}
           </section>
-        </>
+        </div>
       )}
     </Card>
   );

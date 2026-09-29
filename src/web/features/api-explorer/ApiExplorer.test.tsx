@@ -195,3 +195,36 @@ it("retries schema loading, searches operations and sends a seeded read", async 
     expect.objectContaining({ method: "GET" }),
   );
 });
+
+it("shows method chips, auth state and pretty-prints JSON responses", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: unknown) => {
+      if (String(url).includes("schema/"))
+        return { ok: true, json: async () => schema };
+      return new Response('{"status":"ok","items":[1]}', {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }),
+  );
+  await mount();
+  await until(
+    () => container.textContent?.includes("Check service health") ?? false,
+  );
+  expect(
+    container.querySelector('.cx-method[data-method="post"]'),
+  ).not.toBeNull();
+  await click("Check service health");
+  expect(container.querySelector(".cx-api-endpoint")?.textContent).toContain(
+    "Session cookie",
+  );
+  await click("Send request");
+  await until(() => container.textContent?.includes("HTTP 200") ?? false);
+  expect(container.querySelector(".cx-api-status")?.textContent).toBe(
+    "Success",
+  );
+  expect(container.querySelector("pre.cx-code")?.textContent).toContain(
+    '{\n  "status": "ok"',
+  );
+});

@@ -194,6 +194,7 @@ test("organizer publishes rules, participants acknowledge, counts update", async
   await organizerEvent(page);
   const problems = watch(page);
   await goToDestination(page, "setup");
+  await goToTask(page, "Rules");
   const rules = page.getByRole("region", { name: "Event rules" });
   const title = `Rules ${Date.now()}`;
   await rules.getByLabel("Title").fill(title);
@@ -214,6 +215,7 @@ test("organizer publishes rules, participants acknowledge, counts update", async
 
   await page.reload();
   await chooseWorkspaceEvent(page);
+  await goToTask(page, "Rules");
   await expect(
     page
       .getByRole("region", { name: "Event rules" })

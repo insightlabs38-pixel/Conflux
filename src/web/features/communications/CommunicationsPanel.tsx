@@ -196,41 +196,45 @@ export function CommunicationsPanel({
     <Card title="Communications">
       {error && <p role="alert">{error}</p>}
       <form onSubmit={(event) => void send(event)}>
-        <label htmlFor="comms-audience">Audience</label>
-        <select
-          id="comms-audience"
-          value={audienceKind}
-          onChange={(event) => {
-            setAudienceKind(event.target.value);
-            setParam("");
-            setPreview(null);
-          }}
-        >
-          {kinds.map((kind) => (
-            <option key={kind.key} value={kind.key}>
-              {kind.label}
-            </option>
-          ))}
-        </select>
+        <div className="cx-field-pair">
+          <label htmlFor="comms-audience">Audience</label>
+          <select
+            id="comms-audience"
+            value={audienceKind}
+            onChange={(event) => {
+              setAudienceKind(event.target.value);
+              setParam("");
+              setPreview(null);
+            }}
+          >
+            {kinds.map((kind) => (
+              <option key={kind.key} value={kind.key}>
+                {kind.label}
+              </option>
+            ))}
+          </select>
+        </div>
         {paramName && selectedKind && (
           <>
-            <label htmlFor="comms-param">{paramName}</label>
-            <select
-              id="comms-param"
-              value={param}
-              onChange={(event) => {
-                setParam(event.target.value);
-                setPreview(null);
-              }}
-              required
-            >
-              <option value="">Choose one</option>
-              {(selectedKind.options[paramName] ?? []).map((option) => (
-                <option key={option.public_id} value={option.public_id}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <div className="cx-field-pair">
+              <label htmlFor="comms-param">{paramName}</label>
+              <select
+                id="comms-param"
+                value={param}
+                onChange={(event) => {
+                  setParam(event.target.value);
+                  setPreview(null);
+                }}
+                required
+              >
+                <option value="">Choose one</option>
+                {(selectedKind.options[paramName] ?? []).map((option) => (
+                  <option key={option.public_id} value={option.public_id}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </>
         )}
         <Button
@@ -247,21 +251,25 @@ export function CommunicationsPanel({
               ` — e.g. ${preview.sample.map((s) => s.username).join(", ")}`}
           </p>
         )}
-        <label htmlFor="comms-subject">Subject</label>
-        <input
-          id="comms-subject"
-          value={subject}
-          onChange={(event) => setSubject(event.target.value)}
-          required
-          maxLength={200}
-        />
-        <label htmlFor="comms-body">Message</label>
-        <textarea
-          id="comms-body"
-          value={body}
-          onChange={(event) => setBody(event.target.value)}
-          required
-        />
+        <div className="cx-field-pair">
+          <label htmlFor="comms-subject">Subject</label>
+          <input
+            id="comms-subject"
+            value={subject}
+            onChange={(event) => setSubject(event.target.value)}
+            required
+            maxLength={200}
+          />
+        </div>
+        <div className="cx-field-pair">
+          <label htmlFor="comms-body">Message</label>
+          <textarea
+            id="comms-body"
+            value={body}
+            onChange={(event) => setBody(event.target.value)}
+            required
+          />
+        </div>
         <Button type="submit" disabled={busy}>
           Send message
         </Button>
@@ -272,39 +280,47 @@ export function CommunicationsPanel({
         reminder is sent to the in-app inbox.
       </p>
       <form onSubmit={(event) => void scheduleReminder(event)}>
-        <label htmlFor="reminder-kind">Reminder type</label>
-        <select
-          id="reminder-kind"
-          value={reminderKind}
-          onChange={(event) => setReminderKind(event.target.value)}
-        >
-          <option value="deadline">Submission deadline</option>
-          <option value="judging">Judging</option>
-          <option value="voting">Voting</option>
-        </select>
-        <label htmlFor="reminder-due">Send at</label>
-        <input
-          id="reminder-due"
-          type="datetime-local"
-          value={reminderDue}
-          onChange={(event) => setReminderDue(event.target.value)}
-          required
-        />
-        <label htmlFor="reminder-subject">Subject</label>
-        <input
-          id="reminder-subject"
-          value={reminderSubject}
-          onChange={(event) => setReminderSubject(event.target.value)}
-          required
-          maxLength={200}
-        />
-        <label htmlFor="reminder-body">Message</label>
-        <textarea
-          id="reminder-body"
-          value={reminderBody}
-          onChange={(event) => setReminderBody(event.target.value)}
-          required
-        />
+        <div className="cx-field-pair">
+          <label htmlFor="reminder-kind">Reminder type</label>
+          <select
+            id="reminder-kind"
+            value={reminderKind}
+            onChange={(event) => setReminderKind(event.target.value)}
+          >
+            <option value="deadline">Submission deadline</option>
+            <option value="judging">Judging</option>
+            <option value="voting">Voting</option>
+          </select>
+        </div>
+        <div className="cx-field-pair">
+          <label htmlFor="reminder-due">Send at</label>
+          <input
+            id="reminder-due"
+            type="datetime-local"
+            value={reminderDue}
+            onChange={(event) => setReminderDue(event.target.value)}
+            required
+          />
+        </div>
+        <div className="cx-field-pair">
+          <label htmlFor="reminder-subject">Subject</label>
+          <input
+            id="reminder-subject"
+            value={reminderSubject}
+            onChange={(event) => setReminderSubject(event.target.value)}
+            required
+            maxLength={200}
+          />
+        </div>
+        <div className="cx-field-pair">
+          <label htmlFor="reminder-body">Message</label>
+          <textarea
+            id="reminder-body"
+            value={reminderBody}
+            onChange={(event) => setReminderBody(event.target.value)}
+            required
+          />
+        </div>
         <Button type="submit" disabled={busy}>
           Schedule reminder
         </Button>

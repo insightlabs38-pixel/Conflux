@@ -43,12 +43,24 @@ export async function openWorkspace(page: Page) {
 }
 
 export async function noHorizontalOverflow(page: Page) {
-  const overflow = await page.evaluate(
-    () =>
-      document.documentElement.scrollWidth -
-      document.documentElement.clientWidth,
-  );
-  expect(overflow, "horizontal overflow (px)").toBeLessThanOrEqual(0);
+  const { overflow, culprit } = await page.evaluate(() => {
+    const width = document.documentElement.clientWidth;
+    const overflow = document.documentElement.scrollWidth - width;
+    let culprit = "";
+    if (overflow > 0)
+      for (const element of document.body.querySelectorAll("*")) {
+        const box = element.getBoundingClientRect();
+        if (box.width > 0 && box.right > width + 1) {
+          culprit = `${element.tagName.toLowerCase()}.${String(element.className).slice(0, 60)} (right ${Math.round(box.right)} > ${width})`;
+          break;
+        }
+      }
+    return { overflow, culprit };
+  });
+  expect(
+    overflow,
+    `horizontal overflow (px)${culprit ? `; first offender ${culprit}` : ""}`,
+  ).toBeLessThanOrEqual(0);
 }
 
 export async function accessible(page: Page) {

@@ -193,7 +193,8 @@ describe("workflow load states", () => {
       }),
     );
     await waitFor(
-      () => container.querySelector("article h2")?.textContent === "Second",
+      () =>
+        container.querySelector(".cx-page-header h1")?.textContent === "Second",
     );
     await act(async () =>
       pending.get("e1")?.({
@@ -206,6 +207,8 @@ describe("workflow load states", () => {
         }),
       }),
     );
-    expect(container.querySelector("article h2")?.textContent).toBe("Second");
+    expect(container.querySelector(".cx-page-header h1")?.textContent).toBe(
+      "Second",
+    );
   });
 });

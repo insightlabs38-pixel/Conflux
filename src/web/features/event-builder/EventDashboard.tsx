@@ -1,3 +1,9 @@
+import {
+  Destination,
+  DestinationLink,
+  WorkspaceViewTitle,
+} from "../../components/WorkspaceNavigation";
+import { PageHeader, Grid } from "../../components/Foundation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { PolicyBuilder } from "../policy-builder/PolicyBuilder";
 import { StageBuilder } from "../stage-builder/StageBuilder";
@@ -265,7 +271,13 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
 
   return (
     <section aria-label="Event dashboard">
-      <h1>Events</h1>
+      <PageHeader
+        as="h1"
+        title={selected?.name || "Events"}
+        eyebrow="Organizer workspace"
+        description="Manage the event, review what needs attention, and bring the results to publication."
+      />
+      <WorkspaceViewTitle role="organizer" />
       {error && <p role="alert">{error}</p>}
       {loadingEvents && <LoadingState label="Loading events…" />}
       {loadError && (
@@ -274,26 +286,28 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
           onRetry={() => setRetry((count) => count + 1)}
         />
       )}
-      <form onSubmit={createEvent}>
-        <h2>Create event</h2>
-        <label>
-          Name{" "}
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </label>
-        <label>
-          Slug{" "}
-          <input
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            required
-          />
-        </label>
-        <button disabled={busy}>Create event</button>
-      </form>
+      <Destination id="setup">
+        <form onSubmit={createEvent}>
+          <h2>Create event</h2>
+          <label>
+            Name{" "}
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </label>
+          <label>
+            Slug{" "}
+            <input
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              required
+            />
+          </label>
+          <button disabled={busy}>Create event</button>
+        </form>
+      </Destination>
       <nav aria-label="Workspace events">
         {events.map((item) => (
           <button
@@ -309,15 +323,64 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
       {!loadingEvents && !loadError && events.length === 0 && (
         <p>No events yet. Create one to get started.</p>
       )}
-      <OperatorConsole workspaceId={workspaceId} onChooseEvent={choose} />
-      <EventTemplatesPanel workspaceId={workspaceId} onCreated={choose} />
+      <Destination id="operations">
+        <OperatorConsole workspaceId={workspaceId} onChooseEvent={choose} />
+      </Destination>
+      <Destination id="setup">
+        <EventTemplatesPanel workspaceId={workspaceId} onCreated={choose} />
+      </Destination>
       {selected && (
         <article>
-          <h2>{selected.name}</h2>
           <p>
             Status: {selected.status} ·{" "}
             {selected.is_public ? "Public" : "Private"}
           </p>
+          <Destination id="overview">
+            <section
+              className="cx-workspace-overview"
+              aria-label="Event overview"
+            >
+              <h3>Event at a glance</h3>
+              <dl className="cx-facts">
+                <div>
+                  <dt>Event state</dt>
+                  <dd>{selected.status}</dd>
+                </div>
+                <div>
+                  <dt>Tracks</dt>
+                  <dd>{dashboard.track_count}</dd>
+                </div>
+                <div>
+                  <dt>Base prizes</dt>
+                  <dd>{dashboard.base_prize_count}</dd>
+                </div>
+                <div>
+                  <dt>Configuration checks</dt>
+                  <dd>{dashboard.configuration_checks.length}</dd>
+                </div>
+              </dl>
+              <Grid>
+                <DestinationLink id="eligibility">
+                  <strong>Review eligibility</strong>
+                  <span>
+                    Findings, participant responses, and deadline exceptions.
+                  </span>
+                </DestinationLink>
+                <DestinationLink id="judging">
+                  <strong>Manage judging</strong>
+                  <span>
+                    Rubrics, workload, coverage, and assignment logistics.
+                  </span>
+                </DestinationLink>
+                <DestinationLink id="results">
+                  <strong>Finalize and publish</strong>
+                  <span>
+                    Compare finalists, deliberate, and control publication.
+                  </span>
+                </DestinationLink>
+              </Grid>
+            </section>
+          </Destination>
           {dashboard.configuration_checks.length > 0 && (
             <section aria-label="Configuration checks">
               <h3>Configuration checks</h3>
@@ -328,269 +391,325 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
               </ul>
             </section>
           )}
-          <form
-            onSubmit={saveSettings}
-            key={selected.public_id + selected.updated_at}
-          >
-            <h3>Settings</h3>
-            <label>
-              Name <input name="name" defaultValue={selected.name} required />
-            </label>
-            <label>
-              Timezone{" "}
-              <input
-                name="timezone"
-                defaultValue={selected.timezone}
-                required
-              />
-            </label>
-            <label>
-              Start{" "}
-              <input
-                name="starts_at"
-                type="datetime-local"
-                defaultValue={localDateTime(selected.starts_at)}
-              />
-            </label>
-            <label>
-              End{" "}
-              <input
-                name="ends_at"
-                type="datetime-local"
-                defaultValue={localDateTime(selected.ends_at)}
-              />
-            </label>
-            <label>
-              Public{" "}
-              <input
-                name="is_public"
-                type="checkbox"
-                defaultChecked={selected.is_public}
-              />
-            </label>
-            <button disabled={busy || selected.status === "archived"}>
-              Save settings
-            </button>
-          </form>
-          {nextStatus && (
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => transition(nextStatus)}
+          <Destination id="setup">
+            <form
+              onSubmit={saveSettings}
+              key={selected.public_id + selected.updated_at}
             >
-              Move to {nextStatus}
-            </button>
-          )}
-          <section>
-            <h3>Tracks ({dashboard.track_count})</h3>
-            <ul>
-              {tracks.map((track) => (
-                <li key={track.public_id}>{track.name}</li>
-              ))}
-            </ul>
-            <form onSubmit={addTrack}>
+              <h3>Settings</h3>
               <label>
-                Track name{" "}
-                <input
-                  value={trackName}
-                  onChange={(e) => setTrackName(e.target.value)}
-                  required
-                />
+                Name <input name="name" defaultValue={selected.name} required />
               </label>
-              <button disabled={busy}>Add track</button>
-            </form>
-          </section>
-          <section>
-            <h3>Base prizes ({dashboard.base_prize_count})</h3>
-            <ul>
-              {prizes.map((prize) => (
-                <li key={prize.public_id}>
-                  {prize.name} ({prize.kind})
-                </li>
-              ))}
-            </ul>
-            <form onSubmit={addPrize}>
               <label>
-                Prize name{" "}
+                Timezone{" "}
                 <input
-                  value={prizeName}
-                  onChange={(e) => setPrizeName(e.target.value)}
+                  name="timezone"
+                  defaultValue={selected.timezone}
                   required
                 />
               </label>
               <label>
-                Type{" "}
-                <select
-                  value={prizeKind}
-                  onChange={(e) => setPrizeKind(e.target.value)}
-                >
-                  {[
-                    "cash",
-                    "credit",
-                    "discount",
-                    "subscription",
-                    "hardware",
-                    "travel",
-                    "service",
-                    "mentorship",
-                    "swag",
-                    "other",
-                  ].map((kind) => (
-                    <option key={kind} value={kind}>
-                      {kind}
-                    </option>
-                  ))}
-                </select>
+                Start{" "}
+                <input
+                  name="starts_at"
+                  type="datetime-local"
+                  defaultValue={localDateTime(selected.starts_at)}
+                />
               </label>
               <label>
-                Track{" "}
-                <select
-                  value={prizeTrack}
-                  onChange={(e) => setPrizeTrack(e.target.value)}
-                >
-                  <option value="">All tracks</option>
-                  {tracks.map((track) => (
-                    <option key={track.public_id} value={track.public_id}>
-                      {track.name}
-                    </option>
-                  ))}
-                </select>
+                End{" "}
+                <input
+                  name="ends_at"
+                  type="datetime-local"
+                  defaultValue={localDateTime(selected.ends_at)}
+                />
               </label>
-              {prizeKind === "cash" && (
-                <>
-                  <label>
-                    Amount{" "}
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={prizeAmount}
-                      onChange={(e) => setPrizeAmount(e.target.value)}
-                      required
-                    />
-                  </label>
-                  <label>
-                    Currency{" "}
-                    <input
-                      maxLength={3}
-                      value={prizeCurrency}
-                      onChange={(e) => setPrizeCurrency(e.target.value)}
-                      required
-                    />
-                  </label>
-                </>
-              )}
-              <button disabled={busy}>Add prize</button>
+              <label>
+                Public{" "}
+                <input
+                  name="is_public"
+                  type="checkbox"
+                  defaultChecked={selected.is_public}
+                />
+              </label>
+              <button disabled={busy || selected.status === "archived"}>
+                Save settings
+              </button>
             </form>
-          </section>
-          <StageBuilder
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-          />
-          <PolicyBuilder
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-          />
-          <RegistrationPanel
-            key={`registration-${selected.public_id}`}
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-          />
-          <EligibilityReviewPanel
-            key={`EligibilityReviewPanel-${selected.public_id}`}
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-          />
-          <RulesPanel
-            key={`RulesPanel-${selected.public_id}`}
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-            canPublish
-          />
-          <OnsiteOperationsPanel
-            key={`OnsiteOperationsPanel-${selected.public_id}`}
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-            canManage
-          />
-          <TeamPanel workspaceId={workspaceId} eventId={selected.public_id} />
-          <FormBuilder workspaceId={workspaceId} eventId={selected.public_id} />
-          <PageBuilder workspaceId={workspaceId} eventId={selected.public_id} />
-          <EvaluationBuilder
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-          />
-          <JudgeWorkloadPanel
-            key={`judge-workload-${selected.public_id}`}
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-          />
-          <OrganizerJudgingLogisticsPanel
-            key={`OrganizerJudgingLogisticsPanel-${selected.public_id}`}
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-          />
-          <CommunityVotingBuilder
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-          />
-          <WebhooksPanel
-            key={`webhooks-${selected.public_id}`}
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-          />
-          <AwardsPanel
-            key={`awards-${selected.public_id}-${awardsRevision}`}
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-          />
-          <DeliberationPanel
-            key={`DeliberationPanel-${selected.public_id}`}
-            onFinalized={() => setAwardsRevision((n) => n + 1)}
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-          />
-          <PublicationGovernancePanel
-            key={`PublicationGovernancePanel-${selected.public_id}`}
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-          />
-          <OperationsCenter
-            key={`operations-${selected.public_id}`}
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-          />
-          <ExceptionRequestsPanel
-            key={`ExceptionRequestsPanel-${selected.public_id}`}
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-          />
-          <MentorDeskPanel
-            key={`MentorDeskPanel-${selected.public_id}`}
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-            isOrganizer
-          />
-          <ContinuationsAdminPanel
-            key={`ContinuationsAdminPanel-${selected.public_id}`}
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-          />
-          <CommunicationsPanel
-            key={`communications-${selected.public_id}`}
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-          />
-          <ConfigHistoryPanel
-            key={`config-history-${selected.public_id}`}
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-          />
-          <PermissionMatrixExplorer
-            key={`permission-matrix-${selected.public_id}`}
-            workspaceId={workspaceId}
-            eventId={selected.public_id}
-          />
+            {nextStatus && (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => transition(nextStatus)}
+              >
+                Move to {nextStatus}
+              </button>
+            )}
+            <section>
+              <h3>Tracks ({dashboard.track_count})</h3>
+              <ul>
+                {tracks.map((track) => (
+                  <li key={track.public_id}>{track.name}</li>
+                ))}
+              </ul>
+              <form onSubmit={addTrack}>
+                <label>
+                  Track name{" "}
+                  <input
+                    value={trackName}
+                    onChange={(e) => setTrackName(e.target.value)}
+                    required
+                  />
+                </label>
+                <button disabled={busy}>Add track</button>
+              </form>
+            </section>
+            <section>
+              <h3>Base prizes ({dashboard.base_prize_count})</h3>
+              <ul>
+                {prizes.map((prize) => (
+                  <li key={prize.public_id}>
+                    {prize.name} ({prize.kind})
+                  </li>
+                ))}
+              </ul>
+              <form onSubmit={addPrize}>
+                <label>
+                  Prize name{" "}
+                  <input
+                    value={prizeName}
+                    onChange={(e) => setPrizeName(e.target.value)}
+                    required
+                  />
+                </label>
+                <label>
+                  Type{" "}
+                  <select
+                    value={prizeKind}
+                    onChange={(e) => setPrizeKind(e.target.value)}
+                  >
+                    {[
+                      "cash",
+                      "credit",
+                      "discount",
+                      "subscription",
+                      "hardware",
+                      "travel",
+                      "service",
+                      "mentorship",
+                      "swag",
+                      "other",
+                    ].map((kind) => (
+                      <option key={kind} value={kind}>
+                        {kind}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Track{" "}
+                  <select
+                    value={prizeTrack}
+                    onChange={(e) => setPrizeTrack(e.target.value)}
+                  >
+                    <option value="">All tracks</option>
+                    {tracks.map((track) => (
+                      <option key={track.public_id} value={track.public_id}>
+                        {track.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {prizeKind === "cash" && (
+                  <>
+                    <label>
+                      Amount{" "}
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={prizeAmount}
+                        onChange={(e) => setPrizeAmount(e.target.value)}
+                        required
+                      />
+                    </label>
+                    <label>
+                      Currency{" "}
+                      <input
+                        maxLength={3}
+                        value={prizeCurrency}
+                        onChange={(e) => setPrizeCurrency(e.target.value)}
+                        required
+                      />
+                    </label>
+                  </>
+                )}
+                <button disabled={busy}>Add prize</button>
+              </form>
+            </section>
+          </Destination>
+          <Destination id="setup">
+            <StageBuilder
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="setup">
+            <PolicyBuilder
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="participants">
+            <RegistrationPanel
+              key={`registration-${selected.public_id}`}
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="eligibility">
+            <EligibilityReviewPanel
+              key={`EligibilityReviewPanel-${selected.public_id}`}
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="setup">
+            <RulesPanel
+              key={`RulesPanel-${selected.public_id}`}
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+              canPublish
+            />
+          </Destination>
+          <Destination id="onsite">
+            <OnsiteOperationsPanel
+              key={`OnsiteOperationsPanel-${selected.public_id}`}
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+              canManage
+            />
+          </Destination>
+          <Destination id="participants">
+            <TeamPanel workspaceId={workspaceId} eventId={selected.public_id} />
+          </Destination>
+          <Destination id="setup">
+            <FormBuilder
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="setup">
+            <PageBuilder
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="judging">
+            <EvaluationBuilder
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="judging">
+            <JudgeWorkloadPanel
+              key={`judge-workload-${selected.public_id}`}
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="judging">
+            <OrganizerJudgingLogisticsPanel
+              key={`OrganizerJudgingLogisticsPanel-${selected.public_id}`}
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="judging">
+            <CommunityVotingBuilder
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="integrations">
+            <WebhooksPanel
+              key={`webhooks-${selected.public_id}`}
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="results">
+            <AwardsPanel
+              key={`awards-${selected.public_id}-${awardsRevision}`}
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="results">
+            <DeliberationPanel
+              key={`DeliberationPanel-${selected.public_id}`}
+              onFinalized={() => setAwardsRevision((n) => n + 1)}
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="results">
+            <PublicationGovernancePanel
+              key={`PublicationGovernancePanel-${selected.public_id}`}
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="operations">
+            <OperationsCenter
+              key={`operations-${selected.public_id}`}
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="eligibility">
+            <ExceptionRequestsPanel
+              key={`ExceptionRequestsPanel-${selected.public_id}`}
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="participants">
+            <MentorDeskPanel
+              key={`MentorDeskPanel-${selected.public_id}`}
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+              isOrganizer
+            />
+          </Destination>
+          <Destination id="operations">
+            <ContinuationsAdminPanel
+              key={`ContinuationsAdminPanel-${selected.public_id}`}
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="communications">
+            <CommunicationsPanel
+              key={`communications-${selected.public_id}`}
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="operations">
+            <ConfigHistoryPanel
+              key={`config-history-${selected.public_id}`}
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
+          <Destination id="operations">
+            <PermissionMatrixExplorer
+              key={`permission-matrix-${selected.public_id}`}
+              workspaceId={workspaceId}
+              eventId={selected.public_id}
+            />
+          </Destination>
         </article>
       )}
     </section>

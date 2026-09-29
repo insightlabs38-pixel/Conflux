@@ -5,6 +5,8 @@ import { App } from "./App";
 describe("bootstrap shell", () => {
   it("renders a stable heading", () => {
     const html = renderToStaticMarkup(<App />);
-    expect(html).toMatch(/<h1[^>]*>Conflux<\/h1>/);
+    expect(html).toMatch(
+      /<h1[^>]*><span[^>]*aria-hidden="true"[^>]*>C<\/span>Conflux<\/h1>/,
+    );
   });
 });

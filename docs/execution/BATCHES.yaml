@@ -1897,11 +1897,14 @@ batches:
   - src/web/components/**
   - src/web/features/teams/TeamWorkspace.tsx
   - src/web/features/judging/JudgeWorkspace.tsx
+  - src/web/features/judging/JudgeCalendarPanel.tsx
   - src/web/features/event-builder/EventDashboard.tsx
+  - src/web/features/pvs/StaffWorkspace.tsx
+  - tests/e2e/**
   task_ids:
   - UIV2-B02-01
   - UIV2-B02-02
-  status: BLOCKED
+  status: DONE
   completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
     receipt and commit recorded before advancing.
 - id: UIV2-B03

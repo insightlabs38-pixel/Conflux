@@ -1,6 +1,12 @@
 import { expect, test } from "@playwright/test";
 import path from "node:path";
-import { eventIds, openWorkspace, settled, signIn } from "./support";
+import {
+  eventIds,
+  goToDestination,
+  openWorkspace,
+  settled,
+  signIn,
+} from "./support";
 
 // Deterministic demo scenes: fixed viewport, reduced motion, seeded data. Screenshots land in
 // tests/e2e/artifacts/scenes; a video of each scene is kept because the config records it on demand.
@@ -41,6 +47,7 @@ for (const [n, role] of [
     if (role === "organizer") {
       await page.getByRole("button", { name: /^Demo \(/ }).click();
       await settled(page);
+      await goToDestination(page, "judging");
       const judging = page.locator(".cx-card").filter({
         has: page.getByRole("heading", { name: "Judging", exact: true }),
       });
@@ -58,12 +65,21 @@ for (const [n, role] of [
         .getByLabel("Stage")
         .selectOption({ index: 1 });
       await settled(page);
-      for (const [name, region] of [
-        ["organizer-eligibility-overview", "Eligibility review queue"],
-        ["organizer-deliberation-overview", "Deliberation and finalization"],
-        ["organizer-onsite", "On-site operations"],
-        ["organizer-judging-logistics", "Judging logistics"],
+      for (const [name, region, destination] of [
+        [
+          "organizer-eligibility-overview",
+          "Eligibility review queue",
+          "eligibility",
+        ],
+        [
+          "organizer-deliberation-overview",
+          "Deliberation and finalization",
+          "results",
+        ],
+        ["organizer-onsite", "On-site operations", "onsite"],
+        ["organizer-judging-logistics", "Judging logistics", "judging"],
       ]) {
+        await goToDestination(page, destination);
         await page
           .getByRole("region", { name: region })
           .screenshot({ path: shot(name) });
@@ -77,14 +93,18 @@ for (const [n, role] of [
       if (role === "judge-01") {
         const judging = page.getByRole("region", { name: "Judging" });
         await judging.getByLabel("Stage").selectOption({ index: 1 });
+        await goToDestination(page, "queue");
         await expect(
           page.getByRole("region", { name: "Your assignments" }),
         ).toBeVisible();
         await settled(page);
+        await goToDestination(page, "schedule");
         await page
           .getByRole("region", { name: "Your judging route" })
           .screenshot({ path: shot("judge-route") });
+        await goToDestination(page, "queue");
       } else {
+        await goToDestination(page, "project");
         await page
           .getByRole("region", { name: "My projects" })
           .locator("select")

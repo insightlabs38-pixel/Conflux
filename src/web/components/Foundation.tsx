@@ -25,17 +25,19 @@ export function PageHeader({
   description,
   eyebrow,
   actions,
+  as: Heading = "h2",
 }: {
   title: string;
   description?: string;
   eyebrow?: string;
   actions?: ReactNode;
+  as?: "h1" | "h2";
 }) {
   return (
     <header className="cx-page-header">
       <div>
         {eyebrow && <p className="cx-eyebrow">{eyebrow}</p>}
-        <h2>{title}</h2>
+        <Heading>{title}</Heading>
         {description && (
           <p className="cx-page-header__description">{description}</p>
         )}

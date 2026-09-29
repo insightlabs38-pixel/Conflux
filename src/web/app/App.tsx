@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { WorkspaceNavigationProvider } from "../components/WorkspaceNavigation";
 import { AppShell } from "../components/AppShell";
 import { Button } from "../components/Button";
 import { DeniedState } from "../components/DeniedState";
@@ -33,6 +34,7 @@ function setWorkspaceParam(id: string | null) {
     url.searchParams.delete("workspace");
     url.searchParams.delete("event");
     url.searchParams.delete("invite");
+    url.searchParams.delete("view");
   }
   window.history.pushState({}, "", url);
 }
@@ -41,6 +43,9 @@ export function App() {
   const [workspaceId, setWorkspaceId] = useState<string | null>(
     workspaceFromLocation,
   );
+  const [signingOut, setSigningOut] = useState(false);
+  const [workspaceName, setWorkspaceName] = useState("");
+  const [username, setUsername] = useState("");
   const [workspaceRole, setWorkspaceRole] = useState<string | null>(null);
   const [roleState, setRoleState] = useState<
     "loading" | "ready" | "denied" | "error"
@@ -57,26 +62,38 @@ export function App() {
         if (!response.ok) throw new Error("Could not check workspace access.");
         return response.json();
       })
-      .then((me: { memberships?: { workspace: string; role: string }[] }) => {
-        if (!active) return;
-        const role = me?.memberships?.find(
-          (membership) => membership.workspace === workspaceId,
-        )?.role;
-        if (
-          role === "participant" ||
-          role === "judge" ||
-          role === "mentor" ||
-          role === "volunteer" ||
-          role === "organizer" ||
-          role === "admin"
-        ) {
-          setWorkspaceRole(role);
-          setRoleState("ready");
-        } else {
-          setWorkspaceRole(null);
-          setRoleState("denied");
-        }
-      })
+      .then(
+        (me: {
+          username?: string;
+          memberships?: {
+            workspace: string;
+            workspace_name?: string;
+            role: string;
+          }[];
+        }) => {
+          if (!active) return;
+          setUsername(me.username || "");
+          const membership = me?.memberships?.find(
+            (membership) => membership.workspace === workspaceId,
+          );
+          const role = membership?.role;
+          setWorkspaceName(membership?.workspace_name || "");
+          if (
+            role === "participant" ||
+            role === "judge" ||
+            role === "mentor" ||
+            role === "volunteer" ||
+            role === "organizer" ||
+            role === "admin"
+          ) {
+            setWorkspaceRole(role);
+            setRoleState("ready");
+          } else {
+            setWorkspaceRole(null);
+            setRoleState("denied");
+          }
+        },
+      )
       .catch(() => {
         if (active) setRoleState("error");
       });
@@ -96,54 +113,81 @@ export function App() {
     setWorkspaceParam(null);
     setWorkspaceId(null);
     setWorkspaceRole(null);
+    setWorkspaceName("");
     setRoleState("loading");
   }, []);
+
+  const signOut = useCallback(async () => {
+    setSigningOut(true);
+    await fetch("/api/v1/accounts/logout/", {
+      method: "POST",
+      credentials: "include",
+    }).catch(() => undefined);
+    setUsername("");
+    backToWorkspaces();
+    setSigningOut(false);
+  }, [backToWorkspaces]);
 
   if (publicEventId) {
     return <EventSite eventId={publicEventId} />;
   }
 
   return (
-    <AppShell
-      nav={
-        <>
-          <a href="/?api=explorer">API explorer</a>
-          {workspaceId && (
-            <Button variant="secondary" onClick={backToWorkspaces}>
-              Back to workspaces
-            </Button>
-          )}
-        </>
-      }
+    <WorkspaceNavigationProvider
+      key={workspaceId || "selection"}
+      role={workspaceRole || ""}
     >
-      {workspaceId ? (
-        roleState === "loading" ? (
-          <LoadingState label="Checking workspace access…" />
-        ) : roleState === "error" ? (
-          <ErrorState
-            message="Could not check workspace access."
-            onRetry={() => setRoleRetry((count) => count + 1)}
-          />
-        ) : roleState === "denied" ? (
-          <DeniedState message="You are not a member of this workspace." />
-        ) : workspaceRole === "participant" ? (
-          <TeamWorkspace key={workspaceId} workspaceId={workspaceId} />
-        ) : workspaceRole === "judge" ? (
-          <JudgeWorkspace key={workspaceId} workspaceId={workspaceId} />
-        ) : workspaceRole === "mentor" || workspaceRole === "volunteer" ? (
-          <StaffWorkspace
-            key={workspaceId}
-            workspaceId={workspaceId}
-            role={workspaceRole}
-          />
-        ) : workspaceRole === "organizer" || workspaceRole === "admin" ? (
-          <EventDashboard key={workspaceId} workspaceId={workspaceId} />
+      <AppShell
+        role={
+          roleState === "ready" && workspaceId
+            ? workspaceRole || undefined
+            : undefined
+        }
+        username={username}
+        workspaceName={workspaceName}
+        onSignOut={signOut}
+        signingOut={signingOut}
+        brandAs={workspaceId && roleState === "ready" ? "p" : "h1"}
+        nav={
+          <>
+            <a href="/?api=explorer">API explorer</a>
+            {workspaceId && (
+              <Button variant="secondary" onClick={backToWorkspaces}>
+                Back to workspaces
+              </Button>
+            )}
+          </>
+        }
+      >
+        {workspaceId ? (
+          roleState === "loading" ? (
+            <LoadingState label="Checking workspace access…" />
+          ) : roleState === "error" ? (
+            <ErrorState
+              message="Could not check workspace access."
+              onRetry={() => setRoleRetry((count) => count + 1)}
+            />
+          ) : roleState === "denied" ? (
+            <DeniedState message="You are not a member of this workspace." />
+          ) : workspaceRole === "participant" ? (
+            <TeamWorkspace key={workspaceId} workspaceId={workspaceId} />
+          ) : workspaceRole === "judge" ? (
+            <JudgeWorkspace key={workspaceId} workspaceId={workspaceId} />
+          ) : workspaceRole === "mentor" || workspaceRole === "volunteer" ? (
+            <StaffWorkspace
+              key={workspaceId}
+              workspaceId={workspaceId}
+              role={workspaceRole}
+            />
+          ) : workspaceRole === "organizer" || workspaceRole === "admin" ? (
+            <EventDashboard key={workspaceId} workspaceId={workspaceId} />
+          ) : (
+            <DeniedState />
+          )
         ) : (
-          <DeniedState />
-        )
-      ) : (
-        <WorkspaceSelector onSelect={selectWorkspace} />
-      )}
-    </AppShell>
+          <WorkspaceSelector onSelect={selectWorkspace} />
+        )}
+      </AppShell>
+    </WorkspaceNavigationProvider>
   );
 }

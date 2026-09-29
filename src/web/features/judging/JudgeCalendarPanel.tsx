@@ -63,7 +63,7 @@ export function JudgeCalendarPanel({
   useEffect(load, [workspaceId, eventId]);
 
   return (
-    <Card title="My judging calendar" as="h4">
+    <Card title="My judging calendar" as="h3">
       {error && <ErrorState message={error} onRetry={load} />}
       {!error && calendar === null && (
         <LoadingState label="Loading your judging calendar…" />

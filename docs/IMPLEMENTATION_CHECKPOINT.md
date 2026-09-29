@@ -1,7 +1,7 @@
 # Conflux — current implementation checkpoint
 
 UI-v2 is active on canonical `main`; authoritative [queue](execution/README.md)
-and [surface census](ui-v2/SURFACE_CENSUS.md). One sequential worker; B00/B01 complete; B02 role-aware shell is next. PVS-H06 remains a completed historical release.
+and [surface census](ui-v2/SURFACE_CENSUS.md). One sequential worker; B00–B02 complete; B03 event theming/public shell is next. PVS-H06 remains a completed historical release.
 
 PVS-H06 is complete on `main`; the prior release campaign is closed. Its final
 targeted pass closes the pairwise-to-awards and sponsor-resource portability

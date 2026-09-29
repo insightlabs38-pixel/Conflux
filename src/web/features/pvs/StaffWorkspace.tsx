@@ -1,3 +1,8 @@
+import {
+  Destination,
+  WorkspaceViewTitle,
+} from "../../components/WorkspaceNavigation";
+import { PageHeader } from "../../components/Foundation";
 import { useState } from "react";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
@@ -23,8 +28,14 @@ export function StaffWorkspace({
   const [eventId, setEventId] = useState("");
   return (
     <section aria-label={role === "mentor" ? "Mentoring" : "Event desk"}>
-      <h2>{role === "mentor" ? "Mentoring" : "Event desk"}</h2>
-      <Inbox workspaceId={workspaceId} />
+      <PageHeader
+        as="h1"
+        title={role === "mentor" ? "Mentoring" : "Event desk"}
+      />
+      <WorkspaceViewTitle role={role} />
+      <Destination id="messages">
+        <Inbox workspaceId={workspaceId} />
+      </Destination>
       {events.loading && <LoadingState label="Loading events…" />}
       {events.error && (
         <ErrorState message={events.error.message} onRetry={events.reload} />

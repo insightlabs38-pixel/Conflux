@@ -77,3 +77,12 @@ export async function settled(page: Page) {
     0,
   );
 }
+
+/** Navigate the visible role shell, disclosing mobile navigation when necessary. */
+export async function goToDestination(page: Page, id: string) {
+  const link = page.locator(`#workspace-navigation a[href*="view=${id}"]`);
+  if (!(await link.isVisible()))
+    await page.getByRole("button", { name: "Navigation", exact: true }).click();
+  await link.click();
+  await expect(link).toHaveAttribute("aria-current", "page");
+}

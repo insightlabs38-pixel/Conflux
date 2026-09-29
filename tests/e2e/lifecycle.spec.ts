@@ -1,3 +1,4 @@
+import { goToDestination } from "./support";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 import {
@@ -45,14 +46,17 @@ test("participant creates a team, submits, and receives a signed receipt", async
   const problems = watch(page);
   await openWorkspace(page);
   await chooseEvent(page);
+  await goToDestination(page, "resources");
   await expect(
     page.getByRole("region", { name: "Sponsor challenges" }),
   ).toContainText("Sponsor API documentation");
+  await goToDestination(page, "team");
   await page.getByLabel("Team name").fill("Team Live Wire");
   await page.getByRole("button", { name: "Create team" }).click();
   await expect(page.getByRole("region", { name: "My team" })).toContainText(
     "Team Live Wire",
   );
+  await goToDestination(page, "project");
   await page.getByLabel("Project name").fill(PROJECT);
   await page.getByRole("button", { name: "Create project" }).click();
 
@@ -124,6 +128,7 @@ test("organizer requests changes; participant remediates; organizer approves", a
   await signIn(org, "organizer");
   await openWorkspace(org);
   await org.getByRole("button", { name: /^Demo \(open\)/ }).click();
+  await goToDestination(org, "eligibility");
   const queue = org.getByRole("region", { name: "Eligibility review queue" });
   await queue.getByLabel("Open a project").selectOption({ label: PROJECT });
   await queue.getByLabel("Finding").fill("Describe what the project does.");
@@ -142,6 +147,7 @@ test("organizer requests changes; participant remediates; organizer approves", a
   await signIn(part, LIVE);
   await openWorkspace(part);
   await chooseEvent(part);
+  await goToDestination(part, "project");
   await part
     .getByRole("region", { name: "My projects" })
     .locator("select")
@@ -174,6 +180,7 @@ test("organizer requests changes; participant remediates; organizer approves", a
   await shot(org, "organizer-eligibility", "Eligibility review queue");
   await part.reload();
   await chooseEvent(part);
+  await goToDestination(part, "project");
   await part
     .getByRole("region", { name: "My projects" })
     .locator("select")
@@ -203,12 +210,15 @@ for (const judge of ["judge-01", "judge-02", "judge-03"]) {
     const main = page.getByRole("region", { name: "Judging" });
     await main.getByLabel("Event").selectOption({ index: 1 });
     await main.getByLabel("Stage").selectOption({ index: 1 });
+    await goToDestination(page, "queue");
     await expect(
       page.getByRole("region", { name: "Your assignments" }),
     ).toBeVisible();
+    await goToDestination(page, "schedule");
     await expect(
       page.getByRole("region", { name: "Your judging route" }),
     ).toBeVisible();
+    await goToDestination(page, "queue");
     await page.getByRole("button", { name: PROJECT }).click();
     await expect(
       page.getByRole("region", { name: "Submitted artifacts" }),
@@ -230,7 +240,15 @@ for (const judge of ["judge-01", "judge-02", "judge-03"]) {
       await shot(page, "judge-scoring");
     }
     await page.getByRole("button", { name: "Submit ballot" }).click();
-    await expect(page.getByText("submitted").first()).toBeVisible();
+    await expect(
+      page
+        .getByRole("region", { name: "Review queue", exact: true })
+        .locator("li")
+        .filter({
+          has: page.getByRole("button", { name: PROJECT, exact: true }),
+        })
+        .getByText("submitted", { exact: true }),
+    ).toBeVisible();
     await settled(page);
     expect(problems.filter((p) => !p.includes("/accounts/me/"))).toEqual([]);
   });
@@ -242,6 +260,7 @@ test("organizer publishes results and the public results page shows them", async
   await signIn(page, "organizer");
   await openWorkspace(page);
   await page.getByRole("button", { name: /^Demo \(open\)/ }).click();
+  await goToDestination(page, "judging");
   const judging = page.locator(".cx-card").filter({
     has: page.getByRole("heading", { name: "Judging", exact: true }),
   });
@@ -253,6 +272,7 @@ test("organizer publishes results and the public results page shows them", async
   await publish.click();
   await expect(page.getByText("Results published.").first()).toBeVisible();
 
+  await goToDestination(page, "results");
   // Deliberation: finalist comparison → finalize the winner → publish the award.
   const room = page.getByRole("region", {
     name: "Deliberation and finalization",
@@ -272,7 +292,11 @@ test("organizer publishes results and the public results page shows them", async
   void awards;
   await page.getByLabel("Manage award").selectOption({ label: "Grand Prize" });
   await page.getByRole("button", { name: "Publish winners" }).click();
-  await expect(page.getByText(/Published/).first()).toBeVisible();
+  await expect(
+    page
+      .getByRole("region", { name: "Award operations", exact: true })
+      .getByText(/Published/),
+  ).toBeVisible();
   const { event } = await (async () => {
     const me = await (await page.request.get("/api/v1/accounts/me/")).json();
     const ws = me.memberships[0].workspace as string;

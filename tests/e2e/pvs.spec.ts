@@ -1,6 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
   account,
+  goToDestination,
   accessible,
   noHorizontalOverflow,
   openWorkspace,
@@ -36,6 +37,7 @@ async function organizerEvent(page: Page) {
   await signIn(page, "organizer");
   await openWorkspace(page);
   await page.getByRole("button", { name: /^Demo \(/ }).click();
+  await goToDestination(page, "eligibility");
   await expect(
     page.getByRole("region", { name: "Eligibility review queue" }),
   ).toBeVisible();
@@ -112,12 +114,14 @@ test("participant RSVPs, books office hours and asks for a mentor", async ({
   const problems = watch(page);
   await openWorkspace(page);
   await chooseEvent(page);
+  await goToDestination(page, "resources");
   const attending = page.getByRole("region", { name: "Attending in person" });
   await attending.getByLabel("Your RSVP").selectOption("remote");
   await expect(attending.getByText("RSVP saved: Remote.")).toBeVisible();
   await attending.getByLabel("Your RSVP").selectOption("in_person");
   await expect(attending.getByAltText("Check-in QR code")).toBeVisible();
 
+  await goToDestination(page, "project");
   await page
     .getByRole("region", { name: "My projects" })
     .locator("select")
@@ -147,6 +151,7 @@ test("participant requests a deadline exception and the organizer decides it", a
   await signIn(page, "participant-02");
   await openWorkspace(page);
   await chooseEvent(page);
+  await goToDestination(page, "project");
   await page
     .getByRole("region", { name: "My projects" })
     .locator("select")
@@ -182,6 +187,7 @@ test("organizer publishes rules, participants acknowledge, counts update", async
 }) => {
   await organizerEvent(page);
   const problems = watch(page);
+  await goToDestination(page, "setup");
   const rules = page.getByRole("region", { name: "Event rules" });
   const title = `Rules ${Date.now()}`;
   await rules.getByLabel("Title").fill(title);
@@ -196,6 +202,7 @@ test("organizer publishes rules, participants acknowledge, counts update", async
   await signIn(part, "participant-03");
   await openWorkspace(part);
   await chooseEvent(part);
+  await goToDestination(part, "resources");
   await part.getByRole("button", { name: /I have read and accept/ }).click();
   await expect(part.getByText("Acknowledged", { exact: true })).toBeVisible();
 
@@ -224,6 +231,19 @@ test("organizer operations panels load, are labelled, and never overflow", async
     "Mentor desk",
     "Post-event continuation",
   ]) {
+    const destination = (
+      {
+        "Eligibility review queue": "eligibility",
+        "On-site operations": "onsite",
+        "Judging logistics": "judging",
+        "Deliberation and finalization": "results",
+        "Publication approval and corrections": "results",
+        "Deadline exception requests": "eligibility",
+        "Mentor desk": "participants",
+        "Post-event continuation": "operations",
+      } as Record<string, string>
+    )[name];
+    await goToDestination(page, destination);
     const panel = page.getByRole("region", { name });
     await panel.scrollIntoViewIfNeeded();
     await expect(panel).toBeVisible();
@@ -244,6 +264,7 @@ for (const role of ["participant-01", "judge-01", "mentor", "volunteer"]) {
     await openWorkspace(page);
     await chooseEvent(page);
     if (role === "participant-01") {
+      await goToDestination(page, "project");
       await page
         .getByRole("region", { name: "My projects" })
         .locator("select")
@@ -261,6 +282,7 @@ for (const role of ["participant-01", "judge-01", "mentor", "volunteer"]) {
     if (role === "judge-01") {
       const main = page.getByRole("region", { name: "Judging" });
       await main.getByLabel("Stage").selectOption({ index: 1 });
+      await goToDestination(page, "schedule");
       await expect(
         page.getByRole("region", { name: "Your judging route" }),
       ).toBeVisible();

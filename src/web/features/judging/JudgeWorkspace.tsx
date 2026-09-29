@@ -1,3 +1,9 @@
+import {
+  Destination,
+  DestinationLink,
+  WorkspaceViewTitle,
+} from "../../components/WorkspaceNavigation";
+import { PageHeader, Grid } from "../../components/Foundation";
 import { useEffect, useRef, useState } from "react";
 import { Badge } from "../../components/Badge";
 import { Button } from "../../components/Button";
@@ -623,10 +629,25 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
 
   return (
     <section aria-label="Judging">
-      <h2>Judging</h2>
-      <Inbox workspaceId={workspaceId} />
-      <JudgeInvitationInbox workspaceId={workspaceId} />
-      <JudgeExpertisePanel workspaceId={workspaceId} />
+      <PageHeader
+        as="h1"
+        title="Judging"
+        eyebrow={
+          events.find((event) => event.public_id === eventId)?.name ||
+          "Your judging workspace"
+        }
+        description="Review your assigned projects, inspect evidence, and submit your own scores."
+      />
+      <WorkspaceViewTitle role="judge" />
+      <Destination id="messages">
+        <Inbox workspaceId={workspaceId} />
+      </Destination>
+      <Destination id="profile">
+        <JudgeInvitationInbox workspaceId={workspaceId} />
+      </Destination>
+      <Destination id="profile">
+        <JudgeExpertisePanel workspaceId={workspaceId} />
+      </Destination>
       {error && <p role="alert">{error}</p>}
       {loadingEvents && <LoadingState label="Loading judging events…" />}
       {!loadingEvents && !error && events.length === 0 && (
@@ -644,11 +665,13 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
         </select>
       </label>
       {eventId && (
-        <JudgeCalendarPanel
-          key={`calendar-${eventId}`}
-          workspaceId={workspaceId}
-          eventId={eventId}
-        />
+        <Destination id={["overview", "schedule"]}>
+          <JudgeCalendarPanel
+            key={`calendar-${eventId}`}
+            workspaceId={workspaceId}
+            eventId={eventId}
+          />
+        </Destination>
       )}
       {eventId && loadingStages && <LoadingState label="Loading stages…" />}
       {eventId && !loadingStages && !error && stages.length === 0 && (
@@ -686,19 +709,48 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
           </select>
         </label>
       )}
+      <Destination id="overview">
+        <section className="cx-workspace-overview" aria-label="Judge overview">
+          <h2>Review with confidence</h2>
+          <Grid>
+            <DestinationLink id="queue">
+              <strong>Open your review queue</strong>
+              <span>
+                Assignments, rubric scoring, and safe artifact inspection.
+              </span>
+            </DestinationLink>
+            <DestinationLink id="schedule">
+              <strong>Plan your next stop</strong>
+              <span>See your event schedule and remaining judging route.</span>
+            </DestinationLink>
+            <DestinationLink id="profile">
+              <strong>Keep your expertise current</strong>
+              <span>
+                Respond to invitations and update your judging expertise.
+              </span>
+            </DestinationLink>
+          </Grid>
+        </section>
+      </Destination>
       {planBase && (
         <>
-          <JudgeAssignmentsPanel
-            key={`assign-${planBase}`}
-            planBase={planBase}
-          />
-          <JudgeRoutePanel key={`route-${planBase}`} planBase={planBase} />
-          <PlanQueue
-            key={planBase}
-            base={planBase}
-            workspaceId={workspaceId}
-            eventId={eventId}
-          />
+          <Destination id="queue">
+            <JudgeAssignmentsPanel
+              key={`assign-${planBase}`}
+              planBase={planBase}
+            />
+          </Destination>
+          <Destination id="schedule">
+            <JudgeRoutePanel key={`route-${planBase}`} planBase={planBase} />
+          </Destination>
+          <Destination id="queue">
+            <PlanQueue
+              key={planBase}
+              base={planBase}
+              workspaceId={workspaceId}
+              eventId={eventId}
+            />
+          </Destination>
         </>
       )}
     </section>

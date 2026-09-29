@@ -1,3 +1,9 @@
+import {
+  Destination,
+  DestinationLink,
+  WorkspaceViewTitle,
+} from "../../components/WorkspaceNavigation";
+import { PageHeader, Grid } from "../../components/Foundation";
 import { useEffect, useState } from "react";
 import { TeamPanel } from "./TeamPanel";
 import { MarketplacePanel } from "./MarketplacePanel";
@@ -69,9 +75,22 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
 
   return (
     <section aria-label="Participant events">
-      <h2>Join an event team</h2>
-      <Inbox workspaceId={workspaceId} />
-      <PortfolioPanel workspaceId={workspaceId} />
+      <PageHeader
+        as="h1"
+        title="Participant workspace"
+        eyebrow={
+          events.find((event) => event.public_id === selectedId)?.name ||
+          "Your events"
+        }
+        description="Bring your team together, build your project, and get ready to submit."
+      />
+      <WorkspaceViewTitle role="participant" />
+      <Destination id="messages">
+        <Inbox workspaceId={workspaceId} />
+      </Destination>
+      <Destination id="profile">
+        <PortfolioPanel workspaceId={workspaceId} />
+      </Destination>
       {loading && <LoadingState label="Loading events…" />}
       {error && (
         <ErrorState
@@ -107,43 +126,81 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
           </select>
         </label>
       )}
+      <Destination id="overview">
+        <section
+          className="cx-workspace-overview"
+          aria-label="Participant overview"
+        >
+          <h2>Your next steps</h2>
+          <Grid>
+            <DestinationLink id="team">
+              <strong>1. Get your team ready</strong>
+              <span>Manage your roster, invitations, and find teammates.</span>
+            </DestinationLink>
+            <DestinationLink id="project">
+              <strong>2. Build and submit</strong>
+              <span>
+                Prepare your project, evidence, and finalized submission.
+              </span>
+            </DestinationLink>
+            <DestinationLink id="resources">
+              <strong>3. Stay connected to the event</strong>
+              <span>
+                Rules, sponsor challenges, sessions, and participation.
+              </span>
+            </DestinationLink>
+          </Grid>
+        </section>
+      </Destination>
       {!loading &&
         !error &&
         selectedId &&
         events.some((event) => event.public_id === selectedId) && (
           <>
-            <TeamPanel
-              key={selectedId}
-              workspaceId={workspaceId}
-              eventId={selectedId}
-              onTeamChange={() => setTeamRevision((revision) => revision + 1)}
-            />
-            <MarketplacePanel
-              key={`marketplace-${selectedId}-${teamRevision}`}
-              workspaceId={workspaceId}
-              eventId={selectedId}
-            />
-            <RulesPanel
-              key={`rules-${selectedId}`}
-              workspaceId={workspaceId}
-              eventId={selectedId}
-              canPublish={false}
-            />
-            <ChallengesPanel
-              key={`challenges-${selectedId}`}
-              workspaceId={workspaceId}
-              eventId={selectedId}
-            />
-            <MyOnsitePanel
-              key={`onsite-${selectedId}`}
-              workspaceId={workspaceId}
-              eventId={selectedId}
-            />
-            <ProjectWorkspace
-              key={`projects-${selectedId}`}
-              workspaceId={workspaceId}
-              eventId={selectedId}
-            />
+            <Destination id="team">
+              <TeamPanel
+                key={selectedId}
+                workspaceId={workspaceId}
+                eventId={selectedId}
+                onTeamChange={() => setTeamRevision((revision) => revision + 1)}
+              />
+            </Destination>
+            <Destination id="team">
+              <MarketplacePanel
+                key={`marketplace-${selectedId}-${teamRevision}`}
+                workspaceId={workspaceId}
+                eventId={selectedId}
+              />
+            </Destination>
+            <Destination id="resources">
+              <RulesPanel
+                key={`rules-${selectedId}`}
+                workspaceId={workspaceId}
+                eventId={selectedId}
+                canPublish={false}
+              />
+            </Destination>
+            <Destination id="resources">
+              <ChallengesPanel
+                key={`challenges-${selectedId}`}
+                workspaceId={workspaceId}
+                eventId={selectedId}
+              />
+            </Destination>
+            <Destination id="resources">
+              <MyOnsitePanel
+                key={`onsite-${selectedId}`}
+                workspaceId={workspaceId}
+                eventId={selectedId}
+              />
+            </Destination>
+            <Destination id="project">
+              <ProjectWorkspace
+                key={`projects-${selectedId}`}
+                workspaceId={workspaceId}
+                eventId={selectedId}
+              />
+            </Destination>
           </>
         )}
     </section>

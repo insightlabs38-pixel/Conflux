@@ -20,9 +20,36 @@ The human workflows live in the existing role workspaces (`/app/`); there is no 
 | PVS11 governance         | Participant | **Event rules** (acknowledge), project **Deadline exception** request, signed **submission receipt** in the Submission panel                                                                                       |
 |                          | Judge       | **Your assignments** accept/decline                                                                                                                                                                                |
 |                          | Organizer   | **Event rules** (publish, who has acknowledged), **Publication approval and corrections**, **Deadline exception requests**                                                                                         |
-| PVS14 portfolio          | Participant | **My portfolio** at the top of the participant workspace                                                                                                                                                           |
+| PVS14 portfolio          | Participant | **Profile & history** → **My portfolio**                                                                                                                                                                           |
 | PVS15 continuation       | Participant | Project → **After the event** (opens once the event is closed)                                                                                                                                                     |
 |                          | Organizer   | **Post-event continuation**: hide/restore listings                                                                                                                                                                 |
+
+## UI-v2 navigation (B02)
+
+Use the persistent desktop sidebar or the mobile **Navigation** disclosure.
+Event/stage selectors stay in the workspace context; destination changes retain
+form drafts and the judge's offline buffers. Direct links use `view` in the URL.
+
+| Role             | Destination                       | Existing workflows                                                                                          |
+| ---------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Participant      | Team                              | Roster, invitations, marketplace                                                                            |
+| Participant      | Project & submission              | Project, artifacts, preflight, forms, submission/receipt, eligibility, exceptions, mentorship, continuation |
+| Participant      | Event resources                   | Rules, sponsor challenges/resources, RSVP and sessions                                                      |
+| Participant      | Profile & history / Messages      | Portfolio / inbox                                                                                           |
+| Judge            | Review queue                      | Assignments, project scoring, artifact inspector                                                            |
+| Judge            | Schedule & route                  | Calendar and remaining route                                                                                |
+| Judge            | Judge profile / Messages          | Invitations and expertise / inbox                                                                           |
+| Organizer        | Event setup                       | Settings, tracks/prizes, stage/policy/form/page builders, rules and templates                               |
+| Organizer        | Participants & teams              | Registration, teams, mentor desk                                                                            |
+| Organizer        | Projects & eligibility            | Review queue, findings, decisions, exception requests                                                       |
+| Organizer        | Judging                           | Evaluation plans, rubric, workload, logistics, community voting                                             |
+| Organizer        | Results & publication             | Awards, deliberation, approvals/corrections                                                                 |
+| Organizer        | On-site / Communications          | Check-in/layout / messages                                                                                  |
+| Organizer        | Integrations / Operations & audit | Webhooks / console, health, continuation moderation, config history, permissions                            |
+| Mentor/volunteer | Mentor desk / Check-in desk       | Existing staff workflows; Messages is separate                                                              |
+
+The account disclosure provides sign-out; participants/judges can open profile
+history from it. Reusable identity is added in B04; a portfolio remains history.
 
 ## Intentionally API/CLI-first
 

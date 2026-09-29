@@ -1,0 +1,13 @@
+task: TASK-ID
+status: complete|blocked|failed
+branch: branch-name
+commit: sha-or-null
+changed_paths:
+- '...'
+verification:
+- command: '...'
+  result: pass|fail
+  note: '...'
+findings: []
+escalations: []
+limitations: []

@@ -1,0 +1,2034 @@
+version: 2
+generated_from: post-spec v2 plan
+batches:
+- id: BOOT-B00
+  title: Legal repository bootstrap
+  phase: core
+  preferred_executor: codex-sol
+  dependencies: []
+  owned_paths:
+  - repository root
+  - src/**
+  - tests/**
+  task_ids:
+  - BOOT-001
+  - BOOT-002
+  - BOOT-003
+  - BOOT-004
+  - BOOT-005
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B01
+  title: Offline runtime and operator foundation
+  phase: core
+  preferred_executor: codex-sol
+  dependencies:
+  - BOOT-B00
+  owned_paths:
+  - docker-compose.yml
+  - src/api/config/**
+  - infra/**
+  - scripts/**
+  task_ids:
+  - RT-001
+  - RT-002
+  - RT-003
+  - RT-004
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B02
+  title: Identity, authorization and application spine
+  phase: core
+  preferred_executor: claude-sonnet
+  dependencies:
+  - BOOT-B00
+  owned_paths:
+  - src/api/accounts/**
+  - src/api/workspaces/**
+  - src/api/core/**
+  - src/api/audit/**
+  task_ids:
+  - ID-001
+  - ID-002
+  - ID-003
+  - ID-004
+  - ID-005
+  - ID-006
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B03
+  title: Fixture import, seed and verification foundation
+  phase: core
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B01
+  - C-B02
+  owned_paths:
+  - src/api/integrations/**
+  - fixtures/**
+  - scripts/**
+  - tests/acceptance/**
+  - .dogfood.toml
+  task_ids:
+  - FX-001
+  - FX-002
+  - FX-003
+  - FX-004
+  - FX-005
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B04
+  title: Event, tracks, dates and base prize configuration
+  phase: core
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B02
+  owned_paths:
+  - src/api/events/**
+  - src/web/features/event-builder/**
+  task_ids:
+  - EV-001
+  - EV-002
+  - EV-003
+  - EV-004
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B05
+  title: Stage graph and advancement
+  phase: core
+  preferred_executor: claude-sonnet
+  dependencies:
+  - C-B04
+  owned_paths:
+  - src/api/stages/**
+  - src/web/features/stage-builder/**
+  task_ids:
+  - ST-001
+  - ST-002
+  - ST-003
+  - ST-004
+  - ST-005
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B06
+  title: Policy, temporal gates, exceptions and explanations
+  phase: core
+  preferred_executor: claude-sonnet
+  dependencies:
+  - C-B02
+  - C-B05
+  owned_paths:
+  - src/api/policies/**
+  - src/web/features/policy-builder/**
+  task_ids:
+  - POL-001
+  - POL-002
+  - POL-003
+  - POL-004
+  - POL-005
+  - POL-006
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B07
+  title: Teams and participation lifecycle
+  phase: core
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B04
+  - C-B06
+  owned_paths:
+  - src/api/participation/**
+  - src/web/features/teams/**
+  task_ids:
+  - TEAM-001
+  - TEAM-002
+  - TEAM-003
+  - TEAM-004
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B08
+  title: Projects and versioned forms
+  phase: core
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B05
+  - C-B07
+  owned_paths:
+  - src/api/projects/**
+  - src/api/forms/**
+  - src/web/features/projects/**
+  - src/web/features/form-builder/**
+  task_ids:
+  - PRJ-001
+  - FORM-001
+  - FORM-002
+  - FORM-003
+  - FORM-004
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B09
+  title: Artifacts, storage and submission preflight
+  phase: core
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B01
+  - C-B08
+  owned_paths:
+  - src/api/artifacts/**
+  - src/web/features/artifacts/**
+  task_ids:
+  - ART-001
+  - ART-002
+  - ART-003
+  - ART-004
+  - ART-005
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B10
+  title: Submission lifecycle and deadline correctness
+  phase: core
+  preferred_executor: claude-sonnet
+  dependencies:
+  - C-B06
+  - C-B08
+  - C-B09
+  owned_paths:
+  - src/api/projects/**
+  - src/web/features/submissions/**
+  task_ids:
+  - SUB-001
+  - SUB-002
+  - SUB-003
+  - SUB-004
+  - SUB-005
+  - SUB-006
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B11
+  title: Design system and public event shell
+  phase: core
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B04
+  owned_paths:
+  - src/web/components/**
+  - src/web/styles/**
+  - src/web/public/event-site/**
+  task_ids:
+  - UI-001
+  - UI-002
+  - UI-003
+  - UI-004
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B12
+  title: Theme/page builder and checker-safe gallery
+  phase: core
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B08
+  - C-B11
+  owned_paths:
+  - src/api/presentation/**
+  - src/web/features/page-builder/**
+  - src/web/public/project-gallery/**
+  - src/web/public/project-page/**
+  task_ids:
+  - PAGE-001
+  - PAGE-002
+  - GAL-001
+  - GAL-002
+  - PAGE-003
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B13
+  title: EvaluationPlan and weighted rubric foundation
+  phase: core
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B08
+  owned_paths:
+  - src/api/evaluations/**
+  - src/web/features/judging/**
+  task_ids:
+  - JDG-001
+  - JDG-002
+  - JDG-003
+  - JDG-004
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B14
+  title: Judge pools, conflicts and baseline assignment
+  phase: core
+  preferred_executor: claude-sonnet
+  dependencies:
+  - C-B13
+  - C-B02
+  owned_paths:
+  - src/api/evaluations/**
+  task_ids:
+  - JDG-005
+  - JDG-006
+  - JDG-007
+  - JDG-008
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B15
+  title: Normalization-aware assignment
+  phase: core
+  preferred_executor: claude-sonnet
+  dependencies:
+  - C-B14
+  owned_paths:
+  - src/api/evaluations/**
+  task_ids:
+  - JDG-009
+  - JDG-010
+  - JDG-011
+  - JDG-012
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B16
+  title: Cross-judge normalization and proof
+  phase: core
+  preferred_executor: claude-sonnet
+  dependencies:
+  - C-B13
+  - C-B15
+  - C-B03
+  owned_paths:
+  - src/api/evaluations/**
+  - tests/integration/normalization/**
+  - JUDGING.md
+  task_ids:
+  - NORM-001
+  - NORM-002
+  - NORM-003
+  - NORM-004
+  - NORM-005
+  - NORM-006
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B17
+  title: Judge experience, progress, results and CSV
+  phase: core
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B13
+  - C-B14
+  - C-B16
+  owned_paths:
+  - src/web/features/judging/**
+  - src/api/evaluations/**
+  task_ids:
+  - JUX-001
+  - JUX-002
+  - JUX-003
+  - JUX-004
+  - JUX-005
+  - JUX-006
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B18
+  title: Community voting, comments and result windows
+  phase: core
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B12
+  - C-B02
+  owned_paths:
+  - src/api/community/**
+  - src/web/features/community-voting/**
+  task_ids:
+  - COM-001
+  - COM-002
+  - COM-003
+  - COM-004
+  - COM-005
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B19
+  title: Voting abuse, fraud review and readable audit
+  phase: core
+  preferred_executor: claude-sonnet
+  dependencies:
+  - C-B18
+  owned_paths:
+  - src/api/community/**
+  - src/web/features/community-voting/**
+  - src/web/features/audit/**
+  task_ids:
+  - ABUSE-001
+  - ABUSE-002
+  - ABUSE-003
+  - ABUSE-004
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B20
+  title: REST API v1, OpenAPI and scoped credentials
+  phase: core
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B02
+  - C-B04
+  - C-B13
+  owned_paths:
+  - src/api/**
+  - src/packages/api-client/**
+  - docs/api/**
+  task_ids:
+  - API-001
+  - API-002
+  - API-003
+  - API-004
+  - API-005
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B21
+  title: Webhooks with signing, retries and replay
+  phase: core
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B20
+  - C-B02
+  owned_paths:
+  - src/api/integrations/**
+  - src/web/features/integrations/**
+  task_ids:
+  - WH-001
+  - WH-002
+  - WH-003
+  - WH-004
+  - WH-005
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B22
+  title: Canonical import/export and compatibility
+  phase: core
+  preferred_executor: claude-sonnet
+  dependencies:
+  - C-B05
+  - C-B06
+  - C-B08
+  - C-B13
+  - C-B24
+  owned_paths:
+  - src/api/integrations/**
+  - docs/architecture/**
+  - tests/compatibility/**
+  task_ids:
+  - PORT-001
+  - PORT-002
+  - PORT-003
+  - PORT-004
+  - PORT-005
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B23
+  title: Certificates, signed judge records and embed
+  phase: core
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B17
+  - C-B20
+  - C-B12
+  owned_paths:
+  - src/api/evaluations/**
+  - src/api/presentation/**
+  - src/embed/**
+  task_ids:
+  - REC-001
+  - REC-002
+  - REC-003
+  - EMB-001
+  - EMB-002
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B24
+  title: Awards, typed prizes and fulfillment
+  phase: core
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B13
+  - C-B04
+  owned_paths:
+  - src/api/awards/**
+  - src/web/features/awards/**
+  task_ids:
+  - AWD-001
+  - AWD-002
+  - AWD-003
+  - AWD-004
+  - AWD-005
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B25
+  title: Operations center, communications and launch checklist
+  phase: core
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B10
+  - C-B17
+  - C-B19
+  - C-B24
+  owned_paths:
+  - src/web/features/operations/**
+  - src/api/communications/**
+  - src/web/features/communications/**
+  task_ids:
+  - OPS-001
+  - OPS-002
+  - OPS-003
+  - OPS-004
+  - OPS-005
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B26
+  title: Event templates, cloning and external qualifier
+  phase: core
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B05
+  - C-B06
+  - C-B08
+  - C-B13
+  - C-B24
+  owned_paths:
+  - src/api/events/**
+  - src/api/integrations/**
+  - src/web/features/event-builder/**
+  task_ids:
+  - TPL-001
+  - TPL-002
+  - TPL-003
+  - EXTQ-001
+  - EXTQ-002
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B27
+  title: Backup, restore, migrations and upgrade discipline
+  phase: core
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B01
+  - C-B22
+  owned_paths:
+  - scripts/**
+  - docs/operations/**
+  - tests/compatibility/**
+  task_ids:
+  - UPG-001
+  - UPG-002
+  - UPG-003
+  - UPG-004
+  - UPG-005
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B28
+  title: Security/adversarial Core gate
+  phase: core-gate
+  preferred_executor: claude-sonnet
+  dependencies:
+  - C-B19
+  - C-B20
+  - C-B21
+  - C-B27
+  owned_paths:
+  - tests/security/**
+  - SECURITY.md
+  task_ids:
+  - GSEC-001
+  - GSEC-002
+  - GSEC-003
+  - GSEC-004
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B29
+  title: Concurrency/deadline correctness Core gate
+  phase: core-gate
+  preferred_executor: claude-sonnet
+  dependencies:
+  - C-B10
+  - C-B18
+  owned_paths:
+  - tests/integration/concurrency/**
+  - loadtests/**
+  task_ids:
+  - GCON-001
+  - GCON-002
+  - GCON-003
+  - GCON-004
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B30
+  title: Judging/fixture integrity Core gate
+  phase: core-gate
+  preferred_executor: claude-sonnet
+  dependencies:
+  - C-B16
+  - C-B17
+  - C-B19
+  owned_paths:
+  - tests/integration/normalization/**
+  - JUDGING.md
+  task_ids:
+  - GJDG-001
+  - GJDG-002
+  - GJDG-003
+  - GJDG-004
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B31
+  title: Performance and reliability Core gate
+  phase: core-gate
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B25
+  - C-B27
+  - C-B29
+  owned_paths:
+  - loadtests/**
+  - docs/operations/**
+  task_ids:
+  - GPERF-001
+  - GPERF-002
+  - GPERF-003
+  - GPERF-004
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B32
+  title: Product polish and accessibility Core gate
+  phase: core-gate
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B12
+  - C-B17
+  - C-B25
+  owned_paths:
+  - src/web/**
+  - tests/e2e/**
+  task_ids:
+  - GPOL-001
+  - GPOL-002
+  - GPOL-003
+  - GPOL-004
+  - GPOL-005
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: C-B33
+  title: Adoption, offline and release Core gate
+  phase: release-gate
+  preferred_executor: claude-sonnet
+  dependencies:
+  - C-B28
+  - C-B29
+  - C-B30
+  - C-B31
+  - C-B32
+  owned_paths:
+  - README.md
+  - ARCHITECTURE.md
+  - DATA-MODEL.md
+  - JUDGING.md
+  - acceptance-report.txt
+  - .dogfood.toml
+  task_ids:
+  - REL-001
+  - REL-002
+  - REL-003
+  - REL-004
+  - REL-005
+  - REL-006
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S01
+  title: "Pairwise judging + Bradley\u2013Terry"
+  phase: stretch
+  preferred_executor: claude-or-codex
+  dependencies:
+  - C-B17
+  - C-B30
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S01-01
+  - S01-02
+  - S01-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S02
+  title: Judge calibration rounds
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B17
+  - C-B30
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S02-01
+  - S02-02
+  - S02-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S03
+  title: Inter-rater agreement analytics
+  phase: stretch
+  preferred_executor: claude-or-codex
+  dependencies:
+  - C-B17
+  - C-B30
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S03-01
+  - S03-02
+  - S03-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S04
+  title: Assignment simulator
+  phase: stretch
+  preferred_executor: claude-or-codex
+  dependencies:
+  - C-B17
+  - C-B30
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S04-01
+  - S04-02
+  - S04-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S05
+  title: Mid-event judge rebalancing
+  phase: stretch
+  preferred_executor: claude-or-codex
+  dependencies:
+  - C-B17
+  - C-B30
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S05-01
+  - S05-02
+  - S05-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S06
+  title: Blind judging/anonymization
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B17
+  - C-B30
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S06-01
+  - S06-02
+  - S06-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S07
+  title: Advanced Submission CI
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B10
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S07-01
+  - S07-02
+  - S07-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S08
+  title: Submission/moderation diff
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B10
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S08-01
+  - S08-02
+  - S08-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S09
+  title: Full policy debugger
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B06
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S09-01
+  - S09-02
+  - S09-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S10
+  title: Segmented communications
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B25
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S10-01
+  - S10-02
+  - S10-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S11
+  title: Reminder/scheduling engine
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B25
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S11-01
+  - S11-02
+  - S11-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S12
+  title: Team marketplace
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B07
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S12-01
+  - S12-02
+  - S12-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S13
+  title: Rich technical renderer
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B12
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S13-01
+  - S13-02
+  - S13-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S14
+  title: Sponsor/prize judging
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B24
+  - C-B17
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S14-01
+  - S14-02
+  - S14-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S15
+  title: Award conflict solver
+  phase: stretch
+  preferred_executor: claude-or-codex
+  dependencies:
+  - C-B24
+  - C-B17
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S15-01
+  - S15-02
+  - S15-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S16
+  title: Generated SDKs
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B20
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S16-01
+  - S16-02
+  - S16-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S17
+  title: Migration adapters
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B22
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S17-01
+  - S17-02
+  - S17-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S18
+  title: Configuration history/diff
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B02
+  - C-B26
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S18-01
+  - S18-02
+  - S18-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S19
+  title: Public static archive
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B12
+  - C-B17
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S19-01
+  - S19-02
+  - S19-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S20
+  title: Multi-round workflow presets
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B17
+  - C-B30
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S20-01
+  - S20-02
+  - S20-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S21
+  title: Feedback release controls
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B17
+  - C-B30
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S21-01
+  - S21-02
+  - S21-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S22
+  title: Advanced accessibility audit
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B12
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S22-01
+  - S22-02
+  - S22-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S23
+  title: Optional GitHub/GitLab/Discord/Slack adapters
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B21
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S23-01
+  - S23-02
+  - S23-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: S24
+  title: Judge schedule/workload calendar
+  phase: stretch
+  preferred_executor: codex-sol
+  dependencies:
+  - C-B17
+  - C-B30
+  owned_paths:
+  - see domain ownership
+  task_ids:
+  - S24-01
+  - S24-02
+  - S24-03
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: STRETCH-GATE
+  title: Very-Stretch promotion gate
+  phase: control
+  preferred_executor: human
+  dependencies: []
+  owned_paths:
+  - control state
+  task_ids:
+  - GATE-VS-001
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS01
+  title: Optimization-grade assignment solver
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS01-01
+  - VS01-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS02
+  title: Adaptive pairwise scheduling
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS02-01
+  - VS02-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS03
+  title: Rubric + pairwise hybrid evaluation
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS03-01
+  - VS03-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS04
+  title: Ranking sensitivity explorer
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS04-01
+  - VS04-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS05
+  title: Judge dropout simulation
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS05-01
+  - VS05-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS06
+  title: Judging provenance explorer
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS06-01
+  - VS06-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS07
+  title: Advanced COI relationship model
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS07-01
+  - VS07-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS08
+  title: Rubric laboratory
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS08-01
+  - VS08-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS09
+  title: Local event-template library
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS09-01
+  - VS09-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS10
+  title: Migration preview/diff
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS10-01
+  - VS10-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS11
+  title: Signed portable event archive
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS11-01
+  - VS11-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS12
+  title: Multi-event operator console
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS12-01
+  - VS12-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS13
+  title: Reusable judge directory
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS13-01
+  - VS13-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS14
+  title: Judge expertise profiles
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS14-01
+  - VS14-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS15
+  title: Historical assignment suggestions
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS15-01
+  - VS15-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS16
+  title: Advanced team matching
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS16-01
+  - VS16-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS17
+  title: Registration/application/waitlist presets
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS17-01
+  - VS17-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS18
+  title: Mentor/volunteer/sponsor roles
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS18-01
+  - VS18-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS19
+  title: Sponsor portal
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS19-01
+  - VS19-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS20
+  title: Appeal/dispute workflow
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS20-01
+  - VS20-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS21
+  title: Offline judge PWA
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS21-01
+  - VS21-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS22
+  title: Installable event/public PWA
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS22-01
+  - VS22-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS23
+  title: Internationalization/localization
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS23-01
+  - VS23-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS24
+  title: Advanced timezone/DST safeguards
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS24-01
+  - VS24-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS25
+  title: Permission matrix explorer
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS25-01
+  - VS25-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS26
+  title: Authorization policy test console
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS26-01
+  - VS26-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS27
+  title: Configuration rollback
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS27-01
+  - VS27-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS28
+  title: Dry-run event simulator
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS28-01
+  - VS28-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS29
+  title: Chaos/operability suite
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS29-01
+  - VS29-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS30
+  title: Point-in-time backup tooling
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS30-01
+  - VS30-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS31
+  title: Storage portability command
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS31-01
+  - VS31-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS32
+  title: Webhook inspector/replay console
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS32-01
+  - VS32-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS33
+  title: Interactive API explorer
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS33-01
+  - VS33-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS34
+  title: CLI administration client
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS34-01
+  - VS34-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS35
+  title: Bulk organizer operations
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS35-01
+  - VS35-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS36
+  title: Advanced moderation queue
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS36-01
+  - VS36-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS37
+  title: Event analytics
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS37-01
+  - VS37-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS38
+  title: Public Q&A + announcements
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS38-01
+  - VS38-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS39
+  title: Advanced public search
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS39-01
+  - VS39-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS40
+  title: Result storytelling
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS40-01
+  - VS40-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS41
+  title: Publication scheduling
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS41-01
+  - VS41-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS42
+  title: Schema-generated organizer configuration UI
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS42-01
+  - VS42-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS43
+  title: Internal extension SDK
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS43-01
+  - VS43-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS44
+  title: Reference extension examples
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS44-01
+  - VS44-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS45
+  title: Deterministic event reconstruction
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - STRETCH-GATE
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS45-01
+  - VS45-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS46
+  title: Retention/privacy controls
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - VS45
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS46-01
+  - VS46-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS47
+  title: Accessibility conformance report
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - VS46
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS47-01
+  - VS47-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS48
+  title: Demo scenario generator
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - VS47
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS48-01
+  - VS48-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS49
+  title: Sponsor fulfillment exports
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - VS48
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS49-01
+  - VS49-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+- id: VS50
+  title: Custom taxonomies/tags
+  phase: very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - VS49
+  owned_paths:
+  - isolated extension paths where possible
+  task_ids:
+  - VS50-01
+  - VS50-02
+  completion_rule: all tasks complete + scoped verification + no unresolved blocker; core gates additionally require explicit
+    gate decision
+# PVS queue rationale and competition constraints are recorded in PVS_CONTEXT.md.
+# The PVS order is intentionally sequential; PVS18 is evidence-conditional and may be
+# completed as SKIPPED BY EVIDENCE only after PVS-H02 supplies its measurements.
+- id: PVS-H00
+  title: Baseline and Release Evidence Snapshot
+  phase: post-very-stretch-hardening
+  preferred_executor: codex-or-freebuff
+  dependencies:
+  - VS50
+  owned_paths:
+  - repository evidence and release reports
+  task_ids:
+  - PVS-H00-01
+  - PVS-H00-02
+  - PVS-H00-03
+  completion_rule: mandatory; all tasks complete + baseline evidence receipt + no fabricated manual-rule evidence
+- id: PVS01
+  title: Eligibility Review and Participant Remediation
+  phase: post-very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS-H00]
+  owned_paths: [submission eligibility and remediation surfaces]
+  task_ids: [PVS01-01, PVS01-02, PVS01-03]
+  completion_rule: mandatory; audited review/resubmission lifecycle and edge-case verification
+- id: PVS02
+  title: Judge Deliberation and Winner Finalization Room
+  phase: post-very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS01]
+  owned_paths: [judging finalization and decision evidence]
+  task_ids: [PVS02-01, PVS02-02, PVS02-03, PVS02-04]
+  completion_rule: mandatory; deterministic explanations, authorization, isolation and immutable receipt verified
+- id: PVS03
+  title: Hybrid and In-Person Event Operations
+  phase: post-very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS02]
+  owned_paths: [event modes, RSVP, check-in and physical logistics]
+  task_ids: [PVS03-01, PVS03-02, PVS03-03, PVS03-04]
+  completion_rule: mandatory; online/hybrid/in-person workflows verified through existing event primitives
+- id: PVS04
+  title: Physical Judge Route Optimization
+  phase: post-very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS03]
+  owned_paths: [physical judging routing and assignment extensions]
+  task_ids: [PVS04-01, PVS04-02, PVS04-03, PVS04-04]
+  completion_rule: mandatory; hard constraints preserved, route is explainable, infeasibility is diagnosed
+- id: PVS05
+  title: Declarative Event-as-Code
+  phase: post-very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS04]
+  owned_paths: [event configuration export/validate/plan/apply]
+  task_ids: [PVS05-01, PVS05-02, PVS05-03, PVS05-04]
+  completion_rule: mandatory; deterministic configuration round-trip and safe idempotent apply verified
+- id: PVS-H01
+  title: Security, Integrity and Concurrency Hardening
+  phase: post-very-stretch-hardening
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS05]
+  owned_paths: [authorization, state integrity, concurrency and adversarial-input verification]
+  task_ids: [PVS-H01-01, PVS-H01-02, PVS-H01-03, PVS-H01-04]
+  completion_rule: mandatory; root causes fixed and affected Core gates rerun without weakening tests
+- id: PVS06
+  title: Deterministic Judging Replay
+  phase: post-very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS-H01]
+  owned_paths: [judging replay and reproducibility]
+  task_ids: [PVS06-01, PVS06-02, PVS06-03, PVS06-04]
+  completion_rule: mandatory; frozen inputs reproduce outputs and semantic diffs are evidence-based
+- id: PVS07
+  title: Portable Judging Audit Capsule
+  phase: post-very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS06]
+  owned_paths: [portable judging audit representation]
+  task_ids: [PVS07-01, PVS07-02, PVS07-03]
+  completion_rule: mandatory; machine-readable and human-readable capsule round-trip with integrity linkage
+- id: PVS08
+  title: Safe Submission Artifact and Demo Inspector
+  phase: post-very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS07]
+  owned_paths: [safe artifact rendering and judge inspection]
+  task_ids: [PVS08-01, PVS08-02, PVS08-03]
+  completion_rule: mandatory; supported artifacts render safely and frozen submission state is respected
+- id: PVS09
+  title: Sponsor Challenge and Developer Resource Center
+  phase: post-very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS08]
+  owned_paths: [sponsor challenges and resources]
+  task_ids: [PVS09-01, PVS09-02, PVS09-03]
+  completion_rule: mandatory; sponsor resources integrate with eligibility and prize workflows
+- id: PVS10
+  title: Mentor Requests and Office Hours
+  phase: post-very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS09]
+  owned_paths: [mentor availability, requests and office hours]
+  task_ids: [PVS10-01, PVS10-02, PVS10-03]
+  completion_rule: mandatory; request queue, scheduling and participant-visible resolution verified
+- id: PVS-H02
+  title: Realistic Service Load, Database and Performance Hardening
+  phase: post-very-stretch-hardening
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS10]
+  owned_paths: [load scenarios, profiling, database and performance remediation]
+  task_ids: [PVS-H02-01, PVS-H02-02, PVS-H02-03, PVS-H02-04]
+  completion_rule: mandatory; realistic load evidence, frozen thresholds and zero integrity failures
+- id: PVS11
+  title: Governance and Operational Assurance Pack
+  phase: post-very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS-H02]
+  owned_paths: [rules, publication, receipts and deadline-exception governance]
+  task_ids: [PVS11-01, PVS11-02, PVS11-03, PVS11-04]
+  completion_rule: mandatory; governance actions are authorized, auditable and preserve canonical ExceptionGrant semantics
+- id: PVS12
+  title: Optional Generic OIDC / SSO
+  phase: post-very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS11]
+  owned_paths: [optional OIDC identity linkage]
+  task_ids: [PVS12-01, PVS12-02, PVS12-03]
+  completion_rule: optional capability within approved queue; local authentication and offline startup remain sufficient
+- id: PVS13
+  title: Permissioned MCP Adapter
+  phase: post-very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS12]
+  owned_paths: [MCP adapter over existing API/service/auth/audit layer]
+  task_ids: [PVS13-01, PVS13-02, PVS13-03, PVS13-04]
+  completion_rule: optional capability within approved queue; no inference dependency and authorization/audit preserved
+- id: PVS14
+  title: Cross-Event Participant and Project Portfolio
+  phase: post-very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS13]
+  owned_paths: [workspace-level participant and project history]
+  task_ids: [PVS14-01, PVS14-02, PVS14-03]
+  completion_rule: optional capability within approved queue; event boundaries and privacy controls verified
+- id: PVS15
+  title: Narrow Post-Event Project Continuation
+  phase: post-very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS14]
+  owned_paths: [bounded post-event continuation workflow]
+  task_ids: [PVS15-01, PVS15-02, PVS15-03]
+  completion_rule: optional capability within approved queue; deliberately bounded lifecycle and visibility verified
+- id: PVS-H03
+  title: Frontend, Accessibility and Demo-Path Hardening
+  phase: post-very-stretch-hardening
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS15]
+  owned_paths: [rendered frontend, accessibility and deterministic browser evidence]
+  task_ids: [PVS-H03-01, PVS-H03-02, PVS-H03-03, PVS-H03-04]
+  completion_rule: mandatory; actual rendered surfaces, deterministic scenes and discovered integration defects verified
+- id: PVS16
+  title: Event Operations Utility Pack
+  phase: post-very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS-H03]
+  owned_paths: [self-hostable event operations and printable fallbacks]
+  task_ids: [PVS16-01, PVS16-02, PVS16-03, PVS16-04]
+  completion_rule: optional capability within approved queue; utilities reuse canonical data and remain accessible
+- id: PVS17
+  title: Operator and Participant Convenience Pack
+  phase: post-very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS16]
+  owned_paths: [bounded operator and participant workflow utilities]
+  task_ids: [PVS17-01, PVS17-02, PVS17-03, PVS17-04]
+  completion_rule: optional capability within approved queue; optional integrations remain self-hostable and additive
+- id: PVS18
+  title: Deadline Surge Resilience — CONDITIONAL
+  phase: post-very-stretch
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS17]
+  owned_paths: [evidence-supported deadline surge protections]
+  task_ids: [PVS18-01, PVS18-02, PVS18-03]
+  completion_rule: conditional; implement only for a material PVS-H02 bottleneck/risk, otherwise record SKIPPED BY EVIDENCE with measurements
+- id: PVS-H04
+  title: Full Release, Rules, Integrity and Operability Gate
+  phase: post-very-stretch-hardening
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS18]
+  owned_paths: [release verification, documentation reconciliation and evidence]
+  task_ids: [PVS-H04-01, PVS-H04-02, PVS-H04-03, PVS-H04-04]
+  completion_rule: mandatory; hostile release review green with blockers fixed and documentation synchronized
+- id: PVS-H05
+  title: Final Demo Readiness and Evidence Package
+  phase: post-very-stretch-hardening
+  preferred_executor: codex-or-freebuff
+  dependencies: [PVS-H04]
+  owned_paths: [deterministic demo state, runbook and final evidence bundle]
+  task_ids: [PVS-H05-01, PVS-H05-02, PVS-H05-03, PVS-H05-04]
+  completion_rule: mandatory; green final evidence, reproducible demo state, no P0/P1 blocker, then create .dogfood/master.complete
+
+# UI-v2: sequential campaign authorized 2026-09-29; historical entries above retained verbatim.
+- id: UIV2-B00
+  title: Baseline, queue setup, surface census
+  phase: ui-v2
+  preferred_executor: single-sequential-worker
+  dependencies: []
+  owned_paths:
+  - docs/**
+  task_ids:
+  - UIV2-B00-01
+  - UIV2-B00-02
+  status: DONE
+  completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
+    receipt and commit recorded before advancing.
+- id: UIV2-B01
+  title: Design system v2 foundations
+  phase: ui-v2
+  preferred_executor: single-sequential-worker
+  dependencies:
+  - UIV2-B00
+  owned_paths:
+  - src/web/components/**
+  - src/web/styles/**
+  - src/web/app/SignIn.tsx
+  - src/web/app/WorkspaceSelector.tsx
+  task_ids:
+  - UIV2-B01-01
+  - UIV2-B01-02
+  status: BLOCKED
+  completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
+    receipt and commit recorded before advancing.
+- id: UIV2-B02
+  title: Authenticated app shell + navigation IA
+  phase: ui-v2
+  preferred_executor: single-sequential-worker
+  dependencies:
+  - UIV2-B01
+  owned_paths:
+  - src/web/app/**
+  - src/web/components/**
+  - src/web/features/teams/TeamWorkspace.tsx
+  - src/web/features/judging/JudgeWorkspace.tsx
+  - src/web/features/event-builder/EventDashboard.tsx
+  task_ids:
+  - UIV2-B02-01
+  - UIV2-B02-02
+  status: BLOCKED
+  completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
+    receipt and commit recorded before advancing.
+- id: UIV2-B03
+  title: Event theming + public event shell
+  phase: ui-v2
+  preferred_executor: single-sequential-worker
+  dependencies:
+  - UIV2-B02
+  owned_paths:
+  - src/api/presentation/**
+  - src/web/features/page-builder/**
+  - src/web/public/**
+  - src/api/integrations/**
+  task_ids:
+  - UIV2-B03-01
+  - UIV2-B03-02
+  status: BLOCKED
+  completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
+    receipt and commit recorded before advancing.
+- id: UIV2-B04
+  title: Identity/profile system + reusable person UI
+  phase: ui-v2
+  preferred_executor: single-sequential-worker
+  dependencies:
+  - UIV2-B03
+  owned_paths:
+  - src/api/accounts/**
+  - src/api/participation/**
+  - src/api/portfolio/**
+  - src/web/features/profile/**
+  - src/web/components/**
+  task_ids:
+  - UIV2-B04-01
+  - UIV2-B04-02
+  status: BLOCKED
+  completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
+    receipt and commit recorded before advancing.
+- id: UIV2-B05
+  title: Gallery, project detail, results/showcase
+  phase: ui-v2
+  preferred_executor: single-sequential-worker
+  dependencies:
+  - UIV2-B04
+  owned_paths:
+  - src/api/presentation/**
+  - src/web/styles/presentation.css
+  - src/web/features/awards/**
+  task_ids:
+  - UIV2-B05-01
+  - UIV2-B05-02
+  status: BLOCKED
+  completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
+    receipt and commit recorded before advancing.
+- id: UIV2-B06
+  title: Participant event/team/submission experience
+  phase: ui-v2
+  preferred_executor: single-sequential-worker
+  dependencies:
+  - UIV2-B05
+  owned_paths:
+  - src/web/features/teams/**
+  - src/web/features/artifacts/**
+  - src/web/features/submissions/**
+  - src/web/features/pvs/**
+  task_ids:
+  - UIV2-B06-01
+  - UIV2-B06-02
+  status: BLOCKED
+  completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
+    receipt and commit recorded before advancing.
+- id: UIV2-B07
+  title: Judge workflow + scoring experience
+  phase: ui-v2
+  preferred_executor: single-sequential-worker
+  dependencies:
+  - UIV2-B06
+  owned_paths:
+  - src/web/features/judging/**
+  - src/web/features/pvs/JudgingLogisticsPanels.tsx
+  task_ids:
+  - UIV2-B07-01
+  - UIV2-B07-02
+  status: BLOCKED
+  completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
+    receipt and commit recorded before advancing.
+- id: UIV2-B08
+  title: Organizer, deliberation, eligibility, onsite operations
+  phase: ui-v2
+  preferred_executor: single-sequential-worker
+  dependencies:
+  - UIV2-B07
+  owned_paths:
+  - src/web/features/event-builder/**
+  - src/web/features/pvs/**
+  - src/api/onsite/templates/**
+  task_ids:
+  - UIV2-B08-01
+  - UIV2-B08-02
+  status: BLOCKED
+  completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
+    receipt and commit recorded before advancing.
+- id: UIV2-B09
+  title: Secondary surfaces + API/developer experience
+  phase: ui-v2
+  preferred_executor: single-sequential-worker
+  dependencies:
+  - UIV2-B08
+  owned_paths:
+  - src/web/features/**
+  - src/web/styles/**
+  task_ids:
+  - UIV2-B09-01
+  - UIV2-B09-02
+  status: BLOCKED
+  completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
+    receipt and commit recorded before advancing.
+- id: UIV2-B10
+  title: Responsive/accessibility/regression/final visual gate
+  phase: ui-v2
+  preferred_executor: single-sequential-worker
+  dependencies:
+  - UIV2-B09
+  owned_paths:
+  - tests/e2e/**
+  - tests/integration/**
+  - docs/verification/**
+  - docs/ui-v2/**
+  task_ids:
+  - UIV2-B10-01
+  - UIV2-B10-02
+  status: BLOCKED
+  completion_rule: All tasks DONE; scoped tests, typecheck/build and diff review pass; required visual gate passes;
+    receipt and commit recorded before advancing.

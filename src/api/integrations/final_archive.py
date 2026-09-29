@@ -1,4 +1,4 @@
-"""Canonical v2 snapshots restored atomically into fresh, private event-owned rows."""
+"""Canonical v3 snapshots restored atomically into fresh, private event-owned rows."""
 
 import hashlib
 import json
@@ -14,7 +14,7 @@ from django.db.models import JSONField
 from events.models import Event
 
 from .final_archive_json import remap_json
-from .final_archive_schema import TABLES
+from .final_archive_schema import TABLES, V2_TABLES
 from .models import ArchiveRestoration
 
 EVENT_FIELDS = (
@@ -67,7 +67,11 @@ def _scalar(field, obj):
 def build_final_archive(event):
     models = {label: apps.get_model(label) for label in TABLES}
     objects = {
-        label: list(model.objects.filter(**{TABLES[label][0]: event}).order_by("public_id"))
+        label: list(
+            model.objects.filter(**{TABLES[label][0]: event}).order_by(
+                *(("position", "pk") if label == "awards.awardresource" else ("public_id",))
+            )
+        )
         for label, model in models.items()
     }
     restoration = ArchiveRestoration.objects.filter(event=event).first()
@@ -129,6 +133,9 @@ def build_final_archive(event):
                         if isinstance(field, JSONField)
                         else _scalar(field, obj)
                     )
+            if label == "evaluations.pairwisecomparison" and data["project_a"] > data["project_b"]:
+                # Archive order uses portable refs, independent of database insertion order.
+                data["project_a"], data["project_b"] = data["project_b"], data["project_a"]
             if label == "stages.stageentry":
                 subject_label = {"team": "participation.team", "user": "accounts.user"}.get(
                     obj.subject_type
@@ -147,18 +154,25 @@ def build_final_archive(event):
                     lookup(target._meta.label_lower, target.public_id)
                 m2m[name] = sorted(reference(target) for target in targets)
             table.append({"ref": reference(obj), "fields": data, "m2m": m2m})
-        tables[label] = sorted(table, key=lambda row: row["ref"])
+        tables[label] = sorted(
+            table,
+            key=(
+                (lambda row: (row["fields"]["award"], row["fields"]["position"]))
+                if label == "awards.awardresource"
+                else (lambda row: row["ref"])
+            ),
+        )
     provenance = deepcopy(restoration.source_archive.get("provenance", []) if restoration else [])
     if restoration:
         provenance.append(
             {
                 "source_sha256": restoration.source_sha256,
                 "source_event_ref": restoration.source_archive["event"]["ref"],
-                "source_format_version": 2,
+                "source_format_version": restoration.source_archive["format_version"],
             }
         )
     archive = {
-        "format_version": 2,
+        "format_version": 3,
         "mode": "final",
         "event": {
             "ref": reference(event),
@@ -182,14 +196,16 @@ def _validate_shape(archive):
         "tables",
         "provenance",
     }:
-        _error("A final archive needs exactly the v2 contract keys.")
+        _error("A final archive needs exactly the final-archive contract keys.")
     if (
         type(archive["format_version"]) is not int
-        or archive["format_version"] != 2
+        or archive["format_version"] not in (2, 3)
         or archive["mode"] != "final"
     ):
-        _error("Expected format_version 2 and mode final.")
-    if not isinstance(archive["tables"], dict) or set(archive["tables"]) != set(TABLES):
+        _error("Expected format_version 2 or 3 and mode final.")
+    if not isinstance(archive["tables"], dict) or set(archive["tables"]) != set(
+        V2_TABLES if archive["format_version"] == 2 else TABLES
+    ):
         _error("Final archives require every known table, including empty tables.")
     if not isinstance(archive["event"], dict) or set(archive["event"]) != {"ref", "fields"}:
         _error("Invalid event envelope.")
@@ -209,7 +225,8 @@ def _validate_shape(archive):
             _error("Invalid provenance entry.")
         _uuid(item["source_event_ref"])
         if (
-            item["source_format_version"] != 2
+            type(item["source_format_version"]) is not int
+            or item["source_format_version"] not in (2, 3)
             or not isinstance(item["source_sha256"], str)
             or len(item["source_sha256"]) != 64
         ):
@@ -338,6 +355,12 @@ def restore_final_archive(*, workspace, archive, name, slug):
                     obj.digest = hashlib.sha256(
                         json.dumps(obj.snapshot, sort_keys=True, separators=(",", ":")).encode()
                     ).hexdigest()
+                if (
+                    label == "evaluations.pairwisecomparison"
+                    and obj.project_a_id > obj.project_b_id
+                ):
+                    # Fresh primary keys may reverse the source comparison's canonical order.
+                    obj.project_a, obj.project_b = obj.project_b, obj.project_a
                 obj.save(force_insert=True)
                 timestamps[key] = times
                 del pending[key]

@@ -12,12 +12,14 @@ def preview_archive_import(*, workspace, archive, name, slug):
     if type(archive.get("format_version")) is not int or archive.get("format_version") not in (
         FORMAT_VERSION,
         2,
+        3,
     ):
         raise ValidationError(
             {
                 "format_version": (
                     f"Unsupported archive format_version: {archive.get('format_version')!r}. "
-                    "This build reads v1 config/full and v2 final; no migration path is defined."
+                    "This build reads v1 config/full and v2/v3 final; v2 re-exports as v3; "
+                    "no migration path for other versions."
                 )
             }
         )
@@ -28,10 +30,10 @@ def preview_archive_import(*, workspace, archive, name, slug):
         transaction.set_rollback(True)
 
     source_event = (
-        archive["event"]["fields"] if archive["format_version"] == 2 else archive["event"]
+        archive["event"]["fields"] if archive["format_version"] in (2, 3) else archive["event"]
     )
     imported_event = (
-        imported["event"]["fields"] if archive["format_version"] == 2 else imported["event"]
+        imported["event"]["fields"] if archive["format_version"] in (2, 3) else imported["event"]
     )
     event_changes = [
         {"field": field, "source": source_event.get(field), "imported": imported_event[field]}
@@ -50,7 +52,7 @@ def preview_archive_import(*, workspace, archive, name, slug):
     ignored_sections = sorted(
         set(archive) - {"format_version", "mode", "event", *SECTION_KEYS, "projects"}
     )
-    if archive["format_version"] == 2:
+    if archive["format_version"] in (2, 3):
         sections = [
             {
                 "section": label,
@@ -63,7 +65,9 @@ def preview_archive_import(*, workspace, archive, name, slug):
     return {
         "format_version": archive["format_version"],
         "mode": archive["mode"],
-        "migration_steps": [],
+        "migration_steps": ["v2 → v3: add empty award-resource table"]
+        if archive["format_version"] == 2
+        else [],
         "deprecations": [],
         "event_changes": event_changes,
         "sections": sections,

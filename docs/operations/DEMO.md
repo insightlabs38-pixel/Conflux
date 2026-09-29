@@ -20,8 +20,6 @@ Checkpoints (each includes the previous):
 
 Accounts: `demo-hackathon-7-organizer`, `-judge-01…06`, `-participant-01…24`, `-mentor`, `-volunteer`, `-sponsor`. Tests and scripts address people by username and the event by discovering it through the API (or the fixed ID); nothing depends on random IDs.
 
-Accounts: `demo-hackathon-7-organizer`, `-judge-01…06`, `-participant-01…24`.
-
 ## Script (~7 minutes)
 
 1. **Public site** — `/e/<event>/`: landing, tracks, gallery, published awards. Open the gallery and one project page; open `/results/` and an award story (shareable card).
@@ -34,7 +32,24 @@ Accounts: `demo-hackathon-7-organizer`, `-judge-01…06`, `-participant-01…24`
 
 ## Assets
 
-`make demo-e2e` (needs the stack above) regenerates, in `tests/e2e/artifacts/`: `scenes/*.png` (landing, gallery, results, agenda, expo map, organizer/judge/participant workspaces, API explorer, sign-in) and one `video.webm` per scene under `results/`. Failures keep traces. The same run is the pre-recording smoke test: 37 checks incl. accessibility, overflow and console/network errors.
+`make demo-reset && make demo-e2e` runs the submitted checkpoint journeys,
+including create → submit → remediate → judge → publish. Successful scene
+and lifecycle clips are recorded, with screenshots in
+`tests/e2e/artifacts/scenes/` and clips under `tests/e2e/artifacts/results/`.
+The lifecycle is serial and consumes participant-24; reset before repeating.
+
+For published public screenshots and role views, run:
+
+```sh
+scripts/demo-reset published
+npx playwright test -c tests/e2e/playwright.config.ts public roles scenes signin extended-embed
+```
+
+Each Playwright run clears its result directory, so copy successful submitted
+clips before the published run. `scripts/package-demo-media` preserves a
+checkpoint's successful media, then `scripts/package-demo-media --zip`
+creates `artifacts/conflux-final-demo-media.zip`. The bundle contains a scene
+index and checksummed manifest; videos and ZIP remain ignored by Git.
 
 ## Recovery
 
@@ -48,4 +63,4 @@ Judging replay, the audit capsule, Event-as-Code, backup/restore, webhooks/MCP a
 
 ## Recording the live lifecycle
 
-`scripts/demo-reset submitted`, then follow `tests/e2e/lifecycle.spec.ts` as the script: participant-24 creates a team and project, submits and gets a signed receipt; organizer requests changes, participant remediates, organizer clears; judges 01–03 inspect and score; organizer publishes results, finalizes the Grand Prize in the deliberation room and publishes the award; the public results page shows it. `make demo-e2e` replays the whole thing headlessly (re-run the reset before repeating it).
+`scripts/demo-reset submitted`, then follow `tests/e2e/lifecycle.spec.ts` as the script: participant-24 creates a team and project, uploads a technical brief, submits and gets a signed receipt; organizer requests changes, participant remediates, organizer clears; judges 01–03 inspect and score; organizer publishes results, finalizes the Grand Prize in the deliberation room and publishes the award; the public results page shows it. `make demo-e2e` replays the whole thing headlessly (re-run the reset before repeating it).

@@ -4,7 +4,7 @@ from audit.models import AuditEvent, DomainEvent
 from awards.models import Award, AwardWinner
 from awards.services import select_winner
 from django.core.exceptions import ValidationError
-from evaluations.models import EvaluationPlan, NormalizationRun
+from evaluations.models import EvaluationPlan, NormalizationRun, PairwiseRun
 from events.models import Event, Track
 from projects.models import Project, Submission
 from stages.models import Stage
@@ -163,3 +163,92 @@ def test_track_award_ranks_its_eligible_field_not_the_whole_event():
     )
     with pytest.raises(ValidationError, match="override reason"):
         select_winner(award=other, project=projects[1], actor=actor)
+
+
+def pairwise_case(*, published=True, track_award=False):
+    event, actor, track, projects = setup_case()
+    stage = Stage.objects.create(event=event, name="Judging")
+    plan = EvaluationPlan.objects.create(stage=stage, name="Pairs", mode="pairwise")
+    other_track = Track.objects.create(event=event, name="Other")
+    rival = Project.objects.create(event=event, created_by=actor, name="Rival", track=other_track)
+    run = PairwiseRun.objects.create(
+        plan=plan,
+        number=1,
+        prior_games=2,
+        iterations=1,
+        converged=True,
+        evidence={
+            "projects": {
+                str(p.pk): {"strength": strength, "win_count": 2, "comparison_count": 3}
+                for p, strength in zip([rival, *projects], [9, 5, 4, 3], strict=True)
+            }
+        },
+    )
+    if published:
+        plan.published_pairwise_run = run
+        plan.save(update_fields=["published_pairwise_run"])
+    award = Award.objects.create(
+        event=event,
+        name="Pairwise award",
+        require_finalized_submission=False,
+        selection_source="evaluation",
+        evaluation_plan=plan,
+        eligibility_track=track if track_award else None,
+    )
+    return actor, projects, rival, run, award
+
+
+def test_pairwise_winner_records_exact_published_run_and_frozen_rank():
+    actor, _, rival, run, award = pairwise_case()
+    winner = select_winner(award=award, project=rival, actor=actor)
+    assert winner.evidence == {
+        "plan": str(run.plan.public_id),
+        "pairwise_run": str(run.public_id),
+        "rank": 1,
+    }
+    assert "normalization_run" not in winner.evidence
+    # Publishing a later run never rewrites a selected winner's evidence.
+    plan = run.plan
+    later = PairwiseRun.objects.create(
+        plan=plan,
+        number=2,
+        prior_games=2,
+        iterations=1,
+        converged=True,
+        evidence={"projects": {}},
+    )
+    plan.published_pairwise_run = later
+    plan.save(update_fields=["published_pairwise_run"])
+    winner.refresh_from_db()
+    assert winner.evidence["pairwise_run"] == str(run.public_id)
+
+
+def test_pairwise_outside_rank_requires_override_reason():
+    actor, projects, _, run, award = pairwise_case()
+    with pytest.raises(ValidationError, match="override reason"):
+        select_winner(award=award, project=projects[0], actor=actor)
+    winner = select_winner(
+        award=award,
+        project=projects[0],
+        actor=actor,
+        override_reason="Documented exception",
+    )
+    assert winner.evidence["rank"] == 2
+    assert winner.evidence["pairwise_run"] == str(run.public_id)
+    assert winner.override_reason == "Documented exception"
+
+
+def test_pairwise_track_filters_field_before_ranking():
+    actor, projects, rival, _, award = pairwise_case(track_award=True)
+    with pytest.raises(ValidationError, match="override reason"):
+        select_winner(award=award, project=projects[1], actor=actor)
+    winner = select_winner(award=award, project=projects[0], actor=actor)
+    assert winner.evidence["rank"] == 1
+    with pytest.raises(ValidationError, match="eligible track"):
+        select_winner(award=award, project=rival, actor=actor)
+
+
+def test_pairwise_unpublished_run_cannot_be_bypassed_with_reason():
+    actor, projects, _, _, award = pairwise_case(published=False)
+    with pytest.raises(ValidationError, match="published"):
+        select_winner(award=award, project=projects[0], actor=actor, override_reason="Exception")

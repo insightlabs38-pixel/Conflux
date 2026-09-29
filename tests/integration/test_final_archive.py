@@ -234,7 +234,7 @@ def test_default_reexport_preserves_final_state_and_supports_multiple_restoratio
     copied = restore(workspace, build_archive(event, mode="final"))
     exported = build_archive(copied)
     assert exported == build_archive(copied)
-    assert exported["format_version"] == 2 and exported["mode"] == "final"
+    assert exported["format_version"] == 3 and exported["mode"] == "final"
     assert exported["provenance"][0]["source_sha256"] == copied.archive_restoration.source_sha256
     again = restore(workspace, exported, slug="again")
     reexported = build_archive(again)
@@ -305,7 +305,7 @@ def test_preview_and_signed_api_preserve_scope_audit_and_rollback():
     preview = preview_archive_import(
         workspace=workspace, archive=archive, name="Preview", slug="preview"
     )
-    assert preview["format_version"] == 2 and preview["ignored_sections"] == []
+    assert preview["format_version"] == 3 and preview["ignored_sections"] == []
     assert not Event.objects.filter(slug="preview").exists()
     assert not ArchiveRestoration.objects.exists()
     envelope = sign_archive(archive)
@@ -375,3 +375,94 @@ def test_every_event_owned_model_is_archived_or_explicitly_excluded():
     )
     assert not unclassified, f"Classify new event-owned models for the v2 archive: {unclassified}"
     assert not set(TABLES) & EXCLUDED_EVENT_MODELS
+
+
+def test_award_resources_restore_content_order_actor_and_portable_references():
+    from awards.models import AwardResource
+
+    workspace, event, owner, *_ = source()
+    award = Award.objects.get(event=event)
+    kinds = ["api", "starter_repo", "contact", "faq", "workshop"]
+    for position, kind in enumerate(kinds):
+        AwardResource.objects.create(
+            award=award,
+            kind=kind,
+            title=f"Sponsor {kind}",
+            url=f"https://sponsor.example/{kind}",
+            body=f"Resource content {kind}",
+            position=position // 2,
+            created_by=owner,
+        )
+    archive = build_archive(event, mode="final")
+    assert archive["format_version"] == 3
+    rows = archive["tables"]["awards.awardresource"]
+    assert len(rows) == 5
+    assert {row["fields"]["award"] for row in rows} == {str(award.public_id)}
+    copied = restore(workspace, archive)
+    restored_award = Award.objects.get(event=copied)
+    assert restored_award.pk != award.pk
+    fields = ("kind", "title", "url", "body", "position", "created_by_id", "created_at")
+    assert list(restored_award.resources.values_list(*fields)) == list(
+        award.resources.values_list(*fields)
+    )
+    assert build_archive(copied)["tables"]["awards.awardresource"] == rows
+    assert build_archive(copied) == build_archive(copied)
+
+
+def test_original_v2_contract_remains_readable_and_upgrades_explicitly():
+    workspace, event, *_ = source()
+    archive = build_archive(event, mode="final")
+    del archive["tables"]["awards.awardresource"]
+    with pytest.raises(ValidationError, match="every known table"):
+        restore(workspace, archive)
+    archive["format_version"] = 2
+    preview = preview_archive_import(
+        workspace=workspace, archive=archive, name="Preview", slug="preview"
+    )
+    assert preview["migration_steps"] == ["v2 → v3: add empty award-resource table"]
+    copied = restore(workspace, archive)
+    exported = build_archive(copied)
+    assert exported["format_version"] == 3
+    assert exported["tables"]["awards.awardresource"] == []
+    assert exported["provenance"][0]["source_format_version"] == 2
+    assert copied.archive_restoration.source_archive == archive
+
+
+def test_pairwise_award_evidence_remaps_to_restored_run():
+    from awards.services import select_winner
+    from evaluations.models import PairwiseComparison
+    from evaluations.pairwise import run as pairwise_run
+
+    workspace, event, owner, judge, project, _ = source()
+    stage = Stage.objects.get(event=event)
+    plan = EvaluationPlan.objects.create(stage=stage, name="Pairwise", mode="pairwise")
+    rival = Project.objects.create(event=event, created_by=owner, name="Rival")
+    PairwiseComparison.objects.create(
+        plan=plan,
+        judge=judge,
+        project_a=project,
+        project_b=rival,
+        winner=project,
+    )
+    plan.published_pairwise_run = pairwise_run(plan)
+    plan.save()
+    award = Award.objects.create(
+        event=event,
+        name="Pairs",
+        selection_source="evaluation",
+        evaluation_plan=plan,
+        require_finalized_submission=False,
+    )
+    winner = select_winner(award=award, project=project, actor=owner)
+    archive = build_archive(event, mode="final")
+    copied = restore(workspace, archive)
+    assert (
+        build_archive(copied)["tables"]["evaluations.pairwisecomparison"]
+        == archive["tables"]["evaluations.pairwisecomparison"]
+    )
+    restored = AwardWinner.objects.get(award__event=copied, award__name="Pairs")
+    assert restored.evidence["pairwise_run"] == str(
+        restored.award.evaluation_plan.published_pairwise_run.public_id
+    )
+    assert restored.evidence["pairwise_run"] != winner.evidence["pairwise_run"]
+    assert restored.evidence["plan"] == str(restored.award.evaluation_plan.public_id)

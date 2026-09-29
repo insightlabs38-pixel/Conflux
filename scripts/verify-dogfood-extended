@@ -1,0 +1,217 @@
+#!/usr/bin/env python3
+"""Conflux-owned receipts from existing regression suites; never alters the vendor checker."""
+
+import os
+import subprocess
+import sys
+import tempfile
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+os.chdir(ROOT)
+REPORT = ROOT / "docs/verification/dogfood-extended.txt"
+CHECKS = {
+    "Official checker integrity": ["tests/acceptance/test_acceptance_report.py"],
+    "T3 community voting": [
+        "tests/integration/community/test_voting_plan_api.py",
+        "tests/integration/community/test_voting_flows.py",
+    ],
+    "T3 comments": ["tests/integration/community/test_comments_and_results.py"],
+    "T3 hidden results": ["tests/integration/community/test_comments_and_results.py"],
+    "T3 randomized ballots": [
+        "tests/integration/community/test_ordering.py",
+        "tests/integration/community/test_voting_flows.py",
+    ],
+    "T3 abuse controls": [
+        "tests/integration/community/test_abuse_controls.py",
+        "tests/integration/community/test_fraud_review.py",
+    ],
+    "T4 certificates / records": [
+        "tests/integration/test_records_api.py",
+        "tests/integration/test_verifiable_records.py",
+    ],
+    "T4 signed judge records": [
+        "tests/integration/test_verifiable_records.py",
+        "tests/integration/test_records_api.py",
+    ],
+    "T4 webhooks": ["tests/integration/test_webhooks.py"],
+    "T4 bulk import/export": [
+        "tests/compatibility/test_canonical_archive.py",
+        "tests/integration/test_final_archive.py",
+        "tests/integration/test_signed_archive.py",
+    ],
+    "Normalization proof": [
+        "tests/integration/normalization/test_fixture_proof.py",
+        "tests/integration/normalization/test_fixture_mutations.py",
+        "tests/integration/normalization/test_normalization_api.py",
+    ],
+    "Pairwise Bradley-Terry": [
+        "tests/integration/test_pairwise_estimator.py",
+        "tests/integration/test_pairwise_judging_api.py",
+    ],
+    "Pairwise → awards": [
+        "tests/integration/test_award_selection.py",
+        "tests/integration/test_final_archive.py",
+    ],
+    "Threat model / isolation": [
+        "tests/integration/test_permission_matrix.py",
+        "tests/integration/test_blind_judging_api.py",
+    ],
+    "API-first SDK / CLI": [
+        "tests/test_generated_sdks.py",
+        "tests/test_admin_cli.py",
+        "tests/integration/test_api_explorer_examples.py",
+    ],
+    "Judging replay": ["tests/integration/test_judging_replay.py"],
+    "Event-as-Code": ["tests/integration/test_event_as_code.py"],
+    "Audit capsule": ["tests/integration/test_audit_capsule.py"],
+    "OIDC": ["tests/integration/test_oidc.py"],
+    "MCP adapter": ["tests/integration/test_mcp_adapter.py"],
+    "Hybrid / on-site": [
+        "tests/integration/test_hybrid_evaluation.py",
+        "tests/integration/test_onsite.py",
+        "tests/integration/test_event_logistics.py",
+        "tests/integration/test_judge_routes.py",
+    ],
+    "Governance": ["tests/integration/test_governance.py"],
+    "Portfolio": ["tests/integration/test_portfolio.py"],
+}
+lines = [
+    "Conflux DOGFOOD extended verification",
+    "source commit: " + subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+    "Scope: disposable regression DB plus live official checker and gallery embed.",
+    "Source worktree (excluding generated receipts): "
+    + (
+        "modified"
+        if subprocess.check_output(
+            [
+                "git",
+                "status",
+                "--porcelain",
+                "--untracked-files=all",
+                "--",
+                ".",
+                ":!acceptance-report.txt",
+                ":!docs/verification/dogfood-extended.txt",
+            ],
+            text=True,
+        ).strip()
+        else "clean"
+    ),
+    "T3/T4 are manually judged by organizers; PASS below is Conflux evidence only.",
+    (
+        "Anti-abuse: single-use/duplicate controls, throttling and audit "
+        "signals; no claim of Sybil-proof identity."
+    ),
+    "Records: Ed25519 event/project/judge records; no claim of a PDF certificate designer.",
+    "",
+]
+failed = False
+
+
+def record(label, status, detail):
+    global failed
+    lines.append(f"{label:.<38} {status} — {detail}")
+    failed |= status == "FAIL"
+
+
+def command(label, args):
+    result = subprocess.run(args, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    log = (
+        ROOT / "artifacts/final-pass" / (label.lower().replace("/", "-").replace(" ", "-") + ".log")
+    )
+    log.parent.mkdir(parents=True, exist_ok=True)
+    log.write_text(result.stdout)
+    record(
+        label,
+        "PASS" if result.returncode == 0 else "FAIL",
+        f"{' '.join(args)} (log: {log.relative_to(ROOT)})",
+    )
+    return result
+
+
+lines.append("OFFICIAL (untouched organizer-supplied checker; automated T1/T2 only)")
+official = command("Official checker execution", ["scripts/run-acceptance"])
+receipt = (ROOT / "acceptance-report.txt").read_text()
+for tier in ("T1", "T2"):
+    record(
+        tier + " official",
+        "PASS" if official.returncode == 0 and "verified T1 T2" in receipt else "FAIL",
+        "acceptance-report.txt",
+    )
+lines.append("")
+lines.append("MANUAL TIERS / CONFLUX REGRESSION EVIDENCE + DIFFERENTIATORS")
+env = dict(os.environ)
+env.setdefault("DJANGO_SECRET_KEY", "bootstrap-checks-only")
+env.setdefault("RECORD_SIGNING_KEY_SEED", "bootstrap-checks-only-record-signing-seed")
+paths = sorted({path for group in CHECKS.values() for path in group})
+with tempfile.TemporaryDirectory(prefix="conflux-extended-") as temp:
+    junit = Path(temp) / "regression.xml"
+    result = subprocess.run(
+        ["uv", "run", "--frozen", "pytest", "-q", "-n", "auto", *paths, f"--junitxml={junit}"],
+        env=env,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+    (ROOT / "artifacts/final-pass/extended-regression.log").write_text(result.stdout)
+    cases = list(ET.parse(junit).iter("testcase")) if junit.exists() else []
+    for label, sources in CHECKS.items():
+        stems = {Path(source).stem for source in sources}
+        matched = [case for case in cases if case.get("classname", "").split(".")[-1] in stems]
+        bad = any(
+            case.find("failure") is not None or case.find("error") is not None for case in matched
+        )
+        skips = sum(case.find("skipped") is not None for case in matched)
+        missing = stems - {case.get("classname", "").split(".")[-1] for case in matched}
+        status = "FAIL" if bad or missing or not matched else "SKIP" if skips else "PASS"
+        record(label, status, f"{len(matched) - skips}/{len(matched)} tests; " + ", ".join(sources))
+    if result.returncode != 0:
+        record("Regression process", "FAIL", "see artifacts/final-pass/extended-regression.log")
+command("T4 REST/OpenAPI", ["make", "openapi-check"])
+command("SDK consistency", ["make", "sdk-check"])
+command(
+    "T4 gallery embed",
+    [
+        "npx",
+        "playwright",
+        "test",
+        "-c",
+        "tests/e2e/playwright.config.ts",
+        "extended-embed",
+        "--project=desktop",
+    ],
+)
+record(
+    "Threat model document",
+    "PASS" if (ROOT / "SECURITY.md").is_file() else "FAIL",
+    "SECURITY.md; representative isolation tests above",
+)
+for label, detail in {
+    "Dex real-provider OIDC": (
+        "docs/verification/PVS-H06/oidc-dex-smoke.txt (18/18; prior release receipt)"
+    ),
+    "Cold/offline self-hosting": (
+        "docs/verification/PVS-H06/report.md (prior release receipt; make cold-boot-smoke)"
+    ),
+    "Backup/restore": (
+        "docs/verification/PVS-H06/report.md (prior release receipt; make backup-restore-smoke)"
+    ),
+    "Load integrity": (
+        "docs/verification/PVS-H06/saturated-workers2.json and unsaturated-"
+        "workers4.json (prior release receipts)"
+    ),
+    "Human PVS workspaces": "docs/operations/PVS_UI.md; make demo-reset && make demo-e2e",
+}.items():
+    record(label, "MANUAL-EVIDENCE", detail)
+lines += [
+    "",
+    "Overall: " + ("FAIL" if failed else "PASS"),
+    "Reproduce: make up; make demo-reset; make verify-dogfood-extended",
+    "SKIP and MANUAL-EVIDENCE are not machine PASS. Logs are generated, not committed.",
+]
+REPORT.parent.mkdir(parents=True, exist_ok=True)
+REPORT.write_text("\n".join(lines) + "\n")
+print(REPORT.read_text())
+sys.exit(1 if failed else 0)

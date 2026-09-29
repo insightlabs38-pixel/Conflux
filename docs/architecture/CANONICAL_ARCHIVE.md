@@ -1,4 +1,4 @@
-# Canonical archive (v1)
+# Canonical archive
 
 A deterministic JSON export of one event's organizer-authored configuration,
 and a validated importer that rebuilds it as a brand-new event. Lets an
@@ -20,9 +20,8 @@ Preview runs the same importer in a transaction that is rolled back. It
 reports event-field changes, per-section source/imported counts, and ignored
 top-level sections without leaving a new event or configuration rows. It
 does not reserve the requested slug: another import can create that slug
-between preview and import. Only v1 is supported; the preview returns a
-named error for another `format_version` rather than claiming an undefined
-migration or deprecation path.
+between preview and import. Preview supports v1 config/full and v2/v3 final archives. A v2 final archive
+reports its explicit upgrade to v3; unsupported versions fail by name.
 
 ## Signed portable envelope
 
@@ -47,7 +46,7 @@ records; version 1 has no key rotation or revocation support.
 
 ## `format_version`
 
-The archive's top-level `format_version` (currently `1`) is the compatibility
+The archive's top-level `format_version` (`1` for config/full, `3` for final) is the compatibility
 contract. A build only ever reads the versions it was written to understand:
 importing a document with any other `format_version` is an explicit, named
 error — never a best-effort reinterpretation. Raising the number is reserved
@@ -151,16 +150,16 @@ went through a template.
 `POST /api/v1/workspaces/<workspace>/events/<event>/clone/` — body
 `{name, slug, sections?}`
 
-## Final archive v2 (`mode: final`, `format_version: 2`)
+## Final archive v3 (`mode: final`, `format_version: 3`)
 
 `GET .../archive/?mode=final` exports a frozen table contract
 (`integrations/final_archive_schema.py`) covering configuration, teams,
 projects, form responses, submissions and frozen versions, assignments,
 ballots, normalization/pairwise runs, awards, winners, fulfillment, votes
-and presentation. Every row carries a stable `ref` (the source public id),
+and presentation, including award resources. Every row carries a stable `ref` (the source public id),
 and evidence JSON is remapped on restore; free-text answers stay opaque.
 
-Restoration is deterministic and never recomputes: `import_archive` on a v2
+Restoration is deterministic and never recomputes: `import_archive` on a v2 or v3
 document builds a **new private draft event** (`is_public=False`) atomically
 inside the caller's transaction, stores immutable `ArchiveRestoration`
 provenance (source SHA-256, identity map) and rejects any missing table,
@@ -174,3 +173,27 @@ Not archived (operational or secret): API credentials, webhooks, invite
 codes, applications, check-ins, exception grants, marketplace profiles,
 saved searches, COI rules, messages, moderation and reminders. A test forces
 every new event-owned model to be classified as archived or excluded.
+
+### v2 compatibility and sponsor resources
+
+v3 adds the required `awards.awardresource` table through `award__event`:
+`award`, `kind`, `title`, `url`, `body`, `position`, `created_by`, `created_at`.
+Resource rows are sorted by portable award reference and position, retaining
+source order for equal positions; restore preserves those ordering ties.
+Creator attribution follows the existing exact-username actor policy; no
+credentials or account secrets are exported. Resource content is authorized
+organizer data, so contact entries travel in this private archive, never in
+the public gallery. Sponsor access grants (`Award.sponsor_contacts`) remain
+excluded and must be granted explicitly at the destination.
+
+The v2 table set is frozen separately. Import accepts its exact original
+shape, stores the unchanged source and checksum, and re-exports as v3 with
+an empty resource table. v3 requires that table even when empty; older v2
+readers reject v3 rather than silently dropping sponsor content. v1
+config/full and Event-as-Code are unchanged; select `mode=final` to carry
+sponsor content and judging history.
+
+Pairwise winner evidence rewrites `pairwise_run` to the restored run, just
+as rubric evidence rewrites `normalization_run`. Comparison pairs use stable
+reference order in the document and fresh primary-key order on restore,
+so allocation order cannot invalidate or change their meaning.

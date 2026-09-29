@@ -5,11 +5,10 @@ version = 1
 base_url = "http://localhost:8080"
 
 [tiers]
-# Honest, not aspirational: only what `scripts/run-acceptance` currently
-# verifies end-to-end. Raise this only alongside the batch that earns it —
-# see BATCHES.yaml/ATTENTION.md for what's actually built so far.
-claimed = ["T1", "T2"]
-pitch = "A staged hackathon competition platform: event/track setup, fixture-backed judging with peer-score isolation, and a public gallery — built incrementally, tier claims kept honest as each is verified."
+# The organizer checker automates T1/T2 only; T3/T4 are manually judged.
+# Conflux-owned regression/evidence: make verify-dogfood-extended.
+claimed = ["T1", "T2", "T3", "T4"]
+pitch = "Self-hostable hackathon operations from submissions to awards: isolated weighted and Bradley–Terry judging, normalization and replay evidence, community voting and abuse controls, signed records, webhooks, hybrid event workspaces, and portable archives — with OpenAPI, SDKs, CLI and MCP, and offline-capable Compose deployment."
 
 [routes]
 gallery = "/api/v1/gallery/"

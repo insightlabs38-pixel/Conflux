@@ -75,6 +75,7 @@ def remap_json(label, field, value, *, pk, public):
         for key, table in (
             ("plan", "evaluations.evaluationplan"),
             ("normalization_run", "evaluations.normalizationrun"),
+            ("pairwise_run", "evaluations.pairwiserun"),
             ("voting_plan", "community.votingplan"),
         ):
             if key in result:

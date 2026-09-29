@@ -1,4 +1,4 @@
-"""Frozen v2 final-archive tables; new fields require an explicit contract change."""
+"""Frozen v3 final-archive tables; new fields require an explicit contract change."""
 
 TABLES = {
     "events.track": ("event", "event name description position", ""),
@@ -214,3 +214,11 @@ TABLES = {
         "",
     ),
 }
+
+# v2 remains readable with its original, exact table set.
+V2_TABLES = dict(TABLES)
+TABLES["awards.awardresource"] = (
+    "award__event",
+    "award kind title url body position created_by created_at",
+    "",
+)

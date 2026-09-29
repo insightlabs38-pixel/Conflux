@@ -4,7 +4,7 @@ from community.results import tally
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from eligibility.services import ensure_project_eligible
-from evaluations.results import ranked_results
+from evaluations.results import pairwise_ranked_results, ranked_results
 from projects.models import Project, SubmissionStatus
 
 from .models import Award, AwardWinner, FulfillmentState, PrizeFulfillment, SelectionSource
@@ -42,9 +42,13 @@ def _source_evidence(award, project):
         return {}, True
     if award.selection_source == SelectionSource.EVALUATION:
         plan = award.evaluation_plan
-        if plan is None or plan.published_normalization_run_id is None:
+        if plan is None:
             raise ValidationError("Evaluation results must be published before winner selection.")
-        rows = ranked_results(plan, plan.published_normalization_run)
+        pairwise = plan.mode == "pairwise"
+        run = plan.published_pairwise_run if pairwise else plan.published_normalization_run
+        if run is None:
+            raise ValidationError("Evaluation results must be published before winner selection.")
+        rows = pairwise_ranked_results(plan, run) if pairwise else ranked_results(plan, run)
         if award.eligibility_track_id:
             # A track award ranks its own eligible field, not the whole event.
             eligible = set(
@@ -60,7 +64,7 @@ def _source_evidence(award, project):
             rank = next((row.rank for row in rows if row.project_id == project.pk), None)
         return {
             "plan": str(plan.public_id),
-            "normalization_run": str(plan.published_normalization_run.public_id),
+            "pairwise_run" if pairwise else "normalization_run": str(run.public_id),
             "rank": rank,
         }, rank is not None and rank <= award.winner_count
     plan = VotingPlan.objects.filter(event=award.event).first()

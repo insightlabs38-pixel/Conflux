@@ -278,7 +278,7 @@ def import_archive(*, workspace, archive, name, slug):
     """
     if not isinstance(archive, dict):
         raise ValidationError({"archive": "Archive must be an object."})
-    if archive.get("format_version") == 2:
+    if archive.get("format_version") in (2, 3):
         from .final_archive import restore_final_archive
 
         return restore_final_archive(workspace=workspace, archive=archive, name=name, slug=slug)

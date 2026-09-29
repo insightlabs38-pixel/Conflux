@@ -20,3 +20,6 @@ __pycache__/
 *.pem
 *.key
 coverage/
+
+# Generated media and local verification logs are handoff assets.
+artifacts/

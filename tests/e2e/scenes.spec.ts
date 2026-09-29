@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import path from "node:path";
 import { eventIds, openWorkspace, settled, signIn } from "./support";
 
@@ -22,6 +22,10 @@ test("scene 01 — public event, gallery and results", async ({ page }) => {
     await settled(page);
     await page.screenshot({ path: shot(name), fullPage: true });
   }
+  await page.goto(`/e/${event}/gallery/`);
+  await page.locator("main a[href*='/projects/']").first().click();
+  await settled(page);
+  await page.screenshot({ path: shot("public-project"), fullPage: true });
 });
 
 for (const [n, role] of [
@@ -34,7 +38,64 @@ for (const [n, role] of [
     await page.screenshot({ path: shot(`${n}-selector`) });
     await openWorkspace(page);
     await settled(page);
-    await page.screenshot({ path: shot(`${n}-workspace`), fullPage: true });
+    if (role === "organizer") {
+      await page.getByRole("button", { name: /^Demo \(/ }).click();
+      await settled(page);
+      const judging = page.locator(".cx-card").filter({
+        has: page.getByRole("heading", { name: "Judging", exact: true }),
+      });
+      await judging.getByLabel("Stage").selectOption({ index: 1 });
+      await expect(
+        judging.getByText("ballots submitted", { exact: false }),
+      ).toBeVisible();
+      await settled(page);
+      await page
+        .getByRole("heading", { name: "Main judging", exact: true })
+        .evaluate((heading) => heading.scrollIntoView({ block: "start" }));
+      await page.screenshot({ path: shot(`${n}-workspace`) });
+      await page
+        .getByRole("region", { name: "Judging logistics" })
+        .getByLabel("Stage")
+        .selectOption({ index: 1 });
+      await settled(page);
+      for (const [name, region] of [
+        ["organizer-eligibility-overview", "Eligibility review queue"],
+        ["organizer-deliberation-overview", "Deliberation and finalization"],
+        ["organizer-onsite", "On-site operations"],
+        ["organizer-judging-logistics", "Judging logistics"],
+      ]) {
+        await page
+          .getByRole("region", { name: region })
+          .screenshot({ path: shot(name) });
+      }
+    } else {
+      await page
+        .locator("select")
+        .filter({ has: page.locator("option", { hasText: "Choose an event" }) })
+        .first()
+        .selectOption({ index: 1 });
+      if (role === "judge-01") {
+        const judging = page.getByRole("region", { name: "Judging" });
+        await judging.getByLabel("Stage").selectOption({ index: 1 });
+        await expect(
+          page.getByRole("region", { name: "Your assignments" }),
+        ).toBeVisible();
+        await settled(page);
+        await page
+          .getByRole("region", { name: "Your judging route" })
+          .screenshot({ path: shot("judge-route") });
+      } else {
+        await page
+          .getByRole("region", { name: "My projects" })
+          .locator("select")
+          .filter({
+            has: page.locator("option", { hasText: "Choose a project" }),
+          })
+          .selectOption({ index: 1 });
+      }
+      await settled(page);
+      await page.screenshot({ path: shot(`${n}-workspace`) });
+    }
   });
 }
 

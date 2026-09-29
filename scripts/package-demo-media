@@ -1,0 +1,142 @@
+#!/usr/bin/env python3
+"""Collect selected media only from successful Playwright runs; ZIP the handoff."""
+
+import hashlib
+import json
+import shutil
+import sys
+import zipfile
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SOURCE = ROOT / "tests/e2e/artifacts"
+DEST = ROOT / "artifacts/final-demo-media"
+ZIP = ROOT / "artifacts/conflux-final-demo-media.zip"
+SCENES = {
+    "public": [
+        "01-landing",
+        "02-gallery",
+        "03-results",
+        "07-agenda",
+        "08-expo-map",
+        "public-project",
+    ],
+    "organizer": [
+        "04-organizer-workspace",
+        "organizer-eligibility",
+        "organizer-deliberation",
+        "organizer-onsite",
+        "organizer-judging-logistics",
+        "09-api-explorer",
+    ],
+    "judge": ["05-judge-workspace", "judge-route", "judge-artifact-inspector", "judge-scoring"],
+    "participant": [
+        "06-participant-workspace",
+        "participant-submission-receipt",
+        "participant-remediation",
+    ],
+}
+DEST.mkdir(parents=True, exist_ok=True)
+index_path = DEST / "scene-index.json"
+index = json.loads(index_path.read_text()) if index_path.exists() else {}
+if len(sys.argv) != 2 or sys.argv[1] not in ("submitted", "published", "--zip"):
+    raise SystemExit("usage: scripts/package-demo-media submitted|published|--zip")
+checkpoint = sys.argv[1]
+if checkpoint != "--zip":
+    report = json.loads((SOURCE / "report.json").read_text())
+    if report["stats"]["unexpected"] or report.get("errors"):
+        raise SystemExit("Refusing media from a run with failed tests.")
+    for role, names in SCENES.items():
+        for name in names:
+            source = SOURCE / "scenes" / (name + ".png")
+            # Workflow captures come from submitted; published refreshes representative views.
+            workflow = name in {
+                "participant-submission-receipt",
+                "participant-remediation",
+                "judge-artifact-inspector",
+                "judge-scoring",
+                "organizer-eligibility",
+                "organizer-deliberation",
+            }
+            if not source.exists() or (checkpoint == "published" and workflow):
+                continue
+            target = DEST / "screenshots" / role / source.name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source, target)
+            index[str(target.relative_to(DEST))] = f"{checkpoint}: {name}"
+
+    def walk(suites):
+        for suite in suites:
+            yield from suite.get("specs", [])
+            yield from walk(suite.get("suites", []))
+
+    for spec in walk(report["suites"]):
+        for test in spec["tests"]:
+            if test["projectName"] != "desktop" or test["status"] != "expected":
+                continue
+            for result in test["results"]:
+                if result["status"] != "passed":
+                    continue
+                for number, attachment in enumerate(result.get("attachments", [])):
+                    if attachment.get("contentType") != "video/webm":
+                        continue
+                    source = Path(attachment["path"])
+                    # Published scene clips are stronger than submitted duplicates.
+                    scene = spec["file"].endswith("scenes.spec.ts")
+                    if scene and checkpoint != "published":
+                        continue
+                    slug = "".join(c if c.isalnum() else "-" for c in spec["title"]).strip("-")
+                    target = DEST / "videos" / f"{checkpoint}-{slug}-{number + 1}.webm"
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(source, target)
+                    index[str(target.relative_to(DEST))] = (
+                        f"{checkpoint}: {spec['title']} ({attachment['name']})"
+                    )
+    index_path.write_text(json.dumps(index, indent=2, sort_keys=True) + "\n")
+    print(f"Collected successful {checkpoint} media in {DEST}")
+else:
+    if not index or not list((DEST / "videos").glob("*.webm")):
+        raise SystemExit("Collect screenshots and successful videos before zipping.")
+    readme = [
+        "# Conflux final demo media",
+        "",
+        (
+            "Generated with deterministic scripts/demo-reset (seed 7), make "
+            "demo-e2e, and the published scene/regression run."
+        ),
+        (
+            "Workflow scenes use submitted; public results and representative role "
+            "scenes use published. Raw Playwright WebM clips are reference assets, "
+            "without cinematic editing. Only passing test attachments are "
+            "collected."
+        ),
+        "",
+        (
+            "Strong README candidates: public/01-landing, organizer/04-organizer-"
+            "workspace, organizer/organizer-deliberation, judge/judge-artifact-inspector. "
+            "Strong video candidates: participant submission, remediation (two "
+            "roles), judge-01 review, organizer publication, and published public "
+            "tour."
+        ),
+        "",
+        (
+            "The lifecycle is recorded as successive successful scenes; there is no"
+            " single continuous multi-role recording."
+        ),
+        "",
+        "## Scene index",
+        "",
+    ]
+    readme += [f"- `{name}` — {description}" for name, description in sorted(index.items())]
+    (DEST / "README.md").write_text("\n".join(readme) + "\n")
+    files = sorted(p for p in DEST.rglob("*") if p.is_file() and p.name != "manifest.txt")
+    (DEST / "manifest.txt").write_text(
+        "".join(
+            f"{hashlib.sha256(p.read_bytes()).hexdigest()}  {p.relative_to(DEST)}\n" for p in files
+        )
+    )
+    with zipfile.ZipFile(ZIP, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        for path in sorted(DEST.rglob("*")):
+            if path.is_file():
+                archive.write(path, Path("final-demo-media") / path.relative_to(DEST))
+    print(f"Media ZIP: {ZIP}")

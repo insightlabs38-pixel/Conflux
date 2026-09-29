@@ -38,9 +38,6 @@ type ResponseSummary = {
 };
 type Named = { public_id: string; name: string };
 
-const unplacedLabel = (item: Route["unplaced"][number]) =>
-  typeof item === "string" ? item : (item.project_name ?? item.name ?? "?");
-
 function saving(route: {
   total_distance: number;
   baseline_distance: number;
@@ -180,8 +177,7 @@ export function JudgeRoutePanel({ planBase }: { planBase: string }) {
           )}
           {route.data.unplaced.length > 0 && (
             <p role="status">
-              Not on the route yet (no table assigned):{" "}
-              {route.data.unplaced.map(unplacedLabel).join(", ")}.
+              {route.data.unplaced.length} projects have no table assigned yet.
             </p>
           )}
         </>

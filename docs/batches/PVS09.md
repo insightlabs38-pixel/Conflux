@@ -10,7 +10,7 @@ Sponsors and organizers can attach structured challenge content (API docs, start
 - Full suite: 1189 passed/20 skipped. `test_final_archive.py`'s event-owned-model guard passes unchanged (`AwardResource` has no direct FK to `Event`).
 - `spectacular --validate --fail-on-warn`, `generate_sdks.py` + `--check`, `check_openapi_artifact.py` → clean.
 ## Limitations
-- `AwardResource` is not yet in the final-archive/event-as-code table set — a reversible scope call to avoid touching the frozen v2 archive contract this late; flag for PVS-H04 if full portability of sponsor content is required.
-- No UI (PVS-H03).
+- Resolved in the final targeted pass: canonical final archive v3 carries all AwardResource content, order, award references and creator attribution. Existing v2 archives remain readable; see `tests/integration/test_final_archive.py`. Use `mode=final` for sponsor-content portability; v1 config/full and declarative Event-as-Code retain their narrower configuration scope.
+- Participant sponsor challenges and organizer resource viewing are integrated into existing workspaces (PVS-H06); sponsor writes remain API-first.
 ## Next
 PVS10 (mentor requests and office hours).

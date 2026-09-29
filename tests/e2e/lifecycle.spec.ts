@@ -1,3 +1,4 @@
+import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 import {
   account,
@@ -15,6 +16,15 @@ import {
  * participant: approved, no team). Re-run the reset before repeating.
  */
 test.describe.configure({ mode: "serial" });
+test.use({ video: "on" });
+const shot = async (page: Page, name: string, region?: string) => {
+  const target = region
+    ? page.getByRole("region", { name: region, exact: true })
+    : page;
+  await target.screenshot({
+    path: path.join(__dirname, "artifacts/scenes", `${name}.png`),
+  });
+};
 test.skip(({ isMobile }) => isMobile, "desktop-only recorded journey");
 
 const LIVE = "participant-24";
@@ -46,8 +56,45 @@ test("participant creates a team, submits, and receives a signed receipt", async
   await page.getByLabel("Project name").fill(PROJECT);
   await page.getByRole("button", { name: "Create project" }).click();
 
-  const submission = page.getByRole("region", { name: "Submission" });
+  const evidence = page.getByRole("region", { name: "Project artifacts" });
+  await evidence
+    .getByLabel("Title", { exact: true })
+    .first()
+    .fill("Live Wire technical brief");
+  await evidence
+    .getByRole("combobox", { name: "Kind", exact: true })
+    .first()
+    .selectOption("document");
+  await evidence
+    .getByRole("combobox", { name: "Visibility", exact: true })
+    .first()
+    .selectOption("public");
+  await evidence.getByLabel("File", { exact: true }).setInputFiles({
+    name: "technical-brief.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "Live Wire connects local volunteers with neighborhood needs.\nStack: Django REST API and an accessible web client.\nDemo evidence: offline operation, auditable submissions and isolated judging.\n",
+    ),
+  });
+  await evidence.getByRole("button", { name: "Upload", exact: true }).click();
+  await expect(
+    evidence.getByText("Evidence uploaded and ready."),
+  ).toBeVisible();
+  // Re-open the project so the submission picker loads the newly uploaded evidence.
+  const projects = page
+    .getByRole("region", { name: "My projects" })
+    .locator("select")
+    .filter({
+      has: page.locator("option", { hasText: "Choose a project" }),
+    });
+  await projects.selectOption("");
+  await projects.selectOption({ label: PROJECT });
+  const submission = page.getByRole("region", {
+    name: "Submission",
+    exact: true,
+  });
   await submission.getByLabel("Stage").selectOption({ index: 1 });
+  await submission.getByLabel("Live Wire technical brief").check();
   await submission
     .getByLabel("Submission notes")
     .fill("Built live during the demo.");
@@ -61,6 +108,7 @@ test("participant creates a team, submits, and receives a signed receipt", async
     page.getByRole("region", { name: "Deadline exception" }),
   ).toBeVisible();
   await expect(page.getByRole("region", { name: "Mentorship" })).toBeVisible();
+  await shot(page, "participant-submission-receipt", "Submission");
   await settled(page);
   expect(problems.filter((p) => !p.includes("/accounts/me/"))).toEqual([]);
 });
@@ -68,7 +116,11 @@ test("participant creates a team, submits, and receives a signed receipt", async
 test("organizer requests changes; participant remediates; organizer approves", async ({
   browser,
 }) => {
-  const org = await (await browser.newContext()).newPage();
+  const org = await (
+    await browser.newContext({
+      recordVideo: { dir: test.info().outputPath("clips") },
+    })
+  ).newPage();
   await signIn(org, "organizer");
   await openWorkspace(org);
   await org.getByRole("button", { name: /^Demo \(open\)/ }).click();
@@ -82,7 +134,11 @@ test("organizer requests changes; participant remediates; organizer approves", a
     queue.locator(".cx-badge", { hasText: "Changes requested" }).first(),
   ).toBeVisible();
 
-  const part = await (await browser.newContext()).newPage();
+  const part = await (
+    await browser.newContext({
+      recordVideo: { dir: test.info().outputPath("clips") },
+    })
+  ).newPage();
   await signIn(part, LIVE);
   await openWorkspace(part);
   await chooseEvent(part);
@@ -114,6 +170,8 @@ test("organizer requests changes; participant remediates; organizer approves", a
   await expect(
     again.locator(".cx-badge", { hasText: "Cleared" }).first(),
   ).toBeVisible();
+  await shot(part, "participant-remediation", "Eligibility review");
+  await shot(org, "organizer-eligibility", "Eligibility review queue");
   await part.reload();
   await chooseEvent(part);
   await part
@@ -124,6 +182,17 @@ test("organizer requests changes; participant remediates; organizer approves", a
   await expect(
     part.getByRole("region", { name: "Eligibility review" }),
   ).toContainText("cleared", { ignoreCase: true });
+  await org.context().close();
+  await part.context().close();
+  for (const [name, page] of [
+    ["remediation-organizer", org],
+    ["remediation-participant", part],
+  ] as const) {
+    await test.info().attach(name, {
+      path: await page.video()!.path(),
+      contentType: "video/webm",
+    });
+  }
 });
 
 for (const judge of ["judge-01", "judge-02", "judge-03"]) {
@@ -148,6 +217,18 @@ for (const judge of ["judge-01", "judge-02", "judge-03"]) {
     const count = await scores.count();
     for (let i = 0; i < count; i++)
       await scores.nth(i).fill(String(6 + (i % 3)));
+    if (judge === "judge-01") {
+      const inspector = page.getByRole("region", {
+        name: "Submitted artifacts",
+      });
+      await inspector.getByRole("button", { name: "Inspect safely" }).click();
+      await expect(
+        inspector.getByText("Detected type:", { exact: false }),
+      ).toBeVisible();
+      await shot(page, "judge-artifact-inspector", "Submitted artifacts");
+      await scores.first().scrollIntoViewIfNeeded();
+      await shot(page, "judge-scoring");
+    }
     await page.getByRole("button", { name: "Submit ballot" }).click();
     await expect(page.getByText("submitted").first()).toBeVisible();
     await settled(page);
@@ -184,6 +265,7 @@ test("organizer publishes results and the public results page shows them", async
   await room
     .getByLabel("Override reason")
     .fill("Only project scored in the live demo.");
+  await shot(page, "organizer-deliberation", "Deliberation and finalization");
   await room.getByRole("button", { name: "Finalize", exact: true }).click();
   await expect(room.getByText(/Finalized/)).toBeVisible();
   const awards = page.getByRole("region", { name: "Awards" }).first();

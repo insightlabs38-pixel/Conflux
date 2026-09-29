@@ -93,10 +93,14 @@ Results publish/read/CSV-export through a dedicated `pairwise/results*`
 surface (`evaluations/results.py::pairwise_ranked_results`), parallel to
 the rubric one, sharing only the plan's `tie_breaks` field.
 
-**Known limitation.** Award winner selection
-(`awards/services.py::_source_evidence`) only reads
-`published_normalization_run`; a pairwise-mode plan's published ranking
-is not yet wired into evaluation-sourced award selection.
+**Awards.** Evaluation-sourced awards read the published run for the plan's
+mode: `published_normalization_run` for weighted rubric judging and
+`published_pairwise_run` for pairwise judging. Both use their canonical,
+deterministic ranking, filter track awards before ranking, and require an
+audited override reason for a candidate outside the allowed winner count.
+Pairwise winner evidence records `plan`, `pairwise_run` and `rank`; rubric
+evidence retains `normalization_run`. Later publications do not rewrite
+selected winner evidence.
 
 ## Assumptions
 

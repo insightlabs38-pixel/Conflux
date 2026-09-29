@@ -125,3 +125,7 @@ demo-e2e:
 # Real-provider OIDC interoperability smoke (Dex in Docker; see docs/operations/SSO.md).
 oidc-smoke:
 	uv run --frozen python scripts/oidc-interop-smoke
+
+.PHONY: verify-dogfood-extended
+verify-dogfood-extended:
+	./scripts/verify-dogfood-extended

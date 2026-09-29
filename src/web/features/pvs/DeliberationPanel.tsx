@@ -131,10 +131,14 @@ function EvidencePanel({
     <Card title="Evidence" as="h4">
       {progress.data && (
         <p>
-          Coverage: {progress.data.submitted_ballots} of{" "}
-          {progress.data.expected_ballots ?? "?"} expected ballots from{" "}
-          {progress.data.pool_judge_count} judges across{" "}
-          {progress.data.candidate_count} candidates. Conflicts excluded:{" "}
+          Coverage: {progress.data.submitted_ballots}
+          {progress.data.expected_ballots == null
+            ? " submitted ballots"
+            : ` of ${progress.data.expected_ballots} expected ballots`}
+          {progress.data.pool_judge_count > 0
+            ? ` from ${progress.data.pool_judge_count} judges`
+            : ""}{" "}
+          across {progress.data.candidate_count} candidates. Conflicts excluded:{" "}
           {progress.data.conflict_count}.
         </p>
       )}

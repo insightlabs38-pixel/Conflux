@@ -73,5 +73,7 @@ export async function eventIds(page: Page) {
 /** Waits until every loading indicator has resolved into content or an error. */
 export async function settled(page: Page) {
   await page.waitForLoadState("networkidle");
-  await expect(page.getByText(/^(Loading|Checking) .*…$/)).toHaveCount(0);
+  await expect(page.getByText(/^(Loading|Checking) .*(…|\.\.\.)$/)).toHaveCount(
+    0,
+  );
 }

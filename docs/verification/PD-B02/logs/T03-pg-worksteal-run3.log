@@ -1,0 +1,47 @@
+bringing up nodes...
+bringing up nodes...
+
+......................................s................................. [  5%]
+........................................................................ [ 10%]
+........................................................................ [ 15%]
+........................................................................ [ 20%]
+........................................................................ [ 25%]
+........................................................................ [ 30%]
+........................................................................ [ 35%]
+........................................................................ [ 40%]
+........................................................................ [ 45%]
+........................................................................ [ 50%]
+ss.s.................................................................... [ 55%]
+........................................................................ [ 60%]
+........................................................................ [ 65%]
+........................................................................ [ 70%]
+........................................................................ [ 75%]
+........................................................................ [ 80%]
+........................................................................ [ 85%]
+........................................................................ [ 90%]
+........................................................................ [ 95%]
+.....................................................F.....              [100%]
+=================================== FAILURES ===================================
+________ test_checkpoints_are_deterministic_and_reject_bad_combinations ________
+[gw6] linux -- Python 3.12.3 /home/insightlabs38/conflux/.venv/bin/python
+
+    def test_checkpoints_are_deterministic_and_reject_bad_combinations():
+        a = generate_demo_event(seed=14, participants=6, judges=2, checkpoint="judged")
+        snapshot = sorted(a.projects.values_list("name", "track__name"))
+        purge_demo_scenario("demo-hackathon-14")
+        b = generate_demo_event(seed=14, participants=6, judges=2, checkpoint="judged")
+        assert sorted(b.projects.values_list("name", "track__name")) == snapshot
+        purge_demo_scenario("demo-hackathon-14")
+        for kwargs in ({"checkpoint": "nope"}, {"checkpoint": "published", "live": 1}, {"live": 5}):
+            with pytest.raises(ValidationError):
+                generate_demo_event(seed=14, participants=6, judges=2, **kwargs)
+>       assert not Workspace.objects.exists()
+E       assert not True
+E        +  where True = exists()
+E        +    where exists = <django.db.models.manager.Manager object at 0xe8dcf08bd220>.exists
+E        +      where <django.db.models.manager.Manager object at 0xe8dcf08bd220> = Workspace.objects
+
+tests/integration/test_demo_scenarios.py:190: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_demo_scenarios.py::test_checkpoints_are_deterministic_and_reject_bad_combinations
+1 failed, 1422 passed, 4 skipped in 43.08s

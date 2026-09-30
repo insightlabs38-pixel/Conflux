@@ -1,0 +1,10 @@
+sqlite load run1 wall=25.39s
+sqlite worksteal run1 wall=22.28s
+sqlite load run2 wall=25.54s
+sqlite worksteal run2 wall=22.31s
+sqlite load run3 wall=25.93s
+sqlite worksteal run3 wall=22.08s
+1423 passed, 4 skipped in 45.16s
+pg load wall=45.75s
+1 failed, 1422 passed, 4 skipped in 42.60s
+pg worksteal wall=43.19s

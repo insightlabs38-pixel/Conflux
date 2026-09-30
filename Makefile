@@ -18,7 +18,7 @@ lint:
 	pnpm lint
 
 test:
-	uv run --frozen pytest -n auto
+	uv run --frozen pytest -n auto --dist worksteal
 	pnpm test
 
 build:

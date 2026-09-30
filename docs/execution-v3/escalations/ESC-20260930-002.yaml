@@ -1,0 +1,43 @@
+version: 1
+id: ESC-20260930-002
+task: PD-F001-B01-T00
+batch: PD-F001-B01
+category: plan_defect
+severity: P2
+status: RESOLVED
+summary: PD-F001-B01 consumes shared primitives that are scheduled to be built later, and its owned paths do not cover the code it must change.
+observed:
+- "PD-F001-B01 tasks list reuses SCHEMA_EDITOR, QUERY, POLICY_EXPLAIN, RICH_DOC, ROUTER, ASYNC_JOB. PRIMITIVE_REGISTRY.yaml marks all PLANNED with owners PD-F002-B01-T01 (QUERY), PD-F002-B01-T05 (ASYNC_JOB), PD-F002-B02-T01 (SCHEMA_EDITOR), PD-F002-B02-T06 (POLICY_EXPLAIN), PD-F071-B01-T01 (ROUTER)."
+- "BATCHES.yaml order is PD-F001-B01 -> PD-F001-B02 -> PD-F002-B01 -> PD-F002-B02, so the owners run after their first consumer. The registry rule says consumers must reuse or escalate and must not create a parallel representation."
+- "ROUTER is functionally delivered by PD-B04 (lib/routes.ts, Destination, useUrlParam) though still PLANNED in the registry."
+- "PD-F001-B01 owned_paths are src/web/**, src/api/core/**, docs/**. The canonical current code is in src/api/events/** (dashboard checks), src/api/communications/** (launch checklist), src/api/integrations/** (template library); none is owned, and core/ cannot import events without inverting dependencies."
+- "Only PD-F001-B01-T00 was READY; every later batch is chained behind it, so there was no other eligible work to select instead."
+attempts:
+- Read the registry, both batch dependency chains and task reuses; searched web and api for any existing schema editor, job runner, query AST or explain model (none generic; forms/ and policies/debugger are domain-specific).
+- Census of persisted events and presets (docs/verification/PD-F001-B01/T00-census.log) to see which parts need a primitive at all.
+decision_needed: Resequence the primitive owners before their consumers, or let F001-B01 proceed domain-first without the primitives?
+options:
+- option: A, domain-first (implemented as the default)
+  tradeoff: F001 builds server-side canonical contracts (registry, readiness, modules, configuration API) and UI on existing controls; the primitive seams are plain JSON-Schema-compatible descriptors, plain query parameters and one Reason shape. Cost - a small Reason/descriptor shape lives in eventconfig until POLICY_EXPLAIN/SCHEMA_EDITOR absorb it (migration obligation on those tasks).
+- option: B, resequence F002-B01/B02 (and the primitive owners) before F001
+  tradeoff: matches the registry exactly but rewrites the dependency graph (plan change, F002 currently depends on F001-B02) and delays the base-experience work the program starts from.
+- option: C, stop until the owner decides
+  tradeoff: safest literally, but every remaining task is chained behind this batch so the program halts.
+recommended: A now; owner may choose B later. Nothing built under A is irreversible (additive tables, code-declared registry).
+affected_invariants:
+- No duplicate source of truth or parallel primitive representation.
+- Deterministic readiness and defaults.
+affected_tasks:
+- PD-F001-B01-T01..T08, T90, T91
+- PD-F002-B02-T01 (SCHEMA_EDITOR must consume eventconfig descriptors)
+- PD-F002-B02-T06 (POLICY_EXPLAIN must absorb eventconfig Reason)
+- PD-F002-B01-T01 (QUERY must absorb the configuration API filters)
+artifacts:
+- docs/product-depth-v3/specs/001-base-experience-must-remain-smaller-than-the-platform.md
+- docs/verification/PD-F001-B01/T00-census.log
+resolution: |
+  Decision: option A. Primitive reuse table and forbidden list are in spec 001 (PD-F001-B01 canonical contract). ASYNC_JOB, RICH_DOC and APPROVAL are recorded as not consumed (nothing long-running, no rich text, no approvals in this batch). Owned paths are extended for this batch to a new app src/api/eventconfig/** plus the minimal edits to events/, communications/ and integrations/ needed to turn the two readiness sources and the template library into projections/wrappers of the canonical modules.
+  Rationale: additive, reversible, avoids both a dependency rewrite and halting the campaign, and keeps one source of truth because the new layer only describes domain rows.
+  Changed contracts: spec 001 (this batch); no queue edit. Obligations recorded for F002-B02-T01, F002-B02-T06 and F002-B01-T01 to adopt eventconfig shapes.
+  Also decided inside the contract, owner may revisit: readiness stays advisory (no new hard gate on draft -> open); the open transition audits unresolved readiness ids.
+  Verification needed: T90 proves each registry/readiness/module/preset rule and the compatibility fixtures.

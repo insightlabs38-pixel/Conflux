@@ -1,0 +1,78 @@
+version: 3
+task: PD-F001-B01-T00
+batch: PD-F001-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: architecture
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 6490842
+  head_commit: 6490842
+changed_paths:
+- docs/product-depth-v3/specs/001-base-experience-must-remain-smaller-than-the-platform.md
+- docs/execution-v3/escalations/ESC-20260930-002.yaml
+- docs/verification/PD-F001-B01/probe_census.py
+- docs/verification/PD-F001-B01/T00-census.log
+deliverables:
+- item: Update spec 001 with canonical state/data model, lifecycle, authority boundary, migration plan and cross-surface applicability
+  result: pass
+  evidence: spec 001 section "PD-F001-B01 canonical contract" (registry, preset, EventProfile, EventModuleSetting, derived state, readiness, configuration API, overrides, creation, compatibility, task boundaries)
+- item: Resolve reuse of shared primitives and forbid duplicate local representations
+  result: pass
+  evidence: primitive reuse table and forbidden list in spec 001; ESC-20260930-002 (sequencing defect, option A)
+- item: Record unresolved ambiguity as an escalation rather than guessing
+  result: pass
+  evidence: ESC-20260930-002 (P2, resolved by the conservative default, owner may choose resequencing); QUESTIONS.md entry
+invariants:
+- item: One canonical source of truth and existing domain services
+  result: pass
+  evidence: domain rows stay authoritative; new layer only describes and persists provenance and module intent
+- item: Server-side authorization, validation and audit remain authoritative
+  result: pass
+  evidence: no generic write path; overrides go through existing domain endpoints; module changes audited; nav hiding is not authorization
+- item: No placeholder/demo-only closure
+  result: pass
+  evidence: contract defines real defaults for creation and a T90 verification strategy; implementation is left to T01-T08
+verification:
+- command: docker compose exec -T app python manage.py shell < docs/verification/PD-F001-B01/probe_census.py
+  result: pass
+  note: 9 persisted events described (modules in use, both readiness sources); all 5 library presets instantiated and rolled back (events after rollback 9)
+- command: python3 scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid, 0 errors
+- command: npx prettier --check docs/product-depth-v3/specs/001-*.md
+  result: pass
+  note: formatted
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: nav, create flow and panel disclosure contract defined (T01-T04)
+- surface: api
+  result: pass
+  evidence: configuration, modules and readiness endpoints defined (T05, T08)
+- surface: audit
+  result: pass
+  evidence: module enable/disable, preset provenance and readiness-at-open audit defined
+- surface: docs
+  result: pass
+  evidence: spec 001 updated
+- surface: sdk
+  result: pass
+  evidence: "not applicable for this task: not_required; OpenAPI/SDK artifacts regenerate when endpoints land"
+migrations:
+- "contract: additive EventProfile and EventModuleSetting; legacy events need no backfill; unchanged legacy response shapes; archive exclusion with recorded reason"
+findings:
+- Two readiness sources disagree on 9 of 9 persisted events
+- Every library preset yields a draft blocked on day one (no dates, no published rubric, no judge pool, no registration settings row, no prize)
+- Four unrelated preset notions exist (library, workflow, policy, saved template)
+- Eligibility rules hold base decisions (team size, required artifacts) so they must not count as an optional module
+- Listed reuse ASYNC_JOB/RICH_DOC is not applicable to this batch (recorded)
+escalations:
+- ESC-20260930-002 (P2 plan_defect, RESOLVED by default A; owner may prefer resequencing)
+limitations:
+- No code changed; the contract is proven by the census, implementation proofs belong to T01-T08/T90
+- Readiness stays advisory; a hard launch gate is an owner decision
+next: review

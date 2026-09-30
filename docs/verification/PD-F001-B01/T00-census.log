@@ -1,0 +1,27 @@
+135 objects imported automatically (use -v 2 for details).
+
+== persisted events
+{'event': 'demo', 'status': 'closed', 'modules_in_use': ['public_page'], 'registration_settings_row': True, 'dashboard_configuration_checks': ['base_prize'], 'launch_checklist': 'warning', 'launch_checklist_failing': ['judging_pools'], 'two_readiness_sources_agree': False}
+{'event': 'demo', 'status': 'closed', 'modules_in_use': ['public_page'], 'registration_settings_row': True, 'dashboard_configuration_checks': ['base_prize'], 'launch_checklist': 'warning', 'launch_checklist_failing': ['judging_pools'], 'two_readiness_sources_agree': False}
+{'event': 'demo', 'status': 'closed', 'modules_in_use': ['public_page'], 'registration_settings_row': True, 'dashboard_configuration_checks': ['base_prize'], 'launch_checklist': 'warning', 'launch_checklist_failing': ['judging_pools'], 'two_readiness_sources_agree': False}
+{'event': 'demo', 'status': 'open', 'modules_in_use': ['community_voting', 'mentorship', 'onsite', 'public_page'], 'registration_settings_row': True, 'dashboard_configuration_checks': ['base_prize'], 'launch_checklist': 'warning', 'launch_checklist_failing': ['judging_pools'], 'two_readiness_sources_agree': False}
+{'event': 'demo', 'status': 'open', 'modules_in_use': ['community_voting', 'deliberation', 'mentorship', 'onsite', 'public_page'], 'registration_settings_row': True, 'dashboard_configuration_checks': ['base_prize'], 'launch_checklist': 'warning', 'launch_checklist_failing': ['judging_pools'], 'two_readiness_sources_agree': False}
+{'event': 'demo', 'status': 'open', 'modules_in_use': ['mentorship', 'onsite', 'public_page'], 'registration_settings_row': True, 'dashboard_configuration_checks': ['base_prize'], 'launch_checklist': 'warning', 'launch_checklist_failing': ['judging_pools'], 'two_readiness_sources_agree': False}
+{'event': 'demo', 'status': 'open', 'modules_in_use': ['mentorship', 'onsite', 'public_page'], 'registration_settings_row': True, 'dashboard_configuration_checks': ['base_prize'], 'launch_checklist': 'warning', 'launch_checklist_failing': ['judging_pools'], 'two_readiness_sources_agree': False}
+{'event': 'demo', 'status': 'open', 'modules_in_use': ['mentorship', 'onsite', 'public_page'], 'registration_settings_row': True, 'dashboard_configuration_checks': ['base_prize'], 'launch_checklist': 'warning', 'launch_checklist_failing': ['judging_pools'], 'two_readiness_sources_agree': False}
+{'event': 'demo', 'status': 'open', 'modules_in_use': ['community_voting', 'mentorship', 'onsite', 'public_page'], 'registration_settings_row': True, 'dashboard_configuration_checks': ['base_prize'], 'launch_checklist': 'warning', 'launch_checklist_failing': ['judging_pools'], 'two_readiness_sources_agree': False}
+events: 9
+disagreeing readiness sources: 9
+module usage: {'public_page': 9, 'community_voting': 3, 'mentorship': 6, 'onsite': 6, 'deliberation': 1}
+== library presets instantiated on an empty draft (rolled back)
+hackathon {'event': 'census-hackathon', 'status': EventStatus.DRAFT, 'modules_in_use': [], 'registration_settings_row': False, 'dashboard_configuration_checks': ['dates', 'base_prize'], 'launch_checklist': 'blocked', 'launch_checklist_failing': ['event_dates', 'judging_rubrics', 'judging_pools'], 'two_readiness_sources_agree': True}
+   registration settings row: False | tracks: ['Software', 'Hardware'] | base prizes: 0 | dates: False
+science_fair {'event': 'census-science_fair', 'status': EventStatus.DRAFT, 'modules_in_use': [], 'registration_settings_row': False, 'dashboard_configuration_checks': ['dates', 'base_prize'], 'launch_checklist': 'blocked', 'launch_checklist_failing': ['event_dates', 'judging_rubrics', 'judging_pools'], 'two_readiness_sources_agree': True}
+   registration settings row: False | tracks: ['Research', 'Engineering'] | base prizes: 0 | dates: False
+grant {'event': 'census-grant', 'status': EventStatus.DRAFT, 'modules_in_use': [], 'registration_settings_row': False, 'dashboard_configuration_checks': ['dates', 'base_prize'], 'launch_checklist': 'blocked', 'launch_checklist_failing': ['event_dates', 'judging_rubrics', 'judging_pools'], 'two_readiness_sources_agree': True}
+   registration settings row: False | tracks: ['Research', 'Community'] | base prizes: 0 | dates: False
+demo_day {'event': 'census-demo_day', 'status': EventStatus.DRAFT, 'modules_in_use': [], 'registration_settings_row': False, 'dashboard_configuration_checks': ['dates', 'base_prize'], 'launch_checklist': 'blocked', 'launch_checklist_failing': ['event_dates', 'judging_rubrics', 'judging_pools'], 'two_readiness_sources_agree': True}
+   registration settings row: False | tracks: ['Products', 'Platforms'] | base prizes: 0 | dates: False
+pitch_competition {'event': 'census-pitch_competition', 'status': EventStatus.DRAFT, 'modules_in_use': [], 'registration_settings_row': False, 'dashboard_configuration_checks': ['dates', 'base_prize'], 'launch_checklist': 'blocked', 'launch_checklist_failing': ['event_dates', 'judging_rubrics', 'judging_pools'], 'two_readiness_sources_agree': True}
+   registration settings row: False | tracks: ['Early Stage', 'Growth'] | base prizes: 0 | dates: False
+events after rollback: 9

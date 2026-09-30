@@ -1,0 +1,50 @@
+version: 3
+task: PD-B01-T01
+batch: PD-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 6a5677ab0ee7622266cea2ce8f2ec6ec3c96ef01
+  head_commit: 5d38cb20d7f34884ccc797ce788a28b5f7513748
+changed_paths:
+- docs/verification/PD-B01/TRIAGE.md
+- docs/execution-v3/claims/PD-B01-T01.yaml
+- docs/execution-v3/reconciliation/PD-R00-STATE.md
+- docs/execution-v3/LINEAGE.md
+deliverables:
+- item: Convert PD-B00 findings into P0/P1/P2 correctness/integration/UX/docs groups
+  result: pass
+  evidence: TRIAGE.md groups all 14 findings; no P0/P1
+- item: Do not mix feature expansion into repair
+  result: pass
+  evidence: D-03/05/08/10/12/13 explicitly deferred to owning batches
+invariants:
+- item: Preserve domain behavior
+  result: pass
+  evidence: triage only
+- item: Record exact evidence
+  result: pass
+  evidence: each disposition cites the register/logs
+verification:
+- command: read DEFECT_REGISTER and map every ID
+  result: pass
+  note: 14/14 IDs dispositioned
+- command: reproduce D-09 root cause (playwright probe + failing vitest before fix)
+  result: pass
+  note: probe reproduced stuck loading; vitest failed pre-fix
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs/evidence-only task
+migrations: []
+findings:
+- legacy freebuff process discovered; PD-R00 record corrected
+escalations: []
+limitations:
+- Same agent triaged and repaired.
+next: review

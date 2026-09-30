@@ -1,0 +1,65 @@
+version: 3
+task: PD-B01-T02
+batch: PD-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 6a5677ab0ee7622266cea2ce8f2ec6ec3c96ef01
+  head_commit: 5d38cb20d7f34884ccc797ce788a28b5f7513748
+changed_paths:
+- src/web/features/judging/JudgeWorkspace.tsx
+- src/web/features/judging/JudgeWorkspace.navigation.test.tsx
+- tests/compatibility/test_prior_schema_migration_smoke.py
+deliverables:
+- item: Fix D-09 at root cause
+  result: pass
+  evidence: chooseEvent/chooseStage return early on unchanged id; regression test added and shown failing
+    before the fix
+- item: Fix D-04 prior-schema upgrade coverage
+  result: pass
+  evidence: 'real smoke test: restore release-freeze dump into scratch DB, migrate 51->101 migrations,
+    migrate --check clean, 5 known records intact, scratch DB dropped'
+invariants:
+- item: Domain behavior/authz/audit unchanged
+  result: pass
+  evidence: only UI handler guard and a new test
+- item: No weakened tests
+  result: pass
+  evidence: the permanent skip was replaced by a real test; it skips only when no PostgreSQL/matching
+    pg_restore
+- item: No demo-only workaround
+  result: pass
+  evidence: uses the recorded released dump, not synthetic data
+verification:
+- command: pnpm vitest (src/web)
+  result: pass
+  note: 65 files, 169 tests pass (168 + 1 new)
+- command: DATABASE_URL=<PG17> pytest tests/compatibility/test_prior_schema_migration_smoke.py
+  result: pass
+  note: 2 passed, 8.3 s
+- command: same test with a bogus expected award id
+  result: pass
+  note: fails with 'awards_award ... lost or duplicated by the upgrade' (negative case)
+- command: same test on SQLite
+  result: pass
+  note: skips with reason; fixture-hash test still runs
+- command: make lint; ruff format
+  result: pass
+  note: clean
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs/evidence-only task
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Upgrade smoke needs PostgreSQL 17-capable pg_restore or Docker postgres:17; local pg_restore 16 cannot
+  read the dump so the test falls back to docker.
+- Browser re-verification of judge queue happens in PD-B01-T05.
+next: review

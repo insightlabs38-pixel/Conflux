@@ -9,7 +9,7 @@
   },
   "full": {
     "wall_s": 210,
-    "measured": "138-141 s, 152 passed, single host, 3 isolated jobs + 4 read-only workers + canary"
+    "measured": "138-142 s, 156 passed, single host, 3 isolated jobs + 4 read-only workers + canary"
   },
   "canary": {
     "wall_s": 150,

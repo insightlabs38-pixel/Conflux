@@ -1,0 +1,7 @@
+### workspace-shell "destination links support opening a separate browser tab" before the fix
+full suite (10 consecutive runs green, then the 11th): 1 failed - browserContext.waitForEvent("page") timeout 30 s (diagnostic re-run passed)
+stress: npx playwright test --project=desktop --workers=8 workspace-shell -g "separate browser tab" --repeat-each=48
+  run 1: 5 failed, 43 passed   (waitForEvent timeout; toHaveURL received "" on a popup that screenshots show fully rendered)
+  run 2: 7 failed, 41 passed
+  run 3: 7 failed, 41 passed (with trace on)
+intermediate attempt (poll context.pages() + waitForLoadState): 17 failed / 79 passed of 96 - rejected

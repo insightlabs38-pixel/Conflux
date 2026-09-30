@@ -1,5 +1,5 @@
 import { chooseWorkspaceEvent } from "./support";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import {
   accessible,
   goToDestination,
@@ -93,21 +93,54 @@ test("destination links support opening a separate browser tab", async ({
   page,
 }, info) => {
   test.skip(info.project.name !== "desktop", "desktop modified click");
+  test.setTimeout(90_000); // room for the popup attempts below
   await page.setViewportSize({ width: 1440, height: 900 });
   await signIn(page, "judge-01");
   await openWorkspace(page);
   const previous = page.url();
-  const [tab] = await Promise.all([
-    page.context().waitForEvent("page"),
-    page
+  const link = page.locator('#workspace-navigation a[href*="view=queue"]');
+  // Contract, independent of browser plumbing: a modified click falls through to the browser
+  // (default not prevented) while a plain click is handled in-app (default prevented).
+  const prevented = (modifiers: boolean) =>
+    link.evaluate((a, ctrl) => {
+      const event = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        button: 0,
+        ctrlKey: ctrl,
+      });
+      a.dispatchEvent(event);
+      return event.defaultPrevented;
+    }, modifiers);
+  expect(await prevented(true)).toBe(false);
+  expect(await prevented(false)).toBe(true);
+  await page.goto(previous); // the plain synthetic click navigated in-app; restore the view
+  // End to end: the real modified click opens the queue view in a second tab. Under heavy load
+  // Chromium sometimes opens the tab without Playwright registering the popup (no `page` event, url
+  // stays ""), so the whole user action is attempted up to three times; a real regression fails all.
+  let tab!: Page;
+  let attempts = 0;
+  await expect(async () => {
+    attempts++;
+    for (const extra of page.context().pages())
+      if (extra !== page) await extra.close();
+    const opened = page.context().waitForEvent("page", { timeout: 7_000 });
+    await page
       .locator('#workspace-navigation a[href*="view=queue"]')
-      .click({ modifiers: ["ControlOrMeta"] }),
-  ]);
-  await expect(tab).toHaveURL(/view=queue/);
+      .click({ modifiers: ["ControlOrMeta"] });
+    tab = await opened;
+    await tab.waitForLoadState("domcontentloaded");
+    expect(await tab.evaluate(() => location.search)).toMatch(/view=queue/);
+    await expect(
+      tab.locator('#workspace-navigation a[aria-current="page"]'),
+    ).toHaveText("Review queue", { timeout: 5_000 });
+  }).toPass({ intervals: [0], timeout: 45_000 });
+  if (attempts > 1)
+    info.annotations.push({
+      type: "popup-attempts",
+      description: `${attempts} attempts (popup tracking lost under load)`,
+    });
   expect(page.url()).toBe(previous);
-  await expect(
-    tab.locator('#workspace-navigation a[aria-current="page"]'),
-  ).toHaveText("Review queue");
   await tab.close();
 });
 

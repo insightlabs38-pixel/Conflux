@@ -38,7 +38,7 @@ invariants:
 verification:
 - command: 10 consecutive python3 scripts/e2e-tiers runs
   result: pass
-  note: exit 0 x10, median 141 s, max 142 s, 152 passed each
+  note: exit 0 x10, median 141 s, max 142 s, 156 passed and 103 skipped each
 - command: uv run --frozen pytest tests/test_e2e_tiers.py
   result: pass
   note: 39 passed including clean-window, breach, flake and repeat-normalisation cases

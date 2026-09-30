@@ -1,0 +1,47 @@
+version: 3
+task: PD-B00-T03
+batch: PD-B00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: b5f398dfc0c4330b34c894bd6d648da6213c83d4
+  head_commit: 0fa4d823baf62e6c9ea895c9c8a5b2b1112332fc
+changed_paths:
+- docs/verification/PD-B00/BASELINE_RESULTS.md
+- docs/verification/PD-B00/logs/T03-pytest-postgres.log
+deliverables:
+- item: Run PostgreSQL integration baseline
+  result: pass
+  evidence: 1418 passed, 5 skipped on PG17.11 via isolated confluxh00 instance
+invariants:
+- item: No shared/production-like DB mutated
+  result: pass
+  evidence: Django test_* databases only; stack DB :5432 untouched
+- item: Do not weaken tests
+  result: pass
+  evidence: no test edits
+verification:
+- command: DATABASE_URL=postgres://...@localhost:15432/conflux uv run --frozen pytest -n auto -q -rs
+  result: pass
+  note: 1418 passed, 5 skipped, 97s; skips are S3 endpoint/prior-schema
+- command: compare skip sets between T02 and T03
+  result: pass
+  note: 18 PG-only skips now executed and passing
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs/evidence-only task
+migrations: []
+findings:
+- '5 skips remain: S3 contract (needs endpoint), two-endpoint portability, no prior-schema upgrade fixture
+  (upgrade-path coverage gap for migration work)'
+escalations: []
+limitations:
+- S3 contract tests not executed (no CONFLUX_S3_TEST_ENDPOINT); may be run against RustFS in T04/T07 if
+  time.
+next: review

@@ -1,0 +1,55 @@
+version: 3
+task: PD-B00-T02
+batch: PD-B00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: b5f398dfc0c4330b34c894bd6d648da6213c83d4
+  head_commit: 0fa4d823baf62e6c9ea895c9c8a5b2b1112332fc
+changed_paths:
+- .prettierignore
+- master/worker_prompt.md
+- master/autonomous_system_prompt.md
+- docs/verification/PD-B00/BASELINE_RESULTS.md
+- docs/verification/PD-B00/logs/
+deliverables:
+- item: Run fast/backend baseline
+  result: pass
+  evidence: 1400 passed/23 skipped; format/lint/web/build/sdk/block-schema/i18n all pass
+- item: Profile test tail
+  result: pass
+  evidence: Setup-dominated tail (8 x ~7.7s) and slowest calls recorded in BASELINE_RESULTS.md
+invariants:
+- item: Do not change behavior to look cleaner
+  result: pass
+  evidence: No product code changed; only prettier ignore for control bundle after it broke format-check
+- item: Record exact evidence
+  result: pass
+  evidence: Raw logs under docs/verification/PD-B00/logs
+verification:
+- command: uv run --frozen pytest -n auto --durations=30 -q
+  result: pass
+  note: 1400 passed, 23 skipped in 78s
+- command: make format-check lint sdk-check block-schema-check i18n-check build; pnpm test
+  result: pass
+  note: first format-check failed (PD-R00 regression, 499 files) then passed after fix
+- command: uv run --frozen pytest -n auto -q -rs
+  result: pass
+  note: all 23 skips enumerated with reasons
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs/evidence-only task
+migrations: []
+findings:
+- README claims 1373/137 tests vs measured 1400/168 (doc drift)
+- Per-worker DB setup dominates test wall time
+escalations: []
+limitations:
+- SQLite-mode run; PostgreSQL in T03
+next: review

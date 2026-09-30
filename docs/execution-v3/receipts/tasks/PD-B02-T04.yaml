@@ -1,0 +1,51 @@
+version: 3
+task: PD-B02-T04
+batch: PD-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 4afe97d5586c10934c88e06d3a2dd186128e4875
+  head_commit: 5098c76ecbc9ca54503f7ff6f47e36f720b15492
+changed_paths:
+- docs/verification/PD-B02/RESULTS.md
+deliverables:
+- item: Preserve high-value integration coverage
+  result: pass
+  evidence: 0 tests removed vs e1888de (collected-id set difference); PG concurrency/race, upgrade smoke,
+    S3, security sweeps all still executed
+- item: No coverage disguised as performance
+  result: pass
+  evidence: only hasher + scheduling + fixture cleanup changed; no test deleted, marked skip, or shrunk
+invariants:
+- item: Coverage and fidelity not reduced
+  result: pass
+  evidence: no test removed; production hasher guarded; skip set not increased
+- item: No test/gate weakened
+  result: pass
+  evidence: assertions unchanged; leak detector adds strictness
+- item: Production settings untouched
+  result: pass
+  evidence: override lives only in tests/conftest.py
+verification:
+- command: pytest --collect-only ids at e1888de (scratch archive) vs HEAD
+  result: pass
+  note: 'removed: none; added: new tests (+scripts-dependent tests not collectable in the scratch archive)'
+- command: PG suite skip list
+  result: pass
+  note: '4 skips: S3 endpoint x3, two-endpoint portability; upgrade skip removed'
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs/evidence-only task
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Scratch archive lacked scripts/, so 1380 vs 1427 ids; the comparison proves nothing was removed, not
+  exact additions.
+next: review

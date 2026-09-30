@@ -1,0 +1,57 @@
+version: 3
+task: PD-B02-T03
+batch: PD-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 4afe97d5586c10934c88e06d3a2dd186128e4875
+  head_commit: 5098c76ecbc9ca54503f7ff6f47e36f720b15492
+changed_paths:
+- Makefile
+- tests/security/test_route_sweep.py
+- tests/conftest.py
+deliverables:
+- item: Parallelize safe backend groups
+  result: pass
+  evidence: 'make test uses --dist worksteal: 22.1-22.3s vs 25.4-25.9s over 3 paired SQLite runs; PG 43-46s'
+- item: Prove safety of the new schedule
+  result: pass
+  evidence: worksteal exposed a real isolation defect (route_sweep leaked committed rows -> test_demo_scenarios
+    failed ~1/3 PG runs); fixed at root cause; 5/5 clean PG runs after
+invariants:
+- item: Coverage and fidelity not reduced
+  result: pass
+  evidence: no test removed; production hasher guarded; skip set not increased
+- item: No test/gate weakened
+  result: pass
+  evidence: assertions unchanged; leak detector adds strictness
+- item: Production settings untouched
+  result: pass
+  evidence: override lives only in tests/conftest.py
+verification:
+- command: 'deterministic repro: pytest -p no:xdist tests/security/test_route_sweep.py tests/integration/test_demo_scenarios.py
+    (PG)'
+  result: pass
+  note: 'before fix: 9 failed; after: 33 passed'
+- command: leak detector negative case (cleanup removed from sweep_world)
+  result: pass
+  note: module errors with 'left committed rows behind' listing demo-hackathon-61
+- command: 5x PG pytest -n auto --dist worksteal after fix
+  result: pass
+  note: 1423 passed, 4 skipped each, 42.9-44.5s
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs/evidence-only task
+migrations: []
+findings:
+- test_route_sweep committed data leaked across modules (fixed)
+escalations: []
+limitations:
+- Detector only inspects worker DBs that are disposable test databases.
+next: review

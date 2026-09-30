@@ -1,0 +1,48 @@
+version: 3
+task: PD-B02-T05
+batch: PD-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 4afe97d5586c10934c88e06d3a2dd186128e4875
+  head_commit: 5098c76ecbc9ca54503f7ff6f47e36f720b15492
+changed_paths:
+- CONTRIBUTING.md
+- docs/verification/PD-B02/RESULTS.md
+deliverables:
+- item: Set and document backend feedback targets
+  result: pass
+  evidence: 'CONTRIBUTING.md: SQLite <30s, PG <60s, investigate at +25%; rules for hashers, committed
+    fixtures, migration setup cost'
+invariants:
+- item: Coverage and fidelity not reduced
+  result: pass
+  evidence: no test removed; production hasher guarded; skip set not increased
+- item: No test/gate weakened
+  result: pass
+  evidence: assertions unchanged; leak detector adds strictness
+- item: Production settings untouched
+  result: pass
+  evidence: override lives only in tests/conftest.py
+verification:
+- command: measured 22.0s SQLite / 43.6s PG vs targets
+  result: pass
+  note: both under target
+- command: make format-check
+  result: pass
+  note: clean
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs/evidence-only task
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Targets are for an 8-core host; not enforced by CI here.
+next: review

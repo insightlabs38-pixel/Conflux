@@ -1,0 +1,55 @@
+version: 3
+task: PD-B02-T02
+batch: PD-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 4afe97d5586c10934c88e06d3a2dd186128e4875
+  head_commit: 5098c76ecbc9ca54503f7ff6f47e36f720b15492
+changed_paths:
+- tests/conftest.py
+- tests/security/test_password_hashing_fidelity.py
+deliverables:
+- item: Remove redundant expensive setup (production-strength hashing of throwaway users)
+  result: pass
+  evidence: SQLite CPU 9m12s -> ~2m27s; wall 78s -> 25s; PG wall 97s -> 44s (with T03)
+- item: Guard fidelity
+  result: pass
+  evidence: '3 tests: production hasher config strong, suite override is test-only, real login works with
+    production hasher'
+invariants:
+- item: Coverage and fidelity not reduced
+  result: pass
+  evidence: no test removed; production hasher guarded; skip set not increased
+- item: No test/gate weakened
+  result: pass
+  evidence: assertions unchanged; leak detector adds strictness
+- item: Production settings untouched
+  result: pass
+  evidence: override lives only in tests/conftest.py
+verification:
+- command: uv run --frozen pytest -n auto (after)
+  result: pass
+  note: 1404 passed, 23 skipped, 24.9s (docs/verification/PD-B02/logs/T02-pytest-after.log)
+- command: pytest tests/security/test_password_hashing_fidelity.py
+  result: pass
+  note: 3 passed incl. end-to-end pbkdf2 login (wrong password 401, right 200)
+- command: scratch MD5 probe before implementing
+  result: pass
+  note: 27s; evidence in PROFILE.md
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs/evidence-only task
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Migration-per-worker setup (~7s) left as is; template-copy reuse deferred (benefit ~6s of 22s, adds
+  infrastructure).
+next: review

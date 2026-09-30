@@ -1,0 +1,30 @@
+version: 1
+checkpoint_id: CP-PD-B02
+created_at: '2026-09-30T06:35:23Z'
+canonical_commit: 5098c76ecbc9ca54503f7ff6f47e36f720b15492
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+- PD-B02
+active_batches:
+- PD-B03
+active_claims: []
+open_escalations: []
+last_completed_task: PD-B02-T06
+ready_summary:
+- PD-B03-T01 (Design isolated browser fixture contract)
+design_revision: r2.1
+verification_summary:
+- verify-fast 1404/23 22s
+- PG17 1423/4 44s x5 clean
+- validate_queue valid
+recovery_notes:
+- PD-B03 promoted IN_PROGRESS, no task started; read docs/verification/PD-B00/DEFECT_REGISTER.md
+  D-01/D-05 and PD-B00 T04 census for input
+- 'Stack: compose project conflux rebuilt at PD-B01 close (source e1888de+B01 frontend
+  fix); run ./scripts/demo-reset before any e2e'
+- Handed off at ~06:40Z before supervisor first window 06:50Z (02:50 EDT); supervisor
+  pid 654256 running
+- main unpushed; freebuff legacy process idle, untouched

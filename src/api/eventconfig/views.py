@@ -13,11 +13,17 @@ from .readiness import compute_readiness
 from .schema import ReadinessSchema
 
 
+class ModuleHomeSchema(serializers.Serializer):
+    destination = serializers.CharField()
+    section = serializers.CharField(allow_blank=True)
+
+
 class ModuleSchema(serializers.Serializer):
     key = serializers.SlugField()
     label = serializers.CharField()
     description = serializers.CharField()
     destination = serializers.CharField(allow_null=True)
+    home = ModuleHomeSchema()
     enabled = serializers.BooleanField()
     in_use = serializers.BooleanField()
     explicit = serializers.BooleanField(allow_null=True)

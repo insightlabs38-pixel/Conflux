@@ -18,7 +18,6 @@ OPTIONAL = {
     "integrations",
     "community_voting",
     "mentorship",
-    "deliberation",
     "public_page",
 }
 
@@ -179,3 +178,14 @@ def test_a_workspace_wide_webhook_counts_for_the_union_not_for_one_event():
     )
     assert by_key(listing(organizer, workspace))["integrations"]["in_use"]
     assert not by_key(listing(organizer, workspace, event.public_id))["integrations"]["in_use"]
+
+
+def test_every_module_says_where_its_tools_live_and_deliberation_is_core():
+    workspace, event, organizer, _ = setup()
+    modules = by_key(listing(organizer, workspace, event.public_id))
+    assert "deliberation" not in modules  # finalizing winners goes through it: core, not optional
+    assert all(m["home"]["destination"] for m in modules.values())
+    assert modules["community_voting"]["home"] == {
+        "destination": "judging",
+        "section": "CommunityVotingBuilder",
+    }

@@ -17,6 +17,7 @@
   ],
   "self-isolating": ["auth-states", "fixture-isolation"],
   "isolated-mutation": [
+    "event-advanced",
     "event-modules",
     "event-presets",
     "event-readiness",

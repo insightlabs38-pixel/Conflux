@@ -146,6 +146,12 @@ export async function goToTask(page: Page, label: string) {
   const tab = page.getByRole("tab", {
     name: new RegExp(`^${escaped}(?:\\s|$)`),
   });
+  // Advanced tabs stay behind a disclosure until asked for (PD-F001-B01-T02).
+  if (!(await tab.isVisible())) {
+    const disclosure = page.locator(".cx-workflow__advanced:visible").first();
+    if ((await disclosure.count()) && (await disclosure.isEnabled()))
+      await disclosure.click();
+  }
   await tab.click();
   await expect(tab).toHaveAttribute("aria-selected", "true");
 }

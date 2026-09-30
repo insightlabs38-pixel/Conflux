@@ -2312,3 +2312,34 @@ html {
 .cx-decision-table td:has(.cx-flags) {
   white-space: normal;
 }
+
+/* Sections with an "Advanced" disclosure: the side column holds the tabs and the disclosure. */
+.cx-workflow__side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  position: sticky;
+  top: var(--space-4);
+}
+.cx-workflow__side > .cx-workflow__navigation {
+  position: static;
+}
+.cx-workflow__advanced {
+  text-align: left;
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-3);
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  cursor: pointer;
+}
+.cx-workflow__advanced:disabled {
+  cursor: default;
+}
+@media (max-width: 48rem) {
+  .cx-workflow__side {
+    position: static;
+  }
+}

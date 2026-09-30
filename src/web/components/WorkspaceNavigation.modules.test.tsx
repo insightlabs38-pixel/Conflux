@@ -22,6 +22,7 @@ const module = (key: string, destination: string | null, enabled: boolean) => ({
   label: key,
   description: "",
   destination,
+  home: { destination: destination ?? "", section: "" },
   enabled,
   in_use: false,
   explicit: null,

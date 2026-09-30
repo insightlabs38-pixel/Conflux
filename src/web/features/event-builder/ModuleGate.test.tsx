@@ -19,6 +19,7 @@ type Mod = {
   label: string;
   description: string;
   destination: string | null;
+  home: { destination: string; section: string };
   enabled: boolean;
   in_use: boolean;
   explicit: boolean | null;
@@ -30,6 +31,7 @@ const onsite = (over: Partial<Mod> = {}): Mod => ({
   label: "On-site",
   description: "Locations and check-in.",
   destination: "onsite",
+  home: { destination: "onsite", section: "" },
   enabled: false,
   in_use: false,
   explicit: null,

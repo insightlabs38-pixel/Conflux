@@ -2355,6 +2355,14 @@ class InputOfModerationReviewResponse(TypedDict):
     actor: str
     created_at: str
 
+class ModuleHomeSchema(TypedDict):
+    destination: str
+    section: str
+
+class InputOfModuleHomeSchema(TypedDict):
+    destination: str
+    section: str
+
 class ModuleListSchema(TypedDict):
     scope: ScopeEnum
     event: str | None
@@ -2370,6 +2378,7 @@ class ModuleSchema(TypedDict):
     label: str
     description: str
     destination: str | None
+    home: ModuleHomeSchema
     enabled: bool
     in_use: bool
     explicit: bool | None
@@ -2381,6 +2390,7 @@ class InputOfModuleSchema(TypedDict):
     label: str
     description: str
     destination: str | None
+    home: InputOfModuleHomeSchema
     enabled: bool
     in_use: bool
     explicit: bool | None

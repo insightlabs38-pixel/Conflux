@@ -87,17 +87,12 @@ for (const width of [390, 1440]) {
         `/api/v1/workspaces/${workspace}/events/${event}/readiness/`,
       )
     ).json();
-    // No blocker is left, and the judge pool is still open (only the organizer can name judges).
-    const open = body.items
-      .filter((i: { passed: boolean }) => !i.passed)
-      .map((i: { id: string }) => i.id);
+    // Nothing is left but the judges only the organizer can name.
     expect(body.status).toBe("warning");
-    expect(open).toContain("judging_pools");
     expect(
-      body.items.filter(
-        (i: { passed: boolean; severity: string }) =>
-          !i.passed && i.severity === "blocker",
-      ),
-    ).toEqual([]);
+      body.items
+        .filter((i: { passed: boolean }) => !i.passed)
+        .map((i: { id: string }) => i.id),
+    ).toEqual(["judging_pools"]);
   });
 }

@@ -28,7 +28,9 @@ class Rule:
     module: str  # "core" or an optional module key: a module that is off contributes no rule
     check: Callable  # event -> (passed, detail)
     destination: str  # where an organizer fixes it
-    section: str = ""  # the tab inside that destination
+    # The tab inside that destination; a function when it depends on the event (e.g. a module that
+    # must be turned on before its tab exists).
+    section: str | Callable = ""
     # What the dashboard's legacy `configuration_checks` list says for this rule, if it is one.
     legacy_check: bool = False
 
@@ -112,7 +114,13 @@ def _public_page(event):
     page = getattr(event, "page", None)
     if page is not None and page.blocks.exists():
         return True, "Public page has content."
+    if not modules.is_enabled(event, "public_page"):
+        return False, "Event is public but has no public page: turn on the public event page."
     return False, "Event is public but its page has no content blocks."
+
+
+def _public_page_section(event):
+    return "page" if modules.is_enabled(event, "public_page") else "features"
 
 
 def _tracks(event):
@@ -150,7 +158,7 @@ RULES = [
     ),
     Rule("judging_rubrics", "blocker", "core", _judging_rubrics, "judging", "EvaluationBuilder"),
     Rule("judging_pools", "warning", "core", _judging_pools, "judging", "EvaluationBuilder"),
-    Rule("public_page", "warning", "core", _public_page, "setup", "page"),
+    Rule("public_page", "warning", "core", _public_page, "setup", _public_page_section),
     Rule(
         "registration_invites",
         "warning",
@@ -177,7 +185,10 @@ def compute_readiness(event) -> dict:
                 "passed": passed,
                 "detail": detail,
                 "module": rule.module,
-                "fix": {"destination": rule.destination, "section": rule.section},
+                "fix": {
+                    "destination": rule.destination,
+                    "section": rule.section(event) if callable(rule.section) else rule.section,
+                },
             }
         )
     blocked = any(not i["passed"] and i["severity"] == "blocker" for i in items)

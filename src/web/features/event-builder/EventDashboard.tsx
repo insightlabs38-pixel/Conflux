@@ -3,6 +3,7 @@ import { WorkflowSections } from "../../components/WorkflowSections";
 import { OrganizerOverview } from "./OrganizerOverview";
 import {
   Destination,
+  useModuleState,
   WorkspaceViewTitle,
 } from "../../components/WorkspaceNavigation";
 import { PageHeader } from "../../components/Foundation";
@@ -131,6 +132,12 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
   });
   // The one readiness list, shared by Setup, the overview and operations (hooks/useReadiness.ts).
   const readinessLoad = useReadiness(workspaceId, known ? selectedId : null);
+  // Panels of optional modules mount only once the server says the module is on for this event:
+  // a hidden panel must not load (or, like the voting plan, create) anything on its own.
+  const forEvent = known ? selectedId : "";
+  const publicPageOff = useModuleState("public_page", forEvent) !== "on";
+  const mentorshipOff = useModuleState("mentorship", forEvent) !== "on";
+  const votingOff = useModuleState("community_voting", forEvent) !== "on";
   const dashboard = dashboardLoad.data;
   const tracks = tracksLoad.data ?? [];
   const prizes = prizesLoad.data ?? [];
@@ -545,6 +552,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
                 },
                 {
                   id: "policies",
+                  advanced: true,
                   label: "Policies",
                   description: "Rules of entry, gates and debugging",
                   content: (
@@ -584,6 +592,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
                 },
                 {
                   id: "page",
+                  hidden: publicPageOff,
                   label: "Public page",
                   description: "Blocks, appearance and accessibility",
                   content: (
@@ -628,6 +637,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
                 },
                 {
                   id: "MentorDeskPanel",
+                  hidden: mentorshipOff,
                   label: "Mentors",
                   description: "Availability and help requests",
                   content: (
@@ -730,6 +740,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
                 },
                 {
                   id: "CommunityVotingBuilder",
+                  hidden: votingOff,
                   label: "Community voting",
                   description: "Public voting",
                   content: (

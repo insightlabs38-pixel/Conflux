@@ -12,7 +12,6 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from community.models import VotingPlan
-from deliberation.models import DeliberationRoom
 from django.core.exceptions import ValidationError
 from eligibility.models import EligibilityFinding, EligibilityReview, EligibilityRules
 from events.models import Event
@@ -41,6 +40,8 @@ class Module:
     has_content: Callable[..., bool]
     # Extra workspace-level content (e.g. webhooks not bound to one event); union view only.
     has_workspace_content: Callable[..., bool] | None = None
+    # Where the module's tools live: (destination, tab), so a turned-on module can be opened.
+    home: tuple[str, str] = ("", "")
 
 
 def _any(model, events, **filters):
@@ -60,6 +61,7 @@ MODULES = {
             or _any(EligibilityRules, events, require_clearance=True)
             # The destination also hosts deadline-exception decisions: a request must be reachable.
             or _any(DeadlineExceptionRequest, events),
+            home=("eligibility", ""),
         ),
         Module(
             "onsite",
@@ -69,6 +71,7 @@ MODULES = {
             lambda events: _any(Location, events)
             or _any(AgendaSession, events)
             or _any(Attendance, events),
+            home=("onsite", ""),
         ),
         Module(
             "integrations",
@@ -82,6 +85,7 @@ MODULES = {
             lambda workspace: WebhookSubscription.objects.filter(
                 workspace=workspace, event__isnull=True
             ).exists(),
+            home=("integrations", ""),
         ),
         Module(
             "community_voting",
@@ -89,6 +93,7 @@ MODULES = {
             "Let the community vote on projects alongside judges.",
             None,
             lambda events: VotingPlan.objects.filter(event__in=events).exists(),
+            home=("judging", "CommunityVotingBuilder"),
         ),
         Module(
             "mentorship",
@@ -98,13 +103,7 @@ MODULES = {
             lambda events: _any(MentorProfile, events)
             or _any(MentorRequest, events)
             or _any(OfficeHourSlot, events),
-        ),
-        Module(
-            "deliberation",
-            "Award deliberation",
-            "Private rooms where judges discuss an award before it is decided.",
-            None,
-            lambda events: DeliberationRoom.objects.filter(award__event__in=events).exists(),
+            home=("participants", "MentorDeskPanel"),
         ),
         Module(
             "public_page",
@@ -112,6 +111,7 @@ MODULES = {
             "Build the page participants and visitors see.",
             None,
             lambda events: Page.objects.filter(event__in=events).exists(),
+            home=("setup", "page"),
         ),
     )
 }
@@ -132,6 +132,7 @@ def _entry(module, *, in_use, explicit, scope_label):
         "label": module.label,
         "description": module.description,
         "destination": module.destination,
+        "home": {"destination": module.home[0], "section": module.home[1]},
         "enabled": enabled,
         "in_use": in_use,
         "explicit": explicit,

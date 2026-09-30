@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { Button } from "../../components/Button";
-import { useWorkspaceNavigation } from "../../components/WorkspaceNavigation";
+import {
+  DestinationLink,
+  useWorkspaceNavigation,
+} from "../../components/WorkspaceNavigation";
 
 /** Optional modules of the selected event: what is on, what holds content, and the switches. */
 export function FeaturesPanel({ eventId }: { eventId: string }) {
@@ -38,6 +41,15 @@ export function FeaturesPanel({ eventId }: { eventId: string }) {
             <strong>{module.label}</strong>
             {module.in_use && <span> · in use</span>}
             <p>{module.description}</p>
+            {module.enabled && module.home.destination && (
+              <DestinationLink
+                id={module.home.destination}
+                section={module.home.section || undefined}
+                className="cx-inline-link"
+              >
+                Open {module.label.toLowerCase()}
+              </DestinationLink>
+            )}{" "}
             {module.enabled ? (
               <Button
                 type="button"

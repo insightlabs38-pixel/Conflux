@@ -1,5 +1,6 @@
 {
   "canary:chain": 126.5,
+  "isolated-mutation:event-advanced": 15.0,
   "isolated-mutation:event-modules": 20.0,
   "isolated-mutation:event-presets": 15.0,
   "isolated-mutation:event-readiness": 20.0,

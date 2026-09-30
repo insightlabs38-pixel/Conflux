@@ -9,6 +9,8 @@ export type ModuleState = {
   description: string;
   /** The organizer destination this module owns (null when it only owns panels). */
   destination: string | null;
+  /** Where its tools live, so a turned-on module can be opened (destination, tab). */
+  home: { destination: string; section: string };
   /** Switched on by an organizer or already holding content. */
   enabled: boolean;
   in_use: boolean;

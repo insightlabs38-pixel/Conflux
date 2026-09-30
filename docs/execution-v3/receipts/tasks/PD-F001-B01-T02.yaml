@@ -1,0 +1,95 @@
+version: 3
+task: PD-F001-B01-T02
+batch: PD-F001-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 54c7d4e
+  head_commit: 54c7d4e
+changed_paths:
+- src/web/components/WorkflowSections.tsx
+- src/web/components/WorkflowSections.test.tsx
+- src/web/components/WorkspaceNavigation.tsx
+- src/web/styles/components.css
+- src/web/hooks/useModules.ts
+- src/web/features/event-builder/ (EventDashboard, FeaturesPanel, tests)
+- src/api/eventconfig/ (modules.py, readiness.py, views.py)
+- tests/integration/test_event_modules.py
+- tests/integration/test_event_readiness.py
+- tests/e2e/event-advanced.spec.ts
+- tests/e2e/event-readiness.spec.ts
+- tests/e2e/support.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+- docs/api/openapi.yaml
+- sdks/
+- docs/product-depth-v3/specs/001-base-experience-must-remain-smaller-than-the-platform.md
+deliverables:
+- item: Advanced configuration stays collapsed until a feature requiring it is enabled
+  result: pass
+  evidence: WorkflowSections sections accept advanced (tab behind an Advanced (N) disclosure that opens when a link selects an advanced section) and hidden (not offered, not mounted); Policies is advanced; Public page, Mentor desk and Community voting tabs are hidden until their module is on
+- item: A hidden panel does not load or create anything
+  result: pass
+  evidence: panels mount only when the server says the module is on for the selected event (useModuleState is unknown until the list describes that event); event-advanced.spec.ts records zero voting-plan requests and no plan while off, and the plan only after turning it on; unit test EventDashboard.modules
+- item: Turning a feature on leads to it
+  result: pass
+  evidence: each module carries home {destination, section}; Setup > Features shows Open <module> once on; the public_page readiness fix points at Features until the module is on
+- item: Progressive disclosure for base users, edge and narrow states
+  result: pass
+  evidence: event-advanced.spec.ts at 390 and 1440 with axe and no horizontal overflow; drafts survive because advanced sections stay mounted while collapsed
+invariants:
+- item: No second source of truth for enablement
+  result: pass
+  evidence: the tabs read the same server module list as navigation and Features
+- item: Server authorization and audit unchanged
+  result: pass
+  evidence: enabling uses the audited PATCH from T04; no endpoint changed semantics
+- item: Drafts preserved
+  result: pass
+  evidence: collapsed advanced sections and visible sections stay mounted; hidden (module off) sections have no draft to lose
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1484 passed, 23 skipped (before the two added assertions); test_event_modules and test_event_readiness 18 passed after
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 313 web tests (WorkflowSections advanced/hidden, EventDashboard.modules added); static checks clean
+- command: event-advanced spec on a fresh isolated fixture
+  result: pass
+  note: 1 passed covering 390 and 1440 and the voting-plan side-effect assertions
+- command: make e2e-fast
+  result: pass
+  note: read-only, isolated-mutation (incl. event-advanced and event-readiness exact list) and canary tiers ok
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: Advanced disclosure, hidden module tabs, Open links in Features
+- surface: api
+  result: pass
+  evidence: module entries gain home; deliberation removed from the optional list
+- surface: audit
+  result: pass
+  evidence: "not applicable for this task: no new mutation; enabling audited in T04"
+- surface: docs
+  result: pass
+  evidence: OpenAPI and SDKs regenerated; spec 001 module table corrected
+- surface: sdk
+  result: pass
+  evidence: "not applicable for this task: not_required; generated artifacts regenerated only"
+migrations: []
+findings:
+- Correction to the T04 catalog - award deliberation is core, not an optional module, because finalizing winners goes through it (release-integrity asserts a deliberation room for the published award); it is removed from the module list, its tab is always offered
+- The voting-plan side effect recorded in the T05 receipt is resolved at its trigger - the community voting panel (which creates the plan when it loads) is no longer mounted for events that have not turned the module on. The GET still creates a plan for any caller that asks; the endpoint contract is unchanged
+- The Policies tab now sits behind Advanced; the read-only uiv2-surfaces tour reaches it through the goToTask helper, which reveals the disclosure (shared helper, not a weakened assertion)
+- The T05 browser spec is back to the exact unresolved list (judging_pools only)
+limitations:
+- Only Setup has an advanced section today (Policies); more sections can opt in with advanced
+- Hidden tabs are for organizer workspaces; participant and judge workspaces are unchanged
+escalations:
+- ESC-20260930-002 (resolved, option A)
+next: review

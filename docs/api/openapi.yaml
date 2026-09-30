@@ -20619,6 +20619,16 @@ components:
       - note
       - public_id
       - source_key
+    ModuleHomeSchema:
+      type: object
+      properties:
+        destination:
+          type: string
+        section:
+          type: string
+      required:
+      - destination
+      - section
     ModuleListSchema:
       type: object
       properties:
@@ -20649,6 +20659,8 @@ components:
         destination:
           type: string
           nullable: true
+        home:
+          $ref: '#/components/schemas/ModuleHomeSchema'
         enabled:
           type: boolean
         in_use:
@@ -20666,6 +20678,7 @@ components:
       - destination
       - enabled
       - explicit
+      - home
       - in_use
       - key
       - label

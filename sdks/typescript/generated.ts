@@ -2551,6 +2551,10 @@ export type InputOfModerationReviewResponse = {
   created_at: string;
 };
 
+export type ModuleHomeSchema = { destination: string; section: string };
+
+export type InputOfModuleHomeSchema = { destination: string; section: string };
+
 export type ModuleListSchema = {
   scope: ScopeEnum;
   event: string | null;
@@ -2568,6 +2572,7 @@ export type ModuleSchema = {
   label: string;
   description: string;
   destination: string | null;
+  home: ModuleHomeSchema;
   enabled: boolean;
   in_use: boolean;
   explicit: boolean | null;
@@ -2580,6 +2585,7 @@ export type InputOfModuleSchema = {
   label: string;
   description: string;
   destination: string | null;
+  home: InputOfModuleHomeSchema;
   enabled: boolean;
   in_use: boolean;
   explicit: boolean | null;

@@ -164,6 +164,21 @@ export function useModuleEnabled(key: string): boolean {
   const modules = useWorkspaceNavigation()?.modules.modules;
   return modules?.find((module) => module.key === key)?.enabled ?? true;
 }
+/**
+ * The state of an optional module for one event, for panels that must not mount (and so must not
+ * load or create anything) until the module is on: "unknown" until the server has answered for
+ * that event, never a guess from a list that describes another event or the workspace.
+ */
+export function useModuleState(
+  key: string,
+  eventId: string,
+): "on" | "off" | "unknown" {
+  const modules = useWorkspaceNavigation()?.modules;
+  if (!modules?.modules || modules.eventId !== eventId) return "unknown";
+  return modules.modules.find((module) => module.key === key)?.enabled
+    ? "on"
+    : "off";
+}
 /** Keep a destination mounted to retain form drafts and offline buffers across navigation. */
 export function Destination({
   id,

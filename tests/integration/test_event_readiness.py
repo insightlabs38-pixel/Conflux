@@ -177,3 +177,16 @@ def test_readiness_is_organizer_only_and_tenant_scoped():
     assert outsider.get(url).status_code == 403
     cross = f"/api/v1/workspaces/{other.public_id}/events/{event.public_id}/readiness/"
     assert outsider.get(cross).status_code == 404
+
+
+def test_the_public_page_fix_points_at_features_until_the_module_is_on():
+    workspace, event, *_ = setup()
+    event.is_public = True
+    event.save()
+    bad = item(compute_readiness(event), "public_page")
+    assert not bad["passed"] and "turn on the public event page" in bad["detail"]
+    assert bad["fix"] == {"destination": "setup", "section": "features"}
+    EventModuleSetting.objects.create(event=event, module="public_page", enabled=True)
+    bad = item(compute_readiness(event), "public_page")
+    assert "no content blocks" in bad["detail"]
+    assert bad["fix"] == {"destination": "setup", "section": "page"}

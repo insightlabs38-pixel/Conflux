@@ -766,6 +766,9 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
   }, [workspaceId, eventId, stageId]);
 
   function chooseEvent(id: string) {
+    // Re-choosing the current event must not reset state: the stages effect keys on eventId
+    // and would not re-run, stranding the "Loading stages…" indicator.
+    if (id === eventId) return;
     setEventId(id);
     setStages([]);
     setStageId("");
@@ -777,6 +780,7 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
   }
 
   function chooseStage(id: string) {
+    if (id === stageId) return;
     setStageId(id);
     setLoadingPlans(!!id);
     setPlans([]);

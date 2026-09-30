@@ -1,0 +1,36 @@
+seeded 400 participants, 30 judges, 300 finalized
+{"wall_s": 62.4, "requests": 7221, "rps": 115.6, "actors": {"participants": 80, "judges": 30, "browsers": 24, "organizers": 2}, "server_errors": 0, "successes": {"ballot": 534, "vote": 100, "finalize": 100}, "unexpected_count": 0, "races": {"total": 70, "violations": []}}
+autosave           n=  320 p50= 1203.3 p95=  1741.0 p99=  1882.9 max=  1980.7 {200: 320}
+ballot_draft_get   n=  524 p50=  642.0 p95=  1304.6 p99=  1465.0 max=  1559.4 {200: 524}
+ballot_draft_put   n=  524 p50=  644.5 p95=  1597.0 p99=  1678.7 max=  1820.3 {200: 524}
+ballot_list        n=  524 p50=  606.8 p95=  1499.4 p99=  1635.2 max=  1687.8 {200: 524}
+ballot_submit      n=  524 p50=  842.0 p95=  1770.9 p99=  2048.9 max=  2125.8 {201: 524}
+finalize           n=   80 p50= 1643.5 p95=  1811.1 p99=  1814.8 max=  1814.8 {201: 80}
+finalize_retry     n=   80 p50= 1223.7 p95=  1755.0 p99=  1830.5 max=  1830.5 {200: 80}
+gallery            n= 1121 p50=  543.9 p95=  1286.2 p99=  1604.0 max=  1830.2 {200: 1121}
+health             n= 1121 p50=  104.9 p95=   160.9 p99=   198.7 max=   219.9 {200: 1121}
+judge_events       n=   30 p50=  915.1 p95=  1039.3 p99=  1043.7 max=  1043.7 {200: 30}
+normalize          n=    1 p50=  118.3 p95=   118.3 p99=   118.3 max=   118.3 {201: 1}
+progress           n=  180 p50=   46.7 p95=   184.9 p99=   805.2 max=   813.5 {200: 180}
+publish_results    n=    1 p50=   69.3 p95=    69.3 p99=    69.3 max=    69.3 {200: 1}
+race_autosave      n=  160 p50=   78.8 p95=   113.8 p99=   126.0 max=   127.9 {200: 20, 400: 140}
+race_ballot        n=   80 p50=  103.2 p95=   141.5 p99=   146.0 max=   146.0 {201: 10, 400: 70}
+race_finalize      n=  160 p50=   82.5 p95=   103.7 p99=   112.1 max=   115.7 {201: 20, 200: 140}
+race_vote          n=  160 p50=   76.3 p95=   103.6 p99=   114.5 max=   114.5 {201: 20, 400: 140}
+results            n=    5 p50=   65.9 p95=    67.0 p99=    67.0 max=    67.0 {200: 5}
+results_csv        n=    5 p50=   65.7 p95=    67.7 p99=    67.7 max=    67.7 {200: 5}
+search             n= 1121 p50=  605.4 p95=  1483.4 p99=  1636.6 max=  1776.3 {200: 1121}
+sub_list           n=  160 p50=  575.0 p95=  1198.0 p99=  1264.0 max=  1271.4 {200: 160}
+vote               n=   80 p50= 1207.9 p95=  1559.8 p99=  1648.9 max=  1648.9 {201: 80}
+vote_dupe          n=   80 p50= 1324.8 p95=  1620.1 p99=  1691.8 max=  1691.8 {400: 80}
+vote_results_org   n=  180 p50=   66.6 p95=   101.8 p99=   800.3 max=   800.5 {200: 180}
+peak db connections: 22
+PASS ballots == 201s 534 vs 534
+PASS no duplicate judge/project ballots 
+PASS ballot.submitted audit == ballots 
+PASS votes == 201s 100 vs 100
+PASS live finalizations == 201s 100 vs 100
+PASS finalize domain events == live finalizations 100
+PASS no submission has >1 version 
+PASS no 5xx 0
+open db connections now: 1

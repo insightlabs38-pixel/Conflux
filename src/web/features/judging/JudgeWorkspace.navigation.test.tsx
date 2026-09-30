@@ -100,6 +100,39 @@ describe("judge navigation", () => {
     );
   });
 
+  it("does not strand loading when the already selected event or stage is chosen again", async () => {
+    const fetchMock = vi.fn().mockImplementation(async (input: unknown) => {
+      const url = String(input);
+      const body = url.endsWith("judge-events/")
+        ? [{ public_id: "e1", name: "First" }]
+        : url.endsWith("judge-calendar/")
+          ? { windows: [], assignments: [] }
+          : url.endsWith("/stages/")
+            ? [{ public_id: "s1", name: "Final" }]
+            : url.endsWith("evaluation-plans/")
+              ? [{ public_id: "p1", name: "Final review" }]
+              : [];
+      return { ok: true, status: 200, json: async () => body };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    act(() => root.render(<JudgeWorkspace workspaceId="w" />));
+    await waitFor(() => container.textContent?.includes("First") ?? false);
+    await choose(container.querySelector("select")!, "e1");
+    await waitFor(() => container.textContent?.includes("Final") ?? false);
+    await choose(container.querySelectorAll("select")[1], "s1");
+    await waitFor(
+      () => !(container.textContent?.includes("Loading evaluation") ?? false),
+    );
+    // Selecting the same values again (assistive tech, autofill, programmatic change) is a no-op.
+    await choose(container.querySelector("select")!, "e1");
+    await act(async () => new Promise((resolve) => setTimeout(resolve, 50)));
+    expect(container.textContent).not.toContain("Loading stages");
+    expect(container.querySelectorAll("select").length).toBeGreaterThan(1);
+    await choose(container.querySelectorAll("select")[1], "s1");
+    await act(async () => new Promise((resolve) => setTimeout(resolve, 50)));
+    expect(container.textContent).not.toMatch(/Loading (plans|evaluation)/);
+  });
+
   it("keeps a rejected draft visibly unsaved and prevents ballot submission", async () => {
     const fetchMock = vi
       .fn()

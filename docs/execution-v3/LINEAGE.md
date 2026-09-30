@@ -27,7 +27,7 @@ Status precedence: runtime override in `state/` > status in `TASKS.yaml`/`BATCHE
 | `docs/batches/*.md`, `docs/verification/**`, `docs/ui-v2/**` | Receipts and verification evidence for shipped work. |
 | `master/`, `master.sh`, `tests/test_master_supervisor.py`, `.dogfood/` | DOGFOOD Claude/Codex master supervisor and its logs. Non-active; do not launch for v3. |
 | `~/DOGFOOD_EXECUTION_CONTROL_v2_2026-09-23*`, `~/DOGFOOD_POST_SPEC_PLAN_v2_*` (outside repo) | Original external plan bundles and zips; docs/execution is the in-repo copy. |
-| Branches `claude/C-B02`, `sol/C-B04`, `sol/BOOT-B00`, `freebuff/RT-001` and their `~/conflux-worktrees/*` | Old lane worktrees; fully merged into `main`, clean, not v3 claims. See PD-R00-T03 reconciliation. |
+| Branches `claude/C-B02`, `sol/C-B04`, `sol/BOOT-B00`, `freebuff/RT-001` and their `~/conflux-worktrees/*` | Old lane worktrees; fully merged into `main`, clean, not v3 claims. A legacy `freebuff` process is still alive in `freebuff-lane` (idle, not writing). See PD-R00-STATE.md. |
 | `conflux_v3_claude_design_handoff*.zip` | Design handoff archives (untracked inputs); the extracted r2.1 handoff under `docs/product-depth-v3/design/` is what PD-DESIGN-B00 consumes. |
 
 ## Rules

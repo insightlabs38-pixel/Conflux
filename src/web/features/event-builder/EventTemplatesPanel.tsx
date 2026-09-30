@@ -17,6 +17,13 @@ type LibraryTemplate = {
   description: string;
   tracks: string[];
   stages: string[];
+  version: number;
+  duration_days: number;
+  registration_mode: string;
+  min_team_size: number;
+  max_team_size: number;
+  required_artifact_kinds: string[];
+  criteria: string[];
 };
 type Preview = Record<string, unknown[] | undefined>;
 
@@ -33,6 +40,12 @@ const SECTION_KEYS = [
   "evaluation_plans",
   "pages",
 ] as const;
+
+const REGISTRATION_LABELS: Record<string, string> = {
+  open: "open",
+  application: "application-based",
+  invite_only: "invite-only",
+};
 
 function message(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -334,8 +347,22 @@ function LibraryTemplateRow({
     <li>
       <strong>{template.label}</strong> — {template.description}
       <p>
-        Stages: {template.stages.join(" → ")}. Tracks:{" "}
-        {template.tracks.join(", ")}.
+        Stages: {template.stages.join(" → ")}.
+        {template.tracks.length > 0 && (
+          <> Tracks: {template.tracks.join(", ")}.</>
+        )}
+      </p>
+      <p>
+        Starts with: {template.duration_days}{" "}
+        {template.duration_days === 1 ? "day" : "days"},{" "}
+        {REGISTRATION_LABELS[template.registration_mode] ??
+          template.registration_mode}{" "}
+        registration, teams of {template.min_team_size}–{template.max_team_size}
+        , required evidence:{" "}
+        {template.required_artifact_kinds
+          .map((kind) => kind.replace(/_/g, " "))
+          .join(", ") || "none"}
+        , published rubric: {template.criteria.join(", ")}.
       </p>
       <label htmlFor={`library-name-${template.slug}`}>Event name</label>
       <input

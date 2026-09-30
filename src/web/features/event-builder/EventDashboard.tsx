@@ -289,7 +289,15 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
             </label>
             <button disabled={busy}>Create event</button>
           </form>
-          <EventTemplatesPanel workspaceId={workspaceId} onCreated={choose} />
+          <EventTemplatesPanel
+            workspaceId={workspaceId}
+            onCreated={(id) => {
+              // The server now lists the new event; without the refetch it was selected but absent
+              // from the events navigation until the next visit.
+              choose(id);
+              void eventsLoad.reload();
+            }}
+          />
         </details>
       </Destination>
       <nav aria-label="Workspace events">

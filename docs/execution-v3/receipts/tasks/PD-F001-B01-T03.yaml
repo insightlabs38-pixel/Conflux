@@ -1,0 +1,92 @@
+version: 3
+task: PD-F001-B01-T03
+batch: PD-F001-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 41090ac
+  head_commit: 41090ac
+changed_paths:
+- src/api/eventconfig/
+- src/api/integrations/template_library.py
+- src/api/integrations/template_views.py
+- src/api/config/settings.py
+- src/web/features/event-builder/EventTemplatesPanel.tsx
+- src/web/features/event-builder/EventTemplatesPanel.test.tsx
+- src/web/features/event-builder/EventDashboard.tsx
+- tests/integration/test_event_presets.py
+- tests/integration/test_template_library.py
+- tests/integration/test_final_archive.py
+- tests/e2e/event-presets.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+- docs/api/openapi.yaml
+- sdks/
+deliverables:
+- item: Real defaults for each event format, not placeholders
+  result: pass
+  evidence: eventconfig/presets.py (5 versioned presets) applied by create_event_from_preset; every preset event has registration settings, team size and required evidence rules, derived end date, stage graph and a published rubric v1 per judging plan; only event_dates (when no date is given) and judging_pools remain
+- item: UI wired to canonical server state showing what a format starts with
+  result: pass
+  evidence: library list shows duration, registration mode, team size, required evidence and rubric criteria from the API; empty tracks are not announced
+- item: Required states (normal, loading, empty, error, mobile)
+  result: pass
+  evidence: existing panel loading/error states unchanged; 390 and 1440 viewport browser runs with axe and no horizontal overflow
+invariants:
+- item: One source of truth; no UI-only rules
+  result: pass
+  evidence: defaults live in presets.py and are written to the existing domain rows; EventProfile stores provenance only
+- item: Server authorization, validation and audit authoritative
+  result: pass
+  evidence: endpoint permissions unchanged (judge 403, anonymous denied); invalid zone, mode or team range rejected atomically; rubric publications and preset_version audited
+- item: Progressive disclosure preserved
+  result: pass
+  evidence: no new advanced controls in the base creation view
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1468 passed, 23 skipped (was 1454; adds test_event_presets, updated template library and archive classification)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 294 web tests; format, lint, tsc, OpenAPI and SDK checks clean
+- command: npx playwright test event-presets --repeat-each=4 --workers=1 (isolated fixture)
+  result: pass
+  note: 8 passed at 390 and 1440 with axe
+- command: make e2e-fast
+  result: pass
+  note: read-only, isolated-mutation (incl. event-presets) and canary tiers ok
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: format defaults shown before creating; created event now appears in the events navigation
+- surface: api
+  result: pass
+  evidence: library listing and instantiate gain additive fields (starts_at, timezone, registration_mode, team sizes)
+- surface: audit
+  result: pass
+  evidence: library_instantiated payload carries preset_version; rubric.published per plan
+- surface: docs
+  result: pass
+  evidence: OpenAPI and generated SDKs regenerated
+- surface: sdk
+  result: pass
+  evidence: "not applicable for this task: not_required; generated artifacts regenerated only"
+migrations:
+- "eventconfig 0001 creates EventProfile (additive); existing events have no profile and are unchanged; template library keeps its URLs and adds response fields"
+findings:
+- Deliberate behavior change recorded, not a weakened gate - test_each_local_template_instantiates_editable_draft_configuration previously asserted no published rubric; the format's rubric now starts published
+- Library tracks Software/Hardware and similar were placeholder-grade and are removed (tracks stay empty unless inherent to a format)
+- "Bug fixed: an event created from a template was selected but missing from the events navigation until a reload (EventDashboard did not refetch)"
+- "End date uses the organizer's wall clock: a 28-day grant across a DST change ends at the same local time (plain UTC arithmetic was an hour off); covered by test"
+- Pre-existing - EventRegistrationSettings is not part of the config archive, so templates and clones do not carry registration mode (recorded for S008)
+escalations:
+- ESC-20260930-002 (resolved, option A)
+limitations:
+- The guided creation form (dates, timezone, registration, team size inputs in the UI) is T01; T03 delivers the defaults and the API inputs
+- The creation disclosure opens while events load and closes after; left for the T01 redesign (the spec waits for it)
+next: review

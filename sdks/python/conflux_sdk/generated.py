@@ -2050,19 +2050,51 @@ class InputOfLaunchChecklistSchema(TypedDict):
     status: str
     items: list[InputOfChecklistItemSchema]
 
+class LibraryInstantiateInput(TypedDict):
+    name: str
+    slug: str
+    starts_at: NotRequired[str | None]
+    timezone: NotRequired[str]
+    registration_mode: NotRequired[str]
+    min_team_size: NotRequired[int]
+    max_team_size: NotRequired[int]
+
+class InputOfLibraryInstantiateInput(TypedDict):
+    name: str
+    slug: str
+    starts_at: NotRequired[str | None]
+    timezone: NotRequired[str]
+    registration_mode: NotRequired[str]
+    min_team_size: NotRequired[int]
+    max_team_size: NotRequired[int]
+
 class LibraryTemplateOutput(TypedDict):
     slug: str
+    version: int
     label: str
     description: str
     tracks: list[str]
     stages: list[str]
+    duration_days: int
+    registration_mode: str
+    min_team_size: int
+    max_team_size: int
+    required_artifact_kinds: list[str]
+    criteria: list[str]
 
 class InputOfLibraryTemplateOutput(TypedDict):
     slug: str
+    version: int
     label: str
     description: str
     tracks: list[str]
     stages: list[str]
+    duration_days: int
+    registration_mode: str
+    min_team_size: int
+    max_team_size: int
+    required_artifact_kinds: list[str]
+    criteria: list[str]
 
 class LocationInput(TypedDict):
     kind: LocationKind

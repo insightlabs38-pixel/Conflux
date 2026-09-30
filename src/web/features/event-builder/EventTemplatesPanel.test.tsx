@@ -176,8 +176,15 @@ describe("EventTemplatesPanel", () => {
               slug: "science_fair",
               label: "Science fair",
               description: "Evaluate research projects.",
-              tracks: ["Research"],
+              tracks: [],
               stages: ["Submission", "Judging"],
+              version: 1,
+              duration_days: 2,
+              registration_mode: "application",
+              min_team_size: 1,
+              max_team_size: 4,
+              required_artifact_kinds: ["document"],
+              criteria: ["Method", "Evidence"],
             },
           ],
         };
@@ -199,6 +206,11 @@ describe("EventTemplatesPanel", () => {
       ),
     );
     await until(() => container.textContent?.includes("Science fair") ?? false);
+    // What the format starts with is shown before creating; empty tracks are not announced.
+    expect(container.textContent).toContain(
+      "Starts with: 2 days, application-based registration, teams of 1–4, required evidence: document, published rubric: Method, Evidence.",
+    );
+    expect(container.textContent).not.toContain("Tracks:");
     for (const [selector, value] of [
       ["#library-name-science_fair", "County Fair"],
       ["#library-slug-science_fair", "county-fair"],

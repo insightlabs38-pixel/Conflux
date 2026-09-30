@@ -1419,13 +1419,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InstantiateInput'
+              $ref: '#/components/schemas/LibraryInstantiateInput'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/InstantiateInput'
+              $ref: '#/components/schemas/LibraryInstantiateInput'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/InstantiateInput'
+              $ref: '#/components/schemas/LibraryInstantiateInput'
         required: true
       security:
       - sessionCookie: []
@@ -19978,12 +19978,48 @@ components:
       required:
       - items
       - status
+    LibraryInstantiateInput:
+      type: object
+      description: |-
+        The base decisions an organizer makes when creating from a format; all optional, since the
+        format supplies a real value for each.
+      properties:
+        name:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+          maxLength: 200
+          pattern: ^[-a-zA-Z0-9_]+$
+        starts_at:
+          type: string
+          format: date-time
+          nullable: true
+        timezone:
+          type: string
+          maxLength: 64
+        registration_mode:
+          type: string
+          maxLength: 20
+        min_team_size:
+          type: integer
+          maximum: 100
+          minimum: 1
+        max_team_size:
+          type: integer
+          maximum: 100
+          minimum: 1
+      required:
+      - name
+      - slug
     LibraryTemplateOutput:
       type: object
       properties:
         slug:
           type: string
           pattern: ^[-a-zA-Z0-9_]+$
+        version:
+          type: integer
         label:
           type: string
         description:
@@ -19996,12 +20032,35 @@ components:
           type: array
           items:
             type: string
+        duration_days:
+          type: integer
+        registration_mode:
+          type: string
+        min_team_size:
+          type: integer
+        max_team_size:
+          type: integer
+        required_artifact_kinds:
+          type: array
+          items:
+            type: string
+        criteria:
+          type: array
+          items:
+            type: string
       required:
+      - criteria
       - description
+      - duration_days
       - label
+      - max_team_size
+      - min_team_size
+      - registration_mode
+      - required_artifact_kinds
       - slug
       - stages
       - tracks
+      - version
     LocationInput:
       type: object
       properties:

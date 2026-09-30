@@ -2239,20 +2239,54 @@ export type InputOfLaunchChecklistSchema = {
   items: InputOfChecklistItemSchema[];
 };
 
+export type LibraryInstantiateInput = {
+  name: string;
+  slug: string;
+  starts_at?: string | null;
+  timezone?: string;
+  registration_mode?: string;
+  min_team_size?: number;
+  max_team_size?: number;
+};
+
+export type InputOfLibraryInstantiateInput = {
+  name: string;
+  slug: string;
+  starts_at?: string | null;
+  timezone?: string;
+  registration_mode?: string;
+  min_team_size?: number;
+  max_team_size?: number;
+};
+
 export type LibraryTemplateOutput = {
   slug: string;
+  version: number;
   label: string;
   description: string;
   tracks: string[];
   stages: string[];
+  duration_days: number;
+  registration_mode: string;
+  min_team_size: number;
+  max_team_size: number;
+  required_artifact_kinds: string[];
+  criteria: string[];
 };
 
 export type InputOfLibraryTemplateOutput = {
   slug: string;
+  version: number;
   label: string;
   description: string;
   tracks: string[];
   stages: string[];
+  duration_days: number;
+  registration_mode: string;
+  min_team_size: number;
+  max_team_size: number;
+  required_artifact_kinds: string[];
+  criteria: string[];
 };
 
 export type LocationInput = {
@@ -5198,7 +5232,7 @@ export interface Operations {
   post_api_v1_workspaces_workspace_public_id_event_templates_library_template_slug_instantiate: {
     request: {
       path: { template_slug: string; workspace_public_id: string };
-      body: InputOfInstantiateInput;
+      body: InputOfLibraryInstantiateInput;
     };
     response: ImportedEventOutput;
   };

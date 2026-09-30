@@ -35,15 +35,33 @@ class EventTemplateCreateInput(serializers.Serializer):
 
 class LibraryTemplateOutput(serializers.Serializer):
     slug = serializers.SlugField()
+    version = serializers.IntegerField()
     label = serializers.CharField()
     description = serializers.CharField()
     tracks = serializers.ListField(child=serializers.CharField())
     stages = serializers.ListField(child=serializers.CharField())
+    duration_days = serializers.IntegerField()
+    registration_mode = serializers.CharField()
+    min_team_size = serializers.IntegerField()
+    max_team_size = serializers.IntegerField()
+    required_artifact_kinds = serializers.ListField(child=serializers.CharField())
+    criteria = serializers.ListField(child=serializers.CharField())
 
 
 class InstantiateInput(serializers.Serializer):
     name = serializers.CharField(max_length=200)
     slug = serializers.SlugField(max_length=200)
+
+
+class LibraryInstantiateInput(InstantiateInput):
+    """The base decisions an organizer makes when creating from a format; all optional, since the
+    format supplies a real value for each."""
+
+    starts_at = serializers.DateTimeField(required=False, allow_null=True)
+    timezone = serializers.CharField(max_length=64, required=False)
+    registration_mode = serializers.CharField(max_length=20, required=False)
+    min_team_size = serializers.IntegerField(min_value=1, max_value=100, required=False)
+    max_team_size = serializers.IntegerField(min_value=1, max_value=100, required=False)
 
 
 class CloneInput(InstantiateInput):
@@ -112,10 +130,13 @@ class TemplateLibraryListView(_WorkspaceRoleView):
 
 
 class TemplateLibraryInstantiateView(_WorkspaceRoleView):
-    @extend_schema(request=InstantiateInput, responses={201: ImportedEventOutput})
+    @extend_schema(request=LibraryInstantiateInput, responses={201: ImportedEventOutput})
     def post(self, request, workspace_public_id, template_slug):
-        data = InstantiateInput(data=request.data)
+        data = LibraryInstantiateInput(data=request.data)
         data.is_valid(raise_exception=True)
+        options = {
+            key: value for key, value in data.validated_data.items() if key not in ("name", "slug")
+        }
         try:
             with transaction.atomic():
                 event = instantiate_library_template(
@@ -123,6 +144,8 @@ class TemplateLibraryInstantiateView(_WorkspaceRoleView):
                     template_slug=template_slug,
                     name=data.validated_data["name"],
                     slug=data.validated_data["slug"],
+                    actor=request.user,
+                    **options,
                 )
                 record_mutation(
                     actor=request.user,
@@ -130,7 +153,11 @@ class TemplateLibraryInstantiateView(_WorkspaceRoleView):
                     action="event_template.library_instantiated",
                     target=event,
                     event_type="event_template.library_instantiated",
-                    payload={"template": template_slug, "event": str(event.public_id)},
+                    payload={
+                        "template": template_slug,
+                        "preset_version": event.profile.preset_version,
+                        "event": str(event.public_id),
+                    },
                 )
         except ModelValidationError as exc:
             raise ValidationError(

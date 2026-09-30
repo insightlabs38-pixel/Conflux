@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     "workspaces",
     "audit",
     "events",
+    "eventconfig",
     "integrations",
     "awards",
     "stages",

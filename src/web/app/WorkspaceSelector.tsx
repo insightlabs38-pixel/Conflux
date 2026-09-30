@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useMe, useSessionChanged, useSignOut } from "../hooks/useMe";
 import { Button } from "../components/Button";
 import { Avatar, PageHeader } from "../components/Foundation";
 import { LoadingState } from "../components/LoadingState";
@@ -13,12 +13,6 @@ type Membership = {
   role: string;
 };
 
-type MeResponse = {
-  public_id: string;
-  username: string;
-  memberships: Membership[];
-};
-
 type LoadState = "loading" | "signed-out" | "ready" | "error";
 
 // One entry per workspace even if the user holds multiple roles there (kept role is arbitrary).
@@ -31,66 +25,32 @@ export function dedupeWorkspaces(memberships: Membership[]): Membership[] {
   return [...byWorkspace.values()];
 }
 
-async function fetchMe(): Promise<MeResponse | null> {
-  const response = await fetch("/api/v1/accounts/me/", {
-    credentials: "include",
-  });
-  if (response.status === 401 || response.status === 403) return null;
-  if (!response.ok)
-    throw new Error(`Could not load your workspaces (${response.status}).`);
-  return response.json();
-}
-
 export function WorkspaceSelector({
   onSelect,
 }: {
   onSelect: (workspaceId: string, role: string) => void;
 }) {
-  const [state, setState] = useState<LoadState>("loading");
-  const [workspaces, setWorkspaces] = useState<Membership[]>([]);
-  const [error, setError] = useState("");
-  const [attempt, setAttempt] = useState(0);
-  const reload = useCallback(() => {
-    setState("loading");
-    setAttempt((count) => count + 1);
-  }, []);
-  const signOut = useCallback(async () => {
-    await fetch("/api/v1/accounts/logout/", {
-      method: "POST",
-      credentials: "include",
-    }).catch(() => undefined);
-    reload();
-  }, [reload]);
-
-  useEffect(() => {
-    let active = true;
-    fetchMe()
-      .then((me) => {
-        if (!active) return;
-        if (!me) {
-          setState("signed-out");
-          return;
-        }
-        setWorkspaces(dedupeWorkspaces(me.memberships));
-        setState("ready");
-      })
-      .catch((cause: unknown) => {
-        if (!active) return;
-        setError(
-          cause instanceof Error
-            ? cause.message
-            : "Could not load your workspaces.",
-        );
-        setState("error");
-      });
-    return () => {
-      active = false;
-    };
-  }, [attempt]);
+  const me = useMe();
+  const signOutMutation = useSignOut();
+  const sessionChanged = useSessionChanged();
+  const loading = me.isPending || (me.isError && me.isFetching);
+  const state: LoadState = loading
+    ? "loading"
+    : me.isError
+      ? "error"
+      : me.data === null
+        ? "signed-out"
+        : "ready";
+  const workspaces = dedupeWorkspaces(
+    (me.data?.memberships ?? []) as Membership[],
+  );
+  const error = me.error?.message ?? "Could not load your workspaces.";
+  const reload = () => void me.refetch();
+  const signOut = () => signOutMutation.mutateAsync();
 
   if (state === "loading")
     return <LoadingState label="Loading your workspaces…" />;
-  if (state === "signed-out") return <SignIn onSignedIn={reload} />;
+  if (state === "signed-out") return <SignIn onSignedIn={sessionChanged} />;
   if (state === "error") return <ErrorState message={error} onRetry={reload} />;
   if (workspaces.length === 0)
     return (

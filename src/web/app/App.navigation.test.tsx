@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
+import { createTestQueryClient } from "../lib/test-router";
 
 // Silences a benign act() warning; happy-dom doesn't set this itself.
 (
@@ -98,7 +99,7 @@ describe("App navigation", () => {
       [],
     );
     act(() => {
-      root.render(<App />);
+      root.render(<App queryClient={createTestQueryClient()} />);
     });
     await waitFor(
       () =>
@@ -147,7 +148,7 @@ describe("App navigation", () => {
       [],
     );
     act(() => {
-      root.render(<App />);
+      root.render(<App queryClient={createTestQueryClient()} />);
     });
     await waitFor(
       () =>
@@ -190,7 +191,7 @@ describe("App navigation", () => {
       [],
     );
     act(() => {
-      root.render(<App />);
+      root.render(<App queryClient={createTestQueryClient()} />);
     });
     await waitFor(
       () =>
@@ -223,7 +224,7 @@ describe("App navigation", () => {
       },
     );
     act(() => {
-      root.render(<App />);
+      root.render(<App queryClient={createTestQueryClient()} />);
     });
 
     await waitFor(
@@ -268,7 +269,7 @@ describe("App navigation", () => {
         return Promise.resolve({ ok: true, status: 200, json: async () => [] });
       }),
     );
-    act(() => root.render(<App />));
+    act(() => root.render(<App queryClient={createTestQueryClient()} />));
     expect(container.textContent).toContain("Checking workspace access");
     expect(
       container.querySelector('[aria-label="Event dashboard"]'),
@@ -289,7 +290,7 @@ describe("App navigation", () => {
   it("shows a retryable error when the membership check fails", async () => {
     window.history.pushState({}, "", "/?workspace=w1");
     mockApi(503, {}, 200, []);
-    act(() => root.render(<App />));
+    act(() => root.render(<App queryClient={createTestQueryClient()} />));
     await waitFor(
       () =>
         container.textContent?.includes("Could not check workspace access") ??
@@ -317,7 +318,7 @@ describe("App navigation", () => {
       200,
       [],
     );
-    act(() => root.render(<App />));
+    act(() => root.render(<App queryClient={createTestQueryClient()} />));
     await waitFor(
       () =>
         container.textContent?.includes("not available for participation") ??
@@ -366,7 +367,7 @@ describe("App navigation", () => {
       }),
     );
     act(() => {
-      root.render(<App />);
+      root.render(<App queryClient={createTestQueryClient()} />);
     });
     await waitFor(
       () =>
@@ -408,7 +409,7 @@ describe("App routing", () => {
   it("opens a deep link to a workspace view directly and marks it current", async () => {
     window.history.pushState({}, "", "/w/w1/queue");
     mockMe("judge");
-    act(() => root.render(<App />));
+    act(() => root.render(<App queryClient={createTestQueryClient()} />));
     await waitFor(
       () => container.querySelector('[aria-label="Judging"]') !== null,
     );
@@ -431,7 +432,7 @@ describe("App routing", () => {
       window.history.pushState({}, "", legacy);
       const before = window.history.length;
       mockMe("judge");
-      act(() => root.render(<App />));
+      act(() => root.render(<App queryClient={createTestQueryClient()} />));
       await waitFor(() => window.location.pathname === canonical.split("?")[0]);
       expect(window.location.pathname + window.location.search).toBe(canonical);
       expect(window.history.length).toBe(before);
@@ -441,7 +442,7 @@ describe("App routing", () => {
   it("keeps the selected event and invite when redirecting a legacy workspace link", async () => {
     window.history.pushState({}, "", "/?workspace=w1&event=e1&invite=tok");
     mockMe("participant");
-    act(() => root.render(<App />));
+    act(() => root.render(<App queryClient={createTestQueryClient()} />));
     await waitFor(() => window.location.pathname === "/w/w1/overview");
     expect(window.location.search).toBe("?event=e1&invite=tok");
   });
@@ -449,7 +450,7 @@ describe("App routing", () => {
   it("sends a view the role does not have to the overview", async () => {
     window.history.pushState({}, "", "/w/w1/operations");
     mockMe("participant");
-    act(() => root.render(<App />));
+    act(() => root.render(<App queryClient={createTestQueryClient()} />));
     await waitFor(() => window.location.pathname === "/w/w1/overview");
     expect(container.querySelector('a[href*="/operations"]')).toBeNull();
   });
@@ -457,7 +458,7 @@ describe("App routing", () => {
   it("redirects a bare workspace path to its overview", async () => {
     window.history.pushState({}, "", "/w/w1?event=e1");
     mockMe("participant");
-    act(() => root.render(<App />));
+    act(() => root.render(<App queryClient={createTestQueryClient()} />));
     await waitFor(() => window.location.pathname === "/w/w1/overview");
     expect(window.location.search).toBe("?event=e1");
   });
@@ -465,7 +466,7 @@ describe("App routing", () => {
   it("shows a not-found page with a way home for unknown paths", async () => {
     window.history.pushState({}, "", "/nope/at/all");
     mockMe("judge");
-    act(() => root.render(<App />));
+    act(() => root.render(<App queryClient={createTestQueryClient()} />));
     await waitFor(
       () =>
         container.textContent?.includes("That page does not exist") ?? false,
@@ -480,7 +481,7 @@ describe("App routing", () => {
   it("offers sign-in on a deep link when signed out and stays on that URL", async () => {
     window.history.pushState({}, "", "/w/w1/queue");
     mockMe("judge", 401);
-    act(() => root.render(<App />));
+    act(() => root.render(<App queryClient={createTestQueryClient()} />));
     await waitFor(
       () => container.querySelector('input[name="username"]') !== null,
     );
@@ -490,7 +491,7 @@ describe("App routing", () => {
   it("supports browser back and forward between the selector and a workspace", async () => {
     window.history.pushState({}, "", "/");
     mockMe("judge");
-    act(() => root.render(<App />));
+    act(() => root.render(<App queryClient={createTestQueryClient()} />));
     await waitFor(
       () =>
         container.querySelector('[aria-label="Your workspaces"] button') !==
@@ -528,7 +529,7 @@ describe("App routing", () => {
   it("serves the app under the /app base path and keeps it in every link", async () => {
     window.history.pushState({}, "", "/app/w/w1/queue");
     mockMe("judge");
-    act(() => root.render(<App />));
+    act(() => root.render(<App queryClient={createTestQueryClient()} />));
     await waitFor(
       () => container.querySelector('[aria-label="Judging"]') !== null,
     );
@@ -540,5 +541,31 @@ describe("App routing", () => {
     ].map((a) => a.getAttribute("href"));
     expect(links.length).toBeGreaterThan(0);
     expect(links.every((href) => href?.startsWith("/app/w/w1/"))).toBe(true);
+  });
+
+  it("loads the account once for the selector and the workspace it opens", async () => {
+    window.history.pushState({}, "", "/");
+    mockMe("judge");
+    act(() => root.render(<App queryClient={createTestQueryClient()} />));
+    await waitFor(
+      () =>
+        container.querySelector('[aria-label="Your workspaces"] button') !==
+        null,
+    );
+    act(() =>
+      container
+        .querySelector<HTMLButtonElement>(
+          '[aria-label="Your workspaces"] button',
+        )
+        ?.click(),
+    );
+    await waitFor(
+      () => container.querySelector('[aria-label="Judging"]') !== null,
+    );
+    const calls = (fetch as unknown as { mock: { calls: unknown[][] } }).mock
+      .calls;
+    expect(
+      calls.filter(([url]) => String(url).includes("/accounts/me/")),
+    ).toHaveLength(1);
   });
 });

@@ -5,6 +5,7 @@
     "public",
     "roles",
     "routing",
+    "server-state",
     "showcase",
     "signin",
     "uiv2-gate",

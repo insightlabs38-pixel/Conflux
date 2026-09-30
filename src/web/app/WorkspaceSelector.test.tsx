@@ -2,6 +2,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { withQuery } from "../lib/test-router";
 import { WorkspaceSelector } from "./WorkspaceSelector";
 
 // Silences a benign act() warning; happy-dom doesn't set this itself.
@@ -75,7 +76,7 @@ describe("WorkspaceSelector", () => {
     });
     const onSelect = vi.fn();
     act(() => {
-      root.render(<WorkspaceSelector onSelect={onSelect} />);
+      root.render(withQuery(<WorkspaceSelector onSelect={onSelect} />));
     });
     await waitFor(() => container.querySelectorAll("button").length > 0);
 
@@ -95,7 +96,7 @@ describe("WorkspaceSelector", () => {
   it("shows an empty state when the user has no workspaces", async () => {
     mockMe(200, { public_id: "u1", username: "organizer", memberships: [] });
     act(() => {
-      root.render(<WorkspaceSelector onSelect={vi.fn()} />);
+      root.render(withQuery(<WorkspaceSelector onSelect={vi.fn()} />));
     });
     await waitFor(() => container.textContent !== "Loading your workspaces…");
     expect(container.textContent).toContain("not a member of any workspace");
@@ -105,7 +106,7 @@ describe("WorkspaceSelector", () => {
   it("prompts sign-in instead of listing workspaces when unauthenticated", async () => {
     mockMe(401);
     act(() => {
-      root.render(<WorkspaceSelector onSelect={vi.fn()} />);
+      root.render(withQuery(<WorkspaceSelector onSelect={vi.fn()} />));
     });
     await waitFor(() => container.textContent !== "Loading your workspaces…");
     expect(container.textContent).toContain("Sign in");

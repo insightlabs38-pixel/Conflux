@@ -1,0 +1,83 @@
+version: 3
+task: PD-B04-T02
+batch: PD-B04
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 6803d7d3ed1858dbb22d5ad45afa6b3fefdf99f6
+  head_commit: 6803d7d3ed1858dbb22d5ad45afa6b3fefdf99f6
+changed_paths:
+- src/web/lib/api.ts
+- src/web/lib/api.test.ts
+- src/web/lib/query.ts
+- src/web/hooks/useMe.ts
+- src/web/hooks/useMe.test.tsx
+- src/web/lib/test-router.tsx
+- src/web/app/App.tsx
+- src/web/app/WorkspaceSelector.tsx
+- src/web/app/App.navigation.test.tsx
+- src/web/app/WorkspaceSelector.test.tsx
+- src/web/features/teams/TeamWorkspace.tsx
+- src/web/package.json
+- pnpm-lock.yaml
+- tests/e2e/server-state.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+- docs/verification/PD-B04/
+deliverables:
+- item: Mature server-state layer for caching, invalidation, retries, optimistic behavior and request deduplication
+  result: pass
+  evidence: TanStack Query v5 with one injectable QueryClient; defaults and retry policy in lib/query.ts; optimistic() helper; apiRequest transport seam; each concern has a unit test (hooks/useMe.test.tsx, lib/api.test.ts)
+- item: Real consumers migrated
+  result: pass
+  evidence: account (useMe) used by selector and workspace route with sign-out; participant events list in TeamWorkspace; selector to workspace now makes 1 account request (was 2) - vitest and browser
+- item: Session/privacy boundary
+  result: pass
+  evidence: useSignOut/useSessionChanged resetQueries; e2e server-state.spec.ts signs out and in as another account in one SPA session and shows nothing from the first
+- item: Failure handling and diagnostics
+  result: pass
+  evidence: 401 is signed-out not an error; 404 final; 5xx/429/network retried twice with backoff then a retryable error state (browser test counts exactly 3 attempts)
+invariants:
+- item: No backend or authorization semantics changed
+  result: pass
+  evidence: no src/api change; same endpoints, credentials include, same statuses
+- item: No weakened tests
+  result: pass
+  evidence: existing 202 web tests unchanged in intent (wrapped in a query client); 24 new vitest and 3 browser tests
+- item: Drafts not disturbed by background refetch
+  result: pass
+  evidence: refetchOnWindowFocus/Reconnect off by default; workspace components stay mounted
+verification:
+- command: pnpm --filter @conflux/web test
+  result: pass
+  note: 226 passed (was 202)
+- command: make verify-fast
+  result: pass
+  note: pytest 1454 passed/23 skipped; web 226 + embed 8; tsc, build clean
+- command: npx playwright test --project=desktop server-state routing
+  result: pass
+  note: 10 passed on the rebuilt stack
+- command: python3 scripts/e2e-tiers x2 consecutive
+  result: pass
+  note: all tiers green, 100 read-only passes
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: "not applicable for this task: consumes existing endpoints unchanged"
+migrations: []
+findings:
+- New dependency @tanstack/react-query 5.104; main bundle grows by its size (measure at batch close)
+- Most fetch call sites remain raw until T03/T07 (documented in SERVER_STATE.md); new code must not add more
+escalations: []
+limitations:
+- Only the account and participant events are on the layer so far; the rest migrates with T03/T07.
+- Optimistic helper is proven on a synthetic mutation; the first real optimistic flow arrives with the workspace migration.
+next: review

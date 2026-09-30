@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useState } from "react";
 import type { ReactNode } from "react";
 import {
   BrowserRouter,
@@ -11,6 +11,9 @@ import {
   useNavigate,
   useParams,
 } from "react-router";
+import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
+import { useMe, useSessionChanged, useSignOut } from "../hooks/useMe";
+import { createQueryClient } from "../lib/query";
 import { PersonProfilePage } from "../features/profile/PersonProfilePage";
 import {
   roleDestinations,
@@ -85,71 +88,33 @@ function WorkspaceRoute() {
   const { workspaceId = "", view = "overview" } = useParams();
   const { search } = useLocation();
   const navigate = useNavigate();
-  const [roleState, setRoleState] = useState<RoleState>("loading");
-  const [role, setRole] = useState<string | null>(null);
-  const [username, setUsername] = useState("");
-  const [workspaceName, setWorkspaceName] = useState("");
-  const [signingOut, setSigningOut] = useState(false);
-  const [retry, setRetry] = useState(0);
+  const me = useMe();
+  const signOutMutation = useSignOut();
+  const sessionChanged = useSessionChanged();
 
-  useEffect(() => {
-    let active = true;
-    setRoleState((state) => (state === "ready" ? state : "loading"));
-    fetch("/api/v1/accounts/me/", { credentials: "include" })
-      .then((response) => {
-        if (response.status === 401) return null;
-        if (!response.ok) throw new Error("Could not check workspace access.");
-        return response.json();
-      })
-      .then(
-        (
-          me: {
-            username?: string;
-            memberships?: {
-              workspace: string;
-              workspace_name?: string;
-              role: string;
-            }[];
-          } | null,
-        ) => {
-          if (!active) return;
-          if (!me) {
-            setRoleState("signed-out");
-            return;
-          }
-          setUsername(me.username || "");
-          const membership = me.memberships?.find(
-            (candidate) => candidate.workspace === workspaceId,
-          );
-          setWorkspaceName(membership?.workspace_name || "");
-          if (membership && ROLES.includes(membership.role)) {
-            setRole(membership.role);
-            setRoleState("ready");
-          } else {
-            setRole(null);
-            setRoleState("denied");
-          }
-        },
-      )
-      .catch(() => {
-        if (active) setRoleState("error");
-      });
-    return () => {
-      active = false;
-    };
-  }, [workspaceId, retry]);
+  const membership = me.data?.memberships?.find(
+    (candidate) => candidate.workspace === workspaceId,
+  );
+  const role =
+    membership && ROLES.includes(membership.role) ? membership.role : null;
+  const roleState: RoleState =
+    me.isPending || (me.isError && me.isFetching)
+      ? "loading"
+      : me.isError
+        ? "error"
+        : me.data === null
+          ? "signed-out"
+          : role
+            ? "ready"
+            : "denied";
+  const username = me.data?.username || "";
+  const workspaceName = membership?.workspace_name || "";
 
   const backToWorkspaces = useCallback(() => navigate(routes.home), [navigate]);
   const signOut = useCallback(async () => {
-    setSigningOut(true);
-    await fetch("/api/v1/accounts/logout/", {
-      method: "POST",
-      credentials: "include",
-    }).catch(() => undefined);
-    setUsername("");
-    setSigningOut(false);
+    await signOutMutation.mutateAsync();
     navigate(routes.home);
-  }, [navigate]);
+  }, [navigate, signOutMutation]);
 
   // A view this role does not have is not a place: send the URL to the overview.
   const destinations = role ? roleDestinations[role] : undefined;
@@ -168,7 +133,7 @@ function WorkspaceRoute() {
         username={username}
         workspaceName={workspaceName}
         onSignOut={signOut}
-        signingOut={signingOut}
+        signingOut={signOutMutation.isPending}
         brandAs={ready ? "p" : "h1"}
         nav={
           <>
@@ -182,11 +147,11 @@ function WorkspaceRoute() {
         {roleState === "loading" ? (
           <LoadingState label="Checking workspace access…" />
         ) : roleState === "signed-out" ? (
-          <SignIn onSignedIn={() => setRetry((count) => count + 1)} />
+          <SignIn onSignedIn={sessionChanged} />
         ) : roleState === "error" ? (
           <ErrorState
             message="Could not check workspace access."
-            onRetry={() => setRetry((count) => count + 1)}
+            onRetry={() => void me.refetch()}
           />
         ) : roleState === "denied" ? (
           <DeniedState message="You are not a member of this workspace." />
@@ -258,10 +223,14 @@ function WorkspaceIndexRedirect() {
   return <Navigate to={routes.workspace(workspaceId) + search} replace />;
 }
 
-export function App() {
+/** `queryClient` is injectable so tests (and embedders) control retries and cache lifetime. */
+export function App({ queryClient }: { queryClient?: QueryClient }) {
+  const [client] = useState(() => queryClient ?? createQueryClient());
   return (
-    <AppRouter>
-      <AppRoutes />
-    </AppRouter>
+    <QueryClientProvider client={client}>
+      <AppRouter>
+        <AppRoutes />
+      </AppRouter>
+    </QueryClientProvider>
   );
 }

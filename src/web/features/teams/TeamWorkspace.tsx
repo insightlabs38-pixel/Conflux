@@ -5,7 +5,10 @@ import {
   WorkspaceViewTitle,
 } from "../../components/WorkspaceNavigation";
 import { PageHeader } from "../../components/Foundation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "../../lib/api";
+import { queryKeys } from "../../lib/query";
 import { useSearchParams } from "react-router";
 import { ParticipantOverview } from "./ParticipantOverview";
 import { TeamPanel } from "./TeamPanel";
@@ -24,12 +27,26 @@ import { LoadingState } from "../../components/LoadingState";
 type Event = { public_id: string; name: string };
 
 export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
-  const [events, setEvents] = useState<Event[]>([]);
   const [search, setSearch] = useSearchParams();
   const selectedId = search.get("event") ?? "";
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [retry, setRetry] = useState(0);
+  const eventsQuery = useQuery({
+    queryKey: queryKeys.participantEvents(workspaceId),
+    queryFn: ({ signal }) =>
+      apiRequest<Event[]>(
+        `/api/v1/workspaces/${workspaceId}/participant-events/`,
+        {
+          signal,
+          describe: (status) => `Could not load events (${status}).`,
+        },
+      ),
+  });
+  const events = eventsQuery.data ?? [];
+  const loading =
+    eventsQuery.isPending || (eventsQuery.isFetching && eventsQuery.isError);
+  const error =
+    eventsQuery.isError && !eventsQuery.isFetching
+      ? eventsQuery.error.message || "Could not load events."
+      : "";
   const [teamRevision, setTeamRevision] = useState(0);
 
   // The selected event lives in the URL (?event=) so it survives refresh, back/forward and sharing.
@@ -42,35 +59,6 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
       return next;
     });
   }
-
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-    setError("");
-    fetch(`/api/v1/workspaces/${workspaceId}/participant-events/`, {
-      credentials: "include",
-    })
-      .then((response) => {
-        if (!response.ok)
-          throw new Error(`Could not load events (${response.status}).`);
-        return response.json() as Promise<Event[]>;
-      })
-      .then((items) => {
-        if (active) setEvents(items);
-      })
-      .catch((cause: unknown) => {
-        if (active)
-          setError(
-            cause instanceof Error ? cause.message : "Could not load events.",
-          );
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [workspaceId, retry]);
 
   return (
     <section aria-label="Participant events">
@@ -95,7 +83,7 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
       {error && (
         <ErrorState
           message={error}
-          onRetry={() => setRetry((count) => count + 1)}
+          onRetry={() => void eventsQuery.refetch()}
         />
       )}
       {!loading && !error && events.length === 0 && (

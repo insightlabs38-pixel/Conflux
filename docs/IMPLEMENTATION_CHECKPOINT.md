@@ -1,8 +1,8 @@
 # Conflux — current implementation checkpoint
 
 UI-v2 is **complete** on canonical `main` (B00–B10 done; final gate passed 2026-09-29). See the
-[final audit](ui-v2/FINAL_AUDIT.md), [surface census](ui-v2/SURFACE_CENSUS.md) and authoritative
-[queue](execution/README.md). PVS-H06 remains a completed historical release.
+[final audit](ui-v2/FINAL_AUDIT.md), [surface census](ui-v2/SURFACE_CENSUS.md) and the
+[legacy queue (historical)](execution/README.md). PVS-H06 remains a completed historical release.
 
 PVS-H06 is complete on `main`; the prior release campaign is closed. Its final
 targeted pass closes the pairwise-to-awards and sponsor-resource portability

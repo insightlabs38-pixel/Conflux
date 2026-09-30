@@ -8,5 +8,5 @@ canonical_commit_at_activation: 5680dcd4bcb22cde5e9f4913eec122fd203f40b0
 last_checkpoint: null
 design_manifest: docs/product-depth-v3/design/DESIGN_MANIFEST.yaml
 notes:
-- Stage B queue is installed but not activated.
+- Activated 2026-09-30 by owner instruction; PD-R00 reconciliation in progress.
 - Claude Design may run while frozen; its committed handoff is consumed by PD-DESIGN-B00.

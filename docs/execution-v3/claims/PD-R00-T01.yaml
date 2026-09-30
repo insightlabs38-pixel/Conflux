@@ -1,0 +1,13 @@
+task: PD-R00-T01
+batch: PD-R00
+controller_epoch: 1
+worker_id: claude-sonnet-5-5-continuous
+executor_class: implementation
+model: claude-sonnet-5-5
+branch: main
+worktree: /home/insightlabs38/conflux
+lock_groups: [execution-control, integration-main]
+claimed_at: 2026-09-30T05:03:01Z
+last_heartbeat: 2026-09-30T05:03:01Z
+state: ACTIVE
+note: single continuous agent owns selection and execution; docs-only batch on canonical main

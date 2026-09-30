@@ -126,3 +126,9 @@ Operational guides for the post-core capabilities live in `docs/operations/`:
 [browser journeys](docs/operations/E2E.md),
 [PVS in the UI](docs/operations/PVS_UI.md) and
 [final demo runbook](docs/operations/DEMO.md).
+
+## Execution
+
+Active work is planned in `TASKS.yaml`/`BATCHES.yaml` under the Product Depth v3 control system
+(`docs/execution-v3/`, see [LINEAGE](docs/execution-v3/LINEAGE.md)). The DOGFOOD queue in
+`docs/execution/` and the `master/` supervisor are historical.

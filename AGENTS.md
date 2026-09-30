@@ -18,6 +18,8 @@ Use targeted inspection (`rg`, `grep`, `sed -n`, `head`, `tail`, narrow `find`, 
 
 ## Authority
 
+Active vs historical execution files: see `docs/execution-v3/LINEAGE.md`. `docs/execution/**` and `master/**` are historical.
+
 Read and follow:
 - `docs/product-depth-v3/EXECUTION_PRINCIPLES.md`
 - `docs/execution-v3/COMPLETION_RULES.md`

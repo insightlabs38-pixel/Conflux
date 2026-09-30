@@ -1,3 +1,8 @@
+> **HISTORICAL / NON-ACTIVE (2026-09-30).** This DOGFOOD master supervisor is not the Product Depth v3
+> scheduler and must not be used to launch v3 work. v3 execution is governed by
+> `docs/execution-v3/**`; the Claude-only scheduled supervisor is `scripts/claude_supervisor/supervisor.py`.
+> See [`docs/execution-v3/LINEAGE.md`](../docs/execution-v3/LINEAGE.md).
+
 # DOGFOODHACK master
 
 `./master.sh` keeps exactly one Claude Code or Codex worker attached to this repository. It starts with Claude, alternates first preference on each polling cycle, and waits 30 seconds when neither provider is available.

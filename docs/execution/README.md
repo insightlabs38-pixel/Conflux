@@ -1,4 +1,9 @@
-# Authoritative sequential execution queue
+> **HISTORICAL (superseded 2026-09-30).** This is the legacy DOGFOOD v2 / UI-v2 queue. It is
+> evidence and context only and does **not** schedule work. The active Product Depth v3
+> queue is `/TASKS.yaml` + `/BATCHES.yaml`, controlled by `docs/execution-v3/**`.
+> See [`docs/execution-v3/LINEAGE.md`](../execution-v3/LINEAGE.md). Original text preserved verbatim below.
+
+# Legacy sequential execution queue (historical)
 
 `BATCHES.yaml` and `TASKS.yaml` are the existing DOGFOOD v2 queue, relocated
 from `/home/insightlabs38/DOGFOOD_EXECUTION_CONTROL_v2_2026-09-23` on 2026-09-29.

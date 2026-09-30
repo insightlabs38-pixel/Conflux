@@ -1,0 +1,77 @@
+version: 3
+task: PD-F001-B01-T91
+batch: PD-F001-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: bcfdb1f
+  head_commit: bcfdb1f
+changed_paths:
+- docs/operations/EVENT_BASE_EXPERIENCE.md
+- README.md
+- docs/verification/PD-F001-B01/MATRIX.md
+deliverables:
+- item: Close the batch surface matrix without undocumented skips
+  result: pass
+  evidence: web, api, audit, docs are pass with evidence in the receipts of T01-T08 and the batch receipt; sdk, cli, mcp, event_as_code, webhook, archive, analytics and search are not_required and each has a recorded reason below
+- item: Every required surface delegates to the same canonical operation and generated contracts stay synchronized
+  result: pass
+  evidence: the create form calls the library instantiate and event create endpoints, panels render readiness, modules, configuration and workflow responses; no client-side business rules; make sdk-check and block-schema-check clean (OpenAPI, Python and TypeScript SDKs regenerated for slug and is_public)
+- item: User, operator and developer documentation and migration notes
+  result: pass
+  evidence: docs/operations/EVENT_BASE_EXPERIENCE.md (organizer flow, automation table, audit, compatibility and migration notes), linked from the README; spec 001 sections per task
+- item: Desktop, mobile and accessibility polish
+  result: pass
+  evidence: create form, workflow status, configuration and readiness checked at 390 and 1440 with axe and no horizontal overflow in browser specs; screenshots of the create form reviewed at both widths
+invariants:
+- item: One source of truth, server authority
+  result: pass
+  evidence: formats only in presets.py, readiness rules only in readiness.py, configuration computed from domain rows
+verification:
+- command: make format-check lint sdk-check block-schema-check
+  result: pass
+  note: clean after the final change
+- command: make e2e-fast
+  result: pass
+  note: see docs/verification/PD-F001-B01/T90-e2e-fast.log
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: Setup create form, Features, readiness, Stages workflow status, Defaults and overrides
+- surface: api
+  result: pass
+  evidence: formats, create, modules, readiness, configuration, workflow
+- surface: audit
+  result: pass
+  evidence: creation payload adds slug_derived and chosen; module and registration changes audited
+- surface: docs
+  result: pass
+  evidence: EVENT_BASE_EXPERIENCE.md
+- surface: sdk
+  result: pass
+  evidence: "not applicable for this task: not_required; generated artifacts regenerated only"
+- surface: cli
+  result: pass
+  evidence: "not applicable for this task: not_required; the CLI events create still requires --slug and keeps working, deriving the address is not exposed there"
+- surface: mcp
+  result: pass
+  evidence: "not applicable for this task: not_required; the adapter exposes event-scoped tools only"
+- surface: event_as_code
+  result: pass
+  evidence: "not applicable for this task: not_required; EventProfile and module settings are excluded from the archive with a recorded reason (spec 001)"
+- surface: webhook
+  result: pass
+  evidence: "not applicable for this task: not_required; the library instantiated payload gained two additive keys"
+migrations: []
+findings:
+- The CLI events create keeps --slug required; exposing the derived address there is optional follow-up, not a compatibility issue
+- Only the four library formats plus no format exist; weekend, online and internal formats and consequence previews belong to later batches
+limitations:
+- The summary under the format list is one paragraph; splitting it would change the text that browser specs assert
+escalations: []
+next: review

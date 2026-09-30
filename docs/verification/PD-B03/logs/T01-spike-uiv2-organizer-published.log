@@ -1,0 +1,19 @@
+    Error Context: tests/e2e/artifacts/results/uiv2-organizer-organizer-operations-at-1440px-desktop/error-context.md
+
+    attachment #10: trace (application/zip) ────────────────────────────────────────────────────────
+    tests/e2e/artifacts/results/uiv2-organizer-organizer-operations-at-1440px-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace tests/e2e/artifacts/results/uiv2-organizer-organizer-operations-at-1440px-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    [desktop] › tests/e2e/uiv2-organizer.spec.ts:17:7 › organizer operations at 390px ──────────────
+    [desktop] › tests/e2e/uiv2-organizer.spec.ts:17:7 › organizer operations at 768px ──────────────
+    [desktop] › tests/e2e/uiv2-organizer.spec.ts:17:7 › organizer operations at 1024px ─────────────
+    [desktop] › tests/e2e/uiv2-organizer.spec.ts:17:7 › organizer operations at 1440px ─────────────
+
+real	0m54.885s
+user	0m20.885s
+sys	0m3.922s

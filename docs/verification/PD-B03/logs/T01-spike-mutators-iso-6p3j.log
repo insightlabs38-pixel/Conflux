@@ -1,0 +1,7 @@
+  4 failed
+    [desktop] › tests/e2e/uiv2-organizer.spec.ts:17:7 › organizer operations at 390px ──────────────
+    [desktop] › tests/e2e/uiv2-organizer.spec.ts:17:7 › organizer operations at 768px ──────────────
+    [desktop] › tests/e2e/uiv2-organizer.spec.ts:17:7 › organizer operations at 1024px ─────────────
+    [desktop] › tests/e2e/uiv2-organizer.spec.ts:17:7 › organizer operations at 1440px ─────────────
+  26 passed (3.8m)
+real	3m49.505s

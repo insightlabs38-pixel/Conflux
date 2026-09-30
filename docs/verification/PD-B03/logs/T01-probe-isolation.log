@@ -1,0 +1,12 @@
+PASS create seed 9201 (4p/2j submitted) — 2.7s
+PASS create seed 9202 (4p/2j submitted) — 2.7s
+PASS distinct workspaces and event ids per seed
+PASS per-seed organizer sees exactly one workspace/event
+PASS mutation accepted on seed A — HTTP 200
+PASS mutation on A invisible to seed B and shared seed
+PASS cross-seed read denied (negative) — HTTP 403
+PASS cross-seed write denied (negative) — HTTP 403
+PASS duplicate seed refused with diagnostic (negative) — CommandError: {"scenario": ["demo-hackathon-9201 already exists; purge it first."]}
+PASS 3p/2j without --live 1 refused (negative) — CommandError: {"live": ["Leave 0 (published) or up to participants-2 live."]}
+PASS purging A leaves B intact
+PASS probe seeds purged; shared seed still listed

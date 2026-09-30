@@ -1,0 +1,29 @@
+
+Running 16 tests using 1 worker
+
+(node:1201459) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [desktop] › tests/e2e/lifecycle.spec.ts:43:5 › participant creates a team, submits, and receives a signed receipt (3.3s)
+  ✓   2 [desktop] › tests/e2e/lifecycle.spec.ts:142:5 › organizer requests changes; participant remediates; organizer approves (6.4s)
+  ✓   3 [desktop] › tests/e2e/lifecycle.spec.ts:242:7 › judge-01 inspects and scores Live Wire (2.2s)
+  ✓   4 [desktop] › tests/e2e/lifecycle.spec.ts:242:7 › judge-02 inspects and scores Live Wire (1.8s)
+  ✓   5 [desktop] › tests/e2e/lifecycle.spec.ts:242:7 › judge-03 inspects and scores Live Wire (1.9s)
+  ✓   6 [desktop] › tests/e2e/lifecycle.spec.ts:293:5 › organizer publishes results and the public results page shows them (4.3s)
+  ✓   7 [desktop] › tests/e2e/uiv2-final-states.spec.ts:22:7 › finalized, published and submitted states at 360px (7.5s)
+  ✓   8 [desktop] › tests/e2e/uiv2-final-states.spec.ts:22:7 › finalized, published and submitted states at 390px (7.6s)
+  ✓   9 [desktop] › tests/e2e/uiv2-final-states.spec.ts:22:7 › finalized, published and submitted states at 768px (7.5s)
+  ✓  10 [desktop] › tests/e2e/uiv2-final-states.spec.ts:22:7 › finalized, published and submitted states at 1024px (7.7s)
+  ✓  11 [desktop] › tests/e2e/uiv2-final-states.spec.ts:22:7 › finalized, published and submitted states at 1440px (8.2s)
+  ✓  12 [desktop] › tests/e2e/uiv2-final-states.spec.ts:22:7 › finalized, published and submitted states at 1920px (7.6s)
+(node:1208867) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  13 [desktop] › tests/e2e/uiv2-organizer.spec.ts:17:7 › organizer operations at 390px (12.0s)
+  ✓  14 [desktop] › tests/e2e/uiv2-organizer.spec.ts:17:7 › organizer operations at 768px (12.4s)
+  ✓  15 [desktop] › tests/e2e/uiv2-organizer.spec.ts:17:7 › organizer operations at 1024px (12.4s)
+  ✓  16 [desktop] › tests/e2e/uiv2-organizer.spec.ts:17:7 › organizer operations at 1440px (12.0s)
+
+  16 passed (1.9m)
+
+real	1m56.570s
+user	0m32.761s
+sys	0m7.502s

@@ -1,0 +1,58 @@
+version: 3
+task: PD-B03-T01
+batch: PD-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 193cf3a8d3befba5d50a0cc5a412acccfe5b06b3
+  head_commit: 193cf3a8d3befba5d50a0cc5a412acccfe5b06b3
+changed_paths:
+- docs/operations/E2E.md
+- docs/verification/PD-B03/
+- docs/execution-v3/claims/PD-B03-T01.yaml
+deliverables:
+- item: Event/workspace/user factory contract so mutable E2E does not depend on one shared event
+  result: pass
+  evidence: 'E2E.md "Isolated browser fixture contract": canonical demo_scenario+demo_showcase primitive, handle type, seed namespace, profiles, tiers, lifecycle, guards'
+- item: Preserve one full lifecycle canary
+  result: pass
+  evidence: canary profile/tier defined; lifecycle chain passed 16/16 on an isolated 24p/6j seed
+- item: Observable diagnostics for failure/next action
+  result: pass
+  evidence: keep-on-failure with printed slug; generator refusals (duplicate seed, live bounds) documented with measured messages
+invariants:
+- item: No new source of truth / product change
+  result: pass
+  evidence: contract reuses demo_scenario/demo_showcase; no code under src or tests changed
+- item: Seed 7 reference untouched
+  result: pass
+  evidence: logs/T01-final-scenario-list.log; probes only created/purged seeds 92xx-94xx
+- item: No weakened tests
+  result: pass
+  evidence: specs ran unmodified
+verification:
+- command: python3 docs/verification/PD-B03/probe_isolation.py
+  result: pass
+  note: 12/12 incl. negatives (cross-seed 403, duplicate seed, live bound)
+- command: E2E_DEMO_SEED=9401 npx playwright test --project=desktop pvs (10/10), then event-themes profiles participant-workflow uiv2-judge uiv2-organizer
+  result: pass
+  note: 26 pass, 4 fail (uiv2-organizer); failure diagnosed as post-lifecycle dependency (deliberation 404) and recorded in contract, re-proved by 9403 lifecycle chain 16/16
+- command: npx prettier --check docs/operations/E2E.md docs/verification/PD-B03 && pnpm format:check
+  result: pass
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: browser specs exercised on isolated fixtures; implementation of factory is T02-T08
+migrations: []
+findings:
+- uiv2-organizer needs a finalized deliberation record the generator does not create (post-lifecycle reader); T02/T04 must either run it after the canary or add a canonical finalize step
+escalations: []
+limitations:
+- Design/contract task; the factory, storage states, tier split and sharding are implemented by T02-T08.
+- Timings are single runs on a shared host including docker exec overhead.
+next: review

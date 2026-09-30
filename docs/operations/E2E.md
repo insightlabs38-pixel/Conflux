@@ -22,3 +22,51 @@ Env: `E2E_BASE_URL`, `E2E_DEMO_SEED` (7), `E2E_DEMO_PASSWORD` (demo-pass-7). Chr
   `scripts/package-demo-media --zip`. See [DEMO.md](DEMO.md).
 
 - `pdv3-baseline-census` (opt-in, `E2E_CENSUS=1`, run after `scripts/demo-reset`): measurement-only tour that writes full-page JPEGs and a `manifest.json` (console/HTTP problems, horizontal overflow, axe counts) for every role at 1280×800 and 390×844 to `docs/verification/PD-B00/ui-census/`. It asserts nothing about layout and is skipped in normal runs.
+
+## Isolated browser fixture contract (PD-B03-T01)
+
+Normal mutable specs must not depend on the one long-lived `demo-hackathon-7` event. The contract below is what `PD-B03-T02…T11` implement; evidence is in `docs/verification/PD-B03/`.
+
+**Canonical primitive.** A fixture is one generated demo scenario: `manage.py demo_scenario create --seed N …` then `manage.py demo_showcase demo-hackathon-N` (exactly what `scripts/demo-reset` runs). Built through the real API, so invariants/audit/permissions apply. No new model or seed path. Seed `N` fixes the workspace slug `demo-hackathon-N`, the workspace/event public IDs and every account (`demo-hackathon-N-<label>`); `support.ts` already selects it via `E2E_DEMO_SEED`/`E2E_DEMO_PASSWORD`.
+
+**Fixture handle** (what a factory returns to specs and storage-state setup; one per worker/shard/test as the tier needs):
+
+```ts
+type Fixture = {
+  seed: number;
+  slug: string; // demo-hackathon-<seed>
+  workspace: string;
+  event: string; // public IDs (derived from seed)
+  password: string; // per fixture; accounts share it
+  profile: "iso-min" | "iso-judged" | "iso-published" | "canary";
+  account(label: string): string; // demo-hackathon-<seed>-<label>
+  dispose(): Promise<void>; // purge via demo_scenario purge <slug>
+};
+```
+
+**Seeds.** `7` is the shared _reference_ (read-only tier; rebuilt only by `scripts/demo-reset`). `1…999999` belong to people/demos (e.g. 81–83) and are never touched. Factory seeds are `10_000_000 + nonce·1000 + slot` (`nonce` 0–9999 per run, `slot` 0–999 per fixture within the run; fits the `PositiveIntegerField`). A taken seed is refused by the generator (`already exists; purge it first`), so the factory picks a new nonce and never reuses or purges a seed it did not create; `dispose` and sweeps only act on seeds ≥ 10_000_000.
+
+**Profiles** (sizes from labels the specs actually use: `participant-05`, `judge-03`; `participant-24` only in the lifecycle; `mentor/volunteer/sponsor` come from `demo_showcase`). Times are measured on the shared stack including ~1.3 s `docker compose exec` overhead.
+
+| profile                    | size / checkpoint             | create + showcase | used by                         |
+| -------------------------- | ----------------------------- | ----------------- | ------------------------------- |
+| reference                  | 24p/6j submitted, seed 7      | `demo-reset`      | read-only tier                  |
+| iso-min                    | 6p/3j, `--live 2`, submitted  | 3.4 s + 1.9 s     | isolated-mutation tier          |
+| iso-judged / iso-published | 6p/3j, `--live 2` / `0`       | ≈3 s + 1.9 s      | specs needing ballots / results |
+| canary                     | 24p/6j, `--live 2`, submitted | 8.3 s + showcase  | lifecycle chain (one per run)   |
+
+Boundaries (all produce a diagnostic, none silently degrade): 3–40 participants, 2–12 judges; `--live` ≤ participants−2 (so 3p/2j needs `--live 1`); `published` requires `--live 0`; duplicate seed refused. Four concurrent creations of 4p/2j took 2.8 s wall (same as one), so factories may create per shard in parallel.
+
+**Tiers** (specs run unmodified on an isolated seed; `pvs` 10/10 and event-themes/profiles/participant-workflow/uiv2-judge 26/26 passed on `iso-min`):
+
+- _read-only on reference:_ `workspace-shell`, `roles`, `signin`, `extended-embed`, `uiv2-surfaces`, `uiv2-gate` (logout only), `public`, `showcase`, `foundations`. They move to isolated seeds only if a run needs the reference stable after a mutator.
+- _isolated-mutation (iso-min, own seed):_ `event-themes` (PATCHes event brand), `profiles`, `participant-workflow`, `pvs`, `uiv2-judge`.
+- _lifecycle canary (serial, `canary` profile, never parallelised or shortened):_ `lifecycle`. Consumes `participant-24`; still the authoritative create→submit→judge→publish→public-results path.
+- _post-lifecycle readers:_ `uiv2-organizer`, `uiv2-final-states`, `scenes` read state the canary creates. `uiv2-organizer` fails on a generator-`published` seed (`404 …/awards/<id>/deliberation/`: the generator decides awards but never opens a deliberation), so these run on the canary's fixture after `lifecycle`, or T02 adds a canonical deliberation-finalize step; they must not be pointed at `iso-published` as-is.
+- _opt-in measurement:_ `pdv3-baseline-census` (reference).
+
+**Lifecycle.** create in worker/shard setup (before any test), sign-in via T03 storage states, dispose on success, **keep on failure** and print the slug so the failing state can be inspected; a sweep purges leftover seeds ≥ 10_000_000. Open checkpoints use the real clock for the submission window, so deadline-sensitive specs are per fixture.
+
+**Guards.** A fixture's event ID must differ from the reference's; cross-fixture access must be denied (measured: organizer of one seed gets 403 reading/writing another's event) and a mutation on one fixture is invisible to another and to seed 7 (`docs/verification/PD-B03/probe_isolation.py`, 12/12).
+
+**Known limits.** Creation scales roughly with account count (8.3 s for 31 accounts, ≈0.25 s each including the API replay), so keep mutation-tier fixtures small. Factory, storage states, tier split and sharding are later tasks (T02–T08).

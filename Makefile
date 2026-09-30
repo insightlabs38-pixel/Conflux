@@ -16,6 +16,7 @@ format-check:
 lint:
 	uv run --frozen ruff check src/api tests
 	pnpm lint
+	python3 scripts/e2e-tiers check
 
 test:
 	uv run --frozen pytest -n auto --dist worksteal
@@ -122,7 +123,8 @@ demo-reset:
 demo-e2e:
 	npx playwright test -c tests/e2e/playwright.config.ts
 
-# Same suite, ~2x faster: concurrent file groups (see scripts/e2e-fast). demo-reset first.
+# Same specs, tiered and concurrent (scripts/e2e-tiers): read-only on the demo event, mutators and the
+# lifecycle canary on throwaway fixtures. No demo-reset needed; `make demo-e2e` stays the serial authority.
 e2e-fast:
 	./scripts/e2e-fast
 

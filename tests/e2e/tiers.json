@@ -1,0 +1,23 @@
+{
+  "read-only": [
+    "extended-embed",
+    "foundations",
+    "public",
+    "roles",
+    "showcase",
+    "signin",
+    "uiv2-gate",
+    "uiv2-surfaces",
+    "workspace-shell"
+  ],
+  "self-isolating": ["auth-states", "fixture-isolation"],
+  "isolated-mutation": [
+    "event-themes",
+    "participant-workflow",
+    "profiles",
+    "pvs",
+    "uiv2-judge"
+  ],
+  "canary": ["lifecycle", "scenes", "uiv2-organizer", "uiv2-final-states"],
+  "opt-in": ["pdv3-baseline-census"]
+}

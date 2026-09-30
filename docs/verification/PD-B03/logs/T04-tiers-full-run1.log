@@ -1,0 +1,15 @@
+[iso-profiles] exit 0: 2 skipped; 2 passed (10.8s)
+[canary-lifecycle] exit 0: 6 skipped; 6 passed (35.4s)
+[iso-participant-workflow] exit 0: 4 skipped; 4 passed (56.0s)
+[canary-scenes] exit 0: 5 passed (20.5s)
+[iso-event-themes] exit 0: 16 skipped; 16 passed (1.1m)
+[iso-pvs] exit 0: 5 skipped; 15 passed (57.7s)
+[iso-uiv2-judge] exit 0: 4 skipped; 4 passed (18.1s)
+[canary-uiv2-organizer] exit 0: 4 skipped; 4 passed (51.7s)
+[read-only] exit 0: 52 skipped; 90 passed (2.5m)
+[canary-uiv2-final-states] exit 0: 6 skipped; 6 passed (46.7s)
+== read-only: ok, isolated-mutation: ok, canary: ok
+
+real	2m49.244s
+user	2m37.443s
+sys	0m45.773s

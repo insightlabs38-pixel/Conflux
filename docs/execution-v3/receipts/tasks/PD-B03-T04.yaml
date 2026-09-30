@@ -1,0 +1,66 @@
+version: 3
+task: PD-B03-T04
+batch: PD-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: a91897e7eeed09ccc73227a35af846e0fa67e117
+  head_commit: a91897e7eeed09ccc73227a35af846e0fa67e117
+changed_paths:
+- tests/e2e/tiers.json
+- scripts/e2e-tiers
+- scripts/e2e-fast
+- Makefile
+- docs/operations/E2E.md
+- docs/verification/PD-B03/MATRIX.md
+- docs/verification/PD-B03/logs/
+deliverables:
+- item: Reclassify browser specs into read-only, isolated-mutation and lifecycle-canary suites
+  result: pass
+  evidence: tests/e2e/tiers.json (read-only 9, self-isolating 2, isolated-mutation 5, canary 4, opt-in 1); scripts/e2e-tiers check enforces exactly-one classification and is part of make lint
+- item: Remove avoidable serial dependencies; only genuinely shared lifecycle tests remain serial
+  result: pass
+  evidence: event-themes/profiles/participant-workflow/pvs/uiv2-judge each run on their own iso-min fixture concurrently; only the lifecycle chain is serial (on its own canary fixture)
+- item: Mutators no longer need demo-reset or touch seed 7
+  result: pass
+  evidence: two consecutive make e2e-fast / scripts/e2e-tiers runs without demo-reset, 152 passed/0 failed (logs/T04-tiers-full-run1.log, run2.log)
+invariants:
+- item: Coverage not reduced
+  result: pass
+  evidence: 152 passed + 99 skipped = baseline 144 passed/91 skipped plus 8 passes/8 mobile skips from the new fixture-isolation and auth-states specs; specs unmodified
+- item: Authoritative serial run retained
+  result: pass
+  evidence: make demo-e2e unchanged; lifecycle chain still exercises create-submit-judge-publish-public results
+- item: No weakened gates
+  result: pass
+  evidence: no assertion, timeout or skip changed; unclassified/duplicate spec fails lint
+verification:
+- command: python3 scripts/e2e-tiers (twice, via make e2e-fast the second time)
+  result: pass
+  note: 'read-only ok, isolated-mutation ok, canary ok; 2m49s and 2m47s vs 3m48s baseline'
+- command: python3 scripts/e2e-tiers run isolated-mutation
+  result: pass
+  note: 61 s, 41 passed
+- command: negative cases (logs/T04-negative-cases.log)
+  result: pass
+  note: unclassified spec makes check exit 1; failing isolated spec exits 1, prints and keeps its fixture, swept afterwards
+- command: make lint && pnpm format:check
+  result: pass
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: full browser suite through the tiered runner
+migrations: []
+findings:
+- read-only run (90 tests, 4 workers, 2.6 min) is now the critical path; T05-T08 address selection/sharding
+- uiv2-judge types a score but does not submit; classified isolated-mutation conservatively
+escalations: []
+limitations:
+- read-only tier still shares seed 7 with workspace-shell draft-retention input (client-side draft; not observed to persist server-side).
+- Three concurrent fixture runs plus 4 read-only workers load the single shared stack; flakiness over repeated runs is measured in T10/T11.
+next: review

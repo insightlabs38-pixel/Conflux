@@ -1,0 +1,139 @@
+#!/usr/bin/env python3
+"""Tiered browser runner (PD-B03-T04). Tiers live in tests/e2e/tiers.json; every spec is in exactly one.
+
+  read-only          reference scenario (seed 7), one Playwright run, 4 workers, never mutates shared state
+  self-isolating     specs that provision their own fixtures (fixtures.ts); run inside the read-only run
+  isolated-mutation  one throwaway `iso-min` fixture PER SPEC FILE, files run concurrently
+  canary             the only serial chain: lifecycle -> scenes -> uiv2-organizer -> uiv2-final-states on
+                     its own `canary` fixture (full create->submit->judge->publish path, untouched by others)
+
+Usage: scripts/e2e-tiers check | run [tier ...]   (default: all three tiers, concurrently)
+Env:   E2E_ISOLATED_JOBS (3)  E2E_READONLY_WORKERS (4)  E2E_MANAGE  E2E_BASE_URL  E2E_KEEP_FIXTURES=1
+Fixtures are disposed on success and kept (slug printed) on failure; `make e2e-fixture-sweep` cleans up.
+Specs run unmodified: fixture identity reaches them through E2E_DEMO_SEED / E2E_DEMO_PASSWORD.
+"""
+import json
+import os
+import subprocess
+import sys
+import threading
+from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+SPECS = ROOT / "tests/e2e"
+CONFIG = "tests/e2e/playwright.config.ts"
+LOGS = ROOT / "artifacts/e2e-fast"
+RUN_TIERS = ("read-only", "isolated-mutation", "canary")
+_print = threading.Lock()
+
+
+def say(line):
+    with _print:
+        print(line, flush=True)
+
+
+def tiers():
+    return json.loads((SPECS / "tiers.json").read_text())
+
+
+def check():
+    declared = [(t, s) for t, names in tiers().items() for s in names]
+    on_disk = {p.name.removesuffix(".spec.ts") for p in SPECS.glob("*.spec.ts")}
+    problems = []
+    seen = {}
+    for tier, spec in declared:
+        if spec in seen:
+            problems.append(f"{spec} is in both {seen[spec]} and {tier}")
+        seen[spec] = tier
+        if spec not in on_disk:
+            problems.append(f"{tier}: {spec}.spec.ts does not exist")
+    problems += [f"{s}.spec.ts is not classified in tests/e2e/tiers.json" for s in sorted(on_disk - set(seen))]
+    return problems
+
+
+def manage(*args):
+    prefix = os.environ.get("E2E_MANAGE", "docker compose exec -T app python manage.py").split()
+    out = subprocess.run([*prefix, "e2e_fixture", *args], cwd=ROOT, capture_output=True, text=True)
+    if out.returncode:
+        raise RuntimeError(f"e2e_fixture {' '.join(args)}: {(out.stderr.strip().splitlines() or ['failed'])[-1]}")
+    return out.stdout.strip().splitlines()[-1] if out.stdout.strip() else ""
+
+
+def playwright(group, specs, env=None, workers=1):
+    LOGS.mkdir(parents=True, exist_ok=True)
+    log = LOGS / f"tier-{group}.log"
+    with log.open("w") as fh:
+        code = subprocess.run(
+            ["npx", "playwright", "test", "-c", CONFIG, f"--workers={workers}", *specs],
+            cwd=ROOT, env={**os.environ, "E2E_GROUP": group, **(env or {})}, stdout=fh, stderr=subprocess.STDOUT,
+        ).returncode
+    summary = [l.strip() for l in log.read_text().splitlines() if "✘" in l or " passed" in l or " failed" in l or " skipped" in l]
+    say(f"[{group}] exit {code}: " + "; ".join(summary[-4:]))
+    return code
+
+
+def with_fixture(profile, group, specs):
+    """Provision a fixture, run specs one file at a time against it, dispose unless something failed."""
+    fixture = json.loads(manage("create", profile))
+    env = {"E2E_DEMO_SEED": str(fixture["seed"]), "E2E_DEMO_PASSWORD": fixture["password"]}
+    code = 0
+    for spec in specs:
+        code = playwright(f"{group}-{spec}" if len(specs) > 1 else group, [spec], env) or code
+        if code:
+            break
+    if code or os.environ.get("E2E_KEEP_FIXTURES"):
+        say(f"[{group}] kept fixture {fixture['slug']} (seed {fixture['seed']}); dispose: manage.py e2e_fixture dispose {fixture['slug']}")
+    else:
+        manage("dispose", fixture["slug"])
+    return code
+
+
+def run_read_only():
+    t = tiers()
+    return playwright("read-only", t["read-only"] + t["self-isolating"], workers=int(os.environ.get("E2E_READONLY_WORKERS", "4")))
+
+
+def run_isolated():
+    jobs = int(os.environ.get("E2E_ISOLATED_JOBS", "3"))
+    with ThreadPoolExecutor(jobs) as pool:
+        codes = list(pool.map(lambda s: with_fixture("iso-min", f"iso-{s}", [s]), tiers()["isolated-mutation"]))
+    return int(any(codes))
+
+
+def run_canary():
+    return with_fixture("canary", "canary", tiers()["canary"])
+
+
+RUNNERS = {"read-only": run_read_only, "isolated-mutation": run_isolated, "canary": run_canary}
+
+
+def main(argv):
+    problems = check()
+    if argv[:1] == ["check"] or problems:
+        for p in problems:
+            print(f"tiers: {p}", file=sys.stderr)
+        print("tiers: OK" if not problems else "tiers: FAILED", file=sys.stderr)
+        return 1 if problems else 0
+    chosen = argv[1:] if argv[:1] == ["run"] and argv[1:] else list(RUN_TIERS)
+    unknown = [t for t in chosen if t not in RUNNERS]
+    if unknown:
+        print(f"unknown tier(s) {unknown}; choose from {list(RUNNERS)}", file=sys.stderr)
+        return 2
+    results = {}
+
+    def go(tier):
+        try:
+            results[tier] = RUNNERS[tier]()
+        except Exception as exc:  # provisioning failures must fail the run loudly, not skip
+            say(f"[{tier}] ERROR {exc}")
+            results[tier] = 1
+
+    threads = [threading.Thread(target=go, args=(t,)) for t in chosen]
+    [t.start() for t in threads]
+    [t.join() for t in threads]
+    say("== " + ", ".join(f"{t}: {'ok' if results[t] == 0 else 'FAILED'}" for t in chosen))
+    return int(any(results.values()))
+
+
+sys.exit(main(sys.argv[1:]))

@@ -1,0 +1,11 @@
+--- unclassified spec guard
+tiers: zz-neg.spec.ts is not classified in tests/e2e/tiers.json
+tiers: FAILED
+exit=1
+--- failing isolated spec keeps its fixture
+[iso-zz-neg] exit 1: ✘  1 [desktop] › tests/e2e/zz-neg.spec.ts:1:51 › x (5ms); ✘  2 [mobile] › tests/e2e/zz-neg.spec.ts:1:51 › x (5ms); 2 failed
+[iso-zz-neg] kept fixture demo-hackathon-16279000 (seed 16279000); dispose: manage.py e2e_fixture dispose demo-hackathon-16279000
+== isolated-mutation: FAILED
+exit=1
+docker compose exec -T app python manage.py e2e_fixture sweep --older-than-minutes 0
+{"purged": ["demo-hackathon-16279000"]}

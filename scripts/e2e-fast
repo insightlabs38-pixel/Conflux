@@ -1,37 +1,8 @@
 #!/usr/bin/env bash
-# Faster e2e: three file groups run concurrently against the same seeded stack.
-#   read-only  auth/navigation/axe checks that never change shared server state (4 workers);
-#              fixture-isolation provisions its own throwaway seed
-#   public     theme + public-site checks (serial: event-themes mutates the event brand)
-#   stateful   ordered participant/pvs/lifecycle chain, then the final-states check (serial)
-# Run `./scripts/demo-reset` first. `make demo-e2e` remains the authoritative serial run.
+# Faster e2e: read-only, isolated-mutation and canary tiers run concurrently (see scripts/e2e-tiers
+# and tests/e2e/tiers.json). Mutating specs run on throwaway fixtures, the lifecycle canary on its
+# own fixture, so no `scripts/demo-reset` is needed between runs. `make demo-e2e` remains the
+# authoritative serial run against the reset demo event.
 set -uo pipefail
 cd "$(dirname "$0")/.."
-cfg=tests/e2e/playwright.config.ts
-logs=artifacts/e2e-fast
-mkdir -p "$logs"
-
-run() { # name workers files...
-  local name=$1 workers=$2
-  shift 2
-  E2E_GROUP=$name npx playwright test -c "$cfg" --workers="$workers" "$@" \
-    >"$logs/fast-$name.log" 2>&1
-  echo $? >"$logs/fast-$name.status"
-}
-
-run read-only 4 workspace-shell roles signin extended-embed uiv2-surfaces uiv2-gate fixture-isolation &
-run public 1 event-themes public showcase foundations &
-(
-  run stateful 1 participant-workflow profiles pvs uiv2-judge uiv2-organizer lifecycle scenes
-  # Needs the finalized/published state that lifecycle creates.
-  run final 1 uiv2-final-states
-) &
-wait
-
-status=0
-for name in read-only public stateful final; do
-  echo "== $name (exit $(cat "$logs/fast-$name.status")) =="
-  grep -E "✘|[0-9]+ (passed|failed|skipped|flaky|did not run)" "$logs/fast-$name.log" || true
-  [ "$(cat "$logs/fast-$name.status")" = 0 ] || status=1
-done
-exit $status
+exec python3 scripts/e2e-tiers "$@"

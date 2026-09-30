@@ -1,0 +1,63 @@
+version: 3
+task: PD-F001-B02-T90
+batch: PD-F001-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 620b507
+  head_commit: 620b507
+changed_paths:
+- docs/verification/PD-F001-B02/MATRIX.md
+- tests/integration/test_base_experience_b02_regression.py
+deliverables:
+- item: Verification matrix for the 2 capability tasks, each with an executable proof
+  result: pass
+  evidence: docs/verification/PD-F001-B02/MATRIX.md has a row per capability with positive, negative, authorization, lifecycle and web-state proofs naming real tests and browser specs
+- item: Positive, negative, authorization, lifecycle, migration and concurrency coverage
+  result: pass
+  evidence: test_base_experience_b02_regression adds read-only proof across every action and the generated configuration, determinism, a preview that goes stale before the operation, pre-slice and archived events; T01 and T02 tests carry the rest
+- item: UI-facing states verified beyond screenshots
+  result: pass
+  evidence: loading, failed, refused, allowed, failed-operation, keyboard and focus states asserted in ConsequenceDialog.test and GeneratedConfiguration.test, browser specs at 390 and 1440 with axe and overflow checks
+- item: Exact commands and unresolved limitations recorded
+  result: pass
+  evidence: matrix Commands section; limitations in the task receipts and batch receipt
+invariants:
+- item: Canonical source of truth, server authority
+  result: pass
+  evidence: no product code changed in this task; the proofs show the endpoints stay authoritative
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1572 passed, 23 skipped (adds 4 regression tests)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 330 web tests; static checks clean
+- command: make e2e-fast
+  result: pass
+  note: no product or browser-spec code changed since the T02 run, so its log stands (docs/verification/PD-F001-B02/T02-e2e-fast.log)
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: states covered in matrix
+- surface: api
+  result: pass
+  evidence: read-only and stale-preview proofs
+- surface: audit
+  result: pass
+  evidence: reads write no audit or domain-event rows; delete audits carry the consequences (T02)
+- surface: docs
+  result: pass
+  evidence: matrix
+migrations: []
+findings:
+- No new defect beyond ESC-20260930-003 (found in T02)
+limitations:
+- Same agent implemented and verified; no independent review
+escalations: []
+next: review

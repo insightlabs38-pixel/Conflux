@@ -122,6 +122,8 @@ function stub(voting: boolean) {
         base_prize_count: 0,
         configuration_checks: [],
       });
+    if (url.endsWith("/configuration/"))
+      return jsonResponse(200, { event: "e1", preset: null, settings: [] });
     if (url.endsWith("/readiness/"))
       return jsonResponse(200, { status: "ready", items: [] });
     return jsonResponse(200, []);
@@ -189,7 +191,7 @@ describe("optional module panels", () => {
       .closest(".cx-workflow")!
       .querySelector<HTMLButtonElement>(".cx-workflow__advanced")!;
     expect(disclosure.textContent?.replace(/^[+\u2212]\s*/, "")).toBe(
-      "Advanced (1)",
+      "Advanced (2)",
     );
     await act(async () => disclosure.click());
     expect(tabNames().some((t) => t?.startsWith("Policies"))).toBe(true);

@@ -23,6 +23,7 @@ import { OperatorConsole } from "../operations/OperatorConsole";
 import { CommunicationsPanel } from "../communications/CommunicationsPanel";
 import { ConfigHistoryPanel } from "../audit/ConfigHistoryPanel";
 import { useReadiness } from "../../hooks/useReadiness";
+import { ConfigurationPanel } from "./ConfigurationPanel";
 import { FeaturesPanel } from "./FeaturesPanel";
 import { ReadinessPanel } from "./ReadinessPanel";
 import { ModuleGate } from "./ModuleGate";
@@ -538,6 +539,19 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
                   label: "Features",
                   description: "Turn on only what this event needs",
                   content: <FeaturesPanel eventId={selected.public_id} />,
+                },
+                {
+                  id: "configuration",
+                  label: "Defaults & overrides",
+                  description: "Where each value comes from",
+                  advanced: true,
+                  content: (
+                    <ConfigurationPanel
+                      key={`configuration-${selected.public_id}`}
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
                 },
                 {
                   id: "stages",

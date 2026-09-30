@@ -1,0 +1,83 @@
+version: 3
+task: PD-F001-B01-T08
+batch: PD-F001-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 9b9533d
+  head_commit: 9b9533d
+changed_paths:
+- src/api/eventconfig/ (registry.py, configuration.py, presets.py baseline, schema.py, views.py, urls.py)
+- src/web/features/event-builder/ (ConfigurationPanel, EventDashboard and tests)
+- tests/integration/test_event_configuration.py
+- tests/e2e/event-configuration.spec.ts
+- tests/e2e/event-advanced.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+- docs/api/openapi.yaml
+- sdks/
+deliverables:
+- item: Defaults and derived values are queryable
+  result: pass
+  evidence: GET workspaces/{w}/events/{e}/configuration/ returns every registry setting with value, default, preset baseline, source (default, preset, overridden, set, unset, derived), editable, lock and the write endpoint; filters module, tier, source and key prefix; unknown filter values are 400
+- item: One registry describes, domain rows stay the truth
+  result: pass
+  evidence: registry.py reads the existing rows (event, registration settings, eligibility rules) without creating any; nothing is stored; presets supply baselines (presets.baseline); a test proves reading creates no registration or eligibility row
+- item: Automation never has to reverse-engineer the UI
+  result: pass
+  evidence: each writable entry names method, path, field and whether the endpoint takes a partial or whole body; every write path is asserted to resolve to a real route; the browser spec performs the write exactly as described and sees the source change to overridden
+- item: The same answer in the UI
+  result: pass
+  evidence: Setup > Defaults and overrides (advanced tab) lists settings with value, source badge, what it started as, locks and modules that are off; its source filter asks the server
+invariants:
+- item: Server authorization and validation unchanged
+  result: pass
+  evidence: endpoint organizer/admin only (judge 403, anonymous denied, cross-workspace 404); the panel is read-only and writes go through existing endpoints
+- item: Deterministic, no duplicate settings store
+  result: pass
+  evidence: no new table; sources are computed by comparing with the preset baseline or the registry default
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1494 passed, 23 skipped (adds 8 configuration tests)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 316 web tests (ConfigurationPanel added); static checks clean
+- command: event-configuration and event-advanced specs on a fresh isolated fixture
+  result: pass
+  note: 3 passed at 390 and 1440 with axe and no overflow
+- command: make e2e-fast
+  result: pass
+  note: read-only, isolated-mutation (incl. event-configuration) and canary tiers ok
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: Defaults and overrides panel behind the Advanced disclosure
+- surface: api
+  result: pass
+  evidence: configuration endpoint with filters
+- surface: audit
+  result: pass
+  evidence: "not applicable for this task: read-only; overrides use the existing audited endpoints"
+- surface: docs
+  result: pass
+  evidence: OpenAPI and SDKs regenerated
+- surface: sdk
+  result: pass
+  evidence: "not applicable for this task: not_required; generated artifacts regenerated only"
+migrations: []
+findings:
+- QUERY is not consumed - filters are plain query parameters by design (spec 001); the QUERY primitive can adopt them later without changing the response
+- Locks are a function on each entry; only the archived-event lock exists yet, T07 adds the rest
+- Only event-scoped settings are registered (event, registration, team, evidence, eligibility flags, derived duration); per-plan and per-stage settings (judging visibility, pool strategy) are multi-instance and are not in this registry yet
+limitations:
+- The Setup panel is read-only; a value is changed in the panel that owns it
+- Judging, stage and award settings are not yet in the registry (multi-instance scopes)
+escalations:
+- ESC-20260930-002 (resolved, option A)
+next: review

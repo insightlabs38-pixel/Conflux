@@ -1,0 +1,25 @@
+./scripts/e2e-fast 
+ok   stack health — http://localhost:8080
+ok   reference scenario seed 7 — organizer signs in; event window open
+ok   source freshness — running API matches src/api
+warn leftover fixtures — 5 kept/leftover (`make e2e-fixture-sweep`)
+ok   playwright chromium
+preflight 2.0s
+[iso-event-advanced] exit 0: 1 skipped; 1 passed (8.0s)
+[iso-event-modules] exit 0: 1 skipped; 1 passed (12.7s)
+[iso-event-configuration] exit 0: 2 skipped; 2 passed (13.1s)
+[iso-event-presets] exit 0: 2 skipped; 2 passed (9.7s)
+[canary-lifecycle] exit 0: 6 skipped; 6 passed (27.0s)
+[iso-event-readiness] exit 0: 2 skipped; 2 passed (16.7s)
+[canary-scenes] exit 0: 5 passed (16.1s)
+[iso-profiles] exit 0: 2 skipped; 2 passed (9.8s)
+[iso-participant-workflow] exit 0: 4 skipped; 4 passed (44.6s)
+[iso-event-themes] exit 0: 16 skipped; 16 passed (57.5s)
+[canary-uiv2-organizer] exit 0: 4 skipped; 4 passed (44.8s)
+[iso-uiv2-judge] exit 0: 4 skipped; 4 passed (14.5s)
+[iso-route-drafts] exit 0: 6 skipped; 6 passed (18.2s)
+[iso-pvs] exit 0: 5 skipped; 15 passed (43.3s)
+[read-only] exit 0: ✓    6 [desktop] › tests/e2e/async-operations.spec.ts:108:5 › a failed part is an alert with the reason, and Try again starts a fresh attempt (1.4s); -   73 [mobile] › tests/e2e/async-operations.spec.ts:108:5 › a failed part is an alert with the reason, and Try again starts a fresh attempt; 69 skipped; 107 passed (2.3m)
+[canary-uiv2-final-states] exit 0: 6 skipped; 6 passed (41.7s)
+[canary-release-integrity] exit 0: 4 skipped; 4 passed (2.9s)
+== read-only: ok, isolated-mutation: ok, canary: ok

@@ -745,6 +745,10 @@ BasePrizeKind = Literal['cash', 'credit', 'discount', 'subscription', 'hardware'
 
 InputOfBasePrizeKind = Literal['cash', 'credit', 'discount', 'subscription', 'hardware', 'travel', 'service', 'mentorship', 'swag', 'other']
 
+BodyEnum = Literal['partial', 'whole']
+
+InputOfBodyEnum = Literal['partial', 'whole']
+
 BulkOperationAction = Literal['assign', 'advance', 'extend', 'move', 'send']
 
 InputOfBulkOperationAction = Literal['assign', 'advance', 'extend', 'move', 'send']
@@ -1120,6 +1124,78 @@ class InputOfConfigRestoreResultSchema(TypedDict):
     resource_type: str
     resource_id: str
     changes: Any
+
+class ConfigurationEntrySchema(TypedDict):
+    key: str
+    module: str
+    tier: TierEnum
+    label: str
+    help: str
+    schema: Any
+    value: Any
+    default: Any
+    baseline: Any
+    source: SourceEnum
+    editable: bool
+    lock: ConfigurationLockSchema | None
+    write: ConfigurationWriteSchema | None
+    module_enabled: bool
+
+class InputOfConfigurationEntrySchema(TypedDict):
+    key: str
+    module: str
+    tier: InputOfTierEnum
+    label: str
+    help: str
+    schema: Any
+    value: Any
+    default: Any
+    baseline: Any
+    source: InputOfSourceEnum
+    editable: bool
+    lock: InputOfConfigurationLockSchema | None
+    write: InputOfConfigurationWriteSchema | None
+    module_enabled: bool
+
+class ConfigurationLockSchema(TypedDict):
+    code: str
+    message: str
+
+class InputOfConfigurationLockSchema(TypedDict):
+    code: str
+    message: str
+
+class ConfigurationPresetSchema(TypedDict):
+    key: str
+    version: int
+    label: str
+
+class InputOfConfigurationPresetSchema(TypedDict):
+    key: str
+    version: int
+    label: str
+
+class ConfigurationSchema(TypedDict):
+    event: str
+    preset: ConfigurationPresetSchema | None
+    settings: list[ConfigurationEntrySchema]
+
+class InputOfConfigurationSchema(TypedDict):
+    event: str
+    preset: InputOfConfigurationPresetSchema | None
+    settings: list[InputOfConfigurationEntrySchema]
+
+class ConfigurationWriteSchema(TypedDict):
+    method: str
+    path: str
+    field: str
+    body: BodyEnum
+
+class InputOfConfigurationWriteSchema(TypedDict):
+    method: str
+    path: str
+    field: str
+    body: InputOfBodyEnum
 
 class ConflictOfInterest(TypedDict):
     public_id: str
@@ -4064,6 +4140,10 @@ class InputOfSignedArchiveOutput(TypedDict):
     public_key_pem: str
     signature: str
 
+SourceEnum = Literal['default', 'preset', 'overridden', 'set', 'unset', 'derived']
+
+InputOfSourceEnum = Literal['default', 'preset', 'overridden', 'set', 'unset', 'derived']
+
 class SponsorProjectSchema(TypedDict):
     public_id: str
     name: str
@@ -4469,6 +4549,10 @@ class InputOfTermOutput(TypedDict):
 ThemeEnum = Literal['default', 'dark', 'minimal']
 
 InputOfThemeEnum = Literal['default', 'dark', 'minimal']
+
+TierEnum = Literal['base', 'advanced', 'expert']
+
+InputOfTierEnum = Literal['base', 'advanced', 'expert']
 
 class TimelineWindowSchema(TypedDict):
     label: str
@@ -5337,6 +5421,16 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                'query_params': [],
                                                                                                'request_body': False,
                                                                                                'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_configuration': {'method': 'GET',
+                                                                                    'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/configuration/',
+                                                                                    'path_params': ['event_public_id',
+                                                                                                    'workspace_public_id'],
+                                                                                    'query_params': ['key',
+                                                                                                     'module',
+                                                                                                     'source',
+                                                                                                     'tier'],
+                                                                                    'request_body': False,
+                                                                                    'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_continuations': {'method': 'GET',
                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/continuations/',
                                                                                     'path_params': ['event_public_id',

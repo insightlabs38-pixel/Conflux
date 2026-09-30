@@ -154,3 +154,18 @@ PRESETS = {
 
 def get_preset(key):
     return PRESETS.get(key)
+
+
+def baseline(preset):
+    """The registry values a preset starts an event with (only keys the preset defines)."""
+    return {
+        "event.description": preset.description,
+        "registration.mode": str(preset.registration_mode),
+        "team.min_size": preset.min_team_size,
+        "team.max_size": preset.max_team_size,
+        "submission.required_artifact_kinds": [
+            str(kind) for kind in preset.required_artifact_kinds
+        ],
+        "submission.require_finalized": preset.require_finalized_submission,
+        "dates.duration_hours": round(preset.duration / timedelta(hours=1), 2),
+    }

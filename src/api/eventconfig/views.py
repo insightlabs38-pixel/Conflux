@@ -9,8 +9,9 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from . import modules
+from .configuration import FILTER_CHOICES, effective_configuration
 from .readiness import compute_readiness
-from .schema import ReadinessSchema
+from .schema import ConfigurationSchema, ReadinessSchema
 
 
 class ModuleHomeSchema(serializers.Serializer):
@@ -113,3 +114,27 @@ class EventReadinessView(OrganizerView):
     @extend_schema(responses=ReadinessSchema)
     def get(self, request, workspace_public_id, event_public_id):
         return Response(compute_readiness(self.get_event()))
+
+
+class EventConfigurationView(OrganizerView):
+    """Every setting of the event with value, default, baseline, source and lock, so automation
+    never has to reverse-engineer what the UI shows."""
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("module", str, description="Only this module (core, onsite, ...)."),
+            OpenApiParameter("tier", str, enum=list(FILTER_CHOICES["tier"])),
+            OpenApiParameter("source", str, enum=list(FILTER_CHOICES["source"])),
+            OpenApiParameter("key", str, description="Key prefix, e.g. registration."),
+        ],
+        responses=ConfigurationSchema,
+    )
+    def get(self, request, workspace_public_id, event_public_id):
+        filters = {
+            name: request.query_params.get(name) or None
+            for name in ("module", "tier", "source", "key")
+        }
+        for name, allowed in FILTER_CHOICES.items():
+            if filters[name] and filters[name] not in allowed:
+                raise ValidationError({name: f"Unknown {name}; use one of {', '.join(allowed)}."})
+        return Response(effective_configuration(self.get_event(), **filters))

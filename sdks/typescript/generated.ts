@@ -836,6 +836,10 @@ export type InputOfBasePrizeKind =
   | "swag"
   | "other";
 
+export type BodyEnum = "partial" | "whole";
+
+export type InputOfBodyEnum = "partial" | "whole";
+
 export type BulkOperationAction =
   "assign" | "advance" | "extend" | "move" | "send";
 
@@ -1241,6 +1245,82 @@ export type InputOfConfigRestoreResultSchema = {
   resource_type: string;
   resource_id: string;
   changes: unknown;
+};
+
+export type ConfigurationEntrySchema = {
+  key: string;
+  module: string;
+  tier: TierEnum;
+  label: string;
+  help: string;
+  schema: unknown;
+  value: unknown;
+  default: unknown;
+  baseline: unknown;
+  source: SourceEnum;
+  editable: boolean;
+  lock: ConfigurationLockSchema | null;
+  write: ConfigurationWriteSchema | null;
+  module_enabled: boolean;
+};
+
+export type InputOfConfigurationEntrySchema = {
+  key: string;
+  module: string;
+  tier: InputOfTierEnum;
+  label: string;
+  help: string;
+  schema: unknown;
+  value: unknown;
+  default: unknown;
+  baseline: unknown;
+  source: InputOfSourceEnum;
+  editable: boolean;
+  lock: InputOfConfigurationLockSchema | null;
+  write: InputOfConfigurationWriteSchema | null;
+  module_enabled: boolean;
+};
+
+export type ConfigurationLockSchema = { code: string; message: string };
+
+export type InputOfConfigurationLockSchema = { code: string; message: string };
+
+export type ConfigurationPresetSchema = {
+  key: string;
+  version: number;
+  label: string;
+};
+
+export type InputOfConfigurationPresetSchema = {
+  key: string;
+  version: number;
+  label: string;
+};
+
+export type ConfigurationSchema = {
+  event: string;
+  preset: ConfigurationPresetSchema | null;
+  settings: ConfigurationEntrySchema[];
+};
+
+export type InputOfConfigurationSchema = {
+  event: string;
+  preset: InputOfConfigurationPresetSchema | null;
+  settings: InputOfConfigurationEntrySchema[];
+};
+
+export type ConfigurationWriteSchema = {
+  method: string;
+  path: string;
+  field: string;
+  body: BodyEnum;
+};
+
+export type InputOfConfigurationWriteSchema = {
+  method: string;
+  path: string;
+  field: string;
+  body: InputOfBodyEnum;
 };
 
 export type ConflictOfInterest = {
@@ -4414,6 +4494,12 @@ export type InputOfSignedArchiveOutput = {
   signature: string;
 };
 
+export type SourceEnum =
+  "default" | "preset" | "overridden" | "set" | "unset" | "derived";
+
+export type InputOfSourceEnum =
+  "default" | "preset" | "overridden" | "set" | "unset" | "derived";
+
 export type SponsorProjectSchema = {
   public_id: string;
   name: string;
@@ -4844,6 +4930,10 @@ export type InputOfTermOutput = {
 export type ThemeEnum = "default" | "dark" | "minimal";
 
 export type InputOfThemeEnum = "default" | "dark" | "minimal";
+
+export type TierEnum = "base" | "advanced" | "expert";
+
+export type InputOfTierEnum = "base" | "advanced" | "expert";
 
 export type TimelineWindowSchema = {
   label: string;
@@ -5854,6 +5944,19 @@ export interface Operations {
       };
     };
     response: ReminderSchema;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_configuration: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      query?: {
+        key?: string;
+        module?: string;
+        source?:
+          "default" | "derived" | "overridden" | "preset" | "set" | "unset";
+        tier?: "advanced" | "base" | "expert";
+      };
+    };
+    response: ConfigurationSchema;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_continuations: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -9692,6 +9795,15 @@ export const operations = {
         "workspace_public_id",
       ],
       query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_configuration:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/configuration/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: ["key", "module", "source", "tier"],
       request_body: false,
       response_kind: "json",
     },

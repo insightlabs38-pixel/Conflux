@@ -4008,6 +4008,66 @@ paths:
               schema:
                 $ref: '#/components/schemas/ReminderSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/configuration/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_configuration
+      description: |-
+        Every setting of the event with value, default, baseline, source and lock, so automation
+        never has to reverse-engineer what the UI shows.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: key
+        schema:
+          type: string
+        description: Key prefix, e.g. registration.
+      - in: query
+        name: module
+        schema:
+          type: string
+        description: Only this module (core, onsite, ...).
+      - in: query
+        name: source
+        schema:
+          type: string
+          enum:
+          - default
+          - derived
+          - overridden
+          - preset
+          - set
+          - unset
+      - in: query
+        name: tier
+        schema:
+          type: string
+          enum:
+          - advanced
+          - base
+          - expert
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/continuations/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_continuations
@@ -17840,6 +17900,14 @@ components:
         * `mentorship` - Mentorship
         * `swag` - Swag
         * `other` - Other
+    BodyEnum:
+      enum:
+      - partial
+      - whole
+      type: string
+      description: |-
+        * `partial` - partial
+        * `whole` - whole
     BulkOperationAction:
       enum:
       - assign
@@ -18485,6 +18553,112 @@ components:
       - resource_id
       - resource_type
       - restored
+    ConfigurationEntrySchema:
+      type: object
+      properties:
+        key:
+          type: string
+        module:
+          type: string
+        tier:
+          $ref: '#/components/schemas/TierEnum'
+        label:
+          type: string
+        help:
+          type: string
+        schema: {}
+        value:
+          nullable: true
+        default:
+          nullable: true
+        baseline:
+          nullable: true
+        source:
+          $ref: '#/components/schemas/SourceEnum'
+        editable:
+          type: boolean
+        lock:
+          allOf:
+          - $ref: '#/components/schemas/ConfigurationLockSchema'
+          nullable: true
+        write:
+          allOf:
+          - $ref: '#/components/schemas/ConfigurationWriteSchema'
+          nullable: true
+        module_enabled:
+          type: boolean
+      required:
+      - baseline
+      - default
+      - editable
+      - help
+      - key
+      - label
+      - lock
+      - module
+      - module_enabled
+      - schema
+      - source
+      - tier
+      - value
+      - write
+    ConfigurationLockSchema:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+      - code
+      - message
+    ConfigurationPresetSchema:
+      type: object
+      properties:
+        key:
+          type: string
+        version:
+          type: integer
+        label:
+          type: string
+      required:
+      - key
+      - label
+      - version
+    ConfigurationSchema:
+      type: object
+      properties:
+        event:
+          type: string
+          format: uuid
+        preset:
+          allOf:
+          - $ref: '#/components/schemas/ConfigurationPresetSchema'
+          nullable: true
+        settings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigurationEntrySchema'
+      required:
+      - event
+      - preset
+      - settings
+    ConfigurationWriteSchema:
+      type: object
+      properties:
+        method:
+          type: string
+        path:
+          type: string
+        field:
+          type: string
+        body:
+          $ref: '#/components/schemas/BodyEnum'
+      required:
+      - body
+      - field
+      - method
+      - path
     ConflictOfInterest:
       type: object
       properties:
@@ -23566,6 +23740,22 @@ components:
       - manifest
       - public_key_pem
       - signature
+    SourceEnum:
+      enum:
+      - default
+      - preset
+      - overridden
+      - set
+      - unset
+      - derived
+      type: string
+      description: |-
+        * `default` - default
+        * `preset` - preset
+        * `overridden` - overridden
+        * `set` - set
+        * `unset` - unset
+        * `derived` - derived
     SponsorProjectSchema:
       type: object
       properties:
@@ -24310,6 +24500,16 @@ components:
         * `default` - Default
         * `dark` - Dark
         * `minimal` - Minimal
+    TierEnum:
+      enum:
+      - base
+      - advanced
+      - expert
+      type: string
+      description: |-
+        * `base` - base
+        * `advanced` - advanced
+        * `expert` - expert
     TimelineWindowSchema:
       type: object
       description: |-

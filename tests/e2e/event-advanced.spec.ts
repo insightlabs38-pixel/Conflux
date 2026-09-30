@@ -49,7 +49,7 @@ test("advanced tabs and optional module panels appear only when asked for or tur
   const setup = page.getByRole("tablist", { name: "Event setup" });
   await expect(setup.getByRole("tab", { name: /^Settings/ })).toBeVisible();
   await expect(setup.getByRole("tab", { name: /^Policies/ })).toHaveCount(0);
-  const advanced = page.getByRole("button", { name: /^Advanced \(1\)$/ });
+  const advanced = page.getByRole("button", { name: /^Advanced \(2\)$/ });
   await expect(advanced).toHaveAttribute("aria-expanded", "false");
   await noHorizontalOverflow(page);
   await accessible(page);

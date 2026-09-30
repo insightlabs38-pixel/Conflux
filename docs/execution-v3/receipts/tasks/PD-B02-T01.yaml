@@ -1,0 +1,49 @@
+version: 3
+task: PD-B02-T01
+batch: PD-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: ac1836f555dac8109f9ed5219c3a9d8320583033
+  head_commit: ac1836f555dac8109f9ed5219c3a9d8320583033
+changed_paths:
+- docs/verification/PD-B02/PROFILE.md
+- docs/verification/PD-B02/logs/
+- docs/execution-v3/claims/PD-B02-T01.yaml
+deliverables:
+- item: Identify slowest material tests/fixtures/DB setup from measurements
+  result: pass
+  evidence: 'PROFILE.md: hashing ~73% of CPU; 7s per-worker migration setup; slowest calls listed'
+- item: Skip optimization where already fast
+  result: pass
+  evidence: 'not applicable: 78s with one dominant removable cost; migration setup optimization deferred
+    pending re-measure'
+invariants:
+- item: No fabricated benchmarks
+  result: pass
+  evidence: logs committed; probe settings kept outside repo
+- item: No product change
+  result: pass
+  evidence: measurement only
+verification:
+- command: pytest -n auto with scratch PASSWORD_HASHERS=[MD5] settings
+  result: pass
+  note: 27s wall vs 78s; 1401 passed/23 skipped
+- command: pytest --nomigrations on identity authz file
+  result: pass
+  note: setup cost gone but 1 test fails -> rejected as blanket fix (negative case)
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs/evidence-only task
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Single-run timings on a shared host.
+next: review

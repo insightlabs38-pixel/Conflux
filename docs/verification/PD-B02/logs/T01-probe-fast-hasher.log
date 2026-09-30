@@ -1,0 +1,33 @@
+bringing up nodes...
+bringing up nodes...
+
+..........................................................s............. [  5%]
+........................................................................ [ 10%]
+........................................................................ [ 15%]
+........................................................................ [ 20%]
+........................................................................ [ 25%]
+........................................................................ [ 30%]
+........................................................................ [ 35%]
+........................................................................ [ 40%]
+........................................................................ [ 45%]
+........................................................................ [ 50%]
+........................................................................ [ 55%]
+.........s.............................................................. [ 60%]
+........................................................................ [ 65%]
+........................................................................ [ 70%]
+........................................................................ [ 75%]
+............................................................ssssssss.... [ 80%]
+..ssssssss....................................s......................... [ 85%]
+........................................................................ [ 91%]
+.........................s.........................ss.............s..... [ 96%]
+........................................................                 [100%]
+============================= slowest 8 durations ==============================
+8.18s setup    tests/integration/community/test_fraud_review.py::test_resolution_requires_note_is_single_use_and_records_actor
+7.62s setup    tests/integration/test_artifact_portability.py::test_invalid_source_is_never_copied[ContentLength]
+7.52s setup    tests/integration/test_coi_relationships.py::test_relationship_api_scopes_self_declarations_and_rejects_invalid_targets
+7.47s setup    tests/integration/test_assignment_rebalance.py::test_rebalance_endpoint_creates_a_new_version_and_records_an_audit_event
+7.46s setup    tests/acceptance/test_acceptance_auth_config.py::test_dogfood_toml_declares_all_four_acceptance_roles
+7.40s setup    tests/integration/test_blind_judging_api.py::test_candidate_queue_anonymizes_the_name_when_blind_judging_is_enabled
+7.31s setup    tests/integration/test_api_credentials.py::test_credential_creation_rejects_invalid_scope_and_wrong_event
+7.17s setup    tests/integration/test_accessibility_conformance.py::test_each_defect_is_detected_with_evidence[<!doctype html><html lang="en"><head><title>T</title>\n<meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body>\n<a href="#main-content">Skip</a><main id="main-content"><h1>A</h1><h2>B</h2>\n<img src="x.png" ><a href="/x">Gallery</a>\n<label for="q">Search</label><input id="q" name="q"><button>Go</button></main></body></html>-image-alt]
+1401 passed, 23 skipped in 27.09s

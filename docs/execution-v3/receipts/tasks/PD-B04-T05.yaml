@@ -1,0 +1,77 @@
+version: 3
+task: PD-B04-T05
+batch: PD-B04
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: b69b1837399cd3e48aee0250ba274cec2cf2d18a
+  head_commit: b69b1837399cd3e48aee0250ba274cec2cf2d18a
+changed_paths:
+- src/web/hooks/useOperation.ts
+- src/web/hooks/useOperation.test.tsx
+- src/web/components/OperationStatus.tsx
+- src/web/components/OperationStatus.test.tsx
+- src/web/styles/components.css
+- src/web/features/artifacts/ArtifactPanel.tsx
+- src/web/features/artifacts/ArtifactPanel.operation.test.tsx
+- tests/e2e/async-operations.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+- docs/verification/PD-B04/
+deliverables:
+- item: Standardize pending/success/failure/progress/cancel/retry handling for long-running operations
+  result: pass
+  evidence: useOperation lifecycle (idle, pending+progress, success, failed, cancelled) with rules in its header; OperationStatus is the single surface; ASYNC_OPERATIONS.md maps each rule to a proof
+- item: A real consumer
+  result: pass
+  evidence: ArtifactPanel evidence upload (per-part determinate progress, abortable presigned PUTs, commit before finalization, retry) and link check
+- item: Verification matrix row with executable proof, negative cases
+  result: pass
+  evidence: MATRIX.md T05 row; 18 new vitest and 2 browser tests
+- item: UI states in a browser
+  result: pass
+  evidence: async-operations.spec.ts (progress, aria-busy, axe, Cancel aborts the request and completes nothing, failed part alert and Try again, x10 repeat); lifecycle canary uploads through the new flow against the real store
+invariants:
+- item: Current authoritative behavior preserved
+  result: pass
+  evidence: same endpoints, presigned PUTs still credential-free, same success and failure texts; existing ArtifactPanel tests unchanged and passing
+- item: No automatic retry of writes
+  result: pass
+  evidence: hook test asserts a failure is not retried by itself
+- item: No second source of truth
+  result: pass
+  evidence: one hook and one surface; ErrorState reused for failures
+verification:
+- command: pnpm --filter @conflux/web test
+  result: pass
+  note: 274 passed (was 256)
+- command: make verify-fast
+  result: pass
+  note: pytest 1454 passed/23 skipped; web 274 + embed 8; tsc, build, sdk-check clean
+- command: make e2e-fast
+  result: pass
+  note: read-only 106 passed, isolated tiers and canary ok on the rebuilt image
+- command: npx playwright test --project=desktop async-operations --repeat-each=10 --workers=4
+  result: pass
+  note: 20 passed
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: "not applicable for this task: no endpoint changed"
+migrations: []
+findings:
+- Failed operations now render the shared ErrorState (title plus message plus Try again) instead of a bare alert line in ArtifactPanel
+- A cancelled upload leaves an unfinished server upload intent, which expires as before (no server change made)
+escalations: []
+limitations:
+- Only ArtifactPanel is on the contract; the other panels' run(action) helpers are single-request writes and move with T07.
+- Server-side durable jobs (ASYNC_JOB) do not exist yet; the contract defines how run polls one but that path is not exercised.
+next: review

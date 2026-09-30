@@ -1,5 +1,6 @@
 {
   "read-only": [
+    "async-operations",
     "extended-embed",
     "foundations",
     "public",

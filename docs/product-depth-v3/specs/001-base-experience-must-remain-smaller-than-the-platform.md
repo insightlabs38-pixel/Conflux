@@ -179,7 +179,7 @@ Only the organizer/admin navigation changes in this batch. Participant, judge, m
 
 ### Task boundaries (this batch vs neighbours)
 
-T01 guided create + preset catalog; T02 collapsed advanced panels; T03 real defaults (registration row, published rubric, derived dates/slug); T04 nav derived from effective modules; T05 canonical readiness; T06 `workflow_source` + switch to custom (detach is implicit: customizing flips `workflow_source`, nothing is reset); T07 `lock`/override contract through domain writes; T08 configuration API. **Not here:** weekend/online/internal formats, deadline editor, stage graph visualization, clone transfer choices (S007/S008), explicit-only generated config and consequence dialogs (F001-B02), participant/judge navigation.
+T01 guided create + preset catalog; T02 collapsed advanced panels; T03 real defaults (registration row, published rubric, derived dates/slug); T04 nav derived from effective modules; T05 canonical readiness; T06 `workflow_source` + switch to custom (detach is implicit: customizing flips `workflow_source`, nothing is reset); T07 `lock`/override contract through domain writes; T08 configuration API. **Not here:** weekend/online/internal formats, deadline editor, stage graph visualization, clone transfer choices (S007/S008), participant/judge navigation. Explicit-only generated configuration and consequence dialogs are F001-B02 (delivered above; covering more destructive operations and a minimal Event-as-Code export remain follow-ups).
 
 ### Verification strategy
 

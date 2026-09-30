@@ -1,0 +1,74 @@
+version: 3
+task: PD-F001-B02-T91
+batch: PD-F001-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: ec92cbe
+  head_commit: ec92cbe
+changed_paths:
+- docs/product-depth-v3/specs/001-base-experience-must-remain-smaller-than-the-platform.md
+deliverables:
+- item: Close the batch surface matrix without undocumented skips
+  result: pass
+  evidence: web, api, audit and docs are pass with evidence in the T01 and T02 receipts; sdk, cli, mcp, event_as_code, webhook, archive, analytics and search are not_required with the reason below
+- item: Every required surface delegates to the same canonical operation and generated contracts stay synchronized
+  result: pass
+  evidence: the generated configuration is a partition of the registry reading, the consequences come from the deletion collector and the endpoint's own validation, the dialog renders the server answer; make sdk-check and block-schema-check clean (OpenAPI, Python and TypeScript SDKs regenerated for both endpoints)
+- item: User, operator and developer documentation and migration notes
+  result: pass
+  evidence: docs/operations/EVENT_BASE_EXPERIENCE.md (what organizers see, automation table rows for both endpoints, audit and compatibility notes), spec 001 sections for both tasks, ESC-20260930-003; behavior change for deletes recorded (HTTP 400 instead of an unhandled error)
+- item: Desktop, mobile and accessibility polish
+  result: pass
+  evidence: both surfaces checked at 390 and 1440 with axe and no overflow in browser specs; the dialog was reviewed in a narrow screenshot
+invariants:
+- item: One source of truth, server authority
+  result: pass
+  evidence: nothing is stored or decided in the UI
+verification:
+- command: make format-check lint sdk-check block-schema-check
+  result: pass
+  note: clean
+- command: make e2e-fast
+  result: pass
+  note: docs/verification/PD-F001-B02/T02-e2e-fast.log (no product code changed since)
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: Generated configuration disclosure and ConsequenceDialog
+- surface: api
+  result: pass
+  evidence: configuration/generated and consequences endpoints
+- surface: audit
+  result: pass
+  evidence: delete audits record the consequences
+- surface: docs
+  result: pass
+  evidence: EVENT_BASE_EXPERIENCE.md and spec 001
+- surface: sdk
+  result: pass
+  evidence: "not applicable for this task: not_required; generated artifacts regenerated only"
+- surface: cli
+  result: pass
+  evidence: "not applicable for this task: not_required"
+- surface: mcp
+  result: pass
+  evidence: "not applicable for this task: not_required"
+- surface: event_as_code
+  result: pass
+  evidence: "not applicable for this task: not_required; the export format is unchanged (minimal export is PD-S046)"
+- surface: webhook
+  result: pass
+  evidence: "not applicable for this task: not_required; delete domain events are unchanged, only audit metadata gained consequences"
+migrations: []
+findings: []
+limitations:
+- Covering the remaining destructive operations (templates, page blocks, invites, webhooks, mentorship, stage advancement, award publication) is follow-up work
+escalations:
+- ESC-20260930-003 (resolved, option A)
+next: review

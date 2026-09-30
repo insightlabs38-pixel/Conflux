@@ -66,3 +66,34 @@ Checks run: (1) relative-link scan of 255 tracked `.md` files outside v3 plannin
 | PVS_UI "API-only by design" list (deliberation stances/notes, sponsor portal writes, eligibility rule configuration, replay/capsule/SSO/MCP) vs v3 specs that promise UI for several                | Not a defect; **input for feature batches** (specs 025/029, 032, 021, 049/060)                              |
 | `docs/execution/**`, `master/**` claim active authority                                                                                                                                             | Resolved in PD-R00 (LINEAGE.md)                                                                             |
 | Not checked (out of bounds for a doc audit): prose feature claims in ARCHITECTURE/JUDGING/SECURITY were not re-derived from code; only measurable claims above were verified.                       |
+
+## T07 — Load/capacity baseline
+
+Harness: existing `loadtests/h02/run.sh` (400 participants, 30 judges, 300 finalized projects; mixed public/participant/judge/organizer workload plus same-resource races; 60 s; uvicorn against isolated PG17 `conflux_h02` on the confluxh00 instance; repo `.venv`; harness sets `DJANGO_DEBUG=1`). Host: 8 cores, 31 GB, shared with the idle demo stack. Raw: `logs/T07-h02-workers{2,4}.log`.
+
+| Workers | Requests | req/s     | 5xx | Peak DB conns | Integrity checks                                                                                                         | Prior (PVS-H02 saturated) req/s |
+| ------- | -------- | --------- | --- | ------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------- |
+| 2       | 9034     | **147.6** | 0   | 20            | 8/8 PASS (ballots==201s 892, votes 100, finalizations 100, no duplicate ballots, audit==ballots, single version, no 5xx) | 141.9                           |
+| 4       | 13667    | **222.7** | 0   | 32            | 8/8 PASS (1068 ballots)                                                                                                  | 186.5                           |
+
+p95 latency (ms), prior PVS-H02 → now (closed-loop mix differs per run, so indicative only):
+
+| Workers | Endpoint      | Prior | Now  |
+| ------- | ------------- | ----- | ---- |
+| 2       | gallery       | 851   | 1152 |
+| 2       | search        | 857   | 1233 |
+| 2       | autosave      | 1799  | 1519 |
+| 2       | finalize      | 2212  | 2095 |
+| 2       | ballot_submit | 2063  | 1097 |
+| 2       | vote          | 1992  | 1363 |
+| 2       | progress      | 659   | 811  |
+| 4       | gallery       | 513   | 427  |
+| 4       | search        | 549   | 476  |
+| 4       | autosave      | 1102  | 1005 |
+| 4       | finalize      | 1077  | 1181 |
+| 4       | ballot_submit | 798   | 816  |
+| 4       | vote          | 968   | 1098 |
+| 4       | progress      | 910   | 677  |
+
+Read: throughput and integrity did not regress (147.6 vs 141.9 and 222.7 vs 186.5 req/s, all integrity checks pass). UIV2 did change backend files (41 files under `src/api`: profiles, themes, public templates/gallery), and at 2 workers gallery/search p95 is ~35–45% higher than PVS-H02 (851→1152 ms, 857→1233 ms) while at 4 workers they are lower; single runs with a closed-loop mix, so this is a flag to re-measure (D-14), not a proven regression. Same-resource races behaved as designed (e.g. finalize 20×201 + 140×200 idempotent retries; autosave/vote race 400s are expected losers). Slowest p95 remain finalize/autosave/vote at 1.1–2.1 s under saturation with 2 workers.
+Coverage vs task list: gallery/search, drafts (autosave), finalize, judge draft/ballot, organizer progress dashboards, voting, normalization/results/CSV are exercised. **Webhooks and API-credential/SDK traffic are not in the workload** (D-12). Not run: k6 scenarios in `loadtests/run.js` (need a hand-built profile; no committed profile exists — D-13).

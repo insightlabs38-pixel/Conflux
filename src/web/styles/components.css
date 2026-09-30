@@ -2173,6 +2173,39 @@
   cursor: pointer;
   font-weight: var(--font-weight-semibold);
 }
+.cx-create-form {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 48rem;
+}
+.cx-create-form label {
+  display: grid;
+  gap: var(--space-1);
+  font-weight: var(--font-weight-semibold);
+}
+.cx-create-form fieldset {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+.cx-create-form .cx-format-choice {
+  display: block;
+  font-weight: var(--font-weight-regular, 400);
+}
+.cx-create-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--space-3);
+}
+.cx-create-form__grid label:has(input[type="checkbox"]) {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  align-self: end;
+}
 /* Nested task tabs run horizontally so editors keep their width. */
 .cx-workflow .cx-workflow {
   grid-template-columns: minmax(0, 1fr);

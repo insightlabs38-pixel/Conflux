@@ -1474,13 +1474,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Event'
+              $ref: '#/components/schemas/EventCreate'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Event'
+              $ref: '#/components/schemas/EventCreate'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Event'
+              $ref: '#/components/schemas/EventCreate'
         required: true
       security:
       - sessionCookie: []
@@ -19466,6 +19466,55 @@ components:
           default: false
       required:
       - document
+    EventCreate:
+      type: object
+      description: 'Creating an event: the address is derived from the name when it
+        is not given.'
+      properties:
+        public_id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+          maxLength: 200
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+        timezone:
+          type: string
+          maxLength: 64
+        starts_at:
+          type: string
+          format: date-time
+          nullable: true
+        ends_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/EventStatus'
+          readOnly: true
+        is_public:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - name
+      - public_id
+      - status
+      - updated_at
     EventDashboardSchema:
       type: object
       properties:
@@ -20344,7 +20393,7 @@ components:
       type: object
       description: |-
         The base decisions an organizer makes when creating from a format; all optional, since the
-        format supplies a real value for each.
+        format supplies a real value for each (and the address is derived from the name).
       properties:
         name:
           type: string
@@ -20353,6 +20402,8 @@ components:
           type: string
           maxLength: 200
           pattern: ^[-a-zA-Z0-9_]+$
+        is_public:
+          type: boolean
         starts_at:
           type: string
           format: date-time
@@ -20373,7 +20424,6 @@ components:
           minimum: 1
       required:
       - name
-      - slug
     LibraryTemplateOutput:
       type: object
       properties:

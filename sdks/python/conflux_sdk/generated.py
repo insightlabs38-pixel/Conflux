@@ -1611,6 +1611,28 @@ class InputOfEventAsCodeDocumentInput(TypedDict):
     document: Any
     prune: NotRequired[bool]
 
+class EventCreate(TypedDict):
+    public_id: str
+    name: str
+    slug: NotRequired[str]
+    description: NotRequired[str]
+    timezone: NotRequired[str]
+    starts_at: NotRequired[str | None]
+    ends_at: NotRequired[str | None]
+    status: EventStatus
+    is_public: NotRequired[bool]
+    created_at: str
+    updated_at: str
+
+class InputOfEventCreate(TypedDict):
+    name: str
+    slug: NotRequired[str]
+    description: NotRequired[str]
+    timezone: NotRequired[str]
+    starts_at: NotRequired[str | None]
+    ends_at: NotRequired[str | None]
+    is_public: NotRequired[bool]
+
 class EventDashboardSchema(TypedDict):
     event: Event
     track_count: int
@@ -2141,7 +2163,8 @@ class InputOfJudgeWorkloadRowSchema(TypedDict):
 
 class LibraryInstantiateInput(TypedDict):
     name: str
-    slug: str
+    slug: NotRequired[str]
+    is_public: NotRequired[bool]
     starts_at: NotRequired[str | None]
     timezone: NotRequired[str]
     registration_mode: NotRequired[str]
@@ -2150,7 +2173,8 @@ class LibraryInstantiateInput(TypedDict):
 
 class InputOfLibraryInstantiateInput(TypedDict):
     name: str
-    slug: str
+    slug: NotRequired[str]
+    is_public: NotRequired[bool]
     starts_at: NotRequired[str | None]
     timezone: NotRequired[str]
     registration_mode: NotRequired[str]

@@ -55,8 +55,10 @@ class InstantiateInput(serializers.Serializer):
 
 class LibraryInstantiateInput(InstantiateInput):
     """The base decisions an organizer makes when creating from a format; all optional, since the
-    format supplies a real value for each."""
+    format supplies a real value for each (and the address is derived from the name)."""
 
+    slug = serializers.SlugField(max_length=200, required=False)
+    is_public = serializers.BooleanField(required=False)
     starts_at = serializers.DateTimeField(required=False, allow_null=True)
     timezone = serializers.CharField(max_length=64, required=False)
     registration_mode = serializers.CharField(max_length=20, required=False)
@@ -137,13 +139,14 @@ class TemplateLibraryInstantiateView(_WorkspaceRoleView):
         options = {
             key: value for key, value in data.validated_data.items() if key not in ("name", "slug")
         }
+        slug = data.validated_data.get("slug")
         try:
             with transaction.atomic():
                 event = instantiate_library_template(
                     workspace=self.get_workspace(),
                     template_slug=template_slug,
                     name=data.validated_data["name"],
-                    slug=data.validated_data["slug"],
+                    slug=slug,
                     actor=request.user,
                     **options,
                 )
@@ -157,6 +160,8 @@ class TemplateLibraryInstantiateView(_WorkspaceRoleView):
                         "template": template_slug,
                         "preset_version": event.profile.preset_version,
                         "event": str(event.public_id),
+                        "slug_derived": not slug,
+                        "chosen": sorted(options),
                     },
                 )
         except ModelValidationError as exc:

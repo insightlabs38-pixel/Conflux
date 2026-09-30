@@ -24,6 +24,7 @@ import { CommunicationsPanel } from "../communications/CommunicationsPanel";
 import { ConfigHistoryPanel } from "../audit/ConfigHistoryPanel";
 import { useReadiness } from "../../hooks/useReadiness";
 import { ConfigurationPanel } from "./ConfigurationPanel";
+import { CreateEvent } from "./CreateEvent";
 import { WorkflowStatus } from "./WorkflowStatus";
 import { FeaturesPanel } from "./FeaturesPanel";
 import { ReadinessPanel } from "./ReadinessPanel";
@@ -101,8 +102,6 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
   const chosen = useRef(new Set<string>());
   const [actionError, setActionError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
   const [trackName, setTrackName] = useState("");
   const [prizeName, setPrizeName] = useState("");
   const [prizeKind, setPrizeKind] = useState("other");
@@ -178,21 +177,6 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
   function choose(id: string) {
     chosen.current.add(id);
     setEventParam(id);
-  }
-  function createEvent(event: FormEvent) {
-    event.preventDefault();
-    void run(async () => {
-      if (!name.trim() || !slug.trim())
-        throw new Error("Name and slug are required.");
-      const created = await apiJson<Event>(base, "POST", {
-        name: name.trim(),
-        slug: slug.trim(),
-      });
-      setName("");
-      setSlug("");
-      eventsLoad.update((list) => [...(list ?? []), created]);
-      choose(created.public_id);
-    });
   }
   function saveSettings(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -285,26 +269,15 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
       <Destination id="setup">
         <details className="cx-create-event" open={events.length === 0}>
           <summary>Create a new event or start from a template</summary>
-          <form onSubmit={createEvent}>
-            <h2>Create event</h2>
-            <label>
-              Name{" "}
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </label>
-            <label>
-              Slug{" "}
-              <input
-                value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-                required
-              />
-            </label>
-            <button disabled={busy}>Create event</button>
-          </form>
+          <CreateEvent
+            workspaceId={workspaceId}
+            onCreated={(id) => {
+              // The server now lists the new event; without the refetch it was selected but absent
+              // from the events navigation until the next visit.
+              choose(id);
+              void eventsLoad.reload();
+            }}
+          />
           <EventTemplatesPanel
             workspaceId={workspaceId}
             onCreated={(id) => {

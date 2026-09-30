@@ -52,6 +52,13 @@ class EventSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class EventCreateSerializer(EventSerializer):
+    """Creating an event: the address is derived from the name when it is not given."""
+
+    class Meta(EventSerializer.Meta):
+        extra_kwargs = {"slug": {"required": False}}
+
+
 class TrackSerializer(serializers.ModelSerializer):
     public_id = serializers.UUIDField(read_only=True)
 

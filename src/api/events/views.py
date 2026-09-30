@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, inline_serializer
 from eventconfig.readiness import compute_readiness, configuration_checks, unresolved
+from eventconfig.services import derive_event_slug
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
@@ -19,6 +20,7 @@ from .schema import EventDashboardSchema, EventStatusSchema, PublicEventSchema
 from .serializers import (
     AnnouncementSerializer,
     BasePrizeSerializer,
+    EventCreateSerializer,
     EventSerializer,
     TrackSerializer,
 )
@@ -90,9 +92,13 @@ class EventListView(OrganizerView):
         events = Event.objects.filter(workspace=self.get_workspace())
         return Response(EventSerializer(events, many=True).data)
 
-    @extend_schema(responses={201: EventSerializer})
+    @extend_schema(request=EventCreateSerializer, responses={201: EventSerializer})
     def post(self, request, workspace_public_id):
-        serializer = EventSerializer(data=request.data)
+        data = request.data
+        if isinstance(data, dict) and not data.get("slug") and str(data.get("name", "")).strip():
+            # The address is derived from the name unless the organizer chose one (eventconfig).
+            data = {**data, "slug": derive_event_slug(self.get_workspace(), data["name"])}
+        serializer = EventCreateSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         event = _save(
             serializer,

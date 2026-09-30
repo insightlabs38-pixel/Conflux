@@ -1,0 +1,88 @@
+version: 3
+task: PD-F001-B01-T01
+batch: PD-F001-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 399ef03
+  head_commit: 399ef03
+changed_paths:
+- src/api/eventconfig/services.py (derive_event_slug, is_public, optional slug)
+- src/api/integrations/template_views.py (optional slug, is_public, audit payload)
+- src/api/events/ (views.py, serializers.py EventCreateSerializer; slug optional on create)
+- src/web/features/event-builder/ (CreateEvent and test, EventDashboard.tsx, EventTemplatesPanel and test)
+- src/web/styles/components.css
+- tests/integration/test_event_creation_flow.py
+- tests/e2e/ (event-presets.spec.ts, route-drafts.spec.ts)
+- docs/product-depth-v3/specs/001-base-experience-must-remain-smaller-than-the-platform.md
+- docs/api/openapi.yaml
+- sdks/
+deliverables:
+- item: Creation starts from a preset with name, dates, registration, team rules, project requirements, judging, awards and publish controls
+  result: pass
+  evidence: CreateEvent asks for name, format, start and time zone, registration mode, team size range and visibility; the format supplies stages, end date, registration row, evidence requirements, a published rubric and tracks only where inherent; awards/prizes only where the preset defines them (none) and are a named readiness item
+- item: Complete workflow on canonical server state
+  result: pass
+  evidence: formats come from GET event-templates/library/; creation is POST library/{key}/instantiate/ (one atomic transaction, audited) or POST events/ for No format; no client-side business rules beyond a pre-check of team size (server validates)
+- item: Real defaults, not placeholders
+  result: pass
+  evidence: slug derived on the server (unique with numeric suffix), end date derived from the format duration, visibility private by default; only chosen values are sent so untouched settings stay source preset in the configuration API
+- item: Edge states
+  result: pass
+  evidence: loading formats, failed format list with Try again and blank draft still possible (unit and browser), validation errors inline (team size client-side, duplicate address from the server), permission denied (judge 403), busy submit, draft retained across navigation (route-drafts)
+- item: Progressive disclosure
+  result: pass
+  evidence: web address is a collapsed disclosure; the template panel no longer repeats the format list, only cloning and saved templates
+invariants:
+- item: Server authorization, validation and audit authoritative
+  result: pass
+  evidence: organizer/admin only (judge 403, anonymous denied); invalid timezone, mode, team sizes and duplicate address rejected atomically; creation audit records slug_derived and the chosen decisions
+- item: One source of truth
+  result: pass
+  evidence: formats stay in eventconfig/presets.py; the form renders the library response; no UI-only defaults
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1540 passed, 23 skipped (adds 6 creation-flow tests)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 322 web tests (CreateEvent adds 4; library test moved); static checks, OpenAPI and SDKs clean
+- command: npx playwright test event-presets route-drafts event-workflow (isolated fixture) and workspace-shell (seed 7)
+  result: pass
+  note: create at 390 and 1440 with axe and no overflow, failed-format-list recovery, draft retention, workspace shell 14 passed
+- command: make e2e-fast
+  result: pass
+  note: see docs/verification/PD-F001-B01/T01-e2e-fast.log
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: CreateEvent on the Setup destination
+- surface: api
+  result: pass
+  evidence: optional slug and is_public on library instantiate, optional slug on event create
+- surface: audit
+  result: pass
+  evidence: event_template.library_instantiated payload adds slug_derived and chosen; event.created unchanged
+- surface: docs
+  result: pass
+  evidence: spec 001 Guided create (T01); OpenAPI regenerated
+- surface: sdk
+  result: pass
+  evidence: "not applicable for this task: not_required; generated artifacts regenerated only"
+migrations: []
+findings:
+- Compatibility - event create and library instantiate stay backward compatible (slug still accepted; previously required fields are now optional)
+- Invite-only registration adds the registration_invites readiness item, so the preset e2e expectation now lists it when that mode is chosen
+- Only the four library formats exist; weekend, online and internal formats are out of scope for this batch (spec task boundaries)
+- SCHEMA_EDITOR, APPROVAL, ASYNC_JOB, QUERY are PLANNED primitives and were not consumed, per the T00 decisions; the form uses native controls
+- JudgeWorkspace offline tests print TypeErrors to stderr (30 occurrences before and after this task); pre-existing, unrelated, tests pass
+limitations:
+- Start date and time are entered in the browser zone with the zone field defaulting to it; a different event zone shifts the instant, not the wall clock
+- Awards and prizes are not created by any format yet; the base-prize readiness item names them
+escalations: []
+next: review

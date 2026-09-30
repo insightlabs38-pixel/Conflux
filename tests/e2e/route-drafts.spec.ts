@@ -94,7 +94,8 @@ test("organizer: an unsaved form survives view changes and history, and the even
   const form = page.locator("form", {
     has: page.getByRole("heading", { name: "Create event" }),
   });
-  await form.getByLabel("Name").fill("Draft event name");
+  await form.getByLabel("Name", { exact: true }).fill("Draft event name");
+  await form.getByText("Web address").click();
   await form.getByLabel("Slug").fill("draft-event-slug");
 
   await goToDestination(page, "judging");
@@ -103,7 +104,9 @@ test("organizer: an unsaved form survives view changes and history, and the even
   await page.goBack(); // judging
   await page.goBack(); // setup
   await expect(page).toHaveURL(/\/setup\?/);
-  await expect(form.getByLabel("Name")).toHaveValue("Draft event name");
+  await expect(form.getByLabel("Name", { exact: true })).toHaveValue(
+    "Draft event name",
+  );
   await expect(form.getByLabel("Slug")).toHaveValue("draft-event-slug");
   await page.goForward();
   await page.goForward();

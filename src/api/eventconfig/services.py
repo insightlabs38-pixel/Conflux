@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from audit.services import record_mutation
 from django.core.exceptions import ValidationError
+from django.utils.text import slugify
 from eligibility.models import EligibilityRules
 from evaluations.models import EvaluationPlan, RubricVersion
 from events.models import Event, EventRegistrationSettings, RegistrationMode, Track
@@ -40,23 +41,41 @@ def _ends_at(starts_at, zone, duration):
     return (starts_at.astimezone(zone) + duration).astimezone(UTC)
 
 
+def derive_event_slug(workspace, name):
+    """The address an event gets when the organizer does not choose one: the name, slugified, and
+    made unique in the workspace with a numeric suffix (spring-hack, spring-hack-2, ...)."""
+    stem = (slugify(name) or "event")[:190].strip("-") or "event"
+    taken = set(
+        Event.objects.filter(workspace=workspace, slug__startswith=stem).values_list(
+            "slug", flat=True
+        )
+    )
+    candidate, number = stem, 1
+    while candidate in taken:
+        number += 1
+        candidate = f"{stem}-{number}"
+    return candidate
+
+
 def create_event_from_preset(
     *,
     workspace,
     actor,
     preset_key,
     name,
-    slug,
+    slug=None,
     starts_at: datetime | None = None,
     timezone: str = "UTC",
     registration_mode: str | None = None,
     min_team_size: int | None = None,
     max_team_size: int | None = None,
+    is_public: bool = False,
 ):
     """A draft event whose configuration is complete except for what only the organizer knows.
 
     With `starts_at` the end is derived from the preset's duration. Registration mode and team
-    size range are the two base decisions an organizer commonly changes at creation; everything
+    size range, plus whether the event page is public, are the base decisions an organizer commonly
+    changes at creation; everything
     else starts at the preset's value and is overridden later through the normal domain writes.
     """
     preset = get_preset(preset_key)
@@ -65,6 +84,7 @@ def create_event_from_preset(
     if registration_mode is not None and registration_mode not in RegistrationMode.values:
         raise ValidationError({"registration_mode": "Unknown registration mode."})
 
+    slug = slug or derive_event_slug(workspace, name)
     zone_name = _timezone(timezone)
     event = _saved(
         Event(
@@ -73,6 +93,7 @@ def create_event_from_preset(
             slug=slug,
             description=preset.description,
             timezone=zone_name,
+            is_public=is_public,
             starts_at=starts_at,
             ends_at=_ends_at(starts_at, ZoneInfo(zone_name), preset.duration)
             if starts_at

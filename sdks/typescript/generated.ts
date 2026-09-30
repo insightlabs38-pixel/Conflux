@@ -1778,6 +1778,30 @@ export type InputOfEventAsCodeDocumentInput = {
   prune?: boolean;
 };
 
+export type EventCreate = {
+  public_id: string;
+  name: string;
+  slug?: string;
+  description?: string;
+  timezone?: string;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  status: EventStatus;
+  is_public?: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type InputOfEventCreate = {
+  name: string;
+  slug?: string;
+  description?: string;
+  timezone?: string;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  is_public?: boolean;
+};
+
 export type EventDashboardSchema = {
   event: Event;
   track_count: number;
@@ -2337,7 +2361,8 @@ export type InputOfJudgeWorkloadRowSchema = {
 
 export type LibraryInstantiateInput = {
   name: string;
-  slug: string;
+  slug?: string;
+  is_public?: boolean;
   starts_at?: string | null;
   timezone?: string;
   registration_mode?: string;
@@ -2347,7 +2372,8 @@ export type LibraryInstantiateInput = {
 
 export type InputOfLibraryInstantiateInput = {
   name: string;
-  slug: string;
+  slug?: string;
+  is_public?: boolean;
   starts_at?: string | null;
   timezone?: string;
   registration_mode?: string;
@@ -5452,7 +5478,10 @@ export interface Operations {
     response: Event;
   };
   post_api_v1_workspaces_workspace_public_id_events: {
-    request: { path: { workspace_public_id: string }; body: InputOfEvent };
+    request: {
+      path: { workspace_public_id: string };
+      body: InputOfEventCreate;
+    };
     response: Event;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id: {

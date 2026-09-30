@@ -10,8 +10,14 @@ from rest_framework.response import Response
 
 from . import modules
 from .configuration import FILTER_CHOICES, effective_configuration
+from .generated import generated_configuration
 from .readiness import compute_readiness
-from .schema import ConfigurationSchema, ReadinessSchema, WorkflowSchema
+from .schema import (
+    ConfigurationSchema,
+    GeneratedConfigurationSchema,
+    ReadinessSchema,
+    WorkflowSchema,
+)
 from .workflow import workflow_state
 
 
@@ -147,3 +153,12 @@ class EventWorkflowView(OrganizerView):
     @extend_schema(responses=WorkflowSchema)
     def get(self, request, workspace_public_id, event_public_id):
         return Response(workflow_state(self.get_event()))
+
+
+class EventGeneratedConfigurationView(OrganizerView):
+    """The event's configuration stating only what is necessary: what the organizer set or changed
+    from the format, with everything inherited listed beside it for reading."""
+
+    @extend_schema(responses=GeneratedConfigurationSchema)
+    def get(self, request, workspace_public_id, event_public_id):
+        return Response(generated_configuration(self.get_event()))

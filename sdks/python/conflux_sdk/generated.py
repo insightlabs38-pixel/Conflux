@@ -1946,6 +1946,74 @@ class InputOfGalleryProjectSchema(TypedDict):
     track: str
     repo_url: str
 
+class GeneratedConfigurationSchema(TypedDict):
+    event: str
+    preset: ConfigurationPresetSchema | None
+    explicit: list[GeneratedExplicitSchema]
+    inherited: list[GeneratedInheritedSchema]
+    derived: list[GeneratedValueSchema]
+    unset: list[str]
+    document: GeneratedDocumentSchema
+    text: str
+
+class InputOfGeneratedConfigurationSchema(TypedDict):
+    event: str
+    preset: InputOfConfigurationPresetSchema | None
+    explicit: list[InputOfGeneratedExplicitSchema]
+    inherited: list[InputOfGeneratedInheritedSchema]
+    derived: list[InputOfGeneratedValueSchema]
+    unset: list[str]
+    document: InputOfGeneratedDocumentSchema
+    text: str
+
+class GeneratedDocumentSchema(TypedDict):
+    format: str | None
+    settings: Any
+
+class InputOfGeneratedDocumentSchema(TypedDict):
+    format: str | None
+    settings: Any
+
+class GeneratedExplicitSchema(TypedDict):
+    key: str
+    label: str
+    value: Any
+    reason: ReasonEnum
+    baseline: Any
+    origin: OriginEnum
+    write: ConfigurationWriteSchema | None
+
+class InputOfGeneratedExplicitSchema(TypedDict):
+    key: str
+    label: str
+    value: Any
+    reason: InputOfReasonEnum
+    baseline: Any
+    origin: InputOfOriginEnum
+    write: InputOfConfigurationWriteSchema | None
+
+class GeneratedInheritedSchema(TypedDict):
+    key: str
+    label: str
+    value: Any
+    origin: OriginEnum
+
+class InputOfGeneratedInheritedSchema(TypedDict):
+    key: str
+    label: str
+    value: Any
+    origin: InputOfOriginEnum
+
+class GeneratedValueSchema(TypedDict):
+    key: str
+    label: str
+    value: Any
+
+class InputOfGeneratedValueSchema(TypedDict):
+    key: str
+    label: str
+    value: Any
+
 class GraphValidationSchema(TypedDict):
     valid: bool
     order: NotRequired[list[str]]
@@ -2662,6 +2730,10 @@ class InputOfOperatorTemplateSchema(TypedDict):
     public_id: str
     name: str
     source_event_name: str
+
+OriginEnum = Literal['preset', 'default']
+
+InputOfOriginEnum = Literal['preset', 'default']
 
 class Page(TypedDict):
     public_id: str
@@ -3686,6 +3758,10 @@ class InputOfReadinessSchema(TypedDict):
 ReadinessSchemaStatusEnum = Literal['ready', 'warning', 'blocked']
 
 InputOfReadinessSchemaStatusEnum = Literal['ready', 'warning', 'blocked']
+
+ReasonEnum = Literal['changed', 'organizer']
+
+InputOfReasonEnum = Literal['changed', 'organizer']
 
 class RecordOutput(TypedDict):
     token: str
@@ -5481,6 +5557,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                      'tier'],
                                                                                     'request_body': False,
                                                                                     'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_configuration_generated': {'method': 'GET',
+                                                                                              'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/configuration/generated/',
+                                                                                              'path_params': ['event_public_id',
+                                                                                                              'workspace_public_id'],
+                                                                                              'query_params': [],
+                                                                                              'request_body': False,
+                                                                                              'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_continuations': {'method': 'GET',
                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/continuations/',
                                                                                     'path_params': ['event_public_id',

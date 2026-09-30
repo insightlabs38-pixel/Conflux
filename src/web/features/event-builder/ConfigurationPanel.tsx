@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Badge } from "../../components/Badge";
 import { describeProblem } from "../../lib/api";
 import { useLoad } from "../../hooks/useLoad";
+import { GeneratedConfiguration } from "./GeneratedConfiguration";
 
 type Entry = {
   key: string;
@@ -126,6 +127,7 @@ export function ConfigurationPanel({
           ))}
         </ul>
       )}
+      <GeneratedConfiguration workspaceId={workspaceId} eventId={eventId} />
     </section>
   );
 }

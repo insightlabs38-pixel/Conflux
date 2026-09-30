@@ -100,6 +100,24 @@ for (const width of [390, 1440]) {
     await expect(panel).toContainText(
       "Rule: Between 1 and 100, and not below the smallest team.",
     );
+    // Generated configuration states only the change; the format's own values stay legible.
+    await panel.getByText("Generated configuration", { exact: true }).click();
+    const generated = panel.locator("pre");
+    await expect(generated).toContainText(
+      'registration.mode: "invite_only"  # changed; the format uses "open"',
+    );
+    await expect(generated).toContainText("# Inherited, not stated");
+    await expect(generated).toContainText("#   team.min_size: 1  # preset");
+    expect(await generated.textContent()).not.toMatch(/^ {2}team\.min_size/m);
+    const stated = await (
+      await page.request.get(
+        `/api/v1/workspaces/${workspace}/events/${event}/configuration/generated/`,
+      )
+    ).json();
+    expect(stated.explicit.map((e: { key: string }) => e.key)).toContain(
+      "registration.mode",
+    );
+    expect(stated.document.format).toBe("hackathon@1");
     await panel.getByLabel("Show").selectOption("overridden");
     await expect(panel.getByRole("listitem")).toHaveCount(1);
     await expect(panel).toContainText("Registration: invite only");

@@ -1,0 +1,82 @@
+version: 3
+task: PD-F001-B02-T01
+batch: PD-F001-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: c4693ab
+  head_commit: c4693ab
+changed_paths:
+- src/api/eventconfig/ (generated.py new, schema.py, views.py, urls.py)
+- src/web/features/event-builder/ (GeneratedConfiguration and test, ConfigurationPanel.tsx)
+- src/web/styles/components.css
+- tests/integration/test_event_generated_configuration.py
+- tests/e2e/event-configuration.spec.ts
+- docs/product-depth-v3/specs/001-base-experience-must-remain-smaller-than-the-platform.md
+- docs/operations/EVENT_BASE_EXPERIENCE.md
+- docs/api/openapi.yaml
+- sdks/
+deliverables:
+- item: Generated configuration states explicit values only when necessary
+  result: pass
+  evidence: GET configuration/generated/ partitions the registry reading into explicit (set by the organizer or changed from the format or default), inherited, derived and unset; a value back at its baseline drops out; an organizer value equal to the default (UTC time zone) is inherited; every registry setting appears exactly once
+- item: Inherited defaults remain legible
+  result: pass
+  evidence: inherited values are returned with their origin and rendered as comments in the YAML text (valid YAML, parsed in a test), with derived and not-set sections; the panel shows the text under a Generated configuration disclosure with counts
+- item: Observable state and diagnostics
+  result: pass
+  evidence: each explicit entry carries reason, baseline, origin and the documented write, so automation can apply it; the panel shows a failed generation with Try again and copy success or failure
+- item: Sufficiency of what is stated
+  result: pass
+  evidence: test_stating_only_the_explicit_values_reproduces_the_event applies only the explicit values through their documented writes to a new event of the same format and gets the same document and the same inherited values
+invariants:
+- item: One source of truth, no parallel settings model
+  result: pass
+  evidence: generated.py only partitions effective_configuration (the registry); nothing is stored
+- item: Server authorization authoritative
+  result: pass
+  evidence: organizer/admin only (judge 403, anonymous denied, cross-workspace 404); read-only
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1555 passed, 23 skipped (adds 7 generated-configuration tests)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 325 web tests (GeneratedConfiguration adds 3; three sequential runs all green); static checks, OpenAPI and SDKs clean
+- command: npx playwright test event-configuration (fresh iso-min fixture)
+  result: pass
+  note: 2 passed at 390 and 1440 with axe and no overflow, including the generated text and the API answer
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: Generated configuration disclosure in Defaults and overrides
+- surface: api
+  result: pass
+  evidence: configuration/generated endpoint
+- surface: audit
+  result: pass
+  evidence: "not applicable for this task: read-only; values are changed through the existing audited endpoints"
+- surface: docs
+  result: pass
+  evidence: spec 001 section Generated configuration, EVENT_BASE_EXPERIENCE.md, OpenAPI
+- surface: sdk
+  result: pass
+  evidence: "not applicable for this task: not_required; generated artifacts regenerated only"
+- surface: event_as_code
+  result: pass
+  evidence: "not applicable for this task: not_required; the Event-as-Code export is unchanged (see finding)"
+migrations: []
+findings:
+- Interpretation recorded in QUESTIONS.md (default A); the Event-as-Code export still writes full documents because its round-trip format is supported behavior; a minimal export is PD-S046 territory
+- Pre-existing flake, unrelated and not fixed here; hooks/useRealtime.test.tsx fails under heavy CPU contention (four concurrent web runs) and passes sequentially
+limitations:
+- Only registry settings are covered (event, registration, team, submission, eligibility flags); judging, stage and award configuration are multi-instance and not in the registry yet
+- There is no apply-document endpoint; applying is done through each entry's documented write
+- No full make e2e-fast for this task alone; the run at the end of the batch covers it (T02 receipt)
+escalations: []
+next: review

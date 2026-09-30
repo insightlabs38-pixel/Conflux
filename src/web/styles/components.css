@@ -2173,6 +2173,15 @@
   cursor: pointer;
   font-weight: var(--font-weight-semibold);
 }
+.cx-generated-config {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-subtle);
+  font-size: var(--font-size-sm);
+}
 .cx-create-form {
   display: grid;
   gap: var(--space-3);

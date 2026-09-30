@@ -2131,6 +2131,84 @@ export type InputOfGalleryProjectSchema = {
   repo_url: string;
 };
 
+export type GeneratedConfigurationSchema = {
+  event: string;
+  preset: ConfigurationPresetSchema | null;
+  explicit: GeneratedExplicitSchema[];
+  inherited: GeneratedInheritedSchema[];
+  derived: GeneratedValueSchema[];
+  unset: string[];
+  document: GeneratedDocumentSchema;
+  text: string;
+};
+
+export type InputOfGeneratedConfigurationSchema = {
+  event: string;
+  preset: InputOfConfigurationPresetSchema | null;
+  explicit: InputOfGeneratedExplicitSchema[];
+  inherited: InputOfGeneratedInheritedSchema[];
+  derived: InputOfGeneratedValueSchema[];
+  unset: string[];
+  document: InputOfGeneratedDocumentSchema;
+  text: string;
+};
+
+export type GeneratedDocumentSchema = {
+  format: string | null;
+  settings: unknown;
+};
+
+export type InputOfGeneratedDocumentSchema = {
+  format: string | null;
+  settings: unknown;
+};
+
+export type GeneratedExplicitSchema = {
+  key: string;
+  label: string;
+  value: unknown;
+  reason: ReasonEnum;
+  baseline: unknown;
+  origin: OriginEnum;
+  write: ConfigurationWriteSchema | null;
+};
+
+export type InputOfGeneratedExplicitSchema = {
+  key: string;
+  label: string;
+  value: unknown;
+  reason: InputOfReasonEnum;
+  baseline: unknown;
+  origin: InputOfOriginEnum;
+  write: InputOfConfigurationWriteSchema | null;
+};
+
+export type GeneratedInheritedSchema = {
+  key: string;
+  label: string;
+  value: unknown;
+  origin: OriginEnum;
+};
+
+export type InputOfGeneratedInheritedSchema = {
+  key: string;
+  label: string;
+  value: unknown;
+  origin: InputOfOriginEnum;
+};
+
+export type GeneratedValueSchema = {
+  key: string;
+  label: string;
+  value: unknown;
+};
+
+export type InputOfGeneratedValueSchema = {
+  key: string;
+  label: string;
+  value: unknown;
+};
+
 export type GraphValidationSchema = {
   valid: boolean;
   order?: string[];
@@ -2873,6 +2951,10 @@ export type InputOfOperatorTemplateSchema = {
   name: string;
   source_event_name: string;
 };
+
+export type OriginEnum = "preset" | "default";
+
+export type InputOfOriginEnum = "preset" | "default";
 
 export type Page = {
   public_id: string;
@@ -4002,6 +4084,10 @@ export type InputOfReadinessSchema = {
 export type ReadinessSchemaStatusEnum = "ready" | "warning" | "blocked";
 
 export type InputOfReadinessSchemaStatusEnum = "ready" | "warning" | "blocked";
+
+export type ReasonEnum = "changed" | "organizer";
+
+export type InputOfReasonEnum = "changed" | "organizer";
 
 export type RecordOutput = { token: string; claims: Record<string, unknown> };
 
@@ -6010,6 +6096,10 @@ export interface Operations {
       };
     };
     response: ConfigurationSchema;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_configuration_generated: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: GeneratedConfigurationSchema;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_continuations: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -9861,6 +9951,15 @@ export const operations = {
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/configuration/",
       path_params: ["event_public_id", "workspace_public_id"],
       query_params: ["key", "module", "source", "tier"],
+      request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_configuration_generated:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/configuration/generated/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
       request_body: false,
       response_kind: "json",
     },

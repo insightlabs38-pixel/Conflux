@@ -74,3 +74,37 @@ class WorkflowSchema(serializers.Serializer):
     preset = ConfigurationPresetSchema(allow_null=True)
     stages = serializers.ListField(child=serializers.CharField())
     differences = WorkflowDifferenceSchema(many=True)
+
+
+class GeneratedValueSchema(serializers.Serializer):
+    key = serializers.CharField()
+    label = serializers.CharField()
+    value = serializers.JSONField(allow_null=True)
+
+
+class GeneratedExplicitSchema(GeneratedValueSchema):
+    reason = serializers.ChoiceField(choices=["changed", "organizer"])
+    baseline = serializers.JSONField(allow_null=True)
+    # Where the baseline comes from: the format, or the registry default when there is none.
+    origin = serializers.ChoiceField(choices=["preset", "default"])
+    write = ConfigurationWriteSchema(allow_null=True)
+
+
+class GeneratedInheritedSchema(GeneratedValueSchema):
+    origin = serializers.ChoiceField(choices=["preset", "default"])
+
+
+class GeneratedDocumentSchema(serializers.Serializer):
+    format = serializers.CharField(allow_null=True)
+    settings = serializers.JSONField()
+
+
+class GeneratedConfigurationSchema(serializers.Serializer):
+    event = serializers.UUIDField()
+    preset = ConfigurationPresetSchema(allow_null=True)
+    explicit = GeneratedExplicitSchema(many=True)
+    inherited = GeneratedInheritedSchema(many=True)
+    derived = GeneratedValueSchema(many=True)
+    unset = serializers.ListField(child=serializers.CharField())
+    document = GeneratedDocumentSchema()
+    text = serializers.CharField()

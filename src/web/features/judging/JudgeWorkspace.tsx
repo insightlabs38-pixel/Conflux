@@ -24,6 +24,7 @@ import {
 } from "../pvs";
 import { apiJson, describeProblem } from "../../lib/api";
 import { useLoad } from "../../hooks/useLoad";
+import { useMe } from "../../hooks/useMe";
 import { useUrlParam } from "../../lib/urlState";
 
 type Event = { public_id: string; name: string };
@@ -97,24 +98,31 @@ function writeJSON(key: string, value: unknown): void {
   }
 }
 
-function cacheKey(base: string): string {
-  return `conflux.judge-cache.${base}`;
+// Offline state belongs to the account that produced it: the cache holds that judge's assignments
+// and the outbox their unsent ballots. Keys are scoped by user, so on a shared device one judge's
+// queued ballots are never replayed as another judge, and one judge's queue is never shown to the
+// next. With no known account nothing is stored (offline support degrades to online-only).
+// Earlier versions used unscoped keys (`conflux.judge-*.<plan>`); those entries cannot be
+// attributed to anyone, so they are left untouched and never read or replayed.
+function cacheKey(owner: string, base: string): string {
+  return `conflux.judge-cache.${owner}.${base}`;
 }
 
-function outboxKey(base: string): string {
-  return `conflux.judge-outbox.${base}`;
+function outboxKey(owner: string, base: string): string {
+  return `conflux.judge-outbox.${owner}.${base}`;
 }
 
-function readOutbox(base: string): BallotPayload[] {
-  return readJSON<BallotPayload[]>(outboxKey(base)) ?? [];
+function readOutbox(owner: string, base: string): BallotPayload[] {
+  return owner ? (readJSON<BallotPayload[]>(outboxKey(owner, base)) ?? []) : [];
 }
 
-function queueBallot(base: string, ballot: BallotPayload): void {
-  const queue = readOutbox(base).filter(
+function queueBallot(owner: string, base: string, ballot: BallotPayload): void {
+  if (!owner) return;
+  const queue = readOutbox(owner, base).filter(
     (item) => item.project !== ballot.project,
   );
   queue.push(ballot);
-  writeJSON(outboxKey(base), queue);
+  writeJSON(outboxKey(owner, base), queue);
 }
 
 /** Replays queued ballots in order; stops at the first network failure
@@ -122,8 +130,8 @@ function queueBallot(base: string, ballot: BallotPayload): void {
  * peer already submitted one first) since re-sending it can never help.
  * Returns how many entries are left in the queue.
  */
-async function flushOutbox(base: string): Promise<number> {
-  const queue = readOutbox(base);
+async function flushOutbox(owner: string, base: string): Promise<number> {
+  const queue = readOutbox(owner, base);
   const remaining: BallotPayload[] = [];
   for (const [index, ballot] of queue.entries()) {
     try {
@@ -137,11 +145,12 @@ async function flushOutbox(base: string): Promise<number> {
       // there is nothing further offline retry can do about it.
     }
   }
-  writeJSON(outboxKey(base), remaining);
+  writeJSON(outboxKey(owner, base), remaining);
   return remaining.length;
 }
 
 function BallotForm({
+  owner,
   base,
   candidate,
   rubric,
@@ -152,6 +161,7 @@ function BallotForm({
   onSubmitted,
   onQueued,
 }: {
+  owner: string;
   base: string;
   candidate: Candidate;
   rubric: RubricVersion;
@@ -289,7 +299,11 @@ function BallotForm({
       onSubmitted(continueToNext);
     } catch (cause) {
       if (isNetworkFailure(cause)) {
-        queueBallot(base, { project: candidate.project, comment, responses });
+        queueBallot(owner, base, {
+          project: candidate.project,
+          comment,
+          responses,
+        });
         setError("");
         onQueued(continueToNext);
       } else {
@@ -463,10 +477,12 @@ function BallotForm({
 }
 
 function PlanQueue({
+  owner,
   base,
   workspaceId,
   eventId,
 }: {
+  owner: string;
   base: string;
   workspaceId: string;
   eventId: string;
@@ -477,7 +493,9 @@ function PlanQueue({
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [offline, setOffline] = useState(false);
-  const [queuedCount, setQueuedCount] = useState(() => readOutbox(base).length);
+  const [queuedCount, setQueuedCount] = useState(
+    () => readOutbox(owner, base).length,
+  );
 
   function refresh() {
     setLoading(true);
@@ -490,13 +508,14 @@ function PlanQueue({
         setCandidates(nextCandidates);
         setRubric(nextRubric);
         setOffline(false);
-        writeJSON(cacheKey(base), {
-          candidates: nextCandidates,
-          rubric: nextRubric,
-        } satisfies CachedQueue);
-        const before = readOutbox(base).length;
+        if (owner)
+          writeJSON(cacheKey(owner, base), {
+            candidates: nextCandidates,
+            rubric: nextRubric,
+          } satisfies CachedQueue);
+        const before = readOutbox(owner, base).length;
         if (before > 0) {
-          const left = await flushOutbox(base);
+          const left = await flushOutbox(owner, base);
           setQueuedCount(left);
           if (left < before) refresh(); // progress was made: re-fetch statuses
         } else {
@@ -504,12 +523,14 @@ function PlanQueue({
         }
       })
       .catch((cause: unknown) => {
-        const cached = readJSON<CachedQueue>(cacheKey(base));
+        const cached = owner
+          ? readJSON<CachedQueue>(cacheKey(owner, base))
+          : null;
         if (isNetworkFailure(cause) && cached) {
           setCandidates(cached.candidates);
           setRubric(cached.rubric);
           setOffline(true);
-          setQueuedCount(readOutbox(base).length);
+          setQueuedCount(readOutbox(owner, base).length);
         } else {
           setError(message(cause));
         }
@@ -517,13 +538,13 @@ function PlanQueue({
       .finally(() => setLoading(false));
   }
 
-  useEffect(refresh, [base]);
+  useEffect(refresh, [base, owner]);
 
   useEffect(() => {
     window.addEventListener("online", refresh);
     return () => window.removeEventListener("online", refresh);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [base]);
+  }, [base, owner]);
 
   if (loading) return <LoadingState label="Loading your review queue…" />;
   if (error) return <ErrorState message={error} onRetry={refresh} />;
@@ -534,7 +555,9 @@ function PlanQueue({
       <EmptyState title="You have no projects assigned to review right now." />
     );
 
-  const outboxProjects = new Set(readOutbox(base).map((item) => item.project));
+  const outboxProjects = new Set(
+    readOutbox(owner, base).map((item) => item.project),
+  );
   const displayCandidates = candidates.map((candidate) =>
     outboxProjects.has(candidate.project)
       ? { ...candidate, status: "queued" as const }
@@ -635,6 +658,7 @@ function PlanQueue({
             </div>
             <BallotForm
               key={current.project}
+              owner={owner}
               base={base}
               candidate={current}
               rubric={rubric}
@@ -655,7 +679,7 @@ function PlanQueue({
                 afterSubmit(next);
               }}
               onQueued={(next) => {
-                setQueuedCount(readOutbox(base).length);
+                setQueuedCount(readOutbox(owner, base).length);
                 afterSubmit(next);
               }}
             />
@@ -673,6 +697,8 @@ function PlanQueue({
 }
 
 export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
+  // Whose offline queue and cache this is (see the storage notes above).
+  const owner = useMe().data?.public_id ?? "";
   // Event, stage and plan are context (lib/urlState.ts): a refresh or a shared link reopens the
   // same review queue. Each level clears the ones below it. The URL is only a request: a value is
   // honoured once it appears in what the server lists for this judge, otherwise it is dropped.
@@ -889,7 +915,8 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
           </Destination>
           <Destination id="queue">
             <PlanQueue
-              key={planBase}
+              key={`${owner}:${planBase}`}
+              owner={owner}
               base={planBase}
               workspaceId={workspaceId}
               eventId={eventId}

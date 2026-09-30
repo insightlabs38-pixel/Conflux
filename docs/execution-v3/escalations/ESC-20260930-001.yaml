@@ -1,0 +1,39 @@
+version: 1
+id: ESC-20260930-001
+task: PD-B04-T08
+batch: PD-B04
+category: data_integrity
+severity: P1
+status: RESOLVED
+summary: Offline judge outbox and cache were keyed by plan only, so on a shared browser one judge's queued ballots were replayed under the next judge's session.
+observed:
+- src/web/features/judging/JudgeWorkspace.tsx stored `conflux.judge-outbox.<planBase>` and `conflux.judge-cache.<planBase>` in localStorage with no user in the key.
+- On the next PlanQueue load while online, flushOutbox POSTed every queued ballot to `<plan>/ballots/` under whoever was signed in. A unit test with a second account reproduced it on the old code (POST issued for judge-2 carrying judge-1's scores).
+- The cache likewise showed the previous judge's assigned candidates and rubric to the next account while offline.
+- Found by the T08 role-change regression work; no other localStorage/sessionStorage use exists in src/web (the service worker only caches public /e/ pages).
+attempts:
+- Read all storage code paths (read/write/queue/flush) and their callers.
+- Reproduced with a two-account jsdom test; confirmed the fix makes the same test pass and fails the old code.
+decision_needed: What to do with unscoped entries written by earlier versions (unattributable), i.e. the migration policy.
+options:
+- option: A, leave legacy entries untouched and never read them
+  tradeoff: safe (nothing replayed to the wrong account, nothing deleted) but a judge with an unsent pre-upgrade ballot no longer sees it queued; the data remains in localStorage for a later recovery step.
+- option: B, adopt legacy entries for the first account that opens the plan
+  tradeoff: preserves the buffer for the usual single-judge browser but repeats the original mis-attribution for shared browsers, one time.
+- option: C, delete legacy entries
+  tradeoff: removes the exposure but silently loses unsent official ballots.
+recommended: A now (implemented); owner may choose B or a per-entry prompt if pre-upgrade unsent ballots are a real concern.
+affected_invariants:
+- Official scoring inputs are attributed to the judge who produced them.
+- Offline buffers are preserved across navigation and refresh for their owner.
+- Sensitive assignment data is not shown across accounts.
+affected_tasks:
+- PD-B04-T08
+artifacts:
+- src/web/features/judging/JudgeWorkspace.tsx
+- src/web/features/judging/JudgeWorkspace.offline.test.tsx
+resolution: |
+  Decision: scope both keys by the signed-in account's public id (`conflux.judge-{outbox,cache}.<user>.<plan>`); with no known account nothing is stored. Unscoped legacy entries are neither read, replayed nor deleted (option A).
+  Rationale: the safe direction that cannot mis-attribute or destroy an official ballot; the only cost is that a pre-upgrade unsent ballot is not shown as queued.
+  Migration: none automatic. Legacy keys stay in localStorage; a follow-up can implement option B/prompt if wanted.
+  Verification: three shared-device tests in JudgeWorkspace.offline.test.tsx (no replay/display across accounts and no deletion, owner gets their queue back, cache is per account); failed on the old code.

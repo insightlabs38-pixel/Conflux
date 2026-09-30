@@ -93,6 +93,8 @@ describe("offline judge workspace", () => {
         .fn()
         .mockImplementation(async (input: unknown, options?: RequestInit) => {
           const url = String(input);
+          if (url.endsWith("/accounts/me/"))
+            return { ok: true, json: async () => ({ public_id: "judge-1" }) };
           if (url.endsWith("judge-events/"))
             return {
               ok: true,
@@ -182,6 +184,7 @@ describe("offline judge workspace", () => {
 
   it("shows the last cached assignments and rubric when reopened offline", async () => {
     function navigationBody(url: string, online: boolean) {
+      if (url.endsWith("/accounts/me/")) return { public_id: "judge-1" };
       if (url.endsWith("judge-events/"))
         return [{ public_id: "e1", name: "First" }];
       if (url.endsWith("judge-calendar/"))
@@ -228,5 +231,111 @@ describe("offline judge workspace", () => {
       () => container.textContent?.includes("You're offline") ?? false,
     );
     expect(container.textContent).toContain("Project");
+  });
+
+  describe("shared device", () => {
+    const PLAN =
+      "/api/v1/workspaces/w/events/e1/stages/s1/evaluation-plans/p1/";
+    const queued = {
+      project: "project",
+      comment: "from judge one",
+      responses: [{ criterion: "impact", score: 9 }],
+    };
+
+    function api(user: string) {
+      return vi.fn().mockImplementation(async (input: unknown) => {
+        const url = String(input);
+        const body = url.endsWith("/accounts/me/")
+          ? { public_id: user }
+          : url.endsWith("judge-events/")
+            ? [{ public_id: "e1", name: "First" }]
+            : url.endsWith("judge-calendar/")
+              ? { windows: [], assignments: [] }
+              : url.endsWith("/stages/")
+                ? [{ public_id: "s1", name: "Final" }]
+                : url.endsWith("evaluation-plans/")
+                  ? [{ public_id: "p1", name: "Review" }]
+                  : url.endsWith("candidates/")
+                    ? [
+                        {
+                          project: "project",
+                          name: "Project",
+                          status: "pending",
+                        },
+                      ]
+                    : url.endsWith("publish-rubric/")
+                      ? RUBRIC
+                      : [];
+        return { ok: true, status: 200, json: async () => body };
+      });
+    }
+
+    it("never replays or shows one judge's queued ballots to another account", async () => {
+      window.localStorage.setItem(
+        `conflux.judge-outbox.judge-1.${PLAN}`,
+        JSON.stringify([queued]),
+      );
+      // Unscoped entries from earlier versions cannot be attributed: never read or replayed.
+      window.localStorage.setItem(
+        `conflux.judge-outbox.${PLAN}`,
+        JSON.stringify([queued]),
+      );
+      const fetchMock = api("judge-2");
+      vi.stubGlobal("fetch", fetchMock);
+      act(() => root.render(withRouter(<JudgeWorkspace workspaceId="w" />)));
+      await navigateToProject();
+      expect(container.textContent).not.toContain("queued");
+      expect(
+        fetchMock.mock.calls.some(
+          ([url, init]) =>
+            String(url).endsWith("/ballots/") && init?.method === "POST",
+        ),
+      ).toBe(false);
+      // Nothing was deleted: the first judge's queue is still theirs to sync.
+      expect(
+        window.localStorage.getItem(`conflux.judge-outbox.judge-1.${PLAN}`),
+      ).toBe(JSON.stringify([queued]));
+      expect(window.localStorage.getItem(`conflux.judge-outbox.${PLAN}`)).toBe(
+        JSON.stringify([queued]),
+      );
+    });
+
+    it("gives the owner their own queue back", async () => {
+      window.localStorage.setItem(
+        `conflux.judge-outbox.judge-1.${PLAN}`,
+        JSON.stringify([queued]),
+      );
+      const fetchMock = api("judge-1");
+      // still offline for ballots so the queue is not flushed away
+      const base = fetchMock.getMockImplementation()!;
+      fetchMock.mockImplementation(
+        async (input: unknown, init?: RequestInit) => {
+          if (String(input).endsWith("/ballots/"))
+            throw new TypeError("offline");
+          return base(input, init);
+        },
+      );
+      vi.stubGlobal("fetch", fetchMock);
+      act(() => root.render(withRouter(<JudgeWorkspace workspaceId="w" />)));
+      await navigateToProject().catch(() => undefined);
+      await waitFor(
+        () => container.textContent?.includes("1 ballot queued") ?? false,
+      );
+    });
+
+    it("keeps the offline cache per account", async () => {
+      vi.stubGlobal("fetch", api("judge-1"));
+      act(() => root.render(withRouter(<JudgeWorkspace workspaceId="w" />)));
+      await navigateToProject();
+      expect(
+        window.localStorage.getItem(`conflux.judge-cache.judge-1.${PLAN}`),
+      ).not.toBeNull();
+      expect(
+        window.localStorage.getItem(`conflux.judge-cache..${PLAN}`),
+      ).toBeNull();
+      expect(
+        window.localStorage.getItem(`conflux.judge-cache.${PLAN}`),
+      ).toBeNull();
+    });
   });
 });

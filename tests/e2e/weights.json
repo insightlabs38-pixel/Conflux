@@ -4,6 +4,7 @@
   "isolated-mutation:participant-workflow": 44.8,
   "isolated-mutation:profiles": 8.2,
   "isolated-mutation:pvs": 50.5,
+  "isolated-mutation:route-drafts": 40.0,
   "isolated-mutation:uiv2-judge": 18.6,
   "read-only:async-operations": 6.0,
   "read-only:auth-states": 2.3,

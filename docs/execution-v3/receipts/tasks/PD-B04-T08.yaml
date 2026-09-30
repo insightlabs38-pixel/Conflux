@@ -1,0 +1,73 @@
+version: 3
+task: PD-B04-T08
+batch: PD-B04
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 340ce8e
+  head_commit: 340ce8e
+changed_paths:
+- src/web/features/judging/JudgeWorkspace.tsx
+- src/web/features/judging/JudgeWorkspace.offline.test.tsx
+- tests/e2e/route-drafts.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+- docs/verification/PD-B04/MATRIX.md
+- docs/verification/PD-B04/logs/
+- docs/execution-v3/escalations/ESC-20260930-001.yaml
+deliverables:
+- item: Verification matrix for the batch capabilities, each linked to an executable proof
+  result: pass
+  evidence: docs/verification/PD-B04/MATRIX.md has a row per T01-T07 and the T08 cross-cutting table
+- item: Positive, negative/boundary, authorization, lifecycle and concurrency cases
+  result: pass
+  evidence: route-drafts.spec.ts (participant, organizer, judge, role change, offline outbox) on real persisted iso-min fixtures plus 3 shared-device unit tests
+- item: UI states verified beyond screenshots
+  result: pass
+  evidence: assertions on field values, URL, history length, rendered regions and localStorage keys; no screenshot-only checks
+- item: Exact commands and unresolved limitations recorded
+  result: pass
+  evidence: this receipt and MATRIX.md limitations
+invariants:
+- item: Current domain behavior preserved except a verified defect repair
+  result: pass
+  evidence: only the offline judge storage keys changed (ESC-20260930-001); server endpoints untouched
+- item: No weakened tests or gates
+  result: pass
+  evidence: tiers.json/weights.json only add the new spec; tiers check and test_e2e_tiers pass
+- item: Evidence recorded
+  result: pass
+  evidence: docs/verification/PD-B04/logs/T08-*.log
+verification:
+- command: pnpm --filter @conflux/web test
+  result: pass
+  note: 294 passed, 79 files (includes 3 new shared-device tests that fail on the old code)
+- command: pnpm lint; python3 scripts/e2e-tiers check; uv run --frozen pytest tests/test_e2e_tiers.py
+  result: pass
+  note: tsc clean, tiers OK, 40 passed
+- command: scripts/e2e-tiers run isolated-mutation
+  result: pass
+  note: iso-route-drafts 6 passed (mobile skips by design)
+- command: six concurrent fresh iso-min fixtures, route-drafts --workers=1 each
+  result: pass
+  note: 36 of 36 passed
+- command: make e2e-fast
+  result: pass
+  note: read-only 107 passed, isolated-mutation ok, canary ok (incl. release-integrity) on the rebuilt image
+design_refs: []
+surface_matrix: []
+migrations:
+- "judge offline outbox/cache keys now conflux.judge-{outbox,cache}.<user>.<plan>; unscoped legacy entries are left untouched and never read (option A)"
+findings:
+- "P1 fixed: offline judge outbox replayed one judge's ballots under the next signed-in judge on a shared browser (ESC-20260930-001)"
+- Repeating the spec against one shared fixture fails the judge tests by design; stress uses a fresh fixture per run
+escalations:
+- ESC-20260930-001 (RESOLVED with the conservative default; owner may choose adoption or a prompt for legacy entries)
+limitations:
+- Pre-upgrade unsent judge ballots stay in localStorage unattributed and are not shown as queued
+- Selection state inside panels (judge project, builder item, tabs) remains local, not in the URL
+next: review

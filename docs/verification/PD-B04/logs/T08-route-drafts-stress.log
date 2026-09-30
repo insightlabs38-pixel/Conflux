@@ -1,0 +1,8 @@
+six concurrent fresh iso-min fixtures, route-drafts --project=desktop --workers=1 each
+6 passed (20.3s)
+6 passed (20.3s)
+6 passed (21.0s)
+6 passed (21.1s)
+6 passed (21.1s)
+6 passed (21.5s)
+(mobile projects skip by design; scripts/e2e-tiers run isolated-mutation: iso-route-drafts exit 0: 6 skipped; 6 passed)

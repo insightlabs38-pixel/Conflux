@@ -21,6 +21,7 @@
     "participant-workflow",
     "profiles",
     "pvs",
+    "route-drafts",
     "uiv2-judge"
   ],
   "canary": [

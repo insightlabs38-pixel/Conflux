@@ -223,6 +223,8 @@ def main(argv):
             for spec in specs:
                 selection.setdefault(tier_of(spec), []).append(spec)
             say(f"affected vs {base}: " + "; ".join(f"{t}: {', '.join(v)}" for t, v in selection.items()))
+            if "canary" in selection:
+                say("  canary runs as a chain: " + " -> ".join(canary_chain(selection["canary"])))
         if "--list" in argv or not preflight():
             return 0 if "--list" in argv else 1
         return run_tiers([t for t in RUN_TIERS if selection is None or t in selection], selection)

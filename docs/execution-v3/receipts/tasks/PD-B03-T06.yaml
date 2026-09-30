@@ -1,0 +1,65 @@
+version: 3
+task: PD-B03-T06
+batch: PD-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 65936ddd4df406ae5f9bfc742391286cb067eb49
+  head_commit: 65936ddd4df406ae5f9bfc742391286cb067eb49
+changed_paths:
+- scripts/e2e-tiers
+- tests/e2e/affected.json
+- tests/test_e2e_tiers.py
+- Makefile
+- docs/operations/E2E.md
+- docs/verification/PD-B03/MATRIX.md
+- docs/verification/PD-B03/logs/
+deliverables:
+- item: Fast smoke tier for day-to-day changes
+  result: pass
+  evidence: make e2e-smoke 16 passed in 8.3 s (10.9 s with preflight)
+- item: Affected selection from changed paths with PR/full/release tiers remaining authoritative
+  result: pass
+  evidence: make e2e-affected [BASE= LIST=1]; full tiers (make e2e-fast) and serial make demo-e2e unchanged; shared infrastructure selects ALL
+- item: Selection is explainable and never silently empty
+  result: pass
+  evidence: every changed path prints its mapping; unmapped source falls back to smoke with an 'add a rule' reason; docs-only reports nothing to run
+invariants:
+- item: Coverage not reduced; authoritative gates intact
+  result: pass
+  evidence: smoke/affected are additive entry points; run/make e2e-fast unchanged; three earlier full runs plus two more during this task green (152 passed)
+- item: No duplicate classification source
+  result: pass
+  evidence: affected.json names specs only; check and tests/test_e2e_tiers.py fail for unclassified specs
+verification:
+- command: uv run --frozen pytest tests/test_e2e_tiers.py
+  result: pass
+  note: 16 passed (mapping, shared-infra ALL, docs none, unmapped fallback, canary chain prefix, classification)
+- command: make e2e-smoke
+  result: pass
+  note: 16 passed desktop, 8.3 s
+- command: edit src/web/features/pvs file then make e2e-affected
+  result: pass
+  note: selects only pvs, runs on an iso-min fixture, 15 passed 49 s; edit reverted (logs/T06-smoke-affected.log)
+- command: affected on docs-only, unmapped api, awards (canary) changes
+  result: pass
+  note: nothing to run; smoke fallback with reason; canary chain listed
+- command: make verify-fast
+  result: pass
+  note: pytest 1430 passed/23 skipped; web 169 + embed 8; lint incl. tiers check
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: smoke and affected runs executed in the browser
+migrations: []
+findings:
+- My first affected demonstration ran on a dirty tree where e2e infrastructure files counted as shared infrastructure (ALL), which correctly selected everything; evidence was regenerated after committing the implementation.
+escalations: []
+limitations:
+- The path-to-spec map is hand-maintained; unmapped paths degrade to smoke, not to the full suite, so a wrong or missing rule can under-select (PR and release tiers still run everything).
+next: review

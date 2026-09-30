@@ -1,4 +1,4 @@
-.PHONY: oidc-smoke demo-reset demo-e2e e2e-fast e2e-stack e2e-fixture-sweep format format-check lint test build verify-fast verify openapi-check sdk-generate sdk-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance backup restore backup-restore-smoke
+.PHONY: oidc-smoke demo-reset demo-e2e e2e-smoke e2e-affected e2e-fast e2e-stack e2e-fixture-sweep format format-check lint test build verify-fast verify openapi-check sdk-generate sdk-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance backup restore backup-restore-smoke
 
 # Local checks use disposable keys; runtime deployments must supply their own.
 export DJANGO_SECRET_KEY ?= bootstrap-checks-only
@@ -122,6 +122,14 @@ demo-reset:
 # Regenerate demo screenshots and clips into tests/e2e/artifacts/ (needs a running, demo-reset stack).
 demo-e2e:
 	npx playwright test -c tests/e2e/playwright.config.ts
+
+# Seconds: sign-in, role workspaces and public pages on desktop only.
+e2e-smoke:
+	python3 scripts/e2e-tiers smoke
+
+# Only specs mapped from changed paths (tests/e2e/affected.json); `make e2e-affected BASE=main~3 LIST=1`.
+e2e-affected:
+	python3 scripts/e2e-tiers affected $(if $(BASE),--base $(BASE)) $(if $(LIST),--list)
 
 # Same specs, tiered and concurrent (scripts/e2e-tiers): read-only on the demo event, mutators and the
 # lifecycle canary on throwaway fixtures. No demo-reset needed; `make demo-e2e` stays the serial authority.

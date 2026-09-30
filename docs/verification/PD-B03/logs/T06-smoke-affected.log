@@ -1,0 +1,28 @@
+### smoke (desktop, reference scenario)
+preflight 1.9s
+[smoke] exit 0: 16 passed (8.3s)
+== smoke: ok
+real	0m10.904s
+
+### affected: one edited pvs feature file (reverted afterwards)
+  src/web/features/pvs/DeliberationPanel.tsx -> pvs
+affected vs HEAD: isolated-mutation: pvs
+warn source freshness — web sources are newer than the image (mtime heuristic); rebuild with `make up` if the change affects the browser
+preflight 2.0s
+[iso-pvs] exit 0: 5 skipped; 15 passed (40.4s)
+== isolated-mutation: ok
+real	0m48.999s
+
+### affected: docs-only change selects nothing
+  docs/operations/DEMO.md -> none
+affected vs HEAD: nothing to run (4 changed path(s) map to no browser spec)
+
+### affected --list: mapped backend app + unmapped source path
+  src/api/onsite/models.py -> pvs
+  src/api/taxonomy/models.py -> smoke (unmapped; add a rule to tests/e2e/affected.json)
+affected vs HEAD: read-only: public, roles, signin; isolated-mutation: pvs
+
+
+### affected --list: awards change selects canary members (chain prefix runs: lifecycle, scenes, uiv2-organizer, uiv2-final-states)
+  src/web/features/awards/AwardsPanel.tsx -> lifecycle, public, showcase, uiv2-final-states, uiv2-organizer
+affected vs HEAD: canary: lifecycle, uiv2-final-states, uiv2-organizer; read-only: public, showcase

@@ -65,7 +65,9 @@ for (const width of [390, 768, 1024, 1440]) {
           fullPage: true,
         });
     }
-    for (const dest of ["integrations", "communications", "operations"]) {
+    // Integrations is an optional module, off on the reference event; its tour is in
+    // event-modules.spec.ts, which turns it on on an isolated fixture.
+    for (const dest of ["communications", "operations"]) {
       await goToDestination(page, dest);
       await settled(page);
       await accessible(page);

@@ -17,6 +17,7 @@
   ],
   "self-isolating": ["auth-states", "fixture-isolation"],
   "isolated-mutation": [
+    "event-modules",
     "event-presets",
     "event-themes",
     "participant-workflow",

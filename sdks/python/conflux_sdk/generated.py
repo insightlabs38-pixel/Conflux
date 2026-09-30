@@ -2348,6 +2348,38 @@ class InputOfModerationReviewResponse(TypedDict):
     actor: str
     created_at: str
 
+class ModuleListSchema(TypedDict):
+    scope: ScopeEnum
+    event: str | None
+    modules: list[ModuleSchema]
+
+class InputOfModuleListSchema(TypedDict):
+    scope: InputOfScopeEnum
+    event: str | None
+    modules: list[InputOfModuleSchema]
+
+class ModuleSchema(TypedDict):
+    key: str
+    label: str
+    description: str
+    destination: str | None
+    enabled: bool
+    in_use: bool
+    explicit: bool | None
+    can_disable: bool
+    reason: str
+
+class InputOfModuleSchema(TypedDict):
+    key: str
+    label: str
+    description: str
+    destination: str | None
+    enabled: bool
+    in_use: bool
+    explicit: bool | None
+    can_disable: bool
+    reason: str
+
 class MyEventApplicationResponse(TypedDict):
     application: EventApplication | None
 
@@ -2759,6 +2791,12 @@ class InputOfPatchedLocationPatchInput(TypedDict):
     y: NotRequired[float | None]
     notes: NotRequired[str]
     position: NotRequired[int]
+
+class PatchedModuleInput(TypedDict):
+    enabled: NotRequired[bool]
+
+class InputOfPatchedModuleInput(TypedDict):
+    enabled: NotRequired[bool]
 
 class PatchedPage(TypedDict):
     public_id: NotRequired[str]
@@ -3830,6 +3868,10 @@ class ScanInput(TypedDict):
 
 class InputOfScanInput(TypedDict):
     token: str
+
+ScopeEnum = Literal['event', 'workspace']
+
+InputOfScopeEnum = Literal['event', 'workspace']
 
 class SearchFilters(TypedDict):
     q: NotRequired[str]
@@ -6331,6 +6373,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                        'query_params': [],
                                                        'request_body': False,
                                                        'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_modules': {'method': 'GET',
+                                                       'path': '/api/v1/workspaces/{workspace_public_id}/modules/',
+                                                       'path_params': ['workspace_public_id'],
+                                                       'query_params': ['event'],
+                                                       'request_body': False,
+                                                       'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_my_judge_expertise': {'method': 'GET',
                                                                   'path': '/api/v1/workspaces/{workspace_public_id}/my-judge-expertise/',
                                                                   'path_params': ['workspace_public_id'],
@@ -6474,6 +6522,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                'query_params': [],
                                                                                                                'request_body': True,
                                                                                                                'response_kind': 'json'},
+ 'patch_api_v1_workspaces_workspace_public_id_events_event_public_id_modules_module_key': {'method': 'PATCH',
+                                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/modules/{module_key}/',
+                                                                                           'path_params': ['event_public_id',
+                                                                                                           'module_key',
+                                                                                                           'workspace_public_id'],
+                                                                                           'query_params': [],
+                                                                                           'request_body': True,
+                                                                                           'response_kind': 'json'},
  'patch_api_v1_workspaces_workspace_public_id_events_event_public_id_page': {'method': 'PATCH',
                                                                              'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/page/',
                                                                              'path_params': ['event_public_id',

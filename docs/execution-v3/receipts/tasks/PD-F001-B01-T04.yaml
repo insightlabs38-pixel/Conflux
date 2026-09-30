@@ -1,0 +1,95 @@
+version: 3
+task: PD-F001-B01-T04
+batch: PD-F001-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: f553782
+  head_commit: f553782
+changed_paths:
+- src/api/eventconfig/ (modules.py, views.py, urls.py, models.py, migrations/0002)
+- src/api/core/urls.py
+- src/web/hooks/useModules.ts
+- src/web/components/WorkspaceNavigation.tsx
+- src/web/components/AppShell.tsx
+- src/web/features/event-builder/ (ModuleGate, FeaturesPanel, EventDashboard and tests)
+- tests/integration/test_event_modules.py
+- tests/integration/test_final_archive.py
+- tests/e2e/event-modules.spec.ts
+- tests/e2e/workspace-shell.spec.ts
+- tests/e2e/uiv2-surfaces.spec.ts
+- docs/api/openapi.yaml
+- sdks/
+- docs/verification/PD-F001-B01/
+deliverables:
+- item: Disabled systems disappear from navigation instead of showing empty tabs
+  result: pass
+  evidence: organizer destinations eligibility, onsite and integrations are hidden while their module is neither turned on nor holding content; group heading moves to the next shown item; unit tests and workspace-shell.spec.ts
+- item: Canonical enablement state, derived not duplicated
+  result: pass
+  evidence: EventModuleSetting (explicit choice) plus computed in_use; enabled = explicit OR in_use; legacy events with no rows keep every module that has content
+- item: A hidden view remains a valid, explanatory place; enabling is explicit
+  result: pass
+  evidence: ModuleGate shows what the module is with a Turn on action; Setup > Features lists all modules with switches; turning on/off is audited (event.module_enabled/disabled)
+- item: Preserve data and role boundaries
+  result: pass
+  evidence: disabling is refused (400 with reason) while the module has content; nothing is deleted; endpoints organizer/admin only, cross-workspace denied; nav hiding is not authorization
+invariants:
+- item: Server authorization, validation and audit authoritative
+  result: pass
+  evidence: test_event_modules.py (judge 403, anonymous denied, stranger 403/404, archived 400, unknown module 400, foreign event id does not leak)
+- item: No duplicate source of truth or client-side enablement rules
+  result: pass
+  evidence: the client reads destination ownership from the server response; no client mapping table
+- item: Progressive disclosure, no base clutter
+  result: pass
+  evidence: the base navigation loses up to three entries; the Features tab is the only new surface
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1477 passed, 23 skipped (adds 9 module tests)
+- command: pnpm --filter @conflux/web test; tsc; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 303 web tests (WorkspaceNavigation.modules, ModuleGate/FeaturesPanel added); all static checks clean
+- command: four concurrent fresh fixtures, event-modules and event-presets, desktop
+  result: pass
+  note: 12 of 12 passed
+- command: make e2e-fast
+  result: pass
+  note: read-only, isolated-mutation (incl. event-modules) and canary tiers ok
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: navigation, gate and Features panel at 390 and 1440 with axe and no horizontal overflow
+- surface: api
+  result: pass
+  evidence: GET workspaces/{w}/modules/?event= and PATCH events/{e}/modules/{module}/
+- surface: audit
+  result: pass
+  evidence: event.module_enabled and event.module_disabled audit events
+- surface: docs
+  result: pass
+  evidence: OpenAPI and SDKs regenerated; spec 001 census corrected
+- surface: sdk
+  result: pass
+  evidence: "not applicable for this task: not_required; generated artifacts regenerated only"
+migrations:
+- "eventconfig 0002 creates EventModuleSetting (additive); no backfill; existing events derive enablement from data; model excluded from the archive classification with a stated reason"
+findings:
+- Census correction - the T00 log undercounted eligibility review (rules-row probe); with the real probes it is in use on 6 of 9 events. Spec 001 and a T04 census log record it
+- The Projects and eligibility destination also hosts deadline-exception decisions, so a deadline exception request counts as eligibility-module content (otherwise requests would be unreachable)
+- Browser specs changed deliberately, not weakened - workspace-shell no longer expects Integrations on an event that does not use it and asserts it is hidden with a working deep link; the integrations tour moved to event-modules.spec.ts which turns it on through the UI
+- Webhook subscriptions cannot be deleted, so a subscription (even disabled) keeps Integrations on for that event
+limitations:
+- Only organizer/admin navigation is module-aware; participant, judge, mentor and volunteer lists are unchanged
+- Panel-level modules (community voting, mentorship, deliberation, public page) are listed and toggleable but their panels collapse in T02
+- Until the first module response arrives every destination shows, then hidden ones disappear (one request per workspace open; the last answer is kept across event changes)
+- Without a selected event the workspace union applies
+escalations:
+- ESC-20260930-002 (resolved, option A)
+next: review

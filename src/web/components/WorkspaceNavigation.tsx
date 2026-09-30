@@ -1,3 +1,4 @@
+import { useModules, type Modules } from "../hooks/useModules";
 import {
   createContext,
   useCallback,
@@ -55,10 +56,38 @@ export const roleDestinations: Record<
 };
 roleDestinations.admin = roleDestinations.organizer;
 
+/**
+ * The destinations without the hidden ones. A group heading belongs to the run of items after it,
+ * so when its first item is hidden the heading moves to the next shown item of that group.
+ */
+function visibleDestinations(
+  destinations: { id: string; label: string; group?: string }[],
+  hidden: Set<string | null>,
+) {
+  let current: string | undefined;
+  let shown: string | undefined;
+  const out: { id: string; label: string; group?: string }[] = [];
+  for (const item of destinations) {
+    if (item.group) current = item.group;
+    if (hidden.has(item.id)) continue;
+    out.push({
+      id: item.id,
+      label: item.label,
+      ...(current !== shown ? { group: current } : {}),
+    });
+    shown = current;
+  }
+  return out;
+}
+
 type Navigation = {
   view: string;
   navigate: (id: string) => void;
   href: (id: string) => string;
+  /** The role's destinations minus optional modules that are neither enabled nor in use. */
+  destinations: { id: string; label: string; group?: string }[];
+  /** Optional modules for the selected event (organizer/admin only; null until known). */
+  modules: Modules;
 };
 const Context = createContext<Navigation | null>(null);
 /**
@@ -81,6 +110,19 @@ export function WorkspaceNavigationProvider({
   const { search } = useLocation();
   const go = useNavigate();
   const destinations = roleDestinations[role] || [];
+  // Optional modules follow the selected event (context param `event`, lib/urlState.ts). A view the
+  // role has stays a valid place while its module is off: it explains and offers to enable it.
+  const modules = useModules(
+    workspaceId,
+    new URLSearchParams(search).get("event") ?? "",
+    role === "organizer" || role === "admin",
+  );
+  const hidden = new Set(
+    (modules.modules ?? [])
+      .filter((module) => module.destination && !module.enabled)
+      .map((module) => module.destination),
+  );
+  const visible = visibleDestinations(destinations, hidden);
   const view = destinations.some((item) => item.id === requested)
     ? requested
     : "overview";
@@ -98,7 +140,11 @@ export function WorkspaceNavigationProvider({
     },
     [destinations, go, href],
   );
-  return <Context value={{ view, navigate, href }}>{children}</Context>;
+  return (
+    <Context value={{ view, navigate, href, destinations: visible, modules }}>
+      {children}
+    </Context>
+  );
 }
 export function useWorkspaceNavigation() {
   return useContext(Context);

@@ -21,6 +21,8 @@ import { OperationsCenter } from "../operations/OperationsCenter";
 import { OperatorConsole } from "../operations/OperatorConsole";
 import { CommunicationsPanel } from "../communications/CommunicationsPanel";
 import { ConfigHistoryPanel } from "../audit/ConfigHistoryPanel";
+import { FeaturesPanel } from "./FeaturesPanel";
+import { ModuleGate } from "./ModuleGate";
 import { EventTemplatesPanel } from "./EventTemplatesPanel";
 import { PermissionMatrixExplorer } from "./PermissionMatrixExplorer";
 import { RegistrationPanel } from "./RegistrationPanel";
@@ -528,6 +530,12 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
                   ),
                 },
                 {
+                  id: "features",
+                  label: "Features",
+                  description: "Turn on only what this event needs",
+                  content: <FeaturesPanel eventId={selected.public_id} />,
+                },
+                {
                   id: "stages",
                   label: "Stages",
                   description: "Timeline and transitions",
@@ -637,43 +645,50 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
             />
           </Destination>
           <Destination id="eligibility">
-            <WorkflowSections
-              label="Eligibility tools"
-              sections={[
-                {
-                  id: "EligibilityReviewPanel",
-                  label: "Review queue",
-                  description: "Findings and decisions",
-                  content: (
-                    <EligibilityReviewPanel
-                      key={`EligibilityReviewPanel-${selected.public_id}`}
-                      workspaceId={workspaceId}
-                      eventId={selected.public_id}
-                    />
-                  ),
-                },
-                {
-                  id: "ExceptionRequestsPanel",
-                  label: "Deadline exceptions",
-                  description: "Requests and decisions",
-                  content: (
-                    <ExceptionRequestsPanel
-                      key={`ExceptionRequestsPanel-${selected.public_id}`}
-                      workspaceId={workspaceId}
-                      eventId={selected.public_id}
-                    />
-                  ),
-                },
-              ]}
-            />
+            <ModuleGate
+              module="eligibility_review"
+              eventId={selected.public_id}
+            >
+              <WorkflowSections
+                label="Eligibility tools"
+                sections={[
+                  {
+                    id: "EligibilityReviewPanel",
+                    label: "Review queue",
+                    description: "Findings and decisions",
+                    content: (
+                      <EligibilityReviewPanel
+                        key={`EligibilityReviewPanel-${selected.public_id}`}
+                        workspaceId={workspaceId}
+                        eventId={selected.public_id}
+                      />
+                    ),
+                  },
+                  {
+                    id: "ExceptionRequestsPanel",
+                    label: "Deadline exceptions",
+                    description: "Requests and decisions",
+                    content: (
+                      <ExceptionRequestsPanel
+                        key={`ExceptionRequestsPanel-${selected.public_id}`}
+                        workspaceId={workspaceId}
+                        eventId={selected.public_id}
+                      />
+                    ),
+                  },
+                ]}
+              />
+            </ModuleGate>
           </Destination>
           <Destination id="onsite">
-            <OnsiteOperationsPanel
-              key={`OnsiteOperationsPanel-${selected.public_id}`}
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
-              canManage
-            />
+            <ModuleGate module="onsite" eventId={selected.public_id}>
+              <OnsiteOperationsPanel
+                key={`OnsiteOperationsPanel-${selected.public_id}`}
+                workspaceId={workspaceId}
+                eventId={selected.public_id}
+                canManage
+              />
+            </ModuleGate>
           </Destination>
           <Destination id="judging">
             <WorkflowSections
@@ -729,11 +744,13 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
             />
           </Destination>
           <Destination id="integrations">
-            <WebhooksPanel
-              key={`webhooks-${selected.public_id}`}
-              workspaceId={workspaceId}
-              eventId={selected.public_id}
-            />
+            <ModuleGate module="integrations" eventId={selected.public_id}>
+              <WebhooksPanel
+                key={`webhooks-${selected.public_id}`}
+                workspaceId={workspaceId}
+                eventId={selected.public_id}
+              />
+            </ModuleGate>
           </Destination>
           <Destination id="results">
             <WorkflowSections

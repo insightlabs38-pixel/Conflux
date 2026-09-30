@@ -354,6 +354,7 @@ EXCLUDED_EVENT_MODELS = {
     "onsite.attendance",
     # Preset provenance only (PD-F001-B01); not part of the archive contract yet (see spec 001).
     "eventconfig.eventprofile",
+    "eventconfig.eventmodulesetting",
 }
 
 

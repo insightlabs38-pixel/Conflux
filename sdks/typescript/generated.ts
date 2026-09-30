@@ -2543,6 +2543,42 @@ export type InputOfModerationReviewResponse = {
   created_at: string;
 };
 
+export type ModuleListSchema = {
+  scope: ScopeEnum;
+  event: string | null;
+  modules: ModuleSchema[];
+};
+
+export type InputOfModuleListSchema = {
+  scope: InputOfScopeEnum;
+  event: string | null;
+  modules: InputOfModuleSchema[];
+};
+
+export type ModuleSchema = {
+  key: string;
+  label: string;
+  description: string;
+  destination: string | null;
+  enabled: boolean;
+  in_use: boolean;
+  explicit: boolean | null;
+  can_disable: boolean;
+  reason: string;
+};
+
+export type InputOfModuleSchema = {
+  key: string;
+  label: string;
+  description: string;
+  destination: string | null;
+  enabled: boolean;
+  in_use: boolean;
+  explicit: boolean | null;
+  can_disable: boolean;
+  reason: string;
+};
+
 export type MyEventApplicationResponse = {
   application: EventApplication | null;
 };
@@ -2998,6 +3034,10 @@ export type InputOfPatchedLocationPatchInput = {
   notes?: string;
   position?: number;
 };
+
+export type PatchedModuleInput = { enabled?: boolean };
+
+export type InputOfPatchedModuleInput = { enabled?: boolean };
 
 export type PatchedPage = {
   public_id?: string;
@@ -4162,6 +4202,10 @@ export type InputOfSavedSearchOutput = {};
 export type ScanInput = { token: string };
 
 export type InputOfScanInput = { token: string };
+
+export type ScopeEnum = "event" | "workspace";
+
+export type InputOfScopeEnum = "event" | "workspace";
 
 export type SearchFilters = {
   q?: string;
@@ -6171,6 +6215,17 @@ export interface Operations {
   put_api_v1_workspaces_workspace_public_id_events_event_public_id_mentors_me: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: null;
+  };
+  patch_api_v1_workspaces_workspace_public_id_events_event_public_id_modules_module_key: {
+    request: {
+      path: {
+        event_public_id: string;
+        module_key: string;
+        workspace_public_id: string;
+      };
+      body?: InputOfPatchedModuleInput;
+    };
+    response: ModuleListSchema;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_application: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -8328,6 +8383,13 @@ export interface Operations {
     };
     response: MembershipSchema;
   };
+  get_api_v1_workspaces_workspace_public_id_modules: {
+    request: {
+      path: { workspace_public_id: string };
+      query?: { event?: string };
+    };
+    response: ModuleListSchema;
+  };
   get_api_v1_workspaces_workspace_public_id_my_judge_expertise: {
     request: { path: { workspace_public_id: string } };
     response: ExpertiseOutputSchema;
@@ -10148,6 +10210,15 @@ export const operations = {
     request_body: false,
     response_kind: "none",
   },
+  patch_api_v1_workspaces_workspace_public_id_events_event_public_id_modules_module_key:
+    {
+      method: "PATCH",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/modules/{module_key}/",
+      path_params: ["event_public_id", "module_key", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_application:
     {
       method: "GET",
@@ -12933,6 +13004,14 @@ export const operations = {
     path_params: ["workspace_public_id"],
     query_params: [],
     request_body: true,
+    response_kind: "json",
+  },
+  get_api_v1_workspaces_workspace_public_id_modules: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/modules/",
+    path_params: ["workspace_public_id"],
+    query_params: ["event"],
+    request_body: false,
     response_kind: "json",
   },
   get_api_v1_workspaces_workspace_public_id_my_judge_expertise: {

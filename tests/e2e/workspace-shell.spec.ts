@@ -12,6 +12,10 @@ import {
   capture,
 } from "./support";
 
+// Optional modules the reference event neither uses nor has turned on are not offered
+// (PD-F001-B01-T04); the reference event has eligibility and on-site content but no integrations.
+// The deep link of a hidden one stays a valid place.
+const hiddenOrganizer = [{ id: "integrations", module: "Integrations" }];
 const destinations: Record<string, string[]> = {
   organizer: [
     "overview",
@@ -22,7 +26,6 @@ const destinations: Record<string, string[]> = {
     "results",
     "communications",
     "onsite",
-    "integrations",
     "operations",
   ],
   "participant-01": [
@@ -66,6 +69,18 @@ for (const width of [390, 768, 1024, 1440]) {
           });
       }
       if (role === "organizer") {
+        for (const { id, module } of hiddenOrganizer) {
+          await expect(destinationLink(page, id)).toHaveCount(0);
+          await page.goto(
+            page.url().replace(/\/w\/([^/]+)\/[^?]+/, `/w/$1/${id}`),
+          );
+          await expect(
+            page.getByText(`${module} is not turned on for this event.`),
+          ).toBeVisible();
+          await settled(page);
+          await noHorizontalOverflow(page);
+          await accessible(page);
+        }
         await goToDestination(page, "setup");
         await page
           .getByText("Create a new event or start from a template")

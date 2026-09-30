@@ -1,8 +1,10 @@
 // @vitest-environment happy-dom
-import { act } from "react";
+import { act, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { createTestQueryClient } from "../lib/test-router";
 import { AppShell } from "./AppShell";
 import {
   Destination,
@@ -22,19 +24,22 @@ function Harness({
   role: string;
   children: React.ReactNode;
 }) {
+  const [client] = useState(createTestQueryClient);
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          path="/w/:workspaceId/:view"
-          element={
-            <WorkspaceNavigationProvider role={role} workspaceId="w">
-              {children}
-            </WorkspaceNavigationProvider>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
+    <QueryClientProvider client={client}>
+      <BrowserRouter>
+        <Routes>
+          <Route
+            path="/w/:workspaceId/:view"
+            element={
+              <WorkspaceNavigationProvider role={role} workspaceId="w">
+                {children}
+              </WorkspaceNavigationProvider>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 const click = (element: Element) =>

@@ -1,5 +1,9 @@
 import { useRef, useState, type ReactNode } from "react";
-import { DestinationLink, roleDestinations } from "./WorkspaceNavigation";
+import {
+  DestinationLink,
+  roleDestinations,
+  useWorkspaceNavigation,
+} from "./WorkspaceNavigation";
 import { SkipLink } from "./SkipLink";
 
 const MAIN_ID = "main-content";
@@ -30,7 +34,11 @@ export function AppShell({
 }) {
   const [navOpen, setNavOpen] = useState(false);
   const toggle = useRef<HTMLButtonElement>(null);
-  const destinations = role ? roleDestinations[role] : undefined;
+  // Optional modules that are off are not offered (see WorkspaceNavigationProvider).
+  const navigation = useWorkspaceNavigation();
+  const destinations = role
+    ? (navigation?.destinations ?? roleDestinations[role])
+    : undefined;
   return (
     <div className={`cx-shell ${destinations ? "cx-shell--workspace" : ""}`}>
       <SkipLink targetId={MAIN_ID} />

@@ -21,6 +21,7 @@ urlpatterns = [
     path("workspaces/", include("workspaces.urls")),
     path("audit/", include("audit.urls")),
     path("", include("events.urls")),
+    path("", include("eventconfig.urls")),
     path("", include("integrations.urls")),
     path("", include("stages.urls")),
     path("", include("policies.urls")),

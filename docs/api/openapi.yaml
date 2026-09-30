@@ -6025,6 +6025,50 @@ paths:
       responses:
         '200':
           description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/modules/{module_key}/:
+    patch:
+      operationId: patch_api_v1_workspaces_workspace_public_id_events_event_public_id_modules_module_key
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: module_key
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedModuleInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedModuleInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedModuleInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModuleListSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/my-application/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_application
@@ -15761,6 +15805,35 @@ paths:
               schema:
                 $ref: '#/components/schemas/MembershipSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/modules/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_modules
+      description: 'Optional modules for navigation: one event''s effective state,
+        or the workspace union.'
+      parameters:
+      - in: query
+        name: event
+        schema:
+          type: string
+        description: Event public id; omit for the union.
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModuleListSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/my-judge-expertise/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_my_judge_expertise
@@ -20481,6 +20554,57 @@ components:
       - note
       - public_id
       - source_key
+    ModuleListSchema:
+      type: object
+      properties:
+        scope:
+          $ref: '#/components/schemas/ScopeEnum'
+        event:
+          type: string
+          format: uuid
+          nullable: true
+        modules:
+          type: array
+          items:
+            $ref: '#/components/schemas/ModuleSchema'
+      required:
+      - event
+      - modules
+      - scope
+    ModuleSchema:
+      type: object
+      properties:
+        key:
+          type: string
+          pattern: ^[-a-zA-Z0-9_]+$
+        label:
+          type: string
+        description:
+          type: string
+        destination:
+          type: string
+          nullable: true
+        enabled:
+          type: boolean
+        in_use:
+          type: boolean
+        explicit:
+          type: boolean
+          nullable: true
+        can_disable:
+          type: boolean
+        reason:
+          type: string
+      required:
+      - can_disable
+      - description
+      - destination
+      - enabled
+      - explicit
+      - in_use
+      - key
+      - label
+      - reason
     MyEventApplicationResponse:
       type: object
       properties:
@@ -21183,6 +21307,11 @@ components:
           type: integer
           maximum: 100000
           minimum: 0
+    PatchedModuleInput:
+      type: object
+      properties:
+        enabled:
+          type: boolean
     PatchedPage:
       type: object
       properties:
@@ -23061,6 +23190,14 @@ components:
           maxLength: 200
       required:
       - token
+    ScopeEnum:
+      enum:
+      - event
+      - workspace
+      type: string
+      description: |-
+        * `event` - event
+        * `workspace` - workspace
     SearchFilters:
       type: object
       properties:

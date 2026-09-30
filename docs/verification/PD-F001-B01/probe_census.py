@@ -14,22 +14,19 @@ from deliberation.models import DeliberationRoom
 from eligibility.models import EligibilityRules
 from events.models import Event, EventRegistrationSettings
 from integrations.models import EventRetentionPolicy, WebhookSubscription
-from integrations.template_library import LIBRARY, instantiate_library_template
+from eventconfig.presets import PRESETS
+from integrations.template_library import instantiate_library_template
 from mentorship.models import MentorProfile
 from onsite.models import AgendaSession, Location
 from presentation.models import Page
 from workspaces.models import Workspace
 
-# Optional-module evidence = rows a module owns for an event ("in use" in the contract).
+# Optional-module evidence: the real probes of eventconfig.modules ("has content for the event").
+from eventconfig.modules import MODULES as OPTIONAL_MODULES  # noqa: E402
+
 MODULES = {
-    "eligibility": lambda e: EligibilityRules.objects.filter(event=e).exists(),
-    "onsite": lambda e: Location.objects.filter(event=e).exists() or AgendaSession.objects.filter(event=e).exists(),
-    "community_voting": lambda e: VotingPlan.objects.filter(event=e).exists(),
-    "mentorship": lambda e: MentorProfile.objects.filter(event=e).exists(),
-    "deliberation": lambda e: DeliberationRoom.objects.filter(award__event=e).exists(),
-    "integrations": lambda e: WebhookSubscription.objects.filter(event=e).exists()
-    or EventRetentionPolicy.objects.filter(event=e).exists(),
-    "public_page": lambda e: Page.objects.filter(event=e).exists(),
+    key: (lambda e, module=module: module.has_content(Event.objects.filter(pk=e.pk)))
+    for key, module in OPTIONAL_MODULES.items()
 }
 
 
@@ -71,9 +68,13 @@ print("== library presets instantiated on an empty draft (rolled back)")
 workspace = Workspace.objects.first()
 try:
     with transaction.atomic():
-        for slug in LIBRARY:
+        for slug in PRESETS:
             event = instantiate_library_template(
-                workspace=workspace, template_slug=slug, name=f"census {slug}", slug=f"census-{slug}"
+                workspace=workspace,
+                template_slug=slug,
+                name=f"census {slug}",
+                slug=f"census-{slug}",
+                actor=None,
             )
             print(slug, describe(event))
             print("   registration settings row:", EventRegistrationSettings.objects.filter(event=event).exists(),

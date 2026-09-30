@@ -1,5 +1,6 @@
 {
   "canary:chain": 126.5,
+  "isolated-mutation:event-modules": 20.0,
   "isolated-mutation:event-presets": 15.0,
   "isolated-mutation:event-themes": 59.4,
   "isolated-mutation:participant-workflow": 44.8,

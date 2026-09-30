@@ -1,0 +1,6 @@
+iso-min        single     rc=0   4.1s
+iso-judged     single     rc=0   4.3s
+iso-published  single     rc=0   4.8s
+canary         single     rc=0   9.0s
+iso-min        4 parallel  rc=[0, 0, 0, 0] wall   4.2s seeds-distinct=True
+leftover fixtures: none

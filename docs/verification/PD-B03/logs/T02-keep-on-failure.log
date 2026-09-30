@@ -1,0 +1,4 @@
+FIXTURE demo-hackathon-16496000
+kept fixture demo-hackathon-16496000 (worker 0); remove with: manage.py e2e_fixture dispose demo-hackathon-16496000
+      5 |   console.log("FIXTURE", fixture.slug);
+  1 failed

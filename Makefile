@@ -1,4 +1,4 @@
-.PHONY: oidc-smoke demo-reset demo-e2e e2e-fast format format-check lint test build verify-fast verify openapi-check sdk-generate sdk-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance backup restore backup-restore-smoke
+.PHONY: oidc-smoke demo-reset demo-e2e e2e-fast e2e-fixture-sweep format format-check lint test build verify-fast verify openapi-check sdk-generate sdk-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance backup restore backup-restore-smoke
 
 # Local checks use disposable keys; runtime deployments must supply their own.
 export DJANGO_SECRET_KEY ?= bootstrap-checks-only
@@ -125,6 +125,12 @@ demo-e2e:
 # Same suite, ~2x faster: concurrent file groups (see scripts/e2e-fast). demo-reset first.
 e2e-fast:
 	./scripts/e2e-fast
+
+# Purge isolated browser fixtures (seeds >= 10,000,000) left by failed or interrupted runs.
+# Only those older than E2E_SWEEP_MINUTES, so a concurrent run's live fixtures survive.
+E2E_SWEEP_MINUTES ?= 30
+e2e-fixture-sweep:
+	docker compose exec -T app python manage.py e2e_fixture sweep --older-than-minutes $(E2E_SWEEP_MINUTES)
 
 # Real-provider OIDC interoperability smoke (Dex in Docker; see docs/operations/SSO.md).
 oidc-smoke:

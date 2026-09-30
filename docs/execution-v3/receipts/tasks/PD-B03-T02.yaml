@@ -1,0 +1,75 @@
+version: 3
+task: PD-B03-T02
+batch: PD-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 8e7042bf212b581079163542d70df79707c4640a
+  head_commit: 8e7042bf212b581079163542d70df79707c4640a
+changed_paths:
+- src/api/integrations/e2e_fixtures.py
+- src/api/integrations/management/commands/e2e_fixture.py
+- tests/integration/test_e2e_fixtures.py
+- tests/e2e/fixtures.ts
+- tests/e2e/fixture-isolation.spec.ts
+- tests/e2e/support.ts
+- scripts/e2e-fast
+- Makefile
+- docs/operations/E2E.md
+- docs/verification/PD-B03/logs/
+deliverables:
+- item: Deterministic management-command fixtures provisioning isolated state quickly and cleanly
+  result: pass
+  evidence: 'manage.py e2e_fixture create/dispose/sweep/list over generate_demo_event + demo_showcase; iso-min 4.1 s, canary 9.0 s, 4 parallel iso-min 4.2 s wall (logs/T02-create-timing.log)'
+- item: Per-test/per-shard usage from Playwright
+  result: pass
+  evidence: tests/e2e/fixtures.ts isolatedTest() worker-scoped fixture + signIn(page,label,fixture); fixture-isolation.spec.ts 3/3 desktop
+- item: Observable diagnostics / cleanup path
+  result: pass
+  evidence: failed specs keep fixture and print slug (logs/T02-keep-on-failure.log); make e2e-fixture-sweep (logs/T02-sweep.log); generator/refusal messages surfaced by the TS helper
+- item: Focused tests for the real workflow
+  result: pass
+  evidence: tests/integration/test_e2e_fixtures.py 10 passed
+invariants:
+- item: Canonical primitive reuse, no parallel seed path
+  result: pass
+  evidence: e2e_fixtures.py calls generate_demo_event/purge_demo_scenario/demo_showcase; no new model or migration
+- item: Shared reference seed 7 protected
+  result: pass
+  evidence: dispose/sweep refuse seeds < 10,000,000 (tests + Playwright negative); seed 7 listed and signing in after every run
+- item: Authorization/audit preserved
+  result: pass
+  evidence: fixtures built through the real API replay; cross-fixture access 403 (spec + T01 probe)
+- item: No weakened tests
+  result: pass
+  evidence: support.ts change is backward compatible; signin/roles/workspace-shell 31 passed on seed 7
+verification:
+- command: uv run --frozen pytest tests/integration/test_e2e_fixtures.py
+  result: pass
+  note: '10 passed (happy path: real accounts, showcase, closed event; negatives: bad profile/nonce, non-fixture dispose, showcase failure leaves nothing)'
+- command: npx playwright test --project=desktop --project=mobile fixture-isolation
+  result: pass
+  note: 3 passed desktop, 3 mobile skipped by design, against the rebuilt shared stack
+- command: make verify-fast
+  result: pass
+  note: pytest 1414 passed/23 skipped; web 169 + embed 8; format/lint/build/sdk/block-schema clean
+- command: npx playwright test --workers=4 signin roles workspace-shell
+  result: pass
+  note: 31 passed/13 skipped (adjacent regression on seed 7)
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: Playwright fixture/helper and isolation spec; tier split T04, storage states T03
+migrations: []
+findings:
+- app container bakes source; the shared app container was rebuilt/recreated once (docker compose up -d --build app) to ship the command
+escalations: []
+limitations:
+- Not run on PostgreSQL (queries are backend-agnostic); seed-collision race between processes is handled by retry but not stress-tested beyond 4 parallel creates.
+- Account password hashing still uses the production hasher (~0.25 s/account).
+next: review

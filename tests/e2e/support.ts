@@ -3,7 +3,11 @@ import { expect, type Page } from "@playwright/test";
 
 export const SEED = process.env.E2E_DEMO_SEED ?? "7";
 export const PASSWORD = process.env.E2E_DEMO_PASSWORD ?? "demo-pass-7";
-export const account = (label: string) => `demo-hackathon-${SEED}-${label}`;
+export const account = (label: string, seed: string | number = SEED) =>
+  `demo-hackathon-${seed}-${label}`;
+
+/** Identity of a demo scenario; defaults to the shared reference (E2E_DEMO_SEED). */
+export type Who = { seed: string | number; password: string };
 
 /** Collects browser-side problems so a test can assert there were none. */
 export function watch(page: Page) {
@@ -24,10 +28,10 @@ export function watch(page: Page) {
   return problems;
 }
 
-export async function signIn(page: Page, label: string) {
+export async function signIn(page: Page, label: string, who?: Who) {
   await page.goto("/app/");
-  await page.getByLabel("Username").fill(account(label));
-  await page.getByLabel("Password").fill(PASSWORD);
+  await page.getByLabel("Username").fill(account(label, who?.seed));
+  await page.getByLabel("Password").fill(who?.password ?? PASSWORD);
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(
     page.getByRole("navigation", { name: "Your workspaces" }),

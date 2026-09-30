@@ -1,0 +1,2 @@
+docker compose exec -T app python manage.py e2e_fixture sweep
+{"purged": ["demo-hackathon-15003000", "demo-hackathon-16496000"]}

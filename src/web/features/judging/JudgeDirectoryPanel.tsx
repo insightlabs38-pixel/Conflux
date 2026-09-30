@@ -1,7 +1,8 @@
 import { PersonRow, type PersonIdentity } from "../../components/Person";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "../../components/Button";
 import { apiRequest } from "../../lib/api";
+import { useLoad } from "../../hooks/useLoad";
 
 type Judge = { judge: string; username: string; identity?: PersonIdentity };
 type Invitation = {
@@ -21,39 +22,23 @@ export function JudgeDirectoryPanel({
   eventId: string;
   poolId: string;
 }) {
-  const [judges, setJudges] = useState<Judge[]>([]);
-  const [invitations, setInvitations] = useState<Invitation[]>([]);
   const [judgeId, setJudgeId] = useState("");
-  const [error, setError] = useState("");
+  const [actionError, setActionError] = useState("");
   const base = `/api/v1/workspaces/${workspaceId}/`;
   const invitationUrl = `${base}events/${eventId}/judge-invitations/`;
-
-  useEffect(() => {
-    let active = true;
-    Promise.all([
-      apiRequest<Judge[]>(`${base}judge-directory/`, {
-        describe: () => "Could not load judge directory.",
-      }),
-      apiRequest<Invitation[]>(invitationUrl, {
-        describe: () => "Could not load judge invitations.",
-      }),
-    ])
-      .then(([directory, existing]) => {
-        if (active) {
-          setJudges(directory);
-          setInvitations(existing);
-        }
-      })
-      .catch((cause: unknown) => {
-        if (active) setError(String(cause));
-      });
-    return () => {
-      active = false;
-    };
-  }, [base, invitationUrl]);
+  const directory = useLoad<Judge[]>(`${base}judge-directory/`, {
+    describe: () => "Could not load judge directory.",
+  });
+  const existing = useLoad<Invitation[]>(invitationUrl, {
+    describe: () => "Could not load judge invitations.",
+  });
+  const judges = directory.data ?? [];
+  const invitations = existing.data ?? [];
+  const error =
+    actionError || directory.error?.message || existing.error?.message || "";
 
   async function invite() {
-    setError("");
+    setActionError("");
     try {
       const invitation = await apiRequest<Invitation>(invitationUrl, {
         method: "POST",
@@ -70,13 +55,15 @@ export function JudgeDirectoryPanel({
           );
         },
       });
-      setInvitations((items) => [
+      existing.update((items) => [
         invitation,
-        ...items.filter((item) => item.public_id !== invitation.public_id),
+        ...(items ?? []).filter(
+          (item) => item.public_id !== invitation.public_id,
+        ),
       ]);
       setJudgeId("");
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
+      setActionError(cause instanceof Error ? cause.message : String(cause));
     }
   }
 

@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { WorkflowSections } from "../../components/WorkflowSections";
 import { ProjectStoryEditor } from "./ProjectStoryEditor";
 import { ArtifactPanel } from "./ArtifactPanel";
@@ -12,7 +12,8 @@ import {
 } from "../pvs";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
-import { apiJson } from "../../lib/api";
+import { apiJson, describeProblem } from "../../lib/api";
+import { useLoad } from "../../hooks/useLoad";
 
 type Project = {
   public_id: string;
@@ -43,50 +44,31 @@ export function ProjectWorkspace({
   eventId: string;
 }) {
   const base = `/api/v1/workspaces/${workspaceId}/events/${eventId}/`;
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [tracks, setTracks] = useState<Track[]>([]);
   const [selectedId, setSelectedId] = useState("");
   const [name, setName] = useState("");
   const [trackId, setTrackId] = useState("");
-  const [error, setError] = useState("");
+  const [actionError, setActionError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [loaded, setLoaded] = useState(false);
-  const [retry, setRetry] = useState(0);
-
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-    setError("");
-    Promise.all([
-      apiJson<Project[]>(base + "projects/"),
-      apiJson<Track[]>(base + "tracks/"),
-    ])
-      .then(([nextProjects, nextTracks]) => {
-        if (active) {
-          setProjects(nextProjects);
-          setTracks(nextTracks);
-          setLoaded(true);
-        }
-      })
-      .catch((cause: unknown) => {
-        if (active) {
-          setLoaded(false);
-          setError(message(cause));
-        }
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [base, retry]);
+  const projectsLoad = useLoad<Project[]>(base + "projects/", {
+    describe: describeProblem,
+  });
+  const tracksLoad = useLoad<Track[]>(base + "tracks/", {
+    describe: describeProblem,
+  });
+  const projects = projectsLoad.data ?? [];
+  const tracks = tracksLoad.data ?? [];
+  const loaded = projectsLoad.data !== null && tracksLoad.data !== null;
+  const loadError =
+    projectsLoad.error?.message || tracksLoad.error?.message || "";
+  const loading = !loaded && !loadError;
+  const error = actionError || loadError;
+  const retry = () =>
+    void Promise.all([projectsLoad.reload(), tracksLoad.reload()]);
 
   function create(event: FormEvent) {
     event.preventDefault();
     setBusy(true);
-    setError("");
+    setActionError("");
     void apiJson<TeamStatus>(base + "my-team/")
       .then((status) =>
         apiJson<Project>(base + "projects/", "POST", {
@@ -96,12 +78,12 @@ export function ProjectWorkspace({
         }),
       )
       .then((project) => {
-        setProjects((current) => [...current, project]);
+        projectsLoad.update((current) => [...(current ?? []), project]);
         setSelectedId(project.public_id);
         setName("");
         setTrackId("");
       })
-      .catch((cause: unknown) => setError(message(cause)))
+      .catch((cause: unknown) => setActionError(message(cause)))
       .finally(() => setBusy(false));
   }
 
@@ -116,10 +98,7 @@ export function ProjectWorkspace({
     return (
       <section aria-label="My projects">
         <h2>My projects</h2>
-        <ErrorState
-          message={error}
-          onRetry={() => setRetry((count) => count + 1)}
-        />
+        <ErrorState message={error} onRetry={retry} />
       </section>
     );
 
@@ -204,8 +183,8 @@ export function ProjectWorkspace({
                       )!}
                       base={base}
                       onSaved={(next) =>
-                        setProjects((items) =>
-                          items.map((item) =>
+                        projectsLoad.update((items) =>
+                          (items ?? []).map((item) =>
                             item.public_id === next.public_id ? next : item,
                           ),
                         )

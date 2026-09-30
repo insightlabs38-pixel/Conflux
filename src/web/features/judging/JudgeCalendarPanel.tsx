@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
 import { Badge } from "../../components/Badge";
 import { Card } from "../../components/Card";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
-import { apiRequest } from "../../lib/api";
+import { useLoad } from "../../hooks/useLoad";
 
 type Window = {
   name: string;
@@ -22,11 +21,6 @@ type Assignment = {
 };
 type Calendar = { windows: Window[]; assignments: Assignment[] };
 
-function message(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return "Request failed.";
-}
-
 const WINDOW_TONE: Record<Window["status"], "success" | "neutral" | "warning"> =
   {
     open: "success",
@@ -44,19 +38,15 @@ export function JudgeCalendarPanel({
   workspaceId: string;
   eventId: string;
 }) {
-  const [calendar, setCalendar] = useState<Calendar | null>(null);
-  const [error, setError] = useState("");
-
-  function load() {
-    setError("");
-    void apiRequest<Calendar>(
-      `/api/v1/workspaces/${workspaceId}/events/${eventId}/judge-calendar/`,
-      { describe: (status) => `Request failed (${status}).` },
-    )
-      .then(setCalendar)
-      .catch((cause: unknown) => setError(message(cause)));
-  }
-  useEffect(load, [workspaceId, eventId]);
+  const {
+    data: calendar,
+    error: failure,
+    reload: load,
+  } = useLoad<Calendar>(
+    `/api/v1/workspaces/${workspaceId}/events/${eventId}/judge-calendar/`,
+    { describe: (status) => `Request failed (${status}).` },
+  );
+  const error = failure?.message ?? "";
 
   return (
     <Card title="My judging calendar" as="h3">

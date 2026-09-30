@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "../../components/Button";
 import { apiRequest } from "../../lib/api";
+import { useLoad } from "../../hooks/useLoad";
 
 type Invitation = {
   public_id: string;
@@ -10,31 +11,19 @@ type Invitation = {
 };
 
 export function JudgeInvitationInbox({ workspaceId }: { workspaceId: string }) {
-  const [invitations, setInvitations] = useState<Invitation[]>([]);
-  const [error, setError] = useState("");
   const base = `/api/v1/workspaces/${workspaceId}/my-judge-invitations/`;
-
-  useEffect(() => {
-    let active = true;
-    apiRequest<Invitation[]>(base, {
-      describe: () => "Could not load judge invitations.",
-    })
-      .then((items) => {
-        if (active) setInvitations(items);
-      })
-      .catch((cause: unknown) => {
-        if (active) setError(String(cause));
-      });
-    return () => {
-      active = false;
-    };
-  }, [base]);
+  const list = useLoad<Invitation[]>(base, {
+    describe: () => "Could not load judge invitations.",
+  });
+  const invitations = list.data ?? [];
+  const [actionError, setActionError] = useState("");
+  const error = actionError || (list.error?.message ?? "");
 
   async function respond(
     invitation: Invitation,
     decision: "accept" | "decline",
   ) {
-    setError("");
+    setActionError("");
     try {
       const updated = await apiRequest<Invitation>(
         `${base}${invitation.public_id}/respond/`,
@@ -44,13 +33,13 @@ export function JudgeInvitationInbox({ workspaceId }: { workspaceId: string }) {
           describe: () => "Could not respond to invitation.",
         },
       );
-      setInvitations((items) =>
-        items.map((item) =>
+      list.update((items) =>
+        (items ?? []).map((item) =>
           item.public_id === updated.public_id ? updated : item,
         ),
       );
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
+      setActionError(cause instanceof Error ? cause.message : String(cause));
     }
   }
 

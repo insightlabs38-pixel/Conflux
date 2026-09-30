@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "../../components/Button";
 import { Badge } from "../../components/Badge";
 import { SubmissionReceipt } from "../pvs";
-import { apiJson } from "../../lib/api";
+import { apiJson, describeProblem } from "../../lib/api";
+import { useLoad } from "../../hooks/useLoad";
 
 type Version = {
   public_id: string;
@@ -39,13 +40,24 @@ export function SubmissionPanel({
   projectId: string;
 }) {
   const base = `/api/v1/workspaces/${workspaceId}/events/${eventId}/projects/${projectId}/`;
-  const [stages, setStages] = useState<Stage[]>([]);
-  const [artifacts, setArtifacts] = useState<Artifact[]>([]);
+  const stagesLoad = useLoad<Stage[]>(base + "submissions/", {
+    describe: describeProblem,
+  });
+  const artifactsLoad = useLoad<Artifact[]>(base + "artifacts/", {
+    describe: describeProblem,
+  });
+  const stages = stagesLoad.data ?? [];
+  const artifacts = artifactsLoad.data ?? [];
   const [stageId, setStageId] = useState("");
   const [submission, setSubmission] = useState<Submission | null>(null);
   const [notes, setNotes] = useState("");
   const [artifactIds, setArtifactIds] = useState<string[]>([]);
-  const [error, setError] = useState("");
+  const [actionError, setError] = useState("");
+  const error =
+    actionError ||
+    stagesLoad.error?.message ||
+    artifactsLoad.error?.message ||
+    "";
   const [saving, setSaving] = useState(false);
   const [finalizing, setFinalizing] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -53,26 +65,6 @@ export function SubmissionPanel({
   const pending = useRef<Promise<void>>(Promise.resolve());
   const latest = useRef({ notes: "", artifact_ids: [] as string[] });
   const saved = useRef(JSON.stringify(latest.current));
-
-  useEffect(() => {
-    let active = true;
-    Promise.all([
-      apiJson<Stage[]>(base + "submissions/"),
-      apiJson<Artifact[]>(base + "artifacts/"),
-    ])
-      .then(([items, evidence]) => {
-        if (active) {
-          setStages(items);
-          setArtifacts(evidence);
-        }
-      })
-      .catch((cause: unknown) => {
-        if (active) setError(message(cause));
-      });
-    return () => {
-      active = false;
-    };
-  }, [base]);
 
   async function selectStage(id: string) {
     if (stageId && dirty) {
@@ -153,8 +145,8 @@ export function SubmissionPanel({
         { draft_revision: revision.current },
       );
       setSubmission(result.submission);
-      setStages((items) =>
-        items.map((item) =>
+      stagesLoad.update((items) =>
+        (items ?? []).map((item) =>
           item.public_id === stageId
             ? { ...item, submission: result.submission }
             : item,
@@ -225,11 +217,7 @@ export function SubmissionPanel({
           </label>
           <Button
             variant="secondary"
-            onClick={() =>
-              void apiJson<Artifact[]>(base + "artifacts/")
-                .then(setArtifacts)
-                .catch((cause: unknown) => setError(message(cause)))
-            }
+            onClick={() => void artifactsLoad.reload()}
           >
             Refresh included artifacts
           </Button>

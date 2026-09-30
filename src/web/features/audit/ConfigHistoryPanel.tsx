@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 import { apiRequest } from "../../lib/api";
+import { useLoad } from "../../hooks/useLoad";
 
 type FieldChange = { before: unknown; after: unknown };
 type HistoryEntry = {
@@ -32,26 +33,23 @@ export function ConfigHistoryPanel({
   workspaceId: string;
   eventId: string;
 }) {
-  const [entries, setEntries] = useState<HistoryEntry[] | null>(null);
-  const [error, setError] = useState("");
+  const {
+    data: entries,
+    error: loadFailure,
+    reload: load,
+  } = useLoad<HistoryEntry[]>(
+    `/api/v1/audit/${workspaceId}/events/${eventId}/config-history/`,
+    { describe: (status) => `Request failed (${status}).` },
+  );
+  const [actionError, setActionError] = useState("");
+  const error = actionError || (loadFailure?.message ?? "");
   const [pending, setPending] = useState<string | null>(null);
   const [restoring, setRestoring] = useState(false);
   const [notice, setNotice] = useState("");
 
-  function load() {
-    setError("");
-    void apiRequest<HistoryEntry[]>(
-      `/api/v1/audit/${workspaceId}/events/${eventId}/config-history/`,
-      { describe: (status) => `Request failed (${status}).` },
-    )
-      .then(setEntries)
-      .catch((cause: unknown) => setError(message(cause)));
-  }
-  useEffect(load, [workspaceId, eventId]);
-
   async function restore(entry: HistoryEntry) {
     setRestoring(true);
-    setError("");
+    setActionError("");
     setNotice("");
     try {
       await apiRequest(
@@ -67,7 +65,7 @@ export function ConfigHistoryPanel({
       );
       load();
     } catch (cause) {
-      setError(message(cause));
+      setActionError(message(cause));
     } finally {
       setRestoring(false);
     }
@@ -76,7 +74,15 @@ export function ConfigHistoryPanel({
   return (
     <Card title="Configuration history">
       {notice && <p role="status">{notice}</p>}
-      {error && <ErrorState message={error} onRetry={load} />}
+      {error && (
+        <ErrorState
+          message={error}
+          onRetry={() => {
+            setActionError("");
+            load();
+          }}
+        />
+      )}
       {!error && entries === null && (
         <LoadingState label="Loading configuration history…" />
       )}

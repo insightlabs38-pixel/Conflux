@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { OperatorConsole } from "./OperatorConsole";
+import { withQuery } from "../../lib/test-router";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -48,12 +49,16 @@ describe("OperatorConsole", () => {
     const onChooseEvent = vi.fn();
     await act(async () =>
       root.render(
-        <OperatorConsole
-          workspaceId="workspace-1"
-          onChooseEvent={onChooseEvent}
-        />,
+        withQuery(
+          <OperatorConsole
+            workspaceId="workspace-1"
+            onChooseEvent={onChooseEvent}
+          />,
+        ),
       ),
     );
+    for (let i = 0; i < 100 && !node.textContent?.includes("Demo"); i++)
+      await act(async () => new Promise((resolve) => setTimeout(resolve, 5)));
     expect(node.textContent).toContain("Demo");
     expect(node.textContent).toContain("1 blockers");
     expect(node.textContent).toContain("Starter");

@@ -24,8 +24,6 @@ import {
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 
-type Event = { public_id: string; name: string };
-
 export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
   // The selected event is context (lib/urlState.ts): it survives refresh, back/forward and sharing.
   const [selectedId, selectEvent] = useUrlParam("event", {

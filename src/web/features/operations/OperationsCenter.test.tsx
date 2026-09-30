@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { OperationsCenter } from "./OperationsCenter";
+import { withQuery } from "../../lib/test-router";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -86,7 +87,11 @@ describe("OperationsCenter", () => {
       };
     });
     vi.stubGlobal("fetch", fetchMock);
-    act(() => root.render(<OperationsCenter workspaceId="w1" eventId="e1" />));
+    act(() =>
+      root.render(
+        withQuery(<OperationsCenter workspaceId="w1" eventId="e1" />),
+      ),
+    );
     await until(
       () =>
         container.textContent?.includes("Set the event start and end dates.") ??

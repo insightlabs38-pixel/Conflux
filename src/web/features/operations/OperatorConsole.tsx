@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
 import { Badge } from "../../components/Badge";
 import { Card } from "../../components/Card";
-import { apiRequest } from "../../lib/api";
+import { useLoad } from "../../hooks/useLoad";
 
 type EventRow = {
   public_id: string;
@@ -32,43 +31,24 @@ export function OperatorConsole({
   workspaceId: string;
   onChooseEvent: (id: string) => void;
 }) {
-  const [data, setData] = useState<ConsoleData | null>(null);
-  const [error, setError] = useState("");
-  const [retry, setRetry] = useState(0);
-
-  useEffect(() => {
-    let active = true;
-    apiRequest<ConsoleData>(
-      `/api/v1/workspaces/${workspaceId}/operator-console/`,
-      {
-        describe: (status) => `Operator console request failed (${status}).`,
-      },
-    )
-      .then((result) => {
-        if (active) {
-          setData(result);
-          setError("");
-        }
-      })
-      .catch((cause: unknown) => {
-        if (active)
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "Operator console could not load.",
-          );
-      });
-    return () => {
-      active = false;
-    };
-  }, [workspaceId, retry]);
+  const {
+    data,
+    error: failure,
+    reload,
+  } = useLoad<ConsoleData>(
+    `/api/v1/workspaces/${workspaceId}/operator-console/`,
+    {
+      describe: (status) => `Operator console request failed (${status}).`,
+    },
+  );
+  const error = failure?.message ?? "";
 
   return (
     <Card title="Operator console" as="h2">
       {error && (
         <p role="alert">
           {error}{" "}
-          <button type="button" onClick={() => setRetry((value) => value + 1)}>
+          <button type="button" onClick={reload}>
             Retry
           </button>
         </p>

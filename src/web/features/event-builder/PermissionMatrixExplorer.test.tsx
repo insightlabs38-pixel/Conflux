@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { PermissionMatrixExplorer } from "./PermissionMatrixExplorer";
+import { withQuery } from "../../lib/test-router";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -63,7 +64,9 @@ describe("permission matrix explorer", () => {
     document.body.appendChild(container);
     const root = createRoot(container);
     await act(async () =>
-      root.render(<PermissionMatrixExplorer workspaceId="w" eventId="e" />),
+      root.render(
+        withQuery(<PermissionMatrixExplorer workspaceId="w" eventId="e" />),
+      ),
     );
     await waitFor(
       () => container.textContent?.includes("TrackListView") ?? false,
@@ -107,7 +110,9 @@ describe("permission matrix explorer", () => {
     document.body.appendChild(container);
     const root = createRoot(container);
     await act(async () =>
-      root.render(<PermissionMatrixExplorer workspaceId="w" eventId="e" />),
+      root.render(
+        withQuery(<PermissionMatrixExplorer workspaceId="w" eventId="e" />),
+      ),
     );
     await waitFor(
       () => container.textContent?.includes("TrackListView") ?? false,

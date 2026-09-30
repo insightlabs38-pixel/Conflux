@@ -1,5 +1,4 @@
 import { appHref, routes } from "../../lib/routes";
-import { useEffect, useState } from "react";
 import { AppShell } from "../../components/AppShell";
 import { PageHeader, ButtonLink } from "../../components/Foundation";
 import {
@@ -9,43 +8,27 @@ import {
 } from "../../components/Person";
 import { LoadingState } from "../../components/LoadingState";
 import { ErrorState } from "../../components/ErrorState";
-import { apiRequest } from "../../lib/api";
+import { useLoad } from "../../hooks/useLoad";
 export function PersonProfilePage({ personId }: { personId: string }) {
-  const [person, setPerson] = useState<PersonIdentity | null>(null);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [retry, setRetry] = useState(0);
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-    setError("");
-    apiRequest<PersonIdentity>(
-      `/api/v1/accounts/people/${encodeURIComponent(personId)}/`,
-      {
-        describe: (status) =>
-          status === 404
-            ? "This profile is private or unavailable."
-            : `Could not load profile (${status}).`,
-      },
-    )
-      .then((data) => {
-        if (typeof data.display_name !== "string" || !Array.isArray(data.links))
-          throw new Error("Invalid profile response.");
-        if (active) setPerson(data);
-      })
-      .catch((cause) => {
-        if (active)
-          setError(
-            cause instanceof Error ? cause.message : "Could not load profile.",
-          );
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [personId, retry]);
+  const {
+    data,
+    error: failure,
+    loading,
+    reload,
+  } = useLoad<PersonIdentity>(
+    `/api/v1/accounts/people/${encodeURIComponent(personId)}/`,
+    {
+      describe: (status) =>
+        status === 404
+          ? "This profile is private or unavailable."
+          : `Could not load profile (${status}).`,
+    },
+  );
+  const valid =
+    data && typeof data.display_name === "string" && Array.isArray(data.links);
+  const person = valid ? data : null;
+  const error =
+    failure?.message ?? (data && !valid ? "Invalid profile response." : "");
   return (
     <AppShell
       brandAs="p"
@@ -62,10 +45,7 @@ export function PersonProfilePage({ personId }: { personId: string }) {
       />
       {loading && <LoadingState label="Loading profile…" />}
       {!loading && error && (
-        <ErrorState
-          message={error}
-          onRetry={() => setRetry((value) => value + 1)}
-        />
+        <ErrorState message={error} onRetry={reload} />
       )}{" "}
       {!loading && !error && person && (
         <ProfileHeader person={person} headingAs="h2">

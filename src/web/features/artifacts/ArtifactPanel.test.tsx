@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, expect, it, vi } from "vitest";
 import { ArtifactPanel } from "./ArtifactPanel";
+import { withQuery } from "../../lib/test-router";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -62,7 +63,9 @@ async function mountAndUpload() {
   document.body.appendChild(container);
   const root = createRoot(container);
   await act(async () => {
-    root.render(<ArtifactPanel workspaceId="w" eventId="e" projectId="p" />);
+    root.render(
+      withQuery(<ArtifactPanel workspaceId="w" eventId="e" projectId="p" />),
+    );
   });
   await waitFor(
     () => container.textContent?.includes("All checks passed.") ?? false,

@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { apiRequest } from "../../lib/api";
+import { useLoad } from "../../hooks/useLoad";
 
 type Access = "roles" | "any_authenticated" | "public" | "unknown";
 type MatrixEntry = {
@@ -43,10 +44,19 @@ export function PermissionMatrixExplorer({
   workspaceId: string;
   eventId: string;
 }) {
-  const [matrix, setMatrix] = useState<MatrixEntry[]>([]);
   const [actor, setActor] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  const {
+    data,
+    error: failure,
+    loading,
+  } = useLoad<MatrixEntry[]>(
+    `/api/v1/workspaces/${workspaceId}/events/${eventId}/permission-matrix/`,
+    {
+      describe: (status) => `Permission matrix request failed (${status}).`,
+    },
+  );
+  const matrix = data ?? [];
+  const error = failure?.message ?? "";
   const base = `/api/v1/workspaces/${workspaceId}/events/${eventId}/`;
 
   const [dryRunKey, setDryRunKey] = useState("");
@@ -56,31 +66,6 @@ export function PermissionMatrixExplorer({
   const [dryRunError, setDryRunError] = useState("");
   const [dryRunBusy, setDryRunBusy] = useState(false);
   const [dryRunResult, setDryRunResult] = useState<DryRunResult | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-    setError("");
-    apiRequest<MatrixEntry[]>(
-      `/api/v1/workspaces/${workspaceId}/events/${eventId}/permission-matrix/`,
-      {
-        describe: (status) => `Permission matrix request failed (${status}).`,
-      },
-    )
-      .then((result) => {
-        if (active) setMatrix(result);
-      })
-      .catch((cause: unknown) => {
-        if (active)
-          setError(cause instanceof Error ? cause.message : "Could not load.");
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [workspaceId, eventId]);
 
   const visible = matrix.filter((entry) => grantsAccessTo(entry, actor));
 

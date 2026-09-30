@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ArtifactPanel } from "./ArtifactPanel";
 import { jsonResponse } from "../../lib/test-http";
+import { withQuery } from "../../lib/test-router";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -74,7 +75,9 @@ async function mount() {
   document.body.appendChild(container);
   const root = createRoot(container);
   await act(async () =>
-    root.render(<ArtifactPanel workspaceId="w" eventId="e" projectId="p" />),
+    root.render(
+      withQuery(<ArtifactPanel workspaceId="w" eventId="e" projectId="p" />),
+    ),
   );
   await waitFor(
     () => container.textContent?.includes("All checks passed.") ?? false,

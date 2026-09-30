@@ -26,7 +26,7 @@ function Metric({
   action,
 }: {
   label: string;
-  load: Loaded<unknown>;
+  load: Pick<Loaded<unknown>, "data" | "error" | "loading" | "reload">;
   render: () => ReactNode;
   destination: string;
   action: string;

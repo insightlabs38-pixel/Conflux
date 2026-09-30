@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
 import { JudgeCalendarPanel } from "./JudgeCalendarPanel";
+import { withQuery } from "../../lib/test-router";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -51,7 +52,11 @@ it("shows event windows and per-plan progress", async () => {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
-  act(() => root.render(<JudgeCalendarPanel workspaceId="w1" eventId="e1" />));
+  act(() =>
+    root.render(
+      withQuery(<JudgeCalendarPanel workspaceId="w1" eventId="e1" />),
+    ),
+  );
 
   await until(() => container.textContent?.includes("Judging window") ?? false);
   expect(container.textContent).toContain("1/3 submitted");
@@ -71,7 +76,11 @@ it("shows an empty state when the judge has no assignments yet", async () => {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
-  act(() => root.render(<JudgeCalendarPanel workspaceId="w1" eventId="e1" />));
+  act(() =>
+    root.render(
+      withQuery(<JudgeCalendarPanel workspaceId="w1" eventId="e1" />),
+    ),
+  );
 
   await until(
     () => container.textContent?.includes("no assigned candidates") ?? false,

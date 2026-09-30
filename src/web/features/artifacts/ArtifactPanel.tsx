@@ -1,5 +1,6 @@
-import { useEffect, useState, type FormEvent } from "react";
-import { apiJson } from "../../lib/api";
+import { useState, type FormEvent } from "react";
+import { apiJson, describeProblem } from "../../lib/api";
+import { useLoad } from "../../hooks/useLoad";
 import { OperationStatus } from "../../components/OperationStatus";
 import { useOperation } from "../../hooks/useOperation";
 
@@ -45,8 +46,14 @@ export function ArtifactPanel({
   projectId: string;
 }) {
   const base = `/api/v1/workspaces/${workspaceId}/events/${eventId}/projects/${projectId}/artifacts/`;
-  const [artifacts, setArtifacts] = useState<Artifact[]>([]);
-  const [preflight, setPreflight] = useState<Preflight | null>(null);
+  const artifactsLoad = useLoad<Artifact[]>(base, {
+    describe: describeProblem,
+  });
+  const preflightLoad = useLoad<Preflight>(base + "preflight/", {
+    describe: describeProblem,
+  });
+  const artifacts = artifactsLoad.data ?? [];
+  const preflight = preflightLoad.data;
   const [title, setTitle] = useState("");
   const [kind, setKind] = useState("file");
   const [visibility, setVisibility] = useState("participant");
@@ -54,36 +61,17 @@ export function ArtifactPanel({
   const [linkTitle, setLinkTitle] = useState("");
   const [linkKind, setLinkKind] = useState("repository");
   const [linkUrl, setLinkUrl] = useState("");
-  const [error, setError] = useState("");
+  const [actionError, setError] = useState("");
+  const error =
+    actionError ||
+    artifactsLoad.error?.message ||
+    preflightLoad.error?.message ||
+    "";
   const [refreshing, setRefreshing] = useState(false);
 
   async function refresh() {
-    const [items, checks] = await Promise.all([
-      apiJson<Artifact[]>(base),
-      apiJson<Preflight>(base + "preflight/"),
-    ]);
-    setArtifacts(items);
-    setPreflight(checks);
+    await Promise.all([artifactsLoad.reload(), preflightLoad.reload()]);
   }
-  useEffect(() => {
-    let active = true;
-    Promise.all([
-      apiJson<Artifact[]>(base),
-      apiJson<Preflight>(base + "preflight/"),
-    ])
-      .then(([items, checks]) => {
-        if (active) {
-          setArtifacts(items);
-          setPreflight(checks);
-        }
-      })
-      .catch((cause: unknown) => {
-        if (active) setError(message(cause));
-      });
-    return () => {
-      active = false;
-    };
-  }, [base]);
 
   // Long-running actions follow the async-operation contract (hooks/useOperation.ts).
   const addLink = useOperation(

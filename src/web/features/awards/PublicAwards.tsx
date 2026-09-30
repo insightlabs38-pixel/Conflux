@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
 import { ButtonLink } from "../../components/Foundation";
 import { ErrorState } from "../../components/ErrorState";
-import { apiRequest } from "../../lib/api";
+import { useLoad } from "../../hooks/useLoad";
 
 type Award = {
   public_id: string;
@@ -11,37 +10,12 @@ type Award = {
 };
 
 export function PublicAwards({ eventId }: { eventId: string }) {
-  const [awards, setAwards] = useState<Award[]>([]);
-  const [error, setError] = useState("");
-  const [retry, setRetry] = useState(0);
-  useEffect(() => {
-    let active = true;
-    apiRequest<Award[]>(`/api/v1/events/${eventId}/awards/`, {
-      describe: (status) => `Could not load awards (${status}).`,
-    })
-      .then((items) => {
-        if (active && Array.isArray(items)) {
-          setAwards(items);
-          setError("");
-        }
-      })
-      .catch((cause: unknown) => {
-        if (active)
-          setError(
-            cause instanceof Error ? cause.message : "Could not load awards.",
-          );
-      });
-    return () => {
-      active = false;
-    };
-  }, [eventId, retry]);
-  if (error)
-    return (
-      <ErrorState
-        message={error}
-        onRetry={() => setRetry((count) => count + 1)}
-      />
-    );
+  const { data, error, reload } = useLoad<Award[]>(
+    `/api/v1/events/${eventId}/awards/`,
+    { describe: (status) => `Could not load awards (${status}).` },
+  );
+  const awards = Array.isArray(data) ? data : [];
+  if (error) return <ErrorState message={error.message} onRetry={reload} />;
   if (awards.length === 0) return null;
   return (
     <section aria-label="Awards">

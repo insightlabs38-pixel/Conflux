@@ -37,7 +37,8 @@ import {
 } from "../pvs";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
-import { apiJson } from "../../lib/api";
+import { apiJson, describeProblem } from "../../lib/api";
+import { useLoad } from "../../hooks/useLoad";
 import { useUrlParam } from "../../lib/urlState";
 
 type Event = {
@@ -87,23 +88,12 @@ function message(error: unknown): string {
 
 export function EventDashboard({ workspaceId }: { workspaceId: string }) {
   const base = `/api/v1/workspaces/${workspaceId}/events/`;
-  const [events, setEvents] = useState<Event[]>([]);
   // The selected event is context (lib/urlState.ts): refresh, back/forward and shared links keep it.
   const [selectedId, setEventParam] = useUrlParam("event");
   const [awardsRevision, setAwardsRevision] = useState(0);
-  const selectedRef = useRef(selectedId);
-  selectedRef.current = selectedId;
-  const loadedFor = useRef("");
   const chosen = useRef(new Set<string>());
-  const listed = useRef(new Set<string>());
-  const [dashboard, setDashboard] = useState<Dashboard | null>(null);
-  const [tracks, setTracks] = useState<Track[]>([]);
-  const [prizes, setPrizes] = useState<Prize[]>([]);
-  const [error, setError] = useState("");
+  const [actionError, setActionError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [loadingEvents, setLoadingEvents] = useState(true);
-  const [loadError, setLoadError] = useState("");
-  const [retry, setRetry] = useState(0);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [trackName, setTrackName] = useState("");
@@ -113,81 +103,58 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
   const [prizeCurrency, setPrizeCurrency] = useState("");
   const [prizeTrack, setPrizeTrack] = useState("");
 
+  // Server state (hooks/useLoad.ts): the list, and the selected event's dashboard, tracks and prizes.
+  const eventsLoad = useLoad<Event[]>(base, { describe: describeProblem });
+  const events = eventsLoad.data ?? [];
+  const loadingEvents = eventsLoad.data === null && eventsLoad.error === null;
+  const loadError = eventsLoad.error?.message ?? "";
+  // Only an event the server listed (or one chosen here, e.g. just created) may be requested; a
+  // link to one this account cannot see is treated as no selection.
+  const known =
+    selectedId !== "" &&
+    (chosen.current.has(selectedId) ||
+      events.some((item) => item.public_id === selectedId));
   const eventBase = `${base}${selectedId}/`;
-  async function refresh(id = selectedId) {
-    const list = await apiJson<Event[]>(base);
-    listed.current = new Set(list.map((item) => item.public_id));
-    setEvents(list);
-    setLoadError("");
-    if (!id) return;
-    const detailBase = `${base}${id}/`;
-    const [health, nextTracks, nextPrizes] = await Promise.all([
-      apiJson<Dashboard>(detailBase + "dashboard/"),
-      apiJson<Track[]>(detailBase + "tracks/"),
-      apiJson<Prize[]>(detailBase + "base-prizes/"),
+  const detail = (path: string) => (known ? eventBase + path : null);
+  const dashboardLoad = useLoad<Dashboard>(detail("dashboard/"), {
+    describe: describeProblem,
+  });
+  const tracksLoad = useLoad<Track[]>(detail("tracks/"), {
+    describe: describeProblem,
+  });
+  const prizesLoad = useLoad<Prize[]>(detail("base-prizes/"), {
+    describe: describeProblem,
+  });
+  const dashboard = dashboardLoad.data;
+  const tracks = tracksLoad.data ?? [];
+  const prizes = prizesLoad.data ?? [];
+  const error =
+    actionError ||
+    dashboardLoad.error?.message ||
+    tracksLoad.error?.message ||
+    prizesLoad.error?.message ||
+    "";
+  async function refresh() {
+    await Promise.all([
+      eventsLoad.reload(),
+      dashboardLoad.reload(),
+      tracksLoad.reload(),
+      prizesLoad.reload(),
     ]);
-    if (selectedRef.current !== id) return;
-    loadedFor.current = id;
-    setDashboard(health);
-    setTracks(nextTracks);
-    setPrizes(nextPrizes);
   }
-  useEffect(() => {
-    let active = true;
-    setLoadingEvents(true);
-    setLoadError("");
-    apiJson<Event[]>(base)
-      .then((list) => {
-        if (!active) return;
-        listed.current = new Set(list.map((item) => item.public_id));
-        setEvents(list);
-      })
-      .catch((cause: unknown) => {
-        if (active) setLoadError(message(cause));
-      })
-      .finally(() => {
-        if (active) setLoadingEvents(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [base, retry]);
 
-  // A link to an event this account cannot see is treated as no selection. Derived from rendered
-  // state, so the correction cannot act on a location the user has already left.
   useEffect(() => {
-    if (
-      !loadingEvents &&
-      selectedId &&
-      !events.some((item) => item.public_id === selectedId) &&
-      !chosen.current.has(selectedId)
-    )
+    if (!loadingEvents && selectedId && !known)
       setEventParam("", { replace: true });
-  }, [loadingEvents, selectedId, events, setEventParam]);
-
-  // Load the selected event's dashboard when the URL selects one (click, deep link, refresh, Back).
-  useEffect(() => {
-    if (loadingEvents || loadedFor.current === selectedId) return;
-    // Only an event the server listed (or one chosen here, e.g. just created) may be requested.
-    if (
-      selectedId &&
-      !chosen.current.has(selectedId) &&
-      !listed.current.has(selectedId)
-    )
-      return;
-    loadedFor.current = "";
-    setDashboard(null);
-    if (selectedId) void run(() => refresh(selectedId));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedId, loadingEvents]);
+  }, [loadingEvents, selectedId, known, setEventParam]);
 
   async function run(action: () => Promise<void>) {
     setBusy(true);
-    setError("");
+    setActionError("");
     try {
       await action();
     } catch (cause) {
-      setError(message(cause));
+      setActionError(message(cause));
     } finally {
       setBusy(false);
     }
@@ -207,8 +174,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
       });
       setName("");
       setSlug("");
-      selectedRef.current = created.public_id;
-      await refresh(created.public_id);
+      eventsLoad.update((list) => [...(list ?? []), created]);
       choose(created.public_id);
     });
   }
@@ -298,10 +264,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
       {error && <p role="alert">{error}</p>}
       {loadingEvents && <LoadingState label="Loading events…" />}
       {loadError && (
-        <ErrorState
-          message={loadError}
-          onRetry={() => setRetry((count) => count + 1)}
-        />
+        <ErrorState message={loadError} onRetry={eventsLoad.reload} />
       )}
       <Destination id="setup">
         <details className="cx-create-event" open={events.length === 0}>

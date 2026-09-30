@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
 import { JudgeDirectoryPanel } from "./JudgeDirectoryPanel";
 import { JudgeInvitationInbox } from "./JudgeInvitationInbox";
+import { withQuery } from "../../lib/test-router";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -45,7 +46,9 @@ it("invites a directory judge to the selected event pool", async () => {
   const root = createRoot(container);
   await act(async () =>
     root.render(
-      <JudgeDirectoryPanel workspaceId="w1" eventId="e1" poolId="p1" />,
+      withQuery(
+        <JudgeDirectoryPanel workspaceId="w1" eventId="e1" poolId="p1" />,
+      ),
     ),
   );
   await until(() => container.textContent?.includes("Ada") ?? false);
@@ -88,7 +91,9 @@ it("accepts a pending invitation and removes its actions", async () => {
   vi.stubGlobal("fetch", fetchMock);
   const container = document.createElement("div");
   const root = createRoot(container);
-  await act(async () => root.render(<JudgeInvitationInbox workspaceId="w1" />));
+  await act(async () =>
+    root.render(withQuery(<JudgeInvitationInbox workspaceId="w1" />)),
+  );
   await until(() => container.textContent?.includes("First") ?? false);
   await act(async () =>
     (container.querySelector("button") as HTMLButtonElement).click(),

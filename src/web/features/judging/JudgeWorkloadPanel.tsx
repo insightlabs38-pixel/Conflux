@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
 import { Card } from "../../components/Card";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
-import { apiRequest } from "../../lib/api";
+import { useLoad } from "../../hooks/useLoad";
 
 type WorkloadRow = {
   judge: string;
@@ -10,11 +9,6 @@ type WorkloadRow = {
   submitted_count: number;
   completion_ratio: number;
 };
-
-function message(error: unknown): string {
-  if (error instanceof Error) return error.message;
-  return "Request failed.";
-}
 
 // Organizer-only roll-up of every judge's assigned/submitted counts across
 // the whole event (S24), least-complete first, so a judge falling behind
@@ -26,19 +20,15 @@ export function JudgeWorkloadPanel({
   workspaceId: string;
   eventId: string;
 }) {
-  const [rows, setRows] = useState<WorkloadRow[] | null>(null);
-  const [error, setError] = useState("");
-
-  function load() {
-    setError("");
-    void apiRequest<WorkloadRow[]>(
-      `/api/v1/workspaces/${workspaceId}/events/${eventId}/judge-workload/`,
-      { describe: (status) => `Request failed (${status}).` },
-    )
-      .then(setRows)
-      .catch((cause: unknown) => setError(message(cause)));
-  }
-  useEffect(load, [workspaceId, eventId]);
+  const {
+    data: rows,
+    error: failure,
+    reload: load,
+  } = useLoad<WorkloadRow[]>(
+    `/api/v1/workspaces/${workspaceId}/events/${eventId}/judge-workload/`,
+    { describe: (status) => `Request failed (${status}).` },
+  );
+  const error = failure?.message ?? "";
 
   return (
     <Card title="Judge workload">

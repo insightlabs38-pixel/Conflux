@@ -4,6 +4,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EventSite } from "./EventSite";
 import { jsonResponse } from "../../lib/test-http";
+import { withQuery } from "../../lib/test-router";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -71,7 +72,7 @@ describe("EventSite", () => {
       }),
     );
     act(() => {
-      root.render(<EventSite eventId="e1" />);
+      root.render(withQuery(<EventSite eventId="e1" />));
     });
     await waitFor(() => container.textContent?.includes("Regionals") ?? false);
     expect(container.textContent).toContain("A great event.");
@@ -86,7 +87,7 @@ describe("EventSite", () => {
   it("shows an error state with retry when the event cannot be loaded", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(404, {})));
     act(() => {
-      root.render(<EventSite eventId="missing" />);
+      root.render(withQuery(<EventSite eventId="missing" />));
     });
     await waitFor(() => container.querySelector('[role="alert"]') !== null);
     expect(container.textContent).toContain("Event not found");

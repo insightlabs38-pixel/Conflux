@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 import "../../styles/presentation.css";
 import { ButtonLink } from "../../components/Foundation";
 import { AppShell } from "../../components/AppShell";
@@ -9,7 +9,7 @@ import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 import { CommunityVoting } from "../../features/community-voting/CommunityVoting";
 import { PublicAwards } from "../../features/awards/PublicAwards";
-import { apiRequest } from "../../lib/api";
+import { useLoad } from "../../hooks/useLoad";
 
 type Track = { public_id: string; name: string; description: string };
 type BasePrize = {
@@ -69,26 +69,15 @@ function formatPrize(prize: BasePrize): string {
  * prizes. This is a strong default (UI-003); the organizer page builder
  * (C-B12/PAGE-002) layers richer, configurable blocks on top of it later. */
 export function EventSite({ eventId }: { eventId: string }) {
-  const [event, setEvent] = useState<PublicEvent | null>(null);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
-
-  const load = () => {
-    setLoading(true);
-    setError("");
-    apiRequest<PublicEvent>(`/api/v1/events/${eventId}/`, {
-      describe: (status) => `Event not found (${status}).`,
-    })
-      .then(setEvent)
-      .catch((cause: unknown) =>
-        setError(
-          cause instanceof Error ? cause.message : "Could not load this event.",
-        ),
-      )
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(load, [eventId]);
+  const {
+    data: event,
+    error: failure,
+    loading,
+    reload: load,
+  } = useLoad<PublicEvent>(`/api/v1/events/${eventId}/`, {
+    describe: (status) => `Event not found (${status}).`,
+  });
+  const error = failure?.message ?? "";
 
   const schedule = event ? formatSchedule(event) : null;
 

@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, expect, it, vi } from "vitest";
 import { EvaluationBuilder } from "./EvaluationBuilder";
+import { withQuery } from "../../lib/test-router";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -50,7 +51,9 @@ describe("prize judging setup", () => {
     const root = createRoot(container);
     try {
       await act(async () =>
-        root.render(<EvaluationBuilder workspaceId="w" eventId="e" />),
+        root.render(
+          withQuery(<EvaluationBuilder workspaceId="w" eventId="e" />),
+        ),
       );
       await until(() => container.textContent?.includes("Final") ?? false);
       const stage = container.querySelector("select") as HTMLSelectElement;

@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
 import { ConfigHistoryPanel } from "./ConfigHistoryPanel";
 import { jsonResponse } from "../../lib/test-http";
+import { withQuery } from "../../lib/test-router";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -40,7 +41,11 @@ it("renders each entry's field-level before/after diff", async () => {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
-  act(() => root.render(<ConfigHistoryPanel workspaceId="w1" eventId="e1" />));
+  act(() =>
+    root.render(
+      withQuery(<ConfigHistoryPanel workspaceId="w1" eventId="e1" />),
+    ),
+  );
   await until(() => container.textContent?.includes("event.updated") ?? false);
   expect(container.textContent).toContain("Hack 2.0");
   expect(fetchMock).toHaveBeenCalledWith(
@@ -59,7 +64,11 @@ it("shows an empty state when there is no captured history yet", async () => {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
-  act(() => root.render(<ConfigHistoryPanel workspaceId="w1" eventId="e1" />));
+  act(() =>
+    root.render(
+      withQuery(<ConfigHistoryPanel workspaceId="w1" eventId="e1" />),
+    ),
+  );
   await until(
     () => container.textContent?.includes("No recorded configuration") ?? false,
   );
@@ -72,7 +81,11 @@ it("shows a retryable error state when the request fails", async () => {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
-  act(() => root.render(<ConfigHistoryPanel workspaceId="w1" eventId="e1" />));
+  act(() =>
+    root.render(
+      withQuery(<ConfigHistoryPanel workspaceId="w1" eventId="e1" />),
+    ),
+  );
   await until(() => container.querySelector('[role="alert"]') !== null);
   act(() => root.unmount());
   container.remove();
@@ -102,7 +115,9 @@ it.each([true, false])(
     document.body.appendChild(container);
     const root = createRoot(container);
     await act(async () =>
-      root.render(<ConfigHistoryPanel workspaceId="w1" eventId="e1" />),
+      root.render(
+        withQuery(<ConfigHistoryPanel workspaceId="w1" eventId="e1" />),
+      ),
     );
     await until(
       () => container.textContent?.includes("Restore before values") ?? false,

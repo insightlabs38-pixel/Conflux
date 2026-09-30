@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
 import { JudgeWorkloadPanel } from "./JudgeWorkloadPanel";
+import { withQuery } from "../../lib/test-router";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -44,7 +45,11 @@ it("renders a completion row per judge", async () => {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
-  act(() => root.render(<JudgeWorkloadPanel workspaceId="w1" eventId="e1" />));
+  act(() =>
+    root.render(
+      withQuery(<JudgeWorkloadPanel workspaceId="w1" eventId="e1" />),
+    ),
+  );
 
   await until(() => container.textContent?.includes("judge_b") ?? false);
   expect(container.textContent).toContain("judge_a");
@@ -62,7 +67,11 @@ it("shows an empty state when no judge has any assignment yet", async () => {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
-  act(() => root.render(<JudgeWorkloadPanel workspaceId="w1" eventId="e1" />));
+  act(() =>
+    root.render(
+      withQuery(<JudgeWorkloadPanel workspaceId="w1" eventId="e1" />),
+    ),
+  );
 
   await until(
     () => container.textContent?.includes("No judge has any assigned") ?? false,

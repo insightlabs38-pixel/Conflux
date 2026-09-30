@@ -4,6 +4,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CommunityVoting } from "./CommunityVoting";
 import { jsonResponse } from "../../lib/test-http";
+import { withQuery } from "../../lib/test-router";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -43,7 +44,7 @@ describe("CommunityVoting", () => {
         .mockResolvedValue({ ok: true, status: 200, json: async () => null }),
     );
     act(() => {
-      root.render(<CommunityVoting eventId="e1" />);
+      root.render(withQuery(<CommunityVoting eventId="e1" />));
     });
     await act(async () => new Promise((resolve) => setTimeout(resolve, 20)));
     expect(container.innerHTML).toBe("");
@@ -85,7 +86,7 @@ describe("CommunityVoting", () => {
       }),
     );
     act(() => {
-      root.render(<CommunityVoting eventId="e1" />);
+      root.render(withQuery(<CommunityVoting eventId="e1" />));
     });
     await waitFor(() => container.textContent?.includes("Autograder") ?? false);
     const voteButton = [...container.querySelectorAll("button")].find(
@@ -114,7 +115,7 @@ describe("CommunityVoting", () => {
         return { ok: true, json: async () => [] };
       });
     vi.stubGlobal("fetch", fetchMock);
-    act(() => root.render(<CommunityVoting eventId="e1" />));
+    act(() => root.render(withQuery(<CommunityVoting eventId="e1" />)));
     await waitFor(
       () =>
         container.querySelector<HTMLInputElement>('input[type="email"]') !==
@@ -168,7 +169,7 @@ describe("CommunityVoting", () => {
         return jsonResponse(403, {});
       }),
     );
-    act(() => root.render(<CommunityVoting eventId="e1" />));
+    act(() => root.render(withQuery(<CommunityVoting eventId="e1" />)));
     await waitFor(
       () =>
         container.textContent?.includes("Could not load voting (503)") ?? false,

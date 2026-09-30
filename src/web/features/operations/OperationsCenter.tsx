@@ -1,8 +1,7 @@
 import { appHref, routes } from "../../lib/routes";
-import { useEffect, useState } from "react";
 import { Badge } from "../../components/Badge";
 import { Card } from "../../components/Card";
-import { apiRequest } from "../../lib/api";
+import { useLoad } from "../../hooks/useLoad";
 
 type ChecklistItem = {
   id: string;
@@ -68,12 +67,6 @@ type Summary = {
   };
 };
 
-function readJson<T>(url: string): Promise<T> {
-  return apiRequest<T>(url, {
-    describe: (status) => `Operations center request failed (${status}).`,
-  });
-}
-
 function severityTone(item: ChecklistItem): "success" | "warning" | "danger" {
   if (item.passed) return "success";
   return item.severity === "blocker" ? "danger" : "warning";
@@ -87,34 +80,14 @@ export function OperationsCenter({
   eventId: string;
 }) {
   const base = `/api/v1/workspaces/${workspaceId}/events/${eventId}/operations/`;
-  const [checklist, setChecklist] = useState<Checklist | null>(null);
-  const [summary, setSummary] = useState<Summary | null>(null);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let active = true;
-    Promise.all([
-      readJson<Checklist>(base + "checklist/"),
-      readJson<Summary>(base + "summary/"),
-    ])
-      .then(([nextChecklist, nextSummary]) => {
-        if (active) {
-          setChecklist(nextChecklist);
-          setSummary(nextSummary);
-        }
-      })
-      .catch((cause: unknown) => {
-        if (active)
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "Operations center could not load.",
-          );
-      });
-    return () => {
-      active = false;
-    };
-  }, [base]);
+  const describe = (status: number) =>
+    `Operations center request failed (${status}).`;
+  const checklistLoad = useLoad<Checklist>(base + "checklist/", { describe });
+  const summaryLoad = useLoad<Summary>(base + "summary/", { describe });
+  const checklist = checklistLoad.data;
+  const summary = summaryLoad.data;
+  const error =
+    checklistLoad.error?.message || summaryLoad.error?.message || "";
 
   return (
     <Card title="Operations center">

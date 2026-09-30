@@ -220,11 +220,15 @@ export function apiJson<T>(
     method,
     body,
     signal,
-    describe: (status, detail) =>
-      detail === undefined
-        ? `Request failed (${status}).`
-        : problemText(detail),
+    describe: describeProblem,
   });
+}
+
+/** `describe` for panels: the server's problem as `field: message` pairs, or the bare status. */
+export function describeProblem(status: number, detail: unknown): string {
+  return detail === undefined
+    ? `Request failed (${status}).`
+    : problemText(detail);
 }
 
 /** Resolves to null when the request failed with one of `statuses` (an expected "not there/not yours"). */
@@ -239,4 +243,20 @@ export async function orNull<T>(
       return null;
     throw error;
   }
+}
+
+/** A server answer as one line: `detail`/`non_field_errors` bare, other fields as `field: message`. */
+export function serverMessage(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (value instanceof Error) return value.message;
+  if (Array.isArray(value)) return value.map(serverMessage).join(" ");
+  if (value && typeof value === "object")
+    return Object.entries(value)
+      .map(([key, item]) =>
+        key === "detail" || key === "non_field_errors"
+          ? serverMessage(item)
+          : `${key}: ${serverMessage(item)}`,
+      )
+      .join(" ");
+  return "Request failed.";
 }

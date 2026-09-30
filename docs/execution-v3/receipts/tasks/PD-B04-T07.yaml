@@ -1,0 +1,87 @@
+version: 3
+task: PD-B04-T07
+batch: PD-B04
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: d45b6c9baacac4fdea298049289a38ee91a346ef
+  head_commit: d45b6c9baacac4fdea298049289a38ee91a346ef
+changed_paths:
+- src/web/hooks/useLoad.ts
+- src/web/lib/api.ts
+- src/web/lib/serverState.test.ts
+- src/web/lib/test-dom.ts
+- src/web/features/pvs/http.ts
+- src/web/features/judging/JudgeWorkspace.tsx
+- src/web/features/event-builder/EventDashboard.tsx
+- src/web/features/teams/TeamPanel.tsx
+- src/web/features/artifacts/ProjectWorkspace.tsx
+- src/web/features/artifacts/ArtifactPanel.tsx
+- src/web/features/submissions/SubmissionPanel.tsx
+- src/web/features/operations/
+- src/web/features/judging/
+- src/web/features/audit/ConfigHistoryPanel.tsx
+- src/web/features/awards/PublicAwards.tsx
+- src/web/features/profile/PersonProfilePage.tsx
+- src/web/features/community-voting/CommunityVoting.tsx
+- src/web/features/event-builder/PermissionMatrixExplorer.tsx
+- src/web/public/event-site/EventSite.tsx
+- docs/verification/PD-B04/
+deliverables:
+- item: Migrate the current major workspaces incrementally onto routing, server-state, typed client and the T04-T06 contracts
+  result: pass
+  evidence: participant, judge and organizer shells and their main panels load through useLoad/useQuery; WORKSPACE_MIGRATION.md lists per workspace what moved and what stays manual and why
+- item: Remove manual query/history/fetch sprawl without regressions
+  result: pass
+  evidence: effect-based fetching 34 files to 17 files (20 effects), each remaining one recorded with a reason and ratcheted by lib/serverState.test.ts; no raw fetch (T03 ratchet)
+- item: Verification matrix row with executable proof
+  result: pass
+  evidence: MATRIX.md T07 row; 291 web tests; e2e-fast across all role journeys
+- item: Deliberate exceptions recorded
+  result: pass
+  evidence: PlanQueue offline cache and outbox, editor drafts, paginated feeds, public schema read
+invariants:
+- item: Drafts, offline buffers and role boundaries preserved
+  result: pass
+  evidence: judge PlanQueue and its outbox untouched; editors keep their local drafts; server authorization unchanged; per-session query reset
+- item: Backend semantics unchanged
+  result: pass
+  evidence: no src/api change; same endpoints, messages and retry controls
+- item: No weakened tests
+  result: pass
+  evidence: existing tests kept and wrapped in a query client; timing waits use real polling of the DOM, no longer timeouts
+verification:
+- command: pnpm --filter @conflux/web test
+  result: pass
+  note: 291 passed (was 287)
+- command: make verify-fast
+  result: pass
+  note: pytest 1454 passed/23 skipped; web 291 + embed 8; tsc, build, sdk-check clean
+- command: make e2e-fast
+  result: pass
+  note: read-only, isolated-mutation and canary tiers ok on the rebuilt image
+- command: npx playwright test --project=desktop uiv2-gate url-state routing workspace-shell --repeat-each=3 --workers=8 (x3)
+  result: pass
+  note: 342 passed, 0 failed
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: "not applicable for this task: no endpoint changed"
+migrations: []
+findings:
+- OperationsCenter now renders checklist and summary independently
+- Load failures in JudgeInvitationInbox and JudgeDirectoryPanel show clean messages (previously ApiError-prefixed)
+- Main bundle 716.0 to 713.4 kB (gzip 172.5 to 171.9)
+escalations: []
+limitations:
+- 17 files still fetch in effects (editors with server-seeded drafts, paginated feeds, the offline judge queue, the public schema read); each is recorded with its reason and moves with its own subsystem work, paginated feeds once an infinite-query contract exists.
+- Selection state inside panels (judge project, builder item, filters, tabs) is still local (URL_STATE.md, T04).
+next: review

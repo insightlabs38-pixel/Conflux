@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Badge } from "../../components/Badge";
 import { Button } from "../../components/Button";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
-import { apiJson, apiRequest, orNull } from "../../lib/api";
+import { apiJson } from "../../lib/api";
+import { useLoad } from "../../hooks/useLoad";
 
 type IdentityMode = "authenticated" | "email_link" | "token";
 type Status = {
@@ -29,78 +30,47 @@ function message(value: unknown): string {
  * Reachable without a workspace id -- see community.urls' public/ prefix. */
 export function CommunityVoting({ eventId }: { eventId: string }) {
   const base = `/api/v1/public/events/${eventId}/voting`;
-  const [status, setStatus] = useState<Status>(null);
-  const [candidates, setCandidates] = useState<Candidate[]>([]);
-  const [results, setResults] = useState<Result[] | null>(null);
   const [voteToken, setVoteToken] = useState("");
   const [email, setEmail] = useState("");
   const [votedFor, setVotedFor] = useState("");
-  const [error, setError] = useState("");
+  const [actionError, setActionError] = useState("");
   const [notice, setNotice] = useState("");
-  const [statusState, setStatusState] = useState<
-    "loading" | "absent" | "ready" | "error"
-  >("loading");
-  const [retry, setRetry] = useState(0);
   const [voting, setVoting] = useState(false);
-  const [resultsError, setResultsError] = useState("");
 
-  useEffect(() => {
-    let active = true;
-    setStatusState("loading");
-    setError("");
-    setResultsError("");
-    orNull(
-      apiRequest<Status>(base + "/status/", {
-        describe: (status) => `Could not load voting (${status}).`,
-      }),
-      404,
-    )
-      .then((nextStatus) => {
-        if (!active) return;
-        setStatus(nextStatus);
-        setStatusState(nextStatus ? "ready" : "absent");
-      })
-      .catch((cause: unknown) => {
-        if (active) {
-          setError(message(cause));
-          setStatusState("error");
-        }
-      });
-    return () => {
-      active = false;
-    };
-  }, [base, retry]);
-
-  useEffect(() => {
-    // Unpublished results are a guaranteed 403 for the public; don't ask.
-    if (!status || status.results_published === false) return;
-    let active = true;
-    orNull(
-      apiRequest<Result[]>(base + "/results/", {
-        describe: (status) => `Could not load voting results (${status}).`,
-      }),
-      403,
-      404,
-    )
-      .then((items) => {
-        if (active) setResults(items);
-      })
-      .catch((cause: unknown) => {
-        if (active) setResultsError(message(cause));
-      });
-    return () => {
-      active = false;
-    };
-  }, [base, status, retry]);
-
-  useEffect(() => {
-    if (!status) return;
-    apiJson<Candidate[]>(
-      base + `/candidates/${voteToken ? `?token=${voteToken}` : ""}`,
-    )
-      .then(setCandidates)
-      .catch((cause: unknown) => setError(message(cause)));
-  }, [base, status, voteToken]);
+  const statusLoad = useLoad<Status>(base + "/status/", {
+    absent: [404],
+    describe: (code) => `Could not load voting (${code}).`,
+  });
+  const status = statusLoad.data ?? null;
+  const statusState = statusLoad.error
+    ? "error"
+    : statusLoad.loading && statusLoad.data === null
+      ? "loading"
+      : status
+        ? "ready"
+        : "absent";
+  // Unpublished results are a guaranteed 403 for the public; don't ask.
+  const resultsLoad = useLoad<Result[]>(
+    status && status.results_published !== false ? base + "/results/" : null,
+    {
+      absent: [403, 404],
+      describe: (code) => `Could not load voting results (${code}).`,
+    },
+  );
+  const results = resultsLoad.data;
+  const resultsError = resultsLoad.error?.message ?? "";
+  const candidatesLoad = useLoad<Candidate[]>(
+    status
+      ? base + `/candidates/${voteToken ? `?token=${voteToken}` : ""}`
+      : null,
+  );
+  const candidates = candidatesLoad.data ?? [];
+  const error =
+    actionError ||
+    statusLoad.error?.message ||
+    candidatesLoad.error?.message ||
+    "";
+  const setError = setActionError;
 
   async function requestEmailToken(event: React.FormEvent) {
     event.preventDefault();
@@ -142,12 +112,7 @@ export function CommunityVoting({ eventId }: { eventId: string }) {
   if (statusState === "loading")
     return <LoadingState label="Loading voting…" />;
   if (statusState === "error")
-    return (
-      <ErrorState
-        message={error}
-        onRetry={() => setRetry((count) => count + 1)}
-      />
-    );
+    return <ErrorState message={error} onRetry={statusLoad.reload} />;
   if (!status) return null;
 
   return (

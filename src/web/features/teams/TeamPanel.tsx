@@ -2,7 +2,8 @@ import { PersonRow, type PersonIdentity } from "../../components/Person";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useUrlParam } from "../../lib/urlState";
 import { appHref, routes } from "../../lib/routes";
-import { apiJson } from "../../lib/api";
+import { apiJson, describeProblem } from "../../lib/api";
+import { useLoad } from "../../hooks/useLoad";
 
 type Member = {
   user_public_id: string;
@@ -54,47 +55,49 @@ export function TeamPanel({
   // `invite` is a single-use entry token (lib/urlState.ts): read once, removed once redeemed.
   const [inviteParam, setInviteParam] = useUrlParam("invite");
   const base = `/api/v1/workspaces/${workspaceId}/events/${eventId}/`;
-  const [status, setStatus] = useState<Status | null>(null);
-  const [invites, setInvites] = useState<Invite[]>([]);
   const [redeemToken, setRedeemToken] = useState(inviteParam);
   const [teamName, setTeamName] = useState("");
-  const [error, setError] = useState("");
+  const [actionError, setActionError] = useState("");
   const [busy, setBusy] = useState(false);
   const teamFingerprint = useRef<string | null>(null);
 
+  const team = useLoad<Status>(base + "my-team/", {
+    describe: describeProblem,
+  });
+  const status = team.data;
+  const captain = !!status?.team && status.my_role === "captain";
+  const inviteLoad = useLoad<Invite[]>(
+    captain ? base + "my-team/invites/" : null,
+    {
+      describe: describeProblem,
+    },
+  );
+  const invites = captain ? (inviteLoad.data ?? []) : [];
+  const error =
+    actionError || team.error?.message || inviteLoad.error?.message || "";
+
   async function refresh() {
-    const nextStatus = await apiJson<Status>(base + "my-team/");
-    setStatus(nextStatus);
-    const fingerprint = `${nextStatus.team?.public_id ?? ""}:${nextStatus.my_role ?? ""}`;
+    await Promise.all([team.reload(), inviteLoad.reload()]);
+  }
+
+  // Tell the parent when membership actually changes (joined, left, role changed).
+  useEffect(() => {
+    if (!status) return;
+    const fingerprint = `${status.team?.public_id ?? ""}:${status.my_role ?? ""}`;
     if (teamFingerprint.current !== fingerprint) {
       teamFingerprint.current = fingerprint;
       onTeamChange?.();
     }
-    if (nextStatus.team && nextStatus.my_role === "captain") {
-      setInvites(await apiJson<Invite[]>(base + "my-team/invites/"));
-    } else {
-      setInvites([]);
-    }
-  }
-
-  useEffect(() => {
-    let active = true;
-    refresh().catch((cause: unknown) => {
-      if (active) setError(message(cause));
-    });
-    return () => {
-      active = false;
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [base]);
+  }, [status]);
 
   async function run(action: () => Promise<void>) {
     setBusy(true);
-    setError("");
+    setActionError("");
     try {
       await action();
     } catch (cause) {
-      setError(message(cause));
+      setActionError(message(cause));
     } finally {
       setBusy(false);
     }

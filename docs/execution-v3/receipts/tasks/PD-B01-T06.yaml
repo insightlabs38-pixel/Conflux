@@ -1,0 +1,49 @@
+version: 3
+task: PD-B01-T06
+batch: PD-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: a4c368c61cdc09e181d82fdfa889af3a10c182c5
+  head_commit: a4c368c61cdc09e181d82fdfa889af3a10c182c5
+changed_paths:
+- docs/verification/PD-B01/BLOCKER_REGISTER.md
+deliverables:
+- item: Record remaining non-blocking limitations separately
+  result: pass
+  evidence: BLOCKER_REGISTER.md 'Remaining' table with owners
+- item: Prove no known P0/P1 blocker remains
+  result: pass
+  evidence: baseline had none; T05 full re-verification green; register states so with evidence links
+invariants:
+- item: No repair replaced by skip/weakened test/demo-only workaround
+  result: pass
+  evidence: D-04 skip replaced by real test; D-01 guard adds assertion only
+- item: Domain invariants/authz/audit preserved
+  result: pass
+  evidence: only a UI handler guard and tests changed
+verification:
+- command: cross-check register vs task receipts T02/T03/T05
+  result: pass
+  note: every 'repaired' row cites a receipt-backed run
+- command: python scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: JudgeWorkspace fix + vitest + Playwright
+- surface: api
+  result: pass
+  evidence: upgrade smoke on PG17; API code unchanged
+migrations: []
+findings: []
+escalations: []
+limitations:
+- See remaining table.
+next: review

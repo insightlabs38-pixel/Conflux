@@ -1,0 +1,28 @@
+version: 1
+checkpoint_id: CP-PD-B01
+created_at: '2026-09-30T06:02:41Z'
+canonical_commit: a4c368c61cdc09e181d82fdfa889af3a10c182c5
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+active_batches: []
+active_claims: []
+open_escalations: []
+last_completed_task: PD-B01-T06
+ready_summary:
+- 'next: PD-B02 (pending promotion)'
+design_revision: r2.1
+verification_summary:
+- verify-fast 1401/23 + web 169+8
+- PG17 1420/4
+- e2e-fast 144/0 fail on rebuilt stack
+- backup-restore smoke PASS
+- validate_queue valid
+recovery_notes:
+- 'Blocker register: docs/verification/PD-B01/BLOCKER_REGISTER.md'
+- conflux compose stack rebuilt from source at B01 close; demo reset to submitted
+- confluxh00 PG hosts disposable conflux_h02/test_* DBs; legacy freebuff idle process
+  untouched
+- main unpushed

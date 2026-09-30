@@ -5,7 +5,7 @@ controller_epoch: 1
 activated_at: '2026-09-30T05:02:17.829727+00:00'
 canonical_branch: main
 canonical_commit_at_activation: 5680dcd4bcb22cde5e9f4913eec122fd203f40b0
-last_checkpoint: CP-PD-B00
+last_checkpoint: CP-PD-B01
 design_manifest: docs/product-depth-v3/design/DESIGN_MANIFEST.yaml
 notes:
 - Activated 2026-09-30 by owner instruction; PD-R00 reconciliation in progress.

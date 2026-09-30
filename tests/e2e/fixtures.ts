@@ -1,5 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { test as base } from "@playwright/test";
+import { asFor, type As } from "./auth-states";
 import { account, type Who } from "./support";
 
 /**
@@ -55,7 +56,9 @@ export const disposeFixture = (slug: string): string =>
  * the worker, disposed after the last one unless something failed. */
 export function isolatedTest(profile: Profile) {
   const failed = new Set<string>();
-  return base.extend<{ _track: void }, { fixture: Fixture }>({
+  return base.extend<{ _track: void; as: As }, { fixture: Fixture }>({
+    as: async ({ browser, context, page, fixture }, use) =>
+      asFor(fixture)({ browser, context, page }, use),
     fixture: [
       async ({}, use, workerInfo) => {
         const fixture = provisionFixture(profile);

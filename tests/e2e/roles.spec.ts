@@ -1,18 +1,19 @@
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
+import { referenceTest as test } from "./auth-states";
 import {
   accessible,
   noHorizontalOverflow,
   openWorkspace,
-  signIn,
   watch,
   settled,
 } from "./support";
 
 for (const role of ["organizer", "judge-01", "participant-01"]) {
   test(`${role}: workspace loads without errors, overflow or axe violations`, async ({
-    page,
+    as,
   }) => {
-    await signIn(page, role);
+    const page = await as(role);
+    await page.goto("/app/");
     const problems = watch(page);
     await openWorkspace(page);
     await settled(page);
@@ -27,17 +28,19 @@ for (const role of ["organizer", "judge-01", "participant-01"]) {
 }
 
 test("a participant cannot open the organizer console by URL", async ({
-  page,
+  as,
 }) => {
-  await signIn(page, "participant-01");
+  const page = await as("participant-01");
+  await page.goto("/app/");
   await openWorkspace(page);
   await expect(page.getByText("Operator console")).toHaveCount(0);
 });
 
 test("organizer keyboard path: every workspace control is reachable and shows focus", async ({
-  page,
+  as,
 }) => {
-  await signIn(page, "organizer");
+  const page = await as("organizer");
+  await page.goto("/app/");
   await openWorkspace(page);
   await settled(page);
   for (let i = 0; i < 6; i++) await page.keyboard.press("Tab");

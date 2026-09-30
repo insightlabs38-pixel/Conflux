@@ -1,0 +1,65 @@
+version: 3
+task: PD-B03-T03
+batch: PD-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: e2c2f83818ec487a8397b6a95cacdef04b9eb816
+  head_commit: e2c2f83818ec487a8397b6a95cacdef04b9eb816
+changed_paths:
+- tests/e2e/auth-states.ts
+- tests/e2e/auth-states.spec.ts
+- tests/e2e/fixtures.ts
+- tests/e2e/roles.spec.ts
+- docs/operations/E2E.md
+- docs/verification/PD-B03/MATRIX.md
+- docs/verification/PD-B03/logs/
+deliverables:
+- item: Stable per-role auth states (participant/judge/mentor/volunteer/organizer) that authorization tests can opt out of
+  result: pass
+  evidence: auth-states.ts authState()/as()/as.other() for reference and fixture scenarios; auth-states.spec.ts 5/5; opt-out documented in E2E.md and proved by the logout-revocation test
+- item: Verification matrix linking each capability to an executable proof
+  result: pass
+  evidence: docs/verification/PD-B03/MATRIX.md rows T01-T03 (plan template lists 11 capability tasks; remaining rows are added as tasks land and closed by T11)
+- item: Positive, negative, authorization and concurrency/idempotency coverage
+  result: pass
+  evidence: reuse without re-login; wrong password diagnostic with no file; two identities in separate contexts; revoked session re-issued; atomic tmp+rename writes
+- item: UI-facing states
+  result: pass
+  evidence: roles.spec adopter passes desktop+mobile; loading/empty/error states are not changed by this task
+invariants:
+- item: Sign-in/authorization behavior unchanged
+  result: pass
+  evidence: no product code touched; signin.spec still drives the real form (39 passed adjacent)
+- item: No weakened tests
+  result: pass
+  evidence: roles.spec assertions unchanged except removal of one byte-identical duplicate expect(problems).toEqual([]); sign-in coverage retained in signin/workspace-shell
+verification:
+- command: npx playwright test --project=desktop auth-states
+  result: pass
+  note: 5 passed
+- command: npx playwright test --project=desktop --project=mobile roles (before/after, 2 runs each)
+  result: pass
+  note: 10 passed both; 15.8/15.4 s -> 13.0/12.3 s
+- command: npx playwright test --workers=4 signin roles workspace-shell fixture-isolation auth-states
+  result: pass
+  note: 39 passed/21 skipped
+- command: pnpm format:check && pnpm lint
+  result: pass
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: browser specs on reference and isolated fixtures
+migrations: []
+findings:
+- 'Plan defect P3: T03 deliverables are the generic verification-task template, not storage states; followed the title/goal and satisfied the template via MATRIX.md. No escalation needed.'
+escalations: []
+limitations:
+- Only roles.spec adopts states so far; workspace-shell and other readers are migrated by T04 reclassification.
+- tests/e2e has no tsconfig/@types/node, so types are checked only by Playwright transpile (pre-existing).
+next: review

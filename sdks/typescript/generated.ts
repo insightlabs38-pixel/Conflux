@@ -1257,7 +1257,7 @@ export type ConfigurationEntrySchema = {
   value: unknown;
   default: unknown;
   baseline: unknown;
-  source: SourceEnum;
+  source: ConfigurationEntrySchemaSourceEnum;
   editable: boolean;
   lock: ConfigurationLockSchema | null;
   constraint: string | null;
@@ -1275,13 +1275,19 @@ export type InputOfConfigurationEntrySchema = {
   value: unknown;
   default: unknown;
   baseline: unknown;
-  source: InputOfSourceEnum;
+  source: InputOfConfigurationEntrySchemaSourceEnum;
   editable: boolean;
   lock: InputOfConfigurationLockSchema | null;
   constraint: string | null;
   write: InputOfConfigurationWriteSchema | null;
   module_enabled: boolean;
 };
+
+export type ConfigurationEntrySchemaSourceEnum =
+  "default" | "preset" | "overridden" | "set" | "unset" | "derived";
+
+export type InputOfConfigurationEntrySchemaSourceEnum =
+  "default" | "preset" | "overridden" | "set" | "unset" | "derived";
 
 export type ConfigurationLockSchema = { code: string; message: string };
 
@@ -4496,12 +4502,6 @@ export type InputOfSignedArchiveOutput = {
   signature: string;
 };
 
-export type SourceEnum =
-  "default" | "preset" | "overridden" | "set" | "unset" | "derived";
-
-export type InputOfSourceEnum =
-  "default" | "preset" | "overridden" | "set" | "unset" | "derived";
-
 export type SponsorProjectSchema = {
   public_id: string;
   name: string;
@@ -5167,6 +5167,10 @@ export type InputOfWinnerOutput = {
   fulfillments: Record<string, unknown>[];
 };
 
+export type WorkflowDifferenceSchema = { code: string; message: string };
+
+export type InputOfWorkflowDifferenceSchema = { code: string; message: string };
+
 export type WorkflowPresetInput = { preset: string };
 
 export type InputOfWorkflowPresetInput = { preset: string };
@@ -5177,6 +5181,24 @@ export type InputOfWorkflowPresetResult = {
   stages: InputOfStage[];
   plans: InputOfEvaluationPlan[];
 };
+
+export type WorkflowSchema = {
+  source: WorkflowSchemaSourceEnum;
+  preset: ConfigurationPresetSchema | null;
+  stages: string[];
+  differences: WorkflowDifferenceSchema[];
+};
+
+export type InputOfWorkflowSchema = {
+  source: InputOfWorkflowSchemaSourceEnum;
+  preset: InputOfConfigurationPresetSchema | null;
+  stages: string[];
+  differences: InputOfWorkflowDifferenceSchema[];
+};
+
+export type WorkflowSchemaSourceEnum = "preset" | "custom" | "none";
+
+export type InputOfWorkflowSchemaSourceEnum = "preset" | "custom" | "none";
 
 export type WorkspaceInputSchema = { name: string; slug?: string };
 
@@ -8493,6 +8515,10 @@ export interface Operations {
       body: InputOfVoteInputSchema;
     };
     response: VoteReceiptSchema;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_workflow: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: WorkflowSchema;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_workflow_presets: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -13103,6 +13129,14 @@ export const operations = {
       request_body: true,
       response_kind: "json",
     },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_workflow: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/workflow/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_workflow_presets:
     {
       method: "GET",

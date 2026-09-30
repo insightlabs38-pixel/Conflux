@@ -93,6 +93,12 @@ def _duration_hours(event):
     return round((event.ends_at - event.starts_at).total_seconds() / 3600, 2)
 
 
+def _workflow_source(event):
+    from .workflow import workflow_state  # the workflow reads stage and judging rows
+
+    return workflow_state(event)["source"]
+
+
 def _open_dates_constraint(event):
     if event.status == EventStatus.OPEN:
         return "Both dates are required while the event is open, and the end must be in the future."
@@ -302,6 +308,19 @@ SPECS = [
         lambda e: _rules(e).require_clearance,
         False,
         _w(_RULES, "require_clearance"),
+    ),
+    SettingSpec(
+        "workflow.source",
+        "core",
+        ADVANCED,
+        "Workflow",
+        "Whether the stages and judging still follow the format the event started from: "
+        "preset (unchanged), custom (changed since) or none (built by hand).",
+        {"type": "string", "enum": ["preset", "custom", "none"]},
+        _workflow_source,
+        "none",
+        None,
+        derived=True,
     ),
     SettingSpec(
         "dates.duration_hours",

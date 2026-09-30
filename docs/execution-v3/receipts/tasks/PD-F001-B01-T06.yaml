@@ -1,0 +1,81 @@
+version: 3
+task: PD-F001-B01-T06
+batch: PD-F001-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: a8ed077
+  head_commit: a8ed077
+changed_paths:
+- src/api/eventconfig/ (workflow.py new, registry.py, schema.py, views.py, urls.py)
+- src/web/features/event-builder/ (WorkflowStatus and test, EventDashboard.tsx)
+- tests/integration/test_event_workflow.py
+- tests/e2e/event-workflow.spec.ts
+- tests/e2e/ (tiers.json, weights.json, affected.json)
+- docs/product-depth-v3/specs/001-base-experience-must-remain-smaller-than-the-platform.md
+- docs/api/openapi.yaml
+- sdks/
+deliverables:
+- item: Progressive switch from preset to custom through the canonical domain layer
+  result: pass
+  evidence: no new state; workflow.py compares the ordinary stage, transition and evaluation-plan rows with the preset baseline recorded in EventProfile; editing goes through the existing audited stage and judging endpoints and is never blocked or reset
+- item: Observable state and diagnostics
+  result: pass
+  evidence: GET workspaces/{w}/events/{e}/workflow/ returns source (preset, custom, none), the preset it started from and named differences (stage_added, stage_removed, stages_reordered, initial_changed, transitions_changed, plan_added, plan_removed, rubric_changed); the same answer is the derived setting workflow.source in the configuration API
+- item: Web surface
+  result: pass
+  evidence: Stages tab shows Workflow source (Follows the format, Customized with each difference, Built by hand) above the stage builder with Check again and a retry on load failure
+- item: Integrate with authorization, audit and versioning primitives
+  result: pass
+  evidence: endpoint organizer/admin only (judge 403, anonymous denied, cross-workspace 404); published rubric versions stay immutable and a version with the format's criteria counts as the format's
+invariants:
+- item: One source of truth, no UI-only rules
+  result: pass
+  evidence: the answer is computed server-side from domain rows; the panel renders the response; no settings table or flag
+- item: Server authorization, validation and audit authoritative
+  result: pass
+  evidence: read-only endpoint; every change is made through existing audited endpoints
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1534 passed, 23 skipped (adds 6 workflow tests; happy path on persisted preset events, negative cases per kind of difference, permission matrix)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 319 web tests (WorkflowStatus adds 3); static checks, OpenAPI and SDK artifacts clean
+- command: npx playwright test -c tests/e2e/playwright.config.ts event-workflow --project=desktop (fresh iso-min fixture)
+  result: pass
+  note: 2 passed at 390 and 1440 with axe and no overflow
+- command: make e2e-fast
+  result: pass
+  note: read-only, isolated-mutation (incl. event-workflow) and canary tiers ok; docs/verification/PD-F001-B01/T06-e2e-fast.log
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: Workflow source status on the Stages tab
+- surface: api
+  result: pass
+  evidence: workflow endpoint and workflow.source registry entry
+- surface: audit
+  result: pass
+  evidence: "not applicable for this task: read-only; stage and judging edits that change the answer use the existing audited endpoints"
+- surface: docs
+  result: pass
+  evidence: spec 001 section Presets to custom workflows (T06); OpenAPI regenerated
+- surface: sdk
+  result: pass
+  evidence: "not applicable for this task: not_required; generated artifacts regenerated only"
+migrations: []
+findings:
+- SCHEMA_EDITOR is PLANNED (F002-B02-T01) and was not built; the declared reuse is satisfied only as registry type descriptors (workflow.source is a JSON-Schema-compatible enum), per the T00 primitive decision
+- tests/e2e/affected.json had no rule for src/api/eventconfig; one was added so changes there select the event-config specs instead of falling back to smoke
+- Comparison is by stage name and criteria id/weight/range; renaming a stage reads as removed plus added
+limitations:
+- No detach or reset-to-format action; reverting a change restores the answer, the recorded format is never cleared
+- Only stages, transitions and evaluation plans are compared; other settings are covered by the configuration API
+escalations: []
+next: review

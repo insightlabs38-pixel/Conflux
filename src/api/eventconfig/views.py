@@ -11,7 +11,8 @@ from rest_framework.response import Response
 from . import modules
 from .configuration import FILTER_CHOICES, effective_configuration
 from .readiness import compute_readiness
-from .schema import ConfigurationSchema, ReadinessSchema
+from .schema import ConfigurationSchema, ReadinessSchema, WorkflowSchema
+from .workflow import workflow_state
 
 
 class ModuleHomeSchema(serializers.Serializer):
@@ -138,3 +139,11 @@ class EventConfigurationView(OrganizerView):
             if filters[name] and filters[name] not in allowed:
                 raise ValidationError({name: f"Unknown {name}; use one of {', '.join(allowed)}."})
         return Response(effective_configuration(self.get_event(), **filters))
+
+
+class EventWorkflowView(OrganizerView):
+    """Whether the event still follows its format's workflow, and what changed if not."""
+
+    @extend_schema(responses=WorkflowSchema)
+    def get(self, request, workspace_public_id, event_public_id):
+        return Response(workflow_state(self.get_event()))

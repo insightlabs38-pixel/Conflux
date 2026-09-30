@@ -104,6 +104,17 @@
       "specs": ["uiv2-surfaces"]
     },
     {
+      "paths": ["src/api/eventconfig/*"],
+      "specs": [
+        "event-advanced",
+        "event-configuration",
+        "event-modules",
+        "event-presets",
+        "event-readiness",
+        "event-workflow"
+      ]
+    },
+    {
       "paths": [
         "src/web/features/page-builder/*",
         "src/api/presentation/*",

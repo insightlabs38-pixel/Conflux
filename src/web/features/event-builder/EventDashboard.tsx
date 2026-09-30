@@ -24,6 +24,7 @@ import { CommunicationsPanel } from "../communications/CommunicationsPanel";
 import { ConfigHistoryPanel } from "../audit/ConfigHistoryPanel";
 import { useReadiness } from "../../hooks/useReadiness";
 import { ConfigurationPanel } from "./ConfigurationPanel";
+import { WorkflowStatus } from "./WorkflowStatus";
 import { FeaturesPanel } from "./FeaturesPanel";
 import { ReadinessPanel } from "./ReadinessPanel";
 import { ModuleGate } from "./ModuleGate";
@@ -558,10 +559,17 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
                   label: "Stages",
                   description: "Timeline and transitions",
                   content: (
-                    <StageBuilder
-                      workspaceId={workspaceId}
-                      eventId={selected.public_id}
-                    />
+                    <>
+                      <WorkflowStatus
+                        key={`workflow-${selected.public_id}`}
+                        workspaceId={workspaceId}
+                        eventId={selected.public_id}
+                      />
+                      <StageBuilder
+                        workspaceId={workspaceId}
+                        eventId={selected.public_id}
+                      />
+                    </>
                   ),
                 },
                 {

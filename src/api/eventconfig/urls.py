@@ -12,6 +12,11 @@ urlpatterns = [
         name="event-configuration",
     ),
     path(
+        f"{_WORKSPACE}/events/<uuid:event_public_id>/workflow/",
+        views.EventWorkflowView.as_view(),
+        name="event-workflow",
+    ),
+    path(
         f"{_WORKSPACE}/events/<uuid:event_public_id>/readiness/",
         views.EventReadinessView.as_view(),
         name="event-readiness",

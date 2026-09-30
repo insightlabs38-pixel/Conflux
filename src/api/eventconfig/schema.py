@@ -62,3 +62,15 @@ class ConfigurationSchema(serializers.Serializer):
     event = serializers.UUIDField()
     preset = ConfigurationPresetSchema(allow_null=True)
     settings = ConfigurationEntrySchema(many=True)
+
+
+class WorkflowDifferenceSchema(serializers.Serializer):
+    code = serializers.CharField()
+    message = serializers.CharField()
+
+
+class WorkflowSchema(serializers.Serializer):
+    source = serializers.ChoiceField(choices=["preset", "custom", "none"])
+    preset = ConfigurationPresetSchema(allow_null=True)
+    stages = serializers.ListField(child=serializers.CharField())
+    differences = WorkflowDifferenceSchema(many=True)

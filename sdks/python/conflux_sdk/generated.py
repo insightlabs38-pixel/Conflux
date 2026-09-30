@@ -1135,7 +1135,7 @@ class ConfigurationEntrySchema(TypedDict):
     value: Any
     default: Any
     baseline: Any
-    source: SourceEnum
+    source: ConfigurationEntrySchemaSourceEnum
     editable: bool
     lock: ConfigurationLockSchema | None
     constraint: str | None
@@ -1152,12 +1152,16 @@ class InputOfConfigurationEntrySchema(TypedDict):
     value: Any
     default: Any
     baseline: Any
-    source: InputOfSourceEnum
+    source: InputOfConfigurationEntrySchemaSourceEnum
     editable: bool
     lock: InputOfConfigurationLockSchema | None
     constraint: str | None
     write: InputOfConfigurationWriteSchema | None
     module_enabled: bool
+
+ConfigurationEntrySchemaSourceEnum = Literal['default', 'preset', 'overridden', 'set', 'unset', 'derived']
+
+InputOfConfigurationEntrySchemaSourceEnum = Literal['default', 'preset', 'overridden', 'set', 'unset', 'derived']
 
 class ConfigurationLockSchema(TypedDict):
     code: str
@@ -4142,10 +4146,6 @@ class InputOfSignedArchiveOutput(TypedDict):
     public_key_pem: str
     signature: str
 
-SourceEnum = Literal['default', 'preset', 'overridden', 'set', 'unset', 'derived']
-
-InputOfSourceEnum = Literal['default', 'preset', 'overridden', 'set', 'unset', 'derived']
-
 class SponsorProjectSchema(TypedDict):
     public_id: str
     name: str
@@ -4787,6 +4787,14 @@ class InputOfWinnerOutput(TypedDict):
     selected_at: str
     fulfillments: list[dict[str, Any]]
 
+class WorkflowDifferenceSchema(TypedDict):
+    code: str
+    message: str
+
+class InputOfWorkflowDifferenceSchema(TypedDict):
+    code: str
+    message: str
+
 class WorkflowPresetInput(TypedDict):
     preset: str
 
@@ -4800,6 +4808,22 @@ class WorkflowPresetResult(TypedDict):
 class InputOfWorkflowPresetResult(TypedDict):
     stages: list[InputOfStage]
     plans: list[InputOfEvaluationPlan]
+
+class WorkflowSchema(TypedDict):
+    source: WorkflowSchemaSourceEnum
+    preset: ConfigurationPresetSchema | None
+    stages: list[str]
+    differences: list[WorkflowDifferenceSchema]
+
+class InputOfWorkflowSchema(TypedDict):
+    source: InputOfWorkflowSchemaSourceEnum
+    preset: InputOfConfigurationPresetSchema | None
+    stages: list[str]
+    differences: list[InputOfWorkflowDifferenceSchema]
+
+WorkflowSchemaSourceEnum = Literal['preset', 'custom', 'none']
+
+InputOfWorkflowSchemaSourceEnum = Literal['preset', 'custom', 'none']
 
 class WorkspaceInputSchema(TypedDict):
     name: str
@@ -6491,6 +6515,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                     'query_params': [],
                                                                                     'request_body': False,
                                                                                     'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_workflow': {'method': 'GET',
+                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/workflow/',
+                                                                               'path_params': ['event_public_id',
+                                                                                               'workspace_public_id'],
+                                                                               'query_params': [],
+                                                                               'request_body': False,
+                                                                               'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_workflow_presets': {'method': 'GET',
                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/workflow-presets/',
                                                                                        'path_params': ['event_public_id',

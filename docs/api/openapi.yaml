@@ -15539,6 +15539,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/VoteReceiptSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/workflow/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_workflow
+      description: Whether the event still follows its format's workflow, and what
+        changed if not.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/workflow-presets/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_workflow_presets
@@ -18574,7 +18604,7 @@ components:
         baseline:
           nullable: true
         source:
-          $ref: '#/components/schemas/SourceEnum'
+          $ref: '#/components/schemas/ConfigurationEntrySchemaSourceEnum'
         editable:
           type: boolean
         lock:
@@ -18606,6 +18636,22 @@ components:
       - tier
       - value
       - write
+    ConfigurationEntrySchemaSourceEnum:
+      enum:
+      - default
+      - preset
+      - overridden
+      - set
+      - unset
+      - derived
+      type: string
+      description: |-
+        * `default` - default
+        * `preset` - preset
+        * `overridden` - overridden
+        * `set` - set
+        * `unset` - unset
+        * `derived` - derived
     ConfigurationLockSchema:
       type: object
       properties:
@@ -23744,22 +23790,6 @@ components:
       - manifest
       - public_key_pem
       - signature
-    SourceEnum:
-      enum:
-      - default
-      - preset
-      - overridden
-      - set
-      - unset
-      - derived
-      type: string
-      description: |-
-        * `default` - default
-        * `preset` - preset
-        * `overridden` - overridden
-        * `set` - set
-        * `unset` - unset
-        * `derived` - derived
     SponsorProjectSchema:
       type: object
       properties:
@@ -24867,6 +24897,16 @@ components:
       - public_id
       - selected_at
       - source
+    WorkflowDifferenceSchema:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+      - code
+      - message
     WorkflowPresetInput:
       type: object
       properties:
@@ -24888,6 +24928,38 @@ components:
       required:
       - plans
       - stages
+    WorkflowSchema:
+      type: object
+      properties:
+        source:
+          $ref: '#/components/schemas/WorkflowSchemaSourceEnum'
+        preset:
+          allOf:
+          - $ref: '#/components/schemas/ConfigurationPresetSchema'
+          nullable: true
+        stages:
+          type: array
+          items:
+            type: string
+        differences:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowDifferenceSchema'
+      required:
+      - differences
+      - preset
+      - source
+      - stages
+    WorkflowSchemaSourceEnum:
+      enum:
+      - preset
+      - custom
+      - none
+      type: string
+      description: |-
+        * `preset` - preset
+        * `custom` - custom
+        * `none` - none
     WorkspaceInputSchema:
       type: object
       properties:

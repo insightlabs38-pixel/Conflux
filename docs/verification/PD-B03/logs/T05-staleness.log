@@ -1,0 +1,7 @@
+### staleness is content-based for the API: touch alone is not stale, an edit is
+ok   source freshness — image is newer than source
+# harmless edit (trailing comment)
+warn source freshness — running API differs from src/api in 1 file(s) (e.g. integrations/e2e_fixtures.py); rebuild with `make up` (or `docker compose up -d --build app`)
+exit(--require-fresh)=1
+# edit reverted
+ok   source freshness — image is newer than source

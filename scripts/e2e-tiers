@@ -8,7 +8,7 @@
                      its own `canary` fixture (full create->submit->judge->publish path, untouched by others)
 
 Usage: scripts/e2e-tiers check | run [tier ...]   (default: all three tiers, concurrently)
-Env:   E2E_ISOLATED_JOBS (3)  E2E_READONLY_WORKERS (4)  E2E_MANAGE  E2E_BASE_URL  E2E_KEEP_FIXTURES=1
+Env:   E2E_SKIP_PREFLIGHT  E2E_ISOLATED_JOBS (3)  E2E_READONLY_WORKERS (4)  E2E_MANAGE  E2E_BASE_URL  E2E_KEEP_FIXTURES=1
 Fixtures are disposed on success and kept (slug printed) on failure; `make e2e-fixture-sweep` cleans up.
 Specs run unmodified: fixture identity reaches them through E2E_DEMO_SEED / E2E_DEMO_PASSWORD.
 """
@@ -115,6 +115,11 @@ def main(argv):
             print(f"tiers: {p}", file=sys.stderr)
         print("tiers: OK" if not problems else "tiers: FAILED", file=sys.stderr)
         return 1 if problems else 0
+    if not os.environ.get("E2E_SKIP_PREFLIGHT"):
+        # Reuse the running stack; only start/seed what is missing (scripts/e2e-stack).
+        if subprocess.run([str(ROOT / "scripts/e2e-stack"), "ensure", "--fix"], cwd=ROOT).returncode:
+            print("preflight failed: fix the stack (see above) or set E2E_SKIP_PREFLIGHT=1", file=sys.stderr)
+            return 1
     chosen = argv[1:] if argv[:1] == ["run"] and argv[1:] else list(RUN_TIERS)
     unknown = [t for t in chosen if t not in RUNNERS]
     if unknown:

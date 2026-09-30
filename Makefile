@@ -1,4 +1,4 @@
-.PHONY: oidc-smoke demo-reset demo-e2e e2e-fast e2e-fixture-sweep format format-check lint test build verify-fast verify openapi-check sdk-generate sdk-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance backup restore backup-restore-smoke
+.PHONY: oidc-smoke demo-reset demo-e2e e2e-fast e2e-stack e2e-fixture-sweep format format-check lint test build verify-fast verify openapi-check sdk-generate sdk-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance backup restore backup-restore-smoke
 
 # Local checks use disposable keys; runtime deployments must supply their own.
 export DJANGO_SECRET_KEY ?= bootstrap-checks-only
@@ -127,6 +127,10 @@ demo-e2e:
 # lifecycle canary on throwaway fixtures. No demo-reset needed; `make demo-e2e` stays the serial authority.
 e2e-fast:
 	./scripts/e2e-fast
+
+# Report (and with `make e2e-stack FIX=--fix` repair) whether the running stack can run the suite as-is.
+e2e-stack:
+	./scripts/e2e-stack $(if $(FIX),ensure --fix,status)
 
 # Purge isolated browser fixtures (seeds >= 10,000,000) left by failed or interrupted runs.
 # Only those older than E2E_SWEEP_MINUTES, so a concurrent run's live fixtures survive.

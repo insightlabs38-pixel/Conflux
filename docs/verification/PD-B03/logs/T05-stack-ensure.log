@@ -1,0 +1,27 @@
+### fix: missing reference seed (9998) is seeded, then left alone on the next run
+ok   stack health — http://localhost:8080
+fix  reference seed 9998: demo-hackathon-9998-organizer cannot sign in (HTTP 401): scenario missing or wrong E2E_DEMO_PASSWORD; running scripts/demo-reset submitted
+ok   reference scenario seed 9998 — organizer signs in; event window open
+ok   source freshness — image is newer than source
+ok   leftover fixtures — none
+ok   playwright chromium
+preflight 14.2s
+real	0m14.202s
+--- second run (no-op)
+ok   stack health — http://localhost:8080
+ok   reference scenario seed 9998 — organizer signs in; event window open
+preflight 1.8s
+Purged demo-hackathon-9998.
+
+### fix: stopped app container is restarted without a rebuild
+FAIL stack health — http://localhost:8080/api/v1/health/; start it with `docker compose up -d`
+ok   source freshness — image is newer than source
+exit(status)=1
+fix  stack is down: docker compose up -d (no build)
+ok   stack health — http://localhost:8080/api/v1/health/
+ok   reference scenario seed 7 — organizer signs in; event window open
+ok   source freshness — image is newer than source
+ok   leftover fixtures — none
+ok   playwright chromium
+preflight 11.1s
+real	0m11.164s

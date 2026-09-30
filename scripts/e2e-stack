@@ -1,0 +1,176 @@
+#!/usr/bin/env python3
+"""Keep the one shared Conflux stack reusable across browser runs (PD-B03-T05).
+
+  scripts/e2e-stack status            report only; exit 1 if the stack cannot run the suite as-is
+  scripts/e2e-stack ensure [--fix]    same, and with --fix repair the cheapest thing that is wrong:
+                                        stack down      -> `docker compose up -d` (no build, no recreate)
+                                        reference gone  -> `scripts/demo-reset submitted` for that seed
+                                      A healthy stack with a usable reference is never rebuilt or reset.
+  options: --require-fresh  treat "image older than source" as failure (default: warning)
+
+Checks: health endpoint; reference scenario sign-in + event window (>= 12 h left, because the
+`submitted` checkpoint uses a real-clock window); source freshness (API files in the container vs the
+working tree by content; web bundle by mtime; skipped under the dev bind-mount overlay); leftover fixtures (the `e2e_fixture` seed range); Chromium installed.
+Env: E2E_BASE_URL (http://localhost:8080) E2E_DEMO_SEED (7) E2E_DEMO_PASSWORD (demo-pass-7) E2E_MANAGE.
+"""
+import hashlib
+import http.cookiejar
+import json
+import os
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.request
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+BASE = os.environ.get("E2E_BASE_URL", "http://localhost:8080")
+SEED = os.environ.get("E2E_DEMO_SEED", "7")
+PASSWORD = os.environ.get("E2E_DEMO_PASSWORD", "demo-pass-7")
+MIN_WINDOW = timedelta(hours=12)
+
+
+def sh(*cmd, **kw):
+    return subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, **kw)
+
+
+def manage(*args):
+    prefix = os.environ.get("E2E_MANAGE", "docker compose exec -T app python manage.py").split()
+    return sh(*prefix, *args)
+
+
+def get(path, opener=None):
+    try:
+        with (opener or urllib.request.build_opener()).open(BASE + path, timeout=5) as r:
+            return r.status, json.loads(r.read() or "null")
+    except (urllib.error.URLError, OSError, ValueError) as exc:
+        return getattr(exc, "code", 0), None
+
+
+def healthy():
+    return get("/api/v1/health/")[0] == 200
+
+
+def reference_problem():
+    """None when the reference scenario is usable, else why not."""
+    jar = http.cookiejar.CookieJar()
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+    user = f"demo-hackathon-{SEED}-organizer"
+    req = urllib.request.Request(
+        BASE + "/api/v1/accounts/login/", method="POST",
+        data=json.dumps({"username": user, "password": PASSWORD}).encode(),
+        headers={"Content-Type": "application/json"},
+    )
+    try:
+        opener.open(req, timeout=10).read()
+    except urllib.error.HTTPError as exc:
+        return f"{user} cannot sign in (HTTP {exc.code}): scenario missing or wrong E2E_DEMO_PASSWORD"
+    except OSError as exc:
+        return f"sign-in request failed: {exc}"
+    _, me = get("/api/v1/accounts/me/", opener)
+    _, events = get(f"/api/v1/workspaces/{me['memberships'][0]['workspace']}/events/", opener)
+    if not events:
+        return "reference workspace has no event"
+    left = datetime.fromisoformat(events[0]["ends_at"]) - datetime.now(timezone.utc)
+    if left < MIN_WINDOW:
+        return f"reference event window ends in {left} (< {MIN_WINDOW}); submissions would be closed mid-run"
+    return None
+
+
+def source_mounted():
+    out = sh("docker", "inspect", "conflux-app-1", "--format", "{{range .Mounts}}{{.Type}}:{{.Destination}} {{end}}").stdout
+    return "bind:/app" in out.split()
+
+
+def freshness():
+    """Content check for the API (files in the container vs the working tree); mtime for the web bundle."""
+    if source_mounted():
+        return "mounted"
+    tracked = sh("git", "ls-files", "-co", "--exclude-standard", "src/api").stdout.split()
+    want = [
+        [f.removeprefix("src/api/"), hashlib.sha256((ROOT / f).read_bytes()).hexdigest()]
+        for f in tracked
+        if (ROOT / f).is_file() and not f.endswith((".pyc", ".sqlite3"))
+    ]
+    probe = (
+        "import sys,json,hashlib,os;want=json.load(sys.stdin);"
+        "print(json.dumps([p for p,h in want if not os.path.exists('/app/'+p) "
+        "or hashlib.sha256(open('/app/'+p,'rb').read()).hexdigest()!=h]))"
+    )
+    prefix = os.environ.get("E2E_MANAGE", "docker compose exec -T app python manage.py").split()[:-1]  # drop "manage.py", keep the interpreter
+    out = subprocess.run([*prefix, "-c", probe], cwd=ROOT, input=json.dumps(want), capture_output=True, text=True)
+    if out.returncode:
+        return "could not compare the running API with the working tree"
+    differs = json.loads(out.stdout.strip().splitlines()[-1])
+    if differs:
+        return f"running API differs from src/api in {len(differs)} file(s) (e.g. {differs[0]}); rebuild with `make up` (or `docker compose up -d --build app`)"
+    created = sh("docker", "image", "inspect", "conflux-api:latest", "--format", "{{.Created}}").stdout.strip()
+    web = sh("git", "ls-files", "-co", "--exclude-standard", "src/web", "package.json", "pnpm-lock.yaml").stdout.split()
+    web = [f for f in web if (ROOT / f).is_file() and ".test." not in f]
+    if created and web:
+        newest = max((ROOT / f).stat().st_mtime for f in web)
+        if newest > datetime.fromisoformat(created[:26] + "+00:00").timestamp() + 1:
+            return "web sources are newer than the image (mtime heuristic); rebuild with `make up` if the change affects the browser"
+    return None
+
+
+def fixtures():
+    out = manage("e2e_fixture", "list")
+    return [line for line in out.stdout.splitlines() if line.startswith("demo-hackathon-")] if out.returncode == 0 else None
+
+
+def main(argv):
+    fix = "--fix" in argv
+    strict = "--require-fresh" in argv
+    if argv[:1] not in (["status"], ["ensure"]):
+        print(__doc__, file=sys.stderr)
+        return 2
+    failed = False
+
+    def line(ok, label, detail=""):
+        nonlocal failed
+        print(f"{'ok  ' if ok else 'FAIL' if ok is False else 'warn'} {label}" + (f" — {detail}" if detail else ""))
+        failed |= ok is False
+
+    started = time.monotonic()
+    if not healthy():
+        if fix:
+            print("fix  stack is down: docker compose up -d (no build)")
+            sh("docker", "compose", "up", "-d")
+            for _ in range(60):
+                if healthy():
+                    break
+                time.sleep(2)
+        line(healthy(), "stack health", BASE + "/api/v1/health/" + ("" if healthy() else "; start it with `docker compose up -d`"))
+    else:
+        line(True, "stack health", BASE)
+    if healthy():
+        problem = reference_problem()
+        if problem and fix and not problem.startswith("sign-in request failed"):
+            print(f"fix  reference seed {SEED}: {problem}; running scripts/demo-reset submitted")
+            env = {**os.environ, "DEMO_SEED": SEED, "DEMO_PASSWORD": PASSWORD, "DEMO_BASE_URL": BASE}
+            reset = subprocess.run(["scripts/demo-reset", "submitted"], cwd=ROOT, env=env, capture_output=True, text=True)
+            problem = reference_problem() if reset.returncode == 0 else f"demo-reset failed: {(reset.stderr.strip().splitlines() or ['?'])[-1]}"
+        if problem is None:
+            line(True, f"reference scenario seed {SEED}", "organizer signs in; event window open")
+        else:
+            line(False, f"reference scenario seed {SEED}", f"{problem}; run `scripts/demo-reset submitted`")
+    stale = freshness()
+    if stale == "mounted":
+        line(True, "source freshness", "dev overlay: src/api is bind-mounted, no rebuild needed")
+    else:
+        line(None if stale and not strict else (stale is None), "source freshness", stale or "running API matches src/api")
+    left = fixtures()
+    if left is None:
+        line(None, "leftover fixtures", "unknown (could not run manage.py e2e_fixture list)")
+    else:
+        line(None if left else True, "leftover fixtures", f"{len(left)} kept/leftover (`make e2e-fixture-sweep`)" if left else "none")
+    chromium = any(Path.home().glob(".cache/ms-playwright/chromium-*"))
+    line(chromium, "playwright chromium", "" if chromium else "run `npx playwright install chromium`")
+    print(f"preflight {time.monotonic() - started:.1f}s")
+    return 1 if failed else 0
+
+
+sys.exit(main(sys.argv[1:]))

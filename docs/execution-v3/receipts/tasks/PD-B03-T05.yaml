@@ -1,0 +1,64 @@
+version: 3
+task: PD-B03-T05
+batch: PD-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 9b48da758ba04f6a2b10ec47aea47ca9722fc530
+  head_commit: 9b48da758ba04f6a2b10ec47aea47ca9722fc530
+changed_paths:
+- scripts/e2e-stack
+- scripts/e2e-tiers
+- Makefile
+- docs/operations/E2E.md
+- docs/verification/PD-B03/MATRIX.md
+- docs/verification/PD-B03/logs/
+deliverables:
+- item: Local stack reusable between browser invocations without rebuild/reset unless semantics require it
+  result: pass
+  evidence: scripts/e2e-stack status/ensure [--fix]; healthy stack preflight 1.8 s, never rebuilds or resets; wired into scripts/e2e-tiers
+- item: Repair only what is wrong
+  result: pass
+  evidence: logs/T05-stack-ensure.log stopped app restarted by docker compose up -d without build; missing reference seed 9998 seeded by demo-reset (14.2 s) then second run no-op 1.8 s, scenario purged
+- item: Stale-image detection
+  result: pass
+  evidence: "logs/T05-staleness.log content comparison of src/api vs container (touch is not stale, one-line edit warns and --require-fresh exits 1, revert clears)"
+- item: Verification matrix row with proof
+  result: pass
+  evidence: MATRIX.md T05 row
+invariants:
+- item: One shared stack, no duplicate servers
+  result: pass
+  evidence: no new compose project or ports; only docker compose up -d on the existing project
+- item: No product or test weakening
+  result: pass
+  evidence: no src or spec change; full tiered run green three consecutive times (152 passed/0 failed, 2m47-2m49s)
+verification:
+- command: python3 scripts/e2e-stack status; E2E_DEMO_SEED=9998 python3 scripts/e2e-stack status
+  result: pass
+  note: healthy all-ok; unseeded reference exits 1 with exact remedy (negative)
+- command: python3 scripts/e2e-stack ensure --fix (down stack; missing reference)
+  result: pass
+  note: see logs/T05-stack-ensure.log
+- command: python3 scripts/e2e-tiers (preflight included)
+  result: pass
+  note: read-only/isolated-mutation/canary ok; 2m48s (logs/T05-tiers-with-preflight.log)
+- command: make lint && pnpm format:check
+  result: pass
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: browser suite run through the persistent-stack preflight
+migrations: []
+findings:
+- Image Created timestamp does not change on cache-identical rebuilds, so an mtime-vs-image check false-positives; replaced with content comparison (API) during this task.
+escalations: []
+limitations:
+- The make dev (Vite HMR bind-mount overlay) path is detected and documented but was not started here; it would switch the shared stack to DEBUG and run pnpm install in a container.
+- Web-bundle freshness is an mtime heuristic.
+next: review

@@ -1,0 +1,61 @@
+version: 3
+task: PD-B00-T07
+batch: PD-B00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: b5f398dfc0c4330b34c894bd6d648da6213c83d4
+  head_commit: 4b0e6576755e81a8754d43a03f5c8e9985601686
+changed_paths:
+- docs/verification/PD-B00/BASELINE_RESULTS.md
+- docs/verification/PD-B00/DEFECT_REGISTER.md
+- docs/verification/PD-B00/logs/T07-h02-workers2.log
+- docs/verification/PD-B00/logs/T07-h02-workers4.log
+deliverables:
+- item: Confirm current latency/error/integrity evidence for gallery, drafts, finalize, judging, dashboards,
+    voting/results
+  result: pass
+  evidence: 'H02 mixed harness at 2 and 4 workers: 147.6 and 222.7 req/s, 0 5xx, 8/8 integrity checks'
+- item: Compare to prior evidence
+  result: pass
+  evidence: p95 table vs PVS-H02; gallery/search 2-worker p95 flagged D-14
+- item: Record coverage gaps (webhooks/API)
+  result: pass
+  evidence: D-12, D-13
+invariants:
+- item: No fabricated benchmarks
+  result: pass
+  evidence: raw logs committed; numbers copied from them
+- item: Isolated data only
+  result: pass
+  evidence: DB conflux_h02 on confluxh00 instance; demo stack untouched
+verification:
+- command: WORKERS=2 SECONDS_=60 SCALE=1 loadtests/h02/run.sh
+  result: pass
+  note: exit 0; integrity PASS x8
+- command: WORKERS=4 SECONDS_=60 SCALE=1 loadtests/h02/run.sh
+  result: pass
+  note: exit 0; integrity PASS x8
+- command: 'race behavior: same-resource finalize/vote/ballot races'
+  result: pass
+  note: expected 201/200/400 mixes; no duplicate ballots
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs/evidence-only task
+migrations: []
+findings:
+- D-12
+- D-13
+- D-14
+escalations: []
+limitations:
+- Single 60 s run per worker count; harness sets DJANGO_DEBUG=1; host shared with idle stack.
+- k6 scenarios not run (no committed profile).
+- Webhook and API-credential traffic not in workload.
+next: review

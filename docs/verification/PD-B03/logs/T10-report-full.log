@@ -1,0 +1,2 @@
+full     last 10 runs: green 10/10  wall median 141s max 142s  target 210s  flaky events 0
+         slowest specs (median s): workspace-shell 95, uiv2-surfaces 71, event-themes 55, pvs 47, participant-workflow 42

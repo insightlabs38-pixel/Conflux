@@ -119,3 +119,51 @@ def test_every_unit_has_a_measured_weight():
 def test_shard_argument_is_validated(bad):
     with pytest.raises(SystemExit):
         tiers.parse_shard(bad)
+
+
+def _history(tmp_path, monkeypatch, rows):
+    monkeypatch.setattr(tiers, "LOGS", tmp_path)
+    (tmp_path / "history.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+
+
+def _run(kind="full", *, wall=140, ok=True, failed=0, flaky=0, diagnosed=(), repeat=None):
+    return {
+        "ts": "2026-09-30T00:00:00Z", "kind": kind, "ok": ok, "wall_s": wall, "commit": "abc",
+        "passed": 152, "skipped": 99, "failed": failed, "flaky": flaky,
+        "slowest": [["pvs", 48.0]], "diagnosed": list(diagnosed), "repeat": repeat,
+    }  # fmt: skip
+
+
+def test_targets_cover_every_published_run_kind_with_measured_evidence():
+    cfg = tiers.targets()
+    for kind in ("smoke", "affected", "full", "canary"):
+        assert cfg[kind]["wall_s"] > 0 and cfg[kind]["measured"]
+    assert cfg["reliability"]["max_failed"] == 0 and cfg["reliability"]["max_flaky"] == 0
+
+
+def test_report_passes_for_a_clean_window(tmp_path, monkeypatch, capsys):
+    _history(tmp_path, monkeypatch, [_run() for _ in range(10)])
+    assert tiers.report(["report", "--check"]) == 0
+    assert "green 10/10" in capsys.readouterr().out
+
+
+def test_report_breaches_on_slow_median_failures_flakes_and_a_red_latest_run(
+    tmp_path, monkeypatch, capsys
+):
+    rerun = {"group": "read-only", "specs": ["uiv2-gate"], "passed_on_rerun": True}
+    rows = [_run(wall=400) for _ in range(9)] + [_run(ok=False, failed=1, diagnosed=[rerun])]
+    _history(tmp_path, monkeypatch, rows)
+    assert tiers.report(["report", "--check"]) == 1
+    out = capsys.readouterr().out
+    assert (
+        "median wall 400s > target" in out
+        and "clean runs" in out
+        and "latest run was not green" in out
+    )
+    assert "FLAKY: uiv2-gate" in out
+    assert tiers.report(["report"]) == 0  # informational without --check
+
+
+def test_report_normalizes_repeated_canary_runs_per_run(tmp_path, monkeypatch):
+    _history(tmp_path, monkeypatch, [_run("canary", wall=340, repeat=3)])
+    assert tiers.report(["report", "--check"]) == 0  # 113 s per run, under the 150 s target

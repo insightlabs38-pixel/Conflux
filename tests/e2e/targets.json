@@ -1,0 +1,23 @@
+{
+  "smoke": {
+    "wall_s": 20,
+    "measured": "10.9 s incl. preflight (16 tests, desktop)"
+  },
+  "affected": {
+    "wall_s": 120,
+    "measured": "49 s for one mapped isolated spec (pvs)"
+  },
+  "full": {
+    "wall_s": 210,
+    "measured": "138-141 s, 152 passed, single host, 3 isolated jobs + 4 read-only workers + canary"
+  },
+  "canary": {
+    "wall_s": 150,
+    "measured": "~115 s per fresh-fixture chain run"
+  },
+  "reliability": {
+    "window": 10,
+    "max_failed": 0,
+    "max_flaky": 0
+  }
+}

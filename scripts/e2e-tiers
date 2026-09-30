@@ -11,6 +11,10 @@ Usage: scripts/e2e-tiers check
        scripts/e2e-tiers run [tier ...]      PR/full: all three tiers concurrently (default) or the named ones
        scripts/e2e-tiers run --shard I/N     PR sharding: this job's slice of the work units (1-based I of N)
        scripts/e2e-tiers plan N              print the deterministic N-way split and its estimated balance
+       scripts/e2e-tiers report [--check] [--kind K] [--window N]
+                                             timing vs tests/e2e/targets.json and flake history of recent runs
+                                             (artifacts/e2e-fast/history.jsonl, appended by every run); --check exits 1
+                                             when a target, green streak or flake budget is breached
        scripts/e2e-tiers weights             refresh tests/e2e/weights.json from the last full run's reports
        scripts/e2e-tiers canary [--repeat N] release/nightly gate: the full lifecycle chain on N fresh canary fixtures
                                              (every run must pass; failed runs keep their fixture; pass rate reported)
@@ -28,8 +32,10 @@ import os
 import subprocess
 import sys
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 from fnmatch import fnmatch
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -67,6 +73,7 @@ def check():
     return problems
 
 
+GROUPS, DIAGNOSED, KIND, REPEAT = [], [], None, None  # this invocation's Playwright groups, diagnostic re-runs, run kind
 PREFIX = ""  # set by --shard so concurrent shards on one stack never share output/log directories
 
 
@@ -138,6 +145,95 @@ def refresh_weights():
     return out
 
 
+def targets():
+    return json.loads((SPECS / "targets.json").read_text())
+
+
+def _durations(report):
+    per_spec = {}
+
+    def walk(suite):
+        for spec in suite.get("specs", []):
+            name = Path(spec["file"]).name.removesuffix(".spec.ts")
+            for test in spec.get("tests", []):
+                per_spec[name] = per_spec.get(name, 0) + sum(r["duration"] for r in test["results"]) / 1000
+        for child in suite.get("suites", []):
+            walk(child)
+
+    for suite in report.get("suites", []):
+        walk(suite)
+    return per_spec
+
+
+def record(kind, code, wall):
+    """Append one line per invocation: the raw material for timing targets and flake diagnostics."""
+    totals = {"expected": 0, "skipped": 0, "unexpected": 0, "flaky": 0}
+    per_spec = {}
+    for group in sorted(set(GROUPS)):
+        try:
+            report = json.loads((LOGS / group / "report.json").read_text())
+        except (OSError, ValueError):
+            continue
+        for key in totals:
+            totals[key] += report["stats"].get(key, 0)
+        for name, seconds in _durations(report).items():
+            per_spec[name] = per_spec.get(name, 0) + seconds
+    head = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
+    dirty = bool(subprocess.run(["git", "status", "--porcelain", "--untracked-files=no"], cwd=ROOT, capture_output=True, text=True).stdout.strip())
+    entry = {
+        "ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "kind": kind, "ok": code == 0,
+        "wall_s": round(wall, 1), "commit": head + ("+dirty" if dirty else ""),
+        "passed": totals["expected"], "skipped": totals["skipped"], "failed": totals["unexpected"], "flaky": totals["flaky"],
+        "slowest": [[n, round(v, 1)] for n, v in sorted(per_spec.items(), key=lambda kv: -kv[1])[:5]],
+        "diagnosed": DIAGNOSED,
+        "repeat": REPEAT,
+    }
+    LOGS.mkdir(parents=True, exist_ok=True)
+    with (LOGS / "history.jsonl").open("a") as fh:
+        fh.write(json.dumps(entry) + "\n")
+
+
+def report(argv):
+    cfg = targets()
+    window = int(argv[argv.index("--window") + 1]) if "--window" in argv else cfg["reliability"]["window"]
+    only = argv[argv.index("--kind") + 1] if "--kind" in argv else None
+    try:
+        rows = [json.loads(line) for line in (LOGS / "history.jsonl").read_text().splitlines() if line.strip()]
+    except OSError:
+        rows = []
+    breaches = []
+    for kind in sorted({r["kind"] for r in rows}):
+        if only and kind != only:
+            continue
+        runs = [r for r in rows if r["kind"] == kind][-window:]
+        walls = sorted(r["wall_s"] / (r.get("repeat") or 1) for r in runs)
+        median, worst = walls[len(walls) // 2], walls[-1]
+        green = sum(r["ok"] and not r["failed"] and not r["flaky"] and not any(d["passed_on_rerun"] for d in r["diagnosed"]) for r in runs)
+        streak = next((i for i, r in enumerate(reversed(runs)) if not r["ok"] or r["failed"] or r["flaky"]), len(runs))
+        target = cfg.get(kind, {}).get("wall_s")
+        flaky = [d for r in runs for d in r["diagnosed"] if d["passed_on_rerun"]]
+        say(f"{kind:<8} last {len(runs):>2} runs: green {green}/{len(runs)}  wall median {median:.0f}s max {worst:.0f}s"
+            + (f"  target {target}s" if target else "  (no target)") + f"  flaky events {len(flaky)}")
+        slow = {}
+        for r in runs:
+            for name, seconds in r["slowest"]:
+                slow.setdefault(name, []).append(seconds)
+        say("         slowest specs (median s): " + ", ".join(f"{n} {sorted(v)[len(v) // 2]:.0f}" for n, v in sorted(slow.items(), key=lambda kv: -max(kv[1]))[:5]))
+        for f in flaky:
+            say(f"         FLAKY: {', '.join(f['specs'])} failed in {f['group']} and passed on re-run")
+        if target and median > target:
+            breaches.append(f"{kind}: median wall {median:.0f}s > target {target}s")
+        if len(runs) >= cfg["reliability"]["window"] and green < len(runs):
+            breaches.append(f"{kind}: only {green}/{len(runs)} clean runs in the last {len(runs)} (budget: 0 failures, 0 flakes)")
+        if kind in ("full", "canary") and streak < min(len(runs), 1):
+            breaches.append(f"{kind}: latest run was not green")
+    if not rows:
+        say("no history yet: run the suite first (every run appends to artifacts/e2e-fast/history.jsonl)")
+    for b in breaches:
+        say(f"BREACH {b}")
+    return 1 if breaches and "--check" in argv else 0
+
+
 def manage(*args):
     prefix = os.environ.get("E2E_MANAGE", "docker compose exec -T app python manage.py").split()
     out = subprocess.run([*prefix, "e2e_fixture", *args], cwd=ROOT, capture_output=True, text=True)
@@ -167,6 +263,7 @@ def failed_specs(group):
 
 def playwright(group, specs, env=None, workers=1, extra=(), diagnose=True):
     group = PREFIX + group
+    GROUPS.append(group)
     LOGS.mkdir(parents=True, exist_ok=True)
     log = LOGS / f"tier-{group}.log"
     with log.open("w") as fh:
@@ -195,6 +292,7 @@ def diagnostic_rerun(group, env, extra):
         cwd=ROOT, env={**os.environ, "E2E_GROUP": diag, "E2E_TRACE": "on", **(env or {})},
         stdout=(LOGS / f"tier-{diag}.log").open("w"), stderr=subprocess.STDOUT,
     ).returncode
+    DIAGNOSED.append({"group": group, "specs": specs, "passed_on_rerun": code == 0})
     verdict = "failed again" if code else "PASSED on re-run: treat as flaky/state-dependent, not as a pass"
     say(f"[{group}] diagnostic re-run {verdict}; traces in artifacts/e2e-fast/{diag}/results/**/trace.zip (npx playwright show-trace)")
 
@@ -308,7 +406,7 @@ def run_tiers(chosen, selection=None):
 
 
 def main(argv):
-    global PREFIX
+    global PREFIX, KIND, REPEAT
     problems = check()
     if argv[:1] == ["check"] or problems:
         for p in problems:
@@ -316,8 +414,12 @@ def main(argv):
         print("tiers: OK" if not problems else "tiers: FAILED", file=sys.stderr)
         return 1 if problems else 0
     command = argv[0] if argv else "run"
+    if command == "report":
+        return report(argv)
     if command == "canary":
+        KIND = "canary"
         repeat = int(argv[argv.index("--repeat") + 1]) if "--repeat" in argv else 1
+        REPEAT = repeat
         if repeat < 1 or not preflight():
             return 1 if repeat >= 1 else 2
         results = []
@@ -327,6 +429,7 @@ def main(argv):
         say(f"== canary gate: {sum(results)}/{repeat} runs passed" + ("" if all(results) else " — FAILED (kept fixtures listed above)"))
         return 0 if all(results) else 1
     if command == "smoke":
+        KIND = "smoke"
         if not preflight():
             return 1
         smoke = json.loads((SPECS / "affected.json").read_text())["smoke"]
@@ -334,6 +437,7 @@ def main(argv):
         say(f"== smoke: {'ok' if code == 0 else 'FAILED'}")
         return code
     if command == "affected":
+        KIND = "affected"
         base = argv[argv.index("--base") + 1] if "--base" in argv else "HEAD"
         paths = changed_paths(base)
         specs, reasons = select_affected(paths)
@@ -341,7 +445,7 @@ def main(argv):
             say(f"  {r}")
         if specs is None:
             say(f"affected vs {base}: ALL tiers (shared infrastructure changed)")
-            selection = None
+            selection, KIND = None, "full"  # measured against the full-run target, not the affected one
         elif not specs:
             say(f"affected vs {base}: nothing to run ({len(paths)} changed path(s) map to no browser spec)")
             return 0
@@ -375,6 +479,7 @@ def main(argv):
         rest = [a for a in rest if a != argv[argv.index("--shard") + 1]]
         PREFIX, selection = f"s{i}of{n}-", shard_selection(i, n)
         say(f"shard {i}/{n}: " + "; ".join(f"{t}: {', '.join(v)}" for t, v in selection.items()))
+    KIND = "shard" if selection is not None else ("subset" if rest else "full")
     chosen = rest if command == "run" and rest else list(RUN_TIERS)
     if selection is not None:
         chosen = [t for t in chosen if t in selection]
@@ -385,5 +490,13 @@ def main(argv):
     return run_tiers(chosen, selection) if preflight() else 1
 
 
+def cli(argv):
+    started = time.monotonic()
+    code = main(argv)
+    if KIND and GROUPS:
+        record(KIND, code, time.monotonic() - started)
+    return code
+
+
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:]))
+    sys.exit(cli(sys.argv[1:]))

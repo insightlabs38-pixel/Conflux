@@ -1,0 +1,14 @@
+Checking formatting...
+All matched files use Prettier code style!
+All checks passed!
+$ tsc --noEmit
+$ tsc --noEmit
+tiers: OK
+====================== 1548 passed, 23 skipped in 26.86s =======================
+ Test Files  86 passed (86)
+      Tests  322 passed (322)
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+$ tsc --noEmit && vite build
+✓ built in 1.55s
+$ tsc -p tsconfig.build.json

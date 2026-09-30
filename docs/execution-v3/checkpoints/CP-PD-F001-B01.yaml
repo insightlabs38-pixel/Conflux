@@ -1,0 +1,29 @@
+version: 1
+checkpoint_id: CP-PD-F001-B01
+created_at: '2026-09-30T22:26:02Z'
+canonical_commit: 570a13be9d7f38630062f218404eb233b67702a5
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+- PD-B02
+- PD-B03
+- PD-B04
+- PD-F001-B01
+active_batches:
+- PD-F001-B02
+active_claims: []
+open_escalations: []
+last_completed_task: PD-F001-B01-T91
+ready_summary:
+- PD-F001-B02 (generated configuration; promoted IN_PROGRESS, not started)
+verification_summary:
+- verify-fast pytest 1548/23, web 322 + embed 8, lint/format/build/sdk/block-schema checks clean
+- make e2e-fast all tiers ok on the final code
+- validate_queue valid
+recovery_notes:
+- 'Base experience: src/api/eventconfig (presets, services, modules, readiness, registry, configuration, workflow), web src/web/features/event-builder (CreateEvent, FeaturesPanel, ReadinessPanel, ConfigurationPanel, WorkflowStatus); guide docs/operations/EVENT_BASE_EXPERIENCE.md, matrix docs/verification/PD-F001-B01/'
+- 'ESC-20260930-002 resolved (option A): readiness is advisory, no hard gate on opening'
+- 'app container bakes source: docker compose up -d --build app (wait for health before e2e); seed 7 untouched by the fast path'
+- main unpushed; untracked design handoff zips untouched; .claude-supervisor is prettier-ignored

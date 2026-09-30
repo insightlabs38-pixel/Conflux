@@ -10,6 +10,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from audit.services import record_mutation
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
 from django.utils.text import slugify
 from eligibility.models import EligibilityRules
 from evaluations.models import EvaluationPlan, RubricVersion
@@ -18,6 +19,8 @@ from stages.models import ParticipationMode, Stage, StageTransition
 
 from .models import EventProfile
 from .presets import get_preset
+
+_SLUG_ATTEMPTS = 5
 
 
 def _saved(instance):
@@ -75,8 +78,8 @@ def create_event_from_preset(
 
     With `starts_at` the end is derived from the preset's duration. Registration mode and team
     size range, plus whether the event page is public, are the base decisions an organizer commonly
-    changes at creation; everything
-    else starts at the preset's value and is overridden later through the normal domain writes.
+    changes at creation; everything else starts at the preset's value and is overridden later
+    through the normal domain writes.
     """
     preset = get_preset(preset_key)
     if preset is None:
@@ -84,22 +87,34 @@ def create_event_from_preset(
     if registration_mode is not None and registration_mode not in RegistrationMode.values:
         raise ValidationError({"registration_mode": "Unknown registration mode."})
 
-    slug = slug or derive_event_slug(workspace, name)
     zone_name = _timezone(timezone)
-    event = _saved(
-        Event(
-            workspace=workspace,
-            name=name,
-            slug=slug,
-            description=preset.description,
-            timezone=zone_name,
-            is_public=is_public,
-            starts_at=starts_at,
-            ends_at=_ends_at(starts_at, ZoneInfo(zone_name), preset.duration)
-            if starts_at
-            else None,
-        )
-    )
+    derived = not slug
+    for attempt in range(_SLUG_ATTEMPTS):
+        slug = slug or derive_event_slug(workspace, name)
+        try:
+            # A savepoint: losing a race for the address must not poison the caller's transaction.
+            with transaction.atomic():
+                event = _saved(
+                    Event(
+                        workspace=workspace,
+                        name=name,
+                        slug=slug,
+                        description=preset.description,
+                        timezone=zone_name,
+                        is_public=is_public,
+                        starts_at=starts_at,
+                        ends_at=_ends_at(starts_at, ZoneInfo(zone_name), preset.duration)
+                        if starts_at
+                        else None,
+                    )
+                )
+            break
+        except IntegrityError as exc:
+            if not derived or attempt == _SLUG_ATTEMPTS - 1:
+                raise ValidationError(
+                    {"slug": "That address was taken while the event was created; choose another."}
+                ) from exc
+            slug = None  # someone else took the derived address first: derive the next free one
     _saved(
         EventRegistrationSettings(event=event, mode=registration_mode or preset.registration_mode)
     )

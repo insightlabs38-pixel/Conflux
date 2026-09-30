@@ -1,0 +1,66 @@
+version: 3
+task: PD-F001-B01-T90
+batch: PD-F001-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 004e894
+  head_commit: 004e894
+changed_paths:
+- docs/verification/PD-F001-B01/MATRIX.md
+- docs/verification/PD-F001-B01/T90-e2e-fast.log
+- tests/integration/test_base_experience_regression.py
+- src/api/eventconfig/services.py (address race handling found by this pass)
+deliverables:
+- item: Verification matrix for the 8 capability tasks, each with an executable proof
+  result: pass
+  evidence: docs/verification/PD-F001-B01/MATRIX.md has a row per capability (T01-T08) with positive, negative, authorization, lifecycle and web-state proofs that name real tests and browser specs
+- item: Positive, negative, authorization, lifecycle/migration and concurrency coverage
+  result: pass
+  evidence: test_base_experience_regression adds the cross-endpoint role and tenancy matrix (configuration, workflow, readiness, modules, creation), pre-slice events without a profile, idempotent module changes and both outcomes of an address race
+- item: UI-facing states verified beyond screenshots
+  result: pass
+  evidence: loading, failed list with retry, validation and permission states asserted in CreateEvent.test, WorkflowStatus.test, ConfigurationPanel.test and browser specs at 390 and 1440 with axe and overflow checks
+- item: Exact commands and unresolved limitations recorded
+  result: pass
+  evidence: matrix Commands section; limitations listed in the batch receipt
+invariants:
+- item: Canonical source of truth, server authority
+  result: pass
+  evidence: no new business rule outside the server; the defect fix is server-side
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1548 passed, 23 skipped (adds 8 regression tests)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 322 web tests; static checks clean
+- command: make e2e-fast
+  result: pass
+  note: read-only, isolated-mutation and canary tiers ok after the address-race fix (docs/verification/PD-F001-B01/T90-e2e-fast.log)
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: states covered in matrix
+- surface: api
+  result: pass
+  evidence: role and tenancy matrix
+- surface: audit
+  result: pass
+  evidence: creation audit and a failed creation leave no audit row (test_losing_the_race_for_a_chosen_address)
+- surface: docs
+  result: pass
+  evidence: matrix
+migrations: []
+findings:
+- "P3 fixed: concurrent creation for one address raised an unhandled IntegrityError (HTTP 500) because validation ran before the other request committed; derived addresses now retry inside a savepoint and a chosen one is refused with a reason on slug"
+- Concurrency is exercised by simulating the lost race (validation blinded, database constraint decides), not with parallel threads; the PostgreSQL run was not repeated because no migration changed
+limitations:
+- Same agent implemented and verified; no independent review
+escalations: []
+next: review

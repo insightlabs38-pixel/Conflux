@@ -122,6 +122,7 @@ Operational guides for the post-core capabilities live in `docs/operations/`:
 [MCP adapter](docs/operations/MCP.md), [portfolio](docs/operations/PORTFOLIO.md),
 [continuation](docs/operations/CONTINUATION.md),
 [event logistics](docs/operations/EVENT_LOGISTICS.md),
+[event base experience](docs/operations/EVENT_BASE_EXPERIENCE.md),
 [conveniences](docs/operations/CONVENIENCE.md),
 [capacity and load testing](docs/operations/CAPACITY.md) and
 [browser journeys](docs/operations/E2E.md),

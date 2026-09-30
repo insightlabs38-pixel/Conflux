@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import {
   BrowserRouter,
@@ -14,6 +14,8 @@ import {
 import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 import { useMe, useSessionChanged, useSignOut } from "../hooks/useMe";
 import { createQueryClient } from "../lib/query";
+import { pollingTransport, RealtimeHub } from "../lib/realtime";
+import { RealtimeProvider } from "../hooks/useRealtime";
 import { PersonProfilePage } from "../features/profile/PersonProfilePage";
 import {
   roleDestinations,
@@ -224,13 +226,26 @@ function WorkspaceIndexRedirect() {
 }
 
 /** `queryClient` is injectable so tests (and embedders) control retries and cache lifetime. */
-export function App({ queryClient }: { queryClient?: QueryClient }) {
+export function App({
+  queryClient,
+  realtimeHub,
+}: {
+  queryClient?: QueryClient;
+  realtimeHub?: RealtimeHub;
+}) {
   const [client] = useState(() => queryClient ?? createQueryClient());
+  const [hub] = useState(
+    () => realtimeHub ?? new RealtimeHub(pollingTransport()),
+  );
+  // Closing the hub with the app also releases timers and listeners when it is torn down.
+  useEffect(() => () => hub.reset(), [hub]);
   return (
     <QueryClientProvider client={client}>
-      <AppRouter>
-        <AppRoutes />
-      </AppRouter>
+      <RealtimeProvider hub={hub}>
+        <AppRouter>
+          <AppRoutes />
+        </AppRouter>
+      </RealtimeProvider>
     </QueryClientProvider>
   );
 }

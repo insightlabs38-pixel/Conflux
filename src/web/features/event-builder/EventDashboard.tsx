@@ -141,12 +141,6 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
         if (!active) return;
         listed.current = new Set(list.map((item) => item.public_id));
         setEvents(list);
-        // A link to an event this account cannot see is treated as no selection.
-        if (
-          selectedRef.current &&
-          !list.some((item) => item.public_id === selectedRef.current)
-        )
-          setEventParam("", { replace: true });
       })
       .catch((cause: unknown) => {
         if (active) setLoadError(message(cause));
@@ -158,6 +152,18 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
       active = false;
     };
   }, [base, retry]);
+
+  // A link to an event this account cannot see is treated as no selection. Derived from rendered
+  // state, so the correction cannot act on a location the user has already left.
+  useEffect(() => {
+    if (
+      !loadingEvents &&
+      selectedId &&
+      !events.some((item) => item.public_id === selectedId) &&
+      !chosen.current.has(selectedId)
+    )
+      setEventParam("", { replace: true });
+  }, [loadingEvents, selectedId, events, setEventParam]);
 
   // Load the selected event's dashboard when the URL selects one (click, deep link, refresh, Back).
   useEffect(() => {

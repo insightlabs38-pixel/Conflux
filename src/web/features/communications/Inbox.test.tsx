@@ -3,6 +3,10 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Inbox } from "./Inbox";
+import { withQuery } from "../../lib/test-router";
+import { RealtimeProvider } from "../../hooks/useRealtime";
+import { RealtimeHub, manualTransport } from "../../lib/realtime";
+import { jsonResponse } from "../../lib/test-http";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -57,7 +61,7 @@ describe("Inbox", () => {
         return { ok: true, json: async () => [message] };
       });
     vi.stubGlobal("fetch", fetchMock);
-    act(() => root.render(<Inbox workspaceId="w1" />));
+    act(() => root.render(withQuery(<Inbox workspaceId="w1" />)));
     await until(() => container.textContent?.includes("Reminder") ?? false);
     expect(container.textContent).toContain("Submit soon.");
     expect(container.textContent).toContain("new");
@@ -67,5 +71,40 @@ describe("Inbox", () => {
     });
     await until(() => !(container.textContent?.includes("Mark read") ?? false));
     expect(container.textContent).not.toContain("new");
+  });
+
+  it("refetches when a realtime hint arrives, showing exactly what the server returns", async () => {
+    const make = (id: string, subject: string) => ({
+      public_id: id,
+      subject,
+      body: "b",
+      event_name: "Demo Event",
+      created_at: "2026-09-27T00:00:00Z",
+      read_at: null,
+    });
+    let rows = [make("r1", "First")];
+    const fetchMock = vi.fn(async () => jsonResponse(200, rows));
+    vi.stubGlobal("fetch", fetchMock);
+    const feed = manualTransport();
+    const hub = new RealtimeHub(feed.transport, { coalesceMs: 0 });
+    act(() =>
+      root.render(
+        withQuery(
+          <RealtimeProvider hub={hub}>
+            <Inbox workspaceId="w1" />
+          </RealtimeProvider>,
+        ),
+      ),
+    );
+    await until(() => container.textContent?.includes("First") ?? false);
+    expect(feed.openTopics()).toEqual(["workspace:w1:inbox"]);
+    const before = fetchMock.mock.calls.length;
+    rows = [make("r2", "Second"), make("r1", "First")];
+    await act(async () => feed.emit("workspace:w1:inbox"));
+    await until(() => container.textContent?.includes("Second") ?? false);
+    expect(fetchMock.mock.calls.length).toBe(before + 1);
+    act(() => root.unmount());
+    expect(feed.openTopics()).toEqual([]); // closed with the screen
+    root = createRoot(container);
   });
 });

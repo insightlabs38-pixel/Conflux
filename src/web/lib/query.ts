@@ -50,6 +50,7 @@ export const queryKeys = {
   me: ["me"] as const,
   participantEvents: (workspaceId: string) =>
     ["workspaces", workspaceId, "participant-events"] as const,
+  inbox: (workspaceId: string) => ["workspaces", workspaceId, "inbox"] as const,
 };
 
 /**

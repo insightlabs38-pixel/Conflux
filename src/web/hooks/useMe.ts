@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { MembershipSummarySchema, UserSummarySchema } from "@conflux/sdk";
 import { apiCall, ApiError } from "../lib/api";
 import { queryKeys } from "../lib/query";
+import { useRealtimeHub } from "./useRealtime";
 
 export type Me = UserSummarySchema;
 export type Membership = MembershipSummarySchema;
@@ -41,15 +42,23 @@ export function useMe() {
  */
 export function useSignOut() {
   const client = useQueryClient();
+  const hub = useRealtimeHub();
   return useMutation({
     mutationFn: () =>
       apiCall("post_api_v1_accounts_logout", {}).catch(() => undefined),
-    onSettled: () => client.resetQueries(),
+    onSettled: () => {
+      hub?.reset();
+      return client.resetQueries();
+    },
   });
 }
 
 /** Call after a successful sign-in: the session changed, so drop anything cached for the old one. */
 export function useSessionChanged() {
   const client = useQueryClient();
-  return () => client.resetQueries();
+  const hub = useRealtimeHub();
+  return () => {
+    hub?.reset();
+    return client.resetQueries();
+  };
 }

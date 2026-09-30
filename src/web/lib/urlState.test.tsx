@@ -95,6 +95,17 @@ describe("useUrlParam", () => {
     expect(api.location).toBe("");
   });
 
+  it("builds on the URL as it is now when a navigation has been issued but not yet rendered", () => {
+    mount("/w/w/overview?event=e1&stage=s1");
+    act(() => {
+      api.go("/w/w/queue?event=e1&stage=s1"); // the user's click
+      api.set("e2", { replace: true }); // a correction decided from the previous render
+      // (both run before React renders the navigation)
+    });
+    expect(api.path).toBe("/w/w/queue");
+    expect(api.location).toBe("?event=e2"); // built on the queue URL, not the old one
+  });
+
   it("does not navigate when the value is unchanged", () => {
     mount("/w/w/overview?event=e1");
     act(() => api.set("e1"));

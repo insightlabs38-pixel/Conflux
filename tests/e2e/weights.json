@@ -11,6 +11,7 @@
   "read-only:fixture-isolation": 4.5,
   "read-only:foundations": 9.6,
   "read-only:public": 5.6,
+  "read-only:realtime": 4.0,
   "read-only:roles": 4.3,
   "read-only:routing": 3.5,
   "read-only:server-state": 2.4,

@@ -1,0 +1,88 @@
+version: 3
+task: PD-B04-T06
+batch: PD-B04
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 196ed7537540804bac5a8b0e5c7763e8b9c1a60f
+  head_commit: 196ed7537540804bac5a8b0e5c7763e8b9c1a60f
+changed_paths:
+- src/web/lib/realtime.ts
+- src/web/lib/realtime.test.ts
+- src/web/hooks/useRealtime.tsx
+- src/web/hooks/useRealtime.test.tsx
+- src/web/hooks/useMe.ts
+- src/web/app/App.tsx
+- src/web/lib/query.ts
+- src/web/features/communications/Inbox.tsx
+- src/web/features/communications/Inbox.test.tsx
+- src/web/lib/urlState.ts
+- src/web/lib/urlState.test.tsx
+- src/web/features/judging/JudgeWorkspace.tsx
+- src/web/features/event-builder/EventDashboard.tsx
+- tests/e2e/realtime.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+- docs/verification/PD-B04/
+deliverables:
+- item: A small reusable realtime abstraction that does not couple the app shell to one transport
+  result: pass
+  evidence: RealtimeTransport interface; RealtimeHub (ref-counted topics, coalescing, handler isolation, status, session reset); pollingTransport (works with today's API) and manualTransport; React binding useRealtime/useRealtimeInvalidate/useConnectionStatus; App owns one injectable hub
+- item: A real workflow using it
+  result: pass
+  evidence: Inbox moved to the server-state layer and subscribes to workspace:<id>:inbox; hints refetch, the list shown is what the server returned (Inbox.test.tsx, realtime.spec.ts with Playwright clock)
+- item: Boundary rules recorded
+  result: pass
+  evidence: header of lib/realtime.ts and docs/verification/PD-B04/REALTIME.md (hints never data, topic naming, session reset, drafts untouched, transport trouble is a status)
+- item: Verification matrix row with negative and authorization cases
+  result: pass
+  evidence: MATRIX.md T06 row; 13 new vitest and 1 browser test
+invariants:
+- item: Server remains authority; realtime never carries or merges data
+  result: pass
+  evidence: the only consumer action is invalidateQueries; a hint costs one authorized read
+- item: Session boundary
+  result: pass
+  evidence: hub.reset() on sign-in and sign-out (useMe.ts); browser test shows no polling after sign-out
+- item: No API change and no unrequested transport
+  result: pass
+  evidence: no src/api change; no SSE or WebSocket built because the API has no push channel
+verification:
+- command: pnpm --filter @conflux/web test
+  result: pass
+  note: 287 passed (was 274)
+- command: make verify-fast
+  result: pass
+  note: pytest 1454 passed/23 skipped; web 287 + embed 8; tsc, build, sdk-check clean
+- command: make e2e-fast (twice consecutively)
+  result: pass
+  note: read-only, isolated-mutation and canary tiers ok both times on the rebuilt image
+- command: npx playwright test --project=desktop uiv2-gate url-state --repeat-each=8 --workers=8 (6 runs)
+  result: pass
+  note: 816 passed, 0 failed after the URL-write fix
+- command: npx playwright test --project=desktop realtime --repeat-each=12 --workers=4
+  result: pass
+  note: 12 passed
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: "not applicable for this task: no endpoint changed"
+migrations: []
+findings:
+- "T04 defect found by this task's first e2e-fast run: URL corrections issued from fetch callbacks or effects could overwrite a navigation the router had not rendered yet (flaky uiv2-gate and uiv2-final-states, about 1 in 10-60 runs). Fixed in urlState.ts (setters build on the live history location) and by deriving corrections in effects; unit test fails on the old code. Recorded in URL_STATE.md rule 7."
+- "e2e-report --check currently reports BREACH full 8/10 clean runs: the two red runs are from this session before the fix; the history is local (artifacts/e2e-fast/history.jsonl) and clears as clean runs accumulate. Not edited."
+- Inbox now polls one small GET per minute per visible tab with an inbox mounted
+- Main bundle 710.0 to 716.0 kB (gzip 170.2 to 172.5)
+escalations: []
+limitations:
+- No push transport or reconnect/backoff policy (needs a server channel); ConnectionStatus already carries connecting and live for it.
+- Only the inbox subscribes; other live candidates adopt useRealtimeInvalidate when they move to the server-state layer (T07).
+next: review

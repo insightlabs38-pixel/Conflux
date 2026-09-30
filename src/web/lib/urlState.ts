@@ -1,5 +1,9 @@
-import { useCallback, useRef } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useCallback, useContext, useRef } from "react";
+import {
+  UNSAFE_NavigationContext,
+  useLocation,
+  useNavigate,
+} from "react-router";
 
 /**
  * URL-state conventions (PD-B04-T04). The rule is: the URL holds *where you are and what you are
@@ -58,16 +62,32 @@ export function useUrlParam(
 ): [string, (value: string, change?: Change) => void] {
   const location = useLocation();
   const navigate = useNavigate();
-  // Setters are often called from async callbacks (a list finished loading, a correction). They
-  // must act on the URL *now*, not on the one the callback was created under: a user who navigated
-  // in the meantime must not be sent back.
+  const navigation = useContext(UNSAFE_NavigationContext);
+  // The router renders a navigation *later* (in a transition), so `location` can lag behind the URL
+  // the user has just navigated to. A setter must build on the URL as it is now; the history object
+  // is the one synchronous source. Corrections should still come from effects on rendered state
+  // (see the rules above), this is the safety net that keeps a late one from undoing a navigation.
   const latest = useRef(location);
   latest.current = location;
+  const current = useCallback(() => {
+    const now = (
+      navigation.navigator as {
+        location?: { pathname: string; search: string };
+      }
+    ).location;
+    if (!now) return latest.current;
+    const base = navigation.basename === "/" ? "" : navigation.basename;
+    const pathname =
+      base && now.pathname.startsWith(base)
+        ? now.pathname.slice(base.length) || "/"
+        : now.pathname;
+    return { pathname, search: now.search };
+  }, [navigation]);
   const value = new URLSearchParams(location.search).get(key) ?? "";
   const dependents = clears.join("\u0000");
   const set = useCallback(
     (next: string, { replace = false }: Change = {}) => {
-      const { pathname, search } = latest.current;
+      const { pathname, search } = current();
       const params = new URLSearchParams(search);
       if ((params.get(key) ?? "") === next) return;
       if (next) params.set(key, next);
@@ -77,7 +97,7 @@ export function useUrlParam(
       const text = params.toString();
       void navigate({ pathname, search: text ? `?${text}` : "" }, { replace });
     },
-    [key, dependents, navigate],
+    [key, dependents, navigate, current],
   );
   return [value, set];
 }

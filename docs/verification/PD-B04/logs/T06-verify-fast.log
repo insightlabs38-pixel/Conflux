@@ -1,0 +1,597 @@
+uv run --frozen ruff format --check src/api tests
+635 files already formatted
+pnpm format:check
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+uv run --frozen ruff check src/api tests
+All checks passed!
+pnpm lint
+$ pnpm --filter @conflux/web lint && pnpm --filter @conflux/embed lint
+$ tsc --noEmit
+$ tsc --noEmit
+python3 scripts/e2e-tiers check
+tiers: OK
+uv run --frozen pytest -n auto --dist worksteal
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.4.2, pluggy-1.6.0
+django: version: 5.2.17, settings: config.settings (from ini)
+rootdir: /home/insightlabs38/conflux
+configfile: pyproject.toml
+testpaths: tests
+plugins: xdist-3.8.0, django-4.14.0
+created: 8/8 workers
+8 workers [1477 items]
+
+........................................................................ [  4%]
+............................................sss......................... [  9%]
+................................................s....................... [ 14%]
+........................................................................ [ 19%]
+........................................................................ [ 24%]
+........................................................................ [ 29%]
+........................................................................ [ 34%]
+........................................................................ [ 38%]
+........................................................................ [ 43%]
+........................................................................ [ 48%]
+........................................................................ [ 53%]
+........................................................................ [ 58%]
+......................................................s................. [ 63%]
+........................................................................ [ 68%]
+........................................................................ [ 73%]
+........................................................................ [ 77%]
+.......................s..s.........s.....s............................. [ 82%]
+.........................s.............................................. [ 87%]
+.......................................................................s [ 92%]
+ssssssssssss............................................................ [ 97%]
+.....................................                                    [100%]
+====================== 1454 passed, 23 skipped in 23.86s =======================
+pnpm test
+$ pnpm --filter @conflux/web test && pnpm --filter @conflux/embed test
+$ vitest run
+
+ RUN  v3.2.7 /home/insightlabs38/conflux/src/web
+
+ ✓ lib/urlState.test.tsx (9 tests) 37ms
+stderr | features/pvs/pvs.test.tsx > organizer checks in an RSVP'd participant manually
+Each child in a list should have a unique "key" prop.
+
+Check the render method of `OnsiteOperationsPanel`. See https://react.dev/link/warning-keys for more information.
+
+stderr | features/judging/JudgeWorkspace.offline.test.tsx > offline judge workspace > syncs an offline ballot after browser restart=false
+TypeError: Cannot read properties of undefined (reading 'length')
+    at JudgeRoutePanel (/home/insightlabs38/conflux/src/web/features/pvs/JudgingLogisticsPanels.tsx:199:29)
+    at Object.react_stack_bottom_frame (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:28571:20)
+    at renderWithHooks (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:8030:22)
+    at updateFunctionComponent (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:10569:19)
+    at beginWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:12205:18)
+    at runWithFiberInDEV (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:1048:13)
+    at performUnitOfWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19176:22)
+    at workLoopSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19004:41)
+    at renderRootSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18985:11)
+    at performWorkOnRoot (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18094:35) {
+  [stack]: [Getter/Setter],
+  [message]: "Cannot read properties of undefined (reading 'length')"
+}
+
+The above error occurred in the <JudgeRoutePanel> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Boundary.
+
+
+stderr | features/judging/JudgeWorkspace.navigation.test.tsx > judge navigation > clears the old review queue when switching events
+TypeError: Cannot read properties of undefined (reading 'length')
+    at JudgeRoutePanel (/home/insightlabs38/conflux/src/web/features/pvs/JudgingLogisticsPanels.tsx:199:29)
+    at Object.react_stack_bottom_frame (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:28571:20)
+    at renderWithHooks (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:8030:22)
+    at updateFunctionComponent (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:10569:19)
+    at beginWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:12205:18)
+    at runWithFiberInDEV (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:1048:13)
+    at performUnitOfWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19176:22)
+    at workLoopSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19004:41)
+    at renderRootSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18985:11)
+    at performWorkOnRoot (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18094:35) {
+  [stack]: [Getter/Setter],
+  [message]: "Cannot read properties of undefined (reading 'length')"
+}
+
+The above error occurred in the <JudgeRoutePanel> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Boundary.
+
+
+stderr | features/judging/JudgeWorkspace.navigation.test.tsx > judge navigation > does not strand loading when the already selected event or stage is chosen again
+TypeError: Cannot read properties of undefined (reading 'length')
+    at JudgeRoutePanel (/home/insightlabs38/conflux/src/web/features/pvs/JudgingLogisticsPanels.tsx:199:29)
+    at Object.react_stack_bottom_frame (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:28571:20)
+    at renderWithHooks (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:8030:22)
+    at updateFunctionComponent (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:10569:19)
+    at beginWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:12205:18)
+    at runWithFiberInDEV (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:1048:13)
+    at performUnitOfWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19176:22)
+    at workLoopSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19004:41)
+    at renderRootSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18985:11)
+    at performWorkOnRoot (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18094:35) {
+  [stack]: [Getter/Setter],
+  [message]: "Cannot read properties of undefined (reading 'length')"
+}
+
+The above error occurred in the <JudgeRoutePanel> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Boundary.
+
+
+stderr | features/judging/JudgeWorkspace.offline.test.tsx > offline judge workspace > syncs an offline ballot after browser restart=true
+TypeError: Cannot read properties of undefined (reading 'length')
+    at JudgeRoutePanel (/home/insightlabs38/conflux/src/web/features/pvs/JudgingLogisticsPanels.tsx:199:29)
+    at Object.react_stack_bottom_frame (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:28571:20)
+    at renderWithHooks (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:8030:22)
+    at updateFunctionComponent (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:10569:19)
+    at beginWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:12205:18)
+    at runWithFiberInDEV (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:1048:13)
+    at performUnitOfWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19176:22)
+    at workLoopSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19004:41)
+    at renderRootSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18985:11)
+    at performWorkOnRoot (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18094:35) {
+  [stack]: [Getter/Setter],
+  [message]: "Cannot read properties of undefined (reading 'length')"
+}
+
+The above error occurred in the <JudgeRoutePanel> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Boundary.
+
+
+ ✓ features/pvs/pvs.test.tsx (12 tests) 208ms
+ ✓ features/judging/JudgeDesk.test.tsx (3 tests) 218ms
+stderr | features/judging/JudgeWorkspace.offline.test.tsx > offline judge workspace > syncs an offline ballot after browser restart=true
+TypeError: Cannot read properties of undefined (reading 'length')
+    at JudgeRoutePanel (/home/insightlabs38/conflux/src/web/features/pvs/JudgingLogisticsPanels.tsx:199:29)
+    at Object.react_stack_bottom_frame (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:28571:20)
+    at renderWithHooks (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:8030:22)
+    at updateFunctionComponent (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:10569:19)
+    at beginWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:12205:18)
+    at runWithFiberInDEV (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:1048:13)
+    at performUnitOfWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19176:22)
+    at workLoopSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19004:41)
+    at renderRootSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18985:11)
+    at performWorkOnRoot (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18094:35) {
+  [stack]: [Getter/Setter],
+  [message]: "Cannot read properties of undefined (reading 'length')"
+}
+
+The above error occurred in the <JudgeRoutePanel> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Boundary.
+
+
+stderr | features/judging/JudgeWorkspace.offline.test.tsx > offline judge workspace > shows the last cached assignments and rubric when reopened offline
+TypeError: Cannot read properties of undefined (reading 'length')
+    at JudgeRoutePanel (/home/insightlabs38/conflux/src/web/features/pvs/JudgingLogisticsPanels.tsx:199:29)
+    at Object.react_stack_bottom_frame (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:28571:20)
+    at renderWithHooks (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:8030:22)
+    at updateFunctionComponent (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:10569:19)
+    at beginWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:12205:18)
+    at runWithFiberInDEV (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:1048:13)
+    at performUnitOfWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19176:22)
+    at workLoopSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19004:41)
+    at renderRootSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18985:11)
+    at performWorkOnRoot (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18094:35) {
+  [stack]: [Getter/Setter],
+  [message]: "Cannot read properties of undefined (reading 'length')"
+}
+
+The above error occurred in the <JudgeRoutePanel> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Boundary.
+
+
+stderr | features/event-builder/WorkflowStates.test.tsx > workflow load states > keeps the latest selected event when detail requests finish out of order
+A component is changing a controlled input to be uncontrolled. This is likely caused by the value changing from a defined to undefined, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. More info: https://react.dev/link/controlled-components
+
+stderr | features/judging/JudgeWorkspace.offline.test.tsx > offline judge workspace > shows the last cached assignments and rubric when reopened offline
+TypeError: Cannot read properties of undefined (reading 'length')
+    at JudgeRoutePanel (/home/insightlabs38/conflux/src/web/features/pvs/JudgingLogisticsPanels.tsx:199:29)
+    at Object.react_stack_bottom_frame (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:28571:20)
+    at renderWithHooks (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:8030:22)
+    at updateFunctionComponent (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:10569:19)
+    at beginWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:12205:18)
+    at runWithFiberInDEV (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:1048:13)
+    at performUnitOfWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19176:22)
+    at workLoopSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19004:41)
+    at renderRootSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18985:11)
+    at performWorkOnRoot (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18094:35) {
+  [stack]: [Getter/Setter],
+  [message]: "Cannot read properties of undefined (reading 'length')"
+}
+
+The above error occurred in the <JudgeRoutePanel> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Boundary.
+
+
+ ✓ features/judging/JudgeWorkspace.offline.test.tsx (3 tests) 325ms
+stderr | features/judging/JudgeWorkspace.navigation.test.tsx > judge navigation > keeps a rejected draft visibly unsaved and prevents ballot submission
+TypeError: Cannot read properties of undefined (reading 'length')
+    at JudgeRoutePanel (/home/insightlabs38/conflux/src/web/features/pvs/JudgingLogisticsPanels.tsx:199:29)
+    at Object.react_stack_bottom_frame (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:28571:20)
+    at renderWithHooks (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:8030:22)
+    at updateFunctionComponent (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:10569:19)
+    at beginWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:12205:18)
+    at runWithFiberInDEV (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:1048:13)
+    at performUnitOfWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19176:22)
+    at workLoopSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19004:41)
+    at renderRootSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18985:11)
+    at performWorkOnRoot (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18094:35) {
+  [stack]: [Getter/Setter],
+  [message]: "Cannot read properties of undefined (reading 'length')"
+}
+
+The above error occurred in the <JudgeRoutePanel> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Boundary.
+
+
+stderr | features/event-builder/WorkflowStates.test.tsx > workflow load states > keeps the latest selected event when detail requests finish out of order
+TypeError: Cannot read properties of undefined (reading 'length')
+    at EligibilityReviewPanel (/home/insightlabs38/conflux/src/web/features/pvs/EligibilityPanels.tsx:457:47)
+    at Object.react_stack_bottom_frame (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:28571:20)
+    at renderWithHooks (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:8030:22)
+    at updateFunctionComponent (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:10569:19)
+    at beginWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:12205:18)
+    at runWithFiberInDEV (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:1048:13)
+    at performUnitOfWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19176:22)
+    at workLoopSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19004:41)
+    at renderRootSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18985:11)
+    at performWorkOnRoot (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18094:35) {
+  [stack]: [Getter/Setter],
+  [message]: "Cannot read properties of undefined (reading 'length')"
+}
+
+The above error occurred in the <EligibilityReviewPanel> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Boundary.
+
+
+stderr | features/event-builder/WorkflowStates.test.tsx > workflow load states > keeps the latest selected event when detail requests finish out of order
+TypeError: Cannot read properties of undefined (reading 'in_person')
+    at OnsiteOperationsPanel (/home/insightlabs38/conflux/src/web/features/pvs/OnsitePanels.tsx:203:64)
+    at Object.react_stack_bottom_frame (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:28571:20)
+    at renderWithHooks (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:8030:22)
+    at updateFunctionComponent (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:10569:19)
+    at beginWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:12205:18)
+    at runWithFiberInDEV (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:1048:13)
+    at performUnitOfWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19176:22)
+    at workLoopSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19004:41)
+    at renderRootSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18985:11)
+    at performWorkOnRoot (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18094:35) {
+  [stack]: [Getter/Setter],
+  [message]: "Cannot read properties of undefined (reading 'in_person')"
+}
+
+The above error occurred in the <OnsiteOperationsPanel> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Boundary.
+
+
+ ✓ features/event-builder/WorkflowStates.test.tsx (3 tests) 219ms
+ ✓ app/SignIn.test.tsx (6 tests) 209ms
+stderr | app/App.navigation.test.tsx > App navigation > reaches the event dashboard for an authorized workspace through normal selection
+An update to OperatorConsole inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to OperatorConsole inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to EventDashboard inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to EventTemplatesPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to EventTemplatesPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to EventTemplatesPanel inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | app/App.navigation.test.tsx > App navigation > routes a judge to their review workspace, not the organizer dashboard
+An update to JudgeWorkspace inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | app/App.navigation.test.tsx > App routing > redirects the legacy URL /?person=p1 to /person/p1 without adding a history entry
+An update to PersonProfilePage inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | app/App.navigation.test.tsx > App routing > redirects the legacy URL /?event=e1 to /event/e1 without adding a history entry
+An update to EventSite inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | app/App.navigation.test.tsx > App routing > supports browser back and forward between the selector and a workspace
+An update to JudgeWorkspace inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | app/App.navigation.test.tsx > App routing > supports browser back and forward between the selector and a workspace
+An update to JudgeWorkspace inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+stderr | app/App.navigation.test.tsx > App routing > loads the account once for the selector and the workspace it opens
+An update to JudgeWorkspace inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ app/App.navigation.test.tsx (22 tests) 381ms
+stderr | features/judging/JudgeWorkspace.url.test.tsx > judge workspace URL state > reopens the review queue from a deep link without any interaction
+TypeError: Cannot read properties of undefined (reading 'length')
+    at JudgeRoutePanel (/home/insightlabs38/conflux/src/web/features/pvs/JudgingLogisticsPanels.tsx:199:29)
+    at Object.react_stack_bottom_frame (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:28571:20)
+    at renderWithHooks (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:8030:22)
+    at updateFunctionComponent (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:10569:19)
+    at beginWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:12205:18)
+    at runWithFiberInDEV (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:1048:13)
+    at performUnitOfWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19176:22)
+    at workLoopSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19004:41)
+    at renderRootSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18985:11)
+    at performWorkOnRoot (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18094:35) {
+  [stack]: [Getter/Setter],
+  [message]: "Cannot read properties of undefined (reading 'length')"
+}
+
+The above error occurred in the <JudgeRoutePanel> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Boundary.
+
+
+stderr | features/judging/JudgeWorkspace.url.test.tsx > judge workspace URL state > writes the choice to the URL and clears the levels below it
+TypeError: Cannot read properties of undefined (reading 'length')
+    at JudgeRoutePanel (/home/insightlabs38/conflux/src/web/features/pvs/JudgingLogisticsPanels.tsx:199:29)
+    at Object.react_stack_bottom_frame (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:28571:20)
+    at renderWithHooks (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:8030:22)
+    at updateFunctionComponent (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:10569:19)
+    at beginWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:12205:18)
+    at runWithFiberInDEV (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:1048:13)
+    at performUnitOfWork (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19176:22)
+    at workLoopSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:19004:41)
+    at renderRootSync (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18985:11)
+    at performWorkOnRoot (/home/insightlabs38/conflux/node_modules/.pnpm/react-dom@19.3.0_react@19.3.0/node_modules/react-dom/cjs/react-dom-client.development.js:18094:35) {
+  [stack]: [Getter/Setter],
+  [message]: "Cannot read properties of undefined (reading 'length')"
+}
+
+The above error occurred in the <JudgeRoutePanel> component.
+
+React will try to recreate this component tree from scratch using the error boundary you provided, Boundary.
+
+
+ ✓ features/pvs/operations.test.tsx (5 tests) 210ms
+ ✓ features/integrations/WebhooksPanel.test.tsx (5 tests) 175ms
+ ✓ features/judging/JudgeWorkspace.url.test.tsx (5 tests) 205ms
+ ✓ features/api-explorer/ApiExplorer.test.tsx (4 tests) 149ms
+ ✓ features/artifacts/ArtifactPanel.operation.test.tsx (4 tests) 131ms
+ ✓ features/judging/JudgeWorkspace.navigation.test.tsx (4 tests) 1052ms
+   ✓ judge navigation > keeps a rejected draft visibly unsaved and prevents ballot submission  778ms
+ ✓ features/event-builder/EventTemplatesPanel.test.tsx (3 tests) 142ms
+ ✓ features/community-voting/CommunityVoting.test.tsx (4 tests) 108ms
+ ✓ components/WorkspaceNavigation.test.tsx (6 tests) 103ms
+ ✓ hooks/useMe.test.tsx (7 tests) 106ms
+ ✓ features/communications/CommunicationsPanel.test.tsx (1 test) 92ms
+ ✓ features/page-builder/PageBuilder.workflow.test.tsx (1 test) 120ms
+ ✓ features/artifacts/ProjectWorkspace.test.tsx (1 test) 99ms
+ ✓ features/form-builder/ProjectForms.test.tsx (4 tests) 111ms
+ ✓ features/form-builder/FormBuilder.interaction.test.tsx (2 tests) 88ms
+ ✓ features/audit/ConfigHistoryPanel.test.tsx (5 tests) 96ms
+ ✓ features/page-builder/ConfigFields.test.tsx (4 tests) 89ms
+ ✓ features/event-builder/EventDashboard.url.test.tsx (3 tests) 104ms
+ ✓ features/profile/ProfilePanel.test.tsx (2 tests) 74ms
+ ✓ features/artifacts/ArtifactPanel.test.tsx (2 tests) 90ms
+ ✓ features/policy-builder/PolicyBuilder.timezone.test.tsx (1 test) 92ms
+ ✓ features/judging/EvaluationBuilder.prize.test.tsx (1 test) 76ms
+ ✓ features/page-builder/ThemeSettings.test.tsx (1 test) 65ms
+ ✓ features/page-builder/PageBuilder.audit.test.tsx (2 tests) 82ms
+ ✓ features/event-builder/PermissionMatrixExplorer.test.tsx (2 tests) 84ms
+ ✓ features/judging/EvaluationBuilder.provenance.test.tsx (1 test) 73ms
+ ✓ features/submissions/SubmissionPanel.test.tsx (1 test) 76ms
+ ✓ features/stage-builder/StageBuilder.interaction.test.tsx (1 test) 62ms
+ ✓ features/community-voting/FraudReview.test.tsx (1 test) 62ms
+stderr | hooks/useRealtime.test.tsx > realtime hooks > session reset closes subscriptions
+An update to Live inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+An update to Live inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+
+ ✓ features/judging/JudgeInvitations.test.tsx (2 tests) 51ms
+ ✓ hooks/useRealtime.test.tsx (4 tests) 56ms
+ ✓ public/event-site/EventSite.test.tsx (2 tests) 66ms
+ ✓ features/judging/EvaluationBuilder.feedback.test.tsx (1 test) 59ms
+ ✓ features/teams/ParticipantOverview.test.tsx (4 tests) 64ms
+ ✓ features/teams/MarketplacePanel.interaction.test.tsx (1 test) 48ms
+ ✓ features/awards/AwardsPanel.proposals.test.tsx (1 test) 58ms
+ ✓ features/teams/TeamPanel.invite.test.tsx (1 test) 59ms
+ ✓ features/policy-builder/PolicyDebugger.interaction.test.tsx (1 test) 57ms
+ ✓ app/WorkspaceSelector.test.tsx (3 tests) 52ms
+ ✓ features/communications/Inbox.test.tsx (2 tests) 65ms
+ ✓ features/event-builder/RegistrationPanel.test.tsx (1 test) 50ms
+ ✓ components/OperationStatus.test.tsx (5 tests) 36ms
+ ✓ features/awards/PublicAwards.test.tsx (2 tests) 53ms
+ ✓ features/operations/OperatorConsole.test.tsx (1 test) 46ms
+ ✓ hooks/useOperation.test.tsx (9 tests) 59ms
+ ✓ features/judging/JudgeWorkloadPanel.test.tsx (2 tests) 67ms
+ ✓ components/Foundation.test.tsx (5 tests) 27ms
+ ✓ features/judging/JudgeCalendarPanel.test.tsx (2 tests) 49ms
+ ✓ features/artifacts/ProjectStoryEditor.test.tsx (1 test) 44ms
+ ✓ features/operations/OperationsCenter.test.tsx (1 test) 41ms
+ ✓ components/Person.test.tsx (2 tests) 27ms
+ ✓ features/judging/JudgeExpertisePanel.test.tsx (1 test) 33ms
+ ✓ components/WorkflowSections.test.tsx (1 test) 25ms
+ ✓ features/submissions/FrozenSubmissionPreview.test.tsx (1 test) 35ms
+ ✓ lib/realtime.test.ts (7 tests) 14ms
+ ✓ features/api-explorer/contract.test.ts (10 tests) 26ms
+ ✓ lib/api.test.ts (24 tests) 33ms
+ ✓ features/teams/TeamPanel.test.tsx (1 test) 10ms
+ ✓ components/components.test.tsx (14 tests) 14ms
+ ✓ features/judging/EvaluationBuilder.test.tsx (1 test) 7ms
+ ✓ features/page-builder/PageBuilder.test.tsx (1 test) 11ms
+ ✓ features/policy-builder/PolicyBuilder.test.tsx (1 test) 7ms
+ ✓ features/stage-builder/StageBuilder.test.tsx (1 test) 7ms
+ ✓ features/form-builder/FormBuilder.test.tsx (1 test) 7ms
+ ✓ sdk.test.ts (2 tests) 6ms
+ ✓ features/judging/JudgeWorkspace.test.tsx (1 test) 18ms
+ ✓ lib/routes.test.ts (19 tests) 5ms
+ ✓ features/event-builder/EventDashboard.test.tsx (1 test) 16ms
+ ✓ features/community-voting/CommunityVotingBuilder.test.tsx (1 test) 6ms
+ ✓ app/App.test.tsx (1 test) 13ms
+ ✓ lib/transport.test.ts (4 tests) 3ms
+
+ Test Files  78 passed (78)
+      Tests  287 passed (287)
+   Start at  12:56:20
+   Duration  6.90s (transform 3.07s, setup 0ms, collect 11.37s, tests 7.04s, environment 13.44s, prepare 4.11s)
+
+$ vitest run
+
+ RUN  v3.2.7 /home/insightlabs38/conflux/src/embed
+
+ ✓ src/gallery.test.ts (8 tests) 30ms
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  12:56:27
+   Duration  397ms (transform 31ms, setup 0ms, collect 30ms, tests 30ms, environment 172ms, prepare 51ms)
+
+uv run --frozen python src/api/manage.py check
+System check identified no issues (0 silenced).
+pnpm build
+$ pnpm --filter @conflux/web build && pnpm --filter @conflux/embed build
+$ tsc --noEmit && vite build
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 239 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                         0.41 kB │ gzip:   0.27 kB
+dist/assets/ApiExplorer-QHtK24OS.css    3.14 kB │ gzip:   0.92 kB
+dist/assets/index-zKTOY3Kx.css         61.03 kB │ gzip:  10.13 kB
+dist/assets/ApiExplorer-DPKzoIrJ.js    10.38 kB │ gzip:   4.01 kB
+dist/assets/index-Chl1B6v3.js         716.03 kB │ gzip: 172.46 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 1.44s
+$ esbuild src/gallery.ts --bundle --minify --format=iife --outfile=dist/conflux-gallery.js
+
+  dist/conflux-gallery.js  3.0kb
+
+⚡ Done in 2ms
+uv run --frozen python scripts/check_openapi_artifact.py
+uv run --frozen python scripts/generate_sdks.py --check
+pnpm --filter @conflux/sdk build
+$ tsc -p tsconfig.build.json
+uv run --frozen python scripts/generate_block_schemas.py --check
+exit=0

@@ -716,8 +716,31 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
       ? requestedPlan
       : "";
   const loadingPlans = stageId !== "" && planList.for !== planKey;
-  const asked = useRef({ requestedEvent, requestedStage, requestedPlan });
-  asked.current = { requestedEvent, requestedStage, requestedPlan };
+
+  // Normalize the URL to what is actually valid. This is derived from rendered state (not done in
+  // the fetch callbacks) so a correction can never act on a location the user has already left.
+  useEffect(() => {
+    if (!loadingEvents && requestedEvent && !eventId)
+      setEventParam("", { replace: true });
+  }, [loadingEvents, requestedEvent, eventId, setEventParam]);
+  useEffect(() => {
+    if (eventId && stageList.for === eventId && requestedStage && !stageId)
+      setStageParam("", { replace: true });
+  }, [eventId, stageList.for, requestedStage, stageId, setStageParam]);
+  useEffect(() => {
+    if (!stageId || planList.for !== planKey) return;
+    if (requestedPlan && !planId) setPlanParam("", { replace: true });
+    else if (!requestedPlan && plans.length === 1)
+      setPlanParam(plans[0].public_id, { replace: true });
+  }, [
+    stageId,
+    planKey,
+    planList.for,
+    requestedPlan,
+    planId,
+    plans,
+    setPlanParam,
+  ]);
 
   useEffect(() => {
     let active = true;
@@ -725,10 +748,6 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
       .then((items) => {
         if (!active) return;
         setEvents(items);
-        // A link to an event this judge is not on is treated as no selection.
-        const current = asked.current.requestedEvent;
-        if (current && !items.some((item) => item.public_id === current))
-          setEventParam("", { replace: true });
       })
       .catch((cause: unknown) => {
         if (active) setError(message(cause));
@@ -739,7 +758,6 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
     return () => {
       active = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspaceId]);
 
   useEffect(() => {
@@ -751,9 +769,6 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
       .then((items) => {
         if (!active) return;
         setStageList({ for: eventId, items });
-        const current = asked.current.requestedStage;
-        if (current && !items.some((item) => item.public_id === current))
-          setStageParam("", { replace: true });
       })
       .catch((cause: unknown) => {
         if (!active) return;
@@ -775,11 +790,6 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
       .then((items) => {
         if (!active) return;
         setPlanList({ for: planKey, items });
-        const current = asked.current.requestedPlan;
-        if (current && !items.some((item) => item.public_id === current))
-          setPlanParam("", { replace: true });
-        else if (!current && items.length === 1)
-          setPlanParam(items[0].public_id, { replace: true });
       })
       .catch((cause: unknown) => {
         if (!active) return;

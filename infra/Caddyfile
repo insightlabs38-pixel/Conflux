@@ -8,10 +8,12 @@
 		root * /srv/static
 		file_server
 	}
-	# The browser workspace app: one shell page (client-side state lives in the query string).
+	# The browser workspace app: one shell page; every path under /app/ is a client-side route
+	# (/app/w/<workspace>/<view>, /app/person/<id>, ...), so deep links and refreshes get the shell.
+	# Legacy query-string URLs (/?workspace=..&view=..) land here and the app redirects them.
 	@root path /
 	redir @root /app/?{query} 302
-	@app path /app /app/
+	@app path /app /app/*
 	handle @app {
 		rewrite * /app/index.html
 		root * /srv/static

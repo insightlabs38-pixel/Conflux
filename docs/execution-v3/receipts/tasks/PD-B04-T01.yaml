@@ -1,0 +1,95 @@
+version: 3
+task: PD-B04-T01
+batch: PD-B04
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: ce4391d43e27f9cc44387221b5a303be1821eabb
+  head_commit: ce4391d43e27f9cc44387221b5a303be1821eabb
+changed_paths:
+- src/web/lib/routes.ts
+- src/web/lib/routes.test.ts
+- src/web/lib/test-router.tsx
+- src/web/app/App.tsx
+- src/web/app/main.tsx
+- src/web/components/WorkspaceNavigation.tsx
+- src/web/features/teams/TeamWorkspace.tsx
+- src/web/features/teams/TeamPanel.tsx
+- src/web/features/operations/OperationsCenter.tsx
+- src/web/features/profile/PersonProfilePage.tsx
+- src/web/package.json
+- pnpm-lock.yaml
+- infra/Caddyfile
+- tests/e2e/routing.spec.ts
+- tests/e2e/support.ts
+- tests/e2e/signin.spec.ts
+- tests/e2e/workspace-shell.spec.ts
+- tests/e2e/pdv3-baseline-census.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/affected.json
+- tests/e2e/weights.json
+- src/web/**/*.test.tsx (router wrapper for components that now need routing context)
+- docs/verification/PD-B04/
+- docs/operations/CONVENIENCE.md
+deliverables:
+- item: Real route hierarchy replacing root-level manual query-param navigation
+  result: pass
+  evidence: react-router routes /, /w/:workspace/:view, /person/:id, /event/:id, /api-explorer, * (src/web/app/App.tsx, lib/routes.ts); destination links are router links; history owned by the browser
+- item: Stable deep links
+  result: pass
+  evidence: routing.spec.ts direct hard load of /app/w/<ws>/queue through the gateway, refresh, back/forward; invite links now /app/w/W/team?event=E&invite=T
+- item: Existing URLs preserved through compatibility redirects
+  result: pass
+  evidence: legacyTarget table (11 forms) in routes.test.ts and App.navigation.test.tsx; routing.spec.ts covers workspace/view, gateway root redirect, API profile_url ?person=, ?api=explorer; replace semantics (no extra history entry)
+- item: Role boundaries and edge states
+  result: pass
+  evidence: view the role lacks replaced by overview; unknown workspace denied; unknown path not found; signed-out deep link shows sign-in and resumes on the same URL
+- item: Drafts preserved across navigation
+  result: pass
+  evidence: one workspace component stays mounted while :view changes; WorkspaceNavigation.test.tsx keeps unsaved input mounted across destinations (real history API)
+invariants:
+- item: No backend semantics changed
+  result: pass
+  evidence: no src/api change; profile_url still emitted as /app/?person= and handled by compat redirect
+- item: No weakened tests
+  result: pass
+  evidence: old assertions translated to the new URL contract (pathname instead of search), plus 33 new vitest cases and 7 e2e specs; signin root-redirect test strengthened to assert both the gateway 302 and the canonical route
+- item: One navigation source of truth
+  result: pass
+  evidence: URLs composed only in lib/routes.ts; window.history/location no longer used by app code (TeamWorkspace/TeamPanel use useSearchParams)
+verification:
+- command: pnpm --filter @conflux/web test
+  result: pass
+  note: 202 passed (was 169)
+- command: make verify-fast
+  result: pass
+  note: pytest 1454 passed/23 skipped; web 202 + embed 8; tsc, build, sdk, block-schema clean
+- command: npx playwright test --project=desktop routing (real stack after docker compose up -d --build app and caddy reload)
+  result: pass
+  note: 7 passed
+- command: python3 scripts/e2e-tiers x3 consecutive
+  result: pass
+  note: all tiers green three times (156 + 7 routing passes)
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: routing, navigation, deep links, compat redirects verified in vitest and browser
+- surface: api
+  result: pass
+  evidence: "not applicable for this task: no API change; batch-level api/sdk closure belongs to the typed-client task"
+migrations:
+- 'URL compatibility: legacy query-string URLs and API-emitted profile_url redirect to canonical routes; gateway Caddyfile serves /app/* (reload caddy)'
+findings:
+- 'New dependency react-router 8.4.0 (peer react >= 19.2.7, installed react 19.3.0); bundle grew to 535 kB (150 kB gzip) main chunk'
+- 'First full run after restarting the stack had one profiles spec hit a 30 s API timeout; it passed on the diagnostic re-run, 12/12 serial repeats and 3 consecutive full runs afterwards; attributed to post-restart warm-up, watch in the T08 window'
+escalations: []
+limitations:
+- Role resolution still fetches /accounts/me/ in both selector and workspace route and fetch is raw (T02/T03).
+- Focus/announcements on back/forward navigation are unchanged (only click navigation focuses main).
+- infra/Caddyfile is outside the owned paths; changed as an inseparable correctness fix (recorded in ROUTING.md).
+next: review

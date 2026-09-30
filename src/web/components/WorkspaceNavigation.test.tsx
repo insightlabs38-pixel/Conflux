@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { act } from "react";
 import { createRoot } from "react-dom/client";
+import { BrowserRouter, Route, Routes } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AppShell } from "./AppShell";
 import {
@@ -13,9 +14,37 @@ import {
 ).IS_REACT_ACT_ENVIRONMENT = true;
 afterEach(() => vi.unstubAllGlobals());
 
+// The real history API (happy-dom), so URL changes and popstate behave as in a browser.
+function Harness({
+  role,
+  children,
+}: {
+  role: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/w/:workspaceId/:view"
+          element={
+            <WorkspaceNavigationProvider role={role} workspaceId="w">
+              {children}
+            </WorkspaceNavigationProvider>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+const click = (element: Element) =>
+  element.dispatchEvent(
+    new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }),
+  );
+
 describe("workspace destinations", () => {
   it("keeps drafts mounted while navigation updates the URL, active state and visible destination", () => {
-    window.history.replaceState({}, "", "/app/?workspace=w&event=e");
+    window.history.replaceState({}, "", "/w/w/overview?event=e");
     vi.stubGlobal("requestAnimationFrame", (fn: () => void) => {
       fn();
       return 0;
@@ -25,103 +54,122 @@ describe("workspace destinations", () => {
     const root = createRoot(container);
     act(() =>
       root.render(
-        <WorkspaceNavigationProvider role="participant">
+        <Harness role="participant">
           <AppShell role="participant">
             <Destination id="overview">Overview</Destination>
             <Destination id="project">
               <input aria-label="Draft" defaultValue="" />
             </Destination>
           </AppShell>
-        </WorkspaceNavigationProvider>,
+        </Harness>,
       ),
     );
     const project = container.querySelector<HTMLAnchorElement>(
-      'nav[aria-label="Primary"] a[href*="view=project"]',
+      'nav[aria-label="Primary"] a[href="/w/w/project?event=e"]',
     )!;
-    act(() =>
-      project.dispatchEvent(
-        new MouseEvent("click", { bubbles: true, button: 0 }),
-      ),
-    );
+    act(() => click(project));
     const input = container.querySelector<HTMLInputElement>("input")!;
     input.value = "Unsaved project";
     expect(input.closest<HTMLElement>(".cx-destination")!.hidden).toBe(false);
     expect(project.getAttribute("aria-current")).toBe("page");
-    expect(window.location.search).toContain("event=e");
-    expect(window.location.search).toContain("view=project");
+    expect(window.location.pathname).toBe("/w/w/project");
+    expect(window.location.search).toBe("?event=e");
     const overview = container.querySelector<HTMLAnchorElement>(
-      'nav[aria-label="Primary"] a[href*="view=overview"]',
+      'nav[aria-label="Primary"] a[href="/w/w/overview?event=e"]',
     )!;
-    act(() =>
-      overview.dispatchEvent(
-        new MouseEvent("click", { bubbles: true, button: 0 }),
-      ),
-    );
+    act(() => click(overview));
     expect(input.closest<HTMLElement>(".cx-destination")!.hidden).toBe(true);
-    act(() =>
-      project.dispatchEvent(
-        new MouseEvent("click", { bubbles: true, button: 0 }),
-      ),
-    );
+    act(() => click(project));
     expect(container.querySelector("input")).toBe(input);
     expect(input.value).toBe("Unsaved project");
     act(() => root.unmount());
     container.remove();
   });
   it("does not expose organizer destinations to a participant and responds to browser history", () => {
-    window.history.replaceState({}, "", "/app/?workspace=w&view=operations");
+    window.history.replaceState({}, "", "/w/w/overview");
     const container = document.createElement("div");
     const root = createRoot(container);
     act(() =>
       root.render(
-        <WorkspaceNavigationProvider role="participant">
+        <Harness role="participant">
           <AppShell role="participant">
             <Destination id="overview">Overview</Destination>
             <Destination id="team">Team</Destination>
           </AppShell>
-        </WorkspaceNavigationProvider>,
+        </Harness>,
       ),
     );
-    expect(container.querySelector('a[href*="view=operations"]')).toBeNull();
+    expect(container.querySelector('a[href*="/operations"]')).toBeNull();
     expect(
       container.querySelector<HTMLElement>(".cx-destination")!.hidden,
     ).toBe(false);
+    // Back/forward: the URL is the state, so history navigation changes the visible destination.
     act(() => {
-      window.history.replaceState({}, "", "/app/?workspace=w&view=team");
+      window.history.pushState({}, "", "/w/w/team");
       window.dispatchEvent(new PopStateEvent("popstate"));
     });
     expect(
       container.querySelectorAll<HTMLElement>(".cx-destination")[1].hidden,
     ).toBe(false);
+    act(() => {
+      window.history.back();
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
     act(() => root.unmount());
   });
   it("preserves native modified-link navigation without intercepting open-in-new-tab", () => {
-    window.history.replaceState({}, "", "/app/?workspace=w");
+    window.history.replaceState({}, "", "/w/w/overview");
     const container = document.createElement("div");
     const root = createRoot(container);
     act(() =>
       root.render(
-        <WorkspaceNavigationProvider role="judge">
+        <Harness role="judge">
           <DestinationLink id="queue">Queue</DestinationLink>
-        </WorkspaceNavigationProvider>,
+        </Harness>,
       ),
     );
-    const click = new MouseEvent("click", {
+    const modified = new MouseEvent("click", {
       bubbles: true,
       cancelable: true,
       ctrlKey: true,
     });
     const push = vi.spyOn(window.history, "pushState");
-    act(() => container.querySelector("a")!.dispatchEvent(click));
-    expect(click.defaultPrevented).toBe(false);
+    act(() => container.querySelector("a")!.dispatchEvent(modified));
+    expect(modified.defaultPrevented).toBe(false);
     expect(push).not.toHaveBeenCalled();
+    expect(container.querySelector("a")!.getAttribute("href")).toBe(
+      "/w/w/queue",
+    );
+    // A plain click is handled in-app.
+    act(() => click(container.querySelector("a")!));
+    expect(window.location.pathname).toBe("/w/w/queue");
     push.mockRestore();
+    act(() => root.unmount());
+  });
+  it("resolves a view the role does not have to the overview", () => {
+    window.history.replaceState({}, "", "/w/w/operations");
+    const container = document.createElement("div");
+    const root = createRoot(container);
+    act(() =>
+      root.render(
+        <Harness role="participant">
+          <AppShell role="participant">
+            <Destination id="overview">Overview</Destination>
+            <Destination id="operations">Operations</Destination>
+          </AppShell>
+        </Harness>,
+      ),
+    );
+    const visible = [
+      ...container.querySelectorAll<HTMLElement>(".cx-destination"),
+    ].filter((el) => !el.hidden);
+    expect(visible.map((el) => el.textContent)).toEqual(["Overview"]);
     act(() => root.unmount());
   });
 });
 
 it("loads optional profile content only when visited and retains its draft afterwards", async () => {
-  window.history.replaceState({}, "", "/app/?workspace=w");
+  window.history.replaceState({}, "", "/w/w/overview");
   vi.stubGlobal("requestAnimationFrame", (fn: () => void) => {
     fn();
     return 0;
@@ -131,34 +179,30 @@ it("loads optional profile content only when visited and retains its draft after
   const root = createRoot(host);
   await act(async () =>
     root.render(
-      <WorkspaceNavigationProvider role="participant">
+      <Harness role="participant">
         <AppShell role="participant">
           <Destination id="profile" lazy>
             <input aria-label="Profile draft" defaultValue="" />
           </Destination>
         </AppShell>
-      </WorkspaceNavigationProvider>,
+      </Harness>,
     ),
   );
   expect(host.querySelector("input")).toBeNull();
   const link = host.querySelector<HTMLAnchorElement>(
-    'nav[aria-label="Primary"] a[href*="view=profile"]',
+    'nav[aria-label="Primary"] a[href="/w/w/profile"]',
   )!;
-  await act(async () =>
-    link.dispatchEvent(new MouseEvent("click", { bubbles: true, button: 0 })),
-  );
+  await act(async () => click(link));
   const input = host.querySelector<HTMLInputElement>("input")!;
   input.value = "Unsaved bio";
   await act(async () =>
-    host
-      .querySelector<HTMLAnchorElement>(
-        'nav[aria-label="Primary"] a[href*="view=overview"]',
-      )!
-      .dispatchEvent(new MouseEvent("click", { bubbles: true, button: 0 })),
+    click(
+      host.querySelector<HTMLAnchorElement>(
+        'nav[aria-label="Primary"] a[href="/w/w/overview"]',
+      )!,
+    ),
   );
-  await act(async () =>
-    link.dispatchEvent(new MouseEvent("click", { bubbles: true, button: 0 })),
-  );
+  await act(async () => click(link));
   expect(host.querySelector("input")).toBe(input);
   expect(input.value).toBe("Unsaved bio");
   await act(async () => root.unmount());

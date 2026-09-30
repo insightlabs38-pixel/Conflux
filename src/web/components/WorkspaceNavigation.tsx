@@ -1,11 +1,13 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useState,
-  type MouseEvent,
   type ReactNode,
 } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
+import { routes } from "../lib/routes";
 
 export const roleDestinations: Record<
   string,
@@ -58,42 +60,42 @@ type Navigation = {
   href: (id: string) => string;
 };
 const Context = createContext<Navigation | null>(null);
-function locationView() {
-  return typeof window === "undefined"
-    ? "overview"
-    : new URLSearchParams(window.location.search).get("view") || "overview";
-}
+/**
+ * The current destination is the `:view` segment of `/w/:workspaceId/:view` (lib/routes.ts), so the
+ * browser owns history, deep links and refresh; this provider only validates it against the role.
+ * A view the role does not have resolves to the overview (the workspace route also redirects the
+ * URL). Links keep the current search (`?event=`, `?invite=`) so a selected event survives.
+ */
 export function WorkspaceNavigationProvider({
   role,
+  workspaceId = "",
   children,
 }: {
   role: string;
+  workspaceId?: string;
   children: ReactNode;
 }) {
-  const [requested, setRequested] = useState(locationView);
+  const { view: requested = "overview" } = useParams();
+  const { search } = useLocation();
+  const go = useNavigate();
   const destinations = roleDestinations[role] || [];
   const view = destinations.some((item) => item.id === requested)
     ? requested
     : "overview";
-  useEffect(() => {
-    const sync = () => setRequested(locationView());
-    window.addEventListener("popstate", sync);
-    return () => window.removeEventListener("popstate", sync);
-  }, []);
-  function href(id: string) {
-    if (typeof window === "undefined") return `?view=${id}`;
-    const url = new URL(window.location.href);
-    url.searchParams.set("view", id);
-    return url.pathname + url.search;
-  }
-  function navigate(id: string) {
-    if (!destinations.some((item) => item.id === id)) return;
-    window.history.pushState({}, "", href(id));
-    setRequested(id);
-    requestAnimationFrame(() =>
-      document.getElementById("main-content")?.focus(),
-    );
-  }
+  const href = useCallback(
+    (id: string) => routes.workspace(workspaceId, id) + search,
+    [workspaceId, search],
+  );
+  const navigate = useCallback(
+    (id: string) => {
+      if (!destinations.some((item) => item.id === id)) return;
+      go(href(id));
+      requestAnimationFrame(() =>
+        document.getElementById("main-content")?.focus(),
+      );
+    },
+    [destinations, go, href],
+  );
   return <Context value={{ view, navigate, href }}>{children}</Context>;
 }
 export function useWorkspaceNavigation() {
@@ -135,28 +137,25 @@ export function DestinationLink({
   className?: string;
 }) {
   const navigation = useWorkspaceNavigation();
-  function click(event: MouseEvent<HTMLAnchorElement>) {
-    if (
-      !navigation ||
-      event.button !== 0 ||
-      event.metaKey ||
-      event.ctrlKey ||
-      event.shiftKey ||
-      event.altKey
-    )
-      return;
-    event.preventDefault();
-    navigation.navigate(id);
-  }
+  // A real router link: plain clicks navigate in-app, modified clicks (new tab/window) fall through
+  // to the browser, and the href is the canonical deep link.
   return (
-    <a
-      href={navigation?.href(id) || `?view=${id}`}
-      onClick={click}
+    <Link
+      to={navigation?.href(id) || routes.home}
+      onClick={(event) => {
+        if (
+          event.button === 0 &&
+          !(event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+        )
+          requestAnimationFrame(() =>
+            document.getElementById("main-content")?.focus(),
+          );
+      }}
       className={className}
       aria-current={navigation?.view === id ? "page" : undefined}
     >
       {children}
-    </a>
+    </Link>
   );
 }
 

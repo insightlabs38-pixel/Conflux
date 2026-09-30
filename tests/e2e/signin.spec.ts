@@ -41,6 +41,16 @@ test("signing in lists workspaces and signing out returns to the form", async ({
 });
 
 test("the root URL lands on the app and keeps its query", async ({ page }) => {
-  await page.goto("/?event=00000000-0000-0000-0000-000000000000");
-  await expect(page).toHaveURL(/\/app\/\?event=/);
+  const event = "00000000-0000-0000-0000-000000000000";
+  // The gateway sends the legacy root URL to the app with its query intact...
+  const gateway = await page.request.get(`/?event=${event}`, {
+    maxRedirects: 0,
+  });
+  expect(gateway.status()).toBe(302);
+  expect(gateway.headers().location).toMatch(
+    new RegExp(`/app/\\?event=${event}$`),
+  );
+  // ...and the app turns that legacy URL into its canonical route (lib/routes.ts legacyTarget).
+  await page.goto(`/?event=${event}`);
+  await expect(page).toHaveURL(new RegExp(`/app/event/${event}$`));
 });

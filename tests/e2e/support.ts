@@ -124,9 +124,16 @@ export async function settled(page: Page) {
   );
 }
 
+/** The workspace navigation link to a destination (`/w/<workspace>/<id>`, optionally with a search). */
+export function destinationLink(page: Page, id: string) {
+  return page.locator(
+    `#workspace-navigation a:is([href$="/${id}"], [href*="/${id}?"])`,
+  );
+}
+
 /** Navigate the visible role shell, disclosing mobile navigation when necessary. */
 export async function goToDestination(page: Page, id: string) {
-  const link = page.locator(`#workspace-navigation a[href*="view=${id}"]`);
+  const link = destinationLink(page, id);
   if (!(await link.isVisible()))
     await page.getByRole("button", { name: "Navigation", exact: true }).click();
   await link.click();

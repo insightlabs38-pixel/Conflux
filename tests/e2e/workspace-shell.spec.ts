@@ -2,6 +2,7 @@ import { chooseWorkspaceEvent } from "./support";
 import { expect, test, type Page } from "@playwright/test";
 import {
   accessible,
+  destinationLink,
   goToDestination,
   noHorizontalOverflow,
   openWorkspace,
@@ -98,7 +99,7 @@ test("destination links support opening a separate browser tab", async ({
   await signIn(page, "judge-01");
   await openWorkspace(page);
   const previous = page.url();
-  const link = page.locator('#workspace-navigation a[href*="view=queue"]');
+  const link = destinationLink(page, "queue");
   // Contract, independent of browser plumbing: a modified click falls through to the browser
   // (default not prevented) while a plain click is handled in-app (default prevented).
   const prevented = (modifiers: boolean) =>
@@ -125,12 +126,12 @@ test("destination links support opening a separate browser tab", async ({
     for (const extra of page.context().pages())
       if (extra !== page) await extra.close();
     const opened = page.context().waitForEvent("page", { timeout: 7_000 });
-    await page
-      .locator('#workspace-navigation a[href*="view=queue"]')
-      .click({ modifiers: ["ControlOrMeta"] });
+    await destinationLink(page, "queue").click({
+      modifiers: ["ControlOrMeta"],
+    });
     tab = await opened;
     await tab.waitForLoadState("domcontentloaded");
-    expect(await tab.evaluate(() => location.search)).toMatch(/view=queue/);
+    expect(await tab.evaluate(() => location.pathname)).toMatch(/\/queue$/);
     await expect(
       tab.locator('#workspace-navigation a[aria-current="page"]'),
     ).toHaveText("Review queue", { timeout: 5_000 });
@@ -152,7 +153,7 @@ test("mobile disclosure, account escape and sign-out retain keyboard and session
   await openWorkspace(page);
   const toggle = page.getByRole("button", { name: "Navigation", exact: true });
   await toggle.click();
-  const team = page.locator('#workspace-navigation a[href*="view=team"]');
+  const team = destinationLink(page, "team");
   await team.focus();
   await page.keyboard.press("Escape");
   await expect(toggle).toBeFocused();

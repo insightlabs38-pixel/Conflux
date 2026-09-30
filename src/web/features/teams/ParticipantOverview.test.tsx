@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { withRouter } from "../../lib/test-router";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
@@ -44,7 +45,9 @@ it("derives the next action and progress from the participant's actual records",
   const container = document.createElement("div");
   const root = createRoot(container);
   await act(async () =>
-    root.render(<ParticipantOverview workspaceId="w" eventId="e" />),
+    root.render(
+      withRouter(<ParticipantOverview workspaceId="w" eventId="e" />),
+    ),
   );
   expect(container.textContent).toContain("Resolve your eligibility findings");
   expect(container.textContent).toContain("Actual team");
@@ -66,7 +69,9 @@ it("reports failed overview reads instead of showing zero counts", async () => {
   const container = document.createElement("div");
   const root = createRoot(container);
   await act(async () =>
-    root.render(<ParticipantOverview workspaceId="w" eventId="e" />),
+    root.render(
+      withRouter(<ParticipantOverview workspaceId="w" eventId="e" />),
+    ),
   );
   expect(container.querySelector('[role="alert"]')?.textContent).toContain(
     "Status unavailable",
@@ -76,38 +81,39 @@ it("reports failed overview reads instead of showing zero counts", async () => {
 });
 
 it("settles a deferred overview without leaving a hidden loading indicator", async () => {
-  const original = window.location.href;
-  window.history.replaceState({}, "", "/app/?view=team");
   const fetchMock = vi.fn();
   vi.stubGlobal("fetch", fetchMock);
   const container = document.createElement("div");
   const root = createRoot(container);
   await act(async () =>
     root.render(
-      <WorkspaceNavigationProvider role="participant">
-        <ParticipantOverview workspaceId="w" eventId="e" />
-      </WorkspaceNavigationProvider>,
+      withRouter(
+        <WorkspaceNavigationProvider role="participant" workspaceId="w">
+          <ParticipantOverview workspaceId="w" eventId="e" />
+        </WorkspaceNavigationProvider>,
+        "/w/w/team",
+      ),
     ),
   );
   expect(fetchMock).not.toHaveBeenCalled();
   expect(container.textContent).not.toContain("Loading your event status");
   await act(async () => root.unmount());
-  window.history.replaceState({}, "", original);
 });
 
 it("clears loading when navigation cancels an in-flight overview", async () => {
-  const original = window.location.href;
-  window.history.replaceState({}, "", "/app/?view=overview");
   const fetchMock = vi.fn(() => new Promise(() => {}));
   vi.stubGlobal("fetch", fetchMock);
   const container = document.createElement("div");
   const root = createRoot(container);
   await act(async () =>
     root.render(
-      <WorkspaceNavigationProvider role="participant">
-        <DestinationLink id="team">Team</DestinationLink>
-        <ParticipantOverview workspaceId="w" eventId="e" />
-      </WorkspaceNavigationProvider>,
+      withRouter(
+        <WorkspaceNavigationProvider role="participant" workspaceId="w">
+          <DestinationLink id="team">Team</DestinationLink>
+          <ParticipantOverview workspaceId="w" eventId="e" />
+        </WorkspaceNavigationProvider>,
+        "/w/w/overview",
+      ),
     ),
   );
   expect(fetchMock).toHaveBeenCalledTimes(3);
@@ -121,5 +127,4 @@ it("clears loading when navigation cancels an in-flight overview", async () => {
   );
   expect(container.textContent).not.toContain("Loading your event status");
   await act(async () => root.unmount());
-  window.history.replaceState({}, "", original);
 });

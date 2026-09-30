@@ -56,6 +56,7 @@ def test_changed_paths_select_the_mapped_specs(paths, specs):
     "path",
     [
         "src/web/components/Button.tsx",
+        "src/web/lib/routes.ts",
         "src/web/styles/tokens.css",
         "tests/e2e/support.ts",
         "scripts/e2e-stack",

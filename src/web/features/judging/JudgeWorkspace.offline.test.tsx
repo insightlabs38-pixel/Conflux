@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { withRouter } from "../../lib/test-router";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -138,7 +139,7 @@ describe("offline judge workspace", () => {
           return { ok: true, json: async () => [] };
         });
       vi.stubGlobal("fetch", fetchMock);
-      act(() => root.render(<JudgeWorkspace workspaceId="w" />));
+      act(() => root.render(withRouter(<JudgeWorkspace workspaceId="w" />)));
       await navigateToProject();
 
       online = false;
@@ -151,7 +152,7 @@ describe("offline judge workspace", () => {
       if (restart) {
         await act(async () => root.unmount());
         root = createRoot(container);
-        act(() => root.render(<JudgeWorkspace workspaceId="w" />));
+        act(() => root.render(withRouter(<JudgeWorkspace workspaceId="w" />)));
         await waitFor(() => container.textContent?.includes("First") ?? false);
         await choose(container.querySelector("select")!, "e1");
         await waitFor(() => container.textContent?.includes("Final") ?? false);
@@ -204,7 +205,7 @@ describe("offline judge workspace", () => {
       json: async () => navigationBody(String(input), true),
     }));
     vi.stubGlobal("fetch", onlineFetch);
-    act(() => root.render(<JudgeWorkspace workspaceId="w" />));
+    act(() => root.render(withRouter(<JudgeWorkspace workspaceId="w" />)));
     await navigateToProject();
     await act(async () => root.unmount());
     container.remove();
@@ -218,7 +219,7 @@ describe("offline judge workspace", () => {
       json: async () => navigationBody(String(input), false),
     }));
     vi.stubGlobal("fetch", offlineFetch);
-    act(() => root.render(<JudgeWorkspace workspaceId="w" />));
+    act(() => root.render(withRouter(<JudgeWorkspace workspaceId="w" />)));
     await waitFor(() => container.textContent?.includes("First") ?? false);
     await choose(container.querySelector("select")!, "e1");
     await waitFor(() => container.textContent?.includes("Final") ?? false);

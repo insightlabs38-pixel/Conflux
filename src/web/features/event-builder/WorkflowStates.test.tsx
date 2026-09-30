@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { withRouter } from "../../lib/test-router";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -78,7 +79,7 @@ describe("workflow load states", () => {
         return { ok: true, json: async () => [] };
       }),
     );
-    act(() => root.render(<EventDashboard workspaceId="w" />));
+    act(() => root.render(withRouter(<EventDashboard workspaceId="w" />)));
     expect(container.textContent).toContain("Loading events");
     await waitFor(
       () => container.textContent?.includes("Unavailable") ?? false,
@@ -113,7 +114,9 @@ describe("workflow load states", () => {
         return { ok: true, json: async () => [] };
       }),
     );
-    act(() => root.render(<ProjectWorkspace workspaceId="w" eventId="e" />));
+    act(() =>
+      root.render(withRouter(<ProjectWorkspace workspaceId="w" eventId="e" />)),
+    );
     await waitFor(
       () => container.textContent?.includes("Unavailable") ?? false,
     );
@@ -161,7 +164,7 @@ describe("workflow load states", () => {
         return Promise.resolve({ ok: true, json: async () => [] });
       }),
     );
-    act(() => root.render(<EventDashboard workspaceId="w" />));
+    act(() => root.render(withRouter(<EventDashboard workspaceId="w" />)));
     await waitFor(
       () =>
         container.querySelectorAll('[aria-label="Workspace events"] button')

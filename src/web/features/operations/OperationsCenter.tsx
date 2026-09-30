@@ -1,3 +1,4 @@
+import { appHref, routes } from "../../lib/routes";
 import { useEffect, useState } from "react";
 import { Badge } from "../../components/Badge";
 import { Card } from "../../components/Card";
@@ -254,7 +255,11 @@ export function OperationsCenter({
             </p>
             {summary.publication.event_public && (
               <p>
-                <a href={`?event=${eventId}`} target="_blank" rel="noreferrer">
+                <a
+                  href={appHref(routes.publicEvent(eventId))}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   View public event site
                 </a>
               </p>

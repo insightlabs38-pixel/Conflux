@@ -4,6 +4,7 @@
     "foundations",
     "public",
     "roles",
+    "routing",
     "showcase",
     "signin",
     "uiv2-gate",

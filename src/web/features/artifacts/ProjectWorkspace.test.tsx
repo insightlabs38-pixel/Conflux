@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { withRouter } from "../../lib/test-router";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, expect, it, vi } from "vitest";
@@ -39,7 +40,7 @@ describe("participant project entry", () => {
     document.body.appendChild(container);
     const root = createRoot(container);
     await act(async () => {
-      root.render(<TeamWorkspace workspaceId="w" />);
+      root.render(withRouter(<TeamWorkspace workspaceId="w" />));
     });
     await waitFor(() => container.querySelector("select") !== null);
     const selector = container.querySelector("select") as HTMLSelectElement;

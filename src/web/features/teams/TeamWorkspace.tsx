@@ -6,6 +6,7 @@ import {
 } from "../../components/WorkspaceNavigation";
 import { PageHeader } from "../../components/Foundation";
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router";
 import { ParticipantOverview } from "./ParticipantOverview";
 import { TeamPanel } from "./TeamPanel";
 import { MarketplacePanel } from "./MarketplacePanel";
@@ -22,28 +23,24 @@ import { LoadingState } from "../../components/LoadingState";
 
 type Event = { public_id: string; name: string };
 
-function eventFromLocation(): string {
-  return typeof window === "undefined"
-    ? ""
-    : (new URLSearchParams(window.location.search).get("event") ?? "");
-}
-
 export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
   const [events, setEvents] = useState<Event[]>([]);
-  const [selectedId, setSelectedId] = useState(eventFromLocation);
+  const [search, setSearch] = useSearchParams();
+  const selectedId = search.get("event") ?? "";
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [retry, setRetry] = useState(0);
   const [teamRevision, setTeamRevision] = useState(0);
 
+  // The selected event lives in the URL (?event=) so it survives refresh, back/forward and sharing.
   function selectEvent(id: string) {
-    setSelectedId(id);
-    if (typeof window === "undefined") return;
-    const url = new URL(window.location.href);
-    if (id) url.searchParams.set("event", id);
-    else url.searchParams.delete("event");
-    url.searchParams.delete("invite");
-    window.history.pushState({}, "", url);
+    setSearch((current) => {
+      const next = new URLSearchParams(current);
+      if (id) next.set("event", id);
+      else next.delete("event");
+      next.delete("invite");
+      return next;
+    });
   }
 
   useEffect(() => {

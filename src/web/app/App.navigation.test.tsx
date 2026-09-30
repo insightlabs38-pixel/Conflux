@@ -166,7 +166,7 @@ describe("App navigation", () => {
       () => container.querySelector('[aria-label="Event dashboard"]') !== null,
     );
 
-    expect(window.location.search).toContain("workspace=w1");
+    expect(window.location.pathname).toBe("/w/w1/overview");
     expect(container.textContent).toContain("Back to workspaces");
   });
 
@@ -373,5 +373,172 @@ describe("App navigation", () => {
         container.querySelector('[aria-label="Regionals event page"]') !== null,
     );
     expect(container.textContent).not.toContain("Back to workspaces");
+  });
+});
+
+function mockMe(role: string, status = 200) {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockImplementation(async (input: unknown) => {
+      const url = String(input);
+      if (url.includes("/accounts/me/"))
+        return {
+          ok: status === 200,
+          status,
+          json: async () => ({
+            public_id: "u1",
+            username: "member",
+            memberships: [
+              {
+                workspace: "w1",
+                workspace_name: "Regionals",
+                workspace_slug: "regionals",
+                role,
+              },
+            ],
+          }),
+        };
+      return { ok: true, status: 200, json: async () => [] };
+    }),
+  );
+}
+const popstate = () => window.dispatchEvent(new PopStateEvent("popstate"));
+
+describe("App routing", () => {
+  it("opens a deep link to a workspace view directly and marks it current", async () => {
+    window.history.pushState({}, "", "/w/w1/queue");
+    mockMe("judge");
+    act(() => root.render(<App />));
+    await waitFor(
+      () => container.querySelector('[aria-label="Judging"]') !== null,
+    );
+    expect(window.location.pathname).toBe("/w/w1/queue");
+    const current = container.querySelector(
+      'nav[aria-label="Primary"] a[aria-current="page"]',
+    );
+    expect(current?.getAttribute("href")).toBe("/w/w1/queue");
+  });
+
+  it.each([
+    ["/?workspace=w1&view=queue", "/w/w1/queue"],
+    ["/?workspace=w1", "/w/w1/overview"],
+    ["/?person=p1", "/person/p1"],
+    ["/?api=explorer", "/api-explorer"],
+    ["/?event=e1", "/event/e1"],
+  ])(
+    "redirects the legacy URL %s to %s without adding a history entry",
+    async (legacy, canonical) => {
+      window.history.pushState({}, "", legacy);
+      const before = window.history.length;
+      mockMe("judge");
+      act(() => root.render(<App />));
+      await waitFor(() => window.location.pathname === canonical.split("?")[0]);
+      expect(window.location.pathname + window.location.search).toBe(canonical);
+      expect(window.history.length).toBe(before);
+    },
+  );
+
+  it("keeps the selected event and invite when redirecting a legacy workspace link", async () => {
+    window.history.pushState({}, "", "/?workspace=w1&event=e1&invite=tok");
+    mockMe("participant");
+    act(() => root.render(<App />));
+    await waitFor(() => window.location.pathname === "/w/w1/overview");
+    expect(window.location.search).toBe("?event=e1&invite=tok");
+  });
+
+  it("sends a view the role does not have to the overview", async () => {
+    window.history.pushState({}, "", "/w/w1/operations");
+    mockMe("participant");
+    act(() => root.render(<App />));
+    await waitFor(() => window.location.pathname === "/w/w1/overview");
+    expect(container.querySelector('a[href*="/operations"]')).toBeNull();
+  });
+
+  it("redirects a bare workspace path to its overview", async () => {
+    window.history.pushState({}, "", "/w/w1?event=e1");
+    mockMe("participant");
+    act(() => root.render(<App />));
+    await waitFor(() => window.location.pathname === "/w/w1/overview");
+    expect(window.location.search).toBe("?event=e1");
+  });
+
+  it("shows a not-found page with a way home for unknown paths", async () => {
+    window.history.pushState({}, "", "/nope/at/all");
+    mockMe("judge");
+    act(() => root.render(<App />));
+    await waitFor(
+      () =>
+        container.textContent?.includes("That page does not exist") ?? false,
+    );
+    expect(
+      [...container.querySelectorAll("a")].some(
+        (a) => a.getAttribute("href") === "/",
+      ),
+    ).toBe(true);
+  });
+
+  it("offers sign-in on a deep link when signed out and stays on that URL", async () => {
+    window.history.pushState({}, "", "/w/w1/queue");
+    mockMe("judge", 401);
+    act(() => root.render(<App />));
+    await waitFor(
+      () => container.querySelector('input[name="username"]') !== null,
+    );
+    expect(window.location.pathname).toBe("/w/w1/queue");
+  });
+
+  it("supports browser back and forward between the selector and a workspace", async () => {
+    window.history.pushState({}, "", "/");
+    mockMe("judge");
+    act(() => root.render(<App />));
+    await waitFor(
+      () =>
+        container.querySelector('[aria-label="Your workspaces"] button') !==
+        null,
+    );
+    act(() =>
+      container
+        .querySelector<HTMLButtonElement>(
+          '[aria-label="Your workspaces"] button',
+        )
+        ?.click(),
+    );
+    await waitFor(
+      () => container.querySelector('[aria-label="Judging"]') !== null,
+    );
+    expect(window.location.pathname).toBe("/w/w1/overview");
+    act(() => {
+      window.history.back();
+    });
+    await waitFor(() => window.location.pathname === "/");
+    act(popstate);
+    await waitFor(
+      () => container.querySelector('[aria-label="Your workspaces"]') !== null,
+    );
+    act(() => {
+      window.history.forward();
+    });
+    await waitFor(() => window.location.pathname === "/w/w1/overview");
+    act(popstate);
+    await waitFor(
+      () => container.querySelector('[aria-label="Judging"]') !== null,
+    );
+  });
+
+  it("serves the app under the /app base path and keeps it in every link", async () => {
+    window.history.pushState({}, "", "/app/w/w1/queue");
+    mockMe("judge");
+    act(() => root.render(<App />));
+    await waitFor(
+      () => container.querySelector('[aria-label="Judging"]') !== null,
+    );
+    expect(window.location.pathname).toBe("/app/w/w1/queue");
+    const links = [
+      ...container.querySelectorAll<HTMLAnchorElement>(
+        'nav[aria-label="Primary"] a',
+      ),
+    ].map((a) => a.getAttribute("href"));
+    expect(links.length).toBeGreaterThan(0);
+    expect(links.every((href) => href?.startsWith("/app/w/w1/"))).toBe(true);
   });
 });

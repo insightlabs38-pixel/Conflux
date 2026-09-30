@@ -1,5 +1,7 @@
 import { PersonRow, type PersonIdentity } from "../../components/Person";
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useSearchParams } from "react-router";
+import { appHref, routes } from "../../lib/routes";
 
 type Member = {
   user_public_id: string;
@@ -17,23 +19,14 @@ type Invite = {
   expires_at: string | null;
 };
 
-function invitedToken(): string {
-  return typeof window === "undefined"
-    ? ""
-    : (new URLSearchParams(window.location.search).get("invite") ?? "");
-}
-
 function inviteUrl(
   workspaceId: string,
   eventId: string,
   token: string,
 ): string {
   if (typeof window === "undefined") return token;
-  const url = new URL(window.location.href);
-  url.searchParams.set("workspace", workspaceId);
-  url.searchParams.set("event", eventId);
-  url.searchParams.set("invite", token);
-  return url.toString();
+  const query = new URLSearchParams({ event: eventId, invite: token });
+  return `${window.location.origin}${appHref(routes.workspace(workspaceId, "team"))}?${query}`;
 }
 
 function message(error: unknown): string {
@@ -82,10 +75,13 @@ export function TeamPanel({
   eventId: string;
   onTeamChange?: () => void;
 }) {
+  const [search] = useSearchParams();
   const base = `/api/v1/workspaces/${workspaceId}/events/${eventId}/`;
   const [status, setStatus] = useState<Status | null>(null);
   const [invites, setInvites] = useState<Invite[]>([]);
-  const [redeemToken, setRedeemToken] = useState(invitedToken);
+  const [redeemToken, setRedeemToken] = useState(
+    () => search.get("invite") ?? "",
+  );
   const [teamName, setTeamName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);

@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { withRouter } from "../../lib/test-router";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -121,7 +122,7 @@ function stubDesk() {
 }
 
 async function openPlan() {
-  act(() => root.render(<JudgeWorkspace workspaceId="w" />));
+  act(() => root.render(withRouter(<JudgeWorkspace workspaceId="w" />)));
   await waitFor(() => container.textContent?.includes("First") ?? false);
   await choose(container.querySelector("select")!, "e1");
   await waitFor(() => container.querySelectorAll("select").length > 1);

@@ -2,6 +2,8 @@
   "smoke": ["signin", "roles", "public"],
   "all": [
     "src/web/app/App.tsx",
+    "src/web/lib/*",
+    "src/web/hooks/*",
     "src/web/app/main.tsx",
     "src/web/components/*",
     "src/web/styles/*",

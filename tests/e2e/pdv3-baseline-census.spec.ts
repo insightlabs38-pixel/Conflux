@@ -251,14 +251,14 @@ test.describe("pd-b00 ui census", () => {
       page.getByRole("navigation", { name: "Your workspaces" }),
     ).toBeVisible();
     await openWorkspace(page);
-    await page.goto(page.url().split("&view=")[0] + "&view=setup");
+    await page.goto(page.url().replace(/\/[^/?]+(\?.*)?$/, "/setup"));
     await capture(
       page,
       "state-denied-organizer-view",
       "participant-01",
       "desktop",
       problems,
-      "participant requesting ?view=setup (no denied state: view silently falls back)",
+      "participant requesting /setup (no denied state: the URL is replaced by the overview)",
     );
   });
 });

@@ -1,3 +1,4 @@
+import { appHref, routes } from "../../lib/routes";
 import { useEffect, useState } from "react";
 import { AppShell } from "../../components/AppShell";
 import { PageHeader, ButtonLink } from "../../components/Foundation";
@@ -49,7 +50,7 @@ export function PersonProfilePage({ personId }: { personId: string }) {
     <AppShell
       brandAs="p"
       nav={
-        <ButtonLink href="/app/" variant="secondary">
+        <ButtonLink href={appHref(routes.home)} variant="secondary">
           Open Conflux
         </ButtonLink>
       }

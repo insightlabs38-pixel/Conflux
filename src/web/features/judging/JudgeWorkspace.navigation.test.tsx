@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { withRouter } from "../../lib/test-router";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -44,7 +45,7 @@ describe("judge navigation", () => {
       "fetch",
       vi.fn().mockResolvedValue({ ok: true, json: async () => [] }),
     );
-    act(() => root.render(<JudgeWorkspace workspaceId="w" />));
+    act(() => root.render(withRouter(<JudgeWorkspace workspaceId="w" />)));
     await waitFor(
       () =>
         container.textContent?.includes(
@@ -83,7 +84,7 @@ describe("judge navigation", () => {
       return { ok: true, status: 200, json: async () => body };
     });
     vi.stubGlobal("fetch", fetchMock);
-    act(() => root.render(<JudgeWorkspace workspaceId="w" />));
+    act(() => root.render(withRouter(<JudgeWorkspace workspaceId="w" />)));
     await waitFor(() => container.textContent?.includes("Second") ?? false);
     await choose(container.querySelector("select")!, "e1");
     await waitFor(() => container.textContent?.includes("Final") ?? false);
@@ -115,7 +116,7 @@ describe("judge navigation", () => {
       return { ok: true, status: 200, json: async () => body };
     });
     vi.stubGlobal("fetch", fetchMock);
-    act(() => root.render(<JudgeWorkspace workspaceId="w" />));
+    act(() => root.render(withRouter(<JudgeWorkspace workspaceId="w" />)));
     await waitFor(() => container.textContent?.includes("First") ?? false);
     await choose(container.querySelector("select")!, "e1");
     await waitFor(() => container.textContent?.includes("Final") ?? false);
@@ -174,7 +175,7 @@ describe("judge navigation", () => {
         return { ok: true, status: 200, json: async () => body };
       });
     vi.stubGlobal("fetch", fetchMock);
-    act(() => root.render(<JudgeWorkspace workspaceId="w" />));
+    act(() => root.render(withRouter(<JudgeWorkspace workspaceId="w" />)));
     await waitFor(() => container.textContent?.includes("First") ?? false);
     await choose(container.querySelector("select")!, "e1");
     await waitFor(() => container.textContent?.includes("Final") ?? false);

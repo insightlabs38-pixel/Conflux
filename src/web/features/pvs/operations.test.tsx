@@ -1,4 +1,6 @@
 // @vitest-environment happy-dom
+import type { ReactElement } from "react";
+import { withRouter } from "../../lib/test-router";
 import { act, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
@@ -48,7 +50,7 @@ async function mount(node: ReactNode) {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
-  await act(async () => root.render(node));
+  await act(async () => root.render(withRouter(node as ReactElement)));
   return container;
 }
 

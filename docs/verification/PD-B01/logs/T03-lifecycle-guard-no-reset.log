@@ -1,0 +1,56 @@
+
+Running 12 tests using 1 worker
+
+(node:966473) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   1 [desktop] › tests/e2e/lifecycle.spec.ts:43:5 › participant creates a team, submits, and receives a signed receipt (11.9s)
+Testing stopped early after 1 maximum allowed failures.
+
+
+  1) [desktop] › tests/e2e/lifecycle.spec.ts:43:5 › participant creates a team, submits, and receives a signed receipt 
+
+    Error: participant-24 already belongs to a team, so the demo is not at a fresh "submitted" checkpoint. This journey consumes that participant: run `scripts/demo-reset submitted` first.
+
+    expect(locator).toBeVisible() failed
+
+    Locator: getByLabel('Team name')
+    Expected: visible
+    Timeout: 10000ms
+    Error: element(s) not found
+
+    Call log:
+      - participant-24 already belongs to a team, so the demo is not at a fresh "submitted" checkpoint. This journey consumes that participant: run `scripts/demo-reset submitted` first. getByLabel('Team name') with timeout 10000ms
+      - waiting for getByLabel('Team name')
+
+
+      58 |     `${LIVE} already belongs to a team, so the demo is not at a fresh "submitted" checkpoint. ` +
+      59 |       "This journey consumes that participant: run `scripts/demo-reset submitted` first.",
+    > 60 |   ).toBeVisible({ timeout: 10_000 });
+         |     ^
+      61 |   await page.getByLabel("Team name").fill("Team Live Wire");
+      62 |   await page.getByRole("button", { name: "Create team" }).click();
+      63 |   await expect(page.getByRole("region", { name: "My team" })).toContainText(
+        at /home/insightlabs38/conflux/tests/e2e/lifecycle.spec.ts:60:5
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    artifacts/e2e-fast/neg3/results/lifecycle-participant-crea-80f60-d-receives-a-signed-receipt-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    artifacts/e2e-fast/neg3/results/lifecycle-participant-crea-80f60-d-receives-a-signed-receipt-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: artifacts/e2e-fast/neg3/results/lifecycle-participant-crea-80f60-d-receives-a-signed-receipt-desktop/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    artifacts/e2e-fast/neg3/results/lifecycle-participant-crea-80f60-d-receives-a-signed-receipt-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace artifacts/e2e-fast/neg3/results/lifecycle-participant-crea-80f60-d-receives-a-signed-receipt-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [desktop] › tests/e2e/lifecycle.spec.ts:43:5 › participant creates a team, submits, and receives a signed receipt 
+  11 did not run
+  1 error was not a part of any test, see above for details

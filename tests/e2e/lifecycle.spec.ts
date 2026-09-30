@@ -53,6 +53,11 @@ test("participant creates a team, submits, and receives a signed receipt", async
     page.getByRole("region", { name: "Sponsor challenges" }),
   ).toContainText("Sponsor API documentation");
   await goToDestination(page, "team");
+  await expect(
+    page.getByLabel("Team name"),
+    `${LIVE} already belongs to a team, so the demo is not at a fresh "submitted" checkpoint. ` +
+      "This journey consumes that participant: run `scripts/demo-reset submitted` first.",
+  ).toBeVisible({ timeout: 10_000 });
   await page.getByLabel("Team name").fill("Team Live Wire");
   await page.getByRole("button", { name: "Create team" }).click();
   await expect(page.getByRole("region", { name: "My team" })).toContainText(

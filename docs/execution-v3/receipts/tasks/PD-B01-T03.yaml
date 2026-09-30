@@ -1,0 +1,54 @@
+version: 3
+task: PD-B01-T03
+batch: PD-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 81b3c2e8b051df4d157b8e5b9d5e738411cae419
+  head_commit: 81b3c2e8b051df4d157b8e5b9d5e738411cae419
+changed_paths:
+- tests/e2e/lifecycle.spec.ts
+- docs/verification/PD-B01/logs/
+deliverables:
+- item: Fix misleading/opaque test failure D-01 without weakening
+  result: pass
+  evidence: lifecycle precondition expect now fails in <=10 s with an actionable message; all original
+    assertions unchanged
+- item: No flaky tests found in baseline
+  result: pass
+  evidence: 0 failures across 144 e2e, 1400/1418 backend, 169 web; no retries configured
+invariants:
+- item: Do not weaken tests/gates or extend timeouts to hide races
+  result: pass
+  evidence: added a bounded 10s precondition check only; no existing timeout changed
+- item: No behavior change
+  result: pass
+  evidence: test-only
+verification:
+- command: lifecycle spec on consumed demo state (no reset)
+  result: pass
+  note: fails with 'participant-24 already belongs to a team ... run scripts/demo-reset submitted first'
+    (negative case, log committed)
+- command: demo-reset then lifecycle spec
+  result: pass
+  note: 6 passed 20.9s (happy path on fresh data)
+- command: make format-check lint
+  result: pass
+  note: clean
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs/evidence-only task
+migrations: []
+findings: []
+escalations: []
+limitations:
+- waitForTimeout is used in tests/e2e for animation/network settling; not changed (no failing flake evidence).
+  My earlier attempt to prove the negative ran on already-fresh state and passed; re-run on consumed state
+  gave the recorded failure.
+next: review

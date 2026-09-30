@@ -1,0 +1,22 @@
+
+Running 12 tests using 1 worker
+
+(node:963389) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [desktop] › tests/e2e/lifecycle.spec.ts:43:5 › participant creates a team, submits, and receives a signed receipt (3.3s)
+  ✓   2 [desktop] › tests/e2e/lifecycle.spec.ts:142:5 › organizer requests changes; participant remediates; organizer approves (6.4s)
+  ✓   3 [desktop] › tests/e2e/lifecycle.spec.ts:242:7 › judge-01 inspects and scores Live Wire (2.2s)
+  ✓   4 [desktop] › tests/e2e/lifecycle.spec.ts:242:7 › judge-02 inspects and scores Live Wire (1.8s)
+  ✓   5 [desktop] › tests/e2e/lifecycle.spec.ts:242:7 › judge-03 inspects and scores Live Wire (1.8s)
+  ✓   6 [desktop] › tests/e2e/lifecycle.spec.ts:293:5 › organizer publishes results and the public results page shows them (4.3s)
+(node:966211) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  -   7 [mobile] › tests/e2e/lifecycle.spec.ts:43:5 › participant creates a team, submits, and receives a signed receipt
+  -   8 [mobile] › tests/e2e/lifecycle.spec.ts:142:5 › organizer requests changes; participant remediates; organizer approves
+  -   9 [mobile] › tests/e2e/lifecycle.spec.ts:242:7 › judge-01 inspects and scores Live Wire
+  -  10 [mobile] › tests/e2e/lifecycle.spec.ts:242:7 › judge-02 inspects and scores Live Wire
+  -  11 [mobile] › tests/e2e/lifecycle.spec.ts:242:7 › judge-03 inspects and scores Live Wire
+  -  12 [mobile] › tests/e2e/lifecycle.spec.ts:293:5 › organizer publishes results and the public results page shows them
+
+  6 skipped
+  6 passed (20.9s)

@@ -1,0 +1,47 @@
+137 objects imported automatically (use -v 2 for details).
+
+== models
+-- QUERY/SAVED_VIEWS
+   presentation.SavedPublicSearch rows=0 fields=[id:BigAutoField, public_id:UUIDField, event:ForeignKey->Event, owner:ForeignKey->User, name:CharField, filters:JSONField, created_at:DateTimeField]
+   presentation.ProjectSearchTag rows=0 fields=[id:BigAutoField, project:ForeignKey->Project, tag:SlugField]
+-- BULK_PLAN
+   communications.BulkReceipt rows=0 fields=[id:BigAutoField, public_id:UUIDField, event:ForeignKey->Event, actor:ForeignKey->User, token_digest:CharField, result:JSONField, created_at:DateTimeField]
+-- ASYNC_JOB
+   core.IdempotencyKey rows=0 fields=[id:BigAutoField, key:CharField, method:CharField, path:CharField, request_hash:CharField, response_status:PositiveIntegerField, response_body:JSONField, created_at:DateTimeField, completed_at:DateTimeField]
+   integrations.WebhookDelivery rows=0 fields=[id:BigAutoField, public_id:UUIDField, subscription:ForeignKey->WebhookSubscription, domain_event:ForeignKey->DomainEvent, status:CharField, attempts:PositiveSmallIntegerField, next_attempt_at:DateTimeField, last_status_code:PositiveSmallIntegerField, last_error:CharField, created_at:DateTimeField, completed_at:DateTimeField]
+-- APPROVAL
+   policies.TemporalGate rows=0 fields=[id:BigAutoField, public_id:UUIDField, event:ForeignKey->Event, name:CharField, opens_at:DateTimeField, closes_at:DateTimeField, created_at:DateTimeField]
+   eligibility.EligibilityReview rows=15 fields=[id:BigAutoField, public_id:UUIDField, project:OneToOneField->Project, status:CharField, decision_note:CharField, decided_by:ForeignKey->User, decided_at:DateTimeField, revision:PositiveIntegerField, created_at:DateTimeField, updated_at:DateTimeField]
+-- THREADS
+   community.Comment rows=0 fields=[id:BigAutoField, public_id:UUIDField, project:ForeignKey->Project, author:ForeignKey->User, body:TextField, created_at:DateTimeField, hidden_at:DateTimeField, hidden_by:ForeignKey->User]
+   deliberation.DeliberationNote rows=0 fields=[id:BigAutoField, public_id:UUIDField, room:ForeignKey->DeliberationRoom, project:ForeignKey->Project, author:ForeignKey->User, body:CharField, created_at:DateTimeField]
+   projects.MentorNote rows=0 fields=[id:BigAutoField, public_id:UUIDField, project:ForeignKey->Project, mentor:ForeignKey->User, body:CharField, created_at:DateTimeField]
+   communications.Message rows=25 fields=[id:BigAutoField, public_id:UUIDField, event:ForeignKey->Event, sent_by:ForeignKey->User, subject:CharField, body:TextField, audience_kind:CharField, audience_params:JSONField, recipient_count:PositiveIntegerField, email_failure_count:PositiveIntegerField, created_at:DateTimeField]
+-- TIMELINE
+   onsite.AgendaSession rows=28 fields=[id:BigAutoField, public_id:UUIDField, event:ForeignKey->Event, title:CharField, description:CharField, starts_at:DateTimeField, ends_at:DateTimeField, location:ForeignKey->Location, track:ForeignKey->Track, speakers:CharField, stream_url:CharField, is_public:BooleanField, created_by:ForeignKey->User, created_at:DateTimeField, updated_at:DateTimeField]
+   policies.TemporalGate rows=0 fields=[id:BigAutoField, public_id:UUIDField, event:ForeignKey->Event, name:CharField, opens_at:DateTimeField, closes_at:DateTimeField, created_at:DateTimeField]
+   presentation.PublicationSchedule rows=0 fields=[id:BigAutoField, public_id:UUIDField, event:ForeignKey->Event, surface:CharField, opens_at:DateTimeField, closes_at:DateTimeField, finalist_stage:ForeignKey->Stage, updated_at:DateTimeField]
+== celery tasks
+[]
+beat: ['dispatch-reminders', 'process-webhooks']
+== jobs app
+jobs installed: False
+== list endpoints with filter-like query parameters (static scan of views)
+   accounts/oidc_views.py: ['code', 'error', 'next', 'state']
+   awards/fulfillment_export.py: ['state']
+   communications/views.py: ['offset']
+   community/views.py: ['offset']
+   eligibility/views.py: ['status']
+   evaluations/views.py: ['timeline']
+   eventconfig/views.py: ['action', 'event', 'target']
+   events/registration_views.py: ['status']
+   governance/views.py: ['status', 'version']
+   integrations/archive_views.py: ['mode']
+   integrations/external_qualifier_views.py: ['offset']
+   integrations/webhook_views.py: ['offset']
+   onsite/route_views.py: ['remaining_only', 'start']
+   portfolio/views.py: ['event', 'q', 'status']
+   presentation/public_api.py: ['q']
+files with ad-hoc query parameters: 15
+== url patterns
+top-level include count: 3

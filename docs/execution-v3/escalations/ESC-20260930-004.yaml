@@ -1,0 +1,37 @@
+version: 1
+id: ESC-20260930-004
+task: PD-F002-B01-T00
+batch: PD-F002-B01
+category: architecture
+severity: P2
+status: RESOLVED
+summary: The shared primitives overlap existing domain-specific implementations and must live in a dependency-free core, so adopt-versus-migrate and code location needed a decision before implementation.
+observed:
+- "Bulk planning already exists (communications/bulk.py with signed preview tokens, BulkReceipt, idempotent re-apply); SavedPublicSearch, core/pagination.py and core/idempotency.py are near-primitives; four note and comment models exist with different semantics (docs/verification/PD-F002-B01/T00-census.log)."
+- "No job, approval, thread, query or timeline primitive exists; src/api/jobs is an empty directory; Celery runs three tasks."
+- "The batch owns src/api/core/** and src/web/lib|components/**; core must not import domain apps (dependency direction), yet the primitives must operate on domain rows."
+- "Registry statuses are PLANNED with 100-300 consumers each, so the shapes chosen now are load-bearing for later batches."
+attempts:
+- Census of existing implementations and their fields, row counts and endpoints.
+- Checked how core already reaches domain models (function-level imports in core.mixins and core.authz).
+decision_needed: Migrate existing near-primitives into the new ones, or adopt them and add the new ones beside them; and where does the code live given core cannot import domains?
+options:
+- option: A, registry-first in core, adopt existing ones, migrate nothing (implemented as the default)
+  tradeoff: Domains register entities, actions, kinds, policies, providers and audiences with core; existing models, endpoints and the bulk token format stay; new features must use the primitives. Cost - two representations coexist for notes and saved searches until a later batch adopts them.
+- option: B, migrate the four note models, SavedPublicSearch and the bulk planner into the primitives now
+  tradeoff: one representation sooner, but a data migration and API reshaping across public moderated comments, room-private notes and broadcasts whose semantics differ; large blast radius inside a primitive batch.
+- option: C, put each primitive in the domain app that first needs it
+  tradeoff: fastest first adopter, but it is exactly the per-feature duplication the batch exists to prevent and invites imports in the wrong direction.
+recommended: A now; adoption of the legacy near-primitives is follow-up work per feature batch.
+affected_invariants:
+- No duplicate source of truth.
+- Server-side authorization and audit remain authoritative.
+- Existing supported API and data behavior is not silently changed.
+affected_tasks:
+- PD-F002-B01-T01..T08, T90, T91
+- PD-F002-B02-T01 (SCHEMA_EDITOR), PD-F002-B02-T06 (POLICY_EXPLAIN) adopt the error and Reason shapes
+artifacts:
+- docs/product-depth-v3/specs/002-feature-depth-should-compound-through-shared-primitives.md
+- docs/verification/PD-F002-B01/T00-census.log
+resolution: |
+  Decision: option A. The per-primitive contract, forbidden list, compatibility boundary and verification strategy are in spec 002 (PD-F002-B01 canonical contract). Additive tables only; legacy endpoints, models and token formats are untouched; adopters are named per primitive. Owner may choose B per area later; nothing built under A prevents it.

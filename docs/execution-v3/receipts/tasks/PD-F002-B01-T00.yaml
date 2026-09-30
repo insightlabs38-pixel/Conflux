@@ -1,0 +1,70 @@
+version: 3
+task: PD-F002-B01-T00
+batch: PD-F002-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: frontier-architecture
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: d5eb041
+  head_commit: d5eb041
+changed_paths:
+- docs/product-depth-v3/specs/002-feature-depth-should-compound-through-shared-primitives.md
+- docs/execution-v3/escalations/ESC-20260930-004.yaml
+- docs/verification/PD-F002-B01/probe_census.py
+- docs/verification/PD-F002-B01/T00-census.log
+deliverables:
+- item: Spec 002 updated with canonical state model, lifecycle, authority boundary, migration plan and cross-surface applicability for the batch
+  result: pass
+  evidence: "section PD-F002-B01 canonical contract: census of what exists, eight shared decisions (location, registry-first, authorization once, error shape, idempotency, audit, migration policy), a per-primitive table (state and lifecycle, authority, reuse and migration), compatibility boundary, task boundaries and verification strategy"
+- item: Reuse of shared primitives resolved and duplicate local representations forbidden
+  result: pass
+  evidence: existing near-primitives (bulk planner, SavedPublicSearch, pagination, idempotency, four note models) are adopted and named per primitive; a Forbidden list bans per-feature tables, ad-hoc filter parsing, client-side set filtering, core importing domains, a generic compensation claim, and migrating the legacy models
+- item: Unresolved architecture ambiguity recorded as an escalation
+  result: pass
+  evidence: ESC-20260930-004 (adopt versus migrate, code location) resolved with the conservative default A; QUESTIONS.md entry
+invariants:
+- item: One canonical source of truth, server authority
+  result: pass
+  evidence: every primitive is a server registry with authorization decided in the registration; the web renders server answers
+- item: Additive and compatible
+  result: pass
+  evidence: no code or schema changed; additive tables only are planned; legacy endpoints and models are untouched
+verification:
+- command: docker compose exec -T app python manage.py shell < docs/verification/PD-F002-B01/probe_census.py
+  result: pass
+  note: read-only; models, row counts (15 eligibility reviews, 25 messages, 28 agenda sessions), Celery beat entries, empty jobs app, 15 modules with ad-hoc query parameters
+- command: uv run --frozen pytest tests/integration/test_bulk_operations.py tests/integration/test_public_search.py tests/integration/test_gallery_pagination.py (and idempotency)
+  result: pass
+  note: 62 passed, 3 skipped; the compatibility baseline for the legacy near-primitives
+- command: python3 scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid, 0 errors
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: contract covers DATA_GRID, ViewBar, BulkPlanner, useJob and Timeline
+- surface: api
+  result: pass
+  evidence: contract defines the endpoint families per primitive
+- surface: audit
+  result: pass
+  evidence: every stored-state change is audited (decision 6)
+- surface: docs
+  result: pass
+  evidence: spec 002 section
+- surface: sdk
+  result: pass
+  evidence: "not applicable for this task: not_required"
+migrations: []
+findings:
+- The census probe lists Celery tasks as empty because the shell does not import task modules; the three tasks come from a source scan (integrations, communications, artifacts)
+- PRIMITIVE_REGISTRY statuses stay PLANNED until each owner task is DONE
+limitations:
+- Shapes for THREADS audiences and TIMELINE providers are decided at contract level only; the adopter for ASYNC_JOB and APPROVAL is chosen inside T05 and T06 with their own evidence
+escalations:
+- ESC-20260930-004 (resolved, option A)
+next: review

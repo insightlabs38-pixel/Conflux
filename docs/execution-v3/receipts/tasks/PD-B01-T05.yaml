@@ -1,0 +1,72 @@
+version: 3
+task: PD-B01-T05
+batch: PD-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 356dde23fc99752aaf2cdaed1a5b33b7e517f4d6
+  head_commit: 356dde23fc99752aaf2cdaed1a5b33b7e517f4d6
+changed_paths:
+- docs/verification/PD-B01/logs/
+deliverables:
+- item: Run real affected suites after repairs
+  result: pass
+  evidence: rebuilt compose stack from current source, then browser/PG/fast-gate/release smoke below
+- item: Targeted manual/visual check of the repaired defect
+  result: pass
+  evidence: "real-browser probe: re-selecting the same event no longer strands 'Loading stages\u2026'\
+    \ (was reproduced before the fix)"
+invariants:
+- item: Not closed on unit tests alone
+  result: pass
+  evidence: e2e-fast full suite, PG suite, backup/restore smoke, S3 contract vs RustFS
+- item: No weakened gates
+  result: pass
+  evidence: counts only increased
+verification:
+- command: docker compose up -d --build --wait
+  result: pass
+  note: exit 0; all services healthy; app health 200
+- command: browser probe reselect (judge-01 queue) on rebuilt stack
+  result: pass
+  note: 1 passed; before fix same probe left 'Loading stages' stuck
+- command: ./scripts/demo-reset && ./scripts/e2e-fast
+  result: pass
+  note: 144 passed, 91 skipped, 0 failed, 3m53s (identical to baseline)
+- command: make verify-fast
+  result: pass
+  note: pytest 1401 passed/23 skipped; web 169 + embed 8; format/lint/build/sdk/block-schema clean
+- command: DATABASE_URL=<PG17> pytest -n auto
+  result: pass
+  note: '1420 passed, 4 skipped (was 1418/5): upgrade smoke now runs'
+- command: make backup-restore-smoke
+  result: pass
+  note: PASS recovered
+- command: CONFLUX_S3_TEST_ENDPOINT=<RustFS> pytest tests/storage/test_s3_contract.py
+  result: pass
+  note: 3 passed (D-06 verified)
+- command: 2x WORKERS=2 loadtests/h02/run.sh (D-14 re-measure)
+  result: pass
+  note: 101.6 and 115.6 req/s, 0 5xx, integrity PASS; gallery/search p95 1.2-1.5 s -> throughput varies
+    101-148 rps run to run on this shared host (idle legacy freebuff process), so D-14 not reproducible
+    as a code regression
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: vitest + Playwright
+- surface: api
+  result: pass
+  evidence: PG17 pytest, upgrade smoke, backup/restore, S3 contract
+migrations: []
+findings: []
+escalations: []
+limitations:
+- 'Two-endpoint artifact portability (needs SeaweedFS) and cold/offline smoke not re-run: no backend/infra
+  files changed that they cover.'
+- Load reruns were made before the frontend-only fix; the fix touches no API path.
+next: review

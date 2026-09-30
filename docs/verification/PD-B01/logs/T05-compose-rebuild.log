@@ -1,0 +1,169 @@
+ Image conflux-api:latest Building 
+ Image conflux-api:latest Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 944B done
+#1 DONE 0.0s
+
+#2 [app internal] load build definition from api.Dockerfile
+#2 transferring dockerfile: 1.39kB done
+#2 DONE 0.0s
+
+#3 [app internal] load metadata for docker.io/library/node:24-slim
+#3 DONE 0.0s
+
+#4 [app internal] load metadata for docker.io/library/python:3.12-slim
+#4 DONE 0.0s
+
+#5 [app internal] load .dockerignore
+#5 transferring context: 301B done
+#5 DONE 0.0s
+
+#6 [app stage-1 1/8] FROM docker.io/library/python:3.12-slim@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f
+#6 resolve docker.io/library/python:3.12-slim@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f 0.0s done
+#6 DONE 0.0s
+
+#7 [worker web  1/10] FROM docker.io/library/node:24-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6
+#7 resolve docker.io/library/node:24-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 0.0s done
+#7 DONE 0.0s
+
+#8 [worker internal] load build context
+#8 transferring context: 105.96kB 0.1s done
+#8 transferring context: 105.96kB 0.1s done
+#8 DONE 0.1s
+
+#9 [app web  4/10] COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+#9 CACHED
+
+#10 [app web  5/10] COPY src/web/package.json src/web/package.json
+#10 CACHED
+
+#11 [app web  7/10] COPY sdks/typescript/package.json sdks/typescript/package.json
+#11 CACHED
+
+#12 [app web  3/10] RUN corepack enable
+#12 CACHED
+
+#13 [app web  6/10] COPY src/embed/package.json src/embed/package.json
+#13 CACHED
+
+#14 [app web  2/10] WORKDIR /repo
+#14 CACHED
+
+#15 [worker web  8/10] RUN pnpm install --frozen-lockfile --filter @conflux/web...
+#15 CACHED
+
+#16 [app web  9/10] COPY src/web src/web
+#16 DONE 0.0s
+
+#17 [app web 10/10] RUN pnpm --filter @conflux/web exec vite build
+#17 0.320 vite v7.3.6 building client environment for production...
+#17 0.364 transforming...
+#17 1.220 ✓ 107 modules transformed.
+#17 1.306 rendering chunks...
+#17 1.406 computing gzip size...
+#17 1.418 dist/index.html                         0.41 kB │ gzip:   0.28 kB
+#17 1.419 dist/assets/ApiExplorer-QHtK24OS.css    3.14 kB │ gzip:   0.92 kB
+#17 1.419 dist/assets/index-B6P09xVJ.css         60.70 kB │ gzip:  10.09 kB
+#17 1.419 dist/assets/ApiExplorer-xuEPDnYW.js    10.38 kB │ gzip:   4.01 kB
+#17 1.419 dist/assets/index-CjLZvfxD.js         494.99 kB │ gzip: 137.30 kB
+#17 1.419 ✓ built in 1.08s
+#17 DONE 1.5s
+
+#18 [worker stage-1 2/8] COPY uv.lock pyproject.toml /tmp/deps/
+#18 CACHED
+
+#19 [worker stage-1 3/8] RUN python -m pip install --no-cache-dir "uv==0.12.18"     && uv sync --frozen --directory /tmp/deps --no-dev --compile-bytecode
+#19 CACHED
+
+#20 [worker stage-1 4/8] COPY src/api /app
+#20 CACHED
+
+#21 [app stage-1 5/8] COPY src/web/styles /web/styles
+#21 CACHED
+
+#22 [worker stage-1 6/8] COPY --from=web /repo/src/web/dist /web/dist
+#22 DONE 0.0s
+
+#23 [app stage-1 7/8] COPY fixtures /app/fixtures
+#23 DONE 0.0s
+
+#24 [app stage-1 8/8] WORKDIR /app
+#24 DONE 0.0s
+
+#25 [worker] exporting to image
+#25 exporting layers 0.1s done
+#25 exporting manifest sha256:9d4dfc830869c4ebabdcb69e7e00790a6fa8732438a9a5bb571a35e78b66994c 0.0s done
+#25 exporting config sha256:25b84a7e84e42e09ecec3fa8a9f4962ef07c02aabf2069ae9e2cbf0fb82b06d3 0.0s done
+#25 exporting attestation manifest sha256:e021fb63dc1f605ecb69e287744271af5c04a2acf3efc7ddf3b8e8418b1ca34a 0.0s done
+#25 exporting manifest list sha256:366aa4d6fc5015d5b377b7e93530aba0cd03a2926d829026c00d58958204e80e 0.0s done
+#25 naming to docker.io/library/conflux-api:latest done
+#25 unpacking to docker.io/library/conflux-api:latest
+#25 unpacking to docker.io/library/conflux-api:latest 0.0s done
+#25 DONE 0.2s
+
+#26 [app] exporting to image
+#26 exporting layers 0.1s done
+#26 exporting manifest sha256:2ea30a5de2a8499ee3dcdc6dc3690b5e9ebad0c1382f13cc7e6b5a2da85f28a6 0.0s done
+#26 exporting config sha256:cfd772838ef9255e862f8f6658b911c8c172d1ebd718ff20189ec39ec490e693 0.0s done
+#26 exporting attestation manifest sha256:55cfd80069450b25f3027418586a9effa4cb79c39f796f719ecc2d190226dc15 0.0s done
+#26 exporting manifest list sha256:fa6d177e318a9666f3d606156dc2eed70b304c71aaf1d025c79e8d6629e3a049 0.0s done
+#26 naming to docker.io/library/conflux-api:latest done
+#26 unpacking to docker.io/library/conflux-api:latest 0.0s done
+#26 DONE 0.2s
+
+#27 [app] resolving provenance for metadata file
+#27 DONE 0.0s
+
+#28 [worker] resolving provenance for metadata file
+#28 DONE 0.0s
+ Image conflux-api:latest Built 
+ Image conflux-api:latest Built 
+ Container conflux-cache-1 Running 
+ Container conflux-db-1 Running 
+ Container conflux-caddy-1 Running 
+ Container conflux-objectstore-1 Running 
+ Container conflux-beat-1 Recreate 
+ Container conflux-worker-1 Recreate 
+ Container conflux-app-1 Recreate 
+ Container conflux-beat-1 Recreated 
+ Container conflux-app-1 Recreated 
+ Container conflux-worker-1 Recreated 
+ Container conflux-cache-1 Waiting 
+ Container conflux-db-1 Waiting 
+ Container conflux-cache-1 Waiting 
+ Container conflux-objectstore-1 Waiting 
+ Container conflux-db-1 Waiting 
+ Container conflux-cache-1 Waiting 
+ Container conflux-objectstore-1 Waiting 
+ Container conflux-db-1 Waiting 
+ Container conflux-db-1 Healthy 
+ Container conflux-objectstore-1 Healthy 
+ Container conflux-cache-1 Healthy 
+ Container conflux-beat-1 Starting 
+ Container conflux-db-1 Healthy 
+ Container conflux-cache-1 Healthy 
+ Container conflux-worker-1 Starting 
+ Container conflux-db-1 Healthy 
+ Container conflux-objectstore-1 Healthy 
+ Container conflux-cache-1 Healthy 
+ Container conflux-app-1 Starting 
+ Container conflux-beat-1 Started 
+ Container conflux-worker-1 Started 
+ Container conflux-app-1 Started 
+ Container conflux-app-1 Waiting 
+ Container conflux-app-1 Healthy 
+ Container conflux-beat-1 Waiting 
+ Container conflux-objectstore-1 Waiting 
+ Container conflux-app-1 Waiting 
+ Container conflux-cache-1 Waiting 
+ Container conflux-worker-1 Waiting 
+ Container conflux-db-1 Waiting 
+ Container conflux-caddy-1 Waiting 
+ Container conflux-db-1 Healthy 
+ Container conflux-app-1 Healthy 
+ Container conflux-beat-1 Healthy 
+ Container conflux-cache-1 Healthy 
+ Container conflux-worker-1 Healthy 
+ Container conflux-objectstore-1 Healthy 
+ Container conflux-caddy-1 Healthy 
+exit=0

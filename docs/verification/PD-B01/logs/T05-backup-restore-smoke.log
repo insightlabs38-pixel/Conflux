@@ -1,0 +1,53 @@
+./scripts/backup-restore-smoke
+== seeding a known workspace (restore-smoke-1790748091) ==
+135 objects imported automatically (use -v 2 for details).
+
+seeded
+== backing up ==
+== database (pg_dump, custom format) ==
+== object store (raw volume archive) ==
+backup written to backups/.smoke-restore-smoke-1790748091
+== deleting the seeded workspace to prove restore does real work ==
+135 objects imported automatically (use -v 2 for details).
+
+deleted
+== restoring ==
+== stopping application services ==
+ Container conflux-worker-1 Stopping 
+ Container conflux-app-1 Stopping 
+ Container conflux-beat-1 Stopping 
+ Container conflux-beat-1 Stopped 
+ Container conflux-app-1 Stopped 
+ Container conflux-worker-1 Stopped 
+== restoring database ==
+== restoring object store ==
+== restarting application services ==
+ Container conflux-cache-1 Waiting 
+ Container conflux-objectstore-1 Waiting 
+ Container conflux-db-1 Waiting 
+ Container conflux-db-1 Waiting 
+ Container conflux-cache-1 Waiting 
+ Container conflux-db-1 Waiting 
+ Container conflux-cache-1 Waiting 
+ Container conflux-objectstore-1 Waiting 
+ Container conflux-db-1 Healthy 
+ Container conflux-db-1 Healthy 
+ Container conflux-objectstore-1 Healthy 
+ Container conflux-cache-1 Healthy 
+ Container conflux-cache-1 Healthy 
+ Container conflux-worker-1 Starting 
+ Container conflux-db-1 Healthy 
+ Container conflux-cache-1 Healthy 
+ Container conflux-objectstore-1 Healthy 
+ Container conflux-app-1 Starting 
+ Container conflux-beat-1 Starting 
+ Container conflux-worker-1 Started 
+ Container conflux-app-1 Started 
+ Container conflux-beat-1 Started 
+restore complete from backups/.smoke-restore-smoke-1790748091
+== confirming the workspace came back ==
+135 objects imported automatically (use -v 2 for details).
+
+recovered
+backup/restore smoke: PASS
+exit=0

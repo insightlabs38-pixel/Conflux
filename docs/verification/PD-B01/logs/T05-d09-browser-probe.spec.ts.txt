@@ -1,0 +1,14 @@
+import { test, expect } from "@playwright/test";
+import { goToDestination, openWorkspace, signIn } from "./support";
+test("reselect same event does not strand loading", async ({ page }) => {
+  await signIn(page, "judge-01");
+  await openWorkspace(page);
+  await goToDestination(page, "queue");
+  const pick = page.getByRole("combobox", { name: "Event" });
+  await pick.selectOption({ index: 1 });
+  await expect(page.getByRole("combobox", { name: "Stage" })).toBeVisible();
+  await pick.selectOption({ index: 1 });
+  await page.waitForTimeout(3000);
+  await expect(page.getByText("Loading stages")).toHaveCount(0);
+  await expect(page.getByRole("combobox", { name: "Stage" })).toBeVisible();
+});

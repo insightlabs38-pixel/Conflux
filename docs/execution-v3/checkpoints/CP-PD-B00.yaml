@@ -1,0 +1,27 @@
+version: 1
+checkpoint_id: CP-PD-B00
+created_at: '2026-09-30T05:43:50Z'
+canonical_commit: eb472a0825c4932bccc11f60cc23dcdb0e4fd5b9
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+active_batches:
+- PD-B01
+active_claims: []
+open_escalations: []
+last_completed_task: PD-B00-T08
+ready_summary:
+- "PD-B01 tasks (triage baseline defects) \u2014 see ready_tasks.py"
+design_revision: r2.1
+verification_summary:
+- pytest 1400/23 (SQLite), 1418/5 (PG17)
+- e2e-fast 144 passed 0 failed
+- load 147.6/222.7 rps 0 5xx integrity 8/8
+- validate_queue valid
+recovery_notes:
+- 'Defect register: docs/verification/PD-B00/DEFECT_REGISTER.md (D-01..D-14, no P1)'
+- demo stack reset to submitted checkpoint; confluxh00 PG hosts conflux_h02 + test_*
+  DBs (disposable)
+- main unpushed
+- Supervisor scripts/claude_supervisor/supervisor.py waits for 02:50 EDT window

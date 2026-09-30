@@ -1,0 +1,47 @@
+version: 3
+task: PD-B00-T08
+batch: PD-B00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: b5f398dfc0c4330b34c894bd6d648da6213c83d4
+  head_commit: eb472a0825c4932bccc11f60cc23dcdb0e4fd5b9
+changed_paths:
+- docs/verification/PD-B00/BASELINE_RECEIPT.md
+- docs/verification/PD-B00/DEFECT_REGISTER.md
+deliverables:
+- item: Concise current-state receipt
+  result: pass
+  evidence: BASELINE_RECEIPT.md (20 lines)
+- item: Prioritized defect register as input to PD-B01..B04
+  result: pass
+  evidence: 14 findings (0 P1, 2 P2, 12 P3) with ordered routing table
+invariants:
+- item: Evidence-based, no assumed status
+  result: pass
+  evidence: every number traces to BASELINE_RESULTS/logs
+- item: No product behavior changed to look cleaner
+  result: pass
+  evidence: docs/test-census only
+verification:
+- command: python scripts/pdv3/lint_receipt.py docs/verification/PD-B00/BASELINE_RECEIPT.md
+  result: pass
+  note: PASS 20 lines
+- command: register ids counted programmatically
+  result: pass
+  note: '14 rows: P2x2 P3x12'
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs/evidence-only task
+migrations: []
+findings: []
+escalations: []
+limitations:
+- See BASELINE_RECEIPT limitations.
+next: review

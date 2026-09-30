@@ -3432,6 +3432,22 @@ export type InputOfPatchedResourceInput = {
   position?: number;
 };
 
+export type PatchedSavedViewInputSchema = {
+  entity?: string;
+  name?: string;
+  query?: unknown;
+  visibility?: SavedViewVisibility;
+  version?: number;
+};
+
+export type InputOfPatchedSavedViewInputSchema = {
+  entity?: string;
+  name?: string;
+  query?: unknown;
+  visibility?: InputOfSavedViewVisibility;
+  version?: number;
+};
+
 export type PatchedSessionPatchInput = {
   title?: string;
   description?: string;
@@ -3549,7 +3565,7 @@ export type PatchedUserProfile = {
   bio?: string;
   location?: string;
   links?: ProfileLinkSchema[];
-  visibility?: VisibilityEnum;
+  visibility?: UserProfileVisibilityEnum;
   skills?: string[];
   interests?: string[];
   preferred_roles?: string[];
@@ -3562,7 +3578,7 @@ export type InputOfPatchedUserProfile = {
   bio?: string;
   location?: string;
   links?: InputOfProfileLinkSchema[];
-  visibility?: InputOfVisibilityEnum;
+  visibility?: InputOfUserProfileVisibilityEnum;
   skills?: string[];
   interests?: string[];
   preferred_roles?: string[];
@@ -4566,6 +4582,76 @@ export type SavedSearchOutput = {
 
 export type InputOfSavedSearchOutput = {};
 
+export type SavedViewInputSchema = {
+  entity?: string;
+  name: string;
+  query: unknown;
+  visibility?: SavedViewVisibility;
+  version?: number;
+};
+
+export type InputOfSavedViewInputSchema = {
+  entity?: string;
+  name: string;
+  query: unknown;
+  visibility?: InputOfSavedViewVisibility;
+  version?: number;
+};
+
+export type SavedViewPageSchema = {
+  entity: string;
+  total: number;
+  limit: number;
+  offset: number;
+  filter: unknown;
+  sort: string[];
+  columns: string[];
+  rows: Record<string, unknown>[];
+  density: string;
+  view: SavedViewSchema;
+};
+
+export type InputOfSavedViewPageSchema = {
+  entity: string;
+  total: number;
+  limit: number;
+  offset: number;
+  filter: unknown;
+  sort: string[];
+  columns: string[];
+  rows: Record<string, unknown>[];
+  density: string;
+  view: InputOfSavedViewSchema;
+};
+
+export type SavedViewSchema = {
+  public_id: string;
+  entity: string;
+  name: string;
+  query: unknown;
+  visibility: SavedViewVisibility;
+  version: number;
+  owner: string;
+  mine: boolean;
+  updated_at: string;
+};
+
+export type InputOfSavedViewSchema = {
+  public_id: string;
+  entity: string;
+  name: string;
+  query: unknown;
+  visibility: InputOfSavedViewVisibility;
+  version: number;
+  owner: string;
+  mine: boolean;
+  updated_at: string;
+};
+
+export type SavedViewVisibility = "private" | "organizers";
+
+export type InputOfSavedViewVisibility = "private" | "organizers";
+
 export type ScanInput = { token: string };
 
 export type InputOfScanInput = { token: string };
@@ -5232,6 +5318,10 @@ export type InputOfUploadIntentSchema = {
   upload: unknown;
 };
 
+export type UserProfileVisibilityEnum = "private" | "members" | "public";
+
+export type InputOfUserProfileVisibilityEnum = "private" | "members" | "public";
+
 export type UserSummarySchema = {
   public_id: string;
   username: string;
@@ -5275,10 +5365,6 @@ export type InputOfVerifyRecordOutput = {
   claims?: Record<string, unknown>;
   error?: string;
 };
-
-export type VisibilityEnum = "private" | "members" | "public";
-
-export type InputOfVisibilityEnum = "private" | "members" | "public";
 
 export type VisibilityInput = {
   gallery_visible?: boolean;
@@ -8712,6 +8798,62 @@ export interface Operations {
       };
     };
     response: null;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_views: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      query?: { entity?: string };
+    };
+    response: SavedViewSchema[];
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_views: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body: InputOfSavedViewInputSchema;
+    };
+    response: SavedViewSchema;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_views_view_public_id: {
+    request: {
+      path: {
+        event_public_id: string;
+        view_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: SavedViewSchema;
+  };
+  patch_api_v1_workspaces_workspace_public_id_events_event_public_id_views_view_public_id: {
+    request: {
+      path: {
+        event_public_id: string;
+        view_public_id: string;
+        workspace_public_id: string;
+      };
+      body?: InputOfPatchedSavedViewInputSchema;
+    };
+    response: SavedViewSchema;
+  };
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_views_view_public_id: {
+    request: {
+      path: {
+        event_public_id: string;
+        view_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: null;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_views_view_public_id_run: {
+    request: {
+      path: {
+        event_public_id: string;
+        view_public_id: string;
+        workspace_public_id: string;
+      };
+      query?: { limit?: number; offset?: number };
+    };
+    response: SavedViewPageSchema;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_voting_plan: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -13310,6 +13452,58 @@ export const operations = {
       query_params: [],
       request_body: false,
       response_kind: "none",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_views: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/views/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: ["entity"],
+    request_body: false,
+    response_kind: "json",
+  },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_views: {
+    method: "POST",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/views/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: true,
+    response_kind: "json",
+  },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_views_view_public_id:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/views/{view_public_id}/",
+      path_params: ["event_public_id", "view_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  patch_api_v1_workspaces_workspace_public_id_events_event_public_id_views_view_public_id:
+    {
+      method: "PATCH",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/views/{view_public_id}/",
+      path_params: ["event_public_id", "view_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_views_view_public_id:
+    {
+      method: "DELETE",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/views/{view_public_id}/",
+      path_params: ["event_public_id", "view_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_views_view_public_id_run:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/views/{view_public_id}/run/",
+      path_params: ["event_public_id", "view_public_id", "workspace_public_id"],
+      query_params: ["limit", "offset"],
+      request_body: false,
+      response_kind: "json",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_voting_plan:
     {

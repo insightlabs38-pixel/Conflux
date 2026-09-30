@@ -355,6 +355,8 @@ EXCLUDED_EVENT_MODELS = {
     # Preset provenance only (PD-F001-B01); not part of the archive contract yet (see spec 001).
     "eventconfig.eventprofile",
     "eventconfig.eventmodulesetting",
+    # Per-user working state (how someone likes to look at a list), not event content (PD-F002-B01).
+    "core.savedview",
 }
 
 

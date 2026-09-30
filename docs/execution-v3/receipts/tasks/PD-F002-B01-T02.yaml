@@ -1,0 +1,82 @@
+version: 3
+task: PD-F002-B01-T02
+batch: PD-F002-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 9201491
+  head_commit: 9201491
+changed_paths:
+- src/api/core/ (models.py SavedView, migrations/0002_saved_views.py, saved_views.py, saved_view_views.py, urls.py)
+- src/api/config/settings.py (enum name override)
+- src/web/lib/savedViews.ts and test
+- src/web/components/ViewBar.tsx and test
+- tests/integration/test_saved_views.py
+- tests/integration/test_final_archive.py (SavedView excluded from the archive with a reason)
+- docs/api/SAVED_VIEWS.md
+- docs/product-depth-v3/specs/002-feature-depth-should-compound-through-shared-primitives.md
+- docs/product-depth-v3/PRIMITIVE_REGISTRY.yaml
+- docs/api/openapi.yaml
+- sdks/
+deliverables:
+- item: Saved views as a reusable platform primitive
+  result: pass
+  evidence: core.SavedView stores a named definition of filter tree, sort, columns and density per event, owner and entity with visibility private or organizers; CRUD and a run endpoint under events/{e}/views/; validated against the entity when saved
+- item: Sharable view URLs
+  result: pass
+  evidence: the URL carries the view public id only (view param); inline filters were dropped from the contract because URL-state rules forbid free text and personal data in URLs (recorded in spec 002); a link to a view the caller cannot see falls back to the default list
+- item: Authorization, lifecycle, idempotency and concurrency
+  result: pass
+  evidence: running always goes through the entity query under the viewer's rights; a view of an entity the caller may not query is absent (404) not forbidden; only the owner changes a view, owner or admin deletes; updates carry a version and a stale one is 409 view_changed; names are unique per owner and there is a quota of 50; a definition that no longer fits is 409 view_outdated and never loosened
+- item: Audit
+  result: pass
+  evidence: saved_view.created, updated and deleted are audited with entity, name and visibility changes; filter values are never copied into the record (asserted with an email address in a filter)
+- item: Web surface
+  result: pass
+  evidence: lib/savedViews.ts and ViewBar (pick with my and shared groups, changed-since-saved status, save with version, save as new, rename, share toggle, copy link, delete with the consequence stated, server refusal keeps the work, failed load with retry)
+invariants:
+- item: Server authorization and validation authoritative
+  result: pass
+  evidence: saving and running validate against the registry; sharing widens who sees the definition, never rows
+- item: No duplicate source of truth
+  result: pass
+  evidence: one table and the one entity query; SavedPublicSearch is untouched (different audience)
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1618 passed, 23 skipped (adds 9 saved view tests; the archive classification test now excludes SavedView with a reason)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 344 web tests (ViewBar 6, savedViews 2); static checks, OpenAPI and SDKs clean after an enum name override for visibility
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: ViewBar and lib; mounted on the applications and projects lists by the data grid in T03, where the browser proof lands
+- surface: api
+  result: pass
+  evidence: list, create, detail, update, delete and run endpoints
+- surface: audit
+  result: pass
+  evidence: three audited actions
+- surface: docs
+  result: pass
+  evidence: SAVED_VIEWS.md, spec 002, registry status IMPLEMENTED
+- surface: sdk
+  result: pass
+  evidence: "not applicable for this task, not_required; generated artifacts regenerated only"
+migrations:
+- core.0002_saved_views (additive table; no backfill)
+findings:
+- The spec 002 table offered an inline filter URL; corrected to the view id only (URL-state rules)
+- SavedView is excluded from the event archive as per-user working state
+limitations:
+- No browser verification in this task; ViewBar and the page hook are mounted in T03
+- Views cannot yet be transferred to another owner or copied between events
+- No per-field visibility; access is per entity roles
+escalations: []
+next: review

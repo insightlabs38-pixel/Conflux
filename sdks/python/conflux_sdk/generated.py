@@ -3158,6 +3158,20 @@ class InputOfPatchedResourceInput(TypedDict):
     body: NotRequired[str]
     position: NotRequired[int]
 
+class PatchedSavedViewInputSchema(TypedDict):
+    entity: NotRequired[str]
+    name: NotRequired[str]
+    query: NotRequired[Any]
+    visibility: NotRequired[SavedViewVisibility]
+    version: NotRequired[int]
+
+class InputOfPatchedSavedViewInputSchema(TypedDict):
+    entity: NotRequired[str]
+    name: NotRequired[str]
+    query: NotRequired[Any]
+    visibility: NotRequired[InputOfSavedViewVisibility]
+    version: NotRequired[int]
+
 class PatchedSessionPatchInput(TypedDict):
     title: NotRequired[str]
     description: NotRequired[str]
@@ -3264,7 +3278,7 @@ class PatchedUserProfile(TypedDict):
     bio: NotRequired[str]
     location: NotRequired[str]
     links: NotRequired[list[ProfileLinkSchema]]
-    visibility: NotRequired[VisibilityEnum]
+    visibility: NotRequired[UserProfileVisibilityEnum]
     skills: NotRequired[list[str]]
     interests: NotRequired[list[str]]
     preferred_roles: NotRequired[list[str]]
@@ -3276,7 +3290,7 @@ class InputOfPatchedUserProfile(TypedDict):
     bio: NotRequired[str]
     location: NotRequired[str]
     links: NotRequired[list[InputOfProfileLinkSchema]]
-    visibility: NotRequired[InputOfVisibilityEnum]
+    visibility: NotRequired[InputOfUserProfileVisibilityEnum]
     skills: NotRequired[list[str]]
     interests: NotRequired[list[str]]
     preferred_roles: NotRequired[list[str]]
@@ -4204,6 +4218,70 @@ class SavedSearchOutput(TypedDict):
 class InputOfSavedSearchOutput(TypedDict):
     pass
 
+class SavedViewInputSchema(TypedDict):
+    entity: NotRequired[str]
+    name: str
+    query: Any
+    visibility: NotRequired[SavedViewVisibility]
+    version: NotRequired[int]
+
+class InputOfSavedViewInputSchema(TypedDict):
+    entity: NotRequired[str]
+    name: str
+    query: Any
+    visibility: NotRequired[InputOfSavedViewVisibility]
+    version: NotRequired[int]
+
+class SavedViewPageSchema(TypedDict):
+    entity: str
+    total: int
+    limit: int
+    offset: int
+    filter: Any
+    sort: list[str]
+    columns: list[str]
+    rows: list[dict[str, Any]]
+    density: str
+    view: SavedViewSchema
+
+class InputOfSavedViewPageSchema(TypedDict):
+    entity: str
+    total: int
+    limit: int
+    offset: int
+    filter: Any
+    sort: list[str]
+    columns: list[str]
+    rows: list[dict[str, Any]]
+    density: str
+    view: InputOfSavedViewSchema
+
+class SavedViewSchema(TypedDict):
+    public_id: str
+    entity: str
+    name: str
+    query: Any
+    visibility: SavedViewVisibility
+    version: int
+    owner: str
+    mine: bool
+    updated_at: str
+
+class InputOfSavedViewSchema(TypedDict):
+    public_id: str
+    entity: str
+    name: str
+    query: Any
+    visibility: InputOfSavedViewVisibility
+    version: int
+    owner: str
+    mine: bool
+    updated_at: str
+
+SavedViewVisibility = Literal['private', 'organizers']
+
+InputOfSavedViewVisibility = Literal['private', 'organizers']
+
 class ScanInput(TypedDict):
     token: str
 
@@ -4829,6 +4907,10 @@ class InputOfUploadIntentSchema(TypedDict):
     expires_at: str
     upload: Any
 
+UserProfileVisibilityEnum = Literal['private', 'members', 'public']
+
+InputOfUserProfileVisibilityEnum = Literal['private', 'members', 'public']
+
 class UserSummarySchema(TypedDict):
     public_id: str
     username: str
@@ -4872,10 +4954,6 @@ class InputOfVerifyRecordOutput(TypedDict):
     valid: bool
     claims: NotRequired[dict[str, Any]]
     error: NotRequired[str]
-
-VisibilityEnum = Literal['private', 'members', 'public']
-
-InputOfVisibilityEnum = Literal['private', 'members', 'public']
 
 class VisibilityInput(TypedDict):
     gallery_visible: NotRequired[bool]
@@ -5256,6 +5334,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                 'query_params': [],
                                                                                                 'request_body': False,
                                                                                                 'response_kind': 'none'},
+ 'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_views_view_public_id': {'method': 'DELETE',
+                                                                                              'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/views/{view_public_id}/',
+                                                                                              'path_params': ['event_public_id',
+                                                                                                              'view_public_id',
+                                                                                                              'workspace_public_id'],
+                                                                                              'query_params': [],
+                                                                                              'request_body': False,
+                                                                                              'response_kind': 'none'},
  'delete_api_v1_workspaces_workspace_public_id_taxonomies_taxonomy_public_id': {'method': 'DELETE',
                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/taxonomies/{taxonomy_public_id}/',
                                                                                 'path_params': ['taxonomy_public_id',
@@ -6702,6 +6788,30 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                              'query_params': [],
                                                                              'request_body': False,
                                                                              'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_views': {'method': 'GET',
+                                                                            'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/views/',
+                                                                            'path_params': ['event_public_id',
+                                                                                            'workspace_public_id'],
+                                                                            'query_params': ['entity'],
+                                                                            'request_body': False,
+                                                                            'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_views_view_public_id': {'method': 'GET',
+                                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/views/{view_public_id}/',
+                                                                                           'path_params': ['event_public_id',
+                                                                                                           'view_public_id',
+                                                                                                           'workspace_public_id'],
+                                                                                           'query_params': [],
+                                                                                           'request_body': False,
+                                                                                           'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_views_view_public_id_run': {'method': 'GET',
+                                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/views/{view_public_id}/run/',
+                                                                                               'path_params': ['event_public_id',
+                                                                                                               'view_public_id',
+                                                                                                               'workspace_public_id'],
+                                                                                               'query_params': ['limit',
+                                                                                                                'offset'],
+                                                                                               'request_body': False,
+                                                                                               'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_voting_candidates': {'method': 'GET',
                                                                                         'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/voting/candidates/',
                                                                                         'path_params': ['event_public_id',
@@ -7034,6 +7144,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                'query_params': [],
                                                                                                'request_body': True,
                                                                                                'response_kind': 'json'},
+ 'patch_api_v1_workspaces_workspace_public_id_events_event_public_id_views_view_public_id': {'method': 'PATCH',
+                                                                                             'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/views/{view_public_id}/',
+                                                                                             'path_params': ['event_public_id',
+                                                                                                             'view_public_id',
+                                                                                                             'workspace_public_id'],
+                                                                                             'query_params': [],
+                                                                                             'request_body': True,
+                                                                                             'response_kind': 'json'},
  'patch_api_v1_workspaces_workspace_public_id_events_event_public_id_voting_plan': {'method': 'PATCH',
                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/voting-plan/',
                                                                                     'path_params': ['event_public_id',
@@ -8181,6 +8299,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                               'query_params': [],
                                                                               'request_body': True,
                                                                               'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_views': {'method': 'POST',
+                                                                             'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/views/',
+                                                                             'path_params': ['event_public_id',
+                                                                                             'workspace_public_id'],
+                                                                             'query_params': [],
+                                                                             'request_body': True,
+                                                                             'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_voting_plan_abuse_signals_signal_public_id_resolve': {'method': 'POST',
                                                                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/voting-plan/abuse-signals/{signal_public_id}/resolve/',
                                                                                                                           'path_params': ['event_public_id',

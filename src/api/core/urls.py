@@ -3,6 +3,7 @@ from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView
 
 from .entity_views import EntityCatalogueView, EntityQueryView
+from .saved_view_views import SavedViewDetailView, SavedViewListView, SavedViewRunView
 from .views import health
 
 urlpatterns = [
@@ -27,6 +28,21 @@ urlpatterns = [
         "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/entities/<slug:entity_key>/",
         EntityQueryView.as_view(),
         name="entity-query",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/views/",
+        SavedViewListView.as_view(),
+        name="saved-view-list",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/views/<uuid:view_public_id>/",
+        SavedViewDetailView.as_view(),
+        name="saved-view-detail",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/views/<uuid:view_public_id>/run/",
+        SavedViewRunView.as_view(),
+        name="saved-view-run",
     ),
     path("accounts/", include("accounts.urls")),
     path("workspaces/", include("workspaces.urls")),

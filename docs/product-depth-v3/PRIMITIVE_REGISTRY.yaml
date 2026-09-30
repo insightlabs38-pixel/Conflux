@@ -229,7 +229,7 @@ primitives:
 - id: SAVED_VIEWS
   name: Saved views and URL state
   owner_task: PD-F002-B01-T02
-  status: PLANNED
+  status: IMPLEMENTED
   consumer_count: 34
   consumers:
   - PD-F006-B04-T08

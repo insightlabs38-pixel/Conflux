@@ -15222,6 +15222,265 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/views/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_views
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: query
+        name: entity
+        schema:
+          type: string
+        description: Only views of this entity.
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SavedViewSchema'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_views
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SavedViewInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SavedViewInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SavedViewInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedViewSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/views/{view_public_id}/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_views_view_public_id
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: view_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedViewSchema'
+          description: ''
+    patch:
+      operationId: patch_api_v1_workspaces_workspace_public_id_events_event_public_id_views_view_public_id
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: view_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSavedViewInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSavedViewInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSavedViewInputSchema'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedViewSchema'
+          description: ''
+    delete:
+      operationId: delete_api_v1_workspaces_workspace_public_id_events_event_public_id_views_view_public_id
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: view_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/views/{view_public_id}/run/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_views_view_public_id_run
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: limit
+        schema:
+          type: integer
+      - in: query
+        name: offset
+        schema:
+          type: integer
+      - in: path
+        name: view_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedViewPageSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/voting-plan/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_voting_plan
@@ -22222,6 +22481,19 @@ components:
           type: integer
           maximum: 100000
           minimum: 0
+    PatchedSavedViewInputSchema:
+      type: object
+      properties:
+        entity:
+          type: string
+        name:
+          type: string
+          maxLength: 80
+        query: {}
+        visibility:
+          $ref: '#/components/schemas/SavedViewVisibility'
+        version:
+          type: integer
     PatchedSessionPatchInput:
       type: object
       properties:
@@ -22403,7 +22675,7 @@ components:
           items:
             $ref: '#/components/schemas/ProfileLinkSchema'
         visibility:
-          $ref: '#/components/schemas/VisibilityEnum'
+          $ref: '#/components/schemas/UserProfileVisibilityEnum'
         skills:
           type: array
           items:
@@ -24067,6 +24339,103 @@ components:
       - filters
       - name
       - public_id
+    SavedViewInputSchema:
+      type: object
+      properties:
+        entity:
+          type: string
+        name:
+          type: string
+          maxLength: 80
+        query: {}
+        visibility:
+          $ref: '#/components/schemas/SavedViewVisibility'
+        version:
+          type: integer
+      required:
+      - name
+      - query
+    SavedViewPageSchema:
+      type: object
+      properties:
+        entity:
+          type: string
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        filter:
+          nullable: true
+        sort:
+          type: array
+          items:
+            type: string
+        columns:
+          type: array
+          items:
+            type: string
+        rows:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        density:
+          type: string
+        view:
+          $ref: '#/components/schemas/SavedViewSchema'
+      required:
+      - columns
+      - density
+      - entity
+      - filter
+      - limit
+      - offset
+      - rows
+      - sort
+      - total
+      - view
+    SavedViewSchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        entity:
+          type: string
+        name:
+          type: string
+        query: {}
+        visibility:
+          $ref: '#/components/schemas/SavedViewVisibility'
+        version:
+          type: integer
+        owner:
+          type: string
+        mine:
+          type: boolean
+        updated_at:
+          type: string
+          format: date-time
+      required:
+      - entity
+      - mine
+      - name
+      - owner
+      - public_id
+      - query
+      - updated_at
+      - version
+      - visibility
+    SavedViewVisibility:
+      enum:
+      - private
+      - organizers
+      type: string
+      description: |-
+        * `private` - Private
+        * `organizers` - Organizers
     ScanInput:
       type: object
       properties:
@@ -25174,6 +25543,16 @@ components:
       - expires_at
       - intent
       - upload
+    UserProfileVisibilityEnum:
+      enum:
+      - private
+      - members
+      - public
+      type: string
+      description: |-
+        * `private` - Private
+        * `members` - Shared workspace members
+        * `public` - Public
     UserSummarySchema:
       type: object
       properties:
@@ -25232,16 +25611,6 @@ components:
           type: string
       required:
       - valid
-    VisibilityEnum:
-      enum:
-      - private
-      - members
-      - public
-      type: string
-      description: |-
-        * `private` - Private
-        * `members` - Shared workspace members
-        * `public` - Public
     VisibilityInput:
       type: object
       properties:

@@ -216,6 +216,7 @@ SPECTACULAR_SETTINGS = {
         "COIRelationshipKind": "evaluations.models.COIRelationshipKind",
         "COIRuleKind": "evaluations.models.COIRuleKind",
         "ProjectCOIAttributeKind": ["institution", "domain"],
+        "SavedViewVisibility": "core.models.SavedView.Visibility",
     },
 }
 

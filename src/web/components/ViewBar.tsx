@@ -13,7 +13,7 @@ import {
 import { Button } from "./Button";
 
 /**
- * Pick, save, rename, share and delete saved views of one entity. The selected view is the `view`
+ * Pick, save, rename, share and delete saved views of one entity. The selected view is the `view_<entity>`
  * URL param (a public id, so a link reopens it); an id that is not in the list (deleted, private to
  * someone else, another event) is dropped with `replace`. `current` is what the list shows now, so
  * the bar can say when it differs from the selected view.
@@ -34,7 +34,8 @@ export function ViewBar({
 }) {
   const base = viewsBase(workspaceId, eventId);
   const load = useSavedViews(base, entity);
-  const [selectedId, select] = useUrlParam("view");
+  // One param per entity: a page can hold several lists, and each only knows its own views.
+  const [selectedId, select] = useUrlParam(`view_${entity}`);
   const [naming, setNaming] = useState<"new" | "rename" | null>(null);
   const [name, setName] = useState("");
   const [removing, setRemoving] = useState(false);
@@ -48,8 +49,9 @@ export function ViewBar({
 
   // An unknown or no-longer-visible id falls back to "no view"; the URL is corrected quietly.
   useEffect(() => {
-    if (load.data && selectedId && !selected) select("", { replace: true });
-  }, [load.data, selectedId, selected, select]);
+    if (load.data && !load.loading && selectedId && !selected)
+      select("", { replace: true });
+  }, [load.data, load.loading, selectedId, selected, select]);
   // A view opened from a link is applied once it is known.
   const [applied, setApplied] = useState("");
   useEffect(() => {
@@ -223,6 +225,9 @@ export function ViewBar({
                     name,
                     query: current,
                   });
+                  // The list must know the new view before the URL names it, or the
+                  // unknown-id correction would drop it again (a refetch can lag the render).
+                  load.update((list) => [...(list ?? []), created]);
                   setApplied(created.public_id);
                   select(created.public_id, { replace: true });
                 } else if (selected) {

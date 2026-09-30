@@ -1,5 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { EntityGrid } from "../../components/EntityGrid";
 import { apiRequest } from "../../lib/api";
+import type { EntityRow } from "../../lib/entityQuery";
 
 type Settings = {
   mode: "open" | "application" | "invite_only";
@@ -13,13 +15,7 @@ type InviteCode = {
   use_count: number;
   revoked_at: string | null;
 };
-type Application = {
-  public_id: string;
-  username: string;
-  status: "pending" | "approved" | "waitlisted" | "rejected";
-  note: string;
-  waitlist_position: number | null;
-};
+type Application = { id: string; username: string; status: string };
 
 function request<T>(
   url: string,
@@ -49,22 +45,20 @@ export function RegistrationPanel({
   const [waitlistEnabled, setWaitlistEnabled] = useState(false);
   const [codes, setCodes] = useState<InviteCode[]>([]);
   const [maxUses, setMaxUses] = useState("1");
-  const [applications, setApplications] = useState<Application[]>([]);
+  const [listVersion, setListVersion] = useState(0);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
   async function refresh() {
-    const [nextSettings, nextCodes, nextApplications] = await Promise.all([
+    const [nextSettings, nextCodes] = await Promise.all([
       request<Settings>(base + "registration-settings/"),
       request<InviteCode[]>(base + "registration-invite-codes/"),
-      request<Application[]>(base + "applications/"),
     ]);
     setSettings(nextSettings);
     setMode(nextSettings.mode);
     setCapacity(nextSettings.capacity?.toString() ?? "");
     setWaitlistEnabled(nextSettings.waitlist_enabled);
     setCodes(nextCodes);
-    setApplications(nextApplications);
   }
 
   useEffect(() => {
@@ -132,12 +126,13 @@ export function RegistrationPanel({
 
   function decide(application: Application, decision: string) {
     void run(async () => {
-      await request<Application>(
-        base + `applications/${application.public_id}/decide/`,
+      await request<unknown>(
+        base + `applications/${application.id}/decide/`,
         "POST",
         { decision },
       );
       await refresh();
+      setListVersion((version) => version + 1);
     });
   }
 
@@ -216,47 +211,47 @@ export function RegistrationPanel({
       )}
 
       <h4>Applications</h4>
-      {applications.length === 0 ? (
-        <p>No applications yet.</p>
-      ) : (
-        <ul>
-          {applications.map((application) => (
-            <li key={application.public_id}>
-              {application.username} · {application.status}
-              {application.waitlist_position != null
-                ? ` (#${application.waitlist_position})`
-                : ""}
-              {application.note ? ` · "${application.note}"` : ""}
-              {(application.status === "pending" ||
-                application.status === "waitlisted") && (
-                <>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => decide(application, "approved")}
-                  >
-                    Approve
-                  </button>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => decide(application, "waitlisted")}
-                  >
-                    Waitlist
-                  </button>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => decide(application, "rejected")}
-                  >
-                    Reject
-                  </button>
-                </>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+      <EntityGrid
+        workspaceId={workspaceId}
+        eventId={eventId}
+        entity="applications"
+        label="Applications"
+        rowLabel={(row: EntityRow) => String(row.username ?? row.id)}
+        refreshToken={listVersion}
+        empty={<p>People who apply will appear here.</p>}
+        actions={(row: EntityRow) => {
+          const application = row as unknown as Application;
+          return application.status === "pending" ||
+            application.status === "waitlisted" ? (
+            <>
+              <button
+                type="button"
+                disabled={busy}
+                aria-label={`Approve ${application.username}`}
+                onClick={() => decide(application, "approved")}
+              >
+                Approve
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                aria-label={`Waitlist ${application.username}`}
+                onClick={() => decide(application, "waitlisted")}
+              >
+                Waitlist
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                aria-label={`Reject ${application.username}`}
+                onClick={() => decide(application, "rejected")}
+              >
+                Reject
+              </button>
+            </>
+          ) : null;
+        }}
+      />
     </section>
   );
 }

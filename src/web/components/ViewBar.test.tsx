@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { act, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { useLocation } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { jsonResponse } from "../lib/test-http";
 import { withRouter } from "../lib/test-router";
@@ -78,8 +79,10 @@ async function mount(
     }),
   );
   const applied: (SavedView | null)[] = [];
+  const searches: string[] = [];
   function Host() {
     const [current] = useState(options.current ?? PENDING);
+    searches.push(useLocation().search);
     return (
       <ViewBar
         workspaceId="w"
@@ -97,7 +100,7 @@ async function mount(
     root.render(withRouter(<Host />, options.url ?? "/w/w/setup")),
   );
   await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
-  return { container, calls, applied, root };
+  return { container, calls, applied, searches, root };
 }
 const button = (c: HTMLElement, text: string) =>
   [...c.querySelectorAll("button")].find((b) => b.textContent === text);
@@ -135,13 +138,13 @@ describe("ViewBar", () => {
 
   it("opens the view named in the URL and drops an id that is not in the list", async () => {
     const opened = await mount([view({})], {
-      url: `/w/w/setup?view=${view({}).public_id}`,
+      url: `/w/w/setup?view_applications=${view({}).public_id}`,
     });
     expect(opened.applied.at(-1)?.name).toBe("Pending");
     await act(async () => opened.root.unmount());
 
     const stray = await mount([view({})], {
-      url: "/w/w/setup?view=99999999-9999-4999-8999-999999999999",
+      url: "/w/w/setup?view_applications=99999999-9999-4999-8999-999999999999",
     });
     expect(stray.applied).toEqual([]);
     expect(stray.container.querySelector("select")!.value).toBe("");
@@ -150,7 +153,7 @@ describe("ViewBar", () => {
 
   it("says when the list differs from the saved view and saves the change with the version", async () => {
     const { container, calls, root } = await mount([view({})], {
-      url: `/w/w/setup?view=${view({}).public_id}`,
+      url: `/w/w/setup?view_applications=${view({}).public_id}`,
       current: { ...PENDING, sort: "username" },
     });
     expect(container.textContent).toContain("Changed since saved");
@@ -166,7 +169,7 @@ describe("ViewBar", () => {
   });
 
   it("saves the current list as a new named view", async () => {
-    const { container, calls, applied, root } = await mount([]);
+    const { container, calls, applied, searches, root } = await mount([]);
     await act(async () => button(container, "Save as new view")!.click());
     expect(button(container, "Save view")!.disabled).toBe(true);
     await act(async () =>
@@ -185,12 +188,21 @@ describe("ViewBar", () => {
     });
     expect(container.textContent).toContain("View saved.");
     expect(applied).toEqual([]); // the list already shows this definition; nothing to apply twice
+    // The URL names the new view and keeps naming it once the list has reloaded.
+    await settle();
+    await settle();
+    expect(searches.at(-1)).toBe(
+      "?view_applications=33333333-3333-4333-8333-333333333333",
+    );
+    expect(container.querySelector("select")!.value).toBe(
+      "33333333-3333-4333-8333-333333333333",
+    );
     await act(async () => root.unmount());
   });
 
   it("shares a view, renames it, and deletes it with the consequence stated", async () => {
     const { container, calls, root } = await mount([view({})], {
-      url: `/w/w/setup?view=${view({}).public_id}`,
+      url: `/w/w/setup?view_applications=${view({}).public_id}`,
     });
     await act(async () =>
       container
@@ -233,7 +245,7 @@ describe("ViewBar", () => {
 
   it("shows a server refusal without losing the work, and a failed load with a retry", async () => {
     const { container, root } = await mount([view({})], {
-      url: `/w/w/setup?view=${view({}).public_id}`,
+      url: `/w/w/setup?view_applications=${view({}).public_id}`,
       current: { ...PENDING, sort: "username" },
     });
     vi.stubGlobal(

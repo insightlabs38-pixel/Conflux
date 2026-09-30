@@ -9,7 +9,7 @@ import {
 /**
  * Saved views (PD-F002-B01-T02): named definitions of how to look at one entity in one event. A
  * view is a query definition, never rows; running it goes through the entity query under the
- * viewer's own rights. The only thing a shareable URL carries is the view's public id (`view`),
+ * viewer's own rights. The only thing a shareable URL carries is the view's public id (`view_<entity>`),
  * because filters can hold free text and personal data (URL-state rules, lib/urlState.ts).
  */
 export type ViewDefinition = {

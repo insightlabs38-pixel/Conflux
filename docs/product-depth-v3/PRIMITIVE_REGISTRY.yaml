@@ -269,7 +269,7 @@ primitives:
 - id: DATA_GRID
   name: Dense data-grid
   owner_task: PD-F002-B01-T03
-  status: PLANNED
+  status: IMPLEMENTED
   consumer_count: 141
   consumers:
   - PD-F002-B02-T05

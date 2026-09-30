@@ -90,15 +90,7 @@ def test_filter_sort_columns_and_paging():
     applicants(event, ROWS)
     everyone = ask(client, base).json()
     assert everyone["total"] == 5 and everyone["limit"] == 25 and everyone["offset"] == 0
-    assert everyone["columns"] == [
-        "username",
-        "status",
-        "note",
-        "waitlist_position",
-        "decided_by",
-        "decided_at",
-        "created_at",
-    ]
+    assert everyone["columns"] == ["username", "status", "note", "waitlist_position", "created_at"]
     status = ask(client, base, filter=tree(field="status", op="eq", value="waitlisted"))
     assert names(status) == ["cyd", "dee"]
     assert status.json()["total"] == 2

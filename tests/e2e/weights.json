@@ -1,6 +1,7 @@
 {
   "canary:chain": 126.5,
   "isolated-mutation:event-advanced": 15.0,
+  "isolated-mutation:entity-grid": 25.0,
   "isolated-mutation:event-configuration": 15.0,
   "isolated-mutation:event-consequences": 15.0,
   "isolated-mutation:event-modules": 20.0,

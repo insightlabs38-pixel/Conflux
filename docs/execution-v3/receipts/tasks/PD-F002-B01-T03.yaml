@@ -1,0 +1,81 @@
+version: 3
+task: PD-F002-B01-T03
+batch: PD-F002-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: c129e38
+  head_commit: c129e38
+changed_paths:
+- src/web/components/ (DataGrid, EntityGrid, ViewBar fix, tests)
+- src/web/features/event-builder/ (RegistrationPanel.tsx and test, EventDashboard.tsx)
+- src/web/styles/components.css
+- src/api/events/entities.py (default columns)
+- tests/e2e/ (entity-grid.spec.ts, tiers.json, weights.json)
+- tests/integration/test_entity_query.py
+- docs/operations/DATA_GRID.md
+- docs/product-depth-v3/specs/002-feature-depth-should-compound-through-shared-primitives.md
+- docs/product-depth-v3/PRIMITIVE_REGISTRY.yaml
+- docs/api/SAVED_VIEWS.md
+deliverables:
+- item: Configurable dense data grid as a reusable primitive
+  result: pass
+  evidence: DataGrid is a controlled server-driven table (sort, paging, density, selection, per-row actions, custom cells); EntityGrid composes catalogue, filter builder, saved views, column picker, sort select and density over the entity query
+- item: Real adopters, not a demo
+  result: pass
+  evidence: the applications list in Participants Registration replaces a hand-written list (decide actions are row actions and the grid reloads after a decision) and a new Projects list appears in Participants; both run on the fixture event in the browser
+- item: States and accessibility
+  result: pass
+  evidence: native table with caption, scope and aria-sort; selection checkboxes that move with the arrow keys, Home, End and Page keys; loading, empty, filtered-empty, error with retry and denied states; stacked card layout on narrow screens with a Sort by select because the header is hidden there; axe and no horizontal overflow at 390 and 1440
+- item: Saved views mounted and proven in the browser
+  result: pass
+  evidence: entity-grid.spec saves, reopens from a link, changes, rejects an unknown id and deletes a view; a real defect was found and fixed, a shared view param made each list on a page drop the other list's views, so the param is now one per entity (view_applications)
+invariants:
+- item: Server authoritative, no client-side set logic
+  result: pass
+  evidence: the grid only renders the rows it is given; filters, sorts and columns are request parameters; selection is the ids the server returned
+- item: No duplicate source of truth
+  result: pass
+  evidence: one catalogue drives columns, operators and choices; nothing is hard-coded per list beyond renderers and actions
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1618 passed, 23 skipped
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 355 web tests (DataGrid 6, EntityGrid 5, ViewBar URL case, registration grid), two full runs green; static checks clean
+- command: make e2e-fast
+  result: pass
+  note: read-only, isolated-mutation (incl. entity-grid) and canary ok; docs/verification/PD-F002-B01/T03-e2e-fast.log
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: DataGrid, EntityGrid, ViewBar on two lists
+- surface: api
+  result: pass
+  evidence: no new endpoint; the applications entity default columns changed
+- surface: audit
+  result: pass
+  evidence: "not applicable for this task, read-only list; saved view writes are audited in T02"
+- surface: docs
+  result: pass
+  evidence: DATA_GRID.md, spec 002, registry status IMPLEMENTED
+- surface: sdk
+  result: pass
+  evidence: "not applicable for this task, not_required"
+migrations: []
+findings:
+- The ARIA grid role was not used, native table semantics plus row-checkbox arrow navigation keep the contract without a cell-level focus model
+- Two Clear filter buttons can exist at once, in the builder and in the empty state, by design
+- Flaky hooks/useRealtime.test.tsx under heavy CPU contention remains the only known web test flake (recorded in B02)
+limitations:
+- No saved column widths or order, no inline editing, no multi-key header sort
+- The other nine hand-written tables have not adopted the grid
+- Bulk selection is enabled in the grid but nothing consumes it until the bulk planner in T04
+escalations: []
+next: review

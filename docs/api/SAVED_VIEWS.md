@@ -25,11 +25,11 @@ A definition that no longer fits its entity (a field was renamed or removed) is 
 
 ## URLs
 
-The shareable form is `?view=<public id>`: the URL carries the id only (URL-state rules: no free text or personal data in URLs). A link to a view someone else cannot see falls back to the default list.
+The shareable form is `?view_<entity>=<public id>` (for example `?view_applications=<id>`): the URL carries the id only (URL-state rules: no free text or personal data in URLs). A link to a view someone else cannot see falls back to the default list.
 
 ## Web
 
-`src/web/lib/savedViews.ts` (types, `useSavedViews`, create/update/delete) and `ViewBar` (pick, save, save as new, rename, share, copy link, delete with its consequence stated). The `view` param is the URL state; the list itself stays the caller's.
+`src/web/lib/savedViews.ts` (types, `useSavedViews`, create/update/delete) and `ViewBar` (pick, save, save as new, rename, share, copy link, delete with its consequence stated). The `view_<entity>` param (one per entity, because a page can hold several lists) is the URL state; the list itself stays the caller's.
 
 ## Compatibility
 

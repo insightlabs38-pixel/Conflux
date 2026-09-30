@@ -25,8 +25,10 @@ entities.register(
             ),
             entities.Field("note", entities.TEXT, "note", "Note", sortable=False),
             entities.Field("waitlist_position", entities.NUMBER, "waitlist_position", "Waitlist"),
-            entities.Field("decided_by", entities.TEXT, "decided_by__username", "Decided by"),
-            entities.Field("decided_at", entities.DATE, "decided_at", "Decided"),
+            entities.Field(
+                "decided_by", entities.TEXT, "decided_by__username", "Decided by", default=False
+            ),
+            entities.Field("decided_at", entities.DATE, "decided_at", "Decided", default=False),
             entities.Field("created_at", entities.DATE, "created_at", "Applied"),
         ),
     )

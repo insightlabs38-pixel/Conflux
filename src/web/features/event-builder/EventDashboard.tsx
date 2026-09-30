@@ -25,6 +25,7 @@ import { ConfigHistoryPanel } from "../audit/ConfigHistoryPanel";
 import { useReadiness } from "../../hooks/useReadiness";
 import { ConfigurationPanel } from "./ConfigurationPanel";
 import { ConsequenceDialog } from "../../components/ConsequenceDialog";
+import { EntityGrid } from "../../components/EntityGrid";
 import { CreateEvent } from "./CreateEvent";
 import { WorkflowStatus } from "./WorkflowStatus";
 import { FeaturesPanel } from "./FeaturesPanel";
@@ -632,6 +633,24 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
                       key={`registration-${selected.public_id}`}
                       workspaceId={workspaceId}
                       eventId={selected.public_id}
+                    />
+                  ),
+                },
+                {
+                  id: "ProjectsGrid",
+                  label: "Projects",
+                  description: "Every project, filterable",
+                  content: (
+                    <EntityGrid
+                      key={`projects-${selected.public_id}`}
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                      entity="projects"
+                      label="Projects"
+                      rowLabel={(row) => String(row.name ?? row.id)}
+                      empty={
+                        <p>Projects appear here once teams create them.</p>
+                      }
                     />
                   ),
                 },

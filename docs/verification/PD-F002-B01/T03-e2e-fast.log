@@ -1,0 +1,21 @@
+[iso-event-advanced] exit 0: 1 skipped; 1 passed (9.0s)
+[iso-event-configuration] exit 0: 2 skipped; 2 passed (15.5s)
+[iso-entity-grid] exit 0: 2 skipped; 2 passed (32.0s)
+[canary-lifecycle] exit 0: 6 skipped; 6 passed (31.1s)
+[iso-event-consequences] exit 0: 2 skipped; 2 passed (20.3s)
+[iso-event-modules] exit 0: 1 skipped; 1 passed (15.0s)
+[iso-event-presets] exit 0: ✓  3 [desktop] › tests/e2e/event-presets.spec.ts:98:5 › the create form explains a failed format list and recovers on retry (2.8s); -  6 [mobile] › tests/e2e/event-
+[canary-scenes] exit 0: 5 passed (17.8s)
+[iso-event-readiness] exit 0: 2 skipped; 2 passed (17.7s)
+[iso-event-workflow] exit 0: 2 skipped; 2 passed (13.6s)
+[iso-profiles] exit 0: 2 skipped; 2 passed (8.5s)
+[iso-event-themes] exit 0: 16 skipped; 16 passed (57.7s)
+[canary-uiv2-organizer] exit 0: 4 skipped; 4 passed (49.9s)
+[iso-participant-workflow] exit 0: 4 skipped; 4 passed (41.1s)
+[iso-route-drafts] exit 0: 6 skipped; 6 passed (19.6s)
+[iso-uiv2-judge] exit 0: 4 skipped; 4 passed (15.2s)
+[iso-pvs] exit 0: 5 skipped; 15 passed (42.4s)
+[read-only] exit 0: ✓    6 [desktop] › tests/e2e/async-operations.spec.ts:108:5 › a failed part is an alert with the reason, and Try again starts a fresh attempt (2.1s); -   73 [mobile] › test
+[canary-uiv2-final-states] exit 0: 6 skipped; 6 passed (47.2s)
+[canary-release-integrity] exit 0: 4 skipped; 4 passed (3.0s)
+== read-only: ok, isolated-mutation: ok, canary: ok

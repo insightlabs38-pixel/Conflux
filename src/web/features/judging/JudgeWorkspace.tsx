@@ -22,6 +22,7 @@ import {
   JudgeAssignmentsPanel,
   JudgeRoutePanel,
 } from "../pvs";
+import { apiJson } from "../../lib/api";
 
 type Event = { public_id: string; name: string };
 type Stage = { public_id: string; name: string };
@@ -55,31 +56,6 @@ function message(value: unknown): string {
       .map(([key, item]) => `${key}: ${message(item)}`)
       .join(" ");
   return "Request failed.";
-}
-
-async function request<T>(
-  url: string,
-  method = "GET",
-  body?: object,
-): Promise<T> {
-  const response = await fetch(url, {
-    method,
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) {
-    let detail: unknown = `Request failed (${response.status}).`;
-    try {
-      detail = await response.json();
-    } catch {
-      /* Retain status message. */
-    }
-    throw new Error(message(detail));
-  }
-  return response.status === 204
-    ? (undefined as T)
-    : (response.json() as Promise<T>);
 }
 
 // Offline support (VS21): a judge's assignments/rubric are cached on every
@@ -149,7 +125,7 @@ async function flushOutbox(base: string): Promise<number> {
   const remaining: BallotPayload[] = [];
   for (const [index, ballot] of queue.entries()) {
     try {
-      await request(`${base}ballots/`, "POST", ballot);
+      await apiJson(`${base}ballots/`, "POST", ballot);
     } catch (cause) {
       if (isNetworkFailure(cause)) {
         remaining.push(...queue.slice(index));
@@ -198,7 +174,7 @@ function BallotForm({
 
   useEffect(() => {
     let active = true;
-    request<Draft>(draftUrl)
+    apiJson<Draft>(draftUrl)
       .then((draft) => {
         if (!active) return;
         if (!draft) {
@@ -239,7 +215,7 @@ function BallotForm({
     const work = pending.current
       .catch(() => undefined)
       .then(async () => {
-        await request(draftUrl, "PUT", {
+        await apiJson(draftUrl, "PUT", {
           responses: numeric,
           comment: snapshot.comment,
         });
@@ -303,7 +279,7 @@ function BallotForm({
         // draft step is skippable rather than fatal here.
         if (!isNetworkFailure(draftCause)) throw draftCause;
       }
-      await request(`${base}ballots/`, "POST", {
+      await apiJson(`${base}ballots/`, "POST", {
         project: candidate.project,
         comment,
         responses,
@@ -505,8 +481,8 @@ function PlanQueue({
     setLoading(true);
     setError("");
     Promise.all([
-      request<Candidate[]>(base + "candidates/"),
-      request<RubricVersion | null>(base + "publish-rubric/"),
+      apiJson<Candidate[]>(base + "candidates/"),
+      apiJson<RubricVersion | null>(base + "publish-rubric/"),
     ])
       .then(async ([nextCandidates, nextRubric]) => {
         setCandidates(nextCandidates);
@@ -708,7 +684,7 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
 
   useEffect(() => {
     let active = true;
-    request<Event[]>(`/api/v1/workspaces/${workspaceId}/judge-events/`)
+    apiJson<Event[]>(`/api/v1/workspaces/${workspaceId}/judge-events/`)
       .then((items) => {
         if (active) setEvents(items);
       })
@@ -726,7 +702,7 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
   useEffect(() => {
     if (!eventId) return;
     let active = true;
-    request<Stage[]>(
+    apiJson<Stage[]>(
       `/api/v1/workspaces/${workspaceId}/events/${eventId}/stages/`,
     )
       .then((items) => {
@@ -746,7 +722,7 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
   useEffect(() => {
     if (!stageId) return;
     let active = true;
-    request<Plan[]>(
+    apiJson<Plan[]>(
       `/api/v1/workspaces/${workspaceId}/events/${eventId}/stages/${stageId}/evaluation-plans/`,
     )
       .then((items) => {

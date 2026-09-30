@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { ErrorState } from "../../components/ErrorState";
+import { apiRequest } from "../../lib/api";
 
 type Answer = string | number | boolean | string[];
 type Field = {
@@ -41,28 +42,21 @@ function localDateTime(value: string) {
     .slice(0, 16);
 }
 
-async function request<T>(
+function request<T>(
   url: string,
-  method = "GET",
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" = "GET",
   body?: object,
 ): Promise<T> {
-  const response = await fetch(url, {
+  return apiRequest<T>(url, {
     method,
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
+    body,
+    describe: (status, detail) =>
+      detail === undefined
+        ? `Request failed (${status}).`
+        : typeof detail === "string"
+          ? detail
+          : JSON.stringify(detail),
   });
-  if (!response.ok) {
-    let detail = `Request failed (${response.status}).`;
-    try {
-      const data = await response.json();
-      detail = typeof data === "string" ? data : JSON.stringify(data);
-    } catch {
-      // Keep the HTTP status.
-    }
-    throw new Error(detail);
-  }
-  return response.json() as Promise<T>;
 }
 
 export function ProjectForms({

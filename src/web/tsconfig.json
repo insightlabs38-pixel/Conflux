@@ -8,7 +8,11 @@
     "strict": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["vite/client", "vitest/globals"]
+    "types": ["vite/client", "vitest/globals"],
+    "baseUrl": ".",
+    "paths": {
+      "@conflux/sdk": ["../../sdks/typescript/index.ts"]
+    }
   },
   "include": [
     "app",

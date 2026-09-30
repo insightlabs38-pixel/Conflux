@@ -4,6 +4,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 import { createTestQueryClient } from "../lib/test-router";
+import { jsonResponse } from "../lib/test-http";
 
 // Silences a benign act() warning; happy-dom doesn't set this itself.
 (
@@ -347,7 +348,7 @@ describe("App navigation", () => {
       vi.fn().mockImplementation(async (input: unknown) => {
         const url = String(input);
         if (url.includes("/voting/")) {
-          return { ok: false, status: 404, json: async () => ({}) };
+          return jsonResponse(404, {});
         }
         return {
           ok: true,
@@ -383,22 +384,23 @@ function mockMe(role: string, status = 200) {
     vi.fn().mockImplementation(async (input: unknown) => {
       const url = String(input);
       if (url.includes("/accounts/me/"))
-        return {
-          ok: status === 200,
+        return jsonResponse(
           status,
-          json: async () => ({
-            public_id: "u1",
-            username: "member",
-            memberships: [
-              {
-                workspace: "w1",
-                workspace_name: "Regionals",
-                workspace_slug: "regionals",
-                role,
-              },
-            ],
-          }),
-        };
+          status === 200
+            ? {
+                public_id: "u1",
+                username: "member",
+                memberships: [
+                  {
+                    workspace: "w1",
+                    workspace_name: "Regionals",
+                    workspace_slug: "regionals",
+                    role,
+                  },
+                ],
+              }
+            : { detail: "Not signed in." },
+        );
       return { ok: true, status: 200, json: async () => [] };
     }),
   );

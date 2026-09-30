@@ -2,6 +2,7 @@ import { appHref, routes } from "../../lib/routes";
 import { useEffect, useState } from "react";
 import { Badge } from "../../components/Badge";
 import { Card } from "../../components/Card";
+import { apiRequest } from "../../lib/api";
 
 type ChecklistItem = {
   id: string;
@@ -67,11 +68,10 @@ type Summary = {
   };
 };
 
-async function readJson<T>(url: string): Promise<T> {
-  const response = await fetch(url, { credentials: "include" });
-  if (!response.ok)
-    throw new Error(`Operations center request failed (${response.status}).`);
-  return response.json() as Promise<T>;
+function readJson<T>(url: string): Promise<T> {
+  return apiRequest<T>(url, {
+    describe: (status) => `Operations center request failed (${status}).`,
+  });
 }
 
 function severityTone(item: ChecklistItem): "success" | "warning" | "danger" {

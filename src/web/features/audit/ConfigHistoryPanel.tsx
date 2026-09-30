@@ -3,6 +3,7 @@ import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
+import { apiRequest } from "../../lib/api";
 
 type FieldChange = { before: unknown; after: unknown };
 type HistoryEntry = {
@@ -39,15 +40,10 @@ export function ConfigHistoryPanel({
 
   function load() {
     setError("");
-    void fetch(
+    void apiRequest<HistoryEntry[]>(
       `/api/v1/audit/${workspaceId}/events/${eventId}/config-history/`,
-      { credentials: "include" },
+      { describe: (status) => `Request failed (${status}).` },
     )
-      .then(async (response) => {
-        if (!response.ok)
-          throw new Error(`Request failed (${response.status}).`);
-        return (await response.json()) as HistoryEntry[];
-      })
       .then(setEntries)
       .catch((cause: unknown) => setError(message(cause)));
   }
@@ -58,11 +54,13 @@ export function ConfigHistoryPanel({
     setError("");
     setNotice("");
     try {
-      const response = await fetch(
+      await apiRequest(
         `/api/v1/audit/${workspaceId}/events/${eventId}/config-history/${entry.public_id}/restore/`,
-        { method: "POST", credentials: "include" },
+        {
+          method: "POST",
+          describe: (status) => `Restore failed (${status}).`,
+        },
       );
-      if (!response.ok) throw new Error(`Restore failed (${response.status}).`);
       setPending(null);
       setNotice(
         "Configuration restored. Reload its editor to see the current values.",

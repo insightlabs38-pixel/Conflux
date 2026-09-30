@@ -3,6 +3,7 @@ import { Badge } from "../../components/Badge";
 import { Button } from "../../components/Button";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
+import { apiJson, apiRequest, orNull } from "../../lib/api";
 
 type IdentityMode = "authenticated" | "email_link" | "token";
 type Status = {
@@ -22,31 +23,6 @@ function message(value: unknown): string {
       .map(([key, item]) => `${key}: ${message(item)}`)
       .join(" ");
   return "Request failed.";
-}
-
-async function request<T>(
-  url: string,
-  method = "GET",
-  body?: object,
-): Promise<T> {
-  const response = await fetch(url, {
-    method,
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) {
-    let detail: unknown = `Request failed (${response.status}).`;
-    try {
-      detail = await response.json();
-    } catch {
-      /* Retain status message. */
-    }
-    throw new Error(message(detail));
-  }
-  return response.status === 204
-    ? (undefined as T)
-    : (response.json() as Promise<T>);
 }
 
 /** Public audience-choice voting (COM-*), embedded on the public event page.
@@ -73,13 +49,12 @@ export function CommunityVoting({ eventId }: { eventId: string }) {
     setStatusState("loading");
     setError("");
     setResultsError("");
-    fetch(base + "/status/", { credentials: "include" })
-      .then(async (response) => {
-        if (response.status === 404) return null;
-        if (!response.ok)
-          throw new Error(`Could not load voting (${response.status}).`);
-        return response.json() as Promise<Status>;
-      })
+    orNull(
+      apiRequest<Status>(base + "/status/", {
+        describe: (status) => `Could not load voting (${status}).`,
+      }),
+      404,
+    )
       .then((nextStatus) => {
         if (!active) return;
         setStatus(nextStatus);
@@ -100,15 +75,13 @@ export function CommunityVoting({ eventId }: { eventId: string }) {
     // Unpublished results are a guaranteed 403 for the public; don't ask.
     if (!status || status.results_published === false) return;
     let active = true;
-    fetch(base + "/results/", { credentials: "include" })
-      .then(async (response) => {
-        if (response.status === 403 || response.status === 404) return null;
-        if (!response.ok)
-          throw new Error(
-            `Could not load voting results (${response.status}).`,
-          );
-        return response.json() as Promise<Result[]>;
-      })
+    orNull(
+      apiRequest<Result[]>(base + "/results/", {
+        describe: (status) => `Could not load voting results (${status}).`,
+      }),
+      403,
+      404,
+    )
       .then((items) => {
         if (active) setResults(items);
       })
@@ -122,7 +95,7 @@ export function CommunityVoting({ eventId }: { eventId: string }) {
 
   useEffect(() => {
     if (!status) return;
-    request<Candidate[]>(
+    apiJson<Candidate[]>(
       base + `/candidates/${voteToken ? `?token=${voteToken}` : ""}`,
     )
       .then(setCandidates)
@@ -133,7 +106,7 @@ export function CommunityVoting({ eventId }: { eventId: string }) {
     event.preventDefault();
     setError("");
     try {
-      const response = await request<{ token: string }>(
+      const response = await apiJson<{ token: string }>(
         base + "/request-email-token/",
         "POST",
         {
@@ -154,7 +127,7 @@ export function CommunityVoting({ eventId }: { eventId: string }) {
     setVoting(true);
     setError("");
     try {
-      await request(base + "/votes/", "POST", {
+      await apiJson(base + "/votes/", "POST", {
         project,
         ...(voteToken ? { token: voteToken } : {}),
       });

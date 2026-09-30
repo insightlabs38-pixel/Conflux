@@ -1,6 +1,7 @@
 import { PersonRow, type PersonIdentity } from "../../components/Person";
 import { useEffect, useState } from "react";
 import { Button } from "../../components/Button";
+import { apiRequest } from "../../lib/api";
 
 type Judge = { judge: string; username: string; identity?: PersonIdentity };
 type Invitation = {
@@ -30,13 +31,11 @@ export function JudgeDirectoryPanel({
   useEffect(() => {
     let active = true;
     Promise.all([
-      fetch(`${base}judge-directory/`, { credentials: "include" }).then((r) => {
-        if (!r.ok) throw new Error("Could not load judge directory.");
-        return r.json() as Promise<Judge[]>;
+      apiRequest<Judge[]>(`${base}judge-directory/`, {
+        describe: () => "Could not load judge directory.",
       }),
-      fetch(invitationUrl, { credentials: "include" }).then((r) => {
-        if (!r.ok) throw new Error("Could not load judge invitations.");
-        return r.json() as Promise<Invitation[]>;
+      apiRequest<Invitation[]>(invitationUrl, {
+        describe: () => "Could not load judge invitations.",
       }),
     ])
       .then(([directory, existing]) => {
@@ -56,22 +55,21 @@ export function JudgeDirectoryPanel({
   async function invite() {
     setError("");
     try {
-      const response = await fetch(invitationUrl, {
+      const invitation = await apiRequest<Invitation>(invitationUrl, {
         method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pool: poolId, judge: judgeId }),
+        body: { pool: poolId, judge: judgeId },
+        describe: (_status, detail) => {
+          const problem = (detail ?? {}) as {
+            detail?: string;
+            judge?: string[];
+          };
+          return (
+            problem.detail ||
+            problem.judge?.join(" ") ||
+            "Could not invite judge."
+          );
+        },
       });
-      if (!response.ok) {
-        const detail = (await response.json()) as {
-          detail?: string;
-          judge?: string[];
-        };
-        throw new Error(
-          detail.detail || detail.judge?.join(" ") || "Could not invite judge.",
-        );
-      }
-      const invitation = (await response.json()) as Invitation;
       setInvitations((items) => [
         invitation,
         ...items.filter((item) => item.public_id !== invitation.public_id),

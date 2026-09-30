@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
+import { apiJson } from "../../lib/api";
 
 type EventSummary = { public_id: string; name: string };
 type Template = {
@@ -44,31 +45,6 @@ function message(error: unknown): string {
   return "Request failed.";
 }
 
-async function request<T>(
-  path: string,
-  method = "GET",
-  body?: object,
-): Promise<T> {
-  const response = await fetch(path, {
-    method,
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) {
-    let detail: unknown = `Request failed (${response.status}).`;
-    try {
-      detail = await response.json();
-    } catch {
-      /* Retain status message. */
-    }
-    throw new Error(message(detail));
-  }
-  return response.status === 204
-    ? (undefined as T)
-    : (response.json() as Promise<T>);
-}
-
 export function EventTemplatesPanel({
   workspaceId,
   onCreated,
@@ -96,9 +72,9 @@ export function EventTemplatesPanel({
 
   function loadLists() {
     void Promise.all([
-      request<EventSummary[]>(base + "events/"),
-      request<Template[]>(base + "event-templates/"),
-      request<LibraryTemplate[]>(base + "event-templates/library/"),
+      apiJson<EventSummary[]>(base + "events/"),
+      apiJson<Template[]>(base + "event-templates/"),
+      apiJson<LibraryTemplate[]>(base + "event-templates/library/"),
     ])
       .then(([nextEvents, nextTemplates, nextLibrary]) => {
         setEvents(nextEvents);
@@ -132,7 +108,7 @@ export function EventTemplatesPanel({
   function previewSource() {
     void run(async () => {
       if (!sourceEvent) throw new Error("Choose a source event first.");
-      const archive = await request<Preview>(
+      const archive = await apiJson<Preview>(
         base + `events/${sourceEvent}/archive/?mode=config`,
       );
       setPreview(archive);
@@ -144,7 +120,7 @@ export function EventTemplatesPanel({
     void run(async () => {
       if (!sourceEvent) throw new Error("Choose a source event first.");
       if (!templateName.trim()) throw new Error("Template name is required.");
-      const saved = await request<Template>(base + "event-templates/", "POST", {
+      const saved = await apiJson<Template>(base + "event-templates/", "POST", {
         event: sourceEvent,
         name: templateName.trim(),
         sections,
@@ -160,7 +136,7 @@ export function EventTemplatesPanel({
       if (!sourceEvent) throw new Error("Choose a source event first.");
       if (!name.trim() || !slug.trim())
         throw new Error("Name and slug are required.");
-      const result = await request<{
+      const result = await apiJson<{
         public_id: string;
         name: string;
         slug: string;
@@ -184,7 +160,7 @@ export function EventTemplatesPanel({
     await run(async () => {
       if (!instantiateName.trim() || !instantiateSlug.trim())
         throw new Error("Name and slug are required.");
-      const result = await request<{
+      const result = await apiJson<{
         public_id: string;
         name: string;
         slug: string;
@@ -199,7 +175,7 @@ export function EventTemplatesPanel({
 
   async function removeTemplate(template: Template) {
     await run(async () => {
-      await request(base + `event-templates/${template.public_id}/`, "DELETE");
+      await apiJson(base + `event-templates/${template.public_id}/`, "DELETE");
       setTemplates((current) =>
         current.filter((item) => item.public_id !== template.public_id),
       );
@@ -214,7 +190,7 @@ export function EventTemplatesPanel({
     await run(async () => {
       if (!instantiateName.trim() || !instantiateSlug.trim())
         throw new Error("Name and slug are required.");
-      const result = await request<{
+      const result = await apiJson<{
         public_id: string;
         name: string;
         slug: string;

@@ -1,0 +1,85 @@
+version: 3
+task: PD-B04-T03
+batch: PD-B04
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: a0a358a15cf0bf50c1a9279f5981f25ad2dae54e
+  head_commit: a0a358a15cf0bf50c1a9279f5981f25ad2dae54e
+changed_paths:
+- src/web/lib/api.ts
+- src/web/lib/api.test.ts
+- src/web/lib/transport.test.ts
+- src/web/lib/test-http.ts
+- src/web/hooks/useMe.ts
+- src/web/app/SignIn.tsx
+- src/web/features/pvs/http.ts
+- src/web/features/**/*.tsx
+- sdks/typescript/client.ts
+- sdks/typescript/index.ts
+- src/web/vite.config.ts
+- src/web/tsconfig.json
+- infra/api.Dockerfile
+- docs/verification/PD-B04/
+deliverables:
+- item: Route normal frontend requests through the generated client/service wrappers rather than bespoke raw fetch
+  result: pass
+  evidence: lib/api.ts apiCall (typed) + apiRequest resolving documented URLs to generated operations; 40 raw fetch sites moved onto it; only ApiExplorer (schema/free-form) and presigned uploads remain, enforced by lib/transport.test.ts
+- item: Build/extend the verification matrix for the batch capabilities
+  result: pass
+  evidence: docs/verification/PD-B04/MATRIX.md row for T03 (positive, negative, authorization, lifecycle, command); TYPED_CLIENT.md
+- item: UI-facing states verified in a browser
+  result: pass
+  evidence: make e2e-fast on the rebuilt stack, all tiers ok (100 read-only, isolated, canary); uiv2-gate loading/error/empty/denied states pass, 78/78 with repeat-each=6
+- item: Exact commands and limitations recorded
+  result: pass
+  evidence: verification below, logs in docs/verification/PD-B04/logs/T03-*.log
+invariants:
+- item: Current authoritative behavior preserved
+  result: pass
+  evidence: same relative URLs, credentials include, JSON bodies and per-panel error messages (describe); no src/api change
+- item: No weakened tests
+  result: pass
+  evidence: 226 existing web tests kept; 12 new; mocks that faked non-Response objects now return real Responses; useLoad is retry-free so the prior loading/error timing (uiv2-gate) is unchanged
+- item: No second source of truth
+  result: pass
+  evidence: one operations catalog (sdks/typescript generated.ts) consumed; no hand-written route table
+verification:
+- command: pnpm --filter @conflux/web test
+  result: pass
+  note: 238 passed (was 226)
+- command: make verify-fast
+  result: pass
+  note: pytest 1454 passed/23 skipped; web 238 + embed 8; tsc, build, sdk-check clean
+- command: make e2e-fast
+  result: pass
+  note: read-only 100 passed, isolated tiers and canary ok on the rebuilt image
+- command: npx playwright test --project=desktop uiv2-gate --repeat-each=6
+  result: pass
+  note: 78 passed
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: no API change; contract consumed as published
+- surface: sdk
+  result: pass
+  evidence: client.ts returns a body the schema omitted instead of null; index.ts exports the operations catalog; sdk-check passes
+migrations: []
+findings:
+- 18 GET operations are documented without a response body though they return JSON (P2 backend schema follow-up); SDK now tolerates it
+- The first e2e-fast run after the typed-client switch failed uiv2-gate loading state because useLoad backoff delayed the error; fixed by retry false, not by a longer timeout
+- One uiv2-gate 360px failure occurred immediately after an image rebuild and did not reproduce in 78 repeats
+- Main bundle 570.7 to 710.0 kB (gzip 161.6 to 170.2)
+escalations: []
+limitations:
+- apiRequest is URL-based; only 8 call sites use the compile-time-typed apiCall directly. New code should prefer apiCall.
+- Static types of the 18 schema-empty operations still read null until the backend annotates responses.
+next: review

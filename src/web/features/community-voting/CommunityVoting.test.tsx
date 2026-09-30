@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CommunityVoting } from "./CommunityVoting";
+import { jsonResponse } from "../../lib/test-http";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -71,7 +72,7 @@ describe("CommunityVoting", () => {
           };
         }
         if (url.includes("/results/")) {
-          return { ok: false, status: 403, json: async () => ({}) };
+          return jsonResponse(403, {});
         }
         if (url.includes("/votes/") && init?.method === "POST") {
           return {
@@ -106,8 +107,7 @@ describe("CommunityVoting", () => {
             ok: true,
             json: async () => ({ identity_mode: "email_link", is_open: true }),
           };
-        if (url.endsWith("/results/"))
-          return { ok: false, status: 403, json: async () => ({}) };
+        if (url.endsWith("/results/")) return jsonResponse(403, {});
         if (url.endsWith("/request-email-token/") && init?.method === "POST") {
           return { ok: true, json: async () => ({ token: "token" }) };
         }
@@ -155,7 +155,7 @@ describe("CommunityVoting", () => {
         if (String(input).endsWith("/status/")) {
           attempts += 1;
           return attempts === 1
-            ? { ok: false, status: 503, json: async () => ({}) }
+            ? jsonResponse(503, {})
             : {
                 ok: true,
                 status: 200,
@@ -165,7 +165,7 @@ describe("CommunityVoting", () => {
                 }),
               };
         }
-        return { ok: false, status: 403, json: async () => ({}) };
+        return jsonResponse(403, {});
       }),
     );
     act(() => root.render(<CommunityVoting eventId="e1" />));

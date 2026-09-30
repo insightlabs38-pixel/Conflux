@@ -1,20 +1,14 @@
 import { useEffect, useId, useState, type FormEvent } from "react";
+import type { OidcConfigSchema } from "@conflux/sdk";
 import { Button } from "../components/Button";
+import { apiCall, ApiError } from "../lib/api";
 import { Alert, ButtonLink, Field, TextInput } from "../components/Foundation";
 
-type SsoConfig = {
-  enabled: boolean;
-  provider_name?: string;
-  login_url?: string;
-};
+type SsoConfig = OidcConfigSchema;
 
 async function loadSso(): Promise<SsoConfig> {
   try {
-    const response = await fetch("/api/v1/accounts/oidc/config/", {
-      credentials: "include",
-    });
-    if (!response.ok) return { enabled: false };
-    return (await response.json()) as SsoConfig;
+    return await apiCall("get_api_v1_accounts_oidc_config", {});
   } catch {
     return { enabled: false };
   }
@@ -49,20 +43,18 @@ export function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
     setPending(true);
     setError("");
     try {
-      const response = await fetch("/api/v1/accounts/login/", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+      await apiCall("post_api_v1_accounts_login", {
+        body: { username, password },
       });
-      if (!response.ok) {
-        setError(failureMessage(response.status));
-        setPassword("");
-        return;
-      }
       onSignedIn();
-    } catch {
-      setError("Could not reach the server. Check your connection and retry.");
+    } catch (cause) {
+      if (cause instanceof ApiError) {
+        setError(failureMessage(cause.status));
+        setPassword("");
+      } else
+        setError(
+          "Could not reach the server. Check your connection and retry.",
+        );
     } finally {
       setPending(false);
     }

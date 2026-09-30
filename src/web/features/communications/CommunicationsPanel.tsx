@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
+import { apiRequest } from "../../lib/api";
 
 type AudienceKind = {
   key: string;
@@ -28,11 +29,13 @@ type Reminder = {
   last_error: string;
 };
 
-async function readJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, { credentials: "include", ...init });
-  if (!response.ok)
-    throw new Error(`Communications request failed (${response.status}).`);
-  return response.json() as Promise<T>;
+type Init = { method?: "POST" | "PUT" | "PATCH" | "DELETE"; body?: object };
+
+function readJson<T>(url: string, init: Init = {}): Promise<T> {
+  return apiRequest<T>(url, {
+    ...init,
+    describe: (status) => `Communications request failed (${status}).`,
+  });
 }
 
 export function CommunicationsPanel({
@@ -99,11 +102,10 @@ export function CommunicationsPanel({
       setPreview(
         await readJson(base + "audiences/preview/", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
+          body: {
             audience_kind: audienceKind,
             audience_params: audienceParams,
-          }),
+          },
         }),
       );
     } catch (cause) {
@@ -118,13 +120,12 @@ export function CommunicationsPanel({
     try {
       const sent = await readJson<Message>(base + "messages/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: {
           subject,
           body,
           audience_kind: audienceKind,
           audience_params: audienceParams,
-        }),
+        },
       });
       setMessages((current) => [sent, ...current]);
       setSubject("");
@@ -146,15 +147,14 @@ export function CommunicationsPanel({
     try {
       const reminder = await readJson<Reminder>(base + "reminders/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: {
           kind: reminderKind,
           due_at: new Date(reminderDue).toISOString(),
           audience_kind: audienceKind,
           audience_params: audienceParams,
           subject: reminderSubject,
           body: reminderBody,
-        }),
+        },
       });
       setReminders((current) =>
         [...current, reminder].sort((a, b) => a.due_at.localeCompare(b.due_at)),

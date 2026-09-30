@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ButtonLink } from "../../components/Foundation";
 import { ErrorState } from "../../components/ErrorState";
+import { apiRequest } from "../../lib/api";
 
 type Award = {
   public_id: string;
@@ -15,12 +16,9 @@ export function PublicAwards({ eventId }: { eventId: string }) {
   const [retry, setRetry] = useState(0);
   useEffect(() => {
     let active = true;
-    fetch(`/api/v1/events/${eventId}/awards/`)
-      .then((response) => {
-        if (!response.ok)
-          throw new Error(`Could not load awards (${response.status}).`);
-        return response.json() as Promise<Award[]>;
-      })
+    apiRequest<Award[]>(`/api/v1/events/${eventId}/awards/`, {
+      describe: (status) => `Could not load awards (${status}).`,
+    })
       .then((items) => {
         if (active && Array.isArray(items)) {
           setAwards(items);

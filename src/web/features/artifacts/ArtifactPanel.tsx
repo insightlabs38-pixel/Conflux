@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { apiJson } from "../../lib/api";
 
 type Artifact = {
   public_id: string;
@@ -32,29 +33,6 @@ function message(value: unknown): string {
   return "Request failed.";
 }
 
-async function request<T>(
-  url: string,
-  method = "GET",
-  body?: object,
-): Promise<T> {
-  const response = await fetch(url, {
-    method,
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) {
-    let detail: unknown = `Request failed (${response.status}).`;
-    try {
-      detail = await response.json();
-    } catch {
-      /* Retain status. */
-    }
-    throw new Error(message(detail));
-  }
-  return response.json() as Promise<T>;
-}
-
 export function ArtifactPanel({
   workspaceId,
   eventId,
@@ -81,8 +59,8 @@ export function ArtifactPanel({
 
   async function refresh() {
     const [items, checks] = await Promise.all([
-      request<Artifact[]>(base),
-      request<Preflight>(base + "preflight/"),
+      apiJson<Artifact[]>(base),
+      apiJson<Preflight>(base + "preflight/"),
     ]);
     setArtifacts(items);
     setPreflight(checks);
@@ -90,8 +68,8 @@ export function ArtifactPanel({
   useEffect(() => {
     let active = true;
     Promise.all([
-      request<Artifact[]>(base),
-      request<Preflight>(base + "preflight/"),
+      apiJson<Artifact[]>(base),
+      apiJson<Preflight>(base + "preflight/"),
     ])
       .then(([items, checks]) => {
         if (active) {
@@ -124,14 +102,14 @@ export function ArtifactPanel({
   function addExternal(event: FormEvent) {
     event.preventDefault();
     void run(async () => {
-      const artifact = await request<Artifact>(base, "POST", {
+      const artifact = await apiJson<Artifact>(base, "POST", {
         kind: linkKind,
         visibility: "public",
         title: linkTitle.trim(),
         external_url: linkUrl.trim(),
       });
       setProgress("Checking link…");
-      await request(base + `${artifact.public_id}/validate/`, "POST");
+      await apiJson(base + `${artifact.public_id}/validate/`, "POST");
       setNotice("Link added and checked.");
       setLinkTitle("");
       setLinkUrl("");
@@ -144,7 +122,7 @@ export function ArtifactPanel({
     void run(async () => {
       if (!file) throw new Error("Choose a file first.");
       setProgress("Preparing upload…");
-      const issued = await request<Upload>(base + "upload-intents/", "POST", {
+      const issued = await apiJson<Upload>(base + "upload-intents/", "POST", {
         kind,
         visibility,
         title: title.trim(),
@@ -186,13 +164,13 @@ export function ArtifactPanel({
         }
       }
       setProgress("Verifying upload…");
-      await request(
+      await apiJson(
         base +
           `${issued.artifact.public_id}/upload-intents/${issued.intent}/complete/`,
         "POST",
         parts ? { parts } : {},
       );
-      const validated = await request<Artifact>(
+      const validated = await apiJson<Artifact>(
         base + `${issued.artifact.public_id}/validate/`,
         "POST",
       );

@@ -2,6 +2,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { jsonResponse } from "../lib/test-http";
 import { SignIn } from "./SignIn";
 
 (
@@ -44,15 +45,12 @@ function stubFetch(login: { ok: boolean; status: number }, sso?: unknown) {
   const calls: { url: string; init?: RequestInit }[] = [];
   vi.stubGlobal(
     "fetch",
-    vi.fn(async (url: string, init?: RequestInit) => {
+    vi.fn(async (input: string | URL, init?: RequestInit) => {
+      const url = String(input);
       calls.push({ url, init });
       if (url.includes("oidc/config"))
-        return {
-          ok: true,
-          status: 200,
-          json: async () => sso ?? { enabled: false },
-        };
-      return { ...login, json: async () => ({}) };
+        return jsonResponse(200, sso ?? { enabled: false });
+      return jsonResponse(login.status, {});
     }),
   );
   return calls;

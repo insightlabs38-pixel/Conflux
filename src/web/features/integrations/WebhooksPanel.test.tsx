@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
 import { WebhooksPanel } from "./WebhooksPanel";
+import { jsonResponse } from "../../lib/test-http";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -274,11 +275,7 @@ it("shows inspection failures and hides replay for a disabled subscription", asy
     vi.fn(async (input: unknown) => {
       const url = String(input);
       if (url.includes("d1/"))
-        return {
-          ok: false,
-          status: 403,
-          json: async () => ({ detail: "Access denied" }),
-        };
+        return jsonResponse(403, { detail: "Access denied" });
       if (url.endsWith("deliveries/"))
         return {
           ok: true,

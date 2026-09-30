@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "../../components/Button";
 import { Badge } from "../../components/Badge";
 import { SubmissionReceipt } from "../pvs";
+import { apiJson } from "../../lib/api";
 
 type Version = {
   public_id: string;
@@ -26,29 +27,6 @@ function message(value: unknown): string {
   if (value && typeof value === "object")
     return Object.values(value).map(message).join(" ");
   return "Request failed.";
-}
-
-async function request<T>(
-  url: string,
-  method = "GET",
-  body?: object,
-): Promise<T> {
-  const response = await fetch(url, {
-    method,
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) {
-    let detail: unknown = `Request failed (${response.status}).`;
-    try {
-      detail = await response.json();
-    } catch {
-      // Keep the HTTP status.
-    }
-    throw new Error(message(detail));
-  }
-  return response.json() as Promise<T>;
 }
 
 export function SubmissionPanel({
@@ -79,8 +57,8 @@ export function SubmissionPanel({
   useEffect(() => {
     let active = true;
     Promise.all([
-      request<Stage[]>(base + "submissions/"),
-      request<Artifact[]>(base + "artifacts/"),
+      apiJson<Stage[]>(base + "submissions/"),
+      apiJson<Artifact[]>(base + "artifacts/"),
     ])
       .then(([items, evidence]) => {
         if (active) {
@@ -133,7 +111,7 @@ export function SubmissionPanel({
         )
           return;
         setSaving(true);
-        const next = await request<Submission>(
+        const next = await apiJson<Submission>(
           base + `submissions/${id}/`,
           "PUT",
           {
@@ -169,7 +147,7 @@ export function SubmissionPanel({
     setError("");
     try {
       await queueSave();
-      const result = await request<{ submission: Submission; receipt: string }>(
+      const result = await apiJson<{ submission: Submission; receipt: string }>(
         base + `submissions/${stageId}/finalize/`,
         "POST",
         { draft_revision: revision.current },
@@ -248,7 +226,7 @@ export function SubmissionPanel({
           <Button
             variant="secondary"
             onClick={() =>
-              void request<Artifact[]>(base + "artifacts/")
+              void apiJson<Artifact[]>(base + "artifacts/")
                 .then(setArtifacts)
                 .catch((cause: unknown) => setError(message(cause)))
             }

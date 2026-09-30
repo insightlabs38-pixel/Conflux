@@ -3,6 +3,7 @@ import { Badge } from "../../components/Badge";
 import { Card } from "../../components/Card";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
+import { apiRequest } from "../../lib/api";
 
 type Window = {
   name: string;
@@ -48,15 +49,10 @@ export function JudgeCalendarPanel({
 
   function load() {
     setError("");
-    void fetch(
+    void apiRequest<Calendar>(
       `/api/v1/workspaces/${workspaceId}/events/${eventId}/judge-calendar/`,
-      { credentials: "include" },
+      { describe: (status) => `Request failed (${status}).` },
     )
-      .then(async (response) => {
-        if (!response.ok)
-          throw new Error(`Request failed (${response.status}).`);
-        return (await response.json()) as Calendar;
-      })
       .then(setCalendar)
       .catch((cause: unknown) => setError(message(cause)));
   }

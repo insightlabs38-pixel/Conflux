@@ -9,6 +9,7 @@ import { EmptyState } from "../../components/EmptyState";
 import { WorkflowSections } from "../../components/WorkflowSections";
 
 import { ThemeSettings, type ThemeConfig } from "./ThemeSettings";
+import { apiJson } from "../../lib/api";
 
 type Theme = "default" | "dark" | "minimal";
 type Kind = keyof typeof blockTypes;
@@ -53,31 +54,6 @@ function message(value: unknown): string {
       .map(([key, item]) => `${key}: ${message(item)}`)
       .join(" ");
   return "Request failed.";
-}
-
-async function request<T>(
-  url: string,
-  method = "GET",
-  body?: object,
-): Promise<T> {
-  const response = await fetch(url, {
-    method,
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) {
-    let detail: unknown = `Request failed (${response.status}).`;
-    try {
-      detail = await response.json();
-    } catch {
-      /* Retain status message. */
-    }
-    throw new Error(message(detail));
-  }
-  return response.status === 204
-    ? (undefined as T)
-    : (response.json() as Promise<T>);
 }
 
 function defaultConfig(kind: Kind): Record<string, unknown> {
@@ -165,13 +141,13 @@ export function PageBuilder({
   const [confirmingId, setConfirmingId] = useState("");
 
   async function refreshAudit() {
-    setWarnings(await request<AuditWarning[]>(base + "accessibility-audit/"));
+    setWarnings(await apiJson<AuditWarning[]>(base + "accessibility-audit/"));
   }
 
   async function refresh() {
     const [nextPage, nextBlocks] = await Promise.all([
-      request<Page>(base),
-      request<Block[]>(base + "blocks/"),
+      apiJson<Page>(base),
+      apiJson<Block[]>(base + "blocks/"),
     ]);
     setPage(nextPage);
     setBlocks(nextBlocks);
@@ -187,7 +163,7 @@ export function PageBuilder({
     const cleaned = Object.fromEntries(
       Object.entries(theme_config).filter(([, value]) => value !== ""),
     );
-    const updated = await request<Page>(base, "PATCH", {
+    const updated = await apiJson<Page>(base, "PATCH", {
       theme,
       theme_config: cleaned,
     });
@@ -198,7 +174,7 @@ export function PageBuilder({
 
   async function addBlock() {
     try {
-      const created = await request<Block>(base + "blocks/", "POST", {
+      const created = await apiJson<Block>(base + "blocks/", "POST", {
         kind: addKind,
         config: defaultConfig(addKind),
       });
@@ -210,7 +186,7 @@ export function PageBuilder({
   }
 
   async function saveBlock(block: Block, config: Record<string, unknown>) {
-    const updated = await request<Block>(
+    const updated = await apiJson<Block>(
       base + `blocks/${block.public_id}/`,
       "PATCH",
       {
@@ -229,7 +205,7 @@ export function PageBuilder({
   async function removeBlock(block: Block) {
     setConfirmingId("");
     try {
-      await request(base + `blocks/${block.public_id}/`, "DELETE");
+      await apiJson(base + `blocks/${block.public_id}/`, "DELETE");
       setSelectedId("");
       await refresh();
     } catch (cause) {
@@ -244,7 +220,7 @@ export function PageBuilder({
     [next[index], next[target]] = [next[target], next[index]];
     setBlocks(next);
     try {
-      await request<Block[]>(base + "blocks/reorder/", "POST", {
+      await apiJson<Block[]>(base + "blocks/reorder/", "POST", {
         block_ids: next.map((block) => block.public_id),
       });
     } catch (cause) {

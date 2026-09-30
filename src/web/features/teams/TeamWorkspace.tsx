@@ -7,7 +7,7 @@ import {
 import { PageHeader } from "../../components/Foundation";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "../../lib/api";
+import { apiCall } from "../../lib/api";
 import { queryKeys } from "../../lib/query";
 import { useSearchParams } from "react-router";
 import { ParticipantOverview } from "./ParticipantOverview";
@@ -32,12 +32,10 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
   const eventsQuery = useQuery({
     queryKey: queryKeys.participantEvents(workspaceId),
     queryFn: ({ signal }) =>
-      apiRequest<Event[]>(
-        `/api/v1/workspaces/${workspaceId}/participant-events/`,
-        {
-          signal,
-          describe: (status) => `Could not load events (${status}).`,
-        },
+      apiCall(
+        "get_api_v1_workspaces_workspace_public_id_participant_events",
+        { path: { workspace_public_id: workspaceId } },
+        { signal, describe: (status) => `Could not load events (${status}).` },
       ),
   });
   const events = eventsQuery.data ?? [];

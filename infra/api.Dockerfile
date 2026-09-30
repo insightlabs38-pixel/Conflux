@@ -7,6 +7,8 @@ COPY src/embed/package.json src/embed/package.json
 COPY sdks/typescript/package.json sdks/typescript/package.json
 RUN pnpm install --frozen-lockfile --filter @conflux/web...
 COPY src/web src/web
+# The web app consumes the generated typed client from source (alias @conflux/sdk).
+COPY sdks/typescript sdks/typescript
 RUN pnpm --filter @conflux/web exec vite build
 
 FROM python:3.12-slim

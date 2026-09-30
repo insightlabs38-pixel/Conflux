@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "../../components/Button";
+import { apiRequest } from "../../lib/api";
 
 type Invitation = {
   public_id: string;
@@ -15,11 +16,9 @@ export function JudgeInvitationInbox({ workspaceId }: { workspaceId: string }) {
 
   useEffect(() => {
     let active = true;
-    fetch(base, { credentials: "include" })
-      .then((response) => {
-        if (!response.ok) throw new Error("Could not load judge invitations.");
-        return response.json() as Promise<Invitation[]>;
-      })
+    apiRequest<Invitation[]>(base, {
+      describe: () => "Could not load judge invitations.",
+    })
       .then((items) => {
         if (active) setInvitations(items);
       })
@@ -37,14 +36,14 @@ export function JudgeInvitationInbox({ workspaceId }: { workspaceId: string }) {
   ) {
     setError("");
     try {
-      const response = await fetch(`${base}${invitation.public_id}/respond/`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ decision }),
-      });
-      if (!response.ok) throw new Error("Could not respond to invitation.");
-      const updated = (await response.json()) as Invitation;
+      const updated = await apiRequest<Invitation>(
+        `${base}${invitation.public_id}/respond/`,
+        {
+          method: "POST",
+          body: { decision },
+          describe: () => "Could not respond to invitation.",
+        },
+      );
       setInvitations((items) =>
         items.map((item) =>
           item.public_id === updated.public_id ? updated : item,

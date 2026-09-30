@@ -3,6 +3,7 @@ import { Badge } from "../../components/Badge";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { FraudReview } from "./FraudReview";
+import { apiJson } from "../../lib/api";
 
 type IdentityMode = "authenticated" | "email_link" | "token";
 type CommentVisibility = "organizer" | "organizer_judge" | "everyone";
@@ -28,31 +29,6 @@ function message(value: unknown): string {
   return "Request failed.";
 }
 
-async function request<T>(
-  url: string,
-  method = "GET",
-  body?: object,
-): Promise<T> {
-  const response = await fetch(url, {
-    method,
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) {
-    let detail: unknown = `Request failed (${response.status}).`;
-    try {
-      detail = await response.json();
-    } catch {
-      /* Retain status message. */
-    }
-    throw new Error(message(detail));
-  }
-  return response.status === 204
-    ? (undefined as T)
-    : (response.json() as Promise<T>);
-}
-
 function toLocalInput(value: string): string {
   const date = new Date(value);
   return new Date(date.getTime() - date.getTimezoneOffset() * 60_000)
@@ -75,7 +51,7 @@ export function CommunityVotingBuilder({
   const [error, setError] = useState("");
 
   useEffect(() => {
-    request<Plan>(base)
+    apiJson<Plan>(base)
       .then(setPlan)
       .catch((cause: unknown) => setError(message(cause)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -84,7 +60,7 @@ export function CommunityVotingBuilder({
   async function patch(fields: Partial<Plan>) {
     setError("");
     try {
-      setPlan(await request<Plan>(base, "PATCH", fields));
+      setPlan(await apiJson<Plan>(base, "PATCH", fields));
     } catch (cause) {
       setError(message(cause));
     }
@@ -93,7 +69,7 @@ export function CommunityVotingBuilder({
   async function issueTokens() {
     setError("");
     try {
-      const tokens = await request<{ token: string }[]>(
+      const tokens = await apiJson<{ token: string }[]>(
         base + "tokens/",
         "POST",
         {
@@ -109,9 +85,9 @@ export function CommunityVotingBuilder({
   async function publishResults() {
     setError("");
     try {
-      setPlan(await request<Plan>(base + "publish-results/", "POST"));
+      setPlan(await apiJson<Plan>(base + "publish-results/", "POST"));
       setResults(
-        await request<Result[]>(
+        await apiJson<Result[]>(
           `/api/v1/workspaces/${workspaceId}/events/${eventId}/voting/results/`,
         ),
       );

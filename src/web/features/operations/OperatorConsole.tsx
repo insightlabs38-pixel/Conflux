@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Badge } from "../../components/Badge";
 import { Card } from "../../components/Card";
+import { apiRequest } from "../../lib/api";
 
 type EventRow = {
   public_id: string;
@@ -37,16 +38,12 @@ export function OperatorConsole({
 
   useEffect(() => {
     let active = true;
-    fetch(`/api/v1/workspaces/${workspaceId}/operator-console/`, {
-      credentials: "include",
-    })
-      .then((response) => {
-        if (!response.ok)
-          throw new Error(
-            `Operator console request failed (${response.status}).`,
-          );
-        return response.json() as Promise<ConsoleData>;
-      })
+    apiRequest<ConsoleData>(
+      `/api/v1/workspaces/${workspaceId}/operator-console/`,
+      {
+        describe: (status) => `Operator console request failed (${status}).`,
+      },
+    )
       .then((result) => {
         if (active) {
           setData(result);

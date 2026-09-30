@@ -14,6 +14,7 @@ import {
   type PersonIdentity,
 } from "../../components/Person";
 import { Badge } from "../../components/Badge";
+import { apiRequest } from "../../lib/api";
 
 type Profile = PersonIdentity & {
   visibility: "private" | "members" | "public";
@@ -34,27 +35,23 @@ type Profile = PersonIdentity & {
     tracks: string[];
   }[];
 };
-async function request(method = "GET", body?: object): Promise<Profile> {
-  const response = await fetch("/api/v1/accounts/profile/", {
+async function request(
+  method: "GET" | "PUT" | "PATCH" = "GET",
+  body?: object,
+): Promise<Profile> {
+  const data = await apiRequest<Profile>("/api/v1/accounts/profile/", {
     method,
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) {
-    const data = await response.json().catch(() => null);
-    throw new Error(
-      data
-        ? Object.entries(data)
+    body,
+    describe: (status, detail) =>
+      detail
+        ? Object.entries(detail)
             .map(
               ([key, value]) =>
                 `${key}: ${Array.isArray(value) ? value.join(" ") : JSON.stringify(value)}`,
             )
             .join(" ")
-        : `Profile request failed (${response.status}).`,
-    );
-  }
-  const data = (await response.json()) as Profile;
+        : `Profile request failed (${status}).`,
+  });
   if (
     !data ||
     typeof data.display_name !== "string" ||

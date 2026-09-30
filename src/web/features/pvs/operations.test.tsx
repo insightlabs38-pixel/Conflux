@@ -11,6 +11,7 @@ import {
 } from ".";
 import { EligibilityReviewPanel } from "./EligibilityPanels";
 import { OrganizerOverview } from "../event-builder/OrganizerOverview";
+import { jsonResponse } from "../../lib/test-http";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -34,13 +35,8 @@ function stubApi(routes: Record<string, unknown>) {
       const key = Object.keys(routes).find((suffix) =>
         `${call.method} ${call.url}`.endsWith(suffix),
       );
-      if (!key)
-        return {
-          ok: false,
-          status: 404,
-          json: async () => ({ detail: "No." }),
-        };
-      return { ok: true, status: 200, json: async () => routes[key] };
+      if (!key) return jsonResponse(404, { detail: "No." });
+      return jsonResponse(200, routes[key]);
     }),
   );
   return calls;

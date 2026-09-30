@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EventDashboard } from "./EventDashboard";
 import { ProjectWorkspace } from "../artifacts/ProjectWorkspace";
+import { jsonResponse } from "../../lib/test-http";
 
 vi.mock("./EventTemplatesPanel", () => ({ EventTemplatesPanel: () => null }));
 vi.mock("../policy-builder/PolicyBuilder", () => ({
@@ -69,11 +70,7 @@ describe("workflow load states", () => {
         if (url.endsWith("/events/")) {
           attempts += 1;
           return attempts === 1
-            ? {
-                ok: false,
-                status: 503,
-                json: async () => ({ detail: "Unavailable" }),
-              }
+            ? jsonResponse(503, { detail: "Unavailable" })
             : { ok: true, json: async () => [] };
         }
         return { ok: true, json: async () => [] };
@@ -105,11 +102,7 @@ describe("workflow load states", () => {
         if (url.endsWith("/projects/")) {
           attempts += 1;
           if (attempts === 1)
-            return {
-              ok: false,
-              status: 503,
-              json: async () => ({ detail: "Unavailable" }),
-            };
+            return jsonResponse(503, { detail: "Unavailable" });
         }
         return { ok: true, json: async () => [] };
       }),

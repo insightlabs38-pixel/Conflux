@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiRequest } from "../../lib/api";
 
 type Access = "roles" | "any_authenticated" | "public" | "unknown";
 type MatrixEntry = {
@@ -60,17 +61,12 @@ export function PermissionMatrixExplorer({
     let active = true;
     setLoading(true);
     setError("");
-    fetch(
+    apiRequest<MatrixEntry[]>(
       `/api/v1/workspaces/${workspaceId}/events/${eventId}/permission-matrix/`,
-      { credentials: "include" },
+      {
+        describe: (status) => `Permission matrix request failed (${status}).`,
+      },
     )
-      .then((response) => {
-        if (!response.ok)
-          throw new Error(
-            `Permission matrix request failed (${response.status}).`,
-          );
-        return response.json() as Promise<MatrixEntry[]>;
-      })
       .then((result) => {
         if (active) setMatrix(result);
       })
@@ -97,28 +93,18 @@ export function PermissionMatrixExplorer({
     setDryRunBusy(true);
     setDryRunError("");
     setDryRunResult(null);
-    fetch(base + "authz-dry-run/", {
+    apiRequest<DryRunResult>(base + "authz-dry-run/", {
       method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+      body: {
         path,
         method,
         subject_kind: subjectKind,
         subject: subjectKind === "role" ? subjectRole : subjectUserId.trim(),
-      }),
+      },
+      describe: (status, detail) =>
+        (detail as { detail?: string } | undefined)?.detail ??
+        `Dry run failed (${status}).`,
     })
-      .then(async (response) => {
-        if (!response.ok) {
-          const detail = (await response.json().catch(() => null)) as {
-            detail?: string;
-          } | null;
-          throw new Error(
-            detail?.detail ?? `Dry run failed (${response.status}).`,
-          );
-        }
-        return response.json() as Promise<DryRunResult>;
-      })
       .then(setDryRunResult)
       .catch((cause: unknown) =>
         setDryRunError(

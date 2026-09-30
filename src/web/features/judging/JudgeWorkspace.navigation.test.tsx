@@ -4,6 +4,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { JudgeWorkspace } from "./JudgeWorkspace";
+import { jsonResponse } from "../../lib/test-http";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -166,11 +167,7 @@ describe("judge navigation", () => {
                       ? null
                       : [];
         if (url.endsWith("/draft/") && options?.method === "PUT") {
-          return {
-            ok: false,
-            status: 503,
-            json: async () => ({ detail: "Unavailable" }),
-          };
+          return jsonResponse(503, { detail: "Unavailable" });
         }
         return { ok: true, status: 200, json: async () => body };
       });

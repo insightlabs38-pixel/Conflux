@@ -75,8 +75,18 @@ export class ConfluxClient {
       }
       throw new ApiError(response.status, body);
     }
-    if (response.status === 204 || spec.response_kind === "none") {
+    if (response.status === 204) {
       return null as Operations[K]["response"];
+    }
+    if (spec.response_kind === "none") {
+      // The schema documents no body, but the server may still send one; never discard it.
+      const raw = await response.text();
+      if (raw === "") return null as Operations[K]["response"];
+      try {
+        return JSON.parse(raw) as Operations[K]["response"];
+      } catch {
+        return raw as Operations[K]["response"];
+      }
     }
     return (
       spec.response_kind === "json"

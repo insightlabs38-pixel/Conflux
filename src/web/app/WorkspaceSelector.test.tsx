@@ -2,6 +2,7 @@
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { jsonResponse } from "../lib/test-http";
 import { withQuery } from "../lib/test-router";
 import { WorkspaceSelector } from "./WorkspaceSelector";
 
@@ -40,11 +41,7 @@ async function waitFor(check: () => boolean, timeoutMs = 1000) {
 function mockMe(status: number, body?: unknown) {
   vi.stubGlobal(
     "fetch",
-    vi.fn().mockResolvedValue({
-      ok: status >= 200 && status < 300,
-      status,
-      json: async () => body,
-    }),
+    vi.fn().mockImplementation(async () => jsonResponse(status, body)),
   );
 }
 

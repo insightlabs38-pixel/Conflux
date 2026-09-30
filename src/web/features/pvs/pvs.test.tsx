@@ -14,6 +14,8 @@ import {
 } from ".";
 import { EligibilityReviewPanel } from "./EligibilityPanels";
 import { guarded } from "./Guarded";
+import { withQuery } from "../../lib/test-router";
+import { jsonResponse } from "../../lib/test-http";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -39,15 +41,10 @@ function stubApi(routes: Record<string, Route | unknown>) {
       const key = Object.keys(routes).find((suffix) =>
         `${call.method} ${call.url}`.endsWith(suffix),
       );
-      if (!key)
-        return {
-          ok: false,
-          status: 404,
-          json: async () => ({ detail: "No." }),
-        };
+      if (!key) return jsonResponse(404, { detail: "No." });
       const route = routes[key];
       const body = typeof route === "function" ? (route as Route)(call) : route;
-      return { ok: true, status: 200, json: async () => body };
+      return jsonResponse(200, body);
     }),
   );
   return calls;
@@ -57,7 +54,7 @@ async function mount(node: ReactNode) {
   const container = document.createElement("div");
   document.body.appendChild(container);
   const root = createRoot(container);
-  await act(async () => root.render(node));
+  await act(async () => root.render(withQuery(<>{node}</>)));
   return container;
 }
 

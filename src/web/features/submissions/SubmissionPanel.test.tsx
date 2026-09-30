@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, expect, it, vi } from "vitest";
 import { SubmissionPanel } from "./SubmissionPanel";
+import { withQuery } from "../../lib/test-router";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -68,7 +69,9 @@ describe("participant submission", () => {
     const root = createRoot(container);
     await act(async () => {
       root.render(
-        <SubmissionPanel workspaceId="w" eventId="e" projectId="p" />,
+        withQuery(
+          <SubmissionPanel workspaceId="w" eventId="e" projectId="p" />,
+        ),
       );
     });
     await waitFor(

@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { apiJson } from "../../lib/api";
 
 type Field = {
   id: string;
@@ -46,29 +47,6 @@ function message(value: unknown): string {
   return "Request failed.";
 }
 
-async function request<T>(
-  url: string,
-  method = "GET",
-  body?: object,
-): Promise<T> {
-  const response = await fetch(url, {
-    method,
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) {
-    let detail: unknown = `Request failed (${response.status}).`;
-    try {
-      detail = await response.json();
-    } catch {
-      /* Retain status. */
-    }
-    throw new Error(message(detail));
-  }
-  return response.json() as Promise<T>;
-}
-
 export function FormBuilder({
   workspaceId,
   eventId,
@@ -102,7 +80,7 @@ export function FormBuilder({
 
   useEffect(() => {
     let active = true;
-    request<Form[]>(base)
+    apiJson<Form[]>(base)
       .then((items) => {
         if (active) setForms(items);
       })
@@ -120,7 +98,7 @@ export function FormBuilder({
     setFields(
       list.find((form) => form.public_id === id)?.draft_schema.fields ?? [],
     );
-    setVersions(id ? await request<Version[]>(base + `${id}/versions/`) : []);
+    setVersions(id ? await apiJson<Version[]>(base + `${id}/versions/`) : []);
   }
 
   async function run(action: () => Promise<void>) {
@@ -139,7 +117,7 @@ export function FormBuilder({
   function create(event: FormEvent) {
     event.preventDefault();
     void run(async () => {
-      const form = await request<Form>(base, "POST", { name: formName.trim() });
+      const form = await apiJson<Form>(base, "POST", { name: formName.trim() });
       const list = [...forms, form];
       setForms(list);
       setFormName("");
@@ -221,7 +199,7 @@ export function FormBuilder({
 
   function restoreVersion(version: Version) {
     void run(async () => {
-      const updated = await request<Form>(
+      const updated = await apiJson<Form>(
         base + `${selectedId}/versions/${version.public_id}/restore/`,
         "POST",
       );
@@ -237,14 +215,14 @@ export function FormBuilder({
 
   function save(publish: boolean) {
     void run(async () => {
-      const updated = await request<Form>(base + `${selectedId}/`, "PUT", {
+      const updated = await apiJson<Form>(base + `${selectedId}/`, "PUT", {
         schema: { fields },
       });
       setForms(
         forms.map((form) => (form.public_id === selectedId ? updated : form)),
       );
       if (publish) {
-        const version = await request<Version>(
+        const version = await apiJson<Version>(
           base + `${selectedId}/publish/`,
           "POST",
         );

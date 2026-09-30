@@ -4,6 +4,7 @@ import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 import { JudgeDirectoryPanel } from "./JudgeDirectoryPanel";
+import { apiJson } from "../../lib/api";
 
 type Stage = { public_id: string; name: string };
 type Pool = { public_id: string; name: string };
@@ -86,31 +87,6 @@ function message(value: unknown): string {
       .map(([key, item]) => `${key}: ${message(item)}`)
       .join(" ");
   return "Request failed.";
-}
-
-async function request<T>(
-  url: string,
-  method = "GET",
-  body?: object,
-): Promise<T> {
-  const response = await fetch(url, {
-    method,
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) {
-    let detail: unknown = `Request failed (${response.status}).`;
-    try {
-      detail = await response.json();
-    } catch {
-      /* Retain status message. */
-    }
-    throw new Error(message(detail));
-  }
-  return response.status === 204
-    ? (undefined as T)
-    : (response.json() as Promise<T>);
 }
 
 function newCriterion(n: number): Criterion {
@@ -245,7 +221,7 @@ function ProgressPanel({ planUrl }: { planUrl: string }) {
   const [busy, setBusy] = useState(false);
 
   function refresh() {
-    request<Progress>(planUrl + "progress/")
+    apiJson<Progress>(planUrl + "progress/")
       .then(setProgress)
       .catch((cause: unknown) => setError(message(cause)));
   }
@@ -256,12 +232,12 @@ function ProgressPanel({ planUrl }: { planUrl: string }) {
     setBusy(true);
     setError("");
     try {
-      const run = await request<{ public_id: string }>(
+      const run = await apiJson<{ public_id: string }>(
         planUrl + "normalization-runs/",
         "POST",
         {},
       );
-      await request(planUrl + "publish-results/", "POST", {
+      await apiJson(planUrl + "publish-results/", "POST", {
         normalization_run: run.public_id,
       });
       refresh();
@@ -312,7 +288,7 @@ function ProvenanceExplorer({ planUrl }: { planUrl: string }) {
 
   useEffect(() => {
     let active = true;
-    request<RankedProject[]>(planUrl + "results/")
+    apiJson<RankedProject[]>(planUrl + "results/")
       .then((rows) => {
         if (!active) return;
         setProjects(rows);
@@ -330,7 +306,7 @@ function ProvenanceExplorer({ planUrl }: { planUrl: string }) {
     if (!selected) return;
     let active = true;
     setProvenance(null);
-    request<Provenance>(planUrl + `provenance/${selected}/`)
+    apiJson<Provenance>(planUrl + `provenance/${selected}/`)
       .then((entry) => {
         if (active) setProvenance(entry);
       })
@@ -469,7 +445,7 @@ function PlanEditor({
   async function patch(fields: Partial<Plan>) {
     setError("");
     try {
-      const updated = await request<Plan>(planUrl, "PATCH", fields);
+      const updated = await apiJson<Plan>(planUrl, "PATCH", fields);
       onChange(updated);
       setCriteria(updated.draft_criteria);
     } catch (cause) {
@@ -480,8 +456,8 @@ function PlanEditor({
   async function publish() {
     setError("");
     try {
-      await request(planUrl + "publish-rubric/", "POST");
-      onChange(await request<Plan>(planUrl));
+      await apiJson(planUrl + "publish-rubric/", "POST");
+      onChange(await apiJson<Plan>(planUrl));
     } catch (cause) {
       setError(message(cause));
     }
@@ -578,8 +554,8 @@ export function EvaluationBuilder({
 
   useEffect(() => {
     Promise.all([
-      request<Stage[]>(eventBase + "stages/"),
-      request<Pool[]>(eventBase + "evaluation-pools/"),
+      apiJson<Stage[]>(eventBase + "stages/"),
+      apiJson<Pool[]>(eventBase + "evaluation-pools/"),
     ])
       .then(([nextStages, nextPools]) => {
         setStages(nextStages);
@@ -595,7 +571,7 @@ export function EvaluationBuilder({
 
   useEffect(() => {
     if (!plansBase) return;
-    request<Plan[]>(plansBase)
+    apiJson<Plan[]>(plansBase)
       .then(setPlans)
       .catch((cause: unknown) => setError(message(cause)));
   }, [plansBase]);
@@ -603,7 +579,7 @@ export function EvaluationBuilder({
   async function createPool() {
     setError("");
     try {
-      const pool = await request<Pool>(
+      const pool = await apiJson<Pool>(
         eventBase + "evaluation-pools/",
         "POST",
         {
@@ -621,7 +597,7 @@ export function EvaluationBuilder({
   async function createPlan() {
     setError("");
     try {
-      const plan = await request<Plan>(plansBase, "POST", {
+      const plan = await apiJson<Plan>(plansBase, "POST", {
         name,
         pool: selectedPool || null,
         prize_judging: prizeJudging,

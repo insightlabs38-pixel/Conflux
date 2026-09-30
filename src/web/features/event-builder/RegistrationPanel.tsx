@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { apiRequest } from "../../lib/api";
 
 type Settings = {
   mode: "open" | "application" | "invite_only";
@@ -20,26 +21,18 @@ type Application = {
   waitlist_position: number | null;
 };
 
-async function request<T>(
+function request<T>(
   url: string,
-  method = "GET",
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" = "GET",
   body?: object,
 ): Promise<T> {
-  const response = await fetch(url, {
+  return apiRequest<T>(url, {
     method,
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
+    body,
+    describe: (status, detail) =>
+      (detail as { detail?: string } | undefined)?.detail ||
+      `Registration request failed (${status}).`,
   });
-  if (!response.ok) {
-    const detail = (await response.json().catch(() => null)) as {
-      detail?: string;
-    } | null;
-    throw new Error(
-      detail?.detail || `Registration request failed (${response.status}).`,
-    );
-  }
-  return response.json() as Promise<T>;
 }
 
 export function RegistrationPanel({

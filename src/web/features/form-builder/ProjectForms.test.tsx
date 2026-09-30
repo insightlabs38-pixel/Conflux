@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ProjectForms } from "./ProjectForms";
+import { jsonResponse } from "../../lib/test-http";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -138,11 +139,7 @@ describe("participant project forms", () => {
           if (path.endsWith("/artifacts/"))
             return { ok: true, json: async () => [] };
           if (options?.method === "PUT")
-            return {
-              ok: false,
-              status: 400,
-              json: async () => ({ detail: "Rejected" }),
-            };
+            return jsonResponse(400, { detail: "Rejected" });
           return { ok: true, json: async () => ({ answers: {} }) };
         }),
     );
@@ -181,11 +178,7 @@ describe("participant project forms", () => {
         return { ok: true, json: async () => [] };
       reads += 1;
       return reads === 1
-        ? {
-            ok: false,
-            status: 503,
-            json: async () => ({ detail: "Unavailable" }),
-          }
+        ? jsonResponse(503, { detail: "Unavailable" })
         : { ok: true, json: async () => ({ answers: { pitch: "Saved" } }) };
     });
     vi.stubGlobal("fetch", fetchMock);

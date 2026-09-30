@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { apiRequest } from "../lib/api";
+import { jsonResponse } from "../lib/test-http";
 import { createQueryClient, optimistic, queryKeys } from "../lib/query";
 import { useMe, useSignOut } from "./useMe";
 
@@ -38,11 +39,7 @@ async function until(check: () => boolean, ms = 1500) {
     });
   }
 }
-const response = (status: number, body?: unknown) => ({
-  ok: status >= 200 && status < 300,
-  status,
-  json: async () => body,
-});
+const response = jsonResponse;
 const ME = {
   username: "ada",
   memberships: [{ workspace: "w1", role: "judge" }],
@@ -74,7 +71,7 @@ function mount(client: QueryClient, children: React.ReactNode) {
 
 describe("server-state layer", () => {
   it("deduplicates concurrent requests and serves later mounts from cache", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(response(200, ME));
+    const fetchMock = vi.fn().mockImplementation(async () => response(200, ME));
     vi.stubGlobal("fetch", fetchMock);
     const client = createQueryClient({ retry: false });
     mount(
@@ -100,7 +97,7 @@ describe("server-state layer", () => {
   });
 
   it("maps 401/403 to signed-out without retrying, and surfaces other errors", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(response(401, {}));
+    const fetchMock = vi.fn().mockImplementation(async () => response(401, {}));
     vi.stubGlobal("fetch", fetchMock);
     mount(createQueryClient(), <Who label="a" />);
     await until(() => text("a") === "signed-out");
@@ -110,7 +107,7 @@ describe("server-state layer", () => {
   it("does not retry a 404 but retries transient server errors with backoff until they clear", async () => {
     const notFound = vi
       .fn()
-      .mockResolvedValue(response(404, { detail: "Gone." }));
+      .mockImplementation(async () => response(404, { detail: "Gone." }));
     vi.stubGlobal("fetch", notFound);
     mount(createQueryClient({ retryDelay: 1 }), <Who label="a" />);
     await until(() => text("a")?.startsWith("error:") ?? false);
@@ -120,9 +117,9 @@ describe("server-state layer", () => {
     root = createRoot(container);
     const flaky = vi
       .fn()
-      .mockResolvedValueOnce(response(503, {}))
-      .mockResolvedValueOnce(response(500, {}))
-      .mockResolvedValue(response(200, ME));
+      .mockImplementationOnce(async () => response(503, {}))
+      .mockImplementationOnce(async () => response(500, {}))
+      .mockImplementation(async () => response(200, ME));
     vi.stubGlobal("fetch", flaky);
     mount(createQueryClient({ retryDelay: 1 }), <Who label="a" />);
     await until(() => text("a") === "ada");
@@ -130,7 +127,7 @@ describe("server-state layer", () => {
 
     act(() => root.unmount());
     root = createRoot(container);
-    const down = vi.fn().mockResolvedValue(response(503, {}));
+    const down = vi.fn().mockImplementation(async () => response(503, {}));
     vi.stubGlobal("fetch", down);
     mount(createQueryClient({ retryDelay: 1 }), <Who label="a" />);
     await until(() => text("a")?.startsWith("error:") ?? false);
@@ -140,8 +137,10 @@ describe("server-state layer", () => {
   it("refetches on invalidation", async () => {
     const fetchMock = vi
       .fn()
-      .mockResolvedValueOnce(response(200, ME))
-      .mockResolvedValue(response(200, { ...ME, username: "grace" }));
+      .mockImplementationOnce(async () => response(200, ME))
+      .mockImplementation(async () =>
+        response(200, { ...ME, username: "grace" }),
+      );
     vi.stubGlobal("fetch", fetchMock);
     const client = createQueryClient({ retry: false });
     mount(client, <Who label="a" />);

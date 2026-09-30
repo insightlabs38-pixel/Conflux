@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Badge } from "../../components/Badge";
 import { Card } from "../../components/Card";
+import { apiRequest } from "../../lib/api";
 
 type InboxMessage = {
   public_id: string;
@@ -11,11 +12,13 @@ type InboxMessage = {
   read_at: string | null;
 };
 
-async function readJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, { credentials: "include", ...init });
-  if (!response.ok)
-    throw new Error(`Inbox request failed (${response.status}).`);
-  return response.json() as Promise<T>;
+type Init = { method?: "POST" | "PUT" | "PATCH" | "DELETE"; body?: object };
+
+function readJson<T>(url: string, init: Init = {}): Promise<T> {
+  return apiRequest<T>(url, {
+    ...init,
+    describe: (status) => `Inbox request failed (${status}).`,
+  });
 }
 
 export function Inbox({ workspaceId }: { workspaceId: string }) {

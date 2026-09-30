@@ -1,12 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { ApiError, apiRequest, type RequestOptions } from "../../lib/api";
 
-export class ApiError extends Error {
-  status: number;
-  constructor(message: string, status: number) {
-    super(message);
-    this.status = status;
-  }
-}
+export { ApiError };
 
 export function messageOf(value: unknown): string {
   if (typeof value === "string") return value;
@@ -23,28 +19,20 @@ export function messageOf(value: unknown): string {
   return "Request failed.";
 }
 
-export async function api<T>(
+/** Request `url` through the shared transport (lib/api.ts); failures carry the server's message. */
+export function api<T>(
   url: string,
-  method = "GET",
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | string = "GET",
   body?: object,
+  signal?: AbortSignal,
 ): Promise<T> {
-  const response = await fetch(url, {
-    method,
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
+  return apiRequest<T>(url, {
+    method: method as RequestOptions["method"],
+    body: body || undefined,
+    signal,
+    describe: (status, detail) =>
+      detail === undefined ? `Request failed (${status}).` : messageOf(detail),
   });
-  if (!response.ok) {
-    let detail: unknown = `Request failed (${response.status}).`;
-    try {
-      detail = await response.json();
-    } catch {
-      // Keep the HTTP status.
-    }
-    throw new ApiError(messageOf(detail), response.status);
-  }
-  if (response.status === 204) return undefined as T;
-  return response.json() as Promise<T>;
 }
 
 export type Loaded<T> = {
@@ -54,42 +42,33 @@ export type Loaded<T> = {
   reload: () => void;
 };
 
-/** GET `url` (skipped while null) and re-fetch on demand. */
+/**
+ * GET `url` (skipped while null) on the server-state layer: concurrent users of the same URL share
+ * one request, it is cancelled on unmount, and it always revalidates on mount (staleTime 0) so
+ * panels never show data older than their last visit. Failures surface at once with the panel's own
+ * "Try again" (`reload`); there is no silent backoff retry that would delay the error state.
+ */
 export function useLoad<T>(url: string | null): Loaded<T> {
-  const [data, setData] = useState<T | null>(null);
-  const [error, setError] = useState<ApiError | null>(null);
-  const [loading, setLoading] = useState(url !== null);
-  const [attempt, setAttempt] = useState(0);
-  useEffect(() => {
-    if (url === null) {
-      setData(null);
-      setError(null);
-      setLoading(false);
-      return;
-    }
-    let active = true;
-    setLoading(true);
-    setError(null);
-    api<T>(url)
-      .then((value) => {
-        if (active) setData(value);
-      })
-      .catch((cause: unknown) => {
-        if (!active) return;
-        setData(null);
-        setError(
-          cause instanceof ApiError ? cause : new ApiError(messageOf(cause), 0),
-        );
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [url, attempt]);
-  const reload = useCallback(() => setAttempt((count) => count + 1), []);
-  return { data, error, loading, reload };
+  const query = useQuery({
+    queryKey: ["load", url],
+    queryFn: ({ signal }) => api<T>(url as string, "GET", undefined, signal),
+    enabled: url !== null,
+    staleTime: 0,
+    retry: false,
+  });
+  const failed = query.isError && !query.isFetching;
+  const error = failed
+    ? query.error instanceof ApiError
+      ? query.error
+      : new ApiError(0, messageOf(query.error))
+    : null;
+  const reload = useCallback(() => void query.refetch(), [query]);
+  return {
+    data: failed || url === null ? null : (query.data ?? null),
+    error,
+    loading: url !== null && query.isFetching,
+    reload,
+  };
 }
 
 export const eventBase = (workspaceId: string, eventId: string) =>

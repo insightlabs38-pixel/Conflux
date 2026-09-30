@@ -8,6 +8,7 @@ import {
   WorkspaceNavigationProvider,
 } from "../../components/WorkspaceNavigation";
 import { ParticipantOverview } from "./ParticipantOverview";
+import { jsonResponse } from "../../lib/test-http";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -60,11 +61,7 @@ it("derives the next action and progress from the participant's actual records",
 it("reports failed overview reads instead of showing zero counts", async () => {
   vi.stubGlobal(
     "fetch",
-    vi.fn(async () => ({
-      ok: false,
-      status: 503,
-      json: async () => ({ detail: "Status unavailable" }),
-    })),
+    vi.fn(async () => jsonResponse(503, { detail: "Status unavailable" })),
   );
   const container = document.createElement("div");
   const root = createRoot(container);

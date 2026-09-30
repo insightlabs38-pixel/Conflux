@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Card } from "../../components/Card";
+import { apiRequest } from "../../lib/api";
 import "./webhooks.css";
 
 type Platform = "generic" | "discord" | "slack";
@@ -40,15 +41,16 @@ type Inspection = Delivery & {
   }[];
 };
 
-async function request<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, { credentials: "include", ...init });
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error(
-      body.detail || body.url || `Webhook request failed (${response.status}).`,
-    );
-  }
-  return response.json() as Promise<T>;
+type Init = { method?: "POST" | "PATCH" | "DELETE"; body?: object };
+
+function request<T>(url: string, init: Init = {}): Promise<T> {
+  return apiRequest<T>(url, {
+    ...init,
+    describe: (status, detail) => {
+      const body = (detail ?? {}) as { detail?: string; url?: string };
+      return body.detail || body.url || `Webhook request failed (${status}).`;
+    },
+  });
 }
 
 export function WebhooksPanel({
@@ -115,8 +117,7 @@ export function WebhooksPanel({
     try {
       const issued = await request<Subscription & { secret: string }>(base, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: {
           url,
           event: eventId,
           event_types: types
@@ -124,7 +125,7 @@ export function WebhooksPanel({
             .map((type) => type.trim())
             .filter(Boolean),
           platform,
-        }),
+        },
       });
       setSecret(issued.secret);
       setUrl("");
@@ -192,8 +193,7 @@ export function WebhooksPanel({
     try {
       await request(`${base}${selectedId}/`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: destination }),
+        body: { url: destination },
       });
       if (version !== selection.current) return;
       ++inspectionRequest.current;
@@ -209,8 +209,7 @@ export function WebhooksPanel({
     try {
       await request(`${base}${item.public_id}/`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ enabled: !item.enabled }),
+        body: { enabled: !item.enabled },
       });
       await refresh();
     } catch (cause) {

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card } from "../../components/Card";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
+import { apiRequest } from "../../lib/api";
 
 type WorkloadRow = {
   judge: string;
@@ -30,15 +31,10 @@ export function JudgeWorkloadPanel({
 
   function load() {
     setError("");
-    void fetch(
+    void apiRequest<WorkloadRow[]>(
       `/api/v1/workspaces/${workspaceId}/events/${eventId}/judge-workload/`,
-      { credentials: "include" },
+      { describe: (status) => `Request failed (${status}).` },
     )
-      .then(async (response) => {
-        if (!response.ok)
-          throw new Error(`Request failed (${response.status}).`);
-        return (await response.json()) as WorkloadRow[];
-      })
       .then(setRows)
       .catch((cause: unknown) => setError(message(cause)));
   }

@@ -2,6 +2,7 @@ import { PersonRow, type PersonIdentity } from "../../components/Person";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router";
 import { appHref, routes } from "../../lib/routes";
+import { apiJson } from "../../lib/api";
 
 type Member = {
   user_public_id: string;
@@ -41,31 +42,6 @@ function message(error: unknown): string {
   return "Request failed.";
 }
 
-async function request<T>(
-  path: string,
-  method = "GET",
-  body?: object,
-): Promise<T> {
-  const response = await fetch(path, {
-    method,
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) {
-    let detail: unknown = `Request failed (${response.status}).`;
-    try {
-      detail = await response.json();
-    } catch {
-      /* Retain status message. */
-    }
-    throw new Error(message(detail));
-  }
-  return response.status === 204
-    ? (undefined as T)
-    : (response.json() as Promise<T>);
-}
-
 export function TeamPanel({
   workspaceId,
   eventId,
@@ -88,7 +64,7 @@ export function TeamPanel({
   const teamFingerprint = useRef<string | null>(null);
 
   async function refresh() {
-    const nextStatus = await request<Status>(base + "my-team/");
+    const nextStatus = await apiJson<Status>(base + "my-team/");
     setStatus(nextStatus);
     const fingerprint = `${nextStatus.team?.public_id ?? ""}:${nextStatus.my_role ?? ""}`;
     if (teamFingerprint.current !== fingerprint) {
@@ -96,7 +72,7 @@ export function TeamPanel({
       onTeamChange?.();
     }
     if (nextStatus.team && nextStatus.my_role === "captain") {
-      setInvites(await request<Invite[]>(base + "my-team/invites/"));
+      setInvites(await apiJson<Invite[]>(base + "my-team/invites/"));
     } else {
       setInvites([]);
     }
@@ -129,7 +105,7 @@ export function TeamPanel({
     event.preventDefault();
     void run(async () => {
       if (!teamName.trim()) throw new Error("Team name is required.");
-      await request(base + "my-team/", "POST", { name: teamName.trim() });
+      await apiJson(base + "my-team/", "POST", { name: teamName.trim() });
       setTeamName("");
       await refresh();
     });
@@ -139,7 +115,7 @@ export function TeamPanel({
     event.preventDefault();
     void run(async () => {
       if (!redeemToken.trim()) throw new Error("Invite token is required.");
-      await request(base + "team-invites/redeem/", "POST", {
+      await apiJson(base + "team-invites/redeem/", "POST", {
         token: redeemToken.trim(),
       });
       setRedeemToken("");
@@ -149,28 +125,28 @@ export function TeamPanel({
 
   function leaveTeam() {
     void run(async () => {
-      await request(base + "my-team/leave/", "POST");
+      await apiJson(base + "my-team/leave/", "POST");
       await refresh();
     });
   }
 
   function createInvite() {
     void run(async () => {
-      await request(base + "my-team/invites/", "POST", { max_uses: 1 });
+      await apiJson(base + "my-team/invites/", "POST", { max_uses: 1 });
       await refresh();
     });
   }
 
   function revokeInvite(inviteId: string) {
     void run(async () => {
-      await request(base + `my-team/invites/${inviteId}/`, "DELETE");
+      await apiJson(base + `my-team/invites/${inviteId}/`, "DELETE");
       await refresh();
     });
   }
 
   function transferCaptain(userPublicId: string) {
     void run(async () => {
-      await request(base + "my-team/transfer-captain/", "POST", {
+      await apiJson(base + "my-team/transfer-captain/", "POST", {
         user: userPublicId,
       });
       await refresh();

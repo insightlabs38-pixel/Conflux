@@ -37,6 +37,7 @@ import {
 } from "../pvs";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
+import { apiJson } from "../../lib/api";
 
 type Event = {
   public_id: string;
@@ -83,31 +84,6 @@ function message(error: unknown): string {
   return "Request failed.";
 }
 
-async function request<T>(
-  path: string,
-  method = "GET",
-  body?: object,
-): Promise<T> {
-  const response = await fetch(path, {
-    method,
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) {
-    let detail: unknown = `Request failed (${response.status}).`;
-    try {
-      detail = await response.json();
-    } catch {
-      /* Retain status message. */
-    }
-    throw new Error(message(detail));
-  }
-  return response.status === 204
-    ? (undefined as T)
-    : (response.json() as Promise<T>);
-}
-
 export function EventDashboard({ workspaceId }: { workspaceId: string }) {
   const base = `/api/v1/workspaces/${workspaceId}/events/`;
   const [events, setEvents] = useState<Event[]>([]);
@@ -133,15 +109,15 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
 
   const eventBase = `${base}${selectedId}/`;
   async function refresh(id = selectedId) {
-    const list = await request<Event[]>(base);
+    const list = await apiJson<Event[]>(base);
     setEvents(list);
     setLoadError("");
     if (!id) return;
     const detailBase = `${base}${id}/`;
     const [health, nextTracks, nextPrizes] = await Promise.all([
-      request<Dashboard>(detailBase + "dashboard/"),
-      request<Track[]>(detailBase + "tracks/"),
-      request<Prize[]>(detailBase + "base-prizes/"),
+      apiJson<Dashboard>(detailBase + "dashboard/"),
+      apiJson<Track[]>(detailBase + "tracks/"),
+      apiJson<Prize[]>(detailBase + "base-prizes/"),
     ]);
     if (selectedRef.current !== id) return;
     setDashboard(health);
@@ -152,7 +128,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
     let active = true;
     setLoadingEvents(true);
     setLoadError("");
-    request<Event[]>(base)
+    apiJson<Event[]>(base)
       .then((list) => {
         if (active) setEvents(list);
       })
@@ -189,7 +165,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
     void run(async () => {
       if (!name.trim() || !slug.trim())
         throw new Error("Name and slug are required.");
-      const created = await request<Event>(base, "POST", {
+      const created = await apiJson<Event>(base, "POST", {
         name: name.trim(),
         slug: slug.trim(),
       });
@@ -208,7 +184,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
     void run(async () => {
       if (start && end && start >= end)
         throw new Error("End must be after start.");
-      await request<Event>(eventBase, "PATCH", {
+      await apiJson<Event>(eventBase, "PATCH", {
         name: String(data.get("name") || "").trim(),
         timezone: String(data.get("timezone") || "").trim(),
         starts_at: start ? new Date(start).toISOString() : null,
@@ -222,7 +198,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
     event.preventDefault();
     void run(async () => {
       if (!trackName.trim()) throw new Error("Track name is required.");
-      await request<Track>(eventBase + "tracks/", "POST", {
+      await apiJson<Track>(eventBase + "tracks/", "POST", {
         name: trackName.trim(),
       });
       setTrackName("");
@@ -241,7 +217,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
           "Cash prizes require an amount and three-letter currency.",
         );
       }
-      await request<Prize>(eventBase + "base-prizes/", "POST", {
+      await apiJson<Prize>(eventBase + "base-prizes/", "POST", {
         name: prizeName.trim(),
         kind: prizeKind,
         track: prizeTrack || null,
@@ -257,7 +233,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
   }
   function transition(status: Event["status"]) {
     void run(async () => {
-      await request<Event>(eventBase + "status/", "POST", { status });
+      await apiJson<Event>(eventBase + "status/", "POST", { status });
       await refresh();
     });
   }

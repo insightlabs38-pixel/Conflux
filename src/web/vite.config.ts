@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { fileURLToPath } from "node:url";
 
 // Dev server only (unused by `vite build`): proxies API calls to the Django
 // app so the same relative `/api/v1/...` paths used in production also work
@@ -7,6 +8,15 @@ import react from "@vitejs/plugin-react";
 // reaches the app by its Compose service name instead of localhost.
 export default defineConfig(({ command }) => ({
   plugins: [react()],
+  // The generated typed client is consumed from source (no build step), in the app, tests and the
+  // Docker web stage alike.
+  resolve: {
+    alias: {
+      "@conflux/sdk": fileURLToPath(
+        new URL("../../sdks/typescript/index.ts", import.meta.url),
+      ),
+    },
+  },
   // Built assets are collected by Django into /static/app/ and the shell page is
   // served at /app/ by the gateway; the dev server keeps serving from "/".
   base: command === "build" ? "/static/app/" : "/",

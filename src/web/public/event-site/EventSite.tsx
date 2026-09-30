@@ -9,6 +9,7 @@ import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 import { CommunityVoting } from "../../features/community-voting/CommunityVoting";
 import { PublicAwards } from "../../features/awards/PublicAwards";
+import { apiRequest } from "../../lib/api";
 
 type Track = { public_id: string; name: string; description: string };
 type BasePrize = {
@@ -75,12 +76,9 @@ export function EventSite({ eventId }: { eventId: string }) {
   const load = () => {
     setLoading(true);
     setError("");
-    fetch(`/api/v1/events/${eventId}/`)
-      .then((response) => {
-        if (!response.ok)
-          throw new Error(`Event not found (${response.status}).`);
-        return response.json() as Promise<PublicEvent>;
-      })
+    apiRequest<PublicEvent>(`/api/v1/events/${eventId}/`, {
+      describe: (status) => `Event not found (${status}).`,
+    })
       .then(setEvent)
       .catch((cause: unknown) =>
         setError(

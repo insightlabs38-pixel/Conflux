@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
 import { FrozenSubmissionPreview } from "./FrozenSubmissionPreview";
+import { withQuery } from "../../lib/test-router";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -31,8 +32,16 @@ it("never offers a download for evidence that drifted, even with an unexpected U
   const container = document.createElement("div");
   const root = createRoot(container);
   await act(async () =>
-    root.render(<FrozenSubmissionPreview base="/project/" stageId="s" />),
+    root.render(
+      withQuery(<FrozenSubmissionPreview base="/project/" stageId="s" />),
+    ),
   );
+  for (
+    let i = 0;
+    i < 40 && !container.textContent?.includes("Changed evidence");
+    i++
+  )
+    await act(async () => new Promise((resolve) => setTimeout(resolve, 5)));
   expect(container.textContent).toContain(
     "Evidence changed since finalization",
   );

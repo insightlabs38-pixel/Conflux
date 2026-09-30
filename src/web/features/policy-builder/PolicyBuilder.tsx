@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { apiJson } from "../../lib/api";
 
 type PolicyRow = { public_id: string; name: string; ast: object };
 type Binding = { public_id: string; action: string; policy: string };
@@ -83,31 +84,6 @@ function message(error: unknown): string {
   return "Request failed.";
 }
 
-async function request<T>(
-  path: string,
-  method = "GET",
-  body?: object,
-): Promise<T> {
-  const response = await fetch(path, {
-    method,
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) {
-    let detail: unknown = `Request failed (${response.status}).`;
-    try {
-      detail = await response.json();
-    } catch {
-      /* Retain status message. */
-    }
-    throw new Error(message(detail));
-  }
-  return response.status === 204
-    ? (undefined as T)
-    : (response.json() as Promise<T>);
-}
-
 export function PolicyBuilder({
   workspaceId,
   eventId,
@@ -139,11 +115,11 @@ export function PolicyBuilder({
   async function refresh() {
     const [nextPresets, nextPolicies, nextBindings, nextGates, nextTimeline] =
       await Promise.all([
-        request<Record<string, Preset>>(base + "policy-presets/"),
-        request<PolicyRow[]>(base + "policies/"),
-        request<Binding[]>(base + "policy-bindings/"),
-        request<Gate[]>(base + "temporal-gates/"),
-        request<TimelineWindow[]>(base + "timezone-timeline/"),
+        apiJson<Record<string, Preset>>(base + "policy-presets/"),
+        apiJson<PolicyRow[]>(base + "policies/"),
+        apiJson<Binding[]>(base + "policy-bindings/"),
+        apiJson<Gate[]>(base + "temporal-gates/"),
+        apiJson<TimelineWindow[]>(base + "timezone-timeline/"),
       ]);
     setPresets(nextPresets);
     setBindings(nextBindings);
@@ -182,7 +158,7 @@ export function PolicyBuilder({
       const params = presets[presetSlug]?.params.includes("gate_name")
         ? { gate_name: gateNameParam }
         : undefined;
-      await request<PolicyRow>(base + "policies/", "POST", {
+      await apiJson<PolicyRow>(base + "policies/", "POST", {
         name: policyName.trim(),
         preset: presetSlug,
         ...(params ? { preset_params: params } : {}),
@@ -196,7 +172,7 @@ export function PolicyBuilder({
     event.preventDefault();
     void run(async () => {
       if (!bindPolicy) throw new Error("Choose a policy to bind.");
-      await request<Binding>(base + "policy-bindings/", "POST", {
+      await apiJson<Binding>(base + "policy-bindings/", "POST", {
         action: bindAction,
         policy: bindPolicy,
       });
@@ -208,7 +184,7 @@ export function PolicyBuilder({
     event.preventDefault();
     void run(async () => {
       if (!gateName.trim()) throw new Error("Gate name is required.");
-      await request<Gate>(base + "temporal-gates/", "POST", {
+      await apiJson<Gate>(base + "temporal-gates/", "POST", {
         name: gateName.trim(),
         // <input type="datetime-local"> has no timezone of its own -- the
         // browser treats it as the viewer's local time, so converting via
@@ -244,7 +220,7 @@ export function PolicyBuilder({
           : {}),
       };
       setDebugResult(
-        await request<DebugResult>(base + "policy-debug/", "POST", body),
+        await apiJson<DebugResult>(base + "policy-debug/", "POST", body),
       );
     });
   }

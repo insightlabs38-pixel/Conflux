@@ -12,6 +12,7 @@ import {
 } from "../pvs";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
+import { apiJson } from "../../lib/api";
 
 type Project = {
   public_id: string;
@@ -32,29 +33,6 @@ function message(value: unknown): string {
       .map(([key, item]) => `${key}: ${message(item)}`)
       .join(" ");
   return "Request failed.";
-}
-
-async function request<T>(
-  url: string,
-  method = "GET",
-  body?: object,
-): Promise<T> {
-  const response = await fetch(url, {
-    method,
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) {
-    let detail: unknown = `Request failed (${response.status}).`;
-    try {
-      detail = await response.json();
-    } catch {
-      /* Retain status. */
-    }
-    throw new Error(message(detail));
-  }
-  return response.json() as Promise<T>;
 }
 
 export function ProjectWorkspace({
@@ -81,8 +59,8 @@ export function ProjectWorkspace({
     setLoading(true);
     setError("");
     Promise.all([
-      request<Project[]>(base + "projects/"),
-      request<Track[]>(base + "tracks/"),
+      apiJson<Project[]>(base + "projects/"),
+      apiJson<Track[]>(base + "tracks/"),
     ])
       .then(([nextProjects, nextTracks]) => {
         if (active) {
@@ -109,9 +87,9 @@ export function ProjectWorkspace({
     event.preventDefault();
     setBusy(true);
     setError("");
-    void request<TeamStatus>(base + "my-team/")
+    void apiJson<TeamStatus>(base + "my-team/")
       .then((status) =>
-        request<Project>(base + "projects/", "POST", {
+        apiJson<Project>(base + "projects/", "POST", {
           name: name.trim(),
           ...(status.team ? { team: status.team.public_id } : {}),
           ...(trackId ? { track: trackId } : {}),

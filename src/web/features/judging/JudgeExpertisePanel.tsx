@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "../../components/Button";
+import { apiRequest } from "../../lib/api";
 
 type Profile = { judge: string; tags: string[]; updated_at: string | null };
 
@@ -12,11 +13,9 @@ export function JudgeExpertisePanel({ workspaceId }: { workspaceId: string }) {
 
   useEffect(() => {
     let active = true;
-    fetch(url, { credentials: "include" })
-      .then((response) => {
-        if (!response.ok) throw new Error("Could not load expertise profile.");
-        return response.json() as Promise<Profile>;
-      })
+    apiRequest<Profile>(url, {
+      describe: () => "Could not load expertise profile.",
+    })
       .then((profile) => {
         if (!Array.isArray(profile.tags))
           throw new Error("Invalid expertise profile response.");
@@ -37,24 +36,18 @@ export function JudgeExpertisePanel({ workspaceId }: { workspaceId: string }) {
     setError("");
     setSaving(true);
     try {
-      const response = await fetch(url, {
+      const profile = await apiRequest<Profile>(url, {
         method: "PUT",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: {
           tags: tags
             .split(",")
             .map((tag) => tag.trim())
             .filter(Boolean),
-        }),
+        },
+        describe: (_status, detail) =>
+          (detail as { tags?: string[] } | undefined)?.tags?.join(" ") ||
+          "Could not save expertise profile.",
       });
-      if (!response.ok) {
-        const detail = (await response.json()) as { tags?: string[] };
-        throw new Error(
-          detail.tags?.join(" ") || "Could not save expertise profile.",
-        );
-      }
-      const profile = (await response.json()) as Profile;
       setSavedTags(profile.tags);
       setTags(profile.tags.join(", "));
     } catch (cause) {

@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { apiJson } from "../../lib/api";
 
 type Stage = {
   public_id: string;
@@ -31,31 +32,6 @@ function message(error: unknown): string {
       .join(" ");
   }
   return "Request failed.";
-}
-
-async function request<T>(
-  path: string,
-  method = "GET",
-  body?: object,
-): Promise<T> {
-  const response = await fetch(path, {
-    method,
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) {
-    let detail: unknown = `Request failed (${response.status}).`;
-    try {
-      detail = await response.json();
-    } catch {
-      /* Retain status message. */
-    }
-    throw new Error(message(detail));
-  }
-  return response.status === 204
-    ? (undefined as T)
-    : (response.json() as Promise<T>);
 }
 
 function parseCandidates(text: string) {
@@ -103,11 +79,11 @@ export function StageBuilder({
   async function refresh() {
     const [nextStages, nextTransitions, nextGraph, nextEvidence, nextPresets] =
       await Promise.all([
-        request<Stage[]>(base + "stages/"),
-        request<Transition[]>(base + "stage-transitions/"),
-        request<GraphStatus>(base + "stage-graph/validate/"),
-        request<EvidenceRow[]>(base + "stage-evidence/"),
-        request<Record<string, WorkflowPreset>>(base + "workflow-presets/"),
+        apiJson<Stage[]>(base + "stages/"),
+        apiJson<Transition[]>(base + "stage-transitions/"),
+        apiJson<GraphStatus>(base + "stage-graph/validate/"),
+        apiJson<EvidenceRow[]>(base + "stage-evidence/"),
+        apiJson<Record<string, WorkflowPreset>>(base + "workflow-presets/"),
       ]);
     setStages(nextStages);
     setTransitions(nextTransitions);
@@ -115,7 +91,7 @@ export function StageBuilder({
     setEvidence(nextEvidence);
     setPresets(nextPresets);
     if (nextStages[0] && !strategies.length) {
-      const { strategies: available } = await request<{
+      const { strategies: available } = await apiJson<{
         strategies: string[];
       }>(base + `stages/${nextStages[0].public_id}/advance/`);
       setStrategies(available);
@@ -149,7 +125,7 @@ export function StageBuilder({
     event.preventDefault();
     void run(async () => {
       if (!selectedPreset) throw new Error("Choose a preset first.");
-      await request(base + "workflow-presets/apply/", "POST", {
+      await apiJson(base + "workflow-presets/apply/", "POST", {
         preset: selectedPreset,
       });
       setSelectedPreset("");
@@ -161,7 +137,7 @@ export function StageBuilder({
     event.preventDefault();
     void run(async () => {
       if (!stageName.trim()) throw new Error("Stage name is required.");
-      await request<Stage>(base + "stages/", "POST", {
+      await apiJson<Stage>(base + "stages/", "POST", {
         name: stageName.trim(),
         is_initial: stageInitial,
       });
@@ -173,7 +149,7 @@ export function StageBuilder({
 
   function deleteStage(publicId: string) {
     void run(async () => {
-      await request<void>(base + `stages/${publicId}/`, "DELETE");
+      await apiJson<void>(base + `stages/${publicId}/`, "DELETE");
       await refresh();
     });
   }
@@ -183,7 +159,7 @@ export function StageBuilder({
     void run(async () => {
       if (!fromStage || !toStage)
         throw new Error("Choose both a from-stage and a to-stage.");
-      await request<Transition>(base + "stage-transitions/", "POST", {
+      await apiJson<Transition>(base + "stage-transitions/", "POST", {
         from_stage: fromStage,
         to_stage: toStage,
       });
@@ -193,7 +169,7 @@ export function StageBuilder({
 
   function deleteTransition(publicId: string) {
     void run(async () => {
-      await request<void>(base + `stage-transitions/${publicId}/`, "DELETE");
+      await apiJson<void>(base + `stage-transitions/${publicId}/`, "DELETE");
       await refresh();
     });
   }
@@ -203,7 +179,7 @@ export function StageBuilder({
     void run(async () => {
       if (!advanceFrom || !advanceTo)
         throw new Error("Choose both a from-stage and a to-stage.");
-      await request<{ advanced: unknown[] }>(
+      await apiJson<{ advanced: unknown[] }>(
         base + `stages/${advanceFrom}/advance/`,
         "POST",
         {

@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EventSite } from "./EventSite";
+import { jsonResponse } from "../../lib/test-http";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -40,7 +41,7 @@ describe("EventSite", () => {
       vi.fn().mockImplementation(async (input: unknown) => {
         const url = String(input);
         if (url.includes("/voting/")) {
-          return { ok: false, status: 404, json: async () => ({}) };
+          return jsonResponse(404, {});
         }
         return {
           ok: true,
@@ -83,12 +84,7 @@ describe("EventSite", () => {
   });
 
   it("shows an error state with retry when the event cannot be loaded", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi
-        .fn()
-        .mockResolvedValue({ ok: false, status: 404, json: async () => ({}) }),
-    );
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(404, {})));
     act(() => {
       root.render(<EventSite eventId="missing" />);
     });

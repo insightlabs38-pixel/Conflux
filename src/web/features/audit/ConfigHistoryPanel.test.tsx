@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
 import { ConfigHistoryPanel } from "./ConfigHistoryPanel";
+import { jsonResponse } from "../../lib/test-http";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -93,7 +94,7 @@ it.each([true, false])(
       .fn()
       .mockImplementation(async (_url: string, options?: RequestInit) =>
         options?.method === "POST"
-          ? { ok: success, status: 400, json: async () => ({ restored: true }) }
+          ? jsonResponse(success ? 200 : 400, { restored: true })
           : { ok: true, json: async () => [entry] },
       );
     vi.stubGlobal("fetch", fetchMock);
@@ -126,7 +127,7 @@ it.each([true, false])(
     );
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/audit/w1/events/e1/config-history/h1/restore/",
-      { method: "POST", credentials: "include" },
+      expect.objectContaining({ method: "POST", credentials: "include" }),
     );
     act(() => root.unmount());
     container.remove();

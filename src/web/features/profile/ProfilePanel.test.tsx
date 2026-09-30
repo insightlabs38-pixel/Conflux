@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
 import { ProfilePanel } from "./ProfilePanel";
+import { jsonResponse } from "../../lib/test-http";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -42,11 +43,7 @@ it("retains an editable identity after a rejected save, then shows the confirmed
   const fetchMock = vi
     .fn()
     .mockResolvedValueOnce({ ok: true, json: async () => profile })
-    .mockResolvedValueOnce({
-      ok: false,
-      status: 400,
-      json: async () => ({ avatar_url: ["Invalid URL"] }),
-    })
+    .mockResolvedValueOnce(jsonResponse(400, { avatar_url: ["Invalid URL"] }))
     .mockResolvedValueOnce({
       ok: true,
       json: async () => ({ ...profile, display_name: "Alex Confirmed" }),

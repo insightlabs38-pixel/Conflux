@@ -9,6 +9,7 @@ import {
 } from "../../components/Person";
 import { LoadingState } from "../../components/LoadingState";
 import { ErrorState } from "../../components/ErrorState";
+import { apiRequest } from "../../lib/api";
 export function PersonProfilePage({ personId }: { personId: string }) {
   const [person, setPerson] = useState<PersonIdentity | null>(null);
   const [error, setError] = useState("");
@@ -18,17 +19,16 @@ export function PersonProfilePage({ personId }: { personId: string }) {
     let active = true;
     setLoading(true);
     setError("");
-    fetch(`/api/v1/accounts/people/${encodeURIComponent(personId)}/`, {
-      credentials: "include",
-    })
-      .then(async (response) => {
-        if (!response.ok)
-          throw new Error(
-            response.status === 404
-              ? "This profile is private or unavailable."
-              : `Could not load profile (${response.status}).`,
-          );
-        const data = (await response.json()) as PersonIdentity;
+    apiRequest<PersonIdentity>(
+      `/api/v1/accounts/people/${encodeURIComponent(personId)}/`,
+      {
+        describe: (status) =>
+          status === 404
+            ? "This profile is private or unavailable."
+            : `Could not load profile (${status}).`,
+      },
+    )
+      .then((data) => {
         if (typeof data.display_name !== "string" || !Array.isArray(data.links))
           throw new Error("Invalid profile response.");
         if (active) setPerson(data);

@@ -3,6 +3,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
 import { PublicAwards } from "./PublicAwards";
+import { jsonResponse } from "../../lib/test-http";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -26,7 +27,10 @@ it("shows published winners without internal selection evidence", async () => {
   document.body.appendChild(container);
   const root = createRoot(container);
   await act(async () => root.render(<PublicAwards eventId="e1" />));
-  expect(fetchMock).toHaveBeenCalledWith("/api/v1/events/e1/awards/");
+  expect(fetchMock).toHaveBeenCalledWith(
+    "/api/v1/events/e1/awards/",
+    expect.objectContaining({ method: "GET" }),
+  );
   expect(container.textContent).toContain("Best project");
   expect(container.textContent).toContain("Project One");
   expect(container.querySelector("a")?.getAttribute("href")).toBe(
@@ -39,7 +43,7 @@ it("shows published winners without internal selection evidence", async () => {
 it("shows a retryable error instead of hiding an awards failure", async () => {
   const fetchMock = vi
     .fn()
-    .mockResolvedValueOnce({ ok: false, status: 503, json: async () => ({}) })
+    .mockResolvedValueOnce(jsonResponse(503, {}))
     .mockResolvedValueOnce({ ok: true, json: async () => [] });
   vi.stubGlobal("fetch", fetchMock);
   const container = document.createElement("div");

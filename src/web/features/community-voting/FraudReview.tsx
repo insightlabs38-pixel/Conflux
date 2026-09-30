@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
+import { apiRequest } from "../../lib/api";
 
 type Signal = {
   public_id: string;
@@ -18,11 +19,13 @@ type AuditEntry = {
   created_at: string;
 };
 
-async function readJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, { credentials: "include", ...init });
-  if (!response.ok)
-    throw new Error(`Review request failed (${response.status}).`);
-  return response.json() as Promise<T>;
+type Init = { method?: "POST" | "PUT" | "PATCH" | "DELETE"; body?: object };
+
+function readJson<T>(url: string, init: Init = {}): Promise<T> {
+  return apiRequest<T>(url, {
+    ...init,
+    describe: (status) => `Review request failed (${status}).`,
+  });
 }
 
 export function FraudReview({
@@ -77,8 +80,7 @@ export function FraudReview({
         base + `abuse-signals/${signalId}/resolve/`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ resolution_note: note }),
+          body: { resolution_note: note },
         },
       );
       setSignals((current) =>

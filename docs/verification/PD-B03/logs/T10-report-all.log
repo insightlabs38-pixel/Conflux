@@ -1,0 +1,8 @@
+affected last  1 runs: green 1/1  wall median 44s max 44s  target 120s  flaky events 0
+         slowest specs (median s): pvs 34
+canary   last  1 runs: green 1/1  wall median 120s max 120s  target 150s  flaky events 0
+         slowest specs (median s): uiv2-final-states 38, uiv2-organizer 31, lifecycle 18, scenes 11, release-integrity 1
+full     last 10 runs: green 10/10  wall median 141s max 142s  target 210s  flaky events 0
+         slowest specs (median s): workspace-shell 95, uiv2-surfaces 71, event-themes 55, pvs 47, participant-workflow 42
+smoke    last  3 runs: green 3/3  wall median 11s max 11s  target 20s  flaky events 0
+         slowest specs (median s): public 7, roles 5, signin 1

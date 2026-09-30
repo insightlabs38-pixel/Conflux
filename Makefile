@@ -1,4 +1,4 @@
-.PHONY: oidc-smoke demo-reset demo-e2e e2e-smoke e2e-affected e2e-canary e2e-release e2e-fast e2e-stack e2e-fixture-sweep format format-check lint test build verify-fast verify openapi-check sdk-generate sdk-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance backup restore backup-restore-smoke
+.PHONY: oidc-smoke demo-reset demo-e2e e2e-smoke e2e-affected e2e-canary e2e-release e2e-report e2e-fast e2e-stack e2e-fixture-sweep format format-check lint test build verify-fast verify openapi-check sdk-generate sdk-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance backup restore backup-restore-smoke
 
 # Local checks use disposable keys; runtime deployments must supply their own.
 export DJANGO_SECRET_KEY ?= bootstrap-checks-only
@@ -138,6 +138,10 @@ e2e-canary:
 
 # Authoritative release gate: serial reset-first run on the demo event (visual capture) + the canary gate.
 e2e-release: demo-reset demo-e2e e2e-canary
+
+# Timing vs tests/e2e/targets.json and flake history of recent runs; exits 1 on a breached target or flake.
+e2e-report:
+	python3 scripts/e2e-tiers report --check
 
 # Same specs, tiered and concurrent (scripts/e2e-tiers): read-only on the demo event, mutators and the
 # lifecycle canary on throwaway fixtures. No demo-reset needed; `make demo-e2e` stays the serial authority.

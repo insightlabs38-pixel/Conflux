@@ -1,0 +1,64 @@
+version: 3
+task: PD-B03-T10
+batch: PD-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 48059c09f7b7ba24c9334b248dd6df474bc089b4
+  head_commit: 48059c09f7b7ba24c9334b248dd6df474bc089b4
+changed_paths:
+- scripts/e2e-tiers
+- tests/e2e/targets.json
+- tests/test_e2e_tiers.py
+- Makefile
+- docs/operations/E2E.md
+- docs/verification/PD-B03/MATRIX.md
+- docs/verification/PD-B03/logs/
+deliverables:
+- item: Published local smoke, PR and full/release timing targets
+  result: pass
+  evidence: E2E.md targets table and tests/e2e/targets.json - smoke 20 s (11 s measured), affected 120 s (35-49 s), full 210 s (141 s median over 10 runs), canary 150 s (115-120 s), release serial 12 min (9.0 min)
+- item: Flake diagnostics so growth is visible
+  result: pass
+  evidence: every run appends to artifacts/e2e-fast/history.jsonl; make e2e-report lists median/max wall, slowest specs, clean-run counts and flaky events from diagnostic re-runs; triage procedure documented
+- item: Reliability budget enforced and measured
+  result: pass
+  evidence: 10 consecutive full runs green, 0 failed, 0 flaky (logs/T10-history.jsonl, T10-report-all.log); report --check fails on slow median, failures, flakes, red latest run (pytest)
+invariants:
+- item: Measured, not fabricated
+  result: pass
+  evidence: every figure comes from history.jsonl or the dated logs; sharded speedup explicitly marked not measured across machines
+- item: No gate weakened
+  result: pass
+  evidence: targets add checks only; no spec or timeout changed
+verification:
+- command: 10 consecutive python3 scripts/e2e-tiers runs
+  result: pass
+  note: exit 0 x10, median 141 s, max 142 s, 152 passed each
+- command: uv run --frozen pytest tests/test_e2e_tiers.py
+  result: pass
+  note: 39 passed including clean-window, breach, flake and repeat-normalisation cases
+- command: python3 scripts/e2e-tiers report --check
+  result: pass
+  note: no breach for full, canary, smoke, affected
+- command: make verify-fast
+  result: pass
+  note: pytest 1453 passed/23 skipped; web 169 + embed 8
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: full browser suite x10
+migrations: []
+findings:
+- An affected probe run on a dirty tree selected ALL because e2e infrastructure files counted as shared infrastructure; such runs are now recorded as full runs and the mislabelled local history row was removed before the evidence snapshot.
+escalations: []
+limitations:
+- Targets come from one 8-core host; other hosts need their own measurements (the report flags drift, it does not normalise hardware).
+- history.jsonl lives under artifacts/ (git-ignored); a snapshot is committed as evidence.
+- Reliability window of 10 runs bounds, but does not prove, a flake rate below 10%.
+next: review

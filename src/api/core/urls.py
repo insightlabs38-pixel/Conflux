@@ -2,6 +2,7 @@ from accounts.credential_views import CredentialRevokeView, CredentialView
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView
 
+from .entity_views import EntityCatalogueView, EntityQueryView
 from .views import health
 
 urlpatterns = [
@@ -16,6 +17,16 @@ urlpatterns = [
         "workspaces/<uuid:workspace_public_id>/api-credentials/<uuid:credential_public_id>/revoke/",
         CredentialRevokeView.as_view(),
         name="api-credential-revoke",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/entities/",
+        EntityCatalogueView.as_view(),
+        name="entity-catalogue",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/entities/<slug:entity_key>/",
+        EntityQueryView.as_view(),
+        name="entity-query",
     ),
     path("accounts/", include("accounts.urls")),
     path("workspaces/", include("workspaces.urls")),

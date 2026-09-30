@@ -7,7 +7,7 @@ primitives:
 - id: QUERY
   name: Universal query/filter AST
   owner_task: PD-F002-B01-T01
-  status: PLANNED
+  status: IMPLEMENTED
   consumer_count: 216
   consumers:
   - PD-F001-B01-T08

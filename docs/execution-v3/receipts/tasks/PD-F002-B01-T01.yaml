@@ -1,0 +1,78 @@
+version: 3
+task: PD-F002-B01-T01
+batch: PD-F002-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: frontier-architecture
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 7ce23de
+  head_commit: 7ce23de
+changed_paths:
+- src/api/core/ (entities.py, query.py, entity_views.py, urls.py)
+- src/api/events/entities.py
+- src/api/projects/entities.py
+- src/web/lib/entityQuery.ts and test
+- src/web/components/FilterBuilder.tsx and test
+- tests/integration/test_entity_query.py
+- docs/api/ENTITY_QUERY.md
+- docs/product-depth-v3/specs/002-feature-depth-should-compound-through-shared-primitives.md
+- docs/product-depth-v3/PRIMITIVE_REGISTRY.yaml
+- docs/api/openapi.yaml
+- sdks/
+deliverables:
+- item: Canonical query/filter AST as a reusable platform primitive, not a feature-local helper
+  result: pass
+  evidence: core.entities (registry of entities and typed fields), core.query (versioned JSON filter tree with and, or, not and typed operators, sort, columns, paging), generic endpoints for the catalogue and for a page of any registered entity; domains register from their own entities module and core never imports them
+- item: Stable inputs, outputs, state ownership, lifecycle, authorization, idempotency, error shape and extension boundary
+  result: pass
+  evidence: stateless and read-only (so idempotent); authorization decided in the registration (roles plus a base queryset per event and user); errors are 400 keyed by the path of the offending part (filter.and[1].op, sort, columns, limit, offset), 404 unknown entity, 403 wrong role, 404 foreign event; docs/api/ENTITY_QUERY.md
+- item: Reference consumers demonstrating reuse without private coupling
+  result: pass
+  evidence: "two independent apps register entities (events: applications, projects app: projects) and one conformance test proves every registered field filters and sorts against the database; the web lib and FilterBuilder consume only the catalogue response"
+- item: Compatibility and migration expectations documented
+  result: pass
+  evidence: no schema change; existing list endpoints and parameters are unchanged (test_the_legacy_applications_endpoint_is_unchanged); ENTITY_QUERY.md and spec 002 record adoption
+invariants:
+- item: Server authorization and validation authoritative
+  result: pass
+  evidence: only registered fields and operators compile; no lookup string, relation traversal or SQL comes from the client; values are parameterized (a hostile text value and a percent sign are literals); complexity is bounded (depth 4, 20 conditions, 50 values, 200 characters, 3 sort keys, 100 rows); judges, anonymous users and other workspaces are refused
+- item: No duplicate source of truth
+  result: pass
+  evidence: one registry and one compiler; the client only builds and sends the tree
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1609 passed, 23 skipped (adds 37 entity query tests including path-keyed diagnostics, boundaries, tenancy and registry conformance)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 336 web tests (entityQuery 3, FilterBuilder 3); static checks, OpenAPI and SDKs clean
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: lib/entityQuery.ts and FilterBuilder; they are mounted by the data grid in T03, so there is no browser surface yet (recorded limitation)
+- surface: api
+  result: pass
+  evidence: catalogue and page endpoints
+- surface: audit
+  result: pass
+  evidence: "not applicable for this task: read-only and stateless; nothing is stored"
+- surface: docs
+  result: pass
+  evidence: ENTITY_QUERY.md, spec 002, registry status IMPLEMENTED
+- surface: sdk
+  result: pass
+  evidence: "not applicable for this task: not_required; generated artifacts regenerated only"
+migrations: []
+findings:
+- PRIMITIVE_REGISTRY status for QUERY moved PLANNED to IMPLEMENTED; F001 configuration filters are plain parameters and remain an adopter for later
+- A date without a time means the start of that day in UTC (documented); equality on dates is deliberately not offered, use between
+limitations:
+- No browser verification in this task; the FilterBuilder and the page hook get their browser proof when T03 mounts them on the applications and projects lists
+- Only the applications and projects entities exist; the fifteen modules with ad-hoc parameters keep them until touched
+- Filtering is on stored columns of forward relations; computed values (readiness, scores) are not queryable here
+escalations: []
+next: review

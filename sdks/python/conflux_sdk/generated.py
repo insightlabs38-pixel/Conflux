@@ -1499,6 +1499,62 @@ class InputOfEmailTokenReceiptSchema(TypedDict):
     token: str
     expires_at: str
 
+class EntityFieldSchema(TypedDict):
+    key: str
+    label: str
+    type: EntityFieldSchemaTypeEnum
+    operators: list[str]
+    choices: list[str]
+    sortable: bool
+    filterable: bool
+    default: bool
+
+class InputOfEntityFieldSchema(TypedDict):
+    key: str
+    label: str
+    type: InputOfEntityFieldSchemaTypeEnum
+    operators: list[str]
+    choices: list[str]
+    sortable: bool
+    filterable: bool
+    default: bool
+
+EntityFieldSchemaTypeEnum = Literal['text', 'number', 'date', 'bool', 'enum', 'uuid']
+
+InputOfEntityFieldSchemaTypeEnum = Literal['text', 'number', 'date', 'bool', 'enum', 'uuid']
+
+class EntityPageSchema(TypedDict):
+    entity: str
+    total: int
+    limit: int
+    offset: int
+    filter: Any
+    sort: list[str]
+    columns: list[str]
+    rows: list[dict[str, Any]]
+
+class InputOfEntityPageSchema(TypedDict):
+    entity: str
+    total: int
+    limit: int
+    offset: int
+    filter: Any
+    sort: list[str]
+    columns: list[str]
+    rows: list[dict[str, Any]]
+
+class EntitySchema(TypedDict):
+    key: str
+    label: str
+    default_sort: list[str]
+    fields: list[EntityFieldSchema]
+
+class InputOfEntitySchema(TypedDict):
+    key: str
+    label: str
+    default_sort: list[str]
+    fields: list[InputOfEntityFieldSchema]
+
 class ErrorSchema(TypedDict):
     detail: str
 
@@ -5646,6 +5702,25 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                         'query_params': [],
                                                                                         'request_body': False,
                                                                                         'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_entities': {'method': 'GET',
+                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/entities/',
+                                                                               'path_params': ['event_public_id',
+                                                                                               'workspace_public_id'],
+                                                                               'query_params': [],
+                                                                               'request_body': False,
+                                                                               'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_entities_entity_key': {'method': 'GET',
+                                                                                          'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/entities/{entity_key}/',
+                                                                                          'path_params': ['entity_key',
+                                                                                                          'event_public_id',
+                                                                                                          'workspace_public_id'],
+                                                                                          'query_params': ['columns',
+                                                                                                           'filter',
+                                                                                                           'limit',
+                                                                                                           'offset',
+                                                                                                           'sort'],
+                                                                                          'request_body': False,
+                                                                                          'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_evaluation_pools': {'method': 'GET',
                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/evaluation-pools/',
                                                                                        'path_params': ['event_public_id',

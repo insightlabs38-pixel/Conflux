@@ -1657,6 +1657,70 @@ export type InputOfEmailTokenReceiptSchema = {
   expires_at: string;
 };
 
+export type EntityFieldSchema = {
+  key: string;
+  label: string;
+  type: EntityFieldSchemaTypeEnum;
+  operators: string[];
+  choices: string[];
+  sortable: boolean;
+  filterable: boolean;
+  default: boolean;
+};
+
+export type InputOfEntityFieldSchema = {
+  key: string;
+  label: string;
+  type: InputOfEntityFieldSchemaTypeEnum;
+  operators: string[];
+  choices: string[];
+  sortable: boolean;
+  filterable: boolean;
+  default: boolean;
+};
+
+export type EntityFieldSchemaTypeEnum =
+  "text" | "number" | "date" | "bool" | "enum" | "uuid";
+
+export type InputOfEntityFieldSchemaTypeEnum =
+  "text" | "number" | "date" | "bool" | "enum" | "uuid";
+
+export type EntityPageSchema = {
+  entity: string;
+  total: number;
+  limit: number;
+  offset: number;
+  filter: unknown;
+  sort: string[];
+  columns: string[];
+  rows: Record<string, unknown>[];
+};
+
+export type InputOfEntityPageSchema = {
+  entity: string;
+  total: number;
+  limit: number;
+  offset: number;
+  filter: unknown;
+  sort: string[];
+  columns: string[];
+  rows: Record<string, unknown>[];
+};
+
+export type EntitySchema = {
+  key: string;
+  label: string;
+  default_sort: string[];
+  fields: EntityFieldSchema[];
+};
+
+export type InputOfEntitySchema = {
+  key: string;
+  label: string;
+  default_sort: string[];
+  fields: InputOfEntityFieldSchema[];
+};
+
 export type ErrorSchema = { detail: string };
 
 export type InputOfErrorSchema = { detail: string };
@@ -6193,6 +6257,27 @@ export interface Operations {
     };
     response: RulesOutput;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_entities: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: EntitySchema[];
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_entities_entity_key: {
+    request: {
+      path: {
+        entity_key: string;
+        event_public_id: string;
+        workspace_public_id: string;
+      };
+      query?: {
+        columns?: string;
+        filter?: string;
+        limit?: number;
+        offset?: number;
+        sort?: string;
+      };
+    };
+    response: EntityPageSchema;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_evaluation_pools: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: EvaluationPool;
@@ -10078,6 +10163,23 @@ export const operations = {
       path_params: ["event_public_id", "workspace_public_id"],
       query_params: [],
       request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_entities: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/entities/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_entities_entity_key:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/entities/{entity_key}/",
+      path_params: ["entity_key", "event_public_id", "workspace_public_id"],
+      query_params: ["columns", "filter", "limit", "offset", "sort"],
+      request_body: false,
       response_kind: "json",
     },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_evaluation_pools:

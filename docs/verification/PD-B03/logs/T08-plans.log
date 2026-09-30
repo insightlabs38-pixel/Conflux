@@ -1,0 +1,12 @@
+shard 1/2  ~191s  canary:chain, read-only:workspace-shell, read-only:uiv2-surfaces, read-only:uiv2-gate, read-only:public, read-only:showcase, read-only:roles, read-only:signin
+shard 2/2  ~191s  isolated-mutation:event-themes, isolated-mutation:pvs, isolated-mutation:participant-workflow, isolated-mutation:uiv2-judge, read-only:foundations, isolated-mutation:profiles, read-only:fixture-isolation, read-only:auth-states, read-only:extended-embed
+total ~383s; slowest shard ~191s (ideal ~191s)
+shard 1/3  ~127s  canary:chain, read-only:fixture-isolation, read-only:signin
+shard 2/3  ~127s  isolated-mutation:event-themes, read-only:workspace-shell, read-only:uiv2-surfaces, read-only:uiv2-gate, isolated-mutation:profiles, read-only:showcase, read-only:auth-states
+shard 3/3  ~128s  isolated-mutation:pvs, isolated-mutation:participant-workflow, isolated-mutation:uiv2-judge, read-only:foundations, read-only:public, read-only:roles, read-only:extended-embed
+total ~383s; slowest shard ~128s (ideal ~128s)
+shard 1/4  ~121s  canary:chain
+shard 2/4  ~88s  isolated-mutation:event-themes, isolated-mutation:uiv2-judge, isolated-mutation:profiles, read-only:auth-states, read-only:signin
+shard 3/4  ~88s  isolated-mutation:pvs, read-only:uiv2-surfaces, read-only:foundations, read-only:showcase, read-only:fixture-isolation, read-only:extended-embed
+shard 4/4  ~86s  isolated-mutation:participant-workflow, read-only:workspace-shell, read-only:uiv2-gate, read-only:public, read-only:roles
+total ~383s; slowest shard ~121s (ideal ~96s)

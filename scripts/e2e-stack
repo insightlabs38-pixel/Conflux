@@ -13,6 +13,7 @@ Checks: health endpoint; reference scenario sign-in + event window (>= 12 h left
 working tree by content; web bundle by mtime; skipped under the dev bind-mount overlay); leftover fixtures (the `e2e_fixture` seed range); Chromium installed.
 Env: E2E_BASE_URL (http://localhost:8080) E2E_DEMO_SEED (7) E2E_DEMO_PASSWORD (demo-pass-7) E2E_MANAGE.
 """
+import fcntl
 import hashlib
 import http.cookiejar
 import json
@@ -107,18 +108,35 @@ def freshness():
     if differs:
         return f"running API differs from src/api in {len(differs)} file(s) (e.g. {differs[0]}); rebuild with `make up` (or `docker compose up -d --build app`)"
     created = sh("docker", "image", "inspect", "conflux-api:latest", "--format", "{{.Created}}").stdout.strip()
-    web = sh("git", "ls-files", "-co", "--exclude-standard", "src/web", "package.json", "pnpm-lock.yaml").stdout.split()
-    web = [f for f in web if (ROOT / f).is_file() and ".test." not in f]
-    if created and web:
-        newest = max((ROOT / f).stat().st_mtime for f in web)
-        if newest > datetime.fromisoformat(created[:26] + "+00:00").timestamp() + 1:
-            return "web sources are newer than the image (mtime heuristic); rebuild with `make up` if the change affects the browser"
+    if not created:
+        return None
+    built = datetime.fromisoformat(created[:26] + "+00:00").timestamp()
+    paths = ["src/web", "package.json", "pnpm-lock.yaml"]
+    committed = sh("git", "log", "-1", "--format=%ct", "--", *paths).stdout.strip()
+    dirty = [
+        line[3:] for line in sh("git", "status", "--porcelain", "--", *paths).stdout.splitlines() if ".test." not in line
+    ]
+    newest = max([float(committed or 0)] + [(ROOT / f).stat().st_mtime for f in dirty if (ROOT / f).is_file()])
+    if newest > built + 1:
+        return "web sources changed after the image was built (commit/modification time heuristic); rebuild with `make up` if the change affects the browser"
     return None
 
 
 def fixtures():
     out = manage("e2e_fixture", "list")
     return [line for line in out.stdout.splitlines() if line.startswith("demo-hackathon-")] if out.returncode == 0 else None
+
+
+class repair_lock:
+    """Serialize repairs: concurrent shards on one stack must not start it or reset the reference twice."""
+
+    def __enter__(self):
+        (ROOT / "artifacts").mkdir(exist_ok=True)
+        self.fh = (ROOT / "artifacts/e2e-stack.lock").open("w")
+        fcntl.flock(self.fh, fcntl.LOCK_EX)
+
+    def __exit__(self, *exc):
+        self.fh.close()
 
 
 def main(argv):
@@ -137,22 +155,27 @@ def main(argv):
     started = time.monotonic()
     if not healthy():
         if fix:
-            print("fix  stack is down: docker compose up -d (no build)")
-            sh("docker", "compose", "up", "-d")
-            for _ in range(60):
-                if healthy():
-                    break
-                time.sleep(2)
+            with repair_lock():
+                if not healthy():  # another shard may have repaired it while we waited for the lock
+                    print("fix  stack is down: docker compose up -d (no build)")
+                    sh("docker", "compose", "up", "-d")
+                    for _ in range(60):
+                        if healthy():
+                            break
+                        time.sleep(2)
         line(healthy(), "stack health", BASE + "/api/v1/health/" + ("" if healthy() else "; start it with `docker compose up -d`"))
     else:
         line(True, "stack health", BASE)
     if healthy():
         problem = reference_problem()
         if problem and fix and not problem.startswith("sign-in request failed"):
-            print(f"fix  reference seed {SEED}: {problem}; running scripts/demo-reset submitted")
-            env = {**os.environ, "DEMO_SEED": SEED, "DEMO_PASSWORD": PASSWORD, "DEMO_BASE_URL": BASE}
-            reset = subprocess.run(["scripts/demo-reset", "submitted"], cwd=ROOT, env=env, capture_output=True, text=True)
-            problem = reference_problem() if reset.returncode == 0 else f"demo-reset failed: {(reset.stderr.strip().splitlines() or ['?'])[-1]}"
+            with repair_lock():
+                problem = reference_problem()  # another shard may have reset it while we waited
+                if problem:
+                    print(f"fix  reference seed {SEED}: {problem}; running scripts/demo-reset submitted")
+                    env = {**os.environ, "DEMO_SEED": SEED, "DEMO_PASSWORD": PASSWORD, "DEMO_BASE_URL": BASE}
+                    reset = subprocess.run(["scripts/demo-reset", "submitted"], cwd=ROOT, env=env, capture_output=True, text=True)
+                    problem = reference_problem() if reset.returncode == 0 else f"demo-reset failed: {(reset.stderr.strip().splitlines() or ['?'])[-1]}"
         if problem is None:
             line(True, f"reference scenario seed {SEED}", "organizer signs in; event window open")
         else:

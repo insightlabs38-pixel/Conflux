@@ -76,3 +76,39 @@ def test_canary_selection_runs_the_chain_prefix_the_selected_spec_depends_on():
     assert tiers.canary_chain(["uiv2-organizer"]) == ["lifecycle", "scenes", "uiv2-organizer"]
     assert tiers.canary_chain(["lifecycle"]) == ["lifecycle"]
     assert tiers.canary_chain() == tiers.tiers()["canary"]
+
+
+@pytest.mark.parametrize("count", range(1, 9))
+def test_shards_partition_every_work_unit_exactly_once(count):
+    everything = sorted(u[0] for u in tiers.units())
+    assigned = sorted(u[0] for _, members in tiers.split(count) for u in members)
+    assert assigned == everything
+
+
+def test_sharding_is_deterministic_and_keeps_the_canary_chain_whole():
+    assert tiers.split(4) == tiers.split(4)
+    holders = [i for i in range(1, 5) if "canary" in tiers.shard_selection(i, 4)]
+    assert len(holders) == 1
+    assert (
+        tiers.canary_chain(tiers.shard_selection(holders[0], 4)["canary"])
+        == tiers.tiers()["canary"]
+    )
+
+
+@pytest.mark.parametrize("count", [2, 3, 4, 6])
+def test_shards_are_balanced_within_the_greedy_bound(count):
+    shards = tiers.split(count)
+    total = sum(seconds for seconds, _ in shards)
+    largest = max(tiers.weights().values())
+    assert max(seconds for seconds, _ in shards) <= total / count + largest
+
+
+def test_every_unit_has_a_measured_weight():
+    # A new spec needs `scripts/e2e-tiers weights`; otherwise sharding guesses the median weight.
+    assert {u[0] for u in tiers.units()} <= set(tiers.weights())
+
+
+@pytest.mark.parametrize("bad", ["0/4", "5/4", "x", "2/0", "1-4"])
+def test_shard_argument_is_validated(bad):
+    with pytest.raises(SystemExit):
+        tiers.parse_shard(bad)

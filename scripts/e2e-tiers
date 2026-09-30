@@ -9,6 +9,9 @@
 
 Usage: scripts/e2e-tiers check
        scripts/e2e-tiers run [tier ...]      PR/full: all three tiers concurrently (default) or the named ones
+       scripts/e2e-tiers run --shard I/N     PR sharding: this job's slice of the work units (1-based I of N)
+       scripts/e2e-tiers plan N              print the deterministic N-way split and its estimated balance
+       scripts/e2e-tiers weights             refresh tests/e2e/weights.json from the last full run's reports
        scripts/e2e-tiers smoke               seconds: sign-in, role workspaces and public pages, desktop only
        scripts/e2e-tiers affected [--base REF] [--list]
                                              only specs mapped (tests/e2e/affected.json) from paths changed vs REF
@@ -62,6 +65,77 @@ def check():
     return problems
 
 
+PREFIX = ""  # set by --shard so concurrent shards on one stack never share output/log directories
+
+
+def weights():
+    return json.loads((SPECS / "weights.json").read_text())
+
+
+def units():
+    """Indivisible work units: one per read-only/self-isolating spec, one per isolated spec, one canary chain."""
+    t = tiers()
+    return (
+        [(f"read-only:{s}", "read-only", [s]) for s in t["read-only"] + t["self-isolating"]]
+        + [(f"isolated-mutation:{s}", "isolated-mutation", [s]) for s in t["isolated-mutation"]]
+        + [("canary:chain", "canary", list(t["canary"]))]
+    )
+
+
+def split(n):
+    """Deterministic longest-processing-time split of units into n shards: [(seconds, [unit, ...]), ...]."""
+    w = weights()
+    default = sorted(w.values())[len(w) // 2] if w else 30
+    shards = [(0.0, []) for _ in range(n)]
+    for unit in sorted(units(), key=lambda u: (-w.get(u[0], default), u[0])):
+        i = min(range(n), key=lambda k: (shards[k][0], k))
+        shards[i] = (shards[i][0] + w.get(unit[0], default), shards[i][1] + [unit])
+    return shards
+
+
+def parse_shard(text):
+    try:
+        i, n = (int(x) for x in text.split("/"))
+    except ValueError:
+        i = n = 0
+    if not 1 <= i <= n:
+        raise SystemExit(f"--shard must look like I/N with 1 <= I <= N, got {text!r}")
+    return i, n
+
+
+def shard_selection(i, n):
+    selection = {}
+    for _, tier, specs in split(n)[i - 1][1]:
+        selection.setdefault(tier, []).extend(specs)
+    return selection
+
+
+def refresh_weights():
+    """Serial-equivalent seconds per unit from the last full run: read-only files are summed test time spread
+    over the read-only workers; isolated specs and canary members use their own invocation's wall time."""
+    t, out = tiers(), {}
+    workers = int(os.environ.get("E2E_READONLY_WORKERS", "4"))
+    report = json.loads((LOGS / "read-only" / "report.json").read_text())
+    per_file = {}
+
+    def walk(suite):
+        for spec in suite.get("specs", []):
+            for test in spec.get("tests", []):
+                per_file[Path(spec["file"]).name.removesuffix(".spec.ts")] = per_file.get(Path(spec["file"]).name.removesuffix(".spec.ts"), 0) + sum(r["duration"] for r in test["results"])
+        for child in suite.get("suites", []):
+            walk(child)
+
+    for suite in report["suites"]:
+        walk(suite)
+    for spec in t["read-only"] + t["self-isolating"]:
+        out[f"read-only:{spec}"] = round(per_file.get(spec, 0) / 1000 / workers + 1, 1)
+    for spec in t["isolated-mutation"]:
+        out[f"isolated-mutation:{spec}"] = round(json.loads((LOGS / f"iso-{spec}" / "report.json").read_text())["stats"]["duration"] / 1000, 1)
+    out["canary:chain"] = round(sum(json.loads((LOGS / f"canary-{spec}" / "report.json").read_text())["stats"]["duration"] for spec in t["canary"]) / 1000, 1)
+    (SPECS / "weights.json").write_text(json.dumps(dict(sorted(out.items())), indent=2) + "\n")
+    return out
+
+
 def manage(*args):
     prefix = os.environ.get("E2E_MANAGE", "docker compose exec -T app python manage.py").split()
     out = subprocess.run([*prefix, "e2e_fixture", *args], cwd=ROOT, capture_output=True, text=True)
@@ -90,6 +164,7 @@ def failed_specs(group):
 
 
 def playwright(group, specs, env=None, workers=1, extra=(), diagnose=True):
+    group = PREFIX + group
     LOGS.mkdir(parents=True, exist_ok=True)
     log = LOGS / f"tier-{group}.log"
     with log.open("w") as fh:
@@ -108,10 +183,10 @@ def diagnostic_rerun(group, env, extra):
     """Failure-first tracing: nothing is recorded on the way in, so re-run only the failing files
     once with a trace. Diagnostic only: the tier stays failed whatever the re-run does. Chains that
     consume state (the canary) are not re-run; their fixture is kept instead."""
-    specs = failed_specs(group)
+    specs = failed_specs(group)  # group already carries the shard prefix
     if not specs or any(tier_of(s) == "canary" for s in specs):
         return
-    diag = f"{group}-diagnose"
+    diag = f"{group}-diagnose"  # group already carries the shard prefix
     say(f"[{group}] diagnostic re-run with trace: {', '.join(specs)}")
     code = subprocess.run(
         ["npx", "playwright", "test", "-c", CONFIG, "--workers=1", *extra, *specs],
@@ -267,12 +342,35 @@ def main(argv):
         if "--list" in argv or not preflight():
             return 0 if "--list" in argv else 1
         return run_tiers([t for t in RUN_TIERS if selection is None or t in selection], selection)
-    chosen = argv[1:] if command == "run" and argv[1:] else list(RUN_TIERS)
+    if command == "plan":
+        n = int(argv[1]) if argv[1:] else 0
+        if n < 1:
+            print("usage: e2e-tiers plan N", file=sys.stderr)
+            return 2
+        shards = split(n)
+        for k, (seconds, members) in enumerate(shards, 1):
+            say(f"shard {k}/{n}  ~{seconds:.0f}s  " + ", ".join(u[0] for u in members))
+        total = sum(sec for sec, _ in shards)
+        say(f"total ~{total:.0f}s; slowest shard ~{max(sec for sec, _ in shards):.0f}s (ideal ~{total / n:.0f}s)")
+        return 0
+    if command == "weights":
+        say(json.dumps(refresh_weights(), indent=1))
+        return 0
+    global PREFIX
+    selection, rest = None, [a for a in argv[1:] if not a.startswith("--shard")]
+    if "--shard" in argv:
+        i, n = parse_shard(argv[argv.index("--shard") + 1])
+        rest = [a for a in rest if a != argv[argv.index("--shard") + 1]]
+        PREFIX, selection = f"s{i}of{n}-", shard_selection(i, n)
+        say(f"shard {i}/{n}: " + "; ".join(f"{t}: {', '.join(v)}" for t, v in selection.items()))
+    chosen = rest if command == "run" and rest else list(RUN_TIERS)
+    if selection is not None:
+        chosen = [t for t in chosen if t in selection]
     unknown = [t for t in chosen if t not in RUNNERS]
     if command not in ("run",) or unknown:
-        print(f"usage: e2e-tiers check|run [tier...]|smoke|affected [--base REF] [--list]; unknown {unknown or command}", file=sys.stderr)
+        print(f"usage: e2e-tiers check|run [tier...] [--shard I/N]|plan N|weights|smoke|affected [--base REF] [--list]; unknown {unknown or command}", file=sys.stderr)
         return 2
-    return run_tiers(chosen) if preflight() else 1
+    return run_tiers(chosen, selection) if preflight() else 1
 
 
 if __name__ == "__main__":

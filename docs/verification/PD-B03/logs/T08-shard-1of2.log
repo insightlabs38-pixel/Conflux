@@ -1,0 +1,13 @@
+shard 1/2: canary: lifecycle, scenes, uiv2-organizer, uiv2-final-states; read-only: workspace-shell, uiv2-surfaces, uiv2-gate, public, showcase, roles, signin
+ok   stack health — http://localhost:8080
+ok   reference scenario seed 7 — organizer signs in; event window open
+ok   source freshness — running API matches src/api
+ok   leftover fixtures — none
+ok   playwright chromium
+preflight 2.1s
+[s1of2-canary-lifecycle] exit 0: 6 skipped; 6 passed (32.9s)
+[s1of2-canary-scenes] exit 0: 5 passed (14.9s)
+[s1of2-canary-uiv2-organizer] exit 0: 4 skipped; 4 passed (35.5s)
+[s1of2-read-only] exit 0: 35 skipped; 71 passed (1.9m)
+[s1of2-canary-uiv2-final-states] exit 0: 6 skipped; 6 passed (40.0s)
+== read-only: ok, canary: ok

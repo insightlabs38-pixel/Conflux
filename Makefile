@@ -133,8 +133,9 @@ e2e-affected:
 
 # Same specs, tiered and concurrent (scripts/e2e-tiers): read-only on the demo event, mutators and the
 # lifecycle canary on throwaway fixtures. No demo-reset needed; `make demo-e2e` stays the serial authority.
+# `make e2e-fast SHARD=2/4` runs one slice of the work (see docs/operations/E2E.md#sharding).
 e2e-fast:
-	./scripts/e2e-fast
+	./scripts/e2e-fast $(if $(SHARD),run --shard $(SHARD))
 
 # Report (and with `make e2e-stack FIX=--fix` repair) whether the running stack can run the suite as-is.
 e2e-stack:

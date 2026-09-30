@@ -1,0 +1,19 @@
+{
+  "canary:chain": 120.9,
+  "isolated-mutation:event-themes": 57.4,
+  "isolated-mutation:participant-workflow": 41.5,
+  "isolated-mutation:profiles": 8.4,
+  "isolated-mutation:pvs": 48.6,
+  "isolated-mutation:uiv2-judge": 17.4,
+  "read-only:auth-states": 2.3,
+  "read-only:extended-embed": 1.8,
+  "read-only:fixture-isolation": 4.3,
+  "read-only:foundations": 9.6,
+  "read-only:public": 5.4,
+  "read-only:roles": 4.1,
+  "read-only:showcase": 5.0,
+  "read-only:signin": 2.0,
+  "read-only:uiv2-gate": 10.4,
+  "read-only:uiv2-surfaces": 18.7,
+  "read-only:workspace-shell": 24.8
+}

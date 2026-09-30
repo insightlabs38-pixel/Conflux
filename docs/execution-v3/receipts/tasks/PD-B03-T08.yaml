@@ -1,0 +1,65 @@
+version: 3
+task: PD-B03-T08
+batch: PD-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: a805d0820294852efec70d1629ac5a5fb29a4323
+  head_commit: a805d0820294852efec70d1629ac5a5fb29a4323
+changed_paths:
+- scripts/e2e-tiers
+- scripts/e2e-stack
+- tests/e2e/weights.json
+- tests/test_e2e_tiers.py
+- Makefile
+- docs/operations/E2E.md
+- docs/verification/PD-B03/MATRIX.md
+- docs/verification/PD-B03/logs/
+deliverables:
+- item: Deterministic PR sharding over independent work units
+  result: pass
+  evidence: run --shard I/N, plan N; LPT split over weights.json; units = spec files + one indivisible canary chain; plans 2/3/4 shards ~191/128/121 s
+- item: No collisions in seeded identities, ports, event state, output artifacts
+  result: pass
+  evidence: two shards run concurrently on the one shared stack, 92+60=152 passed, 51+48=99 skipped, 0 failed, equal to unsharded; per-shard dirs artifacts/e2e-fast/s1of2-*, s2of2-*; distinct fixture seeds; repair lock in e2e-stack; port recipe via COMPOSE_PROJECT_NAME/CONFLUX_PORT documented
+- item: Coverage preserved
+  result: pass
+  evidence: partition exactly-once for N=1..8 (pytest); shard totals equal unsharded 152/99; unsharded run green after refactor (2m19s)
+invariants:
+- item: Canary chain and ordering intact
+  result: pass
+  evidence: chain never split (pytest), runs on one shard in order
+- item: No weakened gates
+  result: pass
+  evidence: no spec or assertion changed in this task
+verification:
+- command: uv run --frozen pytest tests/test_e2e_tiers.py
+  result: pass
+  note: 35 passed (partition, determinism, balance bound, weights coverage, shard argument validation)
+- command: scripts/e2e-tiers run --shard 1/2 and --shard 2/2 concurrently
+  result: pass
+  note: 2m23s wall for both on one host; logs/T08-shard-*.log
+- command: make e2e-fast
+  result: pass
+  note: 152 passed, 2m19s
+- command: make verify-fast
+  result: pass
+  note: pytest 1449 passed/23 skipped; web 169 + embed 8; lint and format clean
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: full browser suite sharded and unsharded
+migrations: []
+findings:
+- Web freshness heuristic switched from file mtime to commit/dirty-file time after a git checkout produced a false warning.
+escalations: []
+limitations:
+- The GitHub Actions matrix job is documented as a recipe but not added to ci.yml: it cannot be executed here and an unexercised workflow could break CI.
+- One host gains nothing from sharding (shards contend); speedup is across CI jobs and has not been measured on multiple machines.
+- weights.json is a snapshot; drift is bounded by the LPT split but needs a refresh after large timing changes.
+next: review

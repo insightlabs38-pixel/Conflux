@@ -1,0 +1,14 @@
+shard 2/2: isolated-mutation: event-themes, pvs, participant-workflow, uiv2-judge, profiles; read-only: foundations, fixture-isolation, auth-states, extended-embed
+ok   stack health — http://localhost:8080
+ok   reference scenario seed 7 — organizer signs in; event window open
+ok   source freshness — running API matches src/api
+ok   leftover fixtures — none
+ok   playwright chromium
+preflight 2.1s
+[s2of2-read-only] exit 0: 17 skipped; 19 passed (44.7s)
+[s2of2-iso-participant-workflow] exit 0: 4 skipped; 4 passed (49.8s)
+[s2of2-iso-pvs] exit 0: 5 skipped; 15 passed (56.1s)
+[s2of2-iso-event-themes] exit 0: 16 skipped; 16 passed (1.0m)
+[s2of2-iso-profiles] exit 0: 2 skipped; 2 passed (7.0s)
+[s2of2-iso-uiv2-judge] exit 0: 4 skipped; 4 passed (15.8s)
+== read-only: ok, isolated-mutation: ok

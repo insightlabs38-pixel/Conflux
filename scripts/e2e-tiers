@@ -12,6 +12,8 @@ Usage: scripts/e2e-tiers check
        scripts/e2e-tiers run --shard I/N     PR sharding: this job's slice of the work units (1-based I of N)
        scripts/e2e-tiers plan N              print the deterministic N-way split and its estimated balance
        scripts/e2e-tiers weights             refresh tests/e2e/weights.json from the last full run's reports
+       scripts/e2e-tiers canary [--repeat N] release/nightly gate: the full lifecycle chain on N fresh canary fixtures
+                                             (every run must pass; failed runs keep their fixture; pass rate reported)
        scripts/e2e-tiers smoke               seconds: sign-in, role workspaces and public pages, desktop only
        scripts/e2e-tiers affected [--base REF] [--list]
                                              only specs mapped (tests/e2e/affected.json) from paths changed vs REF
@@ -306,6 +308,7 @@ def run_tiers(chosen, selection=None):
 
 
 def main(argv):
+    global PREFIX
     problems = check()
     if argv[:1] == ["check"] or problems:
         for p in problems:
@@ -313,6 +316,16 @@ def main(argv):
         print("tiers: OK" if not problems else "tiers: FAILED", file=sys.stderr)
         return 1 if problems else 0
     command = argv[0] if argv else "run"
+    if command == "canary":
+        repeat = int(argv[argv.index("--repeat") + 1]) if "--repeat" in argv else 1
+        if repeat < 1 or not preflight():
+            return 1 if repeat >= 1 else 2
+        results = []
+        for run in range(1, repeat + 1):
+            PREFIX = f"r{run}of{repeat}-" if repeat > 1 else ""
+            results.append(run_canary() == 0)
+        say(f"== canary gate: {sum(results)}/{repeat} runs passed" + ("" if all(results) else " — FAILED (kept fixtures listed above)"))
+        return 0 if all(results) else 1
     if command == "smoke":
         if not preflight():
             return 1
@@ -356,7 +369,6 @@ def main(argv):
     if command == "weights":
         say(json.dumps(refresh_weights(), indent=1))
         return 0
-    global PREFIX
     selection, rest = None, [a for a in argv[1:] if not a.startswith("--shard")]
     if "--shard" in argv:
         i, n = parse_shard(argv[argv.index("--shard") + 1])

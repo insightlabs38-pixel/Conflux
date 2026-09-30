@@ -11,14 +11,12 @@ import {
   signIn,
   watch,
   capture,
-  VISUAL,
 } from "./support";
 
 // UIV2-B10: finalized / published / submitted (immutable) states. Requires the lifecycle
 // journey to have run first (alphabetical order serially; the canary chain in scripts/e2e-tiers).
-// In a visual campaign `video: "on"` keeps it in the same worker group as lifecycle/scenes
-// (Playwright groups by fixture options).
-test.use(VISUAL ? { video: "on" } : {});
+// Serial runs rely on alphabetical order within one worker group, so no spec here overrides
+// fixture options (video comes from the config and E2E_CAPTURE): lifecycle < uiv2-final-states.
 
 for (const width of [360, 390, 768, 1024, 1440, 1920]) {
   test(`finalized, published and submitted states at ${width}px`, async ({

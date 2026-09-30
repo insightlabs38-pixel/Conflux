@@ -1,4 +1,4 @@
-.PHONY: oidc-smoke demo-reset demo-e2e e2e-smoke e2e-affected e2e-fast e2e-stack e2e-fixture-sweep format format-check lint test build verify-fast verify openapi-check sdk-generate sdk-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance backup restore backup-restore-smoke
+.PHONY: oidc-smoke demo-reset demo-e2e e2e-smoke e2e-affected e2e-canary e2e-release e2e-fast e2e-stack e2e-fixture-sweep format format-check lint test build verify-fast verify openapi-check sdk-generate sdk-check up dev dev-build down dev-down logs seed cold-boot-smoke acceptance backup restore backup-restore-smoke
 
 # Local checks use disposable keys; runtime deployments must supply their own.
 export DJANGO_SECRET_KEY ?= bootstrap-checks-only
@@ -130,6 +130,14 @@ e2e-smoke:
 # Only specs mapped from changed paths (tests/e2e/affected.json); `make e2e-affected BASE=main~3 LIST=1`.
 e2e-affected:
 	python3 scripts/e2e-tiers affected $(if $(BASE),--base $(BASE)) $(if $(LIST),--list)
+
+# Release/nightly gate: the real create -> submit -> judge -> publish chain plus API integrity checks, on N
+# fresh fixtures (`make e2e-canary REPEAT=3`). Never sharded, sampled or skipped by `e2e-affected`.
+e2e-canary:
+	python3 scripts/e2e-tiers canary $(if $(REPEAT),--repeat $(REPEAT))
+
+# Authoritative release gate: serial reset-first run on the demo event (visual capture) + the canary gate.
+e2e-release: demo-reset demo-e2e e2e-canary
 
 # Same specs, tiered and concurrent (scripts/e2e-tiers): read-only on the demo event, mutators and the
 # lifecycle canary on throwaway fixtures. No demo-reset needed; `make demo-e2e` stays the serial authority.

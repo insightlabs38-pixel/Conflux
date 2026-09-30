@@ -19,7 +19,6 @@ import {
  * participant: approved, no team). Re-run the reset before repeating.
  */
 test.describe.configure({ mode: "serial" });
-test.use({ video: VISUAL ? "on" : "off" });
 const shot = async (page: Page, name: string, region?: string) => {
   const target = region
     ? page.getByRole("region", { name: region, exact: true })

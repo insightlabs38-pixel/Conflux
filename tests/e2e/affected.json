@@ -41,7 +41,8 @@
         "uiv2-gate",
         "lifecycle",
         "uiv2-organizer",
-        "uiv2-final-states"
+        "uiv2-final-states",
+        "release-integrity"
       ]
     },
     {
@@ -51,7 +52,8 @@
         "uiv2-organizer",
         "uiv2-final-states",
         "showcase",
-        "public"
+        "public",
+        "release-integrity"
       ]
     },
     {
@@ -81,7 +83,7 @@
         "src/api/artifacts/*",
         "src/api/forms/*"
       ],
-      "specs": ["participant-workflow", "lifecycle"]
+      "specs": ["participant-workflow", "lifecycle", "release-integrity"]
     },
     {
       "paths": [
@@ -115,6 +117,9 @@
       ],
       "specs": ["fixture-isolation", "auth-states"]
     },
-    { "paths": ["src/embed/*"], "specs": ["extended-embed", "public"] }
+    {
+      "paths": ["src/embed/*"],
+      "specs": ["extended-embed", "public"]
+    }
   ]
 }

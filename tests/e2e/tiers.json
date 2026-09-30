@@ -18,6 +18,12 @@
     "pvs",
     "uiv2-judge"
   ],
-  "canary": ["lifecycle", "scenes", "uiv2-organizer", "uiv2-final-states"],
+  "canary": [
+    "lifecycle",
+    "scenes",
+    "uiv2-organizer",
+    "uiv2-final-states",
+    "release-integrity"
+  ],
   "opt-in": ["pdv3-baseline-census"]
 }

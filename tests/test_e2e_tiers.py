@@ -29,7 +29,14 @@ def test_smoke_is_cheap_read_only_reference_coverage():
         (["src/web/features/pvs/PvsPanel.tsx"], ["pvs"]),
         (
             ["src/web/features/judging/JudgeDesk.tsx"],
-            ["lifecycle", "uiv2-final-states", "uiv2-gate", "uiv2-judge", "uiv2-organizer"],
+            [
+                "lifecycle",
+                "release-integrity",
+                "uiv2-final-states",
+                "uiv2-gate",
+                "uiv2-judge",
+                "uiv2-organizer",
+            ],
         ),
         (["src/api/mentorship/services.py"], ["pvs"]),
         (["src/embed/src/gallery.ts"], ["extended-embed", "public"]),

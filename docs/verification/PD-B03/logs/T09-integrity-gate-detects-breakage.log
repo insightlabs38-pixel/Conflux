@@ -1,0 +1,17 @@
+### A. integrity gate on a canary fixture where the lifecycle did NOT run (must fail)
+  ✘  1 [desktop] › tests/e2e/release-integrity.spec.ts:53:5 › registration, submission and judging left consistent state (171ms)
+    Error: expect(received).toBe(expected) // Object.is equality
+    Expected: 3
+    Received: 0
+  1 failed
+
+### B. lifecycle runs, then integrity passes
+  4 passed (2.0s)
+
+### C. sabotage: one judge ballot removed behind the API's back; integrity must fail
+deleting ballot by demo-hackathon-17816000-judge-01
+  ✘  1 [desktop] › tests/e2e/release-integrity.spec.ts:53:5 › registration, submission and judging left consistent state (160ms)
+    Error: expect(received).toBe(expected) // Object.is equality
+    Expected: 3
+    Received: 2
+  1 failed

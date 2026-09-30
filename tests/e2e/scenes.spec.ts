@@ -1,4 +1,4 @@
-import { chooseWorkspaceEvent, goToTask, VISUAL } from "./support";
+import { chooseWorkspaceEvent, goToTask } from "./support";
 import { expect, test } from "@playwright/test";
 import path from "node:path";
 import {
@@ -13,7 +13,7 @@ import {
 // Deterministic demo scenes: fixed viewport, reduced motion, seeded data. Screenshots and one
 // video per scene are only produced in a visual campaign (E2E_CAPTURE=visual); they land in
 // tests/e2e/artifacts/scenes and artifacts/results.
-test.use({ video: VISUAL ? "on" : "off", screenshot: "off" });
+test.use({ screenshot: "off" });
 const shot = (name: string) =>
   path.join(__dirname, "artifacts", "scenes", `${name}.png`);
 

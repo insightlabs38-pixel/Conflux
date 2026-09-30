@@ -1,0 +1,71 @@
+version: 3
+task: PD-B03-T09
+batch: PD-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: c0ffabe638731769b18c68a771189f5dd44c5b3d
+  head_commit: c0ffabe638731769b18c68a771189f5dd44c5b3d
+changed_paths:
+- tests/e2e/release-integrity.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/affected.json
+- tests/e2e/weights.json
+- tests/e2e/lifecycle.spec.ts
+- tests/e2e/scenes.spec.ts
+- tests/e2e/uiv2-final-states.spec.ts
+- tests/test_e2e_tiers.py
+- scripts/e2e-tiers
+- Makefile
+- docs/operations/E2E.md
+- docs/verification/PD-B03/MATRIX.md
+- docs/verification/PD-B03/logs/
+deliverables:
+- item: Real registration/team/submission/judging/results path kept as a release/nightly gate
+  result: pass
+  evidence: canary chain (lifecycle, scenes, uiv2-organizer, uiv2-final-states, release-integrity) on a fresh canary fixture; make e2e-canary [REPEAT=N] (2/2 passed) and make e2e-release (demo-reset + serial demo-e2e + canary); never sharded or sampled by affected selection
+- item: Cross-stage integrity verification so isolation cannot hide integration failure
+  result: pass
+  evidence: release-integrity.spec.ts 4 tests - applications approved, 3 distinct judges in provenance, converged normalization, signed EdDSA receipt for the published project, published+deliberated award visible to anonymous clients, audit events in causal order with actors, authorization denials after publish
+- item: The gate detects breakage
+  result: pass
+  evidence: logs/T09-integrity-gate-detects-breakage.log fails when lifecycle did not run (0 != 3) and after a ballot is deleted behind the API (2 != 3); passes when intact
+invariants:
+- item: Authoritative serial run intact and green
+  result: pass
+  evidence: make demo-reset demo-e2e 156 passed/133 skipped/0 failed in 9.0 min (logs/T09-serial-demo-e2e.log)
+- item: No weakened assertions or hidden skips
+  result: pass
+  evidence: no assertion relaxed; spec ordering fixed by removing redundant fixture-option overrides, not by skipping or retrying
+verification:
+- command: make e2e-canary REPEAT=2
+  result: pass
+  note: 2/2 canary gate runs passed, each chain ~1m55s
+- command: make demo-reset demo-e2e (after fix)
+  result: pass
+  note: 156 passed, 0 failed, 9.0 min
+- command: make e2e-fast
+  result: pass
+  note: all tiers green, 2m21s after the change
+- command: make verify-fast
+  result: pass
+  note: pytest 1449 passed/23 skipped; web 169 + embed 8
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: full serial and tiered browser runs
+migrations: []
+findings:
+- 'The first make e2e-release attempt FAILED 5 tests (uiv2-organizer x4, release-integrity) and is superseded by the fixed serial run above. Pre-existing ordering defect in the authoritative serial run: specs with test.use video overrides ran as a later worker group, so uiv2-organizer executed before lifecycle. Fixed at the root (no spec overrides fixture options).'
+- Seed 7 was reset with scripts/demo-reset after the serial run to leave the reference pristine.
+escalations: []
+limitations:
+- No scheduled GitHub workflow was added (cannot be exercised here); nightly wiring is documented.
+- Registration itself is created through the generator's API replay, not through a UI registration journey; the canary drives team, submission, judging, publication and award through the UI.
+- Second make e2e-release end-to-end (demo-e2e plus canary in one command) was run as its two halves after the fix.
+next: review

@@ -5,7 +5,8 @@
  *   /                          workspace selector (and sign-in)
  *   /w/:workspaceId            -> /w/:workspaceId/overview
  *   /w/:workspaceId/:view      role workspace; `view` is one of the role's destinations (roleDestinations)
- *                              search: ?event=<id> selected event, ?invite=<token> team invite
+ *                              search: context params `event`, `stage`, `plan` and the `invite` entry
+ *                              token; the rules for what belongs in a URL are in lib/urlState.ts
  *   /person/:personId          public person profile
  *   /event/:eventId            public event site (no session)
  *   /api-explorer              API explorer

@@ -1,0 +1,85 @@
+version: 3
+task: PD-B04-T04
+batch: PD-B04
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 0785902cb3bb355d79cf4a5965229879cc97e656
+  head_commit: 0785902cb3bb355d79cf4a5965229879cc97e656
+changed_paths:
+- src/web/lib/urlState.ts
+- src/web/lib/urlState.test.tsx
+- src/web/lib/routes.ts
+- src/web/components/WorkspaceNavigation.tsx
+- src/web/components/WorkspaceNavigation.test.tsx
+- src/web/features/judging/JudgeWorkspace.tsx
+- src/web/features/judging/JudgeWorkspace.url.test.tsx
+- src/web/features/event-builder/EventDashboard.tsx
+- src/web/features/event-builder/EventDashboard.url.test.tsx
+- src/web/features/event-builder/EventDashboard.test.tsx
+- src/web/features/teams/TeamWorkspace.tsx
+- src/web/features/teams/TeamPanel.tsx
+- src/web/features/teams/TeamPanel.invite.test.tsx
+- tests/e2e/url-state.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+- docs/verification/PD-B04/
+deliverables:
+- item: Specify which filters, selected entities, views and tabs belong in URLs versus local draft state
+  result: pass
+  evidence: rule table and rules in lib/urlState.ts; docs/verification/PD-B04/URL_STATE.md classifies applied state and every remaining local selection with a reason and owner
+- item: A shared primitive that applies the conventions
+  result: pass
+  evidence: useUrlParam (push/replace, defaults omitted, dependents cleared, acts on the current URL) and carriedSearch; participant event, organizer event, judge event/stage/plan and invite consume it
+- item: Verification matrix row with executable proof, including negative and authorization cases
+  result: pass
+  evidence: MATRIX.md T04 row; unit, component and browser specs listed in URL_STATE.md
+- item: UI states in a browser
+  result: pass
+  evidence: url-state.spec.ts refresh, Back, shared link, invalid values (organizer and judge); e2e-fast all tiers ok
+invariants:
+- item: Current authoritative behavior preserved
+  result: pass
+  evidence: routes and legacy redirects unchanged; server still authorizes every id; no src/api change; 238 prior web tests kept
+- item: Drafts not disturbed
+  result: pass
+  evidence: only selection mirrors to the URL; judge selected project and builder editors stay local (documented)
+- item: No second source of truth
+  result: pass
+  evidence: URL replaces local state for event/stage/plan rather than mirroring it; validated against server lists
+verification:
+- command: pnpm --filter @conflux/web test
+  result: pass
+  note: 256 passed (was 238)
+- command: make verify-fast
+  result: pass
+  note: pytest 1454 passed/23 skipped; web 256 + embed 8; tsc, build, sdk-check clean
+- command: make e2e-fast
+  result: pass
+  note: read-only 104 passed, isolated tiers and canary ok on the rebuilt image
+- command: npx playwright test --project=desktop url-state --repeat-each=16 --workers=8 (x3 after the fix)
+  result: pass
+  note: 64/64 twice; the first run right after an image rebuild timed out at sign-in (cold app under 8 workers)
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: "not applicable for this task: no endpoint changed"
+migrations:
+- item: shared URLs
+  note: "old organizer/judge URLs without event/stage/plan keep working (no selection); invite links unchanged"
+findings:
+- A stale async callback replaced a newer navigation (user clicked a view link while the judge plan auto-select resolved) in about 1 of 16 browser runs; fixed by acting on the latest location and covered by a unit test, not by timeouts
+- Organizer dashboard requested an unlisted event id before its list loaded; now gated on the server list
+escalations: []
+limitations:
+- Panel state (judge selected project, builder selected items, enumerated filters, tabs) is specified but not yet in URLs; it moves with each panel migration (T07).
+- Namespacing for multiple instances of a panel in one view is a rule, not yet exercised.
+next: review

@@ -17,5 +17,6 @@
   "read-only:signin": 2.1,
   "read-only:uiv2-gate": 10.4,
   "read-only:uiv2-surfaces": 18.7,
+  "read-only:url-state": 8.0,
   "read-only:workspace-shell": 26.2
 }

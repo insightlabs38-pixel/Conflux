@@ -38,6 +38,7 @@ import {
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 import { apiJson } from "../../lib/api";
+import { useUrlParam } from "../../lib/urlState";
 
 type Event = {
   public_id: string;
@@ -87,9 +88,14 @@ function message(error: unknown): string {
 export function EventDashboard({ workspaceId }: { workspaceId: string }) {
   const base = `/api/v1/workspaces/${workspaceId}/events/`;
   const [events, setEvents] = useState<Event[]>([]);
-  const [selectedId, setSelectedId] = useState("");
+  // The selected event is context (lib/urlState.ts): refresh, back/forward and shared links keep it.
+  const [selectedId, setEventParam] = useUrlParam("event");
   const [awardsRevision, setAwardsRevision] = useState(0);
-  const selectedRef = useRef("");
+  const selectedRef = useRef(selectedId);
+  selectedRef.current = selectedId;
+  const loadedFor = useRef("");
+  const chosen = useRef(new Set<string>());
+  const listed = useRef(new Set<string>());
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [tracks, setTracks] = useState<Track[]>([]);
   const [prizes, setPrizes] = useState<Prize[]>([]);
@@ -110,6 +116,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
   const eventBase = `${base}${selectedId}/`;
   async function refresh(id = selectedId) {
     const list = await apiJson<Event[]>(base);
+    listed.current = new Set(list.map((item) => item.public_id));
     setEvents(list);
     setLoadError("");
     if (!id) return;
@@ -120,6 +127,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
       apiJson<Prize[]>(detailBase + "base-prizes/"),
     ]);
     if (selectedRef.current !== id) return;
+    loadedFor.current = id;
     setDashboard(health);
     setTracks(nextTracks);
     setPrizes(nextPrizes);
@@ -130,7 +138,15 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
     setLoadError("");
     apiJson<Event[]>(base)
       .then((list) => {
-        if (active) setEvents(list);
+        if (!active) return;
+        listed.current = new Set(list.map((item) => item.public_id));
+        setEvents(list);
+        // A link to an event this account cannot see is treated as no selection.
+        if (
+          selectedRef.current &&
+          !list.some((item) => item.public_id === selectedRef.current)
+        )
+          setEventParam("", { replace: true });
       })
       .catch((cause: unknown) => {
         if (active) setLoadError(message(cause));
@@ -142,6 +158,22 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
       active = false;
     };
   }, [base, retry]);
+
+  // Load the selected event's dashboard when the URL selects one (click, deep link, refresh, Back).
+  useEffect(() => {
+    if (loadingEvents || loadedFor.current === selectedId) return;
+    // Only an event the server listed (or one chosen here, e.g. just created) may be requested.
+    if (
+      selectedId &&
+      !chosen.current.has(selectedId) &&
+      !listed.current.has(selectedId)
+    )
+      return;
+    loadedFor.current = "";
+    setDashboard(null);
+    if (selectedId) void run(() => refresh(selectedId));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId, loadingEvents]);
 
   async function run(action: () => Promise<void>) {
     setBusy(true);
@@ -155,10 +187,8 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
     }
   }
   function choose(id: string) {
-    selectedRef.current = id;
-    setSelectedId(id);
-    setDashboard(null);
-    void run(() => refresh(id));
+    chosen.current.add(id);
+    setEventParam(id);
   }
   function createEvent(event: FormEvent) {
     event.preventDefault();
@@ -172,8 +202,8 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
       setName("");
       setSlug("");
       selectedRef.current = created.public_id;
-      setSelectedId(created.public_id);
       await refresh(created.public_id);
+      choose(created.public_id);
     });
   }
   function saveSettings(event: FormEvent<HTMLFormElement>) {

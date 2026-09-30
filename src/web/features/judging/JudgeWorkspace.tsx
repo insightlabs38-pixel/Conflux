@@ -23,6 +23,7 @@ import {
   JudgeRoutePanel,
 } from "../pvs";
 import { apiJson } from "../../lib/api";
+import { useUrlParam } from "../../lib/urlState";
 
 type Event = { public_id: string; name: string };
 type Stage = { public_id: string; name: string };
@@ -671,22 +672,63 @@ function PlanQueue({
 }
 
 export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
+  // Event, stage and plan are context (lib/urlState.ts): a refresh or a shared link reopens the
+  // same review queue. Each level clears the ones below it. The URL is only a request: a value is
+  // honoured once it appears in what the server lists for this judge, otherwise it is dropped.
+  const [requestedEvent, setEventParam] = useUrlParam("event", {
+    clears: ["stage", "plan"],
+  });
+  const [requestedStage, setStageParam] = useUrlParam("stage", {
+    clears: ["plan"],
+  });
+  const [requestedPlan, setPlanParam] = useUrlParam("plan");
   const [events, setEvents] = useState<Event[]>([]);
-  const [eventId, setEventId] = useState("");
-  const [stages, setStages] = useState<Stage[]>([]);
-  const [stageId, setStageId] = useState("");
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [planId, setPlanId] = useState("");
+  // Lists remember which parent they were loaded for, so "loading" and stale lists are derived from
+  // the URL rather than set by hand when it changes.
+  const [stageList, setStageList] = useState<{ for: string; items: Stage[] }>({
+    for: "",
+    items: [],
+  });
+  const [planList, setPlanList] = useState<{ for: string; items: Plan[] }>({
+    for: "",
+    items: [],
+  });
   const [error, setError] = useState("");
   const [loadingEvents, setLoadingEvents] = useState(true);
-  const [loadingStages, setLoadingStages] = useState(false);
-  const [loadingPlans, setLoadingPlans] = useState(false);
+  const eventId =
+    !loadingEvents && events.some((item) => item.public_id === requestedEvent)
+      ? requestedEvent
+      : "";
+  const stages = stageList.for === eventId ? stageList.items : [];
+  const stageId =
+    eventId &&
+    stageList.for === eventId &&
+    stages.some((item) => item.public_id === requestedStage)
+      ? requestedStage
+      : "";
+  const loadingStages = eventId !== "" && stageList.for !== eventId;
+  const planKey = `${eventId}/${stageId}`;
+  const plans = planList.for === planKey ? planList.items : [];
+  const planId =
+    stageId &&
+    planList.for === planKey &&
+    plans.some((item) => item.public_id === requestedPlan)
+      ? requestedPlan
+      : "";
+  const loadingPlans = stageId !== "" && planList.for !== planKey;
+  const asked = useRef({ requestedEvent, requestedStage, requestedPlan });
+  asked.current = { requestedEvent, requestedStage, requestedPlan };
 
   useEffect(() => {
     let active = true;
     apiJson<Event[]>(`/api/v1/workspaces/${workspaceId}/judge-events/`)
       .then((items) => {
-        if (active) setEvents(items);
+        if (!active) return;
+        setEvents(items);
+        // A link to an event this judge is not on is treated as no selection.
+        const current = asked.current.requestedEvent;
+        if (current && !items.some((item) => item.public_id === current))
+          setEventParam("", { replace: true });
       })
       .catch((cause: unknown) => {
         if (active) setError(message(cause));
@@ -697,6 +739,7 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
     return () => {
       active = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspaceId]);
 
   useEffect(() => {
@@ -706,62 +749,58 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
       `/api/v1/workspaces/${workspaceId}/events/${eventId}/stages/`,
     )
       .then((items) => {
-        if (active) setStages(items);
+        if (!active) return;
+        setStageList({ for: eventId, items });
+        const current = asked.current.requestedStage;
+        if (current && !items.some((item) => item.public_id === current))
+          setStageParam("", { replace: true });
       })
       .catch((cause: unknown) => {
-        if (active) setError(message(cause));
-      })
-      .finally(() => {
-        if (active) setLoadingStages(false);
+        if (!active) return;
+        setError(message(cause));
+        setStageList({ for: eventId, items: [] });
       });
     return () => {
       active = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspaceId, eventId]);
 
   useEffect(() => {
-    if (!stageId) return;
+    if (!eventId || !stageId) return;
     let active = true;
     apiJson<Plan[]>(
       `/api/v1/workspaces/${workspaceId}/events/${eventId}/stages/${stageId}/evaluation-plans/`,
     )
       .then((items) => {
         if (!active) return;
-        setPlans(items);
-        if (items.length === 1) setPlanId(items[0].public_id);
+        setPlanList({ for: planKey, items });
+        const current = asked.current.requestedPlan;
+        if (current && !items.some((item) => item.public_id === current))
+          setPlanParam("", { replace: true });
+        else if (!current && items.length === 1)
+          setPlanParam(items[0].public_id, { replace: true });
       })
       .catch((cause: unknown) => {
-        if (active) setError(message(cause));
-      })
-      .finally(() => {
-        if (active) setLoadingPlans(false);
+        if (!active) return;
+        setError(message(cause));
+        setPlanList({ for: planKey, items: [] });
       });
     return () => {
       active = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspaceId, eventId, stageId]);
 
+  // A different event or stage is a different context: drop any error from the previous one.
   function chooseEvent(id: string) {
-    // Re-choosing the current event must not reset state: the stages effect keys on eventId
-    // and would not re-run, stranding the "Loading stages…" indicator.
-    if (id === eventId) return;
-    setEventId(id);
-    setStages([]);
-    setStageId("");
-    setLoadingStages(!!id);
-    setPlans([]);
-    setPlanId("");
-    setLoadingPlans(false);
     setError("");
+    setEventParam(id);
   }
 
   function chooseStage(id: string) {
-    if (id === stageId) return;
-    setStageId(id);
-    setLoadingPlans(!!id);
-    setPlans([]);
-    setPlanId("");
     setError("");
+    setStageParam(id);
   }
 
   const planBase = planId
@@ -830,7 +869,10 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
         {plans.length > 1 && (
           <label>
             Plan{" "}
-            <select value={planId} onChange={(e) => setPlanId(e.target.value)}>
+            <select
+              value={planId}
+              onChange={(e) => setPlanParam(e.target.value)}
+            >
               <option value="">Choose a plan</option>
               {plans.map((plan) => (
                 <option key={plan.public_id} value={plan.public_id}>

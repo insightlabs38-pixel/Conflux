@@ -85,6 +85,33 @@ describe("workspace destinations", () => {
     act(() => root.unmount());
     container.remove();
   });
+  it("carries the context params to other views but not panel state", () => {
+    window.history.replaceState(
+      {},
+      "",
+      "/w/w/overview?event=e&stage=s&plan=p&invite=t&project=x&q=ada&page=2",
+    );
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    act(() =>
+      root.render(
+        <Harness role="participant">
+          <AppShell role="participant">
+            <Destination id="overview">Overview</Destination>
+          </AppShell>
+        </Harness>,
+      ),
+    );
+    const link = container.querySelector<HTMLAnchorElement>(
+      'nav[aria-label="Primary"] a[href^="/w/w/project"]',
+    )!;
+    expect(link.getAttribute("href")).toBe(
+      "/w/w/project?event=e&stage=s&plan=p&invite=t",
+    );
+    act(() => root.unmount());
+    container.remove();
+  });
   it("does not expose organizer destinations to a participant and responds to browser history", () => {
     window.history.replaceState({}, "", "/w/w/overview");
     const container = document.createElement("div");

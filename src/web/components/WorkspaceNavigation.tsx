@@ -8,6 +8,7 @@ import {
 } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { routes } from "../lib/routes";
+import { carriedSearch } from "../lib/urlState";
 
 export const roleDestinations: Record<
   string,
@@ -64,7 +65,8 @@ const Context = createContext<Navigation | null>(null);
  * The current destination is the `:view` segment of `/w/:workspaceId/:view` (lib/routes.ts), so the
  * browser owns history, deep links and refresh; this provider only validates it against the role.
  * A view the role does not have resolves to the overview (the workspace route also redirects the
- * URL). Links keep the current search (`?event=`, `?invite=`) so a selected event survives.
+ * URL). Links carry the context params (`event`, `stage`, `plan`, `invite`: lib/urlState.ts) so the
+ * selected event survives; panel state does not follow the user to another view.
  */
 export function WorkspaceNavigationProvider({
   role,
@@ -83,7 +85,7 @@ export function WorkspaceNavigationProvider({
     ? requested
     : "overview";
   const href = useCallback(
-    (id: string) => routes.workspace(workspaceId, id) + search,
+    (id: string) => routes.workspace(workspaceId, id) + carriedSearch(search),
     [workspaceId, search],
   );
   const navigate = useCallback(

@@ -34,4 +34,4 @@ Precedence as before: API explorer, person, public event, workspace. Invite link
 
 ## Known follow-ups (owned by later PD-B04 tasks)
 
-Role resolution still calls `/accounts/me/` in both selector and workspace route (server-state layer, T02); `fetch` is still raw (typed client, T03); which filters/tabs belong in the URL beyond `event`/`invite` is T04; focus/announcement on history navigation beyond the existing main-content focus is untouched.
+Role resolution still calls `/accounts/me/` in both selector and workspace route (server-state layer, T02); `fetch` is still raw (typed client, T03); URL-state conventions are in `URL_STATE.md` (T04); focus/announcement on history navigation beyond the existing main-content focus is untouched.

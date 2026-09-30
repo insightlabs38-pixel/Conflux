@@ -10,6 +10,7 @@
     "signin",
     "uiv2-gate",
     "uiv2-surfaces",
+    "url-state",
     "workspace-shell"
   ],
   "self-isolating": ["auth-states", "fixture-isolation"],

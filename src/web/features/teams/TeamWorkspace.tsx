@@ -9,7 +9,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiCall } from "../../lib/api";
 import { queryKeys } from "../../lib/query";
-import { useSearchParams } from "react-router";
+import { useUrlParam } from "../../lib/urlState";
 import { ParticipantOverview } from "./ParticipantOverview";
 import { TeamPanel } from "./TeamPanel";
 import { MarketplacePanel } from "./MarketplacePanel";
@@ -27,8 +27,10 @@ import { LoadingState } from "../../components/LoadingState";
 type Event = { public_id: string; name: string };
 
 export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
-  const [search, setSearch] = useSearchParams();
-  const selectedId = search.get("event") ?? "";
+  // The selected event is context (lib/urlState.ts): it survives refresh, back/forward and sharing.
+  const [selectedId, selectEvent] = useUrlParam("event", {
+    clears: ["invite"],
+  });
   const eventsQuery = useQuery({
     queryKey: queryKeys.participantEvents(workspaceId),
     queryFn: ({ signal }) =>
@@ -46,17 +48,6 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
       ? eventsQuery.error.message || "Could not load events."
       : "";
   const [teamRevision, setTeamRevision] = useState(0);
-
-  // The selected event lives in the URL (?event=) so it survives refresh, back/forward and sharing.
-  function selectEvent(id: string) {
-    setSearch((current) => {
-      const next = new URLSearchParams(current);
-      if (id) next.set("event", id);
-      else next.delete("event");
-      next.delete("invite");
-      return next;
-    });
-  }
 
   return (
     <section aria-label="Participant events">

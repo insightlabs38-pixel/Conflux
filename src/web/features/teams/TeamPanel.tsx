@@ -1,6 +1,6 @@
 import { PersonRow, type PersonIdentity } from "../../components/Person";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { useSearchParams } from "react-router";
+import { useUrlParam } from "../../lib/urlState";
 import { appHref, routes } from "../../lib/routes";
 import { apiJson } from "../../lib/api";
 
@@ -51,13 +51,12 @@ export function TeamPanel({
   eventId: string;
   onTeamChange?: () => void;
 }) {
-  const [search] = useSearchParams();
+  // `invite` is a single-use entry token (lib/urlState.ts): read once, removed once redeemed.
+  const [inviteParam, setInviteParam] = useUrlParam("invite");
   const base = `/api/v1/workspaces/${workspaceId}/events/${eventId}/`;
   const [status, setStatus] = useState<Status | null>(null);
   const [invites, setInvites] = useState<Invite[]>([]);
-  const [redeemToken, setRedeemToken] = useState(
-    () => search.get("invite") ?? "",
-  );
+  const [redeemToken, setRedeemToken] = useState(inviteParam);
   const [teamName, setTeamName] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -119,6 +118,7 @@ export function TeamPanel({
         token: redeemToken.trim(),
       });
       setRedeemToken("");
+      setInviteParam("", { replace: true });
       await refresh();
     });
   }

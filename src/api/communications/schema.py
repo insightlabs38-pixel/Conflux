@@ -1,3 +1,4 @@
+from eventconfig.schema import ReadinessSchema
 from rest_framework import serializers
 
 
@@ -10,16 +11,8 @@ class OperationsSummarySchema(serializers.Serializer):
     moderation = serializers.JSONField()
 
 
-class ChecklistItemSchema(serializers.Serializer):
-    id = serializers.CharField()
-    severity = serializers.CharField()
-    passed = serializers.BooleanField()
-    detail = serializers.CharField()
-
-
-class LaunchChecklistSchema(serializers.Serializer):
-    status = serializers.CharField()
-    items = ChecklistItemSchema(many=True)
+# The launch checklist is a projection of the canonical readiness rules (eventconfig).
+LaunchChecklistSchema = ReadinessSchema
 
 
 class OperatorEventSchema(serializers.Serializer):

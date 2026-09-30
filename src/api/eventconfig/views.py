@@ -9,6 +9,8 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from . import modules
+from .readiness import compute_readiness
+from .schema import ReadinessSchema
 
 
 class ModuleSchema(serializers.Serializer):
@@ -97,3 +99,11 @@ class EventModuleView(OrganizerView):
                 "modules": modules.event_modules(event),
             }
         )
+
+
+class EventReadinessView(OrganizerView):
+    """What is missing before this event can launch: the canonical readiness list."""
+
+    @extend_schema(responses=ReadinessSchema)
+    def get(self, request, workspace_public_id, event_public_id):
+        return Response(compute_readiness(self.get_event()))

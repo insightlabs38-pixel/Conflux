@@ -6782,7 +6782,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LaunchChecklistSchema'
+                $ref: '#/components/schemas/ReadinessSchema'
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/moderation/:
     get:
@@ -10134,6 +10134,36 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/readiness/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_readiness
+      description: 'What is missing before this event can launch: the canonical readiness
+        list.'
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/records/event/:
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_records_event
@@ -14510,7 +14540,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Event'
+                $ref: '#/components/schemas/EventStatusSchema'
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/taxonomy-assignments/:
     get:
@@ -18248,22 +18278,6 @@ components:
           format: uuid
       required:
       - participant
-    ChecklistItemSchema:
-      type: object
-      properties:
-        id:
-          type: string
-        severity:
-          type: string
-        passed:
-          type: boolean
-        detail:
-          type: string
-      required:
-      - detail
-      - id
-      - passed
-      - severity
     CloneInput:
       type: object
       properties:
@@ -19315,6 +19329,61 @@ components:
           $ref: '#/components/schemas/EventStatus'
       required:
       - status
+    EventStatusSchema:
+      type: object
+      description: The event after a transition; opening also reports what readiness
+        still had unresolved.
+      properties:
+        public_id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        slug:
+          type: string
+          maxLength: 200
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+        timezone:
+          type: string
+          maxLength: 64
+        starts_at:
+          type: string
+          format: date-time
+          nullable: true
+        ends_at:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/EventStatus'
+          readOnly: true
+        is_public:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        readiness:
+          allOf:
+          - $ref: '#/components/schemas/ReadinessSchema'
+          readOnly: true
+      required:
+      - created_at
+      - name
+      - public_id
+      - readiness
+      - slug
+      - status
+      - updated_at
     EventTemplateCreateInput:
       type: object
       properties:
@@ -19487,10 +19556,18 @@ components:
           maxLength: 500
         severity:
           allOf:
-          - $ref: '#/components/schemas/SeverityEnum'
+          - $ref: '#/components/schemas/FindingInputSeverityEnum'
           default: blocking
       required:
       - message
+    FindingInputSeverityEnum:
+      enum:
+      - blocking
+      - advisory
+      type: string
+      description: |-
+        * `blocking` - Blocking
+        * `advisory` - Advisory
     FindingOutput:
       type: object
       properties:
@@ -20039,18 +20116,6 @@ components:
       - completion_ratio
       - judge
       - submitted_count
-    LaunchChecklistSchema:
-      type: object
-      properties:
-        status:
-          type: string
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/ChecklistItemSchema'
-      required:
-      - items
-      - status
     LibraryInstantiateInput:
       type: object
       description: |-
@@ -22578,6 +22643,68 @@ components:
       - rank
       - raw_score
       - tie_break
+    ReadinessFixSchema:
+      type: object
+      properties:
+        destination:
+          type: string
+        section:
+          type: string
+      required:
+      - destination
+      - section
+    ReadinessItemSchema:
+      type: object
+      properties:
+        id:
+          type: string
+        severity:
+          $ref: '#/components/schemas/ReadinessItemSchemaSeverityEnum'
+        passed:
+          type: boolean
+        detail:
+          type: string
+        module:
+          type: string
+        fix:
+          $ref: '#/components/schemas/ReadinessFixSchema'
+      required:
+      - detail
+      - fix
+      - id
+      - module
+      - passed
+      - severity
+    ReadinessItemSchemaSeverityEnum:
+      enum:
+      - blocker
+      - warning
+      type: string
+      description: |-
+        * `blocker` - blocker
+        * `warning` - warning
+    ReadinessSchema:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ReadinessSchemaStatusEnum'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReadinessItemSchema'
+      required:
+      - items
+      - status
+    ReadinessSchemaStatusEnum:
+      enum:
+      - ready
+      - warning
+      - blocked
+      type: string
+      description: |-
+        * `ready` - ready
+        * `warning` - warning
+        * `blocked` - blocked
     RecordOutput:
       type: object
       properties:
@@ -23393,14 +23520,6 @@ components:
           type: boolean
       required:
       - require_publication_approval
-    SeverityEnum:
-      enum:
-      - blocking
-      - advisory
-      type: string
-      description: |-
-        * `blocking` - Blocking
-        * `advisory` - Advisory
     SignedArchiveImportInput:
       type: object
       properties:

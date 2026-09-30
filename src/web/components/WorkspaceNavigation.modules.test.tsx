@@ -7,7 +7,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { jsonResponse } from "../lib/test-http";
 import { createTestQueryClient } from "../lib/test-router";
 import { AppShell } from "./AppShell";
-import { WorkspaceNavigationProvider } from "./WorkspaceNavigation";
+import { WorkflowSections } from "./WorkflowSections";
+import {
+  DestinationLink,
+  WorkspaceNavigationProvider,
+} from "./WorkspaceNavigation";
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
 ).IS_REACT_ACT_ENVIRONMENT = true;
@@ -154,6 +158,70 @@ describe("organizer navigation follows the event's enabled modules", () => {
     );
     expect(fetchMock).not.toHaveBeenCalled();
     expect(labels(container)).toContain("Team");
+    await act(async () => root.unmount());
+  });
+});
+
+describe("links to a tab of a destination", () => {
+  it("carries the context and opens the named section of a linkable WorkflowSections", async () => {
+    window.history.replaceState({}, "", "/w/w/overview?event=e1");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => jsonResponse(200, offModules("e1"))),
+    );
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    function Page() {
+      const [client] = useState(createTestQueryClient);
+      return (
+        <QueryClientProvider client={client}>
+          <BrowserRouter>
+            <Routes>
+              <Route
+                path="/w/:workspaceId/:view"
+                element={
+                  <WorkspaceNavigationProvider role="organizer" workspaceId="w">
+                    <DestinationLink id="setup" section="forms">
+                      Fix forms
+                    </DestinationLink>
+                    <WorkflowSections
+                      label="Setup"
+                      linkable
+                      sections={[
+                        { id: "settings", label: "Settings", content: "S" },
+                        { id: "forms", label: "Forms", content: "F" },
+                      ]}
+                    />
+                  </WorkspaceNavigationProvider>
+                }
+              />
+            </Routes>
+          </BrowserRouter>
+        </QueryClientProvider>
+      );
+    }
+    await act(async () => root.render(<Page />));
+    const link = container.querySelector("a")!;
+    expect(link.getAttribute("href")).toBe("/w/w/setup?event=e1&section=forms");
+    const selected = () =>
+      container
+        .querySelector('[role="tab"][aria-selected="true"]')
+        ?.textContent?.trim();
+    expect(selected()).toContain("Settings");
+    await act(async () => link.click());
+    expect(window.location.search).toBe("?event=e1&section=forms");
+    expect(selected()).toContain("Forms");
+    // Choosing a tab replaces the param (panel state), an unknown value is ignored.
+    await act(async () =>
+      container.querySelectorAll<HTMLButtonElement>('[role="tab"]')[0].click(),
+    );
+    expect(window.location.search).toBe("?event=e1&section=settings");
+    window.history.replaceState({}, "", "/w/w/setup?event=e1&section=bogus");
+    await act(async () => {
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+    expect(selected()).toContain("Settings");
     await act(async () => root.unmount());
   });
 });

@@ -83,7 +83,8 @@ function visibleDestinations(
 type Navigation = {
   view: string;
   navigate: (id: string) => void;
-  href: (id: string) => string;
+  /** Link to a destination; `section` opens one of its tabs (see WorkflowSections `linkable`). */
+  href: (id: string, section?: string) => string;
   /** The role's destinations minus optional modules that are neither enabled nor in use. */
   destinations: { id: string; label: string; group?: string }[];
   /** Optional modules for the selected event (organizer/admin only; null until known). */
@@ -127,7 +128,13 @@ export function WorkspaceNavigationProvider({
     ? requested
     : "overview";
   const href = useCallback(
-    (id: string) => routes.workspace(workspaceId, id) + carriedSearch(search),
+    (id: string, section?: string) => {
+      const carried = carriedSearch(search);
+      const tab = section
+        ? `${carried ? "&" : "?"}section=${encodeURIComponent(section)}`
+        : "";
+      return routes.workspace(workspaceId, id) + carried + tab;
+    },
     [workspaceId, search],
   );
   const navigate = useCallback(
@@ -148,6 +155,14 @@ export function WorkspaceNavigationProvider({
 }
 export function useWorkspaceNavigation() {
   return useContext(Context);
+}
+/**
+ * Whether an optional module is on for the selected event. Unknown (not loaded, or a role without
+ * a module list) counts as on: nothing is hidden on a guess.
+ */
+export function useModuleEnabled(key: string): boolean {
+  const modules = useWorkspaceNavigation()?.modules.modules;
+  return modules?.find((module) => module.key === key)?.enabled ?? true;
 }
 /** Keep a destination mounted to retain form drafts and offline buffers across navigation. */
 export function Destination({
@@ -177,10 +192,13 @@ export function Destination({
 }
 export function DestinationLink({
   id,
+  section,
   children,
   className = "cx-task-link",
 }: {
   id: string;
+  /** Open this tab of the destination (a `linkable` WorkflowSections id). */
+  section?: string;
   children: ReactNode;
   className?: string;
 }) {
@@ -189,7 +207,7 @@ export function DestinationLink({
   // to the browser, and the href is the canonical deep link.
   return (
     <Link
-      to={navigation?.href(id) || routes.home}
+      to={navigation?.href(id, section) || routes.home}
       onClick={(event) => {
         if (
           event.button === 0 &&

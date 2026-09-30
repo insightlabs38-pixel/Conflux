@@ -7,6 +7,11 @@ _WORKSPACE = "workspaces/<uuid:workspace_public_id>"
 urlpatterns = [
     path(f"{_WORKSPACE}/modules/", views.WorkspaceModulesView.as_view(), name="workspace-modules"),
     path(
+        f"{_WORKSPACE}/events/<uuid:event_public_id>/readiness/",
+        views.EventReadinessView.as_view(),
+        name="event-readiness",
+    ),
+    path(
         f"{_WORKSPACE}/events/<uuid:event_public_id>/modules/<slug:module_key>/",
         views.EventModuleView.as_view(),
         name="event-module",

@@ -154,6 +154,11 @@ describe("workflow load states", () => {
           return new Promise((resolve) =>
             pending.set(url.includes("/e1/") ? "e1" : "e2", resolve),
           );
+        if (url.endsWith("/readiness/"))
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ status: "ready", items: [] }),
+          });
         return Promise.resolve({ ok: true, json: async () => [] });
       }),
     );

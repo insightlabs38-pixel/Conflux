@@ -2,17 +2,8 @@ import { appHref, routes } from "../../lib/routes";
 import { Badge } from "../../components/Badge";
 import { Card } from "../../components/Card";
 import { useLoad } from "../../hooks/useLoad";
-
-type ChecklistItem = {
-  id: string;
-  severity: "blocker" | "warning";
-  passed: boolean;
-  detail: string;
-};
-type Checklist = {
-  status: "ready" | "warning" | "blocked";
-  items: ChecklistItem[];
-};
+import { useReadiness } from "../../hooks/useReadiness";
+import { ReadinessPanel } from "../event-builder/ReadinessPanel";
 
 type CappedList<T> = { items: T[]; total: number };
 
@@ -67,11 +58,6 @@ type Summary = {
   };
 };
 
-function severityTone(item: ChecklistItem): "success" | "warning" | "danger" {
-  if (item.passed) return "success";
-  return item.severity === "blocker" ? "danger" : "warning";
-}
-
 export function OperationsCenter({
   workspaceId,
   eventId,
@@ -82,44 +68,15 @@ export function OperationsCenter({
   const base = `/api/v1/workspaces/${workspaceId}/events/${eventId}/operations/`;
   const describe = (status: number) =>
     `Operations center request failed (${status}).`;
-  const checklistLoad = useLoad<Checklist>(base + "checklist/", { describe });
+  const readinessLoad = useReadiness(workspaceId, eventId);
   const summaryLoad = useLoad<Summary>(base + "summary/", { describe });
-  const checklist = checklistLoad.data;
   const summary = summaryLoad.data;
-  const error =
-    checklistLoad.error?.message || summaryLoad.error?.message || "";
+  const error = summaryLoad.error?.message || "";
 
   return (
     <Card title="Operations center">
       {error && <p role="alert">{error}</p>}
-      {checklist && (
-        <section>
-          <h4>
-            Launch checklist ·{" "}
-            <Badge
-              tone={
-                checklist.status === "ready"
-                  ? "success"
-                  : checklist.status === "warning"
-                    ? "warning"
-                    : "danger"
-              }
-            >
-              {checklist.status}
-            </Badge>
-          </h4>
-          <ul>
-            {checklist.items.map((item) => (
-              <li key={item.id}>
-                <Badge tone={severityTone(item)}>
-                  {item.passed ? "OK" : item.severity}
-                </Badge>{" "}
-                {item.detail}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <ReadinessPanel load={readinessLoad} />
       {summary && (
         <div className="cx-ops-sections">
           <section>

@@ -6,6 +6,7 @@ from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, inline_serializer
+from eventconfig.readiness import compute_readiness, configuration_checks, unresolved
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
@@ -14,7 +15,7 @@ from rest_framework.views import APIView
 from workspaces.models import Role, Workspace
 
 from .models import Announcement, BasePrize, Event, EventStatus, Track
-from .schema import EventDashboardSchema, PublicEventSchema
+from .schema import EventDashboardSchema, EventStatusSchema, PublicEventSchema
 from .serializers import (
     AnnouncementSerializer,
     BasePrizeSerializer,
@@ -153,7 +154,7 @@ class EventStatusView(OrganizerView):
         request=inline_serializer(
             "EventStatusInput", fields={"status": serializers.ChoiceField(EventStatus.choices)}
         ),
-        responses=EventSerializer,
+        responses=EventStatusSchema,
     )
     def post(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
@@ -165,6 +166,7 @@ class EventStatusView(OrganizerView):
         if target == EventStatus.OPEN and event.ends_at and event.ends_at <= timezone.now():
             raise ValidationError({"ends_at": "An event cannot open after its end date."})
         event.status = target
+        readiness = compute_readiness(event) if target == EventStatus.OPEN else None
         try:
             with transaction.atomic():
                 event.full_clean()
@@ -176,31 +178,30 @@ class EventStatusView(OrganizerView):
                     target=event,
                     event_type="event.status_changed",
                     payload={"event": str(event.public_id), "status": target},
+                    # Opening is advisory-gated: what was still unresolved is on the record.
+                    metadata={"unresolved": unresolved(readiness)} if readiness else None,
                 )
         except ModelValidationError as exc:
             raise ValidationError(
                 exc.message_dict if hasattr(exc, "message_dict") else exc.messages
             ) from exc
-        return Response(EventSerializer(event).data)
+        body = EventSerializer(event).data
+        if readiness:
+            body = {**body, "readiness": readiness}
+        return Response(body)
 
 
 class EventDashboardView(OrganizerView):
     @extend_schema(responses=EventDashboardSchema)
     def get(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
-        blockers = []
-        if not event.starts_at or not event.ends_at:
-            blockers.append("Set the event start and end dates.")
-        if not event.tracks.exists():
-            blockers.append("Add a track.")
-        if not event.base_prizes.exists():
-            blockers.append("Configure a base prize.")
         return Response(
             {
                 "event": EventSerializer(event).data,
                 "track_count": event.tracks.count(),
                 "base_prize_count": event.base_prizes.count(),
-                "configuration_checks": blockers,
+                # A projection of the canonical readiness rules (eventconfig/readiness.py).
+                "configuration_checks": configuration_checks(compute_readiness(event)),
             }
         )
 

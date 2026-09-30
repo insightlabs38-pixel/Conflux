@@ -21,7 +21,9 @@ import { OperationsCenter } from "../operations/OperationsCenter";
 import { OperatorConsole } from "../operations/OperatorConsole";
 import { CommunicationsPanel } from "../communications/CommunicationsPanel";
 import { ConfigHistoryPanel } from "../audit/ConfigHistoryPanel";
+import { useReadiness } from "../../hooks/useReadiness";
 import { FeaturesPanel } from "./FeaturesPanel";
+import { ReadinessPanel } from "./ReadinessPanel";
 import { ModuleGate } from "./ModuleGate";
 import { EventTemplatesPanel } from "./EventTemplatesPanel";
 import { PermissionMatrixExplorer } from "./PermissionMatrixExplorer";
@@ -127,6 +129,8 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
   const prizesLoad = useLoad<Prize[]>(detail("base-prizes/"), {
     describe: describeProblem,
   });
+  // The one readiness list, shared by Setup, the overview and operations (hooks/useReadiness.ts).
+  const readinessLoad = useReadiness(workspaceId, known ? selectedId : null);
   const dashboard = dashboardLoad.data;
   const tracks = tracksLoad.data ?? [];
   const prizes = prizesLoad.data ?? [];
@@ -142,6 +146,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
       dashboardLoad.reload(),
       tracksLoad.reload(),
       prizesLoad.reload(),
+      readinessLoad.reload(),
     ]);
   }
 
@@ -334,12 +339,13 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
               starts={selected.starts_at}
               ends={selected.ends_at}
               status={selected.status}
-              checks={dashboard.configuration_checks}
+              readiness={readinessLoad}
             />
           </Destination>
           <Destination id="setup">
             <WorkflowSections
               label="Event setup"
+              linkable
               sections={[
                 {
                   id: "settings",
@@ -347,16 +353,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
                   description: "Details, status, tracks and prizes",
                   content: (
                     <>
-                      {dashboard.configuration_checks.length > 0 && (
-                        <section aria-label="Configuration checks">
-                          <h3>Configuration checks</h3>
-                          <ul>
-                            {dashboard.configuration_checks.map((check) => (
-                              <li key={check}>{check}</li>
-                            ))}
-                          </ul>
-                        </section>
-                      )}
+                      <ReadinessPanel load={readinessLoad} />
                       <form
                         onSubmit={saveSettings}
                         key={selected.public_id + selected.updated_at}
@@ -604,6 +601,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
           <Destination id="participants">
             <WorkflowSections
               label="Participant tools"
+              linkable
               sections={[
                 {
                   id: "RegistrationPanel",
@@ -693,6 +691,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
           <Destination id="judging">
             <WorkflowSections
               label="Judging tools"
+              linkable
               sections={[
                 {
                   id: "EvaluationBuilder",

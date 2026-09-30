@@ -19,6 +19,7 @@
   "isolated-mutation": [
     "event-modules",
     "event-presets",
+    "event-readiness",
     "event-themes",
     "participant-workflow",
     "profiles",

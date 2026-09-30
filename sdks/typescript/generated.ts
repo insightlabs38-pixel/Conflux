@@ -1110,20 +1110,6 @@ export type CheckInInputSchema = { participant: string };
 
 export type InputOfCheckInInputSchema = { participant: string };
 
-export type ChecklistItemSchema = {
-  id: string;
-  severity: string;
-  passed: boolean;
-  detail: string;
-};
-
-export type InputOfChecklistItemSchema = {
-  id: string;
-  severity: string;
-  passed: boolean;
-  detail: string;
-};
-
 export type CloneInput = { name: string; slug: string; sections?: string[] };
 
 export type InputOfCloneInput = {
@@ -1754,6 +1740,31 @@ export type EventStatusInput = { status: EventStatus };
 
 export type InputOfEventStatusInput = { status: InputOfEventStatus };
 
+export type EventStatusSchema = {
+  public_id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  timezone?: string;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  status: EventStatus;
+  is_public?: boolean;
+  created_at: string;
+  updated_at: string;
+  readiness: ReadinessSchema;
+};
+
+export type InputOfEventStatusSchema = {
+  name: string;
+  slug: string;
+  description?: string;
+  timezone?: string;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  is_public?: boolean;
+};
+
 export type EventTemplateCreateInput = {
   event: string;
   name: string;
@@ -1862,12 +1873,19 @@ export type InputOfFinalizeInput = {
   override_reason?: string;
 };
 
-export type FindingInput = { message: string; severity?: SeverityEnum };
+export type FindingInput = {
+  message: string;
+  severity?: FindingInputSeverityEnum;
+};
 
 export type InputOfFindingInput = {
   message: string;
-  severity?: InputOfSeverityEnum;
+  severity?: InputOfFindingInputSeverityEnum;
 };
+
+export type FindingInputSeverityEnum = "blocking" | "advisory";
+
+export type InputOfFindingInputSeverityEnum = "blocking" | "advisory";
 
 export type FindingOutput = {
   public_id: string;
@@ -2227,16 +2245,6 @@ export type InputOfJudgeWorkloadRowSchema = {
   assigned_count: number;
   submitted_count: number;
   completion_ratio: number;
-};
-
-export type LaunchChecklistSchema = {
-  status: string;
-  items: ChecklistItemSchema[];
-};
-
-export type InputOfLaunchChecklistSchema = {
-  status: string;
-  items: InputOfChecklistItemSchema[];
 };
 
 export type LibraryInstantiateInput = {
@@ -3832,6 +3840,49 @@ export type InputOfRankedResultSchema = {
   tie_break: number | null;
 };
 
+export type ReadinessFixSchema = { destination: string; section: string };
+
+export type InputOfReadinessFixSchema = {
+  destination: string;
+  section: string;
+};
+
+export type ReadinessItemSchema = {
+  id: string;
+  severity: ReadinessItemSchemaSeverityEnum;
+  passed: boolean;
+  detail: string;
+  module: string;
+  fix: ReadinessFixSchema;
+};
+
+export type InputOfReadinessItemSchema = {
+  id: string;
+  severity: InputOfReadinessItemSchemaSeverityEnum;
+  passed: boolean;
+  detail: string;
+  module: string;
+  fix: InputOfReadinessFixSchema;
+};
+
+export type ReadinessItemSchemaSeverityEnum = "blocker" | "warning";
+
+export type InputOfReadinessItemSchemaSeverityEnum = "blocker" | "warning";
+
+export type ReadinessSchema = {
+  status: ReadinessSchemaStatusEnum;
+  items: ReadinessItemSchema[];
+};
+
+export type InputOfReadinessSchema = {
+  status: InputOfReadinessSchemaStatusEnum;
+  items: InputOfReadinessItemSchema[];
+};
+
+export type ReadinessSchemaStatusEnum = "ready" | "warning" | "blocked";
+
+export type InputOfReadinessSchemaStatusEnum = "ready" | "warning" | "blocked";
+
 export type RecordOutput = { token: string; claims: Record<string, unknown> };
 
 export type InputOfRecordOutput = {
@@ -4330,10 +4381,6 @@ export type InputOfSessionOutput = {
 export type SettingsInput = { require_publication_approval: boolean };
 
 export type InputOfSettingsInput = { require_publication_approval: boolean };
-
-export type SeverityEnum = "blocking" | "advisory";
-
-export type InputOfSeverityEnum = "blocking" | "advisory";
 
 export type SignedArchiveImportInput = {
   name: string;
@@ -6352,7 +6399,7 @@ export interface Operations {
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_checklist: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
-    response: LaunchChecklistSchema;
+    response: ReadinessSchema;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_moderation: {
     request: {
@@ -7155,6 +7202,10 @@ export interface Operations {
       };
     };
     response: null;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_readiness: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: ReadinessSchema;
   };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_records_event: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -8172,7 +8223,7 @@ export interface Operations {
       path: { event_public_id: string; workspace_public_id: string };
       body: InputOfEventStatusInput;
     };
-    response: Event;
+    response: EventStatusSchema;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_taxonomy_assignments: {
     request: {
@@ -11429,6 +11480,14 @@ export const operations = {
       request_body: false,
       response_kind: "none",
     },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_readiness: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/readiness/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_records_event:
     {
       method: "POST",

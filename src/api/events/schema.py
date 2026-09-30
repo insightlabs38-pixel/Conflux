@@ -1,3 +1,4 @@
+from eventconfig.schema import ReadinessSchema
 from rest_framework import serializers
 
 from .serializers import BasePrizeSerializer, EventSerializer, TrackSerializer
@@ -22,3 +23,12 @@ class PublicEventSchema(serializers.Serializer):
     status = serializers.CharField()
     tracks = TrackSerializer(many=True)
     base_prizes = BasePrizeSerializer(many=True)
+
+
+class EventStatusSchema(EventSerializer):
+    """The event after a transition; opening also reports what readiness still had unresolved."""
+
+    readiness = ReadinessSchema(required=False, read_only=True)
+
+    class Meta(EventSerializer.Meta):
+        fields = [*EventSerializer.Meta.fields, "readiness"]

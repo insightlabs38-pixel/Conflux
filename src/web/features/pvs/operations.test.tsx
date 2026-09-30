@@ -99,7 +99,33 @@ it("organizer overview surfaces workload and issues that need action", async () 
       starts="2026-10-01T09:00:00Z"
       ends={null}
       status="open"
-      checks={["Add a rubric"]}
+      readiness={{
+        data: {
+          status: "blocked",
+          items: [
+            {
+              id: "judging_rubrics",
+              severity: "blocker",
+              passed: false,
+              detail: "Publish a rubric for: Final judging.",
+              module: "core",
+              fix: { destination: "judging", section: "EvaluationBuilder" },
+            },
+            {
+              id: "event_dates",
+              severity: "blocker",
+              passed: true,
+              detail: "Start and end dates are set.",
+              module: "core",
+              fix: { destination: "setup", section: "settings" },
+            },
+          ],
+        },
+        error: null,
+        loading: false,
+        reload: async () => {},
+        update: () => {},
+      }}
     />,
   );
   await until(() => root.textContent?.includes("5 of 8") ?? false);
@@ -108,7 +134,9 @@ it("organizer overview surfaces workload and issues that need action", async () 
   expect(text).toContain("1 judge has unscored assignments");
   expect(text).toContain("1 publication request awaiting approval");
   expect(text).toContain("1 project without a table or booth");
-  expect(text).toContain("Add a rubric");
+  // Readiness items are "needs action" issues; a passed one is not.
+  expect(text).toContain("Publish a rubric for: Final judging.");
+  expect(text).not.toContain("Start and end dates are set.");
   expect(text).toContain("3 of 10");
 });
 

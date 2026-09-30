@@ -3,7 +3,7 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { OperationsCenter } from "./OperationsCenter";
-import { withQuery } from "../../lib/test-router";
+import { withRouter } from "../../lib/test-router";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -44,6 +44,8 @@ describe("OperationsCenter", () => {
           severity: "blocker",
           passed: false,
           detail: "Set the event start and end dates.",
+          module: "core",
+          fix: { destination: "setup", section: "settings" },
         },
       ],
     };
@@ -83,13 +85,13 @@ describe("OperationsCenter", () => {
       const url = String(input);
       return {
         ok: true,
-        json: async () => (url.endsWith("checklist/") ? checklist : summary),
+        json: async () => (url.endsWith("readiness/") ? checklist : summary),
       };
     });
     vi.stubGlobal("fetch", fetchMock);
     act(() =>
       root.render(
-        withQuery(<OperationsCenter workspaceId="w1" eventId="e1" />),
+        withRouter(<OperationsCenter workspaceId="w1" eventId="e1" />),
       ),
     );
     await until(
@@ -97,7 +99,13 @@ describe("OperationsCenter", () => {
         container.textContent?.includes("Set the event start and end dates.") ??
         false,
     );
-    expect(container.textContent).toContain("blocked");
+    expect(container.textContent).toContain("Not ready: blockers remain");
+    // Each open item links to where it is fixed.
+    expect(
+      [...container.querySelectorAll("a")].some((a) =>
+        a.textContent?.startsWith("Fix"),
+      ),
+    ).toBe(true);
     expect(container.textContent).toContain("alice");
     expect(container.textContent).toContain("Demo");
     expect(container.textContent).toContain(

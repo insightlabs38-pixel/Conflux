@@ -999,18 +999,6 @@ class CheckInInputSchema(TypedDict):
 class InputOfCheckInInputSchema(TypedDict):
     participant: str
 
-class ChecklistItemSchema(TypedDict):
-    id: str
-    severity: str
-    passed: bool
-    detail: str
-
-class InputOfChecklistItemSchema(TypedDict):
-    id: str
-    severity: str
-    passed: bool
-    detail: str
-
 class CloneInput(TypedDict):
     name: str
     slug: str
@@ -1589,6 +1577,29 @@ class EventStatusInput(TypedDict):
 class InputOfEventStatusInput(TypedDict):
     status: InputOfEventStatus
 
+class EventStatusSchema(TypedDict):
+    public_id: str
+    name: str
+    slug: str
+    description: NotRequired[str]
+    timezone: NotRequired[str]
+    starts_at: NotRequired[str | None]
+    ends_at: NotRequired[str | None]
+    status: EventStatus
+    is_public: NotRequired[bool]
+    created_at: str
+    updated_at: str
+    readiness: ReadinessSchema
+
+class InputOfEventStatusSchema(TypedDict):
+    name: str
+    slug: str
+    description: NotRequired[str]
+    timezone: NotRequired[str]
+    starts_at: NotRequired[str | None]
+    ends_at: NotRequired[str | None]
+    is_public: NotRequired[bool]
+
 class EventTemplateCreateInput(TypedDict):
     event: str
     name: str
@@ -1693,11 +1704,15 @@ class InputOfFinalizeInput(TypedDict):
 
 class FindingInput(TypedDict):
     message: str
-    severity: NotRequired[SeverityEnum]
+    severity: NotRequired[FindingInputSeverityEnum]
 
 class InputOfFindingInput(TypedDict):
     message: str
-    severity: NotRequired[InputOfSeverityEnum]
+    severity: NotRequired[InputOfFindingInputSeverityEnum]
+
+FindingInputSeverityEnum = Literal['blocking', 'advisory']
+
+InputOfFindingInputSeverityEnum = Literal['blocking', 'advisory']
 
 class FindingOutput(TypedDict):
     public_id: str
@@ -2041,14 +2056,6 @@ class InputOfJudgeWorkloadRowSchema(TypedDict):
     assigned_count: int
     submitted_count: int
     completion_ratio: float
-
-class LaunchChecklistSchema(TypedDict):
-    status: str
-    items: list[ChecklistItemSchema]
-
-class InputOfLaunchChecklistSchema(TypedDict):
-    status: str
-    items: list[InputOfChecklistItemSchema]
 
 class LibraryInstantiateInput(TypedDict):
     name: str
@@ -3524,6 +3531,46 @@ class InputOfRankedResultSchema(TypedDict):
     final_score: float
     tie_break: int | None
 
+class ReadinessFixSchema(TypedDict):
+    destination: str
+    section: str
+
+class InputOfReadinessFixSchema(TypedDict):
+    destination: str
+    section: str
+
+class ReadinessItemSchema(TypedDict):
+    id: str
+    severity: ReadinessItemSchemaSeverityEnum
+    passed: bool
+    detail: str
+    module: str
+    fix: ReadinessFixSchema
+
+class InputOfReadinessItemSchema(TypedDict):
+    id: str
+    severity: InputOfReadinessItemSchemaSeverityEnum
+    passed: bool
+    detail: str
+    module: str
+    fix: InputOfReadinessFixSchema
+
+ReadinessItemSchemaSeverityEnum = Literal['blocker', 'warning']
+
+InputOfReadinessItemSchemaSeverityEnum = Literal['blocker', 'warning']
+
+class ReadinessSchema(TypedDict):
+    status: ReadinessSchemaStatusEnum
+    items: list[ReadinessItemSchema]
+
+class InputOfReadinessSchema(TypedDict):
+    status: InputOfReadinessSchemaStatusEnum
+    items: list[InputOfReadinessItemSchema]
+
+ReadinessSchemaStatusEnum = Literal['ready', 'warning', 'blocked']
+
+InputOfReadinessSchemaStatusEnum = Literal['ready', 'warning', 'blocked']
+
 class RecordOutput(TypedDict):
     token: str
     claims: dict[str, Any]
@@ -3984,10 +4031,6 @@ class SettingsInput(TypedDict):
 
 class InputOfSettingsInput(TypedDict):
     require_publication_approval: bool
-
-SeverityEnum = Literal['blocking', 'advisory']
-
-InputOfSeverityEnum = Literal['blocking', 'advisory']
 
 class SignedArchiveImportInput(TypedDict):
     name: str
@@ -5839,6 +5882,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                             'query_params': [],
                                                                                             'request_body': False,
                                                                                             'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_readiness': {'method': 'GET',
+                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/readiness/',
+                                                                                'path_params': ['event_public_id',
+                                                                                                'workspace_public_id'],
+                                                                                'query_params': [],
+                                                                                'request_body': False,
+                                                                                'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_registration_invite_codes': {'method': 'GET',
                                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/registration-invite-codes/',
                                                                                                 'path_params': ['event_public_id',

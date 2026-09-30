@@ -1,0 +1,98 @@
+version: 3
+task: PD-F001-B01-T05
+batch: PD-F001-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: fab4b1c
+  head_commit: fab4b1c
+changed_paths:
+- src/api/eventconfig/ (readiness.py, schema.py, views.py, urls.py)
+- src/api/communications/checklist.py
+- src/api/communications/schema.py
+- src/api/events/views.py
+- src/api/events/schema.py
+- src/web/hooks/useReadiness.ts
+- src/web/components/WorkflowSections.tsx
+- src/web/components/WorkspaceNavigation.tsx
+- src/web/features/event-builder/ (ReadinessPanel, OrganizerOverview, EventDashboard and tests)
+- src/web/features/operations/OperationsCenter.tsx
+- tests/integration/test_event_readiness.py
+- tests/e2e/event-readiness.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+- docs/api/openapi.yaml
+- sdks/
+- docs/product-depth-v3/specs/001-base-experience-must-remain-smaller-than-the-platform.md
+deliverables:
+- item: One canonical event readiness surface that explains what is missing before launch
+  result: pass
+  evidence: eventconfig/readiness.py is the only rule list; GET events/{e}/readiness/; Setup, the overview needs-action list and the operations center render the same server answer via useReadiness and ReadinessPanel
+- item: Legacy surfaces become projections, not parallel lists
+  result: pass
+  evidence: compute_launch_checklist returns the canonical readiness; dashboard configuration_checks is derived from it; operator console health comes from it; test_event_readiness.py proves the three agree and the old two disagreeing sources are gone
+- item: Each open item says where to fix it
+  result: pass
+  evidence: every item carries fix {destination, section}; Fix links open the destination tab via the section param (WorkflowSections linkable); browser spec follows them
+- item: Module awareness
+  result: pass
+  evidence: a rule of a module that is off is omitted (voting_window); a module with content or turned on contributes it
+- item: Opening stays advisory but is on the record
+  result: pass
+  evidence: the open transition returns readiness and audits the unresolved blocker/warning ids; later transitions carry none; no new hard gate
+invariants:
+- item: Deterministic, server-side rules; no client recomputation
+  result: pass
+  evidence: the UI only renders the server list; rules are code over domain rows
+- item: Authorization and tenant scope unchanged
+  result: pass
+  evidence: readiness endpoint organizer/admin only; judge 403, anonymous denied, cross-workspace 404
+- item: Backward compatibility of response shapes
+  result: pass
+  evidence: checklist body keeps status and items[id, severity, passed, detail] (adds module, fix); dashboard configuration_checks stays a list of strings
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1484 passed, 23 skipped (adds 7 readiness tests)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 308 web tests (ReadinessPanel, linkable sections and fix links added); static checks clean
+- command: event-readiness spec on three concurrent fresh fixtures, desktop
+  result: pass
+  note: 6 of 6 passed at 390 and 1440 with axe and no overflow
+- command: make e2e-fast
+  result: pass
+  note: read-only, isolated-mutation (incl. event-readiness) and canary tiers ok
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: readiness panel in Setup and operations, needs-action list in the overview, deep links to tabs
+- surface: api
+  result: pass
+  evidence: GET readiness; checklist and dashboard projections; open transition response
+- surface: audit
+  result: pass
+  evidence: event.status_changed metadata.unresolved on open
+- surface: docs
+  result: pass
+  evidence: OpenAPI and SDKs regenerated; spec 001 readiness rule list corrected
+- surface: sdk
+  result: pass
+  evidence: "not applicable for this task: not_required; generated artifacts regenerated only"
+migrations: []
+findings:
+- Deliberate semantics change - dashboard configuration_checks no longer asks for a track and a base prize on every event (presets start without them by design); it reports only the rules it always did that still apply (dates, and tracks when a rule requires one). The stale src/api/events/test_events.py that asserted the old counts is not collected by the suite (testpaths is tests) and already fails before this change (404 URL prefix)
+- T04 follow-up fixed here - overview cards for Eligibility workload and On-site readiness are hidden while those modules are off (they linked to destinations that are not offered)
+- "P2 pre-existing defect found: GET voting-plan creates a VotingPlan as a side effect, and the hidden CommunityVotingBuilder mounts for every selected event, so merely viewing an event makes community voting look in use and adds a voting_window warning. Not fixed in the API (contract change); T02 gates the builder on the module being on, which removes the trigger from the base experience"
+- Browser spec asserts no blockers remain and judging_pools is open rather than an exact list, because of the voting-plan side effect above until T02
+limitations:
+- Readiness refetches on mount, after dashboard mutations and on Check again; edits in other panels are not pushed
+- The transition to open is not blocked by open blockers (advisory, owner may decide otherwise)
+escalations:
+- ESC-20260930-002 (resolved, option A)
+next: review

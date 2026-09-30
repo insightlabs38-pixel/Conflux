@@ -1,6 +1,10 @@
 import type { ReactNode } from "react";
 import { Badge } from "../../components/Badge";
-import { DestinationLink } from "../../components/WorkspaceNavigation";
+import {
+  DestinationLink,
+  useModuleEnabled,
+} from "../../components/WorkspaceNavigation";
+import { unresolvedItems, type Readiness } from "../../hooks/useReadiness";
 import { useLoad, type Loaded } from "../pvs/http";
 
 type Application = { status: string };
@@ -71,16 +75,19 @@ export function OrganizerOverview({
   starts,
   ends,
   status,
-  checks,
+  readiness,
 }: {
   workspaceId: string;
   eventId: string;
   starts: string | null;
   ends: string | null;
   status: string;
-  checks: string[];
+  readiness: Loaded<Readiness>;
 }) {
   const base = `/api/v1/workspaces/${workspaceId}/events/${eventId}/`;
+  // A card for a module that is off would link to a destination that is not offered.
+  const eligibilityOn = useModuleEnabled("eligibility_review");
+  const onsiteOn = useModuleEnabled("onsite");
   const applications = useLoad<Application[]>(`${base}applications/`);
   const reviews = useLoad<Review[]>(`${base}eligibility-reviews/`);
   const workload = useLoad<Workload[]>(`${base}judge-workload/`);
@@ -108,8 +115,13 @@ export function OrganizerOverview({
     ? onsite.data.projects - onsite.data.projects_placed
     : 0;
 
-  const issues: { key: string; text: string; destination: string }[] = [];
-  if (needsReview > 0)
+  const issues: {
+    key: string;
+    text: string;
+    destination: string;
+    section?: string;
+  }[] = [];
+  if (eligibilityOn && needsReview > 0)
     issues.push({
       key: "elig",
       text: `${needsReview} project${needsReview === 1 ? "" : "s"} need eligibility review`,
@@ -127,14 +139,20 @@ export function OrganizerOverview({
       text: `${awaitingApproval} publication request${awaitingApproval === 1 ? "" : "s"} awaiting approval`,
       destination: "results",
     });
-  if (unplaced > 0)
+  if (onsiteOn && unplaced > 0)
     issues.push({
       key: "onsite",
       text: `${unplaced} project${unplaced === 1 ? "" : "s"} without a table or booth`,
       destination: "onsite",
     });
-  checks.forEach((check) =>
-    issues.push({ key: `check-${check}`, text: check, destination: "setup" }),
+  // What readiness says is missing (the same server list as Setup and operations), with its fix.
+  unresolvedItems(readiness.data).forEach((item) =>
+    issues.push({
+      key: `ready-${item.id}`,
+      text: item.detail,
+      destination: item.fix.destination,
+      section: item.fix.section || undefined,
+    }),
   );
 
   return (
@@ -157,6 +175,7 @@ export function OrganizerOverview({
               <li key={issue.key}>
                 <DestinationLink
                   id={issue.destination}
+                  section={issue.section}
                   className="cx-inline-link"
                 >
                   {issue.text}
@@ -180,19 +199,21 @@ export function OrganizerOverview({
             </p>
           )}
         />
-        <Metric
-          label="Eligibility workload"
-          load={reviews}
-          destination="eligibility"
-          action="Open review queue"
-          render={() => (
-            <p>
-              <strong>{needsReview}</strong> to review · {rows.length} reviewed
-              records · {rows.filter((r) => r.status === "cleared").length}{" "}
-              cleared
-            </p>
-          )}
-        />
+        {eligibilityOn && (
+          <Metric
+            label="Eligibility workload"
+            load={reviews}
+            destination="eligibility"
+            action="Open review queue"
+            render={() => (
+              <p>
+                <strong>{needsReview}</strong> to review · {rows.length}{" "}
+                reviewed records ·{" "}
+                {rows.filter((r) => r.status === "cleared").length} cleared
+              </p>
+            )}
+          />
+        )}
         <Metric
           label="Judging progress"
           load={workload}
@@ -226,23 +247,25 @@ export function OrganizerOverview({
             </p>
           )}
         />
-        <Metric
-          label="On-site readiness"
-          load={onsite}
-          destination="onsite"
-          action="Open on-site desk"
-          render={() =>
-            onsite.data && (
-              <p>
-                <strong>
-                  {onsite.data.checked_in} of {onsite.data.participants}
-                </strong>{" "}
-                checked in · {onsite.data.projects_placed} of{" "}
-                {onsite.data.projects} projects placed
-              </p>
-            )
-          }
-        />
+        {onsiteOn && (
+          <Metric
+            label="On-site readiness"
+            load={onsite}
+            destination="onsite"
+            action="Open on-site desk"
+            render={() =>
+              onsite.data && (
+                <p>
+                  <strong>
+                    {onsite.data.checked_in} of {onsite.data.participants}
+                  </strong>{" "}
+                  checked in · {onsite.data.projects_placed} of{" "}
+                  {onsite.data.projects} projects placed
+                </p>
+              )
+            }
+          />
+        )}
       </div>
     </section>
   );

@@ -1,0 +1,665 @@
+[
+ {
+  "id": "signin",
+  "role": "anonymous",
+  "viewport": "desktop",
+  "problems": [
+   "http 401: /api/v1/accounts/me/",
+   "console: Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  ],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "public-landing",
+  "role": "anonymous",
+  "viewport": "desktop",
+  "problems": [
+   "http 401: /api/v1/accounts/me/",
+   "console: Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  ],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "public-gallery",
+  "role": "anonymous",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "public-results",
+  "role": "anonymous",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "public-agenda",
+  "role": "anonymous",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "public-map",
+  "role": "anonymous",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "selector-organizer",
+  "role": "organizer",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-overview",
+  "role": "organizer",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-setup",
+  "role": "organizer",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-participants",
+  "role": "organizer",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-eligibility",
+  "role": "organizer",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-judging",
+  "role": "organizer",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-results",
+  "role": "organizer",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-communications",
+  "role": "organizer",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-onsite",
+  "role": "organizer",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-integrations",
+  "role": "organizer",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-operations",
+  "role": "organizer",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-profile",
+  "role": "organizer",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "selector-judge-01",
+  "role": "judge-01",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "judge-01-overview",
+  "role": "judge-01",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "judge-01-queue",
+  "role": "judge-01",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "judge-01-schedule",
+  "role": "judge-01",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "judge-01-profile",
+  "role": "judge-01",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "judge-01-messages",
+  "role": "judge-01",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "selector-participant-01",
+  "role": "participant-01",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "participant-01-overview",
+  "role": "participant-01",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "participant-01-team",
+  "role": "participant-01",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "participant-01-project",
+  "role": "participant-01",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "participant-01-resources",
+  "role": "participant-01",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "participant-01-messages",
+  "role": "participant-01",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "participant-01-profile",
+  "role": "participant-01",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "selector-participant-23",
+  "role": "participant-23",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "participant-23-overview",
+  "role": "participant-23",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "participant-23-team",
+  "role": "participant-23",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "participant-23-project",
+  "role": "participant-23",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "selector-mentor",
+  "role": "mentor",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "mentor-overview",
+  "role": "mentor",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "selector-volunteer",
+  "role": "volunteer",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "volunteer-overview",
+  "role": "volunteer",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "signin",
+  "role": "anonymous",
+  "viewport": "mobile",
+  "problems": [
+   "http 401: /api/v1/accounts/me/",
+   "console: Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  ],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "public-landing",
+  "role": "anonymous",
+  "viewport": "mobile",
+  "problems": [
+   "http 401: /api/v1/accounts/me/",
+   "console: Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  ],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "public-gallery",
+  "role": "anonymous",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "public-results",
+  "role": "anonymous",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "public-agenda",
+  "role": "anonymous",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "public-map",
+  "role": "anonymous",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "selector-organizer",
+  "role": "organizer",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-overview",
+  "role": "organizer",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-setup",
+  "role": "organizer",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-participants",
+  "role": "organizer",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-eligibility",
+  "role": "organizer",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-judging",
+  "role": "organizer",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-results",
+  "role": "organizer",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-communications",
+  "role": "organizer",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-onsite",
+  "role": "organizer",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-integrations",
+  "role": "organizer",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-operations",
+  "role": "organizer",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "organizer-profile",
+  "role": "organizer",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "selector-judge-01",
+  "role": "judge-01",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "judge-01-overview",
+  "role": "judge-01",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "judge-01-queue",
+  "role": "judge-01",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "judge-01-schedule",
+  "role": "judge-01",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "judge-01-profile",
+  "role": "judge-01",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "judge-01-messages",
+  "role": "judge-01",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "selector-participant-01",
+  "role": "participant-01",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "participant-01-overview",
+  "role": "participant-01",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "participant-01-team",
+  "role": "participant-01",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "participant-01-project",
+  "role": "participant-01",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "participant-01-resources",
+  "role": "participant-01",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "participant-01-messages",
+  "role": "participant-01",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "participant-01-profile",
+  "role": "participant-01",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "selector-participant-23",
+  "role": "participant-23",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "participant-23-overview",
+  "role": "participant-23",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "participant-23-team",
+  "role": "participant-23",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "participant-23-project",
+  "role": "participant-23",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "selector-mentor",
+  "role": "mentor",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "mentor-overview",
+  "role": "mentor",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "selector-volunteer",
+  "role": "volunteer",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "volunteer-overview",
+  "role": "volunteer",
+  "viewport": "mobile",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": []
+ },
+ {
+  "id": "state-loading",
+  "role": "anonymous",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": [],
+  "note": "synthetic: /accounts/me held open while the shell renders"
+ },
+ {
+  "id": "state-error-events",
+  "role": "organizer",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": [],
+  "note": "synthetic: events list 500"
+ },
+ {
+  "id": "state-denied-organizer-view",
+  "role": "participant-01",
+  "viewport": "desktop",
+  "problems": [],
+  "overflowPx": 0,
+  "axe": [],
+  "note": "participant requesting ?view=setup (no denied state: view silently falls back)"
+ }
+]

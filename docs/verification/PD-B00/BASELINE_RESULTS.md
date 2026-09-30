@@ -44,3 +44,12 @@ Doc drift: `final-pass` reports 60 passed/11 skipped (submitted) + 39 (published
 | Isolated (own workspace/event)                        | **none**                                                                                                                                                                                                | every spec targets `demo-hackathon-7`; concurrency comes only from grouping.                                                               |
 
 Dependency findings: (1) a single mutable event is a shared fixture, so only the read-only group can scale out; per-spec isolated workspaces would allow parallelism and re-runnability. (2) `e2e-fast` group order encodes an implicit contract (`stateful` before `final`) that is only documented in the script comment.
+
+## T05 — Representative UI surface census
+
+Spec `tests/e2e/pdv3-baseline-census.spec.ts` (opt-in: `E2E_CENSUS=1`, skipped otherwise, so gates are unchanged). Run after `scripts/demo-reset`:
+`E2E_CENSUS=1 E2E_GROUP=census npx playwright test -c tests/e2e/playwright.config.ts --workers=1 pdv3-baseline-census` → **15 passed, 2.1 min**.
+Output `docs/verification/PD-B00/ui-census/`: **81 full-page JPEG captures + `manifest.json`** (3.7 MB) at desktop 1280×800 and mobile 390×844 for: sign-in and workspace selectors; public landing/gallery/results/agenda/map; organizer (11 views), judge (5), participant (6), participant without team (3 real empty states), mentor, volunteer; plus synthetic states: loading (identity request held open), error (events list forced 500), and a participant deep-linking to an organizer view.
+Measured per surface (no assertions on quality): **0 WCAG 2.2 AA axe violations, 0 px horizontal overflow, 0 console/HTTP problems for authenticated surfaces** (signed-out shell logs an expected 401 on `/accounts/me/`).
+Visual baseline read from captures: consistent left-nav role shell, plain neutral canvas, sparse empty/loading states ("Loading stages…" text box, bare selectors before an event is chosen), organizer/judge lists are plain rows, public gallery is initials tiles. Later batches compare against these files.
+Limits: the public gallery is server-rendered so an API-mocked "empty" state is not representable; empty states come from `participant-23`. Judge/participant views require an event (and stage) selection which the harness performs.

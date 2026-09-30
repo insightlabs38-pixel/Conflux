@@ -1,0 +1,13 @@
+# PD-B00 Defect and Drift Register
+
+Append-only during PD-B00. IDs are stable. Severity: P1 blocks correctness/security; P2 significant; P3 minor/process. "Routes to" = owning batch or `PD-B00-T08` triage.
+
+| ID   | Sev | Found in | Finding                                                                                                                              | Evidence                                                               | Routes to                           |
+| ---- | --- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | ----------------------------------- |
+| D-01 | P3  | T04      | `lifecycle` e2e canary has no precondition guard: a re-run without `demo-reset` fails with an opaque `locator.fill` timeout          | `logs/T04-negative-lifecycle-no-reset.log`                             | test infra (PD-B00-T08 / spec 061)  |
+| D-02 | P3  | T02      | Docs test counts stale: README/final-pass claim 1373 backend, 137 web; measured 1400 / 168 (PG: 1418 vs 1391)                        | BASELINE_RESULTS T02/T03                                               | docs sync in T06                    |
+| D-03 | P3  | T02      | pytest wall time dominated by ~7.7 s per-xdist-worker DB setup                                                                       | T02 durations                                                          | spec 061 verification velocity      |
+| D-04 | P2  | T03      | No prior released schema fixture → upgrade-path smoke test is permanently skipped; migration-heavy v3 work lacks an upgrade baseline | `tests/compatibility/test_prior_schema_migration_smoke.py` skip reason | migration tasks (spec 052/UPGRADES) |
+| D-05 | P3  | T04      | e2e has no isolated-workspace specs; single mutable demo event limits parallelism/re-runnability                                     | census                                                                 | spec 061                            |
+| D-06 | P3  | T03      | S3 storage contract (3) + two-endpoint portability (1) tests never run in default gates                                              | skip list                                                              | spec 017                            |
+| D-07 | P3  | T04      | Playwright suite size now exceeds documented receipts (144 passed/91 skipped vs 60/11 + 39)                                          | T04                                                                    | docs sync in T06                    |

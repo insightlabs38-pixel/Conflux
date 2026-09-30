@@ -1,0 +1,49 @@
+
+Running 12 tests using 1 worker
+
+(node:731598) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘   1 [desktop] › tests/e2e/lifecycle.spec.ts:43:5 › participant creates a team, submits, and receives a signed receipt (26.0s)
+Testing stopped early after 1 maximum allowed failures.
+
+
+  1) [desktop] › tests/e2e/lifecycle.spec.ts:43:5 › participant creates a team, submits, and receives a signed receipt 
+
+    Test timeout of 25000ms exceeded.
+
+    Error: locator.fill: Test timeout of 25000ms exceeded.
+    Call log:
+      - waiting for getByLabel('Team name')
+
+
+      54 |   ).toContainText("Sponsor API documentation");
+      55 |   await goToDestination(page, "team");
+    > 56 |   await page.getByLabel("Team name").fill("Team Live Wire");
+         |                                      ^
+      57 |   await page.getByRole("button", { name: "Create team" }).click();
+      58 |   await expect(page.getByRole("region", { name: "My team" })).toContainText(
+      59 |     "Team Live Wire",
+        at /home/insightlabs38/conflux/tests/e2e/lifecycle.spec.ts:56:38
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    artifacts/e2e-fast/neg/results/lifecycle-participant-crea-80f60-d-receives-a-signed-receipt-desktop/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    artifacts/e2e-fast/neg/results/lifecycle-participant-crea-80f60-d-receives-a-signed-receipt-desktop/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: artifacts/e2e-fast/neg/results/lifecycle-participant-crea-80f60-d-receives-a-signed-receipt-desktop/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    artifacts/e2e-fast/neg/results/lifecycle-participant-crea-80f60-d-receives-a-signed-receipt-desktop/trace.zip
+    Usage:
+
+        npx playwright show-trace artifacts/e2e-fast/neg/results/lifecycle-participant-crea-80f60-d-receives-a-signed-receipt-desktop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [desktop] › tests/e2e/lifecycle.spec.ts:43:5 › participant creates a team, submits, and receives a signed receipt 
+  11 did not run
+  1 error was not a part of any test, see above for details

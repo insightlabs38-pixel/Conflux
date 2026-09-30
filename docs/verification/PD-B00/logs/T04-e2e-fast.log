@@ -1,0 +1,13 @@
+== read-only (exit 0) ==
+  30 skipped
+  50 passed (2.0m)
+== public (exit 0) ==
+  30 skipped
+  48 passed (2.0m)
+== stateful (exit 0) ==
+  25 skipped
+  40 passed (3.0m)
+== final (exit 0) ==
+  6 skipped
+  6 passed (45.8s)
+exit=0

@@ -1,0 +1,56 @@
+version: 3
+task: PD-B00-T04
+batch: PD-B00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: b5f398dfc0c4330b34c894bd6d648da6213c83d4
+  head_commit: 32a442a429d66b11ed2327172f63f747f6520c15
+changed_paths:
+- docs/verification/PD-B00/BASELINE_RESULTS.md
+- docs/verification/PD-B00/DEFECT_REGISTER.md
+- docs/verification/PD-B00/logs/
+deliverables:
+- item: Measure current browser suites
+  result: pass
+  evidence: 'e2e-fast all 18 specs: 144 passed, 91 skipped (mobile desktop-only), 0 failed, 3m48s'
+- item: Identify shared mutable fixtures/serial dependencies
+  result: pass
+  evidence: 'census: single shared event; lifecycle->final ordered chain; event-themes mutates brand'
+- item: Classify tests isolated/read-only/lifecycle canary/release-only
+  result: pass
+  evidence: census table; isolated class empty (recorded as D-05)
+invariants:
+- item: No test weakened
+  result: pass
+  evidence: no spec edits
+- item: Do not change behavior
+  result: pass
+  evidence: demo-reset only purges/recreates generated demo-hackathon-7 via its documented path
+verification:
+- command: ./scripts/demo-reset && ./scripts/e2e-fast
+  result: pass
+  note: exit 0; per-group 50/48/40/6 passed
+- command: E2E_GROUP=neg npx playwright test lifecycle (no reset)
+  result: pass
+  note: 'expected failure captured: locator.fill timeout -> D-01 (negative case)'
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs/evidence-only task
+migrations: []
+findings:
+- D-01
+- D-05
+- D-07
+escalations: []
+limitations:
+- Serial make demo-e2e not run; e2e-fast used (documented equivalent).
+- Frontend bundle-to-source equality not hash verified; backend source tree hash equal.
+- Census classification is from spec inspection + group membership, not instrumentation.
+next: review

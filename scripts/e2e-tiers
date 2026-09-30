@@ -7,7 +7,13 @@
   canary             the only serial chain: lifecycle -> scenes -> uiv2-organizer -> uiv2-final-states on
                      its own `canary` fixture (full create->submit->judge->publish path, untouched by others)
 
-Usage: scripts/e2e-tiers check | run [tier ...]   (default: all three tiers, concurrently)
+Usage: scripts/e2e-tiers check
+       scripts/e2e-tiers run [tier ...]      PR/full: all three tiers concurrently (default) or the named ones
+       scripts/e2e-tiers smoke               seconds: sign-in, role workspaces and public pages, desktop only
+       scripts/e2e-tiers affected [--base REF] [--list]
+                                             only specs mapped (tests/e2e/affected.json) from paths changed vs REF
+                                             (default HEAD: uncommitted + untracked); --list prints the selection
+Release stays authoritative and broader: `make demo-e2e` (serial, reset-first, seed 7) plus the canary.
 Env:   E2E_SKIP_PREFLIGHT  E2E_ISOLATED_JOBS (3)  E2E_READONLY_WORKERS (4)  E2E_MANAGE  E2E_BASE_URL  E2E_KEEP_FIXTURES=1
 Fixtures are disposed on success and kept (slug printed) on failure; `make e2e-fixture-sweep` cleans up.
 Specs run unmodified: fixture identity reaches them through E2E_DEMO_SEED / E2E_DEMO_PASSWORD.
@@ -18,6 +24,7 @@ import subprocess
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor
+from fnmatch import fnmatch
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -48,6 +55,9 @@ def check():
         seen[spec] = tier
         if spec not in on_disk:
             problems.append(f"{tier}: {spec}.spec.ts does not exist")
+    cfg = json.loads((SPECS / "affected.json").read_text())
+    named = set(cfg["smoke"]) | {sp for r in cfg["rules"] for sp in r["specs"]}
+    problems += [f"affected.json names unclassified spec {sp}" for sp in sorted(named - set(seen))]
     problems += [f"{s}.spec.ts is not classified in tests/e2e/tiers.json" for s in sorted(on_disk - set(seen))]
     return problems
 
@@ -60,12 +70,12 @@ def manage(*args):
     return out.stdout.strip().splitlines()[-1] if out.stdout.strip() else ""
 
 
-def playwright(group, specs, env=None, workers=1):
+def playwright(group, specs, env=None, workers=1, extra=()):
     LOGS.mkdir(parents=True, exist_ok=True)
     log = LOGS / f"tier-{group}.log"
     with log.open("w") as fh:
         code = subprocess.run(
-            ["npx", "playwright", "test", "-c", CONFIG, f"--workers={workers}", *specs],
+            ["npx", "playwright", "test", "-c", CONFIG, f"--workers={workers}", *extra, *specs],
             cwd=ROOT, env={**os.environ, "E2E_GROUP": group, **(env or {})}, stdout=fh, stderr=subprocess.STDOUT,
         ).returncode
     summary = [l.strip() for l in log.read_text().splitlines() if "✘" in l or " passed" in l or " failed" in l or " skipped" in l]
@@ -89,47 +99,87 @@ def with_fixture(profile, group, specs):
     return code
 
 
-def run_read_only():
+def run_read_only(specs=None):
     t = tiers()
-    return playwright("read-only", t["read-only"] + t["self-isolating"], workers=int(os.environ.get("E2E_READONLY_WORKERS", "4")))
+    return playwright("read-only", specs or t["read-only"] + t["self-isolating"], workers=int(os.environ.get("E2E_READONLY_WORKERS", "4")))
 
 
-def run_isolated():
+def run_isolated(specs=None):
     jobs = int(os.environ.get("E2E_ISOLATED_JOBS", "3"))
     with ThreadPoolExecutor(jobs) as pool:
-        codes = list(pool.map(lambda s: with_fixture("iso-min", f"iso-{s}", [s]), tiers()["isolated-mutation"]))
+        codes = list(pool.map(lambda s: with_fixture("iso-min", f"iso-{s}", [s]), specs or tiers()["isolated-mutation"]))
     return int(any(codes))
 
 
-def run_canary():
-    return with_fixture("canary", "canary", tiers()["canary"])
+def canary_chain(specs=None):
+    """Later chain members read what earlier ones create: run the chain up to the last selected one."""
+    chain = tiers()["canary"]
+    return chain[: max(chain.index(s) for s in specs) + 1] if specs else chain
+
+
+def run_canary(specs=None):
+    return with_fixture("canary", "canary", canary_chain(specs))
 
 
 RUNNERS = {"read-only": run_read_only, "isolated-mutation": run_isolated, "canary": run_canary}
 
 
-def main(argv):
-    problems = check()
-    if argv[:1] == ["check"] or problems:
-        for p in problems:
-            print(f"tiers: {p}", file=sys.stderr)
-        print("tiers: OK" if not problems else "tiers: FAILED", file=sys.stderr)
-        return 1 if problems else 0
-    if not os.environ.get("E2E_SKIP_PREFLIGHT"):
-        # Reuse the running stack; only start/seed what is missing (scripts/e2e-stack).
-        if subprocess.run([str(ROOT / "scripts/e2e-stack"), "ensure", "--fix"], cwd=ROOT).returncode:
-            print("preflight failed: fix the stack (see above) or set E2E_SKIP_PREFLIGHT=1", file=sys.stderr)
-            return 1
-    chosen = argv[1:] if argv[:1] == ["run"] and argv[1:] else list(RUN_TIERS)
-    unknown = [t for t in chosen if t not in RUNNERS]
-    if unknown:
-        print(f"unknown tier(s) {unknown}; choose from {list(RUNNERS)}", file=sys.stderr)
-        return 2
+def tier_of(spec):
+    t = tiers()
+    return "read-only" if spec in t["self-isolating"] else next((k for k in RUN_TIERS if spec in t[k]), None)
+
+
+def changed_paths(base):
+    tracked = subprocess.run(["git", "diff", "--name-only", base], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split()
+    fresh = subprocess.run(["git", "ls-files", "-o", "--exclude-standard"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split()
+    return sorted(set(tracked + fresh))
+
+
+def select_affected(paths):
+    """(specs, reasons): union of mapped specs; 'all' wins; unmapped source paths fall back to smoke."""
+    cfg = json.loads((SPECS / "affected.json").read_text())
+    hit = lambda path, globs: any(fnmatch(path, g) for g in globs)
+    specs, reasons, everything = set(), [], False
+    for path in paths:
+        direct = path.startswith("tests/e2e/") and path.endswith(".spec.ts")
+        if hit(path, cfg["all"]):
+            everything = True
+            reasons.append(f"{path} -> ALL (shared infrastructure)")
+        elif direct and tier_of(Path(path).name.removesuffix(".spec.ts")):
+            name = Path(path).name.removesuffix(".spec.ts")
+            specs.add(name)
+            reasons.append(f"{path} -> {name}")
+        elif hit(path, cfg["none"]):
+            reasons.append(f"{path} -> none")
+        else:
+            mapped = sorted({sp for r in cfg["rules"] if hit(path, r["paths"]) for sp in r["specs"]})
+            if mapped:
+                specs.update(mapped)
+                reasons.append(f"{path} -> {', '.join(mapped)}")
+            elif path.startswith(("src/", "tests/e2e/", "scripts/")):
+                specs.update(cfg["smoke"])
+                reasons.append(f"{path} -> smoke (unmapped; add a rule to tests/e2e/affected.json)")
+            else:
+                reasons.append(f"{path} -> none")
+    return (None if everything else sorted(specs)), reasons
+
+
+def preflight():
+    if os.environ.get("E2E_SKIP_PREFLIGHT"):
+        return True
+    # Reuse the running stack; only start/seed what is missing (scripts/e2e-stack).
+    if subprocess.run([str(ROOT / "scripts/e2e-stack"), "ensure", "--fix"], cwd=ROOT).returncode:
+        print("preflight failed: fix the stack (see above) or set E2E_SKIP_PREFLIGHT=1", file=sys.stderr)
+        return False
+    return True
+
+
+def run_tiers(chosen, selection=None):
     results = {}
 
     def go(tier):
         try:
-            results[tier] = RUNNERS[tier]()
+            results[tier] = RUNNERS[tier](selection.get(tier) if selection else None)
         except Exception as exc:  # provisioning failures must fail the run loudly, not skip
             say(f"[{tier}] ERROR {exc}")
             results[tier] = 1
@@ -141,4 +191,48 @@ def main(argv):
     return int(any(results.values()))
 
 
-sys.exit(main(sys.argv[1:]))
+def main(argv):
+    problems = check()
+    if argv[:1] == ["check"] or problems:
+        for p in problems:
+            print(f"tiers: {p}", file=sys.stderr)
+        print("tiers: OK" if not problems else "tiers: FAILED", file=sys.stderr)
+        return 1 if problems else 0
+    command = argv[0] if argv else "run"
+    if command == "smoke":
+        if not preflight():
+            return 1
+        smoke = json.loads((SPECS / "affected.json").read_text())["smoke"]
+        code = playwright("smoke", smoke, workers=len(smoke), extra=("--project=desktop",))
+        say(f"== smoke: {'ok' if code == 0 else 'FAILED'}")
+        return code
+    if command == "affected":
+        base = argv[argv.index("--base") + 1] if "--base" in argv else "HEAD"
+        paths = changed_paths(base)
+        specs, reasons = select_affected(paths)
+        for r in reasons:
+            say(f"  {r}")
+        if specs is None:
+            say(f"affected vs {base}: ALL tiers (shared infrastructure changed)")
+            selection = None
+        elif not specs:
+            say(f"affected vs {base}: nothing to run ({len(paths)} changed path(s) map to no browser spec)")
+            return 0
+        else:
+            selection = {}
+            for spec in specs:
+                selection.setdefault(tier_of(spec), []).append(spec)
+            say(f"affected vs {base}: " + "; ".join(f"{t}: {', '.join(v)}" for t, v in selection.items()))
+        if "--list" in argv or not preflight():
+            return 0 if "--list" in argv else 1
+        return run_tiers([t for t in RUN_TIERS if selection is None or t in selection], selection)
+    chosen = argv[1:] if command == "run" and argv[1:] else list(RUN_TIERS)
+    unknown = [t for t in chosen if t not in RUNNERS]
+    if command not in ("run",) or unknown:
+        print(f"usage: e2e-tiers check|run [tier...]|smoke|affected [--base REF] [--list]; unknown {unknown or command}", file=sys.stderr)
+        return 2
+    return run_tiers(chosen) if preflight() else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

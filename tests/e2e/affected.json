@@ -1,0 +1,120 @@
+{
+  "smoke": ["signin", "roles", "public"],
+  "all": [
+    "src/web/app/App.tsx",
+    "src/web/app/main.tsx",
+    "src/web/components/*",
+    "src/web/styles/*",
+    "src/web/index.html",
+    "src/web/package.json",
+    "src/web/vite.config.ts",
+    "pnpm-lock.yaml",
+    "tests/e2e/support.ts",
+    "tests/e2e/fixtures.ts",
+    "tests/e2e/auth-states.ts",
+    "tests/e2e/playwright.config.ts",
+    "tests/e2e/tiers.json",
+    "tests/e2e/affected.json",
+    "scripts/e2e-*",
+    "Makefile",
+    ".github/workflows/*"
+  ],
+  "none": ["docs/*", "*.md", "src/web/*.test.ts", "src/web/*.test.tsx"],
+  "rules": [
+    {
+      "paths": [
+        "src/web/app/SignIn*",
+        "src/web/app/WorkspaceSelector*",
+        "src/api/accounts/*",
+        "src/api/workspaces/*"
+      ],
+      "specs": ["signin", "roles", "workspace-shell", "auth-states"]
+    },
+    {
+      "paths": [
+        "src/web/features/judging/*",
+        "src/api/evaluations/*",
+        "src/api/deliberation/*"
+      ],
+      "specs": [
+        "uiv2-judge",
+        "uiv2-gate",
+        "lifecycle",
+        "uiv2-organizer",
+        "uiv2-final-states"
+      ]
+    },
+    {
+      "paths": ["src/web/features/awards/*", "src/api/awards/*"],
+      "specs": [
+        "lifecycle",
+        "uiv2-organizer",
+        "uiv2-final-states",
+        "showcase",
+        "public"
+      ]
+    },
+    {
+      "paths": ["src/web/features/operations/*", "src/api/eligibility/*"],
+      "specs": ["uiv2-organizer", "pvs", "uiv2-surfaces"]
+    },
+    {
+      "paths": [
+        "src/web/features/pvs/*",
+        "src/api/mentorship/*",
+        "src/api/onsite/*",
+        "src/api/governance/*"
+      ],
+      "specs": ["pvs"]
+    },
+    {
+      "paths": ["src/web/features/profile/*", "src/api/portfolio/*"],
+      "specs": ["profiles"]
+    },
+    {
+      "paths": [
+        "src/web/features/teams/*",
+        "src/web/features/submissions/*",
+        "src/web/features/artifacts/*",
+        "src/api/projects/*",
+        "src/api/participation/*",
+        "src/api/artifacts/*",
+        "src/api/forms/*"
+      ],
+      "specs": ["participant-workflow", "lifecycle"]
+    },
+    {
+      "paths": [
+        "src/web/features/api-explorer/*",
+        "src/web/features/integrations/*",
+        "src/web/features/audit/*",
+        "src/web/features/event-builder/*",
+        "src/web/features/form-builder/*",
+        "src/web/features/policy-builder/*",
+        "src/web/features/stage-builder/*",
+        "src/web/features/communications/*",
+        "src/web/features/community-voting/*",
+        "src/api/integrations/*",
+        "src/api/extensions/*"
+      ],
+      "specs": ["uiv2-surfaces"]
+    },
+    {
+      "paths": [
+        "src/web/features/page-builder/*",
+        "src/api/presentation/*",
+        "src/api/events/*"
+      ],
+      "specs": ["event-themes", "foundations", "public", "showcase"]
+    },
+    {
+      "paths": [
+        "src/api/integrations/e2e_fixtures.py",
+        "src/api/integrations/demo_scenarios.py",
+        "src/api/integrations/management/*"
+      ],
+      "specs": ["fixture-isolation", "auth-states"]
+    },
+    { "paths": ["src/embed/*"], "specs": ["extended-embed", "public"] }
+  ]
+}

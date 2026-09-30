@@ -1,0 +1,59 @@
+version: 3
+task: PD-R00-T03
+batch: PD-R00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: feb248c061c3fb0ccec8fd0c2c7ec28ef237237b
+  head_commit: e73b1e4dbeb1b8bcfdd3656519d81d405ea9faf3
+changed_paths:
+- docs/execution-v3/reconciliation/PD-R00-STATE.md
+- docs/execution-v3/state/PROGRAM_STATE.yaml
+deliverables:
+- item: Record canonical branch/HEAD and working tree/worktree state
+  result: pass
+  evidence: docs/execution-v3/reconciliation/PD-R00-STATE.md T03 section
+- item: Inspect claims/handoffs/checkpoints/runtime overrides for stale state
+  result: pass
+  evidence: 'recovery_report: CLAIMS 0 (before T01 claim), escalations 0, handoffs 0; stale .dogfood/master.pid
+    860048 not running'
+- item: Resolve/quarantine stale artifacts
+  result: pass
+  evidence: 3 old lane worktrees + sol/BOOT-B00 verified clean and 0 ahead of main; quarantined via LINEAGE.md
+    (not deleted)
+invariants:
+- item: Product Depth v3 remains frozen until deliberate activation and controller-owned promotion
+  result: pass
+  evidence: Owner explicitly authorized activation (2026-09-30); activation via scripts/pdv3/activate.py
+    --apply; promotions only through state/ files.
+- item: Legacy DOGFOOD evidence remains historical context rather than a second active scheduler
+  result: pass
+  evidence: Legacy files only received HISTORICAL banners; content preserved verbatim; see LINEAGE.md.
+- item: Targeted inspection only
+  result: pass
+  evidence: rg/find/sed/python targeted reads; no bulk dumps.
+verification:
+- command: git status --short; git worktree list; git rev-list --count main..<branch> for 4 legacy branches
+  result: pass
+  note: all 0; tree only had untracked design zips
+- command: python scripts/pdv3/recovery_report.py
+  result: pass
+  note: no unexplained active PD claim; only the live PD-R00-T01 claim
+- command: rg merge-marker scan; git stash list
+  result: pass
+  note: none
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs-only task
+migrations: []
+findings: []
+escalations: []
+limitations:
+- main is 2+ commits ahead of origin/main; not pushed (not authorized).
+next: review

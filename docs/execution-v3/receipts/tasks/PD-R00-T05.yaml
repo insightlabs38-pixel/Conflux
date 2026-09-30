@@ -1,0 +1,54 @@
+version: 3
+task: PD-R00-T05
+batch: PD-R00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: feb248c061c3fb0ccec8fd0c2c7ec28ef237237b
+  head_commit: e73b1e4dbeb1b8bcfdd3656519d81d405ea9faf3
+changed_paths:
+- docs/execution-v3/reconciliation/PD-R00-STATE.md
+deliverables:
+- item: Record Product Depth tasks overlapping shipped functionality with code/evidence pointers
+  result: pass
+  evidence: PD-R00-STATE.md T05 table (17 rows)
+- item: Record queue-owned paths that do not exist and reconcile safely
+  result: pass
+  evidence: 87 missing prefixes analyzed; mostly create-on-first-use; 3 name mismatches (mcp/mcp_adapter,
+    configuration/config, i18n/locale) flagged; no bulk rewrite of 3110 tasks
+- item: Label findings audit/reuse/migration; do not mark tasks DONE
+  result: pass
+  evidence: each row classed; no task state changed
+invariants:
+- item: Product Depth v3 remains frozen until deliberate activation and controller-owned promotion
+  result: pass
+  evidence: Owner explicitly authorized activation (2026-09-30); activation via scripts/pdv3/activate.py
+    --apply; promotions only through state/ files.
+- item: Legacy DOGFOOD evidence remains historical context rather than a second active scheduler
+  result: pass
+  evidence: Legacy files only received HISTORICAL banners; content preserved verbatim; see LINEAGE.md.
+- item: Targeted inspection only
+  result: pass
+  evidence: rg/find/sed/python targeted reads; no bulk dumps.
+verification:
+- command: python owned_paths existence scan over BATCHES.yaml
+  result: pass
+  note: 87 missing prefixes listed
+- command: ls/git ls-files spot checks for each table row's cited path
+  result: pass
+  note: cited paths exist
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs-only task
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Rows are lightweight; depth grading is PD-B00's job.
+next: review

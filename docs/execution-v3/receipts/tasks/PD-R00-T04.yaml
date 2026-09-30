@@ -1,0 +1,65 @@
+version: 3
+task: PD-R00-T04
+batch: PD-R00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: feb248c061c3fb0ccec8fd0c2c7ec28ef237237b
+  head_commit: e73b1e4dbeb1b8bcfdd3656519d81d405ea9faf3
+changed_paths:
+- scripts/pdv3/ (unchanged)
+- conflux_deep_product_feature_research_v2.md
+- conflux_utility_filtered_opportunity_pass.md
+deliverables:
+- item: All task/batch/spec/primitive/design/required-reading references resolve
+  result: pass
+  evidence: validate_queue valid=true, 331 batches, 3110 tasks, 0 errors (after installing root research
+    md files required by required_reading)
+- item: Controller scripts compile and operate in frozen mode
+  result: pass
+  evidence: 'compileall ok; frozen scratch copy of pre-activation commit 5680dcd: ready_tasks -> ''program=FROZEN;
+    no executable READY set while frozen'''
+- item: Activation target/initial chain points at PD-R00 first
+  result: pass
+  evidence: 'activate.py dry-run on frozen copy: initial batch PD-R00; PD-R00 only batch without deps;
+    PD-B00 depends on PD-R00'
+invariants:
+- item: Product Depth v3 remains frozen until deliberate activation and controller-owned promotion
+  result: pass
+  evidence: Owner explicitly authorized activation (2026-09-30); activation via scripts/pdv3/activate.py
+    --apply; promotions only through state/ files.
+- item: Legacy DOGFOOD evidence remains historical context rather than a second active scheduler
+  result: pass
+  evidence: Legacy files only received HISTORICAL banners; content preserved verbatim; see LINEAGE.md.
+- item: Targeted inspection only
+  result: pass
+  evidence: rg/find/sed/python targeted reads; no bulk dumps.
+verification:
+- command: python scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid true, 0 errors
+- command: python -m compileall -q scripts/pdv3
+  result: pass
+  note: exit 0
+- command: python scripts/pdv3/ready_tasks.py (frozen scratch copy)
+  result: pass
+  note: reports no executable READY set while FROZEN
+- command: python scripts/pdv3/activate.py (frozen scratch copy, dry-run)
+  result: pass
+  note: names PD-R00 as initial batch
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs-only task
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Frozen-mode checks ran on a scratch copy of the pre-activation commit because the live program was already
+  activated by owner instruction.
+next: review

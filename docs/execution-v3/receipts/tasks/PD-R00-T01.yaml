@@ -1,0 +1,67 @@
+version: 3
+task: PD-R00-T01
+batch: PD-R00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: feb248c061c3fb0ccec8fd0c2c7ec28ef237237b
+  head_commit: e73b1e4dbeb1b8bcfdd3656519d81d405ea9faf3
+changed_paths:
+- docs/execution-v3/LINEAGE.md
+- docs/execution-v3/claims/PD-R00-T01.yaml
+- docs/execution/README.md
+- master/README.md
+- master/worker_prompt.md
+- master/autonomous_system_prompt.md
+- docs/IMPLEMENTATION_CHECKPOINT.md
+- AGENTS.md
+- README.md
+- prompts/
+deliverables:
+- item: Execution-lineage document identifying active queue, runtime state, historical queue/receipts,
+    precedence
+  result: pass
+  evidence: docs/execution-v3/LINEAGE.md
+- item: Label/relocate duplicate control files plausibly mistaken for active authority
+  result: pass
+  evidence: docs/execution/README.md, master/README.md, master/*prompt.md HISTORICAL banners; docs/IMPLEMENTATION_CHECKPOINT.md
+    link relabeled 'legacy queue (historical)'
+- item: Preserve historical evidence links
+  result: pass
+  evidence: docs/batches, docs/verification, docs/ui-v2 untouched; link check passed
+invariants:
+- item: Product Depth v3 remains frozen until deliberate activation and controller-owned promotion
+  result: pass
+  evidence: Owner explicitly authorized activation (2026-09-30); activation via scripts/pdv3/activate.py
+    --apply; promotions only through state/ files.
+- item: Legacy DOGFOOD evidence remains historical context rather than a second active scheduler
+  result: pass
+  evidence: Legacy files only received HISTORICAL banners; content preserved verbatim; see LINEAGE.md.
+- item: Targeted inspection only
+  result: pass
+  evidence: rg/find/sed/python targeted reads; no bulk dumps.
+verification:
+- command: find . -name TASKS.yaml -not -path './node_modules/*'
+  result: pass
+  note: 'exactly two: root (active) and docs/execution (historical, bannered)'
+- command: rg -l 'Authoritative sequential|authoritative execution queue'
+  result: pass
+  note: no unbannered active-authority claim remains
+- command: python link check over LINEAGE/README/AGENTS/checkpoint/execution README
+  result: pass
+  note: no broken relative links
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs-only task
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Legacy symlinks under ~/DOGFOOD_EXECUTION_CONTROL_v2_2026-09-23 (outside repo) not modified.
+next: review

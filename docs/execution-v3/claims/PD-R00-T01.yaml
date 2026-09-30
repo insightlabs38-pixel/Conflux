@@ -9,5 +9,5 @@ worktree: /home/insightlabs38/conflux
 lock_groups: [execution-control, integration-main]
 claimed_at: 2026-09-30T05:03:01Z
 last_heartbeat: 2026-09-30T05:03:01Z
-state: ACTIVE
+state: RELEASED
 note: single continuous agent owns selection and execution; docs-only batch on canonical main

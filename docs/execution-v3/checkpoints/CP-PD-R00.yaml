@@ -1,0 +1,23 @@
+version: 1
+checkpoint_id: CP-PD-R00
+created_at: '2026-09-30T05:05:23Z'
+canonical_commit: 32c7575bced644aaaf30b254982fd6c7361bf7e7
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+active_batches: []
+active_claims: []
+open_escalations: []
+last_completed_task: PD-R00-T90
+ready_summary:
+- PD-B00 (pending readiness recompute)
+design_revision: r2.1
+verification_summary:
+- validate_queue valid 0 errors
+- compileall ok
+- PD-R00 receipts lint PASS
+recovery_notes:
+- Continuous agent supervised by scripts/claude_supervisor/supervisor.py (windows
+  02:50 EDT +5h until 2026-10-01 13:30 EDT)
+- main unpushed
+- Design zips untracked at repo root are inputs, leave alone

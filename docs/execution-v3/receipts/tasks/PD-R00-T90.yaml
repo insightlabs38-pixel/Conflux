@@ -1,0 +1,58 @@
+version: 3
+task: PD-R00-T90
+batch: PD-R00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: feb248c061c3fb0ccec8fd0c2c7ec28ef237237b
+  head_commit: 32c7575bced644aaaf30b254982fd6c7361bf7e7
+changed_paths:
+- docs/execution-v3/receipts/batches/PD-R00.md
+- docs/execution-v3/receipts/tasks/PD-R00-T90.yaml
+- docs/execution-v3/checkpoints/CP-PD-R00.yaml
+- docs/execution-v3/state/
+deliverables:
+- item: Review T01-T05 evidence; no unresolved P0/P1 blocker
+  result: pass
+  evidence: 5 receipts lint PASS; recovery_report OPEN_ESCALATIONS 0; each receipt's cited paths re-checked
+    to exist
+- item: Re-run queue/tooling validation from canonical integrated state
+  result: pass
+  evidence: validate_queue valid=true 0 errors; compileall ok at HEAD 32c7575
+- item: Emit <=25-line batch receipt and checkpoint
+  result: pass
+  evidence: receipts/batches/PD-R00.md; checkpoints/CP-PD-R00.yaml
+invariants:
+- item: No future feature marked DONE because legacy code exists
+  result: pass
+  evidence: TASK_STATE only lists PD-R00 tasks
+- item: Historical evidence preserved
+  result: pass
+  evidence: only banners added to legacy files
+verification:
+- command: python scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid, 0 errors
+- command: python scripts/pdv3/activate.py
+  result: pass
+  note: 'refuses: program state is ACTIVE (correct post-activation guard); frozen/dry-run behavior verified
+    in T04 on scratch copy'
+- command: python scripts/pdv3/lint_receipt.py docs/execution-v3/receipts/batches/PD-R00.md
+  result: pass
+  note: see batch receipt lint
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs-only
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Same agent implemented and reviewed T01-T05 (single-agent program); review was a fresh re-run of checks,
+  not independent staff.
+next: review

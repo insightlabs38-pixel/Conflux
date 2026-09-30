@@ -1,3 +1,4 @@
 version: 1
 batches:
-  PD-R00: IN_PROGRESS
+  PD-R00: DONE
+  PD-B00: IN_PROGRESS

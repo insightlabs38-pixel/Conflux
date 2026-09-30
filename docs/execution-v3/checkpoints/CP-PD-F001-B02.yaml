@@ -1,0 +1,31 @@
+version: 1
+checkpoint_id: CP-PD-F001-B02
+created_at: '2026-09-30T23:03:14Z'
+canonical_commit: c6ed91ca72d3423aefbee6081629c5d2b707290f
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+- PD-B02
+- PD-B03
+- PD-B04
+- PD-F001-B01
+- PD-F001-B02
+active_batches:
+- PD-F002-B01
+active_claims: []
+open_escalations: []
+last_completed_task: PD-F001-B02-T91
+ready_summary:
+- PD-F002-B01 (universal entity query/filter; promoted IN_PROGRESS, not started)
+verification_summary:
+- verify-fast pytest 1572/23, web 330 + embed 8, lint/format/build/sdk/block-schema checks clean
+- make e2e-fast all tiers ok on the final code
+- validate_queue valid
+recovery_notes:
+- 'Consequences: src/api/eventconfig/consequences.py, web src/web/components/ConsequenceDialog.tsx; generated configuration: src/api/eventconfig/generated.py; matrix docs/verification/PD-F001-B02/'
+- 'ESC-20260930-002 and ESC-20260930-003 resolved with the conservative default; owner may revisit (advisory readiness; rubric immutability vs deleting preset events)'
+- 'PD-F002-B01-T01 (QUERY) must absorb the plain query parameters of the configuration and consequences endpoints; PD-F002-B02 must absorb eventconfig descriptors and the Reason shape'
+- 'Bash env vars do not persist: export E2E_DEMO_SEED/E2E_DEMO_PASSWORD in the same call as playwright; scripts/demo-reset submitted restores seed 7'
+- main unpushed; untracked design handoff zips untouched; .claude-supervisor is prettier-ignored

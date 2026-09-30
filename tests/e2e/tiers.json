@@ -19,6 +19,7 @@
   "isolated-mutation": [
     "event-advanced",
     "event-configuration",
+    "event-consequences",
     "event-modules",
     "event-presets",
     "event-readiness",

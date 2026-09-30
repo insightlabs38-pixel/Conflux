@@ -6,6 +6,7 @@ from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema, inline_serializer
+from eventconfig.consequences import audit_snapshot, preview, refusal_detail
 from eventconfig.readiness import compute_readiness, configuration_checks, unresolved
 from eventconfig.services import derive_event_slug
 from rest_framework import serializers
@@ -15,7 +16,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from workspaces.models import Role, Workspace
 
-from .models import Announcement, BasePrize, Event, EventStatus, Track
+from .models import STATUS_FLOW, Announcement, BasePrize, Event, EventStatus, Track
 from .schema import EventDashboardSchema, EventStatusSchema, PublicEventSchema
 from .serializers import (
     AnnouncementSerializer,
@@ -133,8 +134,9 @@ class EventDetailView(OrganizerView):
 
     def delete(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
-        if event.status != EventStatus.DRAFT:
-            raise ValidationError({"status": "Only draft events can be deleted."})
+        shown = preview("event.delete", event)
+        if not shown["allowed"]:
+            raise ValidationError(refusal_detail(shown))
         with transaction.atomic():
             record_mutation(
                 actor=request.user,
@@ -143,6 +145,7 @@ class EventDetailView(OrganizerView):
                 target=event,
                 event_type="event.deleted",
                 payload={"event": str(event.public_id)},
+                metadata={"consequences": audit_snapshot(shown)},
             )
             event.delete()
         return Response(status=204)
@@ -150,11 +153,7 @@ class EventDetailView(OrganizerView):
 
 class EventStatusView(OrganizerView):
     serializer_class = EventSerializer
-    transitions = {
-        EventStatus.DRAFT: EventStatus.OPEN,
-        EventStatus.OPEN: EventStatus.CLOSED,
-        EventStatus.CLOSED: EventStatus.ARCHIVED,
-    }
+    transitions = STATUS_FLOW
 
     @extend_schema(
         request=inline_serializer(
@@ -267,6 +266,7 @@ class TrackDetailView(OrganizerView):
     def delete(self, request, workspace_public_id, event_public_id, track_public_id):
         track = self.get_track()
         self.ensure_mutable(track.event)
+        shown = preview("track.delete", track.event, track)
         with transaction.atomic():
             record_mutation(
                 actor=request.user,
@@ -275,6 +275,7 @@ class TrackDetailView(OrganizerView):
                 target=track,
                 event_type="track.deleted",
                 payload={"event": str(track.event.public_id)},
+                metadata={"consequences": audit_snapshot(shown)},
             )
             track.delete()
         return Response(status=204)
@@ -342,6 +343,7 @@ class BasePrizeDetailView(OrganizerView):
     def delete(self, request, workspace_public_id, event_public_id, prize_public_id):
         prize = self.get_prize()
         self.ensure_mutable(prize.event)
+        shown = preview("base_prize.delete", prize.event, prize)
         with transaction.atomic():
             record_mutation(
                 actor=request.user,
@@ -350,6 +352,7 @@ class BasePrizeDetailView(OrganizerView):
                 target=prize,
                 event_type="base_prize.deleted",
                 payload={"event": str(prize.event.public_id)},
+                metadata={"consequences": audit_snapshot(shown)},
             )
             prize.delete()
         return Response(status=204)

@@ -1,0 +1,91 @@
+version: 3
+task: PD-F001-B02-T02
+batch: PD-F001-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 6e95117
+  head_commit: 6e95117
+changed_paths:
+- src/api/eventconfig/ (consequences.py new, schema.py, views.py, urls.py)
+- src/api/events/ (models.py STATUS_FLOW, views.py status, event, track and prize deletes)
+- src/api/stages/views.py (stage and link deletes)
+- src/web/components/ConsequenceDialog and test
+- src/web/features/event-builder/EventDashboard.tsx, src/web/features/stage-builder/StageBuilder.tsx
+- src/web/styles/components.css
+- tests/integration/test_event_consequences.py
+- tests/e2e/ (event-consequences.spec.ts, tiers.json, weights.json, affected.json)
+- docs/product-depth-v3/specs/001-base-experience-must-remain-smaller-than-the-platform.md
+- docs/operations/EVENT_BASE_EXPERIENCE.md
+- docs/execution-v3/escalations/ESC-20260930-003.yaml
+- docs/api/openapi.yaml
+- sdks/
+deliverables:
+- item: Destructive and high-impact operations show consequences instead of a generic confirmation
+  result: pass
+  evidence: GET consequences answers for event open, close, archive, delete, stage delete, link delete, track delete and prize delete; the web ConsequenceDialog (status button, stage and link deletes) lists what would happen, says when it cannot be undone, and names its button for the operation
+- item: Consequences come from the domain, not from the UI
+  result: pass
+  evidence: deletes use Django's deletion collector (removed, unlinked, protected), status changes use the same validation and readiness the endpoint uses, a link preview runs the whole-graph validation on a rolled-back removal; tests compare every preview with what the real endpoint then does
+- item: Refusals are explained and consistent
+  result: pass
+  evidence: a refused operation returns the same reason from the preview and the endpoint (HTTP 400), and the dialog offers only Close; a stage or draft event with a published rubric used to fail with an unhandled error (HTTP 500) and is now refused with the reason (ESC-20260930-003)
+- item: Audit
+  result: pass
+  evidence: event, stage, link, track and prize deletes record the consequences (code and count) in the audit metadata; the open transition keeps recording the unresolved readiness items (test compares it with the preview)
+- item: States and accessibility
+  result: pass
+  evidence: loading, failed check with Try again, refused, allowed, failed operation keeps the dialog open; modal with focus moved in, kept in and returned, Escape and Cancel change nothing (ConsequenceDialog.test); browser spec at 390 and 1440 with axe and no overflow
+invariants:
+- item: Server authorization, validation and audit remain authoritative
+  result: pass
+  evidence: the preview is read-only, organizer/admin only (judge 403, anonymous denied, cross-workspace 404); the operation endpoints still validate and audit
+- item: One source of truth
+  result: pass
+  evidence: STATUS_FLOW is shared by the status endpoint and the preview; refusals are computed once
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1568 passed, 23 skipped (adds 13 consequence tests)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 330 web tests (ConsequenceDialog adds 5); static checks, OpenAPI and SDKs clean
+- command: npx playwright test event-consequences (fresh iso-min fixture)
+  result: pass
+  note: 2 passed at 390 and 1440 with axe and no overflow
+- command: make e2e-fast
+  result: pass
+  note: see docs/verification/PD-F001-B02/T02-e2e-fast.log
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: ConsequenceDialog on event status, stage and link deletes
+- surface: api
+  result: pass
+  evidence: consequences endpoint; delete endpoints refuse with 400 instead of failing
+- surface: audit
+  result: pass
+  evidence: consequences in the delete audit metadata
+- surface: docs
+  result: pass
+  evidence: spec 001 section, EVENT_BASE_EXPERIENCE.md, OpenAPI
+- surface: sdk
+  result: pass
+  evidence: "not applicable for this task: not_required; generated artifacts regenerated only"
+migrations: []
+findings:
+- "P2 (ESC-20260930-003, default A applied): deleting a draft event or a stage with a published rubric returned HTTP 500; since presets publish a rubric, preset events cannot be deleted at all. Now a clear 400; whether to allow deleting an unused rubric is an owner decision"
+- Not every destructive operation in the product is covered; template, page-block, invite, webhook and mentorship deletes, stage advancement and award publication still act without the dialog (limitation)
+- Track and prize deletion are covered by the API preview only; the workspace UI has no control for them
+- A scratch screenshot run accidentally created an event on seed 7 and failed the read-only tier once (35 failures, every spec reading the demo event); seed 7 was restored with scripts/demo-reset and the full make e2e-fast then passed
+limitations:
+- The preview describes the state at the time it is read; the endpoint re-validates, so a race shows the endpoint's refusal in the dialog
+- Labels of removed records come from model names (for example stage link); unusual cascades fall back to the model's verbose name
+escalations:
+- ESC-20260930-003 (resolved, option A)
+next: review

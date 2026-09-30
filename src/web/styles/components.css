@@ -2173,6 +2173,35 @@
   cursor: pointer;
   font-weight: var(--font-weight-semibold);
 }
+.cx-consequence__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: rgb(0 0 0 / 45%);
+}
+.cx-consequence {
+  width: min(100%, 34rem);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+}
+.cx-consequence h2 {
+  margin-top: 0;
+}
+.cx-consequence__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
 .cx-generated-config {
   max-width: 100%;
   overflow-x: auto;

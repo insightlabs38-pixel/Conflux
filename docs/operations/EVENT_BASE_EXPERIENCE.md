@@ -9,6 +9,7 @@ The day-one path is small: name an event, pick a format, answer a few questions.
 - **Features** turns optional modules on (eligibility review, on-site, integrations, community voting, mentorship, public page). A module that is off has no navigation entry or tab; opening its link explains and offers to turn it on. A module with content cannot be turned off. Deliberation is always on.
 - **Readiness** (overview and Setup) is the one list of what is missing before launch, each item with a link to fix it. It is advisory: opening an event is never blocked, and the unresolved items are recorded when you open.
 - **Stages** shows whether the stages and judging still follow the format. Edit anything; only what changed is listed as custom, nothing is reset, and changing it back restores "Follows the format".
+- **Status changes and deletions** show what they would do first: opening lists what is still unresolved and whether the page goes live, archiving says everything becomes read-only, deleting a stage or link says what goes with it and whether the stage flow breaks. Something the platform refuses says why and offers no confirmation; a stage or draft event whose judging has a published rubric cannot be deleted because published rubrics are permanent.
 - **Defaults and overrides** (advanced) lists every setting with its value, where it comes from (format, changed, default, derived), what it started as and why it is locked if it is.
 
 ## For automation

@@ -1363,6 +1363,52 @@ export type InputOfConformanceReportOutput = {
   manual_review: Record<string, unknown>[];
 };
 
+export type ConsequenceItemSchema = {
+  code: string;
+  message: string;
+  count: number | null;
+};
+
+export type InputOfConsequenceItemSchema = {
+  code: string;
+  message: string;
+  count: number | null;
+};
+
+export type ConsequenceTargetSchema = { id: string; name: string };
+
+export type InputOfConsequenceTargetSchema = { id: string; name: string };
+
+export type ConsequencesSchema = {
+  action: string;
+  title: string;
+  target: ConsequenceTargetSchema | null;
+  allowed: boolean;
+  refusal: ConsequenceItemSchema | null;
+  blockers: ConsequenceItemSchema[];
+  consequences: ConsequenceItemSchema[];
+  reversible: boolean;
+  severity: ConsequencesSchemaSeverityEnum;
+  confirm_label: string;
+};
+
+export type InputOfConsequencesSchema = {
+  action: string;
+  title: string;
+  target: InputOfConsequenceTargetSchema | null;
+  allowed: boolean;
+  refusal: InputOfConsequenceItemSchema | null;
+  blockers: InputOfConsequenceItemSchema[];
+  consequences: InputOfConsequenceItemSchema[];
+  reversible: boolean;
+  severity: InputOfConsequencesSchemaSeverityEnum;
+  confirm_label: string;
+};
+
+export type ConsequencesSchemaSeverityEnum = "medium" | "high";
+
+export type InputOfConsequencesSchemaSeverityEnum = "medium" | "high";
+
 export type ContinuationInput = {
   summary: string;
   url?: string;
@@ -6101,6 +6147,24 @@ export interface Operations {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: GeneratedConfigurationSchema;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_consequences: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      query?: {
+        action:
+          | "base_prize.delete"
+          | "event.archive"
+          | "event.close"
+          | "event.delete"
+          | "event.open"
+          | "stage.delete"
+          | "stage_transition.delete"
+          | "track.delete";
+        target?: string;
+      };
+    };
+    response: ConsequencesSchema;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_continuations: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
     response: Record<string, unknown>[];
@@ -9960,6 +10024,15 @@ export const operations = {
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/configuration/generated/",
       path_params: ["event_public_id", "workspace_public_id"],
       query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_consequences:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/consequences/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: ["action", "target"],
       request_body: false,
       response_kind: "json",
     },

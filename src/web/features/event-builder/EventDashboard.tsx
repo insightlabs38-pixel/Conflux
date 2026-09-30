@@ -24,6 +24,7 @@ import { CommunicationsPanel } from "../communications/CommunicationsPanel";
 import { ConfigHistoryPanel } from "../audit/ConfigHistoryPanel";
 import { useReadiness } from "../../hooks/useReadiness";
 import { ConfigurationPanel } from "./ConfigurationPanel";
+import { ConsequenceDialog } from "../../components/ConsequenceDialog";
 import { CreateEvent } from "./CreateEvent";
 import { WorkflowStatus } from "./WorkflowStatus";
 import { FeaturesPanel } from "./FeaturesPanel";
@@ -233,11 +234,19 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
       await refresh();
     });
   }
-  function transition(status: Event["status"]) {
-    void run(async () => {
-      await apiJson<Event>(eventBase + "status/", "POST", { status });
-      await refresh();
-    });
+  // The operation waits for the consequences to be read (components/ConsequenceDialog.tsx).
+  const [pendingStatus, setPendingStatus] = useState<Event["status"] | null>(
+    null,
+  );
+  const STATUS_ACTION = {
+    open: "event.open",
+    closed: "event.close",
+    archived: "event.archive",
+  } as const;
+  async function applyStatus(status: Event["status"]) {
+    await apiJson<Event>(eventBase + "status/", "POST", { status });
+    setPendingStatus(null);
+    await refresh();
   }
   const selected = dashboard?.event;
   const nextStatus =
@@ -391,10 +400,17 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
                         <button
                           type="button"
                           disabled={busy}
-                          onClick={() => transition(nextStatus)}
+                          onClick={() => setPendingStatus(nextStatus)}
                         >
                           Move to {nextStatus}
                         </button>
+                      )}
+                      {pendingStatus && pendingStatus !== "draft" && (
+                        <ConsequenceDialog
+                          url={`${eventBase}consequences/?action=${STATUS_ACTION[pendingStatus]}`}
+                          onConfirm={() => applyStatus(pendingStatus)}
+                          onCancel={() => setPendingStatus(null)}
+                        />
                       )}
                       <section>
                         <h3>Tracks ({dashboard.track_count})</h3>

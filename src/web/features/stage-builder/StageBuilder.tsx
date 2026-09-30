@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { ConsequenceDialog } from "../../components/ConsequenceDialog";
 import { apiJson } from "../../lib/api";
 
 type Stage = {
@@ -147,11 +148,20 @@ export function StageBuilder({
     });
   }
 
-  function deleteStage(publicId: string) {
-    void run(async () => {
-      await apiJson<void>(base + `stages/${publicId}/`, "DELETE");
-      await refresh();
-    });
+  // Deleting waits for the consequences to be read (components/ConsequenceDialog.tsx).
+  const [removing, setRemoving] = useState<{
+    kind: "stage" | "transition";
+    id: string;
+  } | null>(null);
+  async function confirmRemoval() {
+    if (!removing) return;
+    const path =
+      removing.kind === "stage"
+        ? `stages/${removing.id}/`
+        : `stage-transitions/${removing.id}/`;
+    await apiJson<void>(base + path, "DELETE");
+    setRemoving(null);
+    await refresh();
   }
 
   function addTransition(event: FormEvent) {
@@ -163,13 +173,6 @@ export function StageBuilder({
         from_stage: fromStage,
         to_stage: toStage,
       });
-      await refresh();
-    });
-  }
-
-  function deleteTransition(publicId: string) {
-    void run(async () => {
-      await apiJson<void>(base + `stage-transitions/${publicId}/`, "DELETE");
       await refresh();
     });
   }
@@ -198,6 +201,13 @@ export function StageBuilder({
   return (
     <section aria-label="Stage builder">
       <h2>Stages</h2>
+      {removing && (
+        <ConsequenceDialog
+          url={`${base}consequences/?action=${removing.kind === "stage" ? "stage.delete" : "stage_transition.delete"}&target=${removing.id}`}
+          onConfirm={confirmRemoval}
+          onCancel={() => setRemoving(null)}
+        />
+      )}
       {error && <p role="alert">{error}</p>}
       {graph && (
         <p>
@@ -212,7 +222,10 @@ export function StageBuilder({
             <button
               type="button"
               disabled={busy}
-              onClick={() => deleteStage(stage.public_id)}
+              aria-label={`Delete stage ${stage.name}`}
+              onClick={() =>
+                setRemoving({ kind: "stage", id: stage.public_id })
+              }
             >
               Delete
             </button>
@@ -268,7 +281,10 @@ export function StageBuilder({
             <button
               type="button"
               disabled={busy}
-              onClick={() => deleteTransition(t.public_id)}
+              aria-label={`Delete link ${stageName_(t.from_stage)} to ${stageName_(t.to_stage)}`}
+              onClick={() =>
+                setRemoving({ kind: "transition", id: t.public_id })
+              }
             >
               Delete
             </button>

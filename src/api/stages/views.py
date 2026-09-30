@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
+from eventconfig.consequences import audit_snapshot, preview, refusal_detail
 from events.views import OrganizerView
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -120,10 +121,9 @@ class StageDetailView(StageEventMixin):
 
     def delete(self, request, workspace_public_id, event_public_id, stage_public_id):
         stage = self.get_stage()
-        if stage.entries.exists():
-            raise ValidationError(
-                {"detail": "A stage that has ever held a participant cannot be deleted."}
-            )
+        shown = preview("stage.delete", stage.event, stage)
+        if not shown["allowed"]:
+            raise ValidationError(refusal_detail(shown))
         with transaction.atomic():
             record_mutation(
                 actor=request.user,
@@ -132,6 +132,7 @@ class StageDetailView(StageEventMixin):
                 target=stage,
                 event_type="stage.deleted",
                 payload={"event": str(stage.event.public_id)},
+                metadata={"consequences": audit_snapshot(shown)},
             )
             stage.delete()
         return Response(status=204)
@@ -181,6 +182,7 @@ class StageTransitionDetailView(StageEventMixin):
         transition = get_object_or_404(
             StageTransition, from_stage__event=self.get_event(), public_id=transition_public_id
         )
+        shown = preview("stage_transition.delete", self.get_event(), transition)
         with transaction.atomic():
             record_mutation(
                 actor=request.user,
@@ -189,6 +191,7 @@ class StageTransitionDetailView(StageEventMixin):
                 target=transition,
                 event_type="stage_transition.deleted",
                 payload={"event": str(self.get_event().public_id)},
+                metadata={"consequences": audit_snapshot(shown)},
             )
             transition.delete()
         return Response(status=204)

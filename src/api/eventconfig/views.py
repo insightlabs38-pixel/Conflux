@@ -10,10 +10,12 @@ from rest_framework.response import Response
 
 from . import modules
 from .configuration import FILTER_CHOICES, effective_configuration
+from .consequences import ACTIONS, STATUS_ACTIONS, preview, target_for
 from .generated import generated_configuration
 from .readiness import compute_readiness
 from .schema import (
     ConfigurationSchema,
+    ConsequencesSchema,
     GeneratedConfigurationSchema,
     ReadinessSchema,
     WorkflowSchema,
@@ -162,3 +164,31 @@ class EventGeneratedConfigurationView(OrganizerView):
     @extend_schema(responses=GeneratedConfigurationSchema)
     def get(self, request, workspace_public_id, event_public_id):
         return Response(generated_configuration(self.get_event()))
+
+
+class EventConsequencesView(OrganizerView):
+    """What a destructive or high-impact operation would do, before it is done. Read-only: the
+    operation's own endpoint still validates, authorizes and audits."""
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter("action", str, enum=list(ACTIONS), required=True),
+            OpenApiParameter("target", str, description="Id of the stage, link, track or prize."),
+        ],
+        responses=ConsequencesSchema,
+    )
+    def get(self, request, workspace_public_id, event_public_id):
+        event = self.get_event()
+        action = request.query_params.get("action")
+        if action not in ACTIONS:
+            raise ValidationError({"action": f"Unknown action; use one of {', '.join(ACTIONS)}."})
+        target = None
+        if action not in STATUS_ACTIONS and action != "event.delete":
+            public_id = request.query_params.get("target")
+            try:
+                target = target_for(action, event, public_id) if public_id else None
+            except (ValueError, TypeError, ModelValidationError):
+                target = None
+            if target is None:
+                raise ValidationError({"target": "Name the existing item the action applies to."})
+        return Response(preview(action, event, target))

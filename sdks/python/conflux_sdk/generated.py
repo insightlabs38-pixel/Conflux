@@ -1233,6 +1233,52 @@ class InputOfConformanceReportOutput(TypedDict):
     pages: list[dict[str, Any]]
     manual_review: list[dict[str, Any]]
 
+class ConsequenceItemSchema(TypedDict):
+    code: str
+    message: str
+    count: int | None
+
+class InputOfConsequenceItemSchema(TypedDict):
+    code: str
+    message: str
+    count: int | None
+
+class ConsequenceTargetSchema(TypedDict):
+    id: str
+    name: str
+
+class InputOfConsequenceTargetSchema(TypedDict):
+    id: str
+    name: str
+
+class ConsequencesSchema(TypedDict):
+    action: str
+    title: str
+    target: ConsequenceTargetSchema | None
+    allowed: bool
+    refusal: ConsequenceItemSchema | None
+    blockers: list[ConsequenceItemSchema]
+    consequences: list[ConsequenceItemSchema]
+    reversible: bool
+    severity: ConsequencesSchemaSeverityEnum
+    confirm_label: str
+
+class InputOfConsequencesSchema(TypedDict):
+    action: str
+    title: str
+    target: InputOfConsequenceTargetSchema | None
+    allowed: bool
+    refusal: InputOfConsequenceItemSchema | None
+    blockers: list[InputOfConsequenceItemSchema]
+    consequences: list[InputOfConsequenceItemSchema]
+    reversible: bool
+    severity: InputOfConsequencesSchemaSeverityEnum
+    confirm_label: str
+
+ConsequencesSchemaSeverityEnum = Literal['medium', 'high']
+
+InputOfConsequencesSchemaSeverityEnum = Literal['medium', 'high']
+
 class ContinuationInput(TypedDict):
     summary: str
     url: NotRequired[str]
@@ -5564,6 +5610,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                               'query_params': [],
                                                                                               'request_body': False,
                                                                                               'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_consequences': {'method': 'GET',
+                                                                                   'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/consequences/',
+                                                                                   'path_params': ['event_public_id',
+                                                                                                   'workspace_public_id'],
+                                                                                   'query_params': ['action',
+                                                                                                    'target'],
+                                                                                   'request_body': False,
+                                                                                   'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_continuations': {'method': 'GET',
                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/continuations/',
                                                                                     'path_params': ['event_public_id',

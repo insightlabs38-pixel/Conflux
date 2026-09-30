@@ -16,6 +16,15 @@ class EventStatus(models.TextChoices):
     ARCHIVED = "archived", "Archived"
 
 
+# The only moves between statuses; there is no way back (used by the status endpoint and by the
+# consequences shown before a status change).
+STATUS_FLOW = {
+    EventStatus.DRAFT: EventStatus.OPEN,
+    EventStatus.OPEN: EventStatus.CLOSED,
+    EventStatus.CLOSED: EventStatus.ARCHIVED,
+}
+
+
 # Every status an unauthenticated visitor may ever reach (S19): once an
 # organizer opens an event it stays publicly readable through closing and
 # archiving, so the public site becomes a stable post-event archive instead

@@ -4099,6 +4099,56 @@ paths:
               schema:
                 $ref: '#/components/schemas/GeneratedConfigurationSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/consequences/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_consequences
+      description: |-
+        What a destructive or high-impact operation would do, before it is done. Read-only: the
+        operation's own endpoint still validates, authorizes and audits.
+      parameters:
+      - in: query
+        name: action
+        schema:
+          type: string
+          enum:
+          - base_prize.delete
+          - event.archive
+          - event.close
+          - event.delete
+          - event.open
+          - stage.delete
+          - stage_transition.delete
+          - track.delete
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: target
+        schema:
+          type: string
+        description: Id of the stage, link, track or prize.
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsequencesSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/continuations/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_continuations
@@ -18805,6 +18855,81 @@ components:
       - standard
       - summary
       - theme
+    ConsequenceItemSchema:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        count:
+          type: integer
+          nullable: true
+      required:
+      - code
+      - count
+      - message
+    ConsequenceTargetSchema:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+      required:
+      - id
+      - name
+    ConsequencesSchema:
+      type: object
+      properties:
+        action:
+          type: string
+        title:
+          type: string
+        target:
+          allOf:
+          - $ref: '#/components/schemas/ConsequenceTargetSchema'
+          nullable: true
+        allowed:
+          type: boolean
+        refusal:
+          allOf:
+          - $ref: '#/components/schemas/ConsequenceItemSchema'
+          nullable: true
+        blockers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsequenceItemSchema'
+        consequences:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsequenceItemSchema'
+        reversible:
+          type: boolean
+        severity:
+          $ref: '#/components/schemas/ConsequencesSchemaSeverityEnum'
+        confirm_label:
+          type: string
+      required:
+      - action
+      - allowed
+      - blockers
+      - confirm_label
+      - consequences
+      - refusal
+      - reversible
+      - severity
+      - target
+      - title
+    ConsequencesSchemaSeverityEnum:
+      enum:
+      - medium
+      - high
+      type: string
+      description: |-
+        * `medium` - medium
+        * `high` - high
     ContinuationInput:
       type: object
       properties:

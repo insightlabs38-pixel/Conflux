@@ -108,3 +108,27 @@ class GeneratedConfigurationSchema(serializers.Serializer):
     unset = serializers.ListField(child=serializers.CharField())
     document = GeneratedDocumentSchema()
     text = serializers.CharField()
+
+
+class ConsequenceItemSchema(serializers.Serializer):
+    code = serializers.CharField()
+    message = serializers.CharField()
+    count = serializers.IntegerField(allow_null=True)
+
+
+class ConsequenceTargetSchema(serializers.Serializer):
+    id = serializers.UUIDField()
+    name = serializers.CharField(allow_blank=True)
+
+
+class ConsequencesSchema(serializers.Serializer):
+    action = serializers.CharField()
+    title = serializers.CharField()
+    target = ConsequenceTargetSchema(allow_null=True)
+    allowed = serializers.BooleanField()
+    refusal = ConsequenceItemSchema(allow_null=True)
+    blockers = ConsequenceItemSchema(many=True)
+    consequences = ConsequenceItemSchema(many=True)
+    reversible = serializers.BooleanField()
+    severity = serializers.ChoiceField(choices=["medium", "high"])
+    confirm_label = serializers.CharField()

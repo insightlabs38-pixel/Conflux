@@ -1,0 +1,60 @@
+version: 3
+task: PD-B00-T05
+batch: PD-B00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: b5f398dfc0c4330b34c894bd6d648da6213c83d4
+  head_commit: 23936fca03ed36b29e19148f7e251397131dd08c
+changed_paths:
+- tests/e2e/pdv3-baseline-census.spec.ts
+- docs/verification/PD-B00/ui-census/
+- docs/verification/PD-B00/BASELINE_RESULTS.md
+- docs/verification/PD-B00/DEFECT_REGISTER.md
+deliverables:
+- item: Capture organizer, judge, participant, public, mobile
+  result: pass
+  evidence: 81 captures at 1280x800 and 390x844 across 7 roles/anonymous incl. mentor/volunteer
+- item: Capture error/empty/loading states
+  result: pass
+  evidence: synthetic loading+error, real empty states (participant-23), denied-deep-link fallback; public-gallery
+    API-mocked empty not representable (server-rendered), replaced
+- item: Establish visual baseline
+  result: pass
+  evidence: manifest.json with overflow/axe/problems per surface; visual observations in BASELINE_RESULTS
+invariants:
+- item: No behavior change
+  result: pass
+  evidence: opt-in spec only; skipped without E2E_CENSUS
+- item: No gate weakened
+  result: pass
+  evidence: no existing spec edited
+verification:
+- command: E2E_CENSUS=1 E2E_GROUP=census npx playwright test ... pdv3-baseline-census
+  result: pass
+  note: 15 passed (2.1m), 81 captures
+- command: visual inspection of state, participant-23 and judge queue captures
+  result: pass
+  note: captures show intended states; earlier mid-load/no-event captures found and fixed in harness
+- command: make lint; make format-check
+  result: pass
+  note: clean
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs/evidence-only task
+migrations: []
+findings:
+- D-08
+- D-09
+- D-10
+escalations: []
+limitations:
+- Synthetic states use network interception and are labeled as such.
+- Only a subset of captures was visually inspected; all have machine metrics.
+next: review

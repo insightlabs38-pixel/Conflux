@@ -1,0 +1,118 @@
+# PD-S081 — Volunteer shift and duty management
+
+**Status:** Product Depth v3 execution contract  
+**Research source:** `conflux_deep_product_feature_research_v2.md` §81  
+**Queue batches:** PD-S081-B01, PD-S081-B02
+
+## Completion interpretation
+
+This specification is the canonical depth contract for §81. Research bullets describe required product behavior, but completion also requires the architecture, migration, edge-state, verification and integration rules below.
+
+A capability is not complete because a model field, endpoint, settings toggle or placeholder screen exists.
+
+## Architecture / implementation contract
+
+- Establish or reuse one canonical source of truth.
+- Server-side authorization and validation remain authoritative.
+- Persist only state that has real lifecycle meaning; derive display-only state where practical.
+- Reuse registered shared primitives instead of creating local near-duplicates.
+- Existing supported state/API behavior requires an explicit migration/compatibility decision before incompatible change.
+- Advanced/expert capability must remain progressively disclosed and must not degrade the base experience.
+
+## Canonical primitive reuse
+
+- `ASYNC_JOB`
+- `RICH_DOC`
+- `TIMELINE`
+- `VERSION_DIFF`
+
+## Required surface matrix
+
+| Surface | Requirement |
+|---|---|
+| `web` | required |
+| `api` | required |
+| `sdk` | not_required |
+| `cli` | not_required |
+| `mcp` | not_required |
+| `event_as_code` | not_required |
+| `audit` | required |
+| `webhook` | not_required |
+| `archive` | not_required |
+| `analytics` | not_required |
+| `search` | not_required |
+| `docs` | required |
+
+## Approved-design references
+
+- `design/onsite-mobile`
+- `design/organizer-data-surface`
+- `design/state-matrix`
+
+These references must resolve to approved local design artifacts before UI-facing tasks close.
+
+## Minimum verification contract
+
+For the subsystem as a whole:
+- realistic happy-path data;
+- malformed/boundary behavior with useful diagnostics;
+- authorization/visibility boundaries;
+- lifecycle and migration/compatibility behavior;
+- retry/idempotency/concurrency for shared-state mutations;
+- required browser states for UI-facing flows;
+- no regression of canonical existing behavior;
+- exact commands/results recorded in receipts.
+
+## Non-goals / restraint
+
+- No duplicate source of truth solely for a new surface.
+- No redundant hash/signature/proof layer unless it enables a real portability, offline-verification or external-trust workflow.
+- No LLM/AI decision authority for deterministic official state such as scores, permissions, deadlines, policy or winner selection.
+- No participant surveillance or engagement gamification without a concrete event purpose.
+- No replacement of a mature generic external product category when a bounded integration solves the event-specific need.
+
+## Product requirements from research
+
+Avoid becoming workforce-management software; solve the event-specific problem.
+
+- BASE — volunteer roles/duties.
+- BASE — shifts and availability.
+- BASE — assign volunteers.
+- BASE — check-in/out of shift.
+- BASE — instructions/location.
+- ADV — min staffing per duty.
+- ADV — shortage warnings.
+- ADV — swap/reassignment.
+- ADV — mobile “my shift.”
+- ADV — role-specific checklists.
+- ADV — meal/break windows.
+- ADV — emergency-contact escalation.
+- ADV — history of completed duties for organizer reference.
+- EXPERT — automatically propose assignments from availability/skills.
+- PROG — shift state appears in live operations dashboard.
+
+**Why include:** MLH explicitly tells organizers to confirm volunteer duties; large in-person events often run these from sheets.
+
+## Batch scope
+
+### PD-S081-B01 — Volunteer shift and duty management — volunteer roles/duties → swap/reassignment
+
+- volunteer roles/duties
+- shifts and availability
+- assign volunteers
+- check-in/out of shift
+- instructions/location
+- min staffing per duty
+- shortage warnings
+- swap/reassignment
+
+### PD-S081-B02 — Volunteer shift and duty management — mobile “my shift → shift state appears in live operations…
+
+- mobile “my shift
+- role-specific checklists
+- meal/break windows
+- emergency-contact escalation
+- history of completed duties for organizer reference
+- automatically propose assignments from availability/skills
+- shift state appears in live operations dashboard
+

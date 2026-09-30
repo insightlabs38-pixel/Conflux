@@ -1,0 +1,3259 @@
+version: 1
+source: conflux_deep_product_feature_research_v2.md
+contracts:
+- id: PD-F001
+  research_section: 1
+  title: Base experience must remain smaller than the platform
+  path: docs/product-depth-v3/specs/001-base-experience-must-remain-smaller-than-the-platform.md
+  batches:
+  - PD-F001-B01
+  - PD-F001-B02
+  design_refs: []
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - ROUTER
+  - SCHEMA_EDITOR
+- id: PD-F002
+  research_section: 2
+  title: Feature depth should compound through shared primitives
+  path: docs/product-depth-v3/specs/002-feature-depth-should-compound-through-shared-primitives.md
+  batches:
+  - PD-F002-B01
+  - PD-F002-B02
+  - PD-F002-B03
+  design_refs: []
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - DATA_GRID
+  - PREVIEW_CONTEXT
+  - QUERY
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-F003
+  research_section: 3
+  title: A cross-surface completeness contract
+  path: docs/product-depth-v3/specs/003-a-cross-surface-completeness-contract.md
+  batches:
+  - PD-F003-B01
+  - PD-F003-B02
+  - PD-F003-B03
+  design_refs: []
+  required_surfaces:
+  - web
+  - api
+  - sdk
+  - cli
+  - mcp
+  - event_as_code
+  - audit
+  - webhook
+  - archive
+  - analytics
+  - search
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - BULK_PLAN
+  - DATA_GRID
+  - EXTENSION_MANIFEST
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TYPED_CLIENT
+  - VERSION_DIFF
+- id: PD-F004
+  research_section: 4
+  title: 'Visual direction: professional, clean, compact, deliberate'
+  path: docs/product-depth-v3/specs/004-visual-direction-professional-clean-compact-deliberate.md
+  batches:
+  - PD-F004-B01
+  - PD-F004-B02
+  - PD-F004-B03
+  - PD-F004-B04
+  - PD-F004-B05
+  design_refs:
+  - design/state-matrix
+  - design/system-v3
+  required_surfaces:
+  - web
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - DATA_GRID
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+- id: PD-F005
+  research_section: 5
+  title: Professional application-shell depth
+  path: docs/product-depth-v3/specs/005-professional-application-shell-depth.md
+  batches:
+  - PD-F005-B01
+  - PD-F005-B02
+  - PD-F005-B03
+  design_refs:
+  - design/app-shell
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - audit
+  - search
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - COMMANDS
+  - DATA_GRID
+  - NOTIFICATIONS
+  - PREVIEW_CONTEXT
+  - QUERY
+  - REALTIME
+  - ROUTER
+  - SCHEMA_EDITOR
+- id: PD-F006
+  research_section: 6
+  title: Universal data-grid and saved-view system
+  path: docs/product-depth-v3/specs/006-universal-data-grid-and-saved-view-system.md
+  batches:
+  - PD-F006-B01
+  - PD-F006-B02
+  - PD-F006-B03
+  - PD-F006-B04
+  - PD-F006-B05
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - cli
+  - mcp
+  - audit
+  - search
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - BULK_PLAN
+  - DATA_GRID
+  - PREVIEW_CONTEXT
+  - QUERY
+  - ROUTER
+  - SAVED_VIEWS
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S007
+  research_section: 7
+  title: Event creation, setup and lifecycle
+  path: docs/product-depth-v3/specs/007-event-creation-setup-and-lifecycle.md
+  batches:
+  - PD-S007-B01
+  - PD-S007-B02
+  - PD-S007-B03
+  design_refs:
+  - design/event-builder
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S008
+  research_section: 8
+  title: Event templates, presets, cloning and reusable modules
+  path: docs/product-depth-v3/specs/008-event-templates-presets-cloning-and-reusable-modules.md
+  batches:
+  - PD-S008-B01
+  - PD-S008-B02
+  design_refs:
+  - design/event-builder
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S009
+  research_section: 9
+  title: Public event site
+  path: docs/product-depth-v3/specs/009-public-event-site.md
+  batches:
+  - PD-S009-B01
+  - PD-S009-B02
+  - PD-S009-B03
+  design_refs:
+  - design/public-event
+  - design/public-project
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - archive
+  - search
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - DATA_GRID
+  - NOTIFICATIONS
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - ROUTER
+  - SCHEMA_EDITOR
+  - TIMELINE
+  - VERSION_DIFF
+- id: PD-S010
+  research_section: 10
+  title: Theme, visual customization and design system
+  path: docs/product-depth-v3/specs/010-theme-visual-customization-and-design-system.md
+  batches:
+  - PD-S010-B01
+  - PD-S010-B02
+  - PD-S010-B03
+  design_refs:
+  - design/event-builder
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - DATA_GRID
+  - EXTENSION_MANIFEST
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S011
+  research_section: 11
+  title: Page builder and CMS
+  path: docs/product-depth-v3/specs/011-page-builder-and-cms.md
+  batches:
+  - PD-S011-B01
+  - PD-S011-B02
+  - PD-S011-B03
+  - PD-S011-B04
+  design_refs:
+  - design/event-builder
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - EXTENSION_MANIFEST
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S012
+  research_section: 12
+  title: Registration, applications, admissions and waitlists
+  path: docs/product-depth-v3/specs/012-registration-applications-admissions-and-waitlists.md
+  batches:
+  - PD-S012-B01
+  - PD-S012-B02
+  - PD-S012-B03
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - analytics
+  - search
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - BULK_PLAN
+  - DATA_GRID
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - THREADS
+  - VERSION_DIFF
+- id: PD-S013
+  research_section: 13
+  title: Identity, profiles, privacy and user history
+  path: docs/product-depth-v3/specs/013-identity-profiles-privacy-and-user-history.md
+  batches:
+  - PD-S013-B01
+  - PD-S013-B02
+  - PD-S013-B03
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - search
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S014
+  research_section: 14
+  title: Teams, invitations and matching
+  path: docs/product-depth-v3/specs/014-teams-invitations-and-matching.md
+  batches:
+  - PD-S014-B01
+  - PD-S014-B02
+  - PD-S014-B03
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - search
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S015
+  research_section: 15
+  title: Project authoring and technical story
+  path: docs/product-depth-v3/specs/015-project-authoring-and-technical-story.md
+  batches:
+  - PD-S015-B01
+  - PD-S015-B02
+  - PD-S015-B03
+  - PD-S015-B04
+  - PD-S015-B05
+  - PD-S015-B06
+  - PD-S015-B07
+  - PD-S015-B08
+  design_refs:
+  - design/project-story-editor
+  - design/public-project
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - cli
+  - mcp
+  - audit
+  - archive
+  - search
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - DATA_GRID
+  - EXTENSION_MANIFEST
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - THREADS
+  - VERSION_DIFF
+- id: PD-S016
+  research_section: 16
+  title: Forms and custom data schemas
+  path: docs/product-depth-v3/specs/016-forms-and-custom-data-schemas.md
+  batches:
+  - PD-S016-B01
+  - PD-S016-B02
+  - PD-S016-B03
+  design_refs:
+  - design/event-builder
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - DATA_GRID
+  - EXTENSION_MANIFEST
+  - NOTIFICATIONS
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S017
+  research_section: 17
+  title: Artifact upload, storage and evidence
+  path: docs/product-depth-v3/specs/017-artifact-upload-storage-and-evidence.md
+  batches:
+  - PD-S017-B01
+  - PD-S017-B02
+  - PD-S017-B03
+  - PD-S017-B04
+  design_refs:
+  - design/judge-review
+  - design/project-story-editor
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - archive
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - DATA_GRID
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S018
+  research_section: 18
+  title: Repository, demo, dataset and external-resource integration
+  path: docs/product-depth-v3/specs/018-repository-demo-dataset-and-external-resource-integration.md
+  batches:
+  - PD-S018-B01
+  - PD-S018-B02
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - archive
+  - search
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - EXTENSION_MANIFEST
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S019
+  research_section: 19
+  title: Submission lifecycle, versioning and deadline correctness
+  path: docs/product-depth-v3/specs/019-submission-lifecycle-versioning-and-deadline-correctness.md
+  batches:
+  - PD-S019-B01
+  - PD-S019-B02
+  - PD-S019-B03
+  design_refs: []
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - webhook
+  - archive
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - DATA_GRID
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+  - VERSION_DIFF
+- id: PD-S020
+  research_section: 20
+  title: Submission CI, preflight, automated checks and provenance
+  path: docs/product-depth-v3/specs/020-submission-ci-preflight-automated-checks-and-provenance.md
+  batches:
+  - PD-S020-B01
+  - PD-S020-B02
+  - PD-S020-B03
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - sdk
+  - audit
+  - webhook
+  - archive
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - EXTENSION_MANIFEST
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+  - TYPED_CLIENT
+  - VERSION_DIFF
+- id: PD-S021
+  research_section: 21
+  title: Eligibility, policy and remediation
+  path: docs/product-depth-v3/specs/021-eligibility-policy-and-remediation.md
+  batches:
+  - PD-S021-B01
+  - PD-S021-B02
+  - PD-S021-B03
+  design_refs:
+  - design/event-builder
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - cli
+  - mcp
+  - event_as_code
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - DATA_GRID
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - RICH_DOC
+  - THREADS
+  - TIMELINE
+  - VERSION_DIFF
+- id: PD-S022
+  research_section: 22
+  title: Rubric authoring and rubric laboratory
+  path: docs/product-depth-v3/specs/022-rubric-authoring-and-rubric-laboratory.md
+  batches:
+  - PD-S022-B01
+  - PD-S022-B02
+  - PD-S022-B03
+  design_refs:
+  - design/judge-review
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - archive
+  - analytics
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - DATA_GRID
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S023
+  research_section: 23
+  title: Judge directory, expertise, bidding and conflicts of interest
+  path: docs/product-depth-v3/specs/023-judge-directory-expertise-bidding-and-conflicts-of-interest.md
+  batches:
+  - PD-S023-B01
+  - PD-S023-B02
+  - PD-S023-B03
+  design_refs:
+  - design/judge-review
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - archive
+  - analytics
+  - search
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - BULK_PLAN
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S024
+  research_section: 24
+  title: Judge assignment optimization
+  path: docs/product-depth-v3/specs/024-judge-assignment-optimization.md
+  batches:
+  - PD-S024-B01
+  - PD-S024-B02
+  - PD-S024-B03
+  design_refs:
+  - design/judge-review
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - archive
+  - analytics
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S025
+  research_section: 25
+  title: Scoring, calibration, normalization and reliability
+  path: docs/product-depth-v3/specs/025-scoring-calibration-normalization-and-reliability.md
+  batches:
+  - PD-S025-B01
+  - PD-S025-B02
+  - PD-S025-B03
+  design_refs:
+  - design/judge-review
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - archive
+  - analytics
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S026
+  research_section: 26
+  title: Pairwise judging and ranking
+  path: docs/product-depth-v3/specs/026-pairwise-judging-and-ranking.md
+  batches:
+  - PD-S026-B01
+  - PD-S026-B02
+  design_refs:
+  - design/judge-review
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - archive
+  - analytics
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+  - VERSION_DIFF
+- id: PD-S027
+  research_section: 27
+  title: Judge workspace UX
+  path: docs/product-depth-v3/specs/027-judge-workspace-ux.md
+  batches:
+  - PD-S027-B01
+  - PD-S027-B02
+  - PD-S027-B03
+  design_refs:
+  - design/judge-review
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - archive
+  - analytics
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - PREVIEW_CONTEXT
+  - RICH_DOC
+  - ROUTER
+  - SCHEMA_EDITOR
+  - THREADS
+  - TIMELINE
+- id: PD-S028
+  research_section: 28
+  title: Multi-round review, rebuttal, meta-review and appeals
+  path: docs/product-depth-v3/specs/028-multi-round-review-rebuttal-meta-review-and-appeals.md
+  batches:
+  - PD-S028-B01
+  - PD-S028-B02
+  design_refs:
+  - design/judge-review
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - archive
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - THREADS
+  - TIMELINE
+  - VERSION_DIFF
+- id: PD-S029
+  research_section: 29
+  title: Deliberation and winner finalization
+  path: docs/product-depth-v3/specs/029-deliberation-and-winner-finalization.md
+  batches:
+  - PD-S029-B01
+  - PD-S029-B02
+  - PD-S029-B03
+  design_refs:
+  - design/deliberation-awards
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - archive
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - DATA_GRID
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - THREADS
+  - VERSION_DIFF
+- id: PD-S030
+  research_section: 30
+  title: Awards, prizes and fulfillment
+  path: docs/product-depth-v3/specs/030-awards-prizes-and-fulfillment.md
+  batches:
+  - PD-S030-B01
+  - PD-S030-B02
+  - PD-S030-B03
+  design_refs:
+  - design/deliberation-awards
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - webhook
+  - archive
+  - analytics
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - THREADS
+  - TIMELINE
+- id: PD-S031
+  research_section: 31
+  title: Community voting and abuse resistance
+  path: docs/product-depth-v3/specs/031-community-voting-and-abuse-resistance.md
+  batches:
+  - PD-S031-B01
+  - PD-S031-B02
+  - PD-S031-B03
+  design_refs:
+  - design/organizer-data-surface
+  - design/public-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - analytics
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S032
+  research_section: 32
+  title: Sponsor challenge and developer-resource center
+  path: docs/product-depth-v3/specs/032-sponsor-challenge-and-developer-resource-center.md
+  batches:
+  - PD-S032-B01
+  - PD-S032-B02
+  - PD-S032-B03
+  design_refs:
+  - design/event-builder
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - analytics
+  - search
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - EXTENSION_MANIFEST
+  - NOTIFICATIONS
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - TIMELINE
+  - VERSION_DIFF
+- id: PD-S033
+  research_section: 33
+  title: Mentorship, support requests and office hours
+  path: docs/product-depth-v3/specs/033-mentorship-support-requests-and-office-hours.md
+  batches:
+  - PD-S033-B01
+  - PD-S033-B02
+  - PD-S033-B03
+  design_refs:
+  - design/event-builder
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - analytics
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - DATA_GRID
+  - NOTIFICATIONS
+  - RICH_DOC
+  - THREADS
+  - TIMELINE
+  - VERSION_DIFF
+- id: PD-S034
+  research_section: 34
+  title: Communications, inbox, notifications and automation
+  path: docs/product-depth-v3/specs/034-communications-inbox-notifications-and-automation.md
+  batches:
+  - PD-S034-B01
+  - PD-S034-B02
+  - PD-S034-B03
+  design_refs:
+  - design/event-builder
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - webhook
+  - analytics
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - BULK_PLAN
+  - NOTIFICATIONS
+  - PREVIEW_CONTEXT
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+  - VERSION_DIFF
+- id: PD-S035
+  research_section: 35
+  title: Hybrid/in-person check-in and access control
+  path: docs/product-depth-v3/specs/035-hybrid-in-person-check-in-and-access-control.md
+  batches:
+  - PD-S035-B01
+  - PD-S035-B02
+  - PD-S035-B03
+  design_refs:
+  - design/onsite-mobile
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+- id: PD-S036
+  research_section: 36
+  title: Floorplans, booths, rooms and spatial logistics
+  path: docs/product-depth-v3/specs/036-floorplans-booths-rooms-and-spatial-logistics.md
+  batches:
+  - PD-S036-B01
+  - PD-S036-B02
+  - PD-S036-B03
+  design_refs:
+  - design/onsite-mobile
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - DATA_GRID
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - ROUTER
+- id: PD-S037
+  research_section: 37
+  title: Schedule, sessions, workshops and livestreams
+  path: docs/product-depth-v3/specs/037-schedule-sessions-workshops-and-livestreams.md
+  batches:
+  - PD-S037-B01
+  - PD-S037-B02
+  - PD-S037-B03
+  design_refs:
+  - design/onsite-mobile
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - NOTIFICATIONS
+  - QUERY
+  - RICH_DOC
+  - TIMELINE
+- id: PD-S038
+  research_section: 38
+  title: Public gallery, search and project discovery
+  path: docs/product-depth-v3/specs/038-public-gallery-search-and-project-discovery.md
+  batches:
+  - PD-S038-B01
+  - PD-S038-B02
+  - PD-S038-B03
+  design_refs:
+  - design/public-event
+  - design/public-project
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - analytics
+  - search
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - QUERY
+  - RICH_DOC
+- id: PD-S039
+  research_section: 39
+  title: Results, publication and storytelling
+  path: docs/product-depth-v3/specs/039-results-publication-and-storytelling.md
+  batches:
+  - PD-S039-B01
+  - PD-S039-B02
+  - PD-S039-B03
+  design_refs:
+  - design/public-event
+  - design/public-project
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - webhook
+  - archive
+  - analytics
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - QUERY
+  - RICH_DOC
+  - TIMELINE
+  - VERSION_DIFF
+- id: PD-S040
+  research_section: 40
+  title: Portfolio and post-event continuation
+  path: docs/product-depth-v3/specs/040-portfolio-and-post-event-continuation.md
+  batches:
+  - PD-S040-B01
+  - PD-S040-B02
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - archive
+  - analytics
+  - search
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - DATA_GRID
+  - RICH_DOC
+  - VERSION_DIFF
+- id: PD-S041
+  research_section: 41
+  title: Search, query language and saved views
+  path: docs/product-depth-v3/specs/041-search-query-language-and-saved-views.md
+  batches:
+  - PD-S041-B01
+  - PD-S041-B02
+  - PD-S041-B03
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - sdk
+  - cli
+  - mcp
+  - event_as_code
+  - audit
+  - webhook
+  - analytics
+  - search
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - BULK_PLAN
+  - DATA_GRID
+  - NOTIFICATIONS
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - SAVED_VIEWS
+  - SCHEMA_EDITOR
+- id: PD-S042
+  research_section: 42
+  title: Bulk organizer operations
+  path: docs/product-depth-v3/specs/042-bulk-organizer-operations.md
+  batches:
+  - PD-S042-B01
+  - PD-S042-B02
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - cli
+  - mcp
+  - event_as_code
+  - audit
+  - webhook
+  - analytics
+  - search
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - BULK_PLAN
+  - PREVIEW_CONTEXT
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S043
+  research_section: 43
+  title: Analytics and operational intelligence
+  path: docs/product-depth-v3/specs/043-analytics-and-operational-intelligence.md
+  batches:
+  - PD-S043-B01
+  - PD-S043-B02
+  - PD-S043-B03
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - analytics
+  - search
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - SAVED_VIEWS
+  - TIMELINE
+  - VERSION_DIFF
+- id: PD-S044
+  research_section: 44
+  title: Governance, approvals, receipts and exceptions
+  path: docs/product-depth-v3/specs/044-governance-approvals-receipts-and-exceptions.md
+  batches:
+  - PD-S044-B01
+  - PD-S044-B02
+  design_refs:
+  - design/event-builder
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - cli
+  - mcp
+  - event_as_code
+  - audit
+  - webhook
+  - archive
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - DATA_GRID
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - THREADS
+  - TIMELINE
+  - VERSION_DIFF
+- id: PD-S045
+  research_section: 45
+  title: Audit and provenance explorer
+  path: docs/product-depth-v3/specs/045-audit-and-provenance-explorer.md
+  batches:
+  - PD-S045-B01
+  - PD-S045-B02
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - archive
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - EXTENSION_MANIFEST
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S046
+  research_section: 46
+  title: 'Event-as-Code: next depth after current plan/apply implementation'
+  path: docs/product-depth-v3/specs/046-event-as-code-next-depth-after-current-plan-apply-implementation.md
+  batches:
+  - PD-S046-B01
+  - PD-S046-B02
+  - PD-S046-B03
+  - PD-S046-B04
+  - PD-S046-B05
+  design_refs:
+  - design/event-builder
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - sdk
+  - cli
+  - mcp
+  - event_as_code
+  - audit
+  - webhook
+  - archive
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - DATA_GRID
+  - EXTENSION_MANIFEST
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+  - VERSION_DIFF
+- id: PD-S047
+  research_section: 47
+  title: REST API, OpenAPI and generated SDK depth
+  path: docs/product-depth-v3/specs/047-rest-api-openapi-and-generated-sdk-depth.md
+  batches:
+  - PD-S047-B01
+  - PD-S047-B02
+  design_refs: []
+  required_surfaces:
+  - api
+  - sdk
+  - cli
+  - mcp
+  - audit
+  - webhook
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - BULK_PLAN
+  - DATA_GRID
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TYPED_CLIENT
+  - VERSION_DIFF
+- id: PD-S048
+  research_section: 48
+  title: 'CLI: from wrapper to serious operator shell'
+  path: docs/product-depth-v3/specs/048-cli-from-wrapper-to-serious-operator-shell.md
+  batches:
+  - PD-S048-B01
+  - PD-S048-B02
+  - PD-S048-B03
+  design_refs: []
+  required_surfaces:
+  - sdk
+  - cli
+  - event_as_code
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - BULK_PLAN
+  - DATA_GRID
+  - EXTENSION_MANIFEST
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - VERSION_DIFF
+- id: PD-S049
+  research_section: 49
+  title: MCP / agent-native operations
+  path: docs/product-depth-v3/specs/049-mcp-agent-native-operations.md
+  batches:
+  - PD-S049-B01
+  - PD-S049-B02
+  - PD-S049-B03
+  - PD-S049-B04
+  design_refs: []
+  required_surfaces:
+  - api
+  - sdk
+  - cli
+  - mcp
+  - audit
+  - webhook
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - NOTIFICATIONS
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S050
+  research_section: 50
+  title: Extension SDK and plugin ecosystem
+  path: docs/product-depth-v3/specs/050-extension-sdk-and-plugin-ecosystem.md
+  batches:
+  - PD-S050-B01
+  - PD-S050-B02
+  - PD-S050-B03
+  - PD-S050-B04
+  design_refs:
+  - design/event-builder
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - sdk
+  - cli
+  - mcp
+  - event_as_code
+  - audit
+  - webhook
+  - search
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - DATA_GRID
+  - EXTENSION_MANIFEST
+  - NOTIFICATIONS
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TYPED_CLIENT
+  - VERSION_DIFF
+- id: PD-S051
+  research_section: 51
+  title: Webhooks and integrations
+  path: docs/product-depth-v3/specs/051-webhooks-and-integrations.md
+  batches:
+  - PD-S051-B01
+  - PD-S051-B02
+  - PD-S051-B03
+  design_refs: []
+  required_surfaces:
+  - web
+  - api
+  - sdk
+  - audit
+  - webhook
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - DATA_GRID
+  - EXTENSION_MANIFEST
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TYPED_CLIENT
+  - VERSION_DIFF
+- id: PD-S052
+  research_section: 52
+  title: Import, export, migration and no-lock-in
+  path: docs/product-depth-v3/specs/052-import-export-migration-and-no-lock-in.md
+  batches:
+  - PD-S052-B01
+  - PD-S052-B02
+  - PD-S052-B03
+  design_refs: []
+  required_surfaces:
+  - api
+  - sdk
+  - cli
+  - audit
+  - archive
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - DATA_GRID
+  - PREVIEW_CONTEXT
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TYPED_CLIENT
+  - VERSION_DIFF
+- id: PD-S053
+  research_section: 53
+  title: Permissions, authorization and delegated roles
+  path: docs/product-depth-v3/specs/053-permissions-authorization-and-delegated-roles.md
+  batches:
+  - PD-S053-B01
+  - PD-S053-B02
+  design_refs:
+  - design/event-builder
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - BULK_PLAN
+  - EXTENSION_MANIFEST
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - RICH_DOC
+- id: PD-S054
+  research_section: 54
+  title: Security and adversarial hardening
+  path: docs/product-depth-v3/specs/054-security-and-adversarial-hardening.md
+  batches:
+  - PD-S054-B01
+  - PD-S054-B02
+  - PD-S054-B03
+  design_refs: []
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - EXTENSION_MANIFEST
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - RICH_DOC
+  - ROUTER
+  - SCHEMA_EDITOR
+  - TIMELINE
+  - VERSION_DIFF
+- id: PD-S055
+  research_section: 55
+  title: Performance, deadline surge and scalability
+  path: docs/product-depth-v3/specs/055-performance-deadline-surge-and-scalability.md
+  batches:
+  - PD-S055-B01
+  - PD-S055-B02
+  - PD-S055-B03
+  design_refs: []
+  required_surfaces:
+  - api
+  - audit
+  - webhook
+  - analytics
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - NOTIFICATIONS
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+  - VERSION_DIFF
+- id: PD-S056
+  research_section: 56
+  title: Offline/PWA and degraded-network behavior
+  path: docs/product-depth-v3/specs/056-offline-pwa-and-degraded-network-behavior.md
+  batches:
+  - PD-S056-B01
+  - PD-S056-B02
+  design_refs:
+  - design/onsite-mobile
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - QUERY
+  - RICH_DOC
+  - TIMELINE
+- id: PD-S057
+  research_section: 57
+  title: Accessibility as a product system
+  path: docs/product-depth-v3/specs/057-accessibility-as-a-product-system.md
+  batches:
+  - PD-S057-B01
+  - PD-S057-B02
+  - PD-S057-B03
+  design_refs:
+  - design/state-matrix
+  - design/system-v3
+  required_surfaces:
+  - web
+  - api
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - DATA_GRID
+  - EXTENSION_MANIFEST
+  - RICH_DOC
+  - ROUTER
+  - SCHEMA_EDITOR
+- id: PD-S058
+  research_section: 58
+  title: Internationalization, locales, calendars and timezones
+  path: docs/product-depth-v3/specs/058-internationalization-locales-calendars-and-timezones.md
+  batches:
+  - PD-S058-B01
+  - PD-S058-B02
+  design_refs:
+  - design/state-matrix
+  - design/system-v3
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - DATA_GRID
+  - NOTIFICATIONS
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S059
+  research_section: 59
+  title: Organizations, multi-event and enterprise layer
+  path: docs/product-depth-v3/specs/059-organizations-multi-event-and-enterprise-layer.md
+  batches:
+  - PD-S059-B01
+  - PD-S059-B02
+  - PD-S059-B03
+  design_refs:
+  - design/app-shell
+  - design/event-builder
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+- id: PD-S060
+  research_section: 60
+  title: Self-hosting, deployment and observability
+  path: docs/product-depth-v3/specs/060-self-hosting-deployment-and-observability.md
+  batches:
+  - PD-S060-B01
+  - PD-S060-B02
+  - PD-S060-B03
+  design_refs: []
+  required_surfaces:
+  - api
+  - cli
+  - audit
+  - webhook
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - SCHEMA_EDITOR
+- id: PD-S061
+  research_section: 61
+  title: Testing, fixtures, scenario generation and verification velocity
+  path: docs/product-depth-v3/specs/061-testing-fixtures-scenario-generation-and-verification-velocity.md
+  batches:
+  - PD-S061-B01
+  - PD-S061-B02
+  - PD-S061-B03
+  design_refs: []
+  required_surfaces:
+  - sdk
+  - cli
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - DATA_GRID
+  - EXTENSION_MANIFEST
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+  - TYPED_CLIENT
+- id: PD-S062
+  research_section: 62
+  title: Optional automated-evaluation competition modes
+  path: docs/product-depth-v3/specs/062-optional-automated-evaluation-competition-modes.md
+  batches:
+  - PD-S062-B01
+  - PD-S062-B02
+  design_refs: []
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - EXTENSION_MANIFEST
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S063
+  research_section: 63
+  title: Organizer operations center
+  path: docs/product-depth-v3/specs/063-organizer-operations-center.md
+  batches:
+  - PD-S063-B01
+  - PD-S063-B02
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - cli
+  - mcp
+  - audit
+  - webhook
+  - analytics
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - SAVED_VIEWS
+  - THREADS
+  - TIMELINE
+- id: PD-S064
+  research_section: 64
+  title: Event readiness, simulation and rehearsal
+  path: docs/product-depth-v3/specs/064-event-readiness-simulation-and-rehearsal.md
+  batches:
+  - PD-S064-B01
+  - PD-S064-B02
+  design_refs:
+  - design/event-builder
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - cli
+  - mcp
+  - event_as_code
+  - audit
+  - webhook
+  - archive
+  - analytics
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - NOTIFICATIONS
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S065
+  research_section: 65
+  title: Custom taxonomies, metadata and semantic organization
+  path: docs/product-depth-v3/specs/065-custom-taxonomies-metadata-and-semantic-organization.md
+  batches:
+  - PD-S065-B01
+  - PD-S065-B02
+  design_refs:
+  - design/event-builder
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - search
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - BULK_PLAN
+  - DATA_GRID
+  - PREVIEW_CONTEXT
+  - QUERY
+  - RICH_DOC
+  - SAVED_VIEWS
+  - SCHEMA_EDITOR
+- id: PD-S066
+  research_section: 66
+  title: Feedback and post-judging participant experience
+  path: docs/product-depth-v3/specs/066-feedback-and-post-judging-participant-experience.md
+  batches:
+  - PD-S066-B01
+  - PD-S066-B02
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - archive
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - DATA_GRID
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - THREADS
+  - VERSION_DIFF
+- id: PD-S067
+  research_section: 67
+  title: Moderation and trust/safety queues
+  path: docs/product-depth-v3/specs/067-moderation-and-trust-safety-queues.md
+  batches:
+  - PD-S067-B01
+  - PD-S067-B02
+  design_refs:
+  - design/organizer-data-surface
+  - design/public-project
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - EXTENSION_MANIFEST
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - THREADS
+  - VERSION_DIFF
+- id: PD-S068
+  research_section: 68
+  title: Developer experience, docs and reference environments
+  path: docs/product-depth-v3/specs/068-developer-experience-docs-and-reference-environments.md
+  batches:
+  - PD-S068-B01
+  - PD-S068-B02
+  design_refs: []
+  required_surfaces:
+  - sdk
+  - cli
+  - event_as_code
+  - search
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - EXTENSION_MANIFEST
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TYPED_CLIENT
+- id: PD-S069
+  research_section: 69
+  title: Cross-event research and benchmarking exports
+  path: docs/product-depth-v3/specs/069-cross-event-research-and-benchmarking-exports.md
+  batches:
+  - PD-S069-B01
+  - PD-S069-B02
+  design_refs: []
+  required_surfaces:
+  - api
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - DATA_GRID
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S070
+  research_section: 70
+  title: Architecture-wide feature interactions worth exploiting
+  path: docs/product-depth-v3/specs/070-architecture-wide-feature-interactions-worth-exploiting.md
+  batches:
+  - PD-S070-B01
+  - PD-S070-B02
+  - PD-S070-B03
+  design_refs: []
+  required_surfaces:
+  - web
+  - api
+  - sdk
+  - mcp
+  - event_as_code
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - BULK_PLAN
+  - DATA_GRID
+  - EXTENSION_MANIFEST
+  - NOTIFICATIONS
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+  - TYPED_CLIENT
+  - VERSION_DIFF
+- id: PD-F071
+  research_section: 71
+  title: The highest-leverage internal primitives
+  path: docs/product-depth-v3/specs/071-the-highest-leverage-internal-primitives.md
+  batches:
+  - PD-F071-B01
+  - PD-F071-B02
+  - PD-F071-B03
+  - PD-F071-B04
+  - PD-F071-B05
+  - PD-F071-B06
+  design_refs: []
+  required_surfaces:
+  - web
+  - api
+  - sdk
+  - cli
+  - mcp
+  - event_as_code
+  - audit
+  - webhook
+  - analytics
+  - search
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - BULK_PLAN
+  - DATA_GRID
+  - EXTENSION_MANIFEST
+  - NOTIFICATIONS
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - SAVED_VIEWS
+  - SCHEMA_EDITOR
+  - TYPE_REGISTRY
+  - VERSION_DIFF
+- id: PD-S073
+  research_section: 73
+  title: Personalized participant event pass / “My Event” hub
+  path: docs/product-depth-v3/specs/073-personalized-participant-event-pass-my-event-hub.md
+  batches:
+  - PD-S073-B01
+  - PD-S073-B02
+  - PD-S073-B03
+  - PD-S073-B04
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - search
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - DATA_GRID
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+  - VERSION_DIFF
+- id: PD-S074
+  research_section: 74
+  title: Staff, judge, mentor, speaker and volunteer recruitment/onboarding
+  path: docs/product-depth-v3/specs/074-staff-judge-mentor-speaker-and-volunteer-recruitment-onboarding.md
+  batches:
+  - PD-S074-B01
+  - PD-S074-B02
+  - PD-S074-B03
+  design_refs:
+  - design/onsite-mobile
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - search
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - BULK_PLAN
+  - NOTIFICATIONS
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S075
+  research_section: 75
+  title: Judge briefing, training and readiness gate
+  path: docs/product-depth-v3/specs/075-judge-briefing-training-and-readiness-gate.md
+  batches:
+  - PD-S075-B01
+  - PD-S075-B02
+  design_refs:
+  - design/judge-review
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S076
+  research_section: 76
+  title: Judge staffing and capacity planner
+  path: docs/product-depth-v3/specs/076-judge-staffing-and-capacity-planner.md
+  batches:
+  - PD-S076-B01
+  - PD-S076-B02
+  design_refs:
+  - design/judge-review
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - analytics
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - RICH_DOC
+- id: PD-S077
+  research_section: 77
+  title: Review coverage and judging-completeness evidence
+  path: docs/product-depth-v3/specs/077-review-coverage-and-judging-completeness-evidence.md
+  batches:
+  - PD-S077-B01
+  - PD-S077-B02
+  design_refs:
+  - design/judge-review
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - analytics
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - QUERY
+  - RICH_DOC
+  - TIMELINE
+- id: PD-S078
+  research_section: 78
+  title: Judge no-show and live reassignment mode
+  path: docs/product-depth-v3/specs/078-judge-no-show-and-live-reassignment-mode.md
+  batches:
+  - PD-S078-B01
+  - PD-S078-B02
+  design_refs:
+  - design/judge-review
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - analytics
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - ROUTER
+- id: PD-S079
+  research_section: 79
+  title: Demo/pitch queue and presentation timer
+  path: docs/product-depth-v3/specs/079-demo-pitch-queue-and-presentation-timer.md
+  batches:
+  - PD-S079-B01
+  - PD-S079-B02
+  design_refs:
+  - design/onsite-mobile
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - NOTIFICATIONS
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S080
+  research_section: 80
+  title: Event run-of-show and live control timeline
+  path: docs/product-depth-v3/specs/080-event-run-of-show-and-live-control-timeline.md
+  batches:
+  - PD-S080-B01
+  - PD-S080-B02
+  design_refs:
+  - design/onsite-mobile
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - BULK_PLAN
+  - NOTIFICATIONS
+  - PREVIEW_CONTEXT
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - THREADS
+  - TIMELINE
+- id: PD-S081
+  research_section: 81
+  title: Volunteer shift and duty management
+  path: docs/product-depth-v3/specs/081-volunteer-shift-and-duty-management.md
+  batches:
+  - PD-S081-B01
+  - PD-S081-B02
+  design_refs:
+  - design/onsite-mobile
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - RICH_DOC
+  - TIMELINE
+  - VERSION_DIFF
+- id: PD-S082
+  research_section: 82
+  title: Help desk / organizer support queue
+  path: docs/product-depth-v3/specs/082-help-desk-organizer-support-queue.md
+  batches:
+  - PD-S082-B01
+  - PD-S082-B02
+  design_refs:
+  - design/onsite-mobile
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - search
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - NOTIFICATIONS
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - THREADS
+- id: PD-S083
+  research_section: 83
+  title: Code of Conduct acknowledgement and incident workflow
+  path: docs/product-depth-v3/specs/083-code-of-conduct-acknowledgement-and-incident-workflow.md
+  batches:
+  - PD-S083-B01
+  - PD-S083-B02
+  design_refs:
+  - design/onsite-mobile
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - DATA_GRID
+  - NOTIFICATIONS
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - THREADS
+  - VERSION_DIFF
+- id: PD-S084
+  research_section: 84
+  title: Minor/guardian forms and participant consent records
+  path: docs/product-depth-v3/specs/084-minor-guardian-forms-and-participant-consent-records.md
+  batches:
+  - PD-S084-B01
+  - PD-S084-B02
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S085
+  research_section: 85
+  title: Accessibility accommodation requests
+  path: docs/product-depth-v3/specs/085-accessibility-accommodation-requests.md
+  batches:
+  - PD-S085-B01
+  - PD-S085-B02
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - RICH_DOC
+  - ROUTER
+  - SCHEMA_EDITOR
+  - THREADS
+  - TIMELINE
+- id: PD-S086
+  research_section: 86
+  title: Dietary needs, meal planning and distribution
+  path: docs/product-depth-v3/specs/086-dietary-needs-meal-planning-and-distribution.md
+  batches:
+  - PD-S086-B01
+  - PD-S086-B02
+  design_refs:
+  - design/onsite-mobile
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - analytics
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S087
+  research_section: 87
+  title: Travel, buses and reimbursement
+  path: docs/product-depth-v3/specs/087-travel-buses-and-reimbursement.md
+  batches:
+  - PD-S087-B01
+  - PD-S087-B02
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - ROUTER
+  - SCHEMA_EDITOR
+- id: PD-S088
+  research_section: 88
+  title: Hardware lab, loaner and equipment checkout
+  path: docs/product-depth-v3/specs/088-hardware-lab-loaner-and-equipment-checkout.md
+  batches:
+  - PD-S088-B01
+  - PD-S088-B02
+  design_refs:
+  - design/onsite-mobile
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - NOTIFICATIONS
+  - RICH_DOC
+- id: PD-S089
+  research_section: 89
+  title: Swag, prize inventory and distribution
+  path: docs/product-depth-v3/specs/089-swag-prize-inventory-and-distribution.md
+  batches:
+  - PD-S089-B01
+  - PD-S089-B02
+  design_refs:
+  - design/onsite-mobile
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - RICH_DOC
+- id: PD-S090
+  research_section: 90
+  title: Badge, signage and print center
+  path: docs/product-depth-v3/specs/090-badge-signage-and-print-center.md
+  batches:
+  - PD-S090-B01
+  - PD-S090-B02
+  design_refs:
+  - design/onsite-mobile
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - BULK_PLAN
+  - DATA_GRID
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S091
+  research_section: 91
+  title: Event emergency and incident operations
+  path: docs/product-depth-v3/specs/091-event-emergency-and-incident-operations.md
+  batches:
+  - PD-S091-B01
+  - PD-S091-B02
+  design_refs:
+  - design/onsite-mobile
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - DATA_GRID
+  - NOTIFICATIONS
+  - RICH_DOC
+  - THREADS
+  - TIMELINE
+- id: PD-S092
+  research_section: 92
+  title: Venue readiness / setup checklist
+  path: docs/product-depth-v3/specs/092-venue-readiness-setup-checklist.md
+  batches:
+  - PD-S092-B01
+  - PD-S092-B02
+  design_refs:
+  - design/onsite-mobile
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - DATA_GRID
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+- id: PD-S093
+  research_section: 93
+  title: Budget, sponsor commitments and event expenses — deliberately narrow scope
+  path: docs/product-depth-v3/specs/093-budget-sponsor-commitments-and-event-expenses-deliberately-narrow-scope.md
+  batches:
+  - PD-S093-B01
+  - PD-S093-B02
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - RICH_DOC
+- id: PD-S094
+  research_section: 94
+  title: Sponsor pipeline and deliverable tracker
+  path: docs/product-depth-v3/specs/094-sponsor-pipeline-and-deliverable-tracker.md
+  batches:
+  - PD-S094-B01
+  - PD-S094-B02
+  design_refs:
+  - design/event-builder
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - webhook
+  - analytics
+  - search
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - DATA_GRID
+  - NOTIFICATIONS
+  - QUERY
+  - RICH_DOC
+  - TIMELINE
+- id: PD-S095
+  research_section: 95
+  title: Sponsor ROI and challenge adoption report
+  path: docs/product-depth-v3/specs/095-sponsor-roi-and-challenge-adoption-report.md
+  batches:
+  - PD-S095-B01
+  - PD-S095-B02
+  design_refs:
+  - design/event-builder
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - analytics
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - RICH_DOC
+  - SCHEMA_EDITOR
+- id: PD-S096
+  research_section: 96
+  title: Participant recruiting / talent opt-in
+  path: docs/product-depth-v3/specs/096-participant-recruiting-talent-opt-in.md
+  batches:
+  - PD-S096-B01
+  - PD-S096-B02
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - search
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+- id: PD-S097
+  research_section: 97
+  title: Participant surveys and event feedback
+  path: docs/product-depth-v3/specs/097-participant-surveys-and-event-feedback.md
+  batches:
+  - PD-S097-B01
+  - PD-S097-B02
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - analytics
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - NOTIFICATIONS
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S098
+  research_section: 98
+  title: Event closeout workflow
+  path: docs/product-depth-v3/specs/098-event-closeout-workflow.md
+  batches:
+  - PD-S098-B01
+  - PD-S098-B02
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - webhook
+  - archive
+  - analytics
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - NOTIFICATIONS
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - RICH_DOC
+  - THREADS
+- id: PD-S099
+  research_section: 99
+  title: Participation certificates and verifiable event credentials
+  path: docs/product-depth-v3/specs/099-participation-certificates-and-verifiable-event-credentials.md
+  batches:
+  - PD-S099-B01
+  - PD-S099-B02
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - archive
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - SCHEMA_EDITOR
+- id: PD-S100
+  research_section: 100
+  title: Marketing attribution and registration-source tracking
+  path: docs/product-depth-v3/specs/100-marketing-attribution-and-registration-source-tracking.md
+  batches:
+  - PD-S100-B01
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - analytics
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S101
+  research_section: 101
+  title: Referral / ambassador links
+  path: docs/product-depth-v3/specs/101-referral-ambassador-links.md
+  batches:
+  - PD-S101-B01
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - analytics
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - RICH_DOC
+- id: PD-S102
+  research_section: 102
+  title: Rules and originality disclosure package
+  path: docs/product-depth-v3/specs/102-rules-and-originality-disclosure-package.md
+  batches:
+  - PD-S102-B01
+  - PD-S102-B02
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - archive
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - POLICY_EXPLAIN
+  - PREVIEW_CONTEXT
+  - RICH_DOC
+  - THREADS
+  - VERSION_DIFF
+- id: PD-S103
+  research_section: 103
+  title: Contribution roles / team contribution record
+  path: docs/product-depth-v3/specs/103-contribution-roles-team-contribution-record.md
+  batches:
+  - PD-S103-B01
+  design_refs: []
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - PREVIEW_CONTEXT
+  - QUERY
+  - RICH_DOC
+  - THREADS
+- id: PD-S104
+  research_section: 104
+  title: Demo evidence checklist and pitch readiness
+  path: docs/product-depth-v3/specs/104-demo-evidence-checklist-and-pitch-readiness.md
+  batches:
+  - PD-S104-B01
+  - PD-S104-B02
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - archive
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - PREVIEW_CONTEXT
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - VERSION_DIFF
+- id: PD-S105
+  research_section: 105
+  title: Live result incident / correction playbook
+  path: docs/product-depth-v3/specs/105-live-result-incident-correction-playbook.md
+  batches:
+  - PD-S105-B01
+  - PD-S105-B02
+  design_refs:
+  - design/deliberation-awards
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - webhook
+  - archive
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - NOTIFICATIONS
+  - PREVIEW_CONTEXT
+  - QUERY
+  - RICH_DOC
+  - VERSION_DIFF
+- id: PD-S106
+  research_section: 106
+  title: Event change impact and notification assistant
+  path: docs/product-depth-v3/specs/106-event-change-impact-and-notification-assistant.md
+  batches:
+  - PD-S106-B01
+  design_refs:
+  - design/event-builder
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - webhook
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - NOTIFICATIONS
+  - PREVIEW_CONTEXT
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S107
+  research_section: 107
+  title: Recurring event edition / year-over-year comparison
+  path: docs/product-depth-v3/specs/107-recurring-event-edition-year-over-year-comparison.md
+  batches:
+  - PD-S107-B01
+  - PD-S107-B02
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - archive
+  - analytics
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - SCHEMA_EDITOR
+- id: PD-S108
+  research_section: 108
+  title: Public event changelog
+  path: docs/product-depth-v3/specs/108-public-event-changelog.md
+  batches:
+  - PD-S108-B01
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+  - VERSION_DIFF
+- id: PD-S109
+  research_section: 109
+  title: Participant-facing notification center with actionability
+  path: docs/product-depth-v3/specs/109-participant-facing-notification-center-with-actionability.md
+  batches:
+  - PD-S109-B01
+  - PD-S109-B02
+  - PD-S109-B03
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - webhook
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - DATA_GRID
+  - NOTIFICATIONS
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - TIMELINE
+- id: PD-S110
+  research_section: 110
+  title: Calendar and reminder integration
+  path: docs/product-depth-v3/specs/110-calendar-and-reminder-integration.md
+  batches:
+  - PD-S110-B01
+  - PD-S110-B02
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - NOTIFICATIONS
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S111
+  research_section: 111
+  title: Searchable event knowledge base / FAQ with operational linkage
+  path: docs/product-depth-v3/specs/111-searchable-event-knowledge-base-faq-with-operational-linkage.md
+  batches:
+  - PD-S111-B01
+  - PD-S111-B02
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - search
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - VERSION_DIFF
+- id: PD-S112
+  research_section: 112
+  title: Announcement acknowledgement for critical operational messages
+  path: docs/product-depth-v3/specs/112-announcement-acknowledgement-for-critical-operational-messages.md
+  batches:
+  - PD-S112-B01
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - webhook
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - NOTIFICATIONS
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - TIMELINE
+- id: PD-S113
+  research_section: 113
+  title: Event-specific document/resource center
+  path: docs/product-depth-v3/specs/113-event-specific-document-resource-center.md
+  batches:
+  - PD-S113-B01
+  - PD-S113-B02
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - search
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - RICH_DOC
+  - VERSION_DIFF
+- id: PD-S114
+  research_section: 114
+  title: Speaker/workshop operator workflow
+  path: docs/product-depth-v3/specs/114-speaker-workshop-operator-workflow.md
+  batches:
+  - PD-S114-B01
+  - PD-S114-B02
+  design_refs:
+  - design/onsite-mobile
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - NOTIFICATIONS
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S115
+  research_section: 115
+  title: Prize claim and winner support inbox
+  path: docs/product-depth-v3/specs/115-prize-claim-and-winner-support-inbox.md
+  batches:
+  - PD-S115-B01
+  - PD-S115-B02
+  design_refs:
+  - design/participant-my-event
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - webhook
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - NOTIFICATIONS
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - THREADS
+  - TIMELINE
+  - VERSION_DIFF
+- id: PD-S116
+  research_section: 116
+  title: Event “doctor” and operator readiness diagnostics
+  path: docs/product-depth-v3/specs/116-event-doctor-and-operator-readiness-diagnostics.md
+  batches:
+  - PD-S116-B01
+  - PD-S116-B02
+  - PD-S116-B03
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - cli
+  - mcp
+  - audit
+  - webhook
+  - analytics
+  - search
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - NOTIFICATIONS
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S117
+  research_section: 117
+  title: What-if simulator for event operations
+  path: docs/product-depth-v3/specs/117-what-if-simulator-for-event-operations.md
+  batches:
+  - PD-S117-B01
+  - PD-S117-B02
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - cli
+  - mcp
+  - audit
+  - analytics
+  - docs
+  reuses:
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - NOTIFICATIONS
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - TIMELINE
+- id: PD-S118
+  research_section: 118
+  title: Saved operational playbooks
+  path: docs/product-depth-v3/specs/118-saved-operational-playbooks.md
+  batches:
+  - PD-S118-B01
+  - PD-S118-B02
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - cli
+  - mcp
+  - event_as_code
+  - audit
+  - webhook
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - NOTIFICATIONS
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S119
+  research_section: 119
+  title: Lightweight organizer decision log
+  path: docs/product-depth-v3/specs/119-lightweight-organizer-decision-log.md
+  batches:
+  - PD-S119-B01
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - SCHEMA_EDITOR
+- id: PD-S120
+  research_section: 120
+  title: Event retrospective and next-edition handoff
+  path: docs/product-depth-v3/specs/120-event-retrospective-and-next-edition-handoff.md
+  batches:
+  - PD-S120-B01
+  - PD-S120-B02
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - cli
+  - mcp
+  - event_as_code
+  - audit
+  - webhook
+  - archive
+  - analytics
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - RICH_DOC
+  - SCHEMA_EDITOR
+- id: PD-S121
+  research_section: 121
+  title: Progressive-disclosure organizer mode
+  path: docs/product-depth-v3/specs/121-progressive-disclosure-organizer-mode.md
+  batches:
+  - PD-S121-B01
+  design_refs:
+  - design/event-builder
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - COMMANDS
+  - QUERY
+  - RICH_DOC
+  - ROUTER
+  - SCHEMA_EDITOR
+- id: PD-S122
+  research_section: 122
+  title: Context-preserving deep links
+  path: docs/product-depth-v3/specs/122-context-preserving-deep-links.md
+  batches:
+  - PD-S122-B01
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - QUERY
+  - RICH_DOC
+  - ROUTER
+  - SAVED_VIEWS
+- id: PD-S123
+  research_section: 123
+  title: “Open in split view” everywhere it saves navigation
+  path: docs/product-depth-v3/specs/123-open-in-split-view-everywhere-it-saves-navigation.md
+  batches:
+  - PD-S123-B01
+  design_refs: []
+  required_surfaces:
+  - web
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - AUDIT_PROVENANCE
+  - DATA_GRID
+  - RICH_DOC
+  - ROUTER
+- id: PD-S124
+  research_section: 124
+  title: Safe undo / compensate where the domain supports it
+  path: docs/product-depth-v3/specs/124-safe-undo-compensate-where-the-domain-supports-it.md
+  batches:
+  - PD-S124-B01
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - NOTIFICATIONS
+  - RICH_DOC
+  - TIMELINE
+- id: PD-S125
+  research_section: 125
+  title: Smart default views
+  path: docs/product-depth-v3/specs/125-smart-default-views.md
+  batches:
+  - PD-S125-B01
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - RICH_DOC
+- id: PD-S126
+  research_section: 126
+  title: Batch setup from CSV with mapping preview
+  path: docs/product-depth-v3/specs/126-batch-setup-from-csv-with-mapping-preview.md
+  batches:
+  - PD-S126-B01
+  - PD-S126-B02
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - BULK_PLAN
+  - PREVIEW_CONTEXT
+  - RICH_DOC
+- id: PD-S127
+  research_section: 127
+  title: Clone-and-edit instead of recreate
+  path: docs/product-depth-v3/specs/127-clone-and-edit-instead-of-recreate.md
+  batches:
+  - PD-S127-B01
+  - PD-S127-B02
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - NOTIFICATIONS
+  - POLICY_EXPLAIN
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S128
+  research_section: 128
+  title: Inline validation at the point of configuration
+  path: docs/product-depth-v3/specs/128-inline-validation-at-the-point-of-configuration.md
+  batches:
+  - PD-S128-B01
+  design_refs:
+  - design/event-builder
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - docs
+  reuses:
+  - ASYNC_JOB
+  - NOTIFICATIONS
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S129
+  research_section: 129
+  title: Default presets for sophisticated systems
+  path: docs/product-depth-v3/specs/129-default-presets-for-sophisticated-systems.md
+  batches:
+  - PD-S129-B01
+  design_refs:
+  - design/event-builder
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ARTIFACT_PREVIEW
+  - ASYNC_JOB
+  - QUERY
+  - RICH_DOC
+  - SCHEMA_EDITOR
+  - TIMELINE
+- id: PD-S130
+  research_section: 130
+  title: Human-readable explanations everywhere a solver/policy decides something
+  path: docs/product-depth-v3/specs/130-human-readable-explanations-everywhere-a-solver-policy-decides-something.md
+  batches:
+  - PD-S130-B01
+  design_refs:
+  - design/organizer-data-surface
+  - design/state-matrix
+  required_surfaces:
+  - web
+  - api
+  - event_as_code
+  - audit
+  - docs
+  reuses:
+  - APPROVAL
+  - ASYNC_JOB
+  - POLICY_EXPLAIN
+  - RICH_DOC
+  - ROUTER

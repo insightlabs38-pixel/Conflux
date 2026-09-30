@@ -1,0 +1,14 @@
+version: 1
+task: TASK-ID
+worker_id: worker-id
+branch: branch
+worktree: path
+head_commit: sha-or-null
+git_dirty: true
+completed: []
+remaining: []
+current_failures: []
+decisions: []
+files_in_progress: []
+safe_next_command: '...'
+notes: []

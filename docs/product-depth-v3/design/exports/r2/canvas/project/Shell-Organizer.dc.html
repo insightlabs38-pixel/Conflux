@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Organizer shell overview</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./v3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="shell" style="width:1440px;height:900px">
+  <header class="top">
+    <div class="mark" aria-hidden="true">C</div>
+    <button class="ev-switch" aria-label="Switch event"><span class="trunc">Gauss Hack 2026</span><span class="tag ok"><i class="ic ic-okc"></i>Judging</span><i class="ic s ic-chev-d"></i></button>
+    <div class="crumbs"><span class="mut3">Berlin + online · 12–13 Oct</span></div>
+    <div class="cmdk sp" style="width:380px" role="search"><i class="ic s ic-search"></i>Search people, projects, or run a command<span class="kbd">⌘K</span></div>
+    <button class="btn ghost icon" aria-label="Keyboard shortcuts"><i class="ic ic-kbd"></i></button>
+    <button class="btn ghost icon" aria-label="Notifications, 3 unread" style="position:relative"><i class="ic ic-bell"></i><span class="cnt e" style="position:absolute;top:1px;right:0;min-width:16px;height:16px;font-size:10px">3</span></button>
+    <button class="row g2" style="border:0;background:none;padding:0 4px;cursor:pointer" aria-label="Account: Amara Okafor, Organizer"><span class="avatar l">AO</span><span class="col" style="align-items:flex-start;line-height:1.2"><span class="t-12" style="font-weight:600">Amara Okafor</span><span class="t-11 mut3">Organizer</span></span><i class="ic s ic-chev-d mut3"></i></button>
+  </header>
+  <nav class="rail" aria-label="Event">
+    <a class="nav-i" aria-current="page"><i class="ic ic-home"></i>Overview</a>
+    <div class="nav-g">Manage event</div>
+    <a class="nav-i"><i class="ic ic-sliders"></i>Event setup</a>
+    <a class="nav-i"><i class="ic ic-users"></i>Participants &amp; teams<span class="cnt">5,012</span></a>
+    <a class="nav-i"><i class="ic ic-file"></i>Projects &amp; eligibility<span class="cnt w">37</span></a>
+    <a class="nav-i"><i class="ic ic-trophy"></i>Judging</a>
+    <a class="nav-i"><i class="ic ic-table"></i>Results &amp; publication</a>
+    <a class="nav-i"><i class="ic ic-msg"></i>Communications</a>
+    <a class="nav-i"><i class="ic ic-qr"></i>On-site</a>
+    <div class="nav-g">Advanced</div>
+    <a class="nav-i"><i class="ic ic-box"></i>Integrations</a>
+    <a class="nav-i"><i class="ic ic-shield"></i>Operations &amp; audit</a>
+    <div class="sp col g1" style="width:100%;border-top:1px solid var(--line);padding-top:8px;margin-top:8px">
+      <a class="nav-i"><i class="ic ic-eye"></i>Preview as…<i class="ic s ic-chev-r sp"></i></a>
+      <a class="nav-i"><i class="ic ic-panel"></i>Collapse</a>
+    </div>
+  </nav>
+  <main style="overflow:hidden;padding:16px 20px;display:flex;flex-direction:column;gap:16px">
+    <div class="row" style="min-height:36px">
+      <h1>Overview</h1><span class="t-12 mut3" style="margin-left:6px">Sun 12 Oct · 14:47 Berlin · updated 8s ago</span>
+      <span class="row g2 sp"><span class="st ok"><i class="ic ic-dot s"></i>Live</span><button class="btn sm"><i class="ic ic-cols"></i>Customize</button><button class="btn sm pri"><i class="ic ic-msg"></i>Announce</button></span>
+    </div>
+
+    <div class="strip" role="group" aria-label="Event summary">
+      <div><div class="k">Registered</div><div class="v">5,012</div><div class="t-12 mut3">4,388 confirmed</div></div>
+      <div><div class="k">Checked in</div><div class="v">3,846</div><div class="t-12 mut3">77% of confirmed</div></div>
+      <div><div class="k">Projects submitted</div><div class="v">1,041 <span class="t-13 mut3" style="font-weight:400">/ 1,284 teams</span></div><div class="t-12 mut3">243 not started</div></div>
+      <div><div class="k">Judging complete</div><div class="v">62%</div><div class="bar h4" style="margin-top:6px"><i style="width:62%"></i></div></div>
+      <div><div class="k">Open incidents</div><div class="v" style="color:var(--warn)">2</div><div class="t-12 mut3">1 acknowledged</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px;flex:1;min-height:0">
+      <div class="pn col" style="min-height:0">
+        <div class="pn-h"><h2>Needs attention</h2><span class="cnt w">7</span><span class="t-12 mut3 sp">sorted by time to impact</span><button class="btn sm ghost"><i class="ic ic-filter"></i>View</button></div>
+        <table class="tbl">
+          <thead><tr><th>Item</th><th>Why now</th><th class="num" style="width:90px">Records</th><th style="width:100px">Impact in</th><th style="width:170px"></th></tr></thead>
+          <tbody>
+            <tr><td><span class="st warn"><i class="ic ic-warn"></i>Judge assignments not started</span></td><td class="mut">Judging closes 18:00; 6 judges have 0 of 8 scored</td><td class="num">6</td><td>3h 13m</td><td><button class="btn sm">Reassign</button></td></tr>
+            <tr><td><span class="st warn"><i class="ic ic-warn"></i>Eligibility findings unresolved</span></td><td class="mut">Blocks finalist list; 12 need organizer decision</td><td class="num">37</td><td>3h 13m</td><td><button class="btn sm">Review queue</button></td></tr>
+            <tr><td><span class="st err"><i class="ic ic-xc"></i>Webhook deliveries failing</span></td><td class="mut">sponsor-crm returns 503 · last ok 14:02</td><td class="num">3</td><td>now</td><td><button class="btn sm"><i class="ic ic-refresh"></i>Retry all</button></td></tr>
+            <tr><td><span class="st warn"><i class="ic ic-warn"></i>Mentor help queue waiting</span></td><td class="mut">Longest wait 14 min · Hardware table B</td><td class="num">5</td><td>now</td><td><button class="btn sm">Open queue</button></td></tr>
+            <tr><td><span class="st warn"><i class="ic ic-warn"></i>Missing waiver, checked in</span></td><td class="mut">Insurance requirement; reminder not yet sent today</td><td class="num">243</td><td>17:00</td><td><button class="btn sm">Send reminder</button></td></tr>
+            <tr><td><span class="st info"><i class="ic ic-half"></i>Dinner headcount unconfirmed</span></td><td class="mut">Caterer cutoff 16:00 · est. 3,700</td><td class="num">1</td><td>1h 13m</td><td><button class="btn sm">Confirm</button></td></tr>
+            <tr><td><span class="st mute"><i class="ic ic-circle"></i>Results page not reviewed</span></td><td class="mut">Publish scheduled 20:30 Sun</td><td class="num">1</td><td>5h 43m</td><td><button class="btn sm">Preview</button></td></tr>
+          </tbody>
+        </table>
+        <div class="pn-h" style="border-top:1px solid var(--line);border-bottom:0"><h2>Live judging by track</h2><span class="t-12 mut3">Saved view · Judging / by track</span></div>
+        <table class="tbl dense">
+          <thead><tr><th>Track</th><th class="num" style="width:80px">Projects</th><th class="num" style="width:80px">Judges</th><th style="width:220px">Reviews complete</th><th style="width:100px">Coverage</th></tr></thead>
+          <tbody>
+            <tr><td>Climate &amp; Energy</td><td class="num">214</td><td class="num">24</td><td><div class="row g2"><div class="bar grow ok"><i style="width:81%"></i></div><span class="t-12 num" style="width:34px">81%</span></div></td><td><span class="st ok"><i class="ic ic-okc"></i>3.0× avg</span></td></tr>
+            <tr><td>Health &amp; Bio</td><td class="num">188</td><td class="num">19</td><td><div class="row g2"><div class="bar grow"><i style="width:64%"></i></div><span class="t-12 num" style="width:34px">64%</span></div></td><td><span class="st ok"><i class="ic ic-okc"></i>3.0× avg</span></td></tr>
+            <tr><td>Open Track</td><td class="num">412</td><td class="num">31</td><td><div class="row g2"><div class="bar grow warn"><i style="width:47%"></i></div><span class="t-12 num" style="width:34px">47%</span></div></td><td><span class="st warn"><i class="ic ic-warn"></i>2.1× avg</span></td></tr>
+            <tr><td>Hardware &amp; Robotics</td><td class="num">97</td><td class="num">12</td><td><div class="row g2"><div class="bar grow ok"><i style="width:73%"></i></div><span class="t-12 num" style="width:34px">73%</span></div></td><td><span class="st ok"><i class="ic ic-okc"></i>3.0× avg</span></td></tr>
+          <tr><td>Student Prize (special)</td><td class="num">121</td><td class="num">9</td><td><div class="row g2"><div class="bar grow ok"><i style="width:77%"></i></div><span class="t-12 num" style="width:34px">77%</span></div></td><td><span class="st ok"><i class="ic ic-okc"></i>3.0× avg</span></td></tr>
+<tr><td>Kestrel: embedded inference</td><td class="num">64</td><td class="num">6</td><td><div class="row g2"><div class="bar grow "><i style="width:58%"></i></div><span class="t-12 num" style="width:34px">58%</span></div></td><td><span class="st ok"><i class="ic ic-okc"></i>3.0× avg</span></td></tr>
+<tr><td>Aster Grid: forecasting</td><td class="num">88</td><td class="num">8</td><td><div class="row g2"><div class="bar grow ok"><i style="width:70%"></i></div><span class="t-12 num" style="width:34px">70%</span></div></td><td><span class="st ok"><i class="ic ic-okc"></i>3.0× avg</span></td></tr>
+<tr><td>Helio Labs: clinical support</td><td class="num">72</td><td class="num">7</td><td><div class="row g2"><div class="bar grow warn"><i style="width:44%"></i></div><span class="t-12 num" style="width:34px">44%</span></div></td><td><span class="st ok"><i class="ic ic-okc"></i>3.0× avg</span></td></tr>
+</tbody>
+        </table>
+      </div>
+      <div class="col g3" style="min-height:0">
+        <div class="pn">
+          <div class="pn-h"><h2>Next transitions</h2><span class="t-12 mut3">Berlin time</span></div>
+          <div class="pn-b col g3" style="padding:12px 16px">
+            <div class="row" style="align-items:flex-start"><span class="mono t-12" style="width:44px;padding-top:1px">15:00</span><div class="col"><span class="t-13" style="font-weight:500">Stage 2 · Judge deliberation prep</span><span class="t-12 mut3">Auto · 12 min</span></div></div>
+            <div class="row" style="align-items:flex-start"><span class="mono t-12" style="width:44px;padding-top:1px">18:00</span><div class="col"><span class="t-13" style="font-weight:500">Judging closes</span><span class="t-12 mut3">Auto · locks scores, opens deliberation</span></div></div>
+            <div class="row" style="align-items:flex-start"><span class="mono t-12" style="width:44px;padding-top:1px">19:00</span><div class="col"><span class="t-13" style="font-weight:500">Finalists announced on stage</span><span class="t-12 mut3">Manual · Main hall</span></div></div>
+            <div class="row" style="align-items:flex-start"><span class="mono t-12" style="width:44px;padding-top:1px">20:30</span><div class="col"><span class="t-13" style="font-weight:500">Results published</span><span class="t-12 mut3">Approval 2 of 3 · <a>Review plan</a></span></div></div>
+          </div>
+        </div>
+        <div class="pn grow" style="min-height:0;overflow:hidden">
+          <div class="pn-h"><h2>Recent high-impact actions</h2><a class="t-12">Audit log</a></div>
+          <div class="pn-b col g3" style="padding:12px 16px">
+            <div class="col"><span class="t-13">Eligibility override applied to <b>Kelvin</b></span><span class="t-12 mut3">Priya Nair · 14:41 · reason recorded</span></div>
+            <div class="col"><span class="t-13">Judge pool changed: 3 judges added to Open Track</span><span class="t-12 mut3">Amara Okafor · 14:22</span></div>
+            <div class="col"><span class="t-13">Submission deadline extended to 13:00 (Sun)</span><span class="t-12 mut3">Amara Okafor · 09:07 · applied via plan #218</span></div>
+            <div class="col"><span class="t-13">Webhook <span class="mono">sponsor-crm</span> disabled by circuit breaker</span><span class="t-12 mut3">System · 14:44</span></div>
+<div class="col"><span class="t-13">Announcement “Dinner at 19:00” sent to 3,846 people</span><span class="t-12 mut3">Amara Okafor · 13:58</span></div>
+<div class="col"><span class="t-13">Badge template v3 activated</span><span class="t-12 mut3">Priya Nair · 13:20</span></div>
+<div class="col"><span class="t-13">Table assignments imported (312 changes)</span><span class="t-12 mut3">Amara Okafor · 12:31</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+version: 1
+id: ESC-YYYYMMDD-NNN
+task: TASK-ID
+batch: BATCH-ID
+category: architecture|product|design|security|data_integrity|migration|performance|test_infra|ownership_collision|plan_defect|external_dependency
+severity: P0|P1|P2|P3
+status: OPEN|RESOLVED|SUPERSEDED
+summary: one-line issue
+observed:
+- facts only
+attempts:
+- bounded investigation already performed
+decision_needed: specific question/decision
+options:
+- option: A
+  tradeoff: '...'
+recommended: optional recommendation, not fabricated authority
+affected_invariants: []
+affected_tasks: []
+artifacts: []
+resolution: null

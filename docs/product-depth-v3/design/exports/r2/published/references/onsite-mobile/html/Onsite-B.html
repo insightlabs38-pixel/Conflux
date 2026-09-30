@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Onsite mobile route mentor pitch</title>
+<link rel="stylesheet" href="../../../system/v3.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+body{margin:0}
+.phone{width:390px;height:844px;background:var(--bg);border:1px solid var(--line-2);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.appbar{height:52px;flex:none;display:flex;align-items:center;gap:8px;padding:0 8px 0 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+.lst{display:flex;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);align-items:center;min-height:60px;background:var(--surface)}
+.big{height:56px;font-size:16px;font-weight:600}
+</style>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div style="width:1250px;height:844px;display:flex;gap:40px">
+
+  <!-- judge route -->
+  <div class="phone">
+    <div class="appbar"><div class="col grow" style="line-height:1.2"><b class="t-13">Route · Hall 2 north</b><span class="t-11 mut3">Stop 4 of 9 · 3h 05m left</span></div><button class="btn ghost icon" aria-label="Map" style="width:44px;height:44px"><i class="ic ic-map"></i></button></div>
+    <div style="padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--line)"><div class="bar h8"><i style="width:44%"></i></div></div>
+    <div style="padding:16px;flex:1;overflow:hidden" class="col g3">
+      <div class="pn" style="border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)"><div class="pn-b col g2"><div class="row"><span class="tag info">Current stop</span><span class="mono t-12 mut3 sp">slot 12:40–12:50</span></div><b style="font-size:20px;letter-spacing:-.01em">A-14 · Northwind Grid Forecaster</b><span class="t-13 mut">Team of 4 · at table now</span><div class="row g2" style="margin-top:4px"><a class="btn pri big grow" style="text-decoration:none">Score this project</a></div><div class="row g2"><button class="btn grow" style="height:44px">Team not here</button><button class="btn grow" style="height:44px">Skip · return</button></div></div></div>
+      <div class="eyebrow">Next</div>
+      <div class="pn"><div class="lst"><span class="step"><span class="n">5</span></span><div class="col grow"><b class="t-13">A-15 Solar Twin</b><span class="t-12 mut">4 min walk · 12:55</span></div><i class="ic s ic-chev-r mut3"></i></div><div class="lst"><span class="step"><span class="n">6</span></span><div class="col grow"><b class="t-13">A-18 Tidewater Salinity Mapper</b><span class="t-12 mut">13:10</span></div></div><div class="lst" style="background:var(--warn-tint)"><span class="step"><span class="n">7</span></span><div class="col grow"><b class="t-13">B-03 Latent Space…</b><span class="t-12 mut">Recusal to confirm</span></div><span class="st warn"><i class="ic ic-ban"></i></span></div></div>
+      <div class="bn" style="padding:10px 12px"><i class="ic ic-clock"></i><span class="t-12"><b>Pace:</b> 10.9 min each to finish by 18:00. You’re 2 min ahead.</span></div>
+    </div>
+    <nav class="bottom-nav"><a><i class="ic l ic-home"></i>Overview</a><a><i class="ic l ic-list"></i>Queue</a><a aria-current="page"><i class="ic l ic-route"></i>Route</a><a><i class="ic l ic-msg"></i>Messages</a></nav>
+  </div>
+
+  <!-- mentor -->
+  <div class="phone">
+    <div class="appbar"><div class="col grow" style="line-height:1.2"><b class="t-13">Mentor desk · Kim H.</b><span class="t-11 mut3">Rust · systems · 2 active</span></div><span class="seg"><button class="btn sm on" style="height:36px">Available</button><button class="btn sm" style="height:36px">Break</button></span></div>
+    <div class="row" style="padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--line)"><span class="seg grow"><button class="btn on grow" style="height:40px">Queue 5</button><button class="btn grow" style="height:40px">Mine 1</button><button class="btn grow" style="height:40px">Booked 2</button></span></div>
+    <div style="flex:1;overflow:hidden">
+      <div class="lst" style="background:var(--accent-tint);box-shadow:inset 3px 0 0 var(--accent)"><div class="col grow"><div class="row"><b class="t-13">Stackless · E-07</b><span class="st warn sp"><i class="ic ic-clock"></i>9 min</span></div><span class="t-12 mut">Rust async lifetimes — borrow checker error in select!</span><div class="row g2" style="margin-top:6px"><button class="btn pri" style="height:44px;flex:1">Take it</button><button class="btn" style="height:44px">Not my area</button></div></div></div>
+      <div class="lst"><div class="col grow"><div class="row"><b class="t-13">Δ-Debuggers · A-02</b><span class="st warn sp"><i class="ic ic-clock"></i>14 min</span></div><span class="t-12 mut">FPGA timing closure — hardware, wants Osei</span></div></div>
+      <div class="lst"><div class="col grow"><div class="row"><b class="t-13">Zero Copy · G-09</b><span class="st mute sp"><i class="ic ic-clock"></i>4 min</span></div><span class="t-12 mut">Arrow IPC schema evolution</span></div></div>
+      <div class="lst"><div class="col grow"><div class="row"><b class="t-13">Hot Loop · H-15</b><span class="st mute sp"><i class="ic ic-clock"></i>2 min</span></div><span class="t-12 mut">Profiler flame graph interpretation</span></div></div>
+      <div class="lst"><div class="col grow"><div class="row"><b class="t-13">Signal &amp; Noise · C-11</b><span class="st mute sp"><i class="ic ic-clock"></i>1 min</span></div><span class="t-12 mut">Kalman filter tuning</span></div></div>
+    </div>
+    <div style="padding:10px 12px;background:var(--surface);border-top:1px solid var(--line-2)"><div class="bn" style="padding:8px 12px"><i class="ic s ic-cal"></i><span class="t-12"><b>Next booking 16:00</b> · Northwind · A-14</span></div></div>
+    <nav class="bottom-nav"><a aria-current="page"><i class="ic l ic-hand"></i>Queue</a><a><i class="ic l ic-cal"></i>Bookings</a><a><i class="ic l ic-msg"></i>Messages</a><a><i class="ic l ic-user"></i>Profile</a></nav>
+  </div>
+
+  <!-- pitch queue -->
+  <div class="phone">
+    <div class="appbar"><div class="col grow" style="line-height:1.2"><b class="t-13">Stage B · Demo queue</b><span class="t-11 mut3">Session 3 · 17:00–18:00</span></div><span class="st ok"><i class="ic ic-dot s"></i>Live</span></div>
+    <div style="padding:16px;flex:1;overflow:hidden" class="col g3">
+      <div class="pn"><div class="pn-b col g2" style="align-items:center;text-align:center"><span class="tag ok"><i class="ic ic-mic"></i>Presenting now</span><b style="font-size:20px;letter-spacing:-.01em">Northwind Grid Forecaster</b><span class="mono" style="font-size:44px;font-weight:500;letter-spacing:-.02em;line-height:1.1">03:12</span><span class="t-12 mut">of 05:00 demo · then 02:00 Q&amp;A</span><div class="bar" style="width:100%"><i style="width:64%"></i></div><div class="row g2" style="width:100%"><button class="btn grow big" style="height:48px"><i class="ic ic-pause"></i>Pause</button><button class="btn pri grow big" style="height:48px">Start Q&amp;A</button></div></div></div>
+      <div class="eyebrow">Up next · 6 teams</div>
+      <div class="pn"><div class="lst"><span class="mono t-12 mut3" style="width:40px">17:10</span><div class="col grow"><b class="t-13">Solar Twin</b><span class="t-12 mut">In the wings · checked in</span></div><span class="st ok"><i class="ic ic-okc"></i>Ready</span></div><div class="lst"><span class="mono t-12 mut3" style="width:40px">17:19</span><div class="col grow"><b class="t-13">Sepsis Sentinel</b><span class="t-12 mut">Needs HDMI-C adapter</span></div><span class="st warn"><i class="ic ic-warn"></i>AV</span></div><div class="lst"><span class="mono t-12 mut3" style="width:40px">17:28</span><div class="col grow"><b class="t-13">Ember</b></div><span class="st mute"><i class="ic ic-circle"></i>Not here</span></div></div>
+      <div class="row g2"><button class="btn grow" style="height:44px">Mark no-show</button><button class="btn grow" style="height:44px">Reorder</button></div>
+    </div>
+    <nav class="bottom-nav"><a aria-current="page"><i class="ic l ic-mic"></i>Now</a><a><i class="ic l ic-list"></i>Queue</a><a><i class="ic l ic-flag"></i>Issues</a></nav>
+  </div>
+</div>
+</body>
+</html>

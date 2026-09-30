@@ -1,0 +1,14 @@
+version: 1
+checkpoint_id: CP-...
+created_at: ISO-8601
+canonical_commit: sha
+program_state: FROZEN|ACTIVE|PAUSED|COMPLETE
+completed_batches: []
+active_batches: []
+active_claims: []
+open_escalations: []
+last_completed_task: null
+ready_summary: []
+design_revision: null
+verification_summary: []
+recovery_notes: []

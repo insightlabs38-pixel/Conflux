@@ -1,0 +1,11 @@
+[
+ {
+  "name": "Dark-Organizer",
+  "declared": "1440x1000",
+  "root": "1440x1000",
+  "scrollH": 1000,
+  "scrollW": 1440,
+  "contentBottom": 1000,
+  "contentRight": 1440
+ }
+]

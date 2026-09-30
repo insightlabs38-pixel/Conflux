@@ -1,0 +1,11 @@
+[
+ {
+  "name": "Judge-Review",
+  "declared": "1440x920",
+  "root": "1440x920",
+  "scrollH": 920,
+  "scrollW": 1440,
+  "contentBottom": 920,
+  "contentRight": 1440
+ }
+]

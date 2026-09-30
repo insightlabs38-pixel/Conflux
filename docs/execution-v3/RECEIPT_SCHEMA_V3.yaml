@@ -1,0 +1,39 @@
+version: 3
+task: TASK-ID
+batch: BATCH-ID
+status: candidate_complete|blocked|failed|corrections
+executor:
+  worker_id: worker-id
+  executor_class: implementation
+  model: record-actual-model
+git:
+  branch: branch-name
+  base_commit: sha
+  head_commit: sha-or-null
+changed_paths:
+- '...'
+deliverables:
+- item: task deliverable
+  result: pass|fail|na
+  evidence: '...'
+invariants:
+- item: task invariant
+  result: pass|fail|na
+  evidence: '...'
+verification:
+- command: '...'
+  result: pass|fail|skipped
+  note: '...'
+design_refs:
+- ref: design/...
+  result: pass|na
+  note: '...'
+surface_matrix:
+- surface: web
+  result: pass|na|deferred-by-contract
+  evidence: '...'
+migrations: []
+findings: []
+escalations: []
+limitations: []
+next: review|corrections|blocked

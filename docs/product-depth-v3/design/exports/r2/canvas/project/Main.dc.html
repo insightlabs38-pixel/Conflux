@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Index and revision</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./v3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>body{margin:0}.map td{white-space:normal;vertical-align:middle;padding-top:3px;padding-bottom:3px}.map td.t-12{line-height:1.35}</style>
+</helmet>
+<div style="width:1440px;height:900px;background:var(--bg);padding:40px 48px;display:flex;gap:48px;overflow:hidden">
+  <div style="width:640px;display:flex;flex-direction:column;gap:20px">
+    <div class="col g1">
+      <div class="eyebrow">Product Depth v3 · foundation design pass · second pass</div>
+      <h1 style="font-size:32px;letter-spacing:-.02em;line-height:1.15">Conflux v3 design system and reference surfaces</h1>
+      <p class="mut" style="font-size:16px;line-height:1.5;max-width:60ch">One neutral, compact, table-first language for participant, judge, organizer, onsite and public surfaces. Revision <b class="mono" style="font-weight:500">r2</b> · 45 artboards · 14 reference groups. r1 is preserved under exports/r1.</p>
+    </div>
+    <div class="pn">
+      <div class="pn-h"><h2>Converged decisions</h2></div>
+      <div class="pn-b col g3" style="font-size:13px">
+        <div class="dl" style="grid-template-columns:150px 1fr">
+          <dt>Direction</dt><dd><b>“Ledger”</b> — light neutral canvas, hairline structure, one blue accent used only for action, selection and focus.</dd>
+          <dt>Type</dt><dd>IBM Plex Sans 14/13/12 for UI, Plex Mono for IDs and code, Source Serif 4 for public long-form reading only.</dd>
+          <dt>Density</dt><dd>Three modes: comfortable 44 · standard 36 · dense 28 px rows. Standard is default; dense is per-user.</dd>
+          <dt>Shape</dt><dd>Radii 3 / 5 / 8. Borders carry hierarchy; shadow only on floating layers.</dd>
+          <dt>Status</dt><dd>Icon + word + tint. Colour is never the only signal. Plain text status in tables; tinted tags only for summaries.</dd>
+          <dt>Shell</dt><dd>44px top bar, 216px rail (collapses to 52px), right inspector that keeps list position. Participant/judge use a top bar only.</dd>
+          <dt>Hero</dt><dd>Public: none / <b>compact (default, 160–240px)</b> / standard. Operator surfaces: no hero.</dd>
+        </div>
+      </div>
+    </div>
+    <div class="pn">
+      <div class="pn-h"><h2>Final quality tests</h2></div>
+      <div class="pn-b col g3" style="font-size:13px">
+        <div class="row" style="align-items:flex-start"><i class="ic ic-okc" style="color:var(--ok);margin-top:1px"></i><div><b>Reads as mature software.</b> Every screen is one hairline surface family with a single accent; there are no gradient washes, coloured icon tiles or nested cards.</div></div>
+        <div class="row" style="align-items:flex-start"><i class="ic ic-okc" style="color:var(--ok);margin-top:1px"></i><div><b>5,000-person event.</b> A saved-view grid, keyboard cursor, range select, frozen-snapshot bulk plans and async progress carry organizer work; the overview is a queue strip, not KPI cards.</div></div>
+        <div class="row" style="align-items:flex-start"><i class="ic ic-okc" style="color:var(--ok);margin-top:1px"></i><div><b>Weekend-hackathon base.</b> Nav shows 6 groups by default; Advanced groups stay collapsed; setup is a 5-step checklist with defaults, not a settings wall.</div></div>
+      </div>
+    </div>
+  </div>
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:12px">
+    <div class="pn" style="flex:1">
+      <div class="pn-h"><h2>Board map</h2><span class="t-12 mut3">pan / zoom the canvas · each row is a reference</span></div>
+      <table class="tbl dense map">
+        <thead><tr><th style="width:48px">Ref</th><th style="width:180px">Reference</th><th>Boards</th><th style="width:92px">Status</th></tr></thead>
+        <tbody>
+          <tr><td class="id">D1</td><td>design/system-v3</td><td class="t-12 mut">Foundations · Components · Directions · <b>Dark</b></td><td><span class="st ok"><i class="ic ic-okc"></i>Approved</span></td></tr>
+          <tr><td class="id">D2</td><td>design/app-shell</td><td class="t-12 mut">Organizer · Dense + ⌘K · Overlays · Participant · Judge (realistic fixtures) · Mobile</td><td><span class="st ok"><i class="ic ic-okc"></i>Approved</span></td></tr>
+          <tr><td class="id">D3</td><td>design/organizer-data-surface</td><td class="t-12 mut">Grid + inspector · Filters / views / bulk plan</td><td><span class="st ok"><i class="ic ic-okc"></i>Approved</span></td></tr>
+          <tr><td class="id">D4</td><td>design/participant-my-event</td><td class="t-12 mut">Desktop action-needed · Mobile action / ready</td><td><span class="st ok"><i class="ic ic-okc"></i>Approved</span></td></tr>
+          <tr><td class="id">D5</td><td>design/project-story-editor</td><td class="t-12 mut">Source + preview · Rich + comments · History / diff (long technical fixture)</td><td><span class="st ok"><i class="ic ic-okc"></i>Approved</span></td></tr>
+          <tr><td class="id">D6</td><td>design/judge-review</td><td class="t-12 mut">Desktop · Dialogs · Narrow · <b>Pairwise: compare · states · narrow</b></td><td><span class="st ok"><i class="ic ic-okc"></i>Approved</span></td></tr>
+          <tr><td class="id">D7</td><td>design/deliberation-awards</td><td class="t-12 mut">Decision room · Override / approval / publication</td><td><span class="st ok"><i class="ic ic-okc"></i>Approved</span></td></tr>
+          <tr><td class="id">D8</td><td>design/public-event</td><td class="t-12 mut">No-artwork default · Organizer theme · Mobile</td><td><span class="st ok"><i class="ic ic-okc"></i>Approved</span></td></tr>
+          <tr><td class="id">D9</td><td>design/public-project</td><td class="t-12 mut">Desktop · Mobile (living vs as-judged)</td><td><span class="st ok"><i class="ic ic-okc"></i>Approved</span></td></tr>
+          <tr><td class="id">D10</td><td>design/event-builder</td><td class="t-12 mut">Setup · Page &amp; theme · Plan/apply + extensions</td><td><span class="st ok"><i class="ic ic-okc"></i>Approved</span></td></tr>
+          <tr><td class="id">D11</td><td>design/onsite-mobile</td><td class="t-12 mut">Check-in · Desk · Pass · Route · Mentor · Pitch</td><td><span class="st ok"><i class="ic ic-okc"></i>Approved</span></td></tr>
+          <tr><td class="id">D12</td><td>design/state-matrix</td><td class="t-12 mut">Two boards, 12 state classes × 6 surfaces</td><td><span class="st ok"><i class="ic ic-okc"></i>Approved</span></td></tr>
+          <tr><td class="id">D13</td><td>design/dark-mode</td><td class="t-12 mut">Organizer + data surface · Judge review · My Event · Overlays (+ D1 dark)</td><td><span class="st ok"><i class="ic ic-okc"></i>Approved</span></td></tr>
+          <tr><td class="id">D14</td><td>design/responsive-wide</td><td class="t-12 mut">1024 organizer · 768 judge · 1920 wide + 5,000-person stress fixture</td><td><span class="st ok"><i class="ic ic-okc"></i>Approved</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="well t-12 mut" style="line-height:1.5">Prototypes are static comps with representative content; boards are sized to realistic viewports (or full page height where the page scrolls). Behavior contracts (keyboard, focus order, confirmation rules) are in <span class="mono">design/decisions/</span> and each reference README — not implied by the picture alone. Legacy visual styling in <span class="mono">src/web/styles</span> is not a target.</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Organizer data surface</title>
+<link rel="stylesheet" href="../../../system/v3.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+body{margin:0}
+.fchip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 4px 0 8px;border:1px solid var(--accent-line);background:var(--accent-tint);border-radius:var(--r-2);font-size:12px;color:var(--ink)}
+.fchip b{font-weight:600;color:var(--accent)}
+.fchip .ic{color:var(--ink-2)}
+.grpbox{display:inline-flex;align-items:center;gap:4px;padding:0 4px 0 8px;height:28px;border:1px dashed var(--accent);border-radius:var(--r-2)}
+.grpbox .fchip{height:22px}
+.opw{font-size:11px;font-weight:600;color:var(--ink-3);letter-spacing:.04em}
+</style>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div class="shell" style="width:1440px;height:1000px">
+  <header class="top">
+    <div class="mark" aria-hidden="true">C</div>
+    <button class="ev-switch"><span class="trunc">Gauss Hack 2026</span><span class="tag ok">Judging</span><i class="ic s ic-chev-d"></i></button>
+    <div class="cmdk sp" style="width:380px"><i class="ic s ic-search"></i>Search people, projects, or run a command<span class="kbd">⌘K</span></div>
+    <button class="btn ghost icon" aria-label="Notifications"><i class="ic ic-bell"></i></button><span class="avatar l">AO</span>
+  </header>
+  <nav class="rail" aria-label="Event">
+    <a class="nav-i"><i class="ic ic-home"></i>Overview</a>
+    <div class="nav-g">Manage event</div>
+    <a class="nav-i"><i class="ic ic-sliders"></i>Event setup</a>
+    <a class="nav-i" aria-current="page"><i class="ic ic-users"></i>Participants &amp; teams<span class="cnt">5,012</span></a>
+    <a class="nav-i sub" aria-current="page" style="background:none;color:var(--accent)">People</a>
+    <a class="nav-i sub">Teams</a><a class="nav-i sub">Applications<span class="cnt w">412</span></a><a class="nav-i sub">Check-in</a>
+    <a class="nav-i"><i class="ic ic-file"></i>Projects &amp; eligibility<span class="cnt w">37</span></a>
+    <a class="nav-i"><i class="ic ic-trophy"></i>Judging</a>
+    <a class="nav-i"><i class="ic ic-table"></i>Results &amp; publication</a>
+    <a class="nav-i"><i class="ic ic-msg"></i>Communications</a>
+    <a class="nav-i"><i class="ic ic-qr"></i>On-site</a>
+    <div class="nav-g">Advanced</div>
+    <a class="nav-i"><i class="ic ic-box"></i>Integrations</a><a class="nav-i"><i class="ic ic-shield"></i>Operations &amp; audit</a>
+  </nav>
+
+  <main style="display:flex;min-width:0;min-height:0;background:var(--surface)">
+    <section style="flex:1;min-width:0;display:flex;flex-direction:column;border-right:1px solid var(--line)">
+      <!-- header + view -->
+      <div class="row" style="padding:10px 16px 8px;gap:12px">
+        <h1>People</h1>
+        <button class="btn sm" style="gap:8px" aria-label="Saved views"><i class="ic s ic-star" style="color:var(--warn)"></i>Needs waiver — Berlin<span class="tag warn" style="margin-left:2px"><i class="ic ic-dot xs"></i>modified</span><i class="ic s ic-chev-d"></i></button>
+        <button class="btn sm ghost">Reset</button><button class="btn sm">Save view</button><button class="btn sm ghost"><i class="ic s ic-link"></i>Copy link</button>
+        <span class="sp row g2"><span class="seg"><button class="btn sm on" aria-pressed="true"><i class="ic s ic-list"></i>List</button><button class="btn sm"><i class="ic s ic-grid"></i>Board</button></span></span>
+      </div>
+      <!-- query bar -->
+      <div class="toolbar" style="padding:6px 16px;border-top:1px solid var(--line);gap:8px">
+        <div class="in-wrap" style="width:200px;flex:none"><i class="ic s ic-search"></i><input class="in sm" placeholder="Search name, email, team" aria-label="Search"><span class="kbd">/</span></div>
+        <button class="btn sm on"><i class="ic s ic-filter"></i>Filters<span class="cnt a">4</span></button>
+        <button class="btn sm"><i class="ic s ic-list"></i>Group: Track<i class="ic xs ic-chev-d"></i></button>
+        <button class="btn sm"><i class="ic s ic-cols"></i>Columns</button>
+        <button class="btn sm"><i class="ic s ic-history"></i>Changed…</button>
+        <span class="sp"></span>
+        <button class="btn sm ghost icon" aria-label="Density"><i class="ic s ic-sliders"></i></button><button class="btn sm"><i class="ic s ic-down"></i>Export</button>
+      </div>
+      <div style="padding:6px 16px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--surface-2);border-bottom:1px solid var(--line)">
+        <span class="fchip"><b>Registration</b> is Confirmed <button class="btn ghost icon sm" style="width:20px;height:20px" aria-label="Remove filter"><i class="ic xs ic-x"></i></button></span>
+        <span class="opw">AND</span>
+        <span class="fchip"><b>Waiver</b> is not Signed <button class="btn ghost icon sm" style="width:20px;height:20px" aria-label="Remove filter"><i class="ic xs ic-x"></i></button></span>
+        <span class="opw">AND</span>
+        <span class="grpbox" role="group" aria-label="Any of"><span class="opw">ANY OF</span><span class="fchip"><b>Track</b> = Climate &amp; Energy <button class="btn ghost icon sm" style="width:20px;height:20px" aria-label="Remove filter"><i class="ic xs ic-x"></i></button></span><span class="opw">OR</span><span class="fchip"><b>Track</b> = Health &amp; Bio <button class="btn ghost icon sm" style="width:20px;height:20px" aria-label="Remove filter"><i class="ic xs ic-x"></i></button></span><button class="btn ghost icon sm" style="width:20px;height:20px" aria-label="Add to group"><i class="ic xs ic-plus"></i></button></span>
+        <button class="btn sm ghost"><i class="ic s ic-plus"></i>Add filter</button><button class="btn sm ghost"><i class="ic s ic-plus"></i>Add group</button>
+        <span class="sp"></span><button class="btn sm ghost"><i class="ic s ic-term"></i>Query</button>
+      </div>
+      <div class="mono t-12 mut" style="padding:4px 16px;border-bottom:1px solid var(--line);background:var(--surface)">registration:confirmed AND waiver:!signed AND (track:climate OR track:health)</div>
+      <!-- async job -->
+      <div class="row" style="padding:6px 16px;background:var(--info-tint);border-bottom:1px solid var(--info-line)"><i class="ic s ic-spin" style="color:var(--info)"></i><span class="t-12"><b>Sending waiver reminder</b> to 243 people · 148 of 243</span><div class="bar h4" style="width:180px"><i style="width:61%"></i></div><span class="t-12 mut3">~1 min left</span><span class="sp row g1"><button class="btn sm ghost">Pause</button><button class="btn sm ghost">Details</button></span></div>
+
+      <!-- grid -->
+      <div style="flex:1;min-height:0;overflow:hidden">
+        <table class="tbl dense fixed" role="grid" aria-label="People" aria-rowcount="1284">
+          <thead><tr>
+            <th class="ck"><input type="checkbox" aria-label="Select page"></th>
+            <th class="sorted" style="width:190px"><i class="ic xs ic-pin"></i> Name <i class="ic ic-sort"></i></th><th>Team</th><th style="width:150px">Waiver</th><th style="width:118px">Check-in</th><th style="width:60px">Table</th><th style="width:80px">Changed</th><th style="width:44px"></th>
+          </tr></thead>
+          <tbody>
+            <tr class="grp"><td colspan="8"><i class="ic s ic-chev-d"></i> Climate &amp; Energy <span class="cnt" style="margin-left:6px">143</span><span class="t-12 mut3" style="margin-left:8px;font-weight:400">Waiver missing 143 · Checked in 96</span></td></tr>
+            <tr><td class="ck"><input type="checkbox" aria-label="Select"></td><td>Adaeze Nwosu</td><td class="mut trunc">Northwind Grid Forecaster</td><td><span class="st warn"><i class="ic ic-warn"></i>Missing</span></td><td><span class="st ok"><i class="ic ic-okc"></i>08:41</span></td><td class="mono t-12">A-14</td><td class="t-12 mut3">2 m ago</td><td class="rowact"><button class="btn sm ghost icon" aria-label="Actions"><i class="ic s ic-more"></i></button></td></tr>
+            <tr class="sel"><td class="ck"><input type="checkbox" checked aria-label="Select"></td><td>Alejandro Ruiz-Ortega</td><td class="mut trunc">Northwind Grid Forecaster</td><td><span class="st warn"><i class="ic ic-warn"></i>Missing</span></td><td><span class="st ok"><i class="ic ic-okc"></i>08:43</span></td><td class="mono t-12">A-14</td><td class="t-12 mut3">2 m ago</td><td class="rowact"></td></tr>
+            <tr class="sel"><td class="ck"><input type="checkbox" checked aria-label="Select"></td><td>Anika Sharma</td><td class="mut trunc">Tidewater Salinity Mapper</td><td><span class="st warn"><i class="ic ic-warn"></i>Missing</span></td><td><span class="st mute"><i class="ic ic-circle"></i>Not arrived</span></td><td class="mono t-12">D-01</td><td class="t-12 mut3">14 m ago</td><td class="rowact"></td></tr>
+            <tr class="sel cur"><td class="ck"><input type="checkbox" checked aria-label="Select"></td><td style="font-weight:600">Dev Patel</td><td class="mut trunc">Latent Space Cartographers of the Gulf Stream</td><td><div class="row g1"><span class="st warn"><i class="ic ic-warn"></i>Missing</span><button class="btn sm rowact" style="height:22px;padding:0 6px">Remind</button></div></td><td><span class="st ok"><i class="ic ic-okc"></i>09:02</span></td><td class="edit"><input class="in sm" style="height:24px;border:0;padding:0 4px;background:transparent" value="C-03" aria-label="Table, editing"></td><td class="t-12 mut3">now</td><td class="rowact"><button class="btn sm ghost icon" aria-label="Actions"><i class="ic s ic-more"></i></button></td></tr>
+            <tr><td class="ck"><input type="checkbox" aria-label="Select"></td><td>Elif Yıldız</td><td class="mut trunc">Grid Whisperers</td><td><span class="st warn"><i class="ic ic-warn"></i>Missing</span></td><td><span class="st ok"><i class="ic ic-okc"></i>08:15</span></td><td class="mono t-12">A-07</td><td class="t-12 mut3">1 h ago</td><td class="rowact"></td></tr>
+            <tr><td class="ck"><input type="checkbox" aria-label="Select"></td><td>Erik Lindholm</td><td class="mut trunc">Grid Whisperers</td><td><span class="st warn"><i class="ic ic-warn"></i>Missing</span></td><td><span class="st ok"><i class="ic ic-okc"></i>08:16</span></td><td class="mono t-12">A-07</td><td class="t-12 mut3">1 h ago</td><td class="rowact"></td></tr>
+            <tr><td class="ck"><input type="checkbox" aria-label="Select"></td><td>Fatou Diallo</td><td class="mut trunc">Ember: wildfire risk edge inference</td><td><span class="st warn"><i class="ic ic-warn"></i>Missing</span></td><td><span class="st mute"><i class="ic ic-circle"></i>Not arrived</span></td><td class="mono t-12">—</td><td class="t-12 mut3">3 h ago</td><td class="rowact"></td></tr>
+            <tr><td class="ck"><input type="checkbox" aria-label="Select"></td><td>Giulia Ferrante</td><td class="mut trunc">Solar Twin</td><td><span class="st warn"><i class="ic ic-warn"></i>Missing</span></td><td><span class="st ok"><i class="ic ic-okc"></i>08:52</span></td><td class="mono t-12">A-15</td><td class="t-12 mut3">3 h ago</td><td class="rowact"></td></tr>
+            <tr><td class="ck"><input type="checkbox" aria-label="Select"></td><td>Hiroshi Tanabe</td><td class="mut trunc">Solar Twin</td><td><span class="st warn"><i class="ic ic-warn"></i>Missing</span></td><td><span class="st ok"><i class="ic ic-okc"></i>08:53</span></td><td class="mono t-12">A-15</td><td class="t-12 mut3">3 h ago</td><td class="rowact"></td></tr>
+            <tr><td class="ck"><input type="checkbox" aria-label="Select"></td><td>Ines Carvalho</td><td class="mut trunc">Heat Island Copilot</td><td><span class="st warn"><i class="ic ic-warn"></i>Missing</span></td><td><span class="st ok"><i class="ic ic-okc"></i>09:11</span></td><td class="mono t-12">A-22</td><td class="t-12 mut3">4 h ago</td><td class="rowact"></td></tr>
+            <tr><td class="ck"><input type="checkbox" aria-label="Select"></td><td>Jamal Whitfield</td><td class="mut trunc">Heat Island Copilot</td><td><span class="st warn"><i class="ic ic-warn"></i>Missing</span></td><td><span class="st ok"><i class="ic ic-okc"></i>09:11</span></td><td class="mono t-12">A-22</td><td class="t-12 mut3">4 h ago</td><td class="rowact"></td></tr>
+            <tr class="grp"><td colspan="8"><i class="ic s ic-chev-d"></i> Health &amp; Bio <span class="cnt" style="margin-left:6px">100</span><span class="t-12 mut3" style="margin-left:8px;font-weight:400">Waiver missing 100 · Checked in 71</span></td></tr>
+            <tr><td class="ck"><input type="checkbox" aria-label="Select"></td><td>Kavya Menon</td><td class="mut trunc">BioSignal Edge Triage</td><td><span class="st warn"><i class="ic ic-warn"></i>Missing</span></td><td><span class="st ok"><i class="ic ic-okc"></i>08:33</span></td><td class="mono t-12">B-22</td><td class="t-12 mut3">5 h ago</td><td class="rowact"></td></tr>
+            <tr><td class="ck"><input type="checkbox" aria-label="Select"></td><td>Lars Øystein</td><td class="mut trunc">BioSignal Edge Triage</td><td><span class="st warn"><i class="ic ic-warn"></i>Missing</span></td><td><span class="st ok"><i class="ic ic-okc"></i>08:34</span></td><td class="mono t-12">B-22</td><td class="t-12 mut3">5 h ago</td><td class="rowact"></td></tr>
+            <tr><td class="ck"><input type="checkbox" aria-label="Select"></td><td>Mariam Al-Sayed</td><td class="mut trunc">Glucose Nowcast</td><td><span class="st warn"><i class="ic ic-warn"></i>Missing</span></td><td><span class="st mute"><i class="ic ic-circle"></i>Not arrived</span></td><td class="mono t-12">—</td><td class="t-12 mut3">5 h ago</td><td class="rowact"></td></tr>
+            <tr><td class="ck"><input type="checkbox" aria-label="Select"></td><td>Nikolai Petrov</td><td class="mut trunc">Glucose Nowcast</td><td><span class="st warn"><i class="ic ic-warn"></i>Missing</span></td><td><span class="st ok"><i class="ic ic-okc"></i>10:20</span></td><td class="mono t-12">B-06</td><td class="t-12 mut3">6 h ago</td><td class="rowact"></td></tr>
+            <tr><td class="ck"><input type="checkbox" aria-label="Select"></td><td>Olivia Bennett</td><td class="mut trunc">Sepsis Sentinel</td><td><span class="st warn"><i class="ic ic-warn"></i>Missing</span></td><td><span class="st ok"><i class="ic ic-okc"></i>10:31</span></td><td class="mono t-12">B-09</td><td class="t-12 mut3">6 h ago</td><td class="rowact"></td></tr>
+            <tr><td class="ck"><input type="checkbox" aria-label="Select"></td><td>Pablo Domínguez</td><td class="mut trunc">Sepsis Sentinel</td><td><span class="st warn"><i class="ic ic-warn"></i>Missing</span></td><td><span class="st ok"><i class="ic ic-okc"></i>10:31</span></td><td class="mono t-12">B-09</td><td class="t-12 mut3">6 h ago</td><td class="rowact"></td></tr>
+            <tr><td class="ck"><input type="checkbox" aria-label="Select"></td><td>Qi Zhang</td><td class="mut trunc">Radiograph Second-Reader</td><td><span class="st warn"><i class="ic ic-warn"></i>Missing</span></td><td><span class="st ok"><i class="ic ic-okc"></i>09:47</span></td><td class="mono t-12">B-14</td><td class="t-12 mut3">7 h ago</td><td class="rowact"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- selection / bulk bar -->
+      <div class="row" style="padding:8px 16px;background:var(--accent-tint);border-top:1px solid var(--accent-line);gap:8px">
+        <b class="t-13" style="white-space:nowrap">3 selected</b><a class="t-12" style="white-space:nowrap">Select all 243</a><span style="width:1px;height:18px;background:var(--accent-line)"></span>
+        <button class="btn sm pri"><i class="ic s ic-msg"></i>Send waiver reminder</button><button class="btn sm">Assign table…</button><button class="btn sm"><i class="ic s ic-down"></i>Export 3</button><button class="btn sm ghost">More<i class="ic xs ic-chev-d"></i></button>
+        <span class="sp t-12 mut" style="white-space:nowrap"><i class="ic s ic-lock"></i> Frozen snapshot · plan first</span>
+      </div>
+      <div class="row t-12 mut3" style="padding:0 16px;height:28px;border-top:1px solid var(--line);background:var(--surface-2)"><span>Rows 1–200 of 243 · virtualized</span><span class="sp"><span class="kbd">J</span><span class="kbd">K</span> move · <span class="kbd">X</span> select · <span class="kbd">⇧</span>+<span class="kbd">↓</span> range · <span class="kbd">E</span> edit · <span class="kbd">↵</span> inspect · <span class="kbd">V</span> views · <span class="kbd">F</span> filter</span></div>
+    </section>
+
+    <!-- inspector -->
+    <aside style="width:372px;flex:none;display:flex;flex-direction:column;min-height:0" aria-label="Inspector: Dev Patel">
+      <div class="row" style="padding:10px 16px;border-bottom:1px solid var(--line)"><span class="avatar xl">DP</span><div class="col grow" style="min-width:0"><b style="font-size:16px">Dev Patel</b><span class="t-12 mut trunc">Participant · Latent Space Cartographers of the Gulf Stream</span></div><button class="btn sm ghost icon" aria-label="Previous"><i class="ic s ic-chev-u"></i></button><button class="btn sm ghost icon" aria-label="Next"><i class="ic s ic-chev-d"></i></button><button class="btn sm ghost icon" aria-label="Close inspector"><i class="ic s ic-x"></i></button></div>
+      <div class="tabs sm" style="padding:0 10px"><a aria-current="page">Overview</a><a>Team</a><a>Activity</a><a>Notes</a></div>
+      <div style="flex:1;overflow:hidden;padding:14px 16px" class="col g4">
+        <div class="bn warn"><i class="ic ic-warn"></i><div class="col g2 grow"><span><b>Waiver missing.</b> Checked in without signing; insurance requires it by 17:00.</span><div class="row g2"><button class="btn sm pri">Send reminder</button><button class="btn sm">Mark as signed on paper…</button></div></div></div>
+        <dl class="dl">
+          <dt>Registration</dt><dd><span class="st ok"><i class="ic ic-okc"></i>Confirmed</span> · Sep 4</dd>
+          <dt>Check-in</dt><dd><span class="st ok"><i class="ic ic-okc"></i>Checked in</span> · 09:02 · Desk 2</dd>
+          <dt>Track</dt><dd>Climate &amp; Energy</dd>
+          <dt>Table</dt><dd class="mono">C-03 <span class="t-12 mut3">· Hall 2 · edited just now</span></dd>
+          <dt>Eligibility</dt><dd><span class="st ok"><i class="ic ic-okc"></i>No findings</span></dd>
+          <dt>Email</dt><dd class="mono t-12">dev.p•••@northwind.example <a class="t-12">reveal</a></dd>
+          <dt>Diet / access</dt><dd><span class="st mute"><i class="ic ic-lock"></i>Restricted · needs Safety role</span></dd>
+        </dl>
+        <hr class="hr">
+        <div class="col g2"><span class="lbl">Team</span>
+          <div class="row g2"><span class="avatar">DP</span><span class="t-13 grow">Dev Patel</span><span class="t-12 mut3">You’re viewing</span></div>
+          <div class="row g2"><span class="avatar">IC</span><span class="t-13 grow">Ines Carvalho</span><span class="t-12 mut3">Contact</span></div>
+          <div class="row g2"><span class="avatar">JW</span><span class="t-13 grow">Jamal Whitfield</span></div>
+        </div>
+        <hr class="hr">
+        <div class="col g2"><span class="lbl">Activity</span>
+          <div class="t-12"><span class="mono mut3">09:02</span> Checked in by volunteer <b>K. Osei</b></div>
+          <div class="t-12"><span class="mono mut3">09:04</span> Table changed <span class="mono">—</span> → <span class="mono">C-03</span> by <b>you</b></div>
+          <div class="t-12"><span class="mono mut3">Sep 4</span> Registration confirmed</div>
+        </div>
+      </div>
+      <div class="row" style="padding:8px 16px;border-top:1px solid var(--line);background:var(--surface-2)"><a class="t-12">Open full record <i class="ic xs ic-ext"></i></a><span class="sp t-12 mut3">Esc closes · list position kept</span></div>
+    </aside>
+  </main>
+</div>
+</body>
+</html>

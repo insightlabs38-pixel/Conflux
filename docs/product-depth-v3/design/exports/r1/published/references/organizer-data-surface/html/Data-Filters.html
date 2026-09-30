@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Data surface filters views bulk plan</title>
+<link rel="stylesheet" href="../../../system/v3.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>body{margin:0}.frow{display:grid;grid-template-columns:22px 130px 120px 1fr 26px;gap:6px;align-items:center}.gbox{border:1px dashed var(--accent);border-radius:var(--r-2);padding:8px;margin:6px 0 6px 18px;display:flex;flex-direction:column;gap:6px;background:var(--accent-tint)}.lg{position:relative}</style>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div style="width:1440px;height:1000px;background:var(--surface-3);padding:28px 36px;display:grid;grid-template-columns:600px 330px 300px;grid-template-rows:auto auto;gap:22px 24px;align-content:start;overflow:hidden">
+
+  <!-- filter builder -->
+  <div class="col g2"><span class="eyebrow">Nested filter builder (popover from “Filters”)</span>
+    <div class="pop" role="dialog" aria-label="Filters">
+      <div class="row" style="padding:10px 12px;border-bottom:1px solid var(--line)"><h2>Filters</h2><span class="t-12 mut3">4 conditions · 243 people match</span><button class="btn sm ghost sp">Clear all</button></div>
+      <div style="padding:10px 12px" class="col g2">
+        <div class="frow"><span></span><select class="in sm" aria-label="Field"><option>Registration</option></select><select class="in sm" aria-label="Operator"><option>is</option></select><select class="in sm" aria-label="Value"><option>Confirmed</option></select><button class="btn ghost icon sm" aria-label="Remove"><i class="ic s ic-x"></i></button></div>
+        <div class="frow"><span class="opw">AND</span><select class="in sm" aria-label="Field"><option>Waiver</option></select><select class="in sm" aria-label="Operator"><option>is not</option></select><select class="in sm" aria-label="Value"><option>Signed</option></select><button class="btn ghost icon sm" aria-label="Remove"><i class="ic s ic-x"></i></button></div>
+        <div class="row" style="margin-top:2px"><span class="opw" style="width:22px">AND</span><span class="t-12 mut">Group</span></div>
+        <div class="gbox">
+          <div class="frow" style="grid-template-columns:30px 130px 120px 1fr 26px"><span class="opw"><select class="in sm" style="width:52px;padding:0 4px" aria-label="Group operator"><option>ANY</option></select></span><select class="in sm" aria-label="Field"><option>Track</option></select><select class="in sm" aria-label="Operator"><option>equals</option></select><select class="in sm" aria-label="Value"><option>Climate &amp; Energy</option></select><button class="btn ghost icon sm" aria-label="Remove"><i class="ic s ic-x"></i></button></div>
+          <div class="frow" style="grid-template-columns:30px 130px 120px 1fr 26px"><span class="opw">OR</span><select class="in sm" aria-label="Field"><option>Track</option></select><select class="in sm" aria-label="Operator"><option>equals</option></select><select class="in sm" aria-label="Value"><option>Health &amp; Bio</option></select><button class="btn ghost icon sm" aria-label="Remove"><i class="ic s ic-x"></i></button></div>
+          <div class="row g2"><button class="btn sm ghost"><i class="ic s ic-plus"></i>Condition</button><button class="btn sm ghost"><i class="ic s ic-plus"></i>Nested group</button></div>
+        </div>
+        <div class="row g2"><button class="btn sm"><i class="ic s ic-plus"></i>Condition</button><button class="btn sm"><i class="ic s ic-plus"></i>Group</button><span class="sp t-12 mut3">Operators adapt to field type: text · number · date · enum · boolean · relation</span></div>
+      </div>
+      <div class="col g2" style="padding:8px 12px;border-top:1px solid var(--line);background:var(--surface-2)"><div class="row"><span class="lbl">Equivalent query</span><a class="t-12 sp"><i class="ic xs ic-copy"></i> Copy · same syntax as CLI &amp; MCP</a></div><div class="mono t-12" style="line-height:1.5">registration:confirmed AND waiver:!signed AND (track:climate OR track:health)</div></div>
+      <div class="row" style="padding:8px 12px;border-top:1px solid var(--line);border-radius:0 0 8px 8px"><span class="t-12 mut3">Applies live · not saved</span><button class="btn sm ghost sp">Cancel</button><button class="btn sm pri">Done</button></div>
+    </div>
+  </div>
+
+  <!-- views menu -->
+  <div class="col g2"><span class="eyebrow">Saved views menu</span>
+    <div class="pop" role="menu" aria-label="Saved views">
+      <div style="padding:8px"><div class="in-wrap"><i class="ic s ic-search"></i><input class="in sm" placeholder="Find a view" aria-label="Find a view"></div></div>
+      <div class="nav-g" style="padding-top:2px">Pinned</div>
+      <div style="padding:0 4px"><div class="menu-i on"><i class="ic s ic-star" style="color:var(--warn)"></i><span class="grow trunc">Needs waiver — Berlin</span><span class="tag warn">modified</span></div><div class="menu-i"><i class="ic s ic-star" style="color:var(--warn)"></i><span class="grow">Not checked in</span><span class="t-12 mut3">1,166</span></div><div class="menu-i"><i class="ic s ic-star" style="color:var(--warn)"></i><span class="grow">Under 18</span><span class="t-12 mut3">88</span></div></div>
+      <div class="nav-g">Shared with organizers</div>
+      <div style="padding:0 4px"><div class="menu-i"><i class="ic s ic-users"></i><span class="grow">Dietary & access — day 1</span><i class="ic xs ic-lock mut3"></i></div><div class="menu-i"><i class="ic s ic-users"></i><span class="grow">Sponsor recruiting opt-in</span></div></div>
+      <div class="nav-g">Organization canonical</div>
+      <div style="padding:0 4px"><div class="menu-i"><i class="ic s ic-shield"></i><span class="grow">Insurance roster</span><span class="tag">managed</span></div></div>
+      <div class="nav-g">Private</div>
+      <div style="padding:0 4px"><div class="menu-i"><i class="ic s ic-user"></i><span class="grow">My check-in shift</span></div></div>
+      <hr class="hr" style="margin:6px 0">
+      <div style="padding:0 4px 4px"><div class="menu-i"><i class="ic s ic-plus"></i>Save as new view…</div><div class="menu-i"><i class="ic s ic-list"></i>Start from template</div></div>
+    </div>
+  </div>
+
+  <!-- columns -->
+  <div class="col g2"><span class="eyebrow">Columns &amp; grouping</span>
+    <div class="pop" role="dialog" aria-label="Columns">
+      <div style="padding:8px"><div class="in-wrap"><i class="ic s ic-search"></i><input class="in sm" placeholder="Find a field (24)" aria-label="Find a field"></div></div>
+      <div style="padding:0 6px" class="col">
+        <label class="menu-i"><i class="ic s ic-grip mut3"></i><input type="checkbox" checked disabled> Name <i class="ic xs ic-pin sp"></i></label>
+        <label class="menu-i"><i class="ic s ic-grip mut3"></i><input type="checkbox" checked> Team</label>
+        <label class="menu-i"><i class="ic s ic-grip mut3"></i><input type="checkbox" checked> Track</label>
+        <label class="menu-i"><i class="ic s ic-grip mut3"></i><input type="checkbox" checked> Registration</label>
+        <label class="menu-i"><i class="ic s ic-grip mut3"></i><input type="checkbox" checked> Waiver</label>
+        <label class="menu-i"><i class="ic s ic-grip mut3"></i><input type="checkbox" checked> Check-in</label>
+        <label class="menu-i"><i class="ic s ic-grip mut3"></i><input type="checkbox"> School / employer</label>
+        <label class="menu-i"><i class="ic s ic-grip mut3"></i><input type="checkbox"> T-shirt size</label>
+        <label class="menu-i"><i class="ic s ic-lock s mut3"></i><input type="checkbox" disabled> Dietary <span class="t-11 mut3 sp">needs Safety role</span></label>
+      </div>
+      <div class="col g2" style="padding:8px 12px;border-top:1px solid var(--line);margin-top:4px"><span class="lbl">Group by</span><select class="in sm" aria-label="Group by"><option>Track</option></select><div class="row g2"><span class="lbl">Then</span><select class="in sm" aria-label="Then group by"><option>None</option></select></div><div class="row g2"><span class="lbl">Aggregates</span><span class="t-12 mut">count · shown in group row + footer</span></div></div>
+      <div class="row" style="padding:8px 12px;border-top:1px solid var(--line)"><a class="t-12">Reset to default</a><span class="sp t-12 mut3">Saved per user</span></div>
+    </div>
+  </div>
+
+  <!-- bulk plan -->
+  <div class="col g2" style="grid-column:1"><span class="eyebrow">Bulk action → plan → approve → apply</span>
+    <div class="dlg" role="dialog" aria-label="Send waiver reminder plan">
+      <div class="row" style="padding:12px 16px;border-bottom:1px solid var(--line)"><h2 style="font-size:16px">Send waiver reminder to 243 people</h2></div>
+      <div class="pn-b col g3">
+        <div class="row g3" style="align-items:flex-start"><i class="ic ic-lock" style="margin-top:2px"></i><span class="t-13">Target is a <b>frozen snapshot</b> of view “Needs waiver — Berlin” taken 14:47:12. People who sign now still receive this run unless you refresh.</span></div>
+        <table class="tbl dense"><thead><tr><th>Effect</th><th class="num" style="width:80px">People</th></tr></thead><tbody>
+          <tr><td>Email + in-app reminder will be sent</td><td class="num">231</td></tr>
+          <tr><td><span class="st warn"><i class="ic ic-warn"></i>Skipped — reminded in the last 2 hours</span></td><td class="num">9</td></tr>
+          <tr><td><span class="st warn"><i class="ic ic-warn"></i>Skipped — no verified email</span></td><td class="num">3</td></tr>
+        </tbody></table>
+        <div class="fld"><label for="tpl">Message template</label><select id="tpl" class="in"><option>Waiver reminder (default) — preview</option></select></div>
+        <div class="t-12 mut">Runs as a background job (~2 min). You can leave this page; progress appears in Operations and the bell.</div>
+      </div>
+      <div class="row" style="padding:10px 16px;border-top:1px solid var(--line)"><button class="btn ghost">Export plan</button><span class="sp"></span><button class="btn ghost">Cancel</button><button class="btn pri">Send to 231</button></div>
+    </div>
+  </div>
+
+  <!-- result / undo / destructive -->
+  <div class="col g3" style="grid-column:2 / 4"><span class="eyebrow">Result, undo and high-impact variants</span>
+    <div class="row" style="background:var(--ink);color:var(--surface);padding:10px 14px;border-radius:var(--r-3);box-shadow:var(--sh-pop)"><i class="ic ic-okc" style="color:#6fd193"></i><span class="t-13 grow">Table assigned for 3 people</span><a style="color:#9dc0ff;font-weight:600" class="t-13">Undo</a><span class="kbd" style="background:transparent;color:#fff;border-color:#777">⌘Z</span></div>
+    <div class="dlg" role="alertdialog" aria-label="Remove participants">
+      <div class="row" style="padding:12px 16px;border-bottom:1px solid var(--line)"><h2 style="font-size:16px">Remove 12 participants from the event?</h2></div>
+      <div class="pn-b col g2"><span class="t-13">They lose access, lose check-in and are removed from teams. Their submissions stay with their teams. Reversible for 30 days from Audit.</span><div class="fld"><label for="cf">Type <span class="mono">remove 12</span> to confirm</label><input id="cf" class="in" placeholder="remove 12"></div></div>
+      <div class="row" style="padding:10px 16px;border-top:1px solid var(--line)"><span class="sp"></span><button class="btn">Cancel</button><button class="btn dng" disabled style="opacity:.6">Remove 12</button></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

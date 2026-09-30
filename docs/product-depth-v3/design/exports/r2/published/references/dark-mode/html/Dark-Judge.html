@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dark judge review</title>
+<link rel="stylesheet" href="../../../system/v3.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+body{margin:0}
+.ev>*{flex:none}
+.q{display:flex;gap:8px;align-items:center;padding:0 12px;min-height:48px;border-bottom:1px solid var(--line);font-size:13px}
+.q.cur{background:var(--accent-tint);box-shadow:inset 3px 0 0 var(--accent)}
+.q .tb{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);width:34px;flex:none}
+.crit{padding:12px 14px;border-bottom:1px solid var(--line)}
+.crit.need{background:var(--warn-tint);box-shadow:inset 3px 0 0 var(--warn)}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin-top:8px}
+.scale .btn{border-radius:0;margin-left:-1px;height:34px;font-weight:600;font-size:14px;flex-direction:column;gap:0}
+.scale .btn:first-child{border-radius:var(--r-2) 0 0 var(--r-2);margin-left:0}.scale .btn:last-child{border-radius:0 var(--r-2) var(--r-2) 0}
+.scale .btn.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);z-index:1}
+</style>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div data-theme="dark" style="width:1440px;height:920px;background:var(--bg);display:flex;flex-direction:column;overflow:hidden">
+  <header class="top" style="height:52px;flex:none;gap:16px;padding:0 20px">
+    <div class="mark" aria-hidden="true">C</div>
+    <div class="col" style="line-height:1.2"><b class="t-13">Gauss Hack 2026</b><span class="t-11 mut3">Judge · Prof. Meera Iyer</span></div>
+    <div class="tabs" style="border:0;height:52px;align-items:stretch;margin-left:8px"><a style="height:52px;margin:0">Overview</a><a aria-current="page" style="height:52px;margin:0">Review queue</a><a style="height:52px;margin:0">Schedule &amp; route</a><a style="height:52px;margin:0">Messages</a></div>
+    <span class="sp"></span>
+    <div class="col" style="width:240px;gap:3px"><div class="row t-12"><b>7 of 24 scored</b><span class="mut3 sp">17 left</span></div><div class="bar h8"><i style="width:29%"></i></div></div>
+    <span class="st warn" title="Pacing"><i class="ic ic-clock"></i>3h 05m · ~10.9 min each</span>
+    <button class="btn sm"><i class="ic s ic-ban"></i>Conflicts &amp; recusal<span class="cnt">2</span></button>
+    <button class="btn ghost icon" aria-label="Display and accessibility"><i class="ic ic-sliders"></i></button>
+  </header>
+  <div style="display:grid;grid-template-columns:288px minmax(0,1fr) 388px;flex:1;min-height:0;gap:1px;background:var(--line)">
+
+    <!-- queue -->
+    <aside style="background:var(--surface);display:flex;flex-direction:column;min-height:0" aria-label="Review queue">
+      <div class="row" style="padding:8px 12px;border-bottom:1px solid var(--line)"><span class="seg"><button class="btn sm on">All 24</button><button class="btn sm">To do 17</button><button class="btn sm">Flag 1</button></span><button class="btn sm ghost icon sp" aria-label="Sort"><i class="ic s ic-sort"></i></button></div>
+      <div class="row t-12" style="padding:6px 12px;background:var(--info-tint);border-bottom:1px solid var(--info-line)"><i class="ic s ic-route" style="color:var(--info)"></i><span><b>Route · Hall 2 north</b> · next A-15 · 40 m walk</span></div>
+      <div class="q"><span class="tb">A-07</span><span class="grow trunc">Grid Whisperers</span><span class="st ok"><i class="ic ic-okc"></i>4.2</span></div>
+      <div class="q"><span class="tb">A-09</span><span class="grow trunc">Heat Island Copilot</span><span class="st ok"><i class="ic ic-okc"></i>3.6</span></div>
+      <div class="q"><span class="tb">A-11</span><span class="grow trunc">Ember: wildfire risk edge inference</span><span class="st ok"><i class="ic ic-okc"></i>4.4</span></div>
+      <div class="q cur" aria-current="true"><span class="tb">A-14</span><span class="grow"><b>Northwind Grid Forecaster</b></span><span class="st info"><i class="ic ic-half"></i>Draft</span></div>
+      <div class="q"><span class="tb">A-15</span><span class="grow trunc">Solar Twin</span><span class="st mute"><i class="ic ic-circle"></i>To do</span></div>
+      <div class="q"><span class="tb">A-18</span><span class="grow trunc">Tidewater Salinity Mapper</span><span class="st mute"><i class="ic ic-circle"></i>To do</span></div>
+      <div class="q"><span class="tb">A-22</span><span class="grow trunc">Load Shedding Game Theory Simulator with a long name</span><span class="st mute"><i class="ic ic-circle"></i>To do</span></div>
+      <div class="q" style="background:var(--warn-tint)"><span class="tb">B-03</span><span class="grow trunc">Latent Space Cartographers</span><span class="st warn"><i class="ic ic-ban"></i>Recusal?</span></div>
+      <div class="q"><span class="tb">B-06</span><span class="grow trunc">Glucose Nowcast</span><span class="st info"><i class="ic ic-half"></i>Draft</span></div>
+      <div class="q"><span class="tb">B-09</span><span class="grow trunc">Sepsis Sentinel</span><span class="st warn"><i class="ic ic-flag"></i>Flagged</span></div>
+      <div class="q"><span class="tb">B-14</span><span class="grow trunc">Radiograph Second-Reader</span><span class="st mute"><i class="ic ic-circle"></i>To do</span></div>
+      <div class="q"><span class="tb">B-22</span><span class="grow trunc">BioSignal Edge Triage</span><span class="st mute"><i class="ic ic-circle"></i>To do</span></div>
+      <div class="q"><span class="tb">C-03</span><span class="grow trunc">Latent Space Cartographers of the Gulf Stream</span><span class="st mute"><i class="ic ic-circle"></i>To do</span></div>
+      <div class="row t-12 mut3" style="margin-top:auto;padding:0 12px;height:32px;border-top:1px solid var(--line);background:var(--surface-2)"><span><span class="kbd">J</span> <span class="kbd">K</span> project</span><span class="sp">Queue keeps your position</span></div>
+    </aside>
+
+    <!-- evidence -->
+    <section style="background:var(--surface);display:flex;flex-direction:column;min-width:0;min-height:0">
+      <div style="padding:12px 20px 0" class="col g2">
+        <div class="row"><h1 style="font-size:20px">Northwind Grid Forecaster</h1><span class="sp row g2"><span class="tag info"><i class="ic ic-lock"></i>Frozen r3 · Sun 13:00</span><a class="t-12">Open full page <i class="ic xs ic-ext"></i></a></span></div>
+        <div class="row t-12 mut" style="gap:14px"><span>Climate &amp; Energy</span><span><i class="ic xs ic-pin"></i> Table A-14 · Hall 2</span><span><i class="ic xs ic-users"></i> 4 members</span><span class="mono">T-0412</span></div>
+        <div class="tabs" style="margin-top:4px"><a aria-current="page">Story</a><a>Artifacts <span class="cnt">3</span></a><a>Demo · 3:12</a><a>Code</a><a>Rubric anchors</a><a>Notes</a></div>
+      </div>
+      <div style="position:relative;flex:1;min-height:0;display:flex;flex-direction:column">
+      <div class="row t-12" style="padding:5px 20px;background:var(--surface-2);border-bottom:1px solid var(--line);gap:12px"><span class="st info"><i class="ic ic-history"></i>Story · 41% read · position kept per tab</span><span class="mut3">Method §2 · Evaluation §3</span><span class="sp mut3">Scores stay editable while you read</span></div>
+      <div style="padding:16px 20px;overflow:hidden;flex:1;position:relative" class="col g3 ev">
+        <p style="font-family:var(--font-read);font-size:16px;line-height:1.6;max-width:70ch"><b>Summary.</b> Northwind forecasts substation-level load 1–24 h ahead using a weather-conditioned sequence model, cutting 24 h MAE by 21.5 % against NWP-Lite on 412 substations while running in 38 ms on a single CPU core.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="well col g2"><span class="eyebrow">Key result</span><table class="tbl dense" style="background:var(--surface)"><thead><tr><th>Model</th><th class="num">MAE 24h</th><th class="num">Latency</th></tr></thead><tbody><tr><td>Persistence</td><td class="num">0.941</td><td class="num">&lt;1 ms</td></tr><tr><td>NWP-Lite</td><td class="num">0.780</td><td class="num">210 ms</td></tr><tr class="sel"><td><b>Northwind</b></td><td class="num"><b>0.612</b></td><td class="num">38 ms</td></tr></tbody></table></div>
+          <div class="ph-art" style="min-height:130px">Figure 2 · Error by horizon</div>
+        </div>
+        <h3 style="font-family:var(--font-sans);font-size:16px;margin:6px 0 0">Method</h3>
+        <p style="font-family:var(--font-read);font-size:16px;line-height:1.6;max-width:70ch">For substation <i>i</i> and horizon <i>h</i> we minimise a pinball-smoothed absolute error and evaluate with MAE<sub>h</sub> = (1/N) Σ |ŷ<sub>i,h</sub> − y<sub>i,h</sub>| (Eq. 1). Weather embeddings are computed once per cell and shared across substations, which is what makes 412 substations fit in 38 ms on one core.</p>
+        <div class="codeblk" style="max-width:70ch"><div class="cb-h"><i class="ic s ic-file"></i>eval.py<span class="t-11 mut3">Python · 3 lines</span></div><pre><span style="display:block"><span class="ln">1</span><span class="k">def</span> <span class="f">mae</span>(pred, y, h):</span><span class="hl"><span class="ln">2</span>    err = np.abs(pred[:, h] - y[:, h])</span><span style="display:block"><span class="ln">3</span>    <span class="k">return</span> <span class="f">float</span>(err.mean())</span></pre></div>
+        <h3 style="font-family:var(--font-sans);font-size:16px;margin:6px 0 0">Evaluation</h3>
+        <p style="font-family:var(--font-read);font-size:16px;line-height:1.6;max-width:70ch">Numbers are 5-seed means with 95 % bootstrap intervals over held-out substations. Removing the weather-embedding branch raises 24 h MAE by 11.4 %; removing calibration raises it by 5.4 %. Gains are largest on substations with under 18 months of history, where NWP-Lite degrades fastest.</p>
+        <h3 style="font-family:var(--font-sans);font-size:16px;margin:6px 0 0">Limitations</h3>
+        <p style="font-family:var(--font-read);font-size:16px;line-height:1.6;max-width:70ch">Performance drops on substations with under 18 months of history; extreme weather regimes are under-represented in training.</p>
+        <div aria-hidden="true" style="position:absolute;right:3px;top:120px;width:6px;height:190px;border-radius:3px;background:var(--line-3);opacity:.55"></div>
+      </div>
+      <div class="col g2" style="flex:none;padding:10px 20px 12px;border-top:1px solid var(--line);background:var(--surface-2)"><div class="row"><span class="eyebrow">Artifacts · opening one keeps your place in the story</span><span class="tag sp"><i class="ic ic-lock"></i>Private notes below</span></div>
+        <div class="row g2"><div class="well row g2 grow" style="background:var(--surface)"><i class="ic ic-play"></i><div class="col"><b class="t-13">Demo video</b><span class="t-12 mut">3:12 · captions</span></div></div><div class="well row g2 grow" style="background:var(--surface)"><i class="ic ic-git"></i><div class="col"><b class="t-13">Repository</b><span class="t-12 mut mono">@4e1c9a7 · Apache-2.0</span></div></div><div class="well row g2 grow" style="background:var(--surface)"><i class="ic ic-db"></i><div class="col"><b class="t-13">Dataset</b><span class="t-12 mut">ENTSO-E · CC BY 4.0</span></div></div></div>
+        <textarea class="in ta" style="min-height:44px;height:44px" aria-label="Personal notes">Ask: is 412 the full fleet or held-out? Benchmark table looks strong; latency claim needs CPU spec.</textarea></div>
+      </div>
+    </section>
+
+    <!-- rubric -->
+    <aside style="background:var(--surface);display:flex;flex-direction:column;min-height:0" aria-label="Scoring rubric">
+      <div class="row" style="padding:10px 14px;border-bottom:1px solid var(--line)"><h2>Score · Round 2 rubric</h2><span class="st ok sp"><i class="ic ic-cloud s"></i>Draft saved 12:41:07</span></div>
+      <div class="crit"><div class="row"><b class="t-13">Technical depth</b><span class="t-12 mut3">30%</span><span class="st ok sp"><i class="ic ic-check"></i>4</span></div><div class="scale" role="radiogroup" aria-label="Technical depth"><button class="btn">1</button><button class="btn">2</button><button class="btn">3</button><button class="btn on" aria-pressed="true">4</button><button class="btn">5</button></div><div class="t-12 mut" style="margin-top:6px"><b>4 —</b> Sound method with evidence beyond a demo; limitations acknowledged.</div></div>
+      <div class="crit"><div class="row"><b class="t-13">Impact &amp; relevance</b><span class="t-12 mut3">25%</span><span class="st ok sp"><i class="ic ic-check"></i>4</span></div><div class="scale" role="radiogroup" aria-label="Impact"><button class="btn">1</button><button class="btn">2</button><button class="btn">3</button><button class="btn on" aria-pressed="true">4</button><button class="btn">5</button></div></div>
+      <div class="crit need"><div class="row"><b class="t-13">Execution &amp; demo</b><span class="t-12 mut3">25%</span><span class="st warn sp"><i class="ic ic-warn"></i>Not scored</span></div><div class="scale" role="radiogroup" aria-label="Execution and demo"><button class="btn">1</button><button class="btn">2</button><button class="btn">3</button><button class="btn">4</button><button class="btn">5</button></div><div class="row g2 t-12 mut" style="margin-top:6px"><span class="kbd">1</span>–<span class="kbd">5</span> to score · <a>Compare with anchors</a></div></div>
+      <div class="crit"><div class="row"><b class="t-13">Originality</b><span class="t-12 mut3">20%</span><span class="st ok sp"><i class="ic ic-check"></i>3</span></div><div class="scale" role="radiogroup" aria-label="Originality"><button class="btn">1</button><button class="btn">2</button><button class="btn on" aria-pressed="true">3</button><button class="btn">4</button><button class="btn">5</button></div></div>
+      <div class="crit" style="border-bottom:0"><div class="fld"><label for="fb">Feedback for the team</label><textarea id="fb" class="in ta" style="min-height:56px" placeholder="Optional · shown to the team after results">Strong benchmark and honest latency numbers…</textarea><span class="hint">Visibility: team, after results are published</span></div></div>
+      <div class="col g2" style="margin-top:auto;padding:12px 14px;border-top:1px solid var(--line);background:var(--surface-2)">
+        <div class="row"><span class="t-12 mut">Weighted (raw)</span><b class="sp" style="font-size:16px">— <span class="t-12 mut3" style="font-weight:400">2 of 3 weights scored</span></b></div>
+        <div class="row g2"><button class="btn"><i class="ic s ic-flag"></i>Flag for organizer</button><button class="btn dng-o"><i class="ic s ic-ban"></i>Recuse…</button></div>
+        <div class="row g2"><button class="btn pri lg grow" disabled>Submit score &amp; next</button></div>
+        <div class="t-11 mut3" style="line-height:1.6"><span class="kbd">1</span>–<span class="kbd">5</span> score · <span class="kbd">Tab</span> next criterion · <span class="kbd">⌘↵</span> submit · <span class="kbd">F</span> flag · <span class="kbd">R</span> recuse · <span class="kbd">J</span><span class="kbd">K</span> project</div>
+      </div>
+    </aside>
+  </div>
+</div>
+</body>
+</html>

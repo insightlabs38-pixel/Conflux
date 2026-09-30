@@ -1,0 +1,12 @@
+version: 1
+program: Conflux Product Depth v3
+state: FROZEN
+controller_epoch: 0
+activated_at: null
+canonical_branch: main
+canonical_commit_at_activation: null
+last_checkpoint: null
+design_manifest: docs/product-depth-v3/design/DESIGN_MANIFEST.yaml
+notes:
+- Stage B queue is installed but not activated.
+- Claude Design may run while frozen; its committed handoff is consumed by PD-DESIGN-B00.

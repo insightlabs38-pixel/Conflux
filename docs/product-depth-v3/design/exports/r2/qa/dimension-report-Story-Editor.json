@@ -1,0 +1,11 @@
+[
+ {
+  "name": "Story-Editor",
+  "declared": "1440x960",
+  "root": "1440x960",
+  "scrollH": 960,
+  "scrollW": 1440,
+  "contentBottom": 1202,
+  "contentRight": 1440
+ }
+]

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Shell overlays</title>
+<link rel="stylesheet" href="../../../system/v3.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>body{margin:0}.itm{display:flex;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line)}</style>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div style="width:1440px;height:640px;background:var(--surface-3);padding:32px 40px;display:grid;grid-template-columns:repeat(4,1fr);gap:24px;align-items:start;overflow:hidden">
+
+  <div class="col g2"><span class="eyebrow">Event / workspace switcher</span>
+    <div class="pop" role="dialog" aria-label="Switch event">
+      <div style="padding:8px"><div class="in-wrap"><i class="ic ic-search"></i><input class="in sm" placeholder="Find event or organization" aria-label="Find event"></div></div>
+      <div class="nav-g" style="padding-top:2px">Current</div>
+      <div class="menu-i on" style="margin:0 4px"><i class="ic s ic-check"></i><span class="grow trunc">Gauss Hack 2026</span><span class="tag ok">Judging</span></div>
+      <div class="nav-g">Favorites</div>
+      <div class="menu-i" style="margin:0 4px"><i class="ic s ic-star" style="color:var(--warn)"></i><span class="grow trunc">Gauss Spring Sprint 2026</span><span class="tag">Archived</span></div>
+      <div class="nav-g">Recent</div>
+      <div class="menu-i" style="margin:0 4px"><span class="grow trunc">Gauss Hack 2026 — Staging</span><span class="tag">Draft</span></div>
+      <div class="menu-i" style="margin:0 4px"><span class="grow trunc">Campus Robotics Cup</span><span class="tag info">Open</span></div>
+      <div class="menu-i" style="margin:0 4px"><span class="grow trunc">ML Reproducibility Challenge</span><span class="tag">Published</span></div>
+      <hr class="hr" style="margin:6px 0">
+      <div style="padding:4px"><div class="menu-i"><i class="ic s ic-plus"></i>New event</div><div class="menu-i"><i class="ic s ic-globe"></i>Organization: Gauss e.V. <i class="ic s ic-chev-r" style="margin-left:auto"></i></div></div>
+    </div>
+    <p class="t-12 mut" style="line-height:1.5">Event state is always the only tag; workspace = organization. Switching preserves the current section when it exists on the target event.</p>
+  </div>
+
+  <div class="col g2"><span class="eyebrow">Notification / inbox center</span>
+    <div class="pop" role="dialog" aria-label="Notifications">
+      <div class="row" style="padding:10px 12px;border-bottom:1px solid var(--line)"><h2>Notifications</h2><button class="btn sm ghost sp">Mark all read</button></div>
+      <div class="tabs sm" style="padding:0 6px"><a aria-current="page">Needs action <span class="cnt w">3</span></a><a>All</a><a>Mentions</a></div>
+      <div class="itm" style="background:var(--accent-tint)"><i class="ic ic-xc" style="color:var(--err);margin-top:2px"></i><div class="col grow"><span class="t-13"><b>Webhook sponsor-crm</b> disabled after 5 failures</span><span class="t-12 mut3">14:44 · Operations</span><div class="row g2" style="margin-top:6px"><button class="btn sm">Retry</button><button class="btn sm ghost">Acknowledge</button></div></div></div>
+      <div class="itm" style="background:var(--accent-tint)"><i class="ic ic-warn" style="color:var(--warn);margin-top:2px"></i><div class="col grow"><span class="t-13"><b>6 judges</b> haven’t started; closes in 3h</span><span class="t-12 mut3">14:30 · Judging</span></div></div>
+      <div class="itm" style="background:var(--accent-tint)"><i class="ic ic-flag" style="color:var(--warn);margin-top:2px"></i><div class="col grow"><span class="t-13">Judge <b>Prof. Iyer</b> flagged “Kelvin” for review</span><span class="t-12 mut3">14:12 · Eligibility</span></div></div>
+      <div class="itm"><i class="ic ic-okc" style="color:var(--ok);margin-top:2px"></i><div class="col grow"><span class="t-13">Badge print batch 2 finished (412)</span><span class="t-12 mut3">13:58</span></div></div>
+      <div class="itm" style="border-bottom:0"><i class="ic ic-msg" style="margin-top:2px"></i><div class="col grow"><span class="t-13"><b>Priya Nair</b> mentioned you in Results checklist</span><span class="t-12 mut3">13:20</span></div></div>
+    </div>
+    <p class="t-12 mut" style="line-height:1.5">Actionable items carry their action. Unread = tinted row + bold subject (not colour alone). Same list powers email digests.</p>
+  </div>
+
+  <div class="col g2"><span class="eyebrow">Account, role &amp; preferences</span>
+    <div class="pop" role="menu" aria-label="Account">
+      <div class="row g3" style="padding:12px"><span class="avatar xl">AO</span><div class="col"><b class="t-13">Amara Okafor</b><span class="t-12 mut">amara@gauss-hack.example</span></div></div>
+      <div class="bn" style="margin:0 8px 8px;padding:8px 10px"><i class="ic s ic-eye"></i><span class="t-12"><b>Viewing as Organizer.</b> You also have Judge and Mentor roles here.</span></div>
+      <div class="nav-g" style="padding-top:2px">Switch role</div>
+      <div style="padding:0 4px"><div class="menu-i on"><i class="ic s ic-check"></i>Organizer</div><div class="menu-i" style="padding-left:32px">Judge</div><div class="menu-i" style="padding-left:32px">Mentor</div></div>
+      <div class="nav-g">Preview as (read-only, no impersonation)</div>
+      <div style="padding:0 4px"><div class="menu-i"><i class="ic s ic-eye"></i>Participant view</div><div class="menu-i"><i class="ic s ic-eye"></i>Judge view</div><div class="menu-i"><i class="ic s ic-globe"></i>Public site</div></div>
+      <div class="nav-g">Preferences</div>
+      <div style="padding:0 4px"><div class="menu-i"><i class="ic s ic-list"></i>Density<span class="t-12 mut3" style="margin-left:auto">Standard <i class="ic xs ic-chev-r"></i></span></div><div class="menu-i"><i class="ic s ic-sliders"></i>Theme<span class="t-12 mut3" style="margin-left:auto">System <i class="ic xs ic-chev-r"></i></span></div><div class="menu-i"><i class="ic s ic-kbd"></i>Keyboard shortcuts<span class="kbd">?</span></div></div>
+      <hr class="hr" style="margin:6px 0">
+      <div style="padding:0 4px 4px"><div class="menu-i">Profile &amp; history</div><div class="menu-i">Sign out</div></div>
+    </div>
+  </div>
+
+  <div class="col g2"><span class="eyebrow">Preview banner &amp; shortcuts help</span>
+    <div class="col" style="border:1px solid var(--warn-line);border-radius:var(--r-3);overflow:hidden;background:var(--surface)">
+      <div class="row" style="background:var(--warn-tint);padding:8px 12px;border-bottom:1px solid var(--warn-line)"><i class="ic s ic-eye" style="color:var(--warn)"></i><span class="t-12 grow"><b>Previewing as Participant</b> · read-only · no data is changed</span><button class="btn sm">Exit</button></div>
+      <div class="pn-b t-12 mut">Persistent for the whole preview; cannot be dismissed. Actions that would write are disabled with reason.</div>
+    </div>
+    <div class="dlg" role="dialog" aria-label="Keyboard shortcuts">
+      <div class="row" style="padding:10px 14px;border-bottom:1px solid var(--line)"><h2>Keyboard shortcuts</h2><span class="kbd sp">Esc</span></div>
+      <div class="pn-b col g2" style="padding:10px 14px">
+        <div class="eyebrow">Global</div>
+        <div class="row t-13"><span class="grow">Command palette</span><span class="kbd">⌘ K</span></div>
+        <div class="row t-13"><span class="grow">Go to Participants</span><span class="kbd">G</span><span class="kbd">P</span></div>
+        <div class="row t-13"><span class="grow">Focus search</span><span class="kbd">/</span></div>
+        <div class="eyebrow" style="margin-top:6px">Grids</div>
+        <div class="row t-13"><span class="grow">Move / open inspector</span><span class="kbd">J</span><span class="kbd">K</span><span class="kbd">↵</span></div>
+        <div class="row t-13"><span class="grow">Select / range</span><span class="kbd">X</span><span class="kbd">⇧ ↓</span></div>
+        <div class="row t-13"><span class="grow">Edit cell · Undo</span><span class="kbd">E</span><span class="kbd">⌘ Z</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

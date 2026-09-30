@@ -1,0 +1,11 @@
+[
+ {
+  "name": "Shell-Judge",
+  "declared": "1280x800",
+  "root": "1280x800",
+  "scrollH": 800,
+  "scrollW": 1280,
+  "contentBottom": 800,
+  "contentRight": 1280
+ }
+]

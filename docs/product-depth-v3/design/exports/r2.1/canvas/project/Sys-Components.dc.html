@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>System v3 component grammar</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./v3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>body{margin:0}.spec li{margin-bottom:3px}</style>
+</helmet>
+<div style="width:1440px;height:2540px;background:var(--bg);padding:40px 48px;display:grid;grid-template-columns:1fr 1fr;gap:20px;align-content:start;overflow:hidden">
+  <div style="grid-column:1/-1" class="row"><div class="col g1"><div class="eyebrow">design/system-v3 · r2.1</div><h1 style="font-size:28px;letter-spacing:-.02em">Component grammar</h1></div><p class="mut sp t-13" style="max-width:520px">Rules first, pixels second. Every organizer page is assembled from this list; anything not here needs a documented escalation.</p></div>
+
+  <!-- ACTIONS -->
+  <div class="pn">
+    <div class="pn-h"><h2>Buttons &amp; actions</h2><span class="t-12 mut3">One primary per local context</span></div>
+    <div class="pn-b col g3">
+      <div class="row g2" style="flex-wrap:wrap"><button class="btn pri">Publish results</button><button class="btn">Save draft</button><button class="btn ghost">Cancel</button><button class="btn"><i class="ic ic-plus"></i>Add filter</button><button class="btn icon" aria-label="Columns"><i class="ic ic-cols"></i></button><button class="btn" disabled>Approve (2 of 3)</button><button class="btn pri busy"><i class="ic ic-spin"></i>Applying…</button></div>
+      <div class="row g2" style="flex-wrap:wrap"><button class="btn sm">Assign judges</button><button class="btn sm"><i class="ic ic-down"></i>Export CSV</button><button class="btn sm ghost"><i class="ic ic-flag"></i>Flag</button><span class="seg"><button class="btn sm on">List</button><button class="btn sm">Board</button><button class="btn sm">Matrix</button></span><button class="btn sm dng-o">Remove 12…</button></div>
+      <ul class="spec t-13" style="margin:0;padding-left:18px;line-height:1.5">
+        <li><b>Primary</b> (filled accent): the single forward action of a panel/page. Right-aligned in footers, left of the toolbar cluster in headers.</li>
+        <li><b>Secondary</b> (outlined): default; border <span class="mono">line-3</span> (≥3:1, light and dark). <b>Ghost</b>/text link: borderless — cancel, tertiary, toolbar tools. Segmented = one bordered group; tags/status are not buttons. Disabled: fill + <span class="mono">line</span> border + reason. <b>Icon-only</b> needs <span class="mono">aria-label</span> + tooltip.</li>
+        <li><b>Frequent actions stay visible.</b> Kebab menus hold ≤4 rare actions; a row exposes 1–2 inline actions on hover/focus (<span class="mono">.rowact</span>) and the same actions in the inspector.</li>
+        <li><b>Destructive</b> = outlined neutral → confirmation dialog whose final button is the only red element. Label states the object and count: “Remove 12 participants”.</li>
+        <li>Disabled buttons explain why in an adjacent hint or tooltip reachable by keyboard.</li>
+        <li>Async: button shows spinner + present-tense verb, stays same width, blocks double-submit; result goes to inline status or toast (undo where reversible).</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- FORMS -->
+  <div class="pn">
+    <div class="pn-h"><h2>Form controls</h2><span class="t-12 mut3">Label above, hint below, error replaces hint</span></div>
+    <div class="pn-b" style="display:grid;grid-template-columns:1fr 1fr;gap:12px 16px">
+      <div class="fld"><label for="f1">Team size limit</label><input id="f1" class="in" value="5"><span class="hint">Applies to all tracks. Overridable per track.</span></div>
+      <div class="fld"><label for="f2">Submission deadline</label><input id="f2" class="in bad" value="Sun 12 Oct 2026, 09:00" aria-invalid="true"><span class="err-t"><i class="ic ic-xc s"></i>Must be before judging opens (Sun 12 Oct, 08:30).</span></div>
+      <div class="fld"><label for="f3">Event timezone</label><div class="in-wrap"><i class="ic ic-globe"></i><input id="f3" class="in" value="Europe/Berlin (UTC+2)"></div></div>
+      <div class="fld"><label for="f4">Slug</label><input id="f4" class="in ro" value="gauss-hack-2026" readonly><span class="hint">Locked after publish. Change via redirect.</span></div>
+      <div class="col g2"><span class="lbl">Registration</span><label class="chk"><input type="radio" checked name="r"> Open to all</label><label class="chk"><input type="radio" name="r"> Invite only</label><label class="chk"><input type="radio" name="r"> Application + review</label></div>
+      <div class="col g2"><span class="lbl">Policies</span><label class="chk"><input type="checkbox" checked> Require code of conduct</label><label class="chk"><input type="checkbox"> Allow solo teams</label><div class="row g2"><span class="sw on"></span><span class="t-13">Allow late submissions</span></div></div>
+      <ul class="t-13" style="grid-column:1/-1;margin:0;padding-left:18px;line-height:1.5">
+        <li>Single column in forms; two columns only for short paired fields. Inline validation on blur, summary banner on submit with links to fields.</li>
+        <li>Required is the default; mark <em>optional</em>. Never placeholder-as-label. Units and formats in the hint (“minutes”, “UTC”).</li>
+        <li>Toggles apply immediately only in settings lists with autosave state; otherwise they are part of a form with Save.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="pn" style="grid-column:1/-1">
+    <div class="pn-h"><h2>Table / data-grid grammar</h2><span class="t-12 mut3">Full pattern in D3. This is the atom.</span></div>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 380px">
+      <div style="overflow:hidden">
+        <table class="tbl dense">
+          <thead><tr><th class="ck"><input type="checkbox" aria-label="Select all"></th><th class="sorted">Team <i class="ic ic-sort"></i></th><th>Track</th><th>Status</th><th class="num">Members</th><th class="num">Score</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="ck"><input type="checkbox" aria-label="Select"></td><td>Northwind Grid Forecaster</td><td>Climate &amp; Energy</td><td><span class="st ok"><i class="ic ic-okc"></i>Submitted</span></td><td class="num">4</td><td class="num">4.25</td><td class="rowact"><button class="btn sm ghost">Open</button></td></tr>
+            <tr class="sel"><td class="ck"><input type="checkbox" checked aria-label="Select"></td><td>Latent Space Cartographers</td><td>Open Track</td><td><span class="st warn"><i class="ic ic-warn"></i>Missing repo</span></td><td class="num">3</td><td class="num">—</td><td class="rowact"><button class="btn sm ghost">Open</button></td></tr>
+            <tr class="cur"><td class="ck"><input type="checkbox" aria-label="Select"></td><td>BioSignal Edge Triage</td><td>Health</td><td><span class="st info"><i class="ic ic-half"></i>In review</span></td><td class="num">5</td><td class="num">3.90</td><td class="rowact"><button class="btn sm ghost">Open</button></td></tr>
+            <tr><td class="ck"><input type="checkbox" aria-label="Select"></td><td>Kelvin</td><td>Climate &amp; Energy</td><td><span class="st err"><i class="ic ic-xc"></i>Ineligible</span></td><td class="num">2</td><td class="num">—</td><td class="rowact"></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul class="t-13" style="margin:0;padding:12px 16px 12px 30px;border-left:1px solid var(--line);line-height:1.5">
+        <li><b>Header</b>: 32px, sticky, sentence case, sort glyph only on sortable columns; sorted column ink + accent glyph.</li>
+        <li><b>Alignment</b>: text left, numbers right in tabular figures, status left. IDs mono, tertiary.</li>
+        <li><b>States</b>: hover = 2% wash · <b>selected</b> = accent tint (+ checked box) · <b>cursor</b> = 2px accent left edge + top/bottom rule (keyboard). Selected ≠ cursor.</li>
+        <li>Zebra striping: never. Row dividers: hairline. Vertical rules: never.</li>
+        <li>Truncate with ellipsis + full text in tooltip and inspector; never wrap in dense mode.</li>
+        <li>Numbers: ≤2 decimals in display (4.25), full precision in inspector/export.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- NAVIGATION + TABS -->
+  <div class="pn">
+    <div class="pn-h"><h2>Navigation &amp; tabs</h2></div>
+    <div class="pn-b col g3">
+      <div style="display:grid;grid-template-columns:200px 1fr;gap:16px">
+        <div class="well col" style="padding:6px;gap:2px;background:var(--surface)">
+          <a class="nav-i"><i class="ic ic-home"></i>Overview</a>
+          <a class="nav-i" aria-current="page"><i class="ic ic-users"></i>Participants<span class="cnt">5,012</span></a>
+          <a class="nav-i"><i class="ic ic-file"></i>Projects<span class="cnt w">37</span></a>
+          <div class="nav-g" style="padding-top:8px">Advanced</div>
+          <a class="nav-i"><i class="ic ic-box"></i>Integrations<i class="ic s ic-chev-r sp"></i></a>
+        </div>
+        <div class="col g3">
+          <div class="tabs"><a aria-current="page">Applications <span class="cnt">412</span></a><a>Teams</a><a>Waitlist</a><a>Check-in</a></div>
+          <div class="crumbs"><span>Judging</span><i class="ic s ic-chev-r"></i><span>Assignments</span><i class="ic s ic-chev-r"></i><span class="cur">Round 2 · Climate</span></div>
+        </div>
+      </div>
+      <ul class="t-13" style="margin:0;padding-left:18px;line-height:1.5">
+        <li>Rail lists ≤6 items by default per role; “Advanced” group collapsed until enabled features or the user open it. Enabled-feature-aware: absent features never appear as disabled links.</li>
+        <li>Tabs switch <em>views of the same object</em> (URL-backed, keyboard arrows); they are not steps. Max 6 visible; overflow → “More”.</li>
+        <li>Breadcrumbs only when depth ≥3; last crumb is the page title — do not repeat it in an H1.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- DRAWERS DIALOGS TOOLTIPS -->
+  <div class="pn">
+    <div class="pn-h"><h2>Inspectors, dialogs, popovers, tooltips</h2></div>
+    <div class="pn-b col g3">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="well" style="background:var(--surface-3);position:relative;height:150px;padding:0;overflow:hidden">
+          <div style="position:absolute;top:0;right:0;bottom:0;width:60%;background:var(--surface);border-left:1px solid var(--line-2);padding:10px" class="col g2"><div class="row"><b class="t-13">BioSignal Edge Triage</b><i class="ic s ic-x sp"></i></div><div class="t-12 mut">Inspector · 380px · list stays visible, position kept</div><div class="bar"><i style="width:60%"></i></div></div>
+        </div>
+        <div class="well" style="background:var(--surface-3);height:150px;display:flex;align-items:center;justify-content:center"><div class="dlg col g2" style="width:230px;padding:12px"><b class="t-13">Remove 12 participants?</b><span class="t-12 mut">Frozen snapshot of 12. Reversible for 30 days.</span><div class="row"><button class="btn sm ghost sp">Cancel</button><button class="btn sm dng">Remove 12</button></div></div></div>
+      </div>
+      <div class="row g3"><div class="pop" style="padding:4px;width:170px"><div class="menu-i on"><i class="ic s ic-eye"></i>Open<span class="kbd">↵</span></div><div class="menu-i"><i class="ic s ic-flag"></i>Flag<span class="kbd">F</span></div><div class="menu-i"><i class="ic s ic-msg"></i>Message</div></div><div style="background:var(--ink);color:var(--surface);padding:5px 8px;border-radius:var(--r-2);font-size:12px">Sort by score <span class="kbd" style="background:transparent;color:#fff;border-color:#888">S</span></div></div>
+      <ul class="t-13" style="margin:0;padding-left:18px;line-height:1.5">
+        <li><b>Inspector</b> (non-modal, right, 380–480, resizable): the default way to view/edit a row. Esc closes, focus returns to the row. Never covers the table it inspects at ≥1280.</li>
+        <li><b>Dialog</b> (modal, ≤480, centred): irreversible or plan/approve steps only. Title = verb + object; body states scope and reversibility; focus starts on Cancel for destructive.</li>
+        <li><b>Tooltip</b>: label or shortcut only, 500ms, also on focus; never the only place for required info. <b>Popover</b>: menus, pickers, filters; Esc dismisses.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- LOADING/EMPTY/ERROR + MOTION -->
+  <div class="pn">
+    <div class="pn-h"><h2>Loading · empty · error</h2></div>
+    <div class="pn-b col g3">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div class="well col g2"><span class="eyebrow">Loading (predictable)</span><div class="sk" style="width:80%"></div><div class="sk" style="width:60%"></div><div class="sk" style="width:70%"></div></div>
+        <div class="well col g2"><span class="eyebrow">Empty</span><b class="t-13">No teams match this view</b><span class="t-12 mut">Clear 2 filters, or invite teams.</span><div class="row g2"><button class="btn sm">Clear filters</button></div></div>
+        <div class="well col g2"><span class="eyebrow">Error</span><b class="t-13" style="color:var(--err)">Couldn’t load teams</b><span class="t-12 mut">Your filters were kept. Nothing was changed.</span><div class="row"><button class="btn sm"><i class="ic ic-refresh"></i>Retry</button></div></div>
+      </div>
+      <ul class="t-13" style="margin:0;padding-left:18px;line-height:1.5">
+        <li>Skeleton rows only where the layout is fixed (tables, lists); otherwise inline spinner + text. &gt;800ms gets a progress label; jobs &gt;3s become async jobs with a persistent progress row.</li>
+        <li>Empty: say why, offer the one next action. First-run empty may include a single 20px glyph — no illustrations.</li>
+        <li>Error: what failed, whether data was kept, what retry does, error reference in mono for support. Permission-denied names the missing role and who can grant it.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="pn">
+    <div class="pn-h"><h2>Motion · focus · keyboard</h2></div>
+    <div class="pn-b col g3">
+      <div class="row g3" style="flex-wrap:wrap"><button class="btn" style="box-shadow:var(--focus)">Focused button</button><input class="in" style="width:170px;box-shadow:var(--focus);border-color:var(--accent)" value="Focused input"><span class="kbd">J</span><span class="kbd">K</span><span class="kbd">↑</span><span class="kbd">↓</span><span class="kbd">Space</span><span class="kbd">⇧ Click</span><span class="kbd">⌘ K</span><span class="kbd">?</span></div>
+      <ul class="t-13" style="margin:0;padding-left:18px;line-height:1.5">
+        <li><b>Focus ring</b>: 2px accent outline with 2px surface gap, on every interactive element; never removed. Visible on tinted rows and in forced-colors.</li>
+        <li><b>Motion</b>: 120–180ms opacity/transform for inspector, popover, toast only. No ambient, parallax or looping decoration; spinners/skeletons stop under <span class="mono">prefers-reduced-motion</span> (static state text remains).</li>
+        <li><b>Global keys</b>: <span class="kbd">⌘K</span> command/search · <span class="kbd">?</span> shortcuts · <span class="kbd">G</span> then letter navigates · <span class="kbd">/</span> focus search · <span class="kbd">Esc</span> close top layer. Grid: <span class="kbd">J</span>/<span class="kbd">K</span> or arrows move cursor, <span class="kbd">X</span>/<span class="kbd">Space</span> select, <span class="kbd">⇧</span>+arrows range, <span class="kbd">↵</span> open inspector, <span class="kbd">E</span> edit cell.</li>
+        <li>Tab order follows visual order; inspector is inserted after its list; dialogs trap focus and restore it. Grids are a <span class="mono">role=grid</span> with one tab stop and roving focus.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- RESPONSIVE + PUBLIC vs OPERATOR -->
+  <div class="pn">
+    <div class="pn-h"><h2>Responsive rules</h2></div>
+    <table class="tbl dense">
+      <thead><tr><th style="width:110px">Breakpoint</th><th>Behaviour</th></tr></thead>
+      <tbody>
+        <tr><td class="mono t-12">≥1800 wide</td><td class="t-12" style="white-space:normal;padding:6px 10px">Same shell (rail 216 + inspector 420 — never stretched). Extra width becomes columns and readable values; dense mode is suggested; no giant cards. Ref: Wide-1920.</td></tr>
+        <tr><td class="mono t-12">1440–1799</td><td class="t-12" style="white-space:normal;padding:6px 10px">Rail 216 + grid + inspector 420; optional 2nd pane (ops mode).</td></tr>
+        <tr><td class="mono t-12">1024–1439</td><td class="t-12" style="white-space:normal;padding:6px 10px">Rail collapses to 52px icons; inspector is docked (push, 340–380px); grid keeps priority columns with a two-line name cell; secondary toolbar controls fold into “View”. Ref: Resp-1024.</td></tr>
+        <tr><td class="mono t-12">768–1023</td><td class="t-12" style="white-space:normal;padding:6px 10px">Top bar + drawer nav; two-pane workflows keep both panes and the third becomes a drawer; grids keep the sticky name column; inspector = full-height sheet; targets ≥44px. Ref: Resp-768.</td></tr>
+        <tr><td class="mono t-12">&lt;768</td><td class="t-12" style="white-space:normal;padding:6px 10px">Task-focused bottom nav (≤5). Grids become row-lists: title, one status, 2 key fields, tap → detail page. Bulk actions in a bottom bar. Body ≥16px on inputs (no zoom); targets ≥44px.</td></tr>
+        <tr><td class="mono t-12">Text</td><td class="t-12" style="white-space:normal;padding:6px 10px">Reflows at 200% zoom without horizontal scroll (except data grids/code, which scroll inside their container).</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="pn">
+    <div class="pn-h"><h2>Public vs operator</h2></div>
+    <div class="pn-b col g3">
+      <table class="tbl dense"><thead><tr><th></th><th>Operator (app)</th><th>Public (event/project)</th></tr></thead><tbody>
+        <tr><td class="t-12">Base size</td><td class="t-12">13–14</td><td class="t-12">16; reading 17 serif</td></tr>
+        <tr><td class="t-12">Title</td><td class="t-12">20 max</td><td class="t-12">24–32</td></tr>
+        <tr><td class="t-12">Width</td><td class="t-12">Fluid, dense</td><td class="t-12">Max 1120; prose 68ch</td></tr>
+        <tr><td class="t-12">Accent</td><td class="t-12">Fixed blue</td><td class="t-12">Organizer <span class="mono">--pub-accent</span></td></tr>
+        <tr><td class="t-12">Hero</td><td class="t-12">None</td><td class="t-12">none · <b>compact</b> · standard · immersive (opt-in)</td></tr>
+      </tbody></table>
+      <div class="well col g2">
+        <span class="eyebrow">Compact hero rule (default)</span>
+        <div class="row g3"><div class="mark">GH</div><div class="col grow"><b style="font-size:16px">Gauss Hack 2026</b><span class="t-12 mut">12–13 Oct · Berlin + online · Judging open</span></div><button class="btn pri sm">Register</button></div>
+        <span class="t-12 mut">160–240px total including nav; identity + status + one primary action; content begins above the fold. Standard ≤ 360px. Mobile ≤ 120px. Missing art falls back to this typographic lockup.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANTI SLOP -->
+  <div class="pn" style="grid-column:1/-1">
+    <div class="pn-h"><h2>Anti-slop rules — review gate for every screen</h2><span class="t-12 mut3">A PR that violates one needs a written exception</span></div>
+    <div class="pn-b" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px 28px;font-size:13px;line-height:1.45">
+      <div><span class="st err"><i class="ic ic-x"></i>No gradients</span> in chrome, buttons or backgrounds (data-viz ramps and placeholder art excepted).</div>
+      <div><span class="st err"><i class="ic ic-x"></i>No coloured icon tiles</span> next to headings; icons are 16px, currentColor.</div>
+      <div><span class="st err"><i class="ic ic-x"></i>No KPI-card grids</span> — use a summary strip (one hairline, ≤6 figures) linked to filtered records.</div>
+      <div><span class="st err"><i class="ic ic-x"></i>No nested cards</span> — one panel level; use hairlines and headings inside.</div>
+      <div><span class="st err"><i class="ic ic-x"></i>No pill soup</span> — ≤1 tag per row; attributes are text or columns.</div>
+      <div><span class="st err"><i class="ic ic-x"></i>No oversized titles</span> in the app; no marketing copy in operator screens.</div>
+      <div><span class="st err"><i class="ic ic-x"></i>No repeated labels</span> in breadcrumb + H1 + card title.</div>
+      <div><span class="st err"><i class="ic ic-x"></i>No hidden primary actions</span> in kebab menus.</div>
+      <div><span class="st err"><i class="ic ic-x"></i>No alarm pages</span> — red only on the failing item and final destructive button.</div>
+      <div><span class="st err"><i class="ic ic-x"></i>No fake “AI” affordances</span> on deterministic flows (scores, eligibility, winners).</div>
+      <div><span class="st err"><i class="ic ic-x"></i>No false precision</span> — 2 decimals max; dates in event timezone with relative hint.</div>
+      <div><span class="st err"><i class="ic ic-x"></i>No opaque IDs as input</span> — pickers show names; IDs are copyable secondary text.</div>
+      <div><span class="st err"><i class="ic ic-x"></i>No glass / blur / ambient motion.</span> Shadow only on floating layers.</div>
+      <div><span class="st err"><i class="ic ic-x"></i>No 3-column card dashboards</span> where a sortable table is the task.</div>
+      <div><span class="st ok"><i class="ic ic-check"></i>Screenshot test:</span> crop any region — it must read as mature production software with no context.</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2540}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

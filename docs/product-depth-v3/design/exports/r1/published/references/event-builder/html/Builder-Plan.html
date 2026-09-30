@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Event builder plan apply and extension config</title>
+<link rel="stylesheet" href="../../../system/v3.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+body{margin:0}
+.ch{display:flex;gap:10px;padding:9px 14px;border-bottom:1px solid var(--line);align-items:flex-start;font-size:13px}
+.ch.on{background:var(--accent-tint);box-shadow:inset 3px 0 0 var(--accent)}
+.yml{font-family:var(--font-mono);font-size:12px;line-height:1.6;background:#f7f8fa;border:1px solid var(--line);border-radius:var(--r-2);padding:8px 0;overflow:hidden}
+.yml div{padding:0 12px;white-space:pre}
+.yml .add{background:var(--ok-tint);color:var(--ok)}.yml .del{background:var(--err-tint);color:var(--err)}.yml .ctx{color:var(--ink-3)}
+.grp{border:1px solid var(--line);border-radius:var(--r-2)}
+.grp>.gh{display:flex;align-items:center;gap:8px;height:34px;padding:0 12px;background:var(--surface-2);border-bottom:1px solid var(--line);font-size:12px;font-weight:600;color:var(--ink-2)}
+</style>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div style="width:1440px;height:920px;background:var(--bg);display:flex;flex-direction:column;overflow:hidden">
+  <header class="top" style="flex:none">
+    <button class="btn ghost sm"><i class="ic s ic-chev-l"></i>Event setup</button>
+    <div class="col" style="line-height:1.2"><b class="t-13">Plan #218 · Gauss Hack 2027</b><span class="t-11 mut3">Draft vs live · same plan engine as CLI &amp; Event-as-Code</span></div>
+    <span class="tag info" style="margin-left:6px"><i class="ic ic-clock"></i>Valid until 13:45 (live state changed → re-validate)</span>
+    <span class="sp"></span>
+    <span class="seg" role="group" aria-label="Plan view"><button class="btn sm on">Impact</button><button class="btn sm"><i class="ic s ic-term"></i>Event-as-Code diff</button></span>
+    <button class="btn sm">Validate</button><button class="btn sm pri">Apply plan…</button>
+  </header>
+  <div style="display:grid;grid-template-columns:336px minmax(0,1fr) 440px;flex:1;min-height:0;gap:1px;background:var(--line)">
+    <aside style="background:var(--surface);overflow:hidden">
+      <div class="row" style="padding:10px 14px;border-bottom:1px solid var(--line)"><h2>Changes</h2><span class="cnt">7</span><span class="t-12 mut3 sp">by area</span></div>
+      <div class="nav-g" style="padding-top:8px">Stages &amp; schedule · 2</div>
+      <div class="ch on"><i class="ic s ic-pencil" style="margin-top:2px"></i><div class="col grow"><b>Submissions close</b><span class="mono t-12 mut">09:00 → 13:00 (Sun)</span></div><span class="tag warn">high</span></div>
+      <div class="ch"><i class="ic s ic-pencil" style="margin-top:2px"></i><div class="col grow"><b>Judging · Round 1 opens</b><span class="mono t-12 mut">13:00 → 13:30</span></div></div>
+      <div class="nav-g">Registration · 2</div>
+      <div class="ch"><i class="ic s ic-plus" style="margin-top:2px;color:var(--ok)"></i><div class="col grow"><b>Add form “Under-18 consent”</b><span class="t-12 mut">4 fields · required at check-in</span></div></div>
+      <div class="ch"><i class="ic s ic-pencil" style="margin-top:2px"></i><div class="col grow"><b>Capacity</b><span class="mono t-12 mut">4,200 → 5,000</span></div></div>
+      <div class="nav-g">Pages · 1</div>
+      <div class="ch"><i class="ic s ic-pencil" style="margin-top:2px"></i><div class="col grow"><b>Hero: standard → compact</b><span class="t-12 mut">Overview page</span></div></div>
+      <div class="nav-g">Extensions · 2</div>
+      <div class="ch"><i class="ic s ic-plus" style="margin-top:2px;color:var(--ok)"></i><div class="col grow"><b>Enable Sponsor CRM sync v1.4.2</b><span class="t-12 mut">2 permissions requested</span></div></div>
+      <div class="ch"><i class="ic s ic-pencil" style="margin-top:2px"></i><div class="col grow"><b>Webhook: retry policy</b><span class="mono t-12 mut">3 → 5 attempts</span></div></div>
+    </aside>
+
+    <section style="background:var(--bg);padding:14px 16px;display:flex;flex-direction:column;gap:12px;min-width:0;overflow:hidden">
+      <div class="pn"><div class="pn-h"><h2>Change impact</h2><span class="t-12 mut3">what this changes for people and jobs, computed from live data</span></div>
+        <table class="tbl dense"><thead><tr><th style="width:190px">Change</th><th>Effect</th><th class="num" style="width:90px">Affected</th><th style="width:90px">Reversible</th></tr></thead><tbody>
+          <tr class="sel"><td><b>Submissions close → 13:00</b></td><td class="t-12" style="white-space:normal;padding:6px 10px">Deadline shown to teams moves +4 h; judging Round 1 shifts +30 min; reminder emails rescheduled.</td><td class="num">1,284 teams</td><td><span class="st ok"><i class="ic ic-check"></i>Yes</span></td></tr>
+          <tr><td>Notifications</td><td class="t-12" style="white-space:normal;padding:6px 10px">“Deadline changed” email + in-app to all members; 1 announcement drafted, not sent.</td><td class="num">5,012</td><td><span class="st warn"><i class="ic ic-warn"></i>No (sent)</span></td></tr>
+          <tr><td>Capacity → 5,000</td><td class="t-12" style="white-space:normal;padding:6px 10px">Waitlist of 312 people is offered places automatically, oldest first.</td><td class="num">312</td><td><span class="st ok"><i class="ic ic-check"></i>Yes</span></td></tr>
+          <tr><td>Under-18 consent form</td><td class="t-12" style="white-space:normal;padding:6px 10px">88 registered minors must complete it before check-in; task appears on My Event.</td><td class="num">88</td><td><span class="st ok"><i class="ic ic-check"></i>Yes</span></td></tr>
+          <tr><td>Sponsor CRM sync</td><td class="t-12" style="white-space:normal;padding:6px 10px">Shares name, email and opt-in flag of 1,904 recruiting-consenting participants.</td><td class="num">1,904</td><td><span class="st warn"><i class="ic ic-warn"></i>Data leaves</span></td></tr>
+        </tbody></table></div>
+      <div class="row g3" style="align-items:stretch">
+        <div class="pn grow"><div class="pn-h"><h2>Checks</h2></div><div class="pn-b col g1 t-13"><span class="st ok"><i class="ic ic-check"></i>Schema valid · 0 errors</span><span class="st warn"><i class="ic ic-warn"></i>Deadline moves after 1,041 teams already submitted</span><span class="st ok"><i class="ic ic-check"></i>Policy: extension permissions within org allowlist</span></div></div>
+        <div class="pn grow"><div class="pn-h"><h2>Approval</h2></div><div class="pn-b col g1 t-13"><span class="st warn"><i class="ic ic-clock"></i>Needs 1 co-organizer approval (data leaves platform)</span><span class="row g2"><span class="avatar">PN</span>Priya Nair <span class="tag" style="margin-left:auto">Requested</span></span></div></div>
+      </div>
+      <div class="pn" style="flex:1;min-height:0"><div class="pn-h"><h2>Event-as-Code diff</h2><span class="tag">event.yaml</span><span class="t-12 mut3 sp">the same operation from <span class="mono">conflux plan</span></span></div>
+        <div style="padding:10px" ><div class="yml"><div class="ctx">stages:</div><div class="ctx">  - id: hacking</div><div class="del">    closes: 2027-10-10T09:00:00+02:00</div><div class="add">    closes: 2027-10-10T13:00:00+02:00</div><div class="ctx">  - id: judging-r1</div><div class="del">    opens: 2027-10-10T13:00:00+02:00</div><div class="add">    opens: 2027-10-10T13:30:00+02:00</div><div class="ctx">registration:</div><div class="del">  capacity: 4200</div><div class="add">  capacity: 5000</div><div class="add">extensions:</div><div class="add">  - id: sponsor-crm-sync@1.4.2</div></div></div></div>
+    </section>
+
+    <aside style="background:var(--surface);display:flex;flex-direction:column;min-height:0;overflow:hidden">
+      <div class="row" style="padding:10px 14px;border-bottom:1px solid var(--line)"><i class="ic ic-box"></i><div class="col grow" style="line-height:1.25"><h2>Sponsor CRM sync</h2><span class="t-12 mut3">v1.4.2 · Aster Labs · signed by publisher</span></div><span class="tag info">Schema-driven</span></div>
+      <div style="padding:12px 14px;overflow:hidden" class="col g3">
+        <div class="grp"><div class="gh"><i class="ic s ic-shield"></i>Requests these permissions</div><div class="pn-b col g1 t-12" style="padding:8px 12px"><span class="row g2"><i class="ic s ic-check" style="color:var(--ok)"></i>Read participants (opt-in flag = true only)</span><span class="row g2"><i class="ic s ic-check" style="color:var(--ok)"></i>Send outbound webhooks</span><span class="row g2 mut3"><i class="ic s ic-x"></i>Write participant data — not requested</span></div></div>
+        <div class="fld"><label for="ep">Endpoint URL</label><input id="ep" class="in bad" value="http://crm.aster.example/hooks" aria-invalid="true"><span class="err-t"><i class="ic s ic-xc"></i>Must be https. <a>Use https://crm.aster.example/hooks</a></span></div>
+        <div class="fld"><label for="sk">Signing secret</label><div class="in-wrap"><i class="ic s ic-lock"></i><input id="sk" class="in" value="secret://crm-signing-key" readonly><span class="t-11 mut3" style="position:absolute;right:8px">vault ref</span></div></div>
+        <div class="col g1"><span class="lbl">Events</span><div class="row g2" style="flex-wrap:wrap"><label class="chk"><input type="checkbox" checked>participant.opted_in</label><label class="chk"><input type="checkbox" checked>team.submitted</label><label class="chk"><input type="checkbox">project.awarded</label></div></div>
+        <div class="col g1"><span class="lbl">Field mapping</span>
+          <table class="tbl dense" style="border:1px solid var(--line);border-radius:6px;overflow:hidden"><thead><tr><th>Conflux field</th><th>CRM field</th></tr></thead><tbody><tr><td class="mono t-12">participant.email</td><td class="mono t-12">contact_email</td></tr><tr><td class="mono t-12">participant.name</td><td class="mono t-12">full_name</td></tr><tr><td class="mono t-12">team.track</td><td class="mono t-12">segment</td></tr></tbody></table></div>
+        <details class="grp"><summary class="gh" style="cursor:pointer;list-style:none"><i class="ic s ic-chev-r"></i>Advanced · retry policy, batching, dead-letter</summary></details>
+        <div class="row g2"><button class="btn"><i class="ic s ic-refresh"></i>Test connection</button><span class="t-12 mut3">Sends a signed sample event · no real data</span></div>
+        <div class="t-11 mut3 mono">Form generated from extension.schema.json · #/properties/config (2 required, 5 optional)</div>
+      </div>
+    </aside>
+  </div>
+</div>
+</body>
+</html>

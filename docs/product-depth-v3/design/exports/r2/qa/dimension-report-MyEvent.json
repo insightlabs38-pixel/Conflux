@@ -1,0 +1,11 @@
+[
+ {
+  "name": "MyEvent",
+  "declared": "1280x1090",
+  "root": "1280x1090",
+  "scrollH": 1090,
+  "scrollW": 1280,
+  "contentBottom": 1090,
+  "contentRight": 1280
+ }
+]

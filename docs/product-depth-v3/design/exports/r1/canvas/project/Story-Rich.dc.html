@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Project story editor rich mode</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./v3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+body{margin:0}
+.doc{font-family:var(--font-read);font-size:16px;line-height:1.65;color:var(--ink)}
+.blk{position:relative;padding:2px 0 2px 0;margin:0 0 10px}
+.blk .hd{position:absolute;left:-44px;top:4px;display:flex;gap:2px;color:var(--ink-3)}
+.anchor{background:#fff1b8;border-bottom:2px solid var(--warn-line);border-radius:2px}
+.sugdel{background:var(--err-tint);color:var(--err);text-decoration:line-through}
+.sugadd{background:var(--ok-tint);color:var(--ok);text-decoration:underline}
+.thr{border:1px solid var(--line);border-radius:var(--r-2);background:var(--surface)}
+.thr.act{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.thr .h{display:flex;align-items:center;gap:8px;padding:8px 10px 0}
+.thr .b{padding:4px 10px 8px;font-size:13px;line-height:1.45}
+.sem{border:1px solid var(--line-2);border-radius:var(--r-2);font-family:var(--font-sans)}
+.sem .sh{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;background:var(--surface-2);border-bottom:1px solid var(--line);font-size:12px;font-weight:600;color:var(--ink-2)}
+</style>
+</helmet>
+<div style="width:1440px;height:900px;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;position:relative">
+  <header class="top" style="flex:none;gap:10px">
+    <button class="btn ghost sm"><i class="ic s ic-chev-l"></i>Project</button>
+    <div class="col" style="line-height:1.2;min-width:0"><b class="t-13 trunc">Northwind Grid Forecaster</b><span class="t-11 mut3">Story · Draft r7</span></div>
+    <span class="st ok" style="margin-left:6px"><i class="ic s ic-cloud"></i>Saved 12:41:07</span>
+    <span class="tag info"><i class="ic ic-users"></i>Amara J. is editing “Results” · live</span>
+    <span class="sp"></span>
+    <span class="seg" role="group" aria-label="Editing mode"><button class="btn sm">Source</button><button class="btn sm">Split</button><button class="btn sm on" aria-pressed="true">Rich</button></span>
+    <span class="seg" role="group" aria-label="Edit or suggest"><button class="btn sm">Editing</button><button class="btn sm on" aria-pressed="true"><i class="ic s ic-pencil"></i>Suggesting</button></span>
+    <button class="btn sm"><i class="ic s ic-history"></i>History</button>
+    <button class="btn sm pri"><i class="ic s ic-shield"></i>Preflight &amp; submit</button>
+  </header>
+  <div style="display:grid;grid-template-columns:56px minmax(0,1fr) 360px;flex:1;min-height:0;background:var(--line);gap:1px">
+    <aside style="background:var(--surface)" class="col" aria-label="Sections (collapsed)"><a class="nav-i" style="justify-content:center;height:36px;padding:0" aria-label="Outline"><i class="ic ic-list"></i></a><a class="nav-i" style="justify-content:center;height:36px;padding:0" aria-label="Metadata"><i class="ic ic-git"></i></a><a class="nav-i" style="justify-content:center;height:36px;padding:0" aria-label="Media"><i class="ic ic-image"></i></a></aside>
+    <section style="background:var(--surface);overflow:hidden;position:relative">
+      <div class="toolbar" style="padding:4px 10px;gap:2px;position:relative;z-index:1">
+        <select class="in sm" style="width:120px" aria-label="Block type"><option>Paragraph</option></select>
+        <button class="btn ghost icon sm" aria-label="Bold"><b>B</b></button><button class="btn ghost icon sm" aria-label="Italic"><i style="font-family:var(--font-read)">I</i></button><button class="btn ghost icon sm" aria-label="Inline code"><i class="ic s ic-code"></i></button><button class="btn ghost icon sm" aria-label="Link"><i class="ic s ic-link"></i></button><button class="btn ghost icon sm" aria-label="Inline math"><i class="ic s ic-sigma"></i></button><button class="btn ghost icon sm" aria-label="Citation"><i class="ic s ic-book"></i></button>
+        <span class="sp t-12 mut3">Rich mode edits the same document (v2 schema) as Source — switching never rewrites your Markdown formatting.</span>
+      </div>
+      <div class="doc" style="width:700px;margin:22px auto 0;position:relative">
+        <div class="blk"><span class="hd" aria-hidden="true"><i class="ic s ic-grip"></i></span><h2 style="font-family:var(--font-sans);font-size:24px;margin:0 0 8px;letter-spacing:-.01em">Evaluation</h2></div>
+        <div class="blk"><span class="hd" aria-hidden="true"><i class="ic s ic-grip"></i></span>We compare against a persistence baseline and NWP-Lite on <span class="anchor" title="Comment thread">412 substations</span> over horizons <i>h</i> ∈ {1, 6, 24} hours, reporting <span class="sugdel">mean absolute error</span><span class="sugadd">MAE (Eq. 1)</span> with 95% bootstrap intervals.</div>
+        <div class="blk" style="text-align:center;font-family:'STIX Two Text','Cambria Math',var(--font-read);font-style:italic;font-size:18px;padding:8px 0;border:1px solid transparent;border-radius:4px;outline:2px solid var(--accent-line)"><span class="hd" aria-hidden="true"><i class="ic s ic-grip"></i></span>MAE<sub>h</sub> = <span class="frac" style="display:inline-flex;flex-direction:column;align-items:center;font-size:.85em;vertical-align:middle;line-height:1.1"><span style="border-bottom:1px solid var(--ink);padding:0 3px">1</span><span><i>N</i></span></span> Σ<sub><i>i</i>=1</sub><sup><i>N</i></sup> | ŷ<sub><i>i,h</i></sub> − <i>y</i><sub><i>i,h</i></sub> |<span style="position:absolute;right:0;font-style:normal;font-family:var(--font-sans);font-size:13px;color:var(--ink-3)">(1)</span>
+          <div class="row" style="position:absolute;right:-6px;top:-32px;font-family:var(--font-sans);font-style:normal"><span class="pop row g1" style="padding:3px"><button class="btn sm ghost">Edit LaTeX</button><button class="btn sm ghost"><i class="ic s ic-copy"></i>Copy source</button><button class="btn sm ghost">Alt text</button></span></div></div>
+        <div class="sem blk" style="margin-bottom:12px"><div class="sh"><i class="ic s ic-table"></i>Benchmark <span class="t-11 mut3" style="font-weight:400">semantic block · Table 1</span><span class="sp t-11 mut3" style="font-weight:400">4 fields</span></div>
+          <table class="tbl dense" style="font-family:var(--font-sans)"><thead><tr><th>Model</th><th class="num">MAE h=1</th><th class="num">h=6</th><th class="num">h=24</th><th class="num">Latency</th></tr></thead><tbody><tr><td>Persistence</td><td class="num">0.412</td><td class="num">0.688</td><td class="num">0.941</td><td class="num">&lt;1 ms</td></tr><tr><td>NWP-Lite</td><td class="num">0.371</td><td class="num">0.552</td><td class="num">0.780</td><td class="num">210 ms</td></tr><tr class="sel"><td><b>Northwind (ours)</b></td><td class="num"><b>0.298</b></td><td class="num"><b>0.441</b></td><td class="num"><b>0.612</b></td><td class="num">38 ms</td></tr></tbody></table></div>
+        <div class="blk"><span class="hd" aria-hidden="true"><i class="ic s ic-grip"></i></span><div class="row" style="position:absolute;left:0;top:-2px"></div><span style="font-family:var(--font-sans);font-size:14px;color:var(--ink-3)">/ </span><span style="border-left:2px solid var(--accent);margin-left:-3px"></span></div>
+      </div>
+      <!-- slash menu -->
+      <div class="pop" style="position:absolute;left:180px;top:552px;width:290px;padding:4px" role="listbox" aria-label="Insert block">
+        <div class="nav-g" style="padding-top:6px">Insert</div>
+        <div class="menu-i on" role="option"><i class="ic s ic-sigma"></i>Equation<span class="kbd">$$</span></div>
+        <div class="menu-i"><i class="ic s ic-image"></i>Figure with caption</div>
+        <div class="menu-i"><i class="ic s ic-table"></i>Benchmark table</div>
+        <div class="menu-i"><i class="ic s ic-box"></i>Architecture block</div>
+        <div class="menu-i"><i class="ic s ic-code"></i>Code block</div>
+        <div class="menu-i"><i class="ic s ic-book"></i>Citation</div>
+        <div class="menu-i"><i class="ic s ic-info"></i>Callout</div>
+      </div>
+    </section>
+    <aside style="background:var(--surface);display:flex;flex-direction:column;min-height:0" aria-label="Comments and suggestions">
+      <div class="tabs sm" style="padding:0 8px"><a>Preflight <span class="cnt e">1</span></a><a aria-current="page">Comments <span class="cnt a">3</span></a><a>Media</a><a>Cites</a></div>
+      <div class="row" style="padding:8px 12px;border-bottom:1px solid var(--line)"><span class="seg"><button class="btn sm on">Open 3</button><button class="btn sm">Resolved 5</button></span><span class="sp t-12 mut3">Visible to</span><select class="in sm" style="width:130px" aria-label="Default visibility"><option>Team + mentors</option></select></div>
+      <div class="col g3" style="padding:12px;overflow:hidden">
+        <div class="thr act"><div class="h"><span class="avatar">KH</span><b class="t-12">Kim Hoffmann</b><span class="tag">Mentor</span><span class="t-11 mut3 sp">12:22</span></div><div class="b">“412 substations” — is this all of them or the held-out set? Judges will ask. <span class="mut3">on <i>Evaluation ¶1</i></span></div><div class="row g2" style="padding:0 10px 8px"><button class="btn sm">Reply</button><button class="btn sm ghost"><i class="ic s ic-check"></i>Resolve</button></div></div>
+        <div class="thr"><div class="h"><span class="avatar">LB</span><b class="t-12">Luca Bianchi</b><span class="tag warn"><i class="ic ic-pencil"></i>Suggestion</span><span class="t-11 mut3 sp">12:40</span></div><div class="b"><span class="sugdel">mean absolute error</span> → <span class="sugadd">MAE (Eq. 1)</span></div><div class="row g2" style="padding:0 10px 8px"><button class="btn sm pri"><i class="ic s ic-check"></i>Accept</button><button class="btn sm">Reject</button></div></div>
+        <div class="thr"><div class="h"><span class="avatar">AN</span><b class="t-12">Adaeze Nwosu</b><span class="t-11 mut3 sp">11:58</span></div><div class="b">Should the benchmark table include the 48h horizon? <span class="mut3">on <i>Table 1</i></span></div><div class="row g2" style="padding:0 10px 8px"><button class="btn sm">Reply</button></div></div>
+        <div class="well t-12 mut" style="line-height:1.5"><i class="ic s ic-lock"></i> Comments anchor to stable block IDs, so they survive edits and reordering. Comments and suggestions are <b>never</b> included in the judged or public render.</div>
+      </div>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

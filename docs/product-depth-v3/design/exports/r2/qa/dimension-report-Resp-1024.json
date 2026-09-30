@@ -1,0 +1,11 @@
+[
+ {
+  "name": "Resp-1024",
+  "declared": "1024x768",
+  "root": "1024x768",
+  "scrollH": 768,
+  "scrollW": 1024,
+  "contentBottom": 800,
+  "contentRight": 1024
+ }
+]

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>System v3 foundations</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./v3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>body{margin:0}.sw-c{height:44px;border-radius:var(--r-2);border:1px solid var(--line)}.spec td,.spec th{height:auto;padding:8px 10px;white-space:normal;vertical-align:top}</style>
+</helmet>
+<div style="width:1440px;height:1760px;background:var(--bg);padding:40px 48px;display:flex;flex-direction:column;gap:28px;overflow:hidden">
+  <div class="row" style="align-items:flex-end">
+    <div class="col g1"><div class="eyebrow">design/system-v3 · r1</div><h1 style="font-size:28px;letter-spacing:-.02em">Foundations</h1></div>
+    <p class="mut sp" style="max-width:560px;font-size:13px">Tokens live in <span class="mono">design/system/tokens.css</span>. Values here are the contract; names are stable, hexes may be tuned only if the contrast table stays green.</p>
+  </div>
+
+  <!-- TYPOGRAPHY -->
+  <div class="pn">
+    <div class="pn-h"><h2>Typography</h2><span class="t-12 mut3">Three families, eight sizes. Nothing outside this scale.</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr">
+      <table class="tbl spec">
+        <thead><tr><th style="width:120px">Token</th><th style="width:110px">Size / line</th><th style="width:70px">Weight</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td class="mono t-12">fs-32 display</td><td class="t-12">32 / 38</td><td class="t-12">600</td><td class="t-12 mut">Public event title (standard hero) only</td></tr>
+          <tr><td class="mono t-12">fs-24</td><td class="t-12">24 / 30</td><td class="t-12">600</td><td class="t-12 mut">Public project title, public section H1</td></tr>
+          <tr><td class="mono t-12">fs-20 page</td><td class="t-12">20 / 25</td><td class="t-12">600</td><td class="t-12 mut">Operator/participant page title. Never larger inside the app.</td></tr>
+          <tr><td class="mono t-12">fs-16</td><td class="t-12">16 / 24</td><td class="t-12">400 · 600</td><td class="t-12 mut">Public lead paragraph, dialog title</td></tr>
+          <tr><td class="mono t-12">fs-14 body</td><td class="t-12">14 / 20</td><td class="t-12">400 · 600</td><td class="t-12 mut">Default text, panel headings (600)</td></tr>
+          <tr><td class="mono t-12">fs-13 ui</td><td class="t-12">13 / 18</td><td class="t-12">400 · 500</td><td class="t-12 mut">Tables, controls, nav, inspectors</td></tr>
+          <tr><td class="mono t-12">fs-12 small</td><td class="t-12">12 / 16</td><td class="t-12">400 · 600</td><td class="t-12 mut">Labels, hints, status text, column heads</td></tr>
+          <tr><td class="mono t-12">fs-11 micro</td><td class="t-12">11 / 14</td><td class="t-12">500 · 600</td><td class="t-12 mut">Eyebrow (uppercase +.06em), tags, keycaps, mobile tab labels</td></tr>
+        </tbody>
+      </table>
+      <div style="padding:16px 20px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:14px">
+        <div class="col g1"><span class="eyebrow">Page title · 20/600</span><h1>Participants &amp; teams</h1></div>
+        <div class="col g1"><span class="eyebrow">Panel heading · 14/600</span><h2>Applications needing review</h2></div>
+        <div class="col g1"><span class="eyebrow">Body · 14/400</span><p>Teams of two to five may submit one project per track. Late submissions are held for organizer review.</p></div>
+        <div class="col g1"><span class="eyebrow">Table / control · 13/400 with tabular figures</span><p class="t-13 num" style="text-align:left">Sofia Marín-Reyes · T-0412 · 4.25 · 1,284 of 5,012</p></div>
+        <div class="col g1"><span class="eyebrow">Mono · Plex Mono 12</span><p class="mono t-12">evt_2026_gauss · tm_0412 · sha256:9f2c…e1a0</p></div>
+        <div class="col g1"><span class="eyebrow">Reading · Source Serif 4 17/28 · public long-form only</span><p style="font-family:var(--font-read);font-size:17px;line-height:1.65">We estimate per-cell drift with a rolling Kalman filter, then bound the residual with <span class="math">‖r<sub>t</sub>‖ ≤ ε</span> under a fixed horizon.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLOR -->
+  <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:20px">
+    <div class="pn">
+      <div class="pn-h"><h2>Colour</h2><span class="t-12 mut3">Neutral structure · one accent · five semantic families</span></div>
+      <div class="pn-b col g4">
+        <div class="col g2">
+          <span class="lbl">Neutrals</span>
+          <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:8px">
+            <div class="col g1"><div class="sw-c" style="background:var(--bg)"></div><span class="t-11 mono">bg #f5f6f8</span></div>
+            <div class="col g1"><div class="sw-c" style="background:var(--surface)"></div><span class="t-11 mono">surface #fff</span></div>
+            <div class="col g1"><div class="sw-c" style="background:var(--surface-2)"></div><span class="t-11 mono">surface-2 #f0f2f5</span></div>
+            <div class="col g1"><div class="sw-c" style="background:var(--surface-3)"></div><span class="t-11 mono">surface-3 #e6e9ee</span></div>
+            <div class="col g1"><div class="sw-c" style="background:var(--line)"></div><span class="t-11 mono">line #dcdfe5</span></div>
+            <div class="col g1"><div class="sw-c" style="background:var(--line-3)"></div><span class="t-11 mono">line-3 #8a929e</span></div>
+            <div class="col g1"><div class="sw-c" style="background:var(--ink-2)"></div><span class="t-11 mono">ink-2 #454e5b</span></div>
+            <div class="col g1"><div class="sw-c" style="background:var(--ink)"></div><span class="t-11 mono">ink #161a21</span></div>
+          </div>
+        </div>
+        <div class="col g2">
+          <span class="lbl">Accent — action, selection, focus, links. Nothing else.</span>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+            <div class="col g1"><div class="sw-c" style="background:var(--accent)"></div><span class="t-11 mono">accent #1d55c2</span></div>
+            <div class="col g1"><div class="sw-c" style="background:var(--accent-hover)"></div><span class="t-11 mono">hover #174aa8</span></div>
+            <div class="col g1"><div class="sw-c" style="background:var(--accent-tint)"></div><span class="t-11 mono">tint #e8effc</span></div>
+            <div class="col g1"><div class="sw-c" style="background:var(--accent-line)"></div><span class="t-11 mono">line #a9c1ef</span></div>
+          </div>
+        </div>
+        <div class="col g2">
+          <span class="lbl">Semantic — ink / tint / line. Always paired with an icon and a word.</span>
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px">
+            <div class="col g2"><span class="tag ok"><i class="ic ic-okc"></i>Complete</span><div class="row g1"><div class="sw-c" style="background:var(--ok);flex:1;height:20px"></div><div class="sw-c" style="background:var(--ok-tint);flex:1;height:20px"></div></div><span class="t-11 mono">ok #17693c</span></div>
+            <div class="col g2"><span class="tag warn"><i class="ic ic-warn"></i>Needs action</span><div class="row g1"><div class="sw-c" style="background:var(--warn);flex:1;height:20px"></div><div class="sw-c" style="background:var(--warn-tint);flex:1;height:20px"></div></div><span class="t-11 mono">warn #7d4e00</span></div>
+            <div class="col g2"><span class="tag err"><i class="ic ic-xc"></i>Blocked</span><div class="row g1"><div class="sw-c" style="background:var(--err);flex:1;height:20px"></div><div class="sw-c" style="background:var(--err-tint);flex:1;height:20px"></div></div><span class="t-11 mono">err #b3261e</span></div>
+            <div class="col g2"><span class="tag info"><i class="ic ic-info"></i>In review</span><div class="row g1"><div class="sw-c" style="background:var(--info);flex:1;height:20px"></div><div class="sw-c" style="background:var(--info-tint);flex:1;height:20px"></div></div><span class="t-11 mono">info = accent</span></div>
+            <div class="col g2"><span class="tag"><i class="ic ic-circle"></i>Not started</span><div class="row g1"><div class="sw-c" style="background:var(--mute);flex:1;height:20px"></div><div class="sw-c" style="background:var(--mute-tint);flex:1;height:20px"></div></div><span class="t-11 mono">mute #5e6772</span></div>
+          </div>
+        </div>
+        <p class="t-12 mut" style="line-height:1.5">Saturated colour is reserved for status and action. Destructive actions are neutral until the confirmation step, where the final button turns <span style="color:var(--err);font-weight:600">err</span>. Themeable public surfaces may override <span class="mono">--pub-accent</span> only; the app accent is fixed for recognisability.</p>
+      </div>
+    </div>
+    <div class="pn">
+      <div class="pn-h"><h2>Contrast (WCAG 2.2, measured)</h2><span class="t-12 mut3">Required: text 4.5 · large 3 · controls 3</span></div>
+      <table class="tbl dense">
+        <thead><tr><th>Pair</th><th class="num" style="width:70px">Ratio</th><th style="width:90px">Result</th></tr></thead>
+        <tbody>
+          <tr><td>ink on surface</td><td class="num">17.4</td><td><span class="st ok"><i class="ic ic-check"></i>AAA</span></td></tr>
+          <tr><td>ink-2 on surface</td><td class="num">8.4</td><td><span class="st ok"><i class="ic ic-check"></i>AAA</span></td></tr>
+          <tr><td>ink-3 on bg / surface-2 (lowest text)</td><td class="num">5.3 / 5.1</td><td><span class="st ok"><i class="ic ic-check"></i>AA</span></td></tr>
+          <tr><td>accent on surface · white on accent</td><td class="num">6.7</td><td><span class="st ok"><i class="ic ic-check"></i>AA</span></td></tr>
+          <tr><td>accent on accent-tint (selected nav)</td><td class="num">5.8</td><td><span class="st ok"><i class="ic ic-check"></i>AA</span></td></tr>
+          <tr><td>ok / warn / err ink on own tint</td><td class="num">5.9 / 6.4 / 5.7</td><td><span class="st ok"><i class="ic ic-check"></i>AA</span></td></tr>
+          <tr><td>white on err (destructive button)</td><td class="num">6.5</td><td><span class="st ok"><i class="ic ic-check"></i>AA</span></td></tr>
+          <tr><td>line-3 control border on surface</td><td class="num">3.1</td><td><span class="st ok"><i class="ic ic-check"></i>1.4.11</span></td></tr>
+          <tr><td>Dark: ink / ink-3 on surface</td><td class="num">15.0 / 6.7</td><td><span class="st ok"><i class="ic ic-check"></i>AAA</span></td></tr>
+          <tr><td>Dark: accent / ok / warn / err on tint</td><td class="num">7.1–8.8</td><td><span class="st ok"><i class="ic ic-check"></i>AAA</span></td></tr>
+        </tbody>
+      </table>
+      <div class="pn-b t-12 mut" style="border-top:1px solid var(--line);line-height:1.5">Row hairlines (<span class="mono">line</span>) are decoration, not information — they may be under 3:1. Any boundary that identifies a control uses <span class="mono">line-3</span> or a fill.</div>
+    </div>
+  </div>
+
+  <!-- SPACING / DENSITY / SHAPE -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px">
+    <div class="pn">
+      <div class="pn-h"><h2>Spacing · 4px base</h2></div>
+      <div class="pn-b col g2">
+        <div class="row"><span class="mono t-12" style="width:60px">sp-1 · 4</span><div style="height:8px;width:4px;background:var(--accent)"></div><span class="t-12 mut" style="margin-left:8px">icon↔label in status</span></div>
+        <div class="row"><span class="mono t-12" style="width:60px">sp-2 · 8</span><div style="height:8px;width:8px;background:var(--accent)"></div><span class="t-12 mut" style="margin-left:8px">inline control gaps</span></div>
+        <div class="row"><span class="mono t-12" style="width:60px">sp-3 · 12</span><div style="height:8px;width:12px;background:var(--accent)"></div><span class="t-12 mut" style="margin-left:8px">toolbar padding, form rows</span></div>
+        <div class="row"><span class="mono t-12" style="width:60px">sp-4 · 16</span><div style="height:8px;width:16px;background:var(--accent)"></div><span class="t-12 mut" style="margin-left:8px">panel padding, section gap</span></div>
+        <div class="row"><span class="mono t-12" style="width:60px">sp-5 · 20</span><div style="height:8px;width:20px;background:var(--accent)"></div><span class="t-12 mut" style="margin-left:8px">page gutter (app)</span></div>
+        <div class="row"><span class="mono t-12" style="width:60px">sp-6 · 24</span><div style="height:8px;width:24px;background:var(--accent)"></div><span class="t-12 mut" style="margin-left:8px">between panels</span></div>
+        <div class="row"><span class="mono t-12" style="width:60px">sp-8 · 32</span><div style="height:8px;width:32px;background:var(--accent)"></div><span class="t-12 mut" style="margin-left:8px">public gutter, section</span></div>
+        <div class="row"><span class="mono t-12" style="width:60px">sp-12 · 48</span><div style="height:8px;width:48px;background:var(--accent)"></div><span class="t-12 mut" style="margin-left:8px">public section rhythm max</span></div>
+      </div>
+    </div>
+    <div class="pn">
+      <div class="pn-h"><h2>Density · per-user</h2></div>
+      <div class="pn-b col g3">
+        <div class="col g1"><div class="row"><span class="lbl">Comfortable · 44px row · 40px control</span></div><div class="well" style="padding:0"><div class="row" style="height:44px;padding:0 12px;border-bottom:1px solid var(--line)">Northwind Grid Forecaster<span class="sp st ok"><i class="ic ic-okc"></i>Submitted</span></div></div></div>
+        <div class="col g1"><div class="row"><span class="lbl">Standard (default) · 36px row · 32px control</span></div><div class="well" style="padding:0"><div class="row" style="height:36px;padding:0 12px;border-bottom:1px solid var(--line)">Northwind Grid Forecaster<span class="sp st ok"><i class="ic ic-okc"></i>Submitted</span></div></div></div>
+        <div class="col g1"><div class="row"><span class="lbl">Dense · 28px row · 28px control · 12px text</span></div><div class="well" style="padding:0"><div class="row" style="height:28px;padding:0 12px;font-size:12px;border-bottom:1px solid var(--line)">Northwind Grid Forecaster<span class="sp st ok"><i class="ic ic-okc"></i>Submitted</span></div></div></div>
+        <p class="t-12 mut" style="line-height:1.5">Touch targets on mobile stay ≥44px regardless of density. Density changes row height, control height and cell padding — never font family or icon size.</p>
+      </div>
+    </div>
+    <div class="pn">
+      <div class="pn-h"><h2>Radii · borders · elevation</h2></div>
+      <div class="pn-b col g3">
+        <div class="row g3"><div style="width:56px;height:36px;border:1px solid var(--line-3);border-radius:3px;background:var(--surface)"></div><div class="t-12"><b>r-1 · 3px</b><br><span class="mut">tags, keycaps, checkboxes</span></div></div>
+        <div class="row g3"><div style="width:56px;height:36px;border:1px solid var(--line-3);border-radius:5px;background:var(--surface)"></div><div class="t-12"><b>r-2 · 5px</b><br><span class="mut">buttons, inputs, menu items</span></div></div>
+        <div class="row g3"><div style="width:56px;height:36px;border:1px solid var(--line-3);border-radius:8px;background:var(--surface)"></div><div class="t-12"><b>r-3 · 8px</b><br><span class="mut">panels, popovers, dialogs</span></div></div>
+        <hr class="hr">
+        <div class="row g3"><div style="width:56px;height:36px;border:1px solid var(--line);background:var(--surface)"></div><div class="t-12"><b>Level 0 — border only</b><br><span class="mut">panels, tables, toolbars, inspectors</span></div></div>
+        <div class="row g3"><div class="pop" style="width:56px;height:36px"></div><div class="t-12"><b>Level 1 — popover shadow</b><br><span class="mut">menus, tooltips, ⌘K, toasts</span></div></div>
+        <div class="row g3"><div class="dlg" style="width:56px;height:36px"></div><div class="t-12"><b>Level 2 — dialog + scrim</b><br><span class="mut">confirmations, wizards</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ICONS + STATUS -->
+  <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:20px">
+    <div class="pn">
+      <div class="pn-h"><h2>Icon policy</h2><span class="t-12 mut3">1.75–2px stroke, 16px default (20 for empty states, 12–14 in tags). currentColor only.</span></div>
+      <div class="pn-b col g3">
+        <div class="row g4" style="flex-wrap:wrap;color:var(--ink-2)">
+          <i class="ic l ic-home"></i><i class="ic l ic-users"></i><i class="ic l ic-file"></i><i class="ic l ic-table"></i><i class="ic l ic-cal"></i><i class="ic l ic-trophy"></i><i class="ic l ic-qr"></i><i class="ic l ic-route"></i><i class="ic l ic-msg"></i><i class="ic l ic-sliders"></i><i class="ic l ic-box"></i><i class="ic l ic-shield"></i><i class="ic l ic-term"></i><i class="ic l ic-flag"></i><i class="ic l ic-history"></i><i class="ic l ic-diff"></i><i class="ic l ic-link"></i><i class="ic l ic-code"></i><i class="ic l ic-sigma"></i><i class="ic l ic-image"></i>
+        </div>
+        <ul class="t-13" style="margin:0;padding-left:18px;line-height:1.6">
+          <li><b>Use</b> for recognition of repeated things (nav, status, tool buttons, file kinds). Always beside text unless the control has an <span class="mono">aria-label</span> and a tooltip.</li>
+          <li><b>Never</b> in a tinted square beside a heading; never as decoration in empty states beyond one 20px glyph.</li>
+          <li><b>Status glyph vocabulary</b> (shape differs, not just colour): ✓ circle = complete · △ = needs action · ✕ circle = blocked/failed · ◔ = in progress · ▸ dashed circle = not started · ⓘ = information.</li>
+          <li>Library: Lucide-compatible set; mask-rendered so it inherits text colour and forced-colors mode.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="pn">
+      <div class="pn-h"><h2>Status treatment</h2><span class="t-12 mut3">two forms</span></div>
+      <div class="pn-b col g3">
+        <div class="col g1"><span class="lbl">Inline (tables, lists, inspectors) — icon + word, no fill</span>
+          <div class="row g4" style="flex-wrap:wrap"><span class="st ok"><i class="ic ic-okc"></i>Checked in</span><span class="st warn"><i class="ic ic-warn"></i>Missing waiver</span><span class="st err"><i class="ic ic-xc"></i>Ineligible</span><span class="st info"><i class="ic ic-half"></i>In review</span><span class="st mute"><i class="ic ic-circle"></i>Not started</span></div></div>
+        <div class="col g1"><span class="lbl">Tag (summaries, headers, exceptions) — tint + icon + word, max one per row</span>
+          <div class="row g2" style="flex-wrap:wrap"><span class="tag ok"><i class="ic ic-okc"></i>Judging open</span><span class="tag warn"><i class="ic ic-warn"></i>3 conflicts</span><span class="tag err"><i class="ic ic-xc"></i>Deadline passed</span><span class="tag info"><i class="ic ic-lock"></i>Frozen r3</span><span class="tag">Draft</span></div></div>
+        <div class="col g1"><span class="lbl">Event state (top bar) — one word, neutral until it needs attention</span>
+          <div class="row g2" style="flex-wrap:wrap"><span class="tag">Draft</span><span class="tag info">Open</span><span class="tag ok">Judging</span><span class="tag">Published</span><span class="tag">Archived</span></div></div>
+        <p class="t-12 mut" style="line-height:1.5">Do not badge ordinary attributes (track, role, school). Put them in text or a column. A row with more than one tag is a design bug — promote to an inspector.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1760}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

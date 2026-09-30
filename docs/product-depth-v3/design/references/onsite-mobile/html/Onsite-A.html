@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Onsite mobile check-in desk pass</title>
+<link rel="stylesheet" href="../../../system/v3.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+body{margin:0}
+.phone{width:390px;height:844px;background:var(--bg);border:1px solid var(--line-2);display:flex;flex-direction:column;overflow:hidden;position:relative}
+.appbar{height:52px;flex:none;display:flex;align-items:center;gap:8px;padding:0 8px 0 16px;background:var(--surface);border-bottom:1px solid var(--line)}
+.lst{display:flex;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);align-items:center;min-height:60px;background:var(--surface)}
+.view{position:relative;background:#1b1f26;height:300px;display:flex;align-items:center;justify-content:center;flex:none}
+.view .br{position:absolute;width:34px;height:34px;border:4px solid #fff}
+.big{height:56px;font-size:16px;font-weight:600}
+</style>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div style="width:1250px;height:844px;display:flex;gap:40px">
+
+  <!-- QR check-in -->
+  <div class="phone">
+    <div class="appbar"><button class="btn ghost icon" aria-label="Close" style="width:44px;height:44px"><i class="ic ic-x"></i></button><div class="col grow" style="line-height:1.2"><b class="t-13">Check-in · Desk 2</b><span class="t-11 mut3">3,846 of 4,388 · you: 212</span></div><span class="st ok"><i class="ic ic-dot s"></i>Online</span></div>
+    <div class="view"><div style="width:220px;height:220px;position:relative"><i class="br" style="left:0;top:0;border-right:0;border-bottom:0;border-radius:10px 0 0 0"></i><i class="br" style="right:0;top:0;border-left:0;border-bottom:0;border-radius:0 10px 0 0"></i><i class="br" style="left:0;bottom:0;border-right:0;border-top:0;border-radius:0 0 0 10px"></i><i class="br" style="right:0;bottom:0;border-left:0;border-top:0;border-radius:0 0 10px 0"></i></div><span style="position:absolute;bottom:12px;color:#d7dce4;font-size:13px">Point at the participant’s pass</span><button class="btn icon" aria-label="Torch" style="position:absolute;right:12px;top:12px;width:44px;height:44px;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.4);color:#fff"><i class="ic ic-sliders"></i></button></div>
+    <div style="padding:14px 16px;flex:1;overflow:hidden" class="col g3">
+      <div class="bn ok" style="padding:12px 14px;flex-direction:column;gap:8px"><div class="row g2"><i class="ic l ic-okc"></i><div class="col grow"><b style="font-size:16px">Sofia Marín-Reyes</b><span class="t-12">Northwind Grid Forecaster · Table A-14</span></div><span class="t-12 mut3">just now</span></div></div>
+      <div class="bn warn" style="padding:12px 14px"><i class="ic ic-warn"></i><div class="col grow"><b>Waiver missing</b><span class="t-12">Hand over waiver form or send link before badge.</span></div></div>
+      <div class="col g2"><div class="row g2"><button class="btn pri big grow"><i class="ic ic-check"></i>Check in &amp; print badge</button></div><div class="row g2"><button class="btn big grow" style="height:48px">Send waiver link</button><button class="btn big grow" style="height:48px">Undo</button></div></div>
+      <span class="t-12 mut3">Auto-advances in 3 s after success · duplicates show “already checked in at 08:41 by Desk 1”.</span>
+    </div>
+    <nav class="bottom-nav" aria-label="Volunteer"><a aria-current="page"><i class="ic l ic-scan"></i>Scan</a><a><i class="ic l ic-search"></i>Find</a><a><i class="ic l ic-users"></i>Walk-ups<span class="cnt w" style="position:absolute;top:6px;right:24%">4</span></a><a><i class="ic l ic-flag"></i>Issues</a></nav>
+  </div>
+
+  <!-- volunteer desk -->
+  <div class="phone">
+    <div class="appbar"><div class="col grow" style="line-height:1.2"><b class="t-13">Desk 2 · Find</b><span class="t-11 mut3">Offline-safe · last sync 14:46</span></div><span class="st ok"><i class="ic ic-dot s"></i>Online</span></div>
+    <div style="padding:10px 12px;background:var(--surface);border-bottom:1px solid var(--line)" class="col g2"><div class="in-wrap"><i class="ic s ic-search"></i><input class="in" style="height:44px;font-size:16px" value="patel" aria-label="Find participant"></div><div class="row g1"><span class="seg grow"><button class="btn on grow" style="height:40px">All</button><button class="btn grow" style="height:40px">Not in</button><button class="btn grow" style="height:40px">Issues</button></span></div></div>
+    <div style="flex:1;overflow:hidden">
+      <div class="lst"><span class="avatar l">DP</span><div class="col grow"><b class="t-13">Dev Patel</b><span class="t-12 mut">Latent Space Cartographers · C-03</span></div><span class="st ok"><i class="ic ic-okc"></i>In</span></div>
+      <div class="lst"><span class="avatar l">PR</span><div class="col grow"><b class="t-13">Priya Raman</b><span class="t-12 mut">Δ-Debuggers · A-02</span></div><button class="btn pri" style="height:44px">Check in</button></div>
+      <div class="lst" style="background:var(--warn-tint)"><span class="avatar l">MP</span><div class="col grow"><b class="t-13">Marta Patrício</b><span class="t-12 mut">Tidewater · D-01 · Under 18</span></div><span class="st warn"><i class="ic ic-warn"></i>Consent</span></div>
+      <div class="lst"><span class="avatar l">RP</span><div class="col grow"><b class="t-13">Rohan Patil</b><span class="t-12 mut">Stackless · E-07</span></div><button class="btn pri" style="height:44px">Check in</button></div>
+      <div class="lst"><span class="avatar l">IP</span><div class="col grow"><b class="t-13">Ilse Pattyn</b><span class="t-12 mut">Not registered</span></div><button class="btn" style="height:44px">Register</button></div>
+    </div>
+    <div style="padding:10px 12px;background:var(--surface);border-top:1px solid var(--line-2)" class="col g2"><div class="bn" style="padding:8px 12px"><i class="ic s ic-users"></i><span class="t-12"><b>4 walk-ups waiting</b> · longest 6 min</span><a class="t-12 sp">Open</a></div></div>
+    <nav class="bottom-nav" aria-label="Volunteer"><a><i class="ic l ic-scan"></i>Scan</a><a aria-current="page"><i class="ic l ic-search"></i>Find</a><a><i class="ic l ic-users"></i>Walk-ups</a><a><i class="ic l ic-flag"></i>Issues</a></nav>
+  </div>
+
+  <!-- participant pass -->
+  <div class="phone" style="background:#fff">
+    <div class="appbar" style="background:#fff"><button class="btn ghost icon" aria-label="Close" style="width:44px;height:44px"><i class="ic ic-x"></i></button><b class="t-13 grow">Event pass</b><span class="st mute"><i class="ic ic-offline s"></i>Saved offline</span></div>
+    <div style="flex:1;padding:24px 28px;display:flex;flex-direction:column;align-items:center;gap:14px">
+      <div class="col" style="align-items:center;text-align:center"><span class="t-12 mut">Gauss Hack 2026 · Participant</span><b style="font-size:22px;letter-spacing:-.01em;margin-top:2px">Sofia Marín-Reyes</b><span class="t-13 mut">Northwind Grid Forecaster</span></div>
+      <div class="qr-art" style="width:296px;border:1px solid var(--line-2);border-radius:8px" role="img" aria-label="Event QR code"></div>
+      <span class="mono t-13">P-04182</span>
+      <div class="row g4 t-13" style="align-items:flex-start"><div class="col" style="align-items:center"><span class="mut t-12">Table</span><b>A-14</b></div><div class="col" style="align-items:center"><span class="mut t-12">Meals</span><b>3 left</b></div><div class="col" style="align-items:center"><span class="mut t-12">Access</span><b>All halls</b></div></div>
+      <span class="st ok"><i class="ic ic-okc"></i>Checked in 08:41</span>
+      <button class="btn lg" style="width:100%;height:48px;margin-top:auto"><i class="ic s ic-sun"></i>Full brightness on</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Event builder page and theme</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./v3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+body{margin:0}
+.bl{display:flex;align-items:center;gap:8px;height:34px;padding:0 10px;border-bottom:1px solid var(--line);font-size:13px;background:var(--surface)}
+.bl.on{background:var(--accent-tint);box-shadow:inset 3px 0 0 var(--accent);font-weight:600}
+.sel-o{outline:2px solid var(--accent);outline-offset:-2px;position:relative}
+.sel-o::before{content:"Hero · compact";position:absolute;top:0;left:0;background:var(--accent);color:#fff;font-size:11px;font-weight:600;padding:2px 8px;z-index:3;border-radius:0 0 4px 0}
+.tok{display:grid;grid-template-columns:22px 1fr 96px 84px;gap:8px;align-items:center;padding:6px 12px;border-bottom:1px solid var(--line);font-size:12px}
+.chip-c{width:20px;height:20px;border-radius:4px;border:1px solid var(--line-3)}
+</style>
+</helmet>
+<div style="width:1440px;height:920px;background:var(--bg);display:flex;flex-direction:column;overflow:hidden">
+  <header class="top" style="flex:none">
+    <button class="btn ghost sm"><i class="ic s ic-chev-l"></i>Event setup</button>
+    <div class="col" style="line-height:1.2"><b class="t-13">Pages &amp; theme</b><span class="t-11 mut3">Gauss Hack 2027 · Draft</span></div>
+    <span class="tag warn" style="margin-left:6px">3 unapplied</span>
+    <span class="sp"></span>
+    <span class="seg" role="group" aria-label="Preview device"><button class="btn sm on"><i class="ic s ic-grid"></i>Desktop</button><button class="btn sm">Tablet</button><button class="btn sm">Mobile</button></span>
+    <span class="seg" role="group" aria-label="Preview state"><button class="btn sm on">Before results</button><button class="btn sm">After results</button></span>
+    <button class="btn sm"><i class="ic s ic-ext"></i>Open preview</button><button class="btn sm pri">Review plan</button>
+  </header>
+  <div style="display:grid;grid-template-columns:264px minmax(0,1fr) 352px;flex:1;min-height:0;gap:1px;background:var(--line)">
+    <aside style="background:var(--surface);display:flex;flex-direction:column;min-height:0">
+      <div class="tabs sm" style="padding:0 8px"><a aria-current="page">Pages</a><a>Theme</a><a>Navigation</a></div>
+      <div class="nav-g" style="padding-top:8px">Pages</div>
+      <a class="nav-i" style="margin:0 6px" aria-current="page"><i class="ic s ic-globe"></i>Overview (home)</a><a class="nav-i" style="margin:0 6px"><i class="ic s ic-file"></i>Schedule</a><a class="nav-i" style="margin:0 6px"><i class="ic s ic-file"></i>Challenges</a><a class="nav-i" style="margin:0 6px"><i class="ic s ic-grid"></i>Projects<span class="t-11 mut3 sp">system</span></a><a class="nav-i" style="margin:0 6px"><i class="ic s ic-trophy"></i>Results<span class="t-11 mut3 sp">system</span></a><a class="nav-i" style="margin:0 6px"><i class="ic s ic-plus"></i>Add page</a>
+      <div class="row" style="padding:12px 12px 6px"><h3>Overview · blocks</h3><span class="t-12 mut3 sp">7</span></div>
+      <div class="bl on"><i class="ic s ic-grip mut3"></i><span class="grow">Hero</span><span class="tag">compact</span></div>
+      <div class="bl"><i class="ic s ic-grip mut3"></i><span class="grow">Winners</span><i class="ic s ic-eye mut3"></i></div>
+      <div class="bl"><i class="ic s ic-grip mut3"></i><span class="grow">Project gallery</span><i class="ic s ic-eye mut3"></i></div>
+      <div class="bl"><i class="ic s ic-grip mut3"></i><span class="grow">Tracks &amp; challenges</span><i class="ic s ic-eye mut3"></i></div>
+      <div class="bl"><i class="ic s ic-grip mut3"></i><span class="grow">Schedule</span><i class="ic s ic-eye mut3"></i></div>
+      <div class="bl"><i class="ic s ic-grip mut3"></i><span class="grow">Sponsors</span><i class="ic s ic-eye mut3"></i></div>
+      <div class="bl"><i class="ic s ic-grip mut3"></i><span class="grow">Resources</span><i class="ic s ic-eye mut3"></i></div>
+      <div style="padding:10px 12px" class="col g2"><button class="btn sm"><i class="ic s ic-plus"></i>Add block</button><span class="t-12 mut3">Blocks come from a versioned catalog; extensions can add blocks with their own schema.</span></div>
+      <div class="bn warn" style="margin:auto 10px 10px"><i class="ic s ic-warn"></i><span class="t-12"><b>Results</b> block hidden until results are published.</span></div>
+    </aside>
+
+    <section style="background:var(--surface-3);overflow:hidden;display:flex;justify-content:center;padding:16px 20px 0">
+      <div style="width:100%;background:#fbfbfc;border:1px solid var(--line-2);border-radius:8px 8px 0 0;overflow:hidden;position:relative" class="pub">
+        <div class="pub-nav" style="padding:0 24px"><b style="font-size:14px">Gauss Hack 2027</b><a aria-current="page">Overview</a><a>Projects</a><a>Schedule</a><a>Challenges</a><a>Sponsors</a><span class="sp"></span></div>
+        <div class="sel-o" style="background:#fff;border-bottom:1px solid var(--line)"><div style="padding:24px 24px 20px;display:flex;align-items:center;gap:16px"><div class="mark" style="width:48px;height:48px;font-size:18px" aria-hidden="true">GH</div><div class="col grow g1"><div class="row g2"><h1 style="font-size:28px;letter-spacing:-.02em;line-height:1.15">Gauss Hack 2027</h1><span class="tag info"><i class="ic ic-clock"></i>Registration open</span></div><span class="mut" style="font-size:15px">48 hours of applied problem-solving in energy, health and open science.</span><span class="t-13 mut">10–11 Oct 2027 · Tempelhof Hall 2, Berlin + online</span></div><a class="btn pri lg" style="text-decoration:none">Register</a></div></div>
+        <div style="padding:20px 24px" class="col g3"><div class="row"><h2 style="font-size:18px">Projects</h2><span class="t-12 mut sp">appears after submissions open</span></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px"><div class="ph-art" style="height:96px">sample</div><div class="ph-art" style="height:96px">sample</div><div class="ph-art" style="height:96px">sample</div><div class="ph-art" style="height:96px">sample</div></div><div class="row"><h2 style="font-size:18px">Tracks &amp; challenges</h2></div><div class="sk" style="height:60px"></div></div>
+      </div>
+    </section>
+
+    <aside style="background:var(--surface);display:flex;flex-direction:column;min-height:0">
+      <div class="row" style="padding:10px 14px;border-bottom:1px solid var(--line)"><h2>Hero block</h2><span class="t-12 mut3 sp">schema hero.v2</span></div>
+      <div style="padding:12px 14px" class="col g3">
+        <div class="col g2"><span class="lbl">Style</span>
+          <div class="seg" role="radiogroup" aria-label="Hero style" style="width:100%"><button class="btn sm grow">None</button><button class="btn sm grow on" aria-pressed="true">Compact</button><button class="btn sm grow">Standard</button></div>
+          <span class="t-12 mut3">Compact (default): 160–240px, identity + status + one action. Immersive is under Advanced.</span></div>
+        <div class="fld"><label for="ht">Title</label><input id="ht" class="in" value="Gauss Hack 2027"></div>
+        <div class="fld"><label for="hs">Tagline</label><input id="hs" class="in" value="48 hours of applied problem-solving in energy, health and open science."><span class="hint">72 of 120 characters</span></div>
+        <div class="fld"><label for="hp">Primary action</label><select id="hp" class="in"><option>Register — automatic by stage</option></select><span class="hint">Changes to “Browse projects” or “See winners” as stages advance.</span></div>
+        <div class="col g1"><span class="lbl">Artwork <span class="mut3" style="font-weight:400">· optional</span></span><div class="row g2"><div class="ph-art" style="width:72px;height:48px">none</div><button class="btn sm"><i class="ic s ic-image"></i>Upload</button><span class="t-12 mut3">No art → typographic lockup</span></div></div>
+        <details><summary class="row" style="cursor:pointer;list-style:none;height:30px"><i class="ic s ic-chev-r"></i><b class="t-13">Advanced</b><span class="t-12 mut3 sp">focal point · immersive · custom lead block</span></summary></details>
+      </div>
+      <div class="row" style="padding:10px 14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><h2>Theme tokens</h2><span class="st ok sp"><i class="ic ic-check"></i>Contrast valid</span></div>
+      <div class="tok"><span class="chip-c" style="background:#1d55c2"></span><span>Accent</span><span class="mono">#1d55c2</span><span class="st ok"><i class="ic ic-check"></i>6.7:1</span></div>
+      <div class="tok"><span class="chip-c" style="background:#fbfbfc"></span><span>Page background</span><span class="mono">#fbfbfc</span><span class="st ok"><i class="ic ic-check"></i>17.0:1</span></div>
+      <div class="tok"><span class="chip-c" style="background:#0a6b60"></span><span>Try: teal</span><span class="mono">#0a6b60</span><span class="st ok"><i class="ic ic-check"></i>6.4:1</span></div>
+      <div class="tok" style="background:var(--err-tint)"><span class="chip-c" style="background:#5ac8a8"></span><span>Try: mint</span><span class="mono">#5ac8a8</span><span class="st err"><i class="ic ic-xc"></i>1.9:1</span></div>
+      <div class="t-12 mut" style="padding:8px 14px;line-height:1.5">Failing colors can’t be saved. App chrome keeps the fixed Conflux accent; only public pages take these tokens.</div>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":920}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

@@ -1,0 +1,492 @@
+{
+  "attachments": {},
+  "boards": {
+    "Builder-Pages.dc.html": {
+      "h": 920,
+      "title": "D10 \u00b7 Page & theme builder",
+      "w": 1440,
+      "x": 1520,
+      "y": 14690
+    },
+    "Builder-Plan.dc.html": {
+      "h": 920,
+      "title": "D10 \u00b7 Plan/apply + extension config",
+      "w": 1440,
+      "x": 3040,
+      "y": 14690
+    },
+    "Builder-Setup.dc.html": {
+      "h": 1180,
+      "title": "D10 \u00b7 Event setup",
+      "w": 1440,
+      "x": 0,
+      "y": 14690
+    },
+    "Dark-Judge.dc.html": {
+      "h": 920,
+      "title": "D13 \u00b7 Dark \u00b7 judge review",
+      "w": 1440,
+      "x": 0,
+      "y": 18000
+    },
+    "Dark-MyEvent.dc.html": {
+      "h": 1000,
+      "title": "D13 \u00b7 Dark \u00b7 participant My Event",
+      "w": 860,
+      "x": 0,
+      "y": 19400
+    },
+    "Dark-Organizer.dc.html": {
+      "h": 1000,
+      "title": "D13 \u00b7 Dark \u00b7 organizer shell + data surface",
+      "w": 1440,
+      "x": 1520,
+      "y": 18000
+    },
+    "Dark-Overlays.dc.html": {
+      "h": 900,
+      "title": "D13 \u00b7 Dark \u00b7 overlays, dialogs, focus",
+      "w": 1440,
+      "x": 940,
+      "y": 19400
+    },
+    "Data-Filters.dc.html": {
+      "h": 1000,
+      "title": "D3 \u00b7 Filters, views, bulk plan",
+      "w": 1350,
+      "x": 1520,
+      "y": 5010
+    },
+    "Data-Surface.dc.html": {
+      "h": 1000,
+      "title": "D3 \u00b7 Organizer data surface",
+      "w": 1440,
+      "x": 0,
+      "y": 5010
+    },
+    "Deliberation-Finalize.dc.html": {
+      "h": 900,
+      "title": "D7 \u00b7 Override, approval, publication",
+      "w": 1440,
+      "x": 1520,
+      "y": 10870
+    },
+    "Deliberation.dc.html": {
+      "h": 1080,
+      "title": "D7 \u00b7 Decision room",
+      "w": 1440,
+      "x": 0,
+      "y": 10870
+    },
+    "Judge-Dialogs.dc.html": {
+      "h": 800,
+      "title": "D6 \u00b7 Recusal, flag, offline, route",
+      "w": 1440,
+      "x": 1520,
+      "y": 9580
+    },
+    "Judge-Mobile.dc.html": {
+      "h": 844,
+      "title": "D6 \u00b7 Judge narrow mode",
+      "w": 1250,
+      "x": 3040,
+      "y": 9580
+    },
+    "Judge-Review.dc.html": {
+      "h": 920,
+      "title": "D6 \u00b7 Judge review",
+      "w": 1440,
+      "x": 0,
+      "y": 9580
+    },
+    "Main.dc.html": {
+      "h": 900,
+      "title": "00 \u00b7 Index & revision r2.1",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "MyEvent-Mobile.dc.html": {
+      "h": 1000,
+      "title": "D4 \u00b7 My Event mobile: action / ready",
+      "w": 860,
+      "x": 1360,
+      "y": 6380
+    },
+    "MyEvent.dc.html": {
+      "h": 1090,
+      "title": "D4 \u00b7 My Event \u2014 action needed",
+      "w": 1280,
+      "x": 0,
+      "y": 6380
+    },
+    "Onsite-A.dc.html": {
+      "h": 844,
+      "title": "D11 \u00b7 Check-in, desk, pass",
+      "w": 1250,
+      "x": 0,
+      "y": 16040
+    },
+    "Onsite-B.dc.html": {
+      "h": 844,
+      "title": "D11 \u00b7 Route, mentor, pitch",
+      "w": 1250,
+      "x": 1330,
+      "y": 16040
+    },
+    "Pairwise-Compare.dc.html": {
+      "h": 900,
+      "title": "D6b \u00b7 Pairwise judging \u00b7 compare",
+      "w": 1440,
+      "x": 0,
+      "y": 23800
+    },
+    "Pairwise-Narrow.dc.html": {
+      "h": 844,
+      "title": "D6b \u00b7 Pairwise \u00b7 narrow fallback",
+      "w": 1250,
+      "x": 0,
+      "y": 24900
+    },
+    "Pairwise-States.dc.html": {
+      "h": 950,
+      "title": "D6b \u00b7 Pairwise \u00b7 recusal, tie, hybrid, history",
+      "w": 1440,
+      "x": 1330,
+      "y": 24900
+    },
+    "Public-Event-Mobile.dc.html": {
+      "h": 1420,
+      "title": "D8 \u00b7 Public event mobile",
+      "w": 860,
+      "x": 2720,
+      "y": 12320
+    },
+    "Public-Event-Themed.dc.html": {
+      "h": 1000,
+      "title": "D8 \u00b7 Public event (organizer theme)",
+      "w": 1280,
+      "x": 1360,
+      "y": 12320
+    },
+    "Public-Event.dc.html": {
+      "h": 1700,
+      "title": "D8 \u00b7 Public event (no artwork)",
+      "w": 1280,
+      "x": 0,
+      "y": 12320
+    },
+    "Public-Project-Mobile.dc.html": {
+      "h": 1600,
+      "title": "D9 \u00b7 Public project mobile",
+      "w": 860,
+      "x": 4940,
+      "y": 12320
+    },
+    "Public-Project.dc.html": {
+      "h": 2010,
+      "title": "D9 \u00b7 Public project",
+      "w": 1200,
+      "x": 3660,
+      "y": 12320
+    },
+    "Resp-1024.dc.html": {
+      "h": 768,
+      "title": "D14 \u00b7 1024 organizer / tablet",
+      "w": 1024,
+      "x": 0,
+      "y": 20800
+    },
+    "Resp-768.dc.html": {
+      "h": 1024,
+      "title": "D14 \u00b7 768 judge review (narrow tablet)",
+      "w": 1176,
+      "x": 0,
+      "y": 20800
+    },
+    "Shell-Dense.dc.html": {
+      "h": 900,
+      "title": "D2 \u00b7 High-density + command",
+      "w": 1440,
+      "x": 1520,
+      "y": 3740
+    },
+    "Shell-Judge.dc.html": {
+      "h": 800,
+      "title": "D2 \u00b7 Judge shell",
+      "w": 1280,
+      "x": 5920,
+      "y": 3740
+    },
+    "Shell-Mobile.dc.html": {
+      "h": 844,
+      "title": "D2 \u00b7 Mobile navigation",
+      "w": 1250,
+      "x": 7280,
+      "y": 3740
+    },
+    "Shell-Organizer.dc.html": {
+      "h": 900,
+      "title": "D2 \u00b7 Organizer shell",
+      "w": 1440,
+      "x": 0,
+      "y": 3740
+    },
+    "Shell-Overlays.dc.html": {
+      "h": 640,
+      "title": "D2 \u00b7 Switcher / notifications / account",
+      "w": 1440,
+      "x": 3040,
+      "y": 3740
+    },
+    "Shell-Participant.dc.html": {
+      "h": 860,
+      "title": "D2 \u00b7 Participant shell",
+      "w": 1280,
+      "x": 4560,
+      "y": 3740
+    },
+    "States-1.dc.html": {
+      "h": 1770,
+      "title": "D12 \u00b7 State matrix (1/2)",
+      "w": 1440,
+      "x": 0,
+      "y": 17254
+    },
+    "States-2.dc.html": {
+      "h": 1560,
+      "title": "D12 \u00b7 State matrix (2/2)",
+      "w": 1440,
+      "x": 1520,
+      "y": 17254
+    },
+    "Story-Editor.dc.html": {
+      "h": 960,
+      "title": "D5 \u00b7 Story editor \u2014 source + preview",
+      "w": 1440,
+      "x": 0,
+      "y": 8250
+    },
+    "Story-History.dc.html": {
+      "h": 900,
+      "title": "D5 \u00b7 History, diff, judged vs living",
+      "w": 1440,
+      "x": 3040,
+      "y": 8250
+    },
+    "Story-Rich.dc.html": {
+      "h": 900,
+      "title": "D5 \u00b7 Story editor \u2014 rich mode + comments",
+      "w": 1440,
+      "x": 1520,
+      "y": 8250
+    },
+    "Sys-Components.dc.html": {
+      "h": 2540,
+      "title": "D1 \u00b7 Component grammar",
+      "w": 1440,
+      "x": 1520,
+      "y": 1270
+    },
+    "Sys-Dark.dc.html": {
+      "h": 1560,
+      "title": "D1 \u00b7 Dark foundations & components",
+      "w": 1440,
+      "x": 3040,
+      "y": 18000
+    },
+    "Sys-Directions.dc.html": {
+      "h": 2050,
+      "title": "D1 \u00b7 Directions explored \u2192 converged",
+      "w": 1440,
+      "x": 3040,
+      "y": 1270
+    },
+    "Sys-Foundations.dc.html": {
+      "h": 1760,
+      "title": "D1 \u00b7 Foundations",
+      "w": 1440,
+      "x": 0,
+      "y": 1270
+    },
+    "Wide-1920.dc.html": {
+      "h": 1080,
+      "title": "D14 \u00b7 1920 wide operator + 5,000-person stress fixture",
+      "w": 1920,
+      "x": 0,
+      "y": 22100
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-09-30T12:00:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "t-builder": {
+      "kind": "title1",
+      "maxW": 4480,
+      "text": "D10 \u2014 Event builder",
+      "w": 240,
+      "x": 0,
+      "y": 14460
+    },
+    "t-dark": {
+      "kind": "title1",
+      "maxW": 4480,
+      "text": "D13 \u2014 Dark mode (representative)",
+      "w": 240,
+      "x": 0,
+      "y": 17770
+    },
+    "t-data": {
+      "kind": "title1",
+      "maxW": 2960,
+      "text": "D3 \u2014 Organizer data surface (reference pattern)",
+      "w": 240,
+      "x": 0,
+      "y": 4780
+    },
+    "t-delib": {
+      "kind": "title1",
+      "maxW": 2960,
+      "text": "D7 \u2014 Deliberation & awards",
+      "w": 240,
+      "x": 0,
+      "y": 10640
+    },
+    "t-judge": {
+      "kind": "title1",
+      "maxW": 4290,
+      "text": "D6 \u2014 Judge review",
+      "w": 240,
+      "x": 0,
+      "y": 9350
+    },
+    "t-my": {
+      "kind": "title1",
+      "maxW": 2220,
+      "text": "D4 \u2014 Participant My Event",
+      "w": 240,
+      "x": 0,
+      "y": 6150
+    },
+    "t-onsite": {
+      "kind": "title1",
+      "maxW": 2580,
+      "text": "D11 \u2014 Onsite mobile",
+      "w": 240,
+      "x": 0,
+      "y": 15810
+    },
+    "t-pair": {
+      "kind": "title1",
+      "maxW": 4480,
+      "text": "D6b \u2014 Pairwise judging",
+      "w": 240,
+      "x": 0,
+      "y": 23570
+    },
+    "t-public": {
+      "kind": "title1",
+      "maxW": 5800,
+      "text": "D8 / D9 \u2014 Public event & project",
+      "w": 240,
+      "x": 0,
+      "y": 12090
+    },
+    "t-resp": {
+      "kind": "title1",
+      "maxW": 4480,
+      "text": "D14 \u2014 Intermediate & wide responsive",
+      "w": 240,
+      "x": 0,
+      "y": 20570
+    },
+    "t-shell": {
+      "kind": "title1",
+      "maxW": 8000,
+      "text": "D2 \u2014 Application shell",
+      "w": 240,
+      "x": 0,
+      "y": 3510
+    },
+    "t-states": {
+      "kind": "title1",
+      "maxW": 2960,
+      "text": "D12 \u2014 State matrix",
+      "w": 240,
+      "x": 0,
+      "y": 17024
+    },
+    "t-story": {
+      "kind": "title1",
+      "maxW": 4480,
+      "text": "D5 \u2014 Project story editor",
+      "w": 240,
+      "x": 0,
+      "y": 8020
+    },
+    "t-system": {
+      "kind": "title1",
+      "maxW": 4480,
+      "text": "D1 \u2014 System v3",
+      "w": 240,
+      "x": 0,
+      "y": 1040
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Sys-Foundations.dc.html",
+    "Sys-Components.dc.html",
+    "Sys-Directions.dc.html",
+    "Shell-Organizer.dc.html",
+    "Shell-Dense.dc.html",
+    "Shell-Overlays.dc.html",
+    "Shell-Participant.dc.html",
+    "Shell-Judge.dc.html",
+    "Shell-Mobile.dc.html",
+    "Data-Surface.dc.html",
+    "Data-Filters.dc.html",
+    "MyEvent.dc.html",
+    "MyEvent-Mobile.dc.html",
+    "Story-Editor.dc.html",
+    "Story-Rich.dc.html",
+    "Story-History.dc.html",
+    "Judge-Review.dc.html",
+    "Judge-Dialogs.dc.html",
+    "Judge-Mobile.dc.html",
+    "Deliberation.dc.html",
+    "Deliberation-Finalize.dc.html",
+    "Public-Event.dc.html",
+    "Public-Event-Themed.dc.html",
+    "Public-Event-Mobile.dc.html",
+    "Public-Project.dc.html",
+    "Public-Project-Mobile.dc.html",
+    "Builder-Setup.dc.html",
+    "Builder-Pages.dc.html",
+    "Builder-Plan.dc.html",
+    "Onsite-A.dc.html",
+    "Onsite-B.dc.html",
+    "States-1.dc.html",
+    "States-2.dc.html",
+    "Dark-Judge.dc.html",
+    "Dark-MyEvent.dc.html",
+    "Dark-Organizer.dc.html",
+    "Dark-Overlays.dc.html",
+    "Sys-Dark.dc.html",
+    "Resp-1024.dc.html",
+    "Wide-1920.dc.html",
+    "Resp-768.dc.html",
+    "Pairwise-Compare.dc.html",
+    "Pairwise-Narrow.dc.html",
+    "Pairwise-States.dc.html"
+  ],
+  "pages": [],
+  "title": "Conflux v3 Design r2.1",
+  "v": 3
+}

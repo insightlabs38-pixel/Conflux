@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>System v3 directions explored</title>
+<link rel="stylesheet" href="../../v3.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+body{margin:0}
+.thumb{width:420px;height:262px;overflow:hidden;border:1px solid var(--line-2);border-radius:var(--r-3);position:relative;background:var(--bg)}
+.thumb>.in-{width:1000px;height:625px;transform:scale(.42);transform-origin:0 0;position:absolute;top:0;left:0}
+.thumb.pick{border:2px solid var(--accent)}
+.sc td,.sc th{white-space:normal}
+.dots{letter-spacing:2px;font-size:12px;color:var(--ink)}
+.dots i{font-style:normal;color:var(--line-3)}
+.card-m{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+</style>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div style="width:1440px;height:2050px;background:var(--bg);padding:40px 48px;display:flex;flex-direction:column;gap:22px;overflow:hidden">
+  <div class="row" style="align-items:flex-end"><div class="col g1"><div class="eyebrow">design/system-v3 · r2.1 · exploration record from r1</div><h1 style="font-size:28px;letter-spacing:-.02em">Three directions per decision, then converge</h1></div><p class="mut sp t-13" style="max-width:560px">Shell, organizer data surface and judge review each explored as three materially different structures. Scores are 1–5 against the seven brief criteria. Selected option has the blue frame.</p></div>
+
+  <!-- SHELL -->
+  <div class="pn">
+    <div class="pn-h"><h2>Application shell</h2><span class="tag info">Selected: A · Ledger</span></div>
+    <div class="pn-b col g3">
+      <div class="row g4" style="align-items:flex-start">
+        <div class="col g2"><div class="thumb pick"><div class="in-"><div class="shell" style="width:1000px;height:625px">
+          <div class="top"><div class="mark">C</div><div class="ev-switch">Gauss Hack 2026<i class="ic s ic-chev-d"></i></div><span class="tag ok">Judging</span><div class="cmdk sp"><i class="ic s ic-search"></i>Search or run a command<span class="kbd">⌘K</span></div><i class="ic ic-bell"></i><span class="avatar">AK</span></div>
+          <div class="rail"><a class="nav-i"><i class="ic ic-home"></i>Overview</a><a class="nav-i" aria-current="page"><i class="ic ic-users"></i>Participants</a><a class="nav-i"><i class="ic ic-file"></i>Projects</a><a class="nav-i"><i class="ic ic-trophy"></i>Judging</a><a class="nav-i"><i class="ic ic-msg"></i>Comms</a><a class="nav-i"><i class="ic ic-qr"></i>On-site</a><div class="nav-g">Advanced</div><a class="nav-i"><i class="ic ic-box"></i>Integrations</a></div>
+          <div style="padding:16px 20px" class="col g3"><div class="row"><h1>Participants</h1><button class="btn pri sp">Invite</button></div><div class="pn"><table class="tbl"><thead><tr><th>Name</th><th>Team</th><th>Status</th></tr></thead><tbody><tr><td>Sofia Marín-Reyes</td><td>Northwind</td><td><span class="st ok"><i class="ic ic-okc"></i>Checked in</span></td></tr><tr><td>Dev Patel</td><td>Latent Space</td><td><span class="st warn"><i class="ic ic-warn"></i>Waiver</span></td></tr><tr><td>Anja Kowalski</td><td>BioSignal</td><td><span class="st ok"><i class="ic ic-okc"></i>Checked in</span></td></tr><tr><td>Tomás Ribeiro</td><td>Kelvin</td><td><span class="st err"><i class="ic ic-xc"></i>Ineligible</span></td></tr></tbody></table></div></div>
+        </div></div></div><b class="t-13">A · Ledger — light rail, hairlines, one accent</b><span class="t-12 mut">Persistent left rail + slim top bar; inspector on the right.</span></div>
+        <div class="col g2"><div class="thumb"><div class="in-"><div class="shell" style="width:1000px;height:625px">
+          <div class="top" data-theme="dark" style="background:#12161c;border-color:#2b323c;color:#eceff3"><div class="mark" style="background:#eceff3;color:#12161c">C</div><span style="font-weight:600">gauss-hack-2026</span><span class="mono t-12" style="color:#98a2b0">/ participants</span><div class="cmdk sp" style="background:#1e232b;border-color:#3c4552;color:#98a2b0"><i class="ic s ic-term"></i>Run…<span class="kbd" style="background:#12161c">⌘K</span></div></div>
+          <div class="rail" data-theme="dark" style="background:#171b21;border-color:#2b323c"><a class="nav-i"><i class="ic ic-home"></i>overview</a><a class="nav-i" aria-current="page"><i class="ic ic-users"></i>participants</a><a class="nav-i"><i class="ic ic-file"></i>projects</a><a class="nav-i"><i class="ic ic-trophy"></i>judging</a><a class="nav-i"><i class="ic ic-term"></i>api / cli</a></div>
+          <div style="padding:16px 20px" class="col g3"><div class="row"><h1 class="mono" style="font-size:18px">participants</h1></div><div class="pn"><table class="tbl dense"><thead><tr><th>name</th><th>team</th><th>status</th></tr></thead><tbody><tr><td>Sofia Marín-Reyes</td><td>Northwind</td><td>checked_in</td></tr><tr><td>Dev Patel</td><td>Latent Space</td><td>waiver_missing</td></tr><tr><td>Anja Kowalski</td><td>BioSignal</td><td>checked_in</td></tr></tbody></table></div></div>
+        </div></div></div><b class="t-13">B · Console — dark chrome, mono labels</b><span class="t-12 mut">Developer-tool feel; strong for API/CLI, cold for participants.</span></div>
+        <div class="col g2"><div class="thumb"><div class="in-" style="background:var(--bg)">
+          <div class="top" style="height:52px"><div class="mark">C</div><b>Gauss Hack</b><a class="nav-i" style="width:auto">Setup</a><a class="nav-i" aria-current="page" style="width:auto">People</a><a class="nav-i" style="width:auto">Judging</a><a class="nav-i" style="width:auto">Results</a><a class="nav-i" style="width:auto">On-site</a><span class="avatar sp">AK</span></div>
+          <div style="padding:24px 40px" class="col g3"><h1 style="font-size:28px">People</h1><div class="tabs"><a aria-current="page">Overview</a><a>Applications</a><a>Teams</a></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px"><div class="card-m"><div class="ic-tile" style="width:36px;height:36px;border-radius:10px;background:#e8e4fc;margin-bottom:10px"></div><b>5,012</b><div class="t-12 mut">Participants</div></div><div class="card-m"><div style="width:36px;height:36px;border-radius:10px;background:#e4f4ec;margin-bottom:10px"></div><b>1,284</b><div class="t-12 mut">Teams</div></div><div class="card-m"><div style="width:36px;height:36px;border-radius:10px;background:#fcebe4;margin-bottom:10px"></div><b>412</b><div class="t-12 mut">Pending</div></div></div></div>
+        </div></div><b class="t-13">C · Workbench — top nav, tabs, card overview</b><span class="t-12 mut">Familiar SaaS; this is the pattern the brief forbids.</span></div>
+      </div>
+      <table class="tbl dense sc">
+        <thead><tr><th style="width:230px">Criterion</th><th style="width:150px">A · Ledger</th><th style="width:150px">B · Console</th><th style="width:150px">C · Workbench</th><th>Reasoning</th></tr></thead>
+        <tbody>
+          <tr><td>Professional credibility</td><td class="dots" aria-label="5 of 5">●●●●●</td><td class="dots" aria-label="4 of 5">●●●●<i>●</i></td><td class="dots" aria-label="3 of 5">●●●<i>●●</i></td><td class="t-12 mut">C reads as generic SaaS; B as a devtool not a competition OS.</td></tr>
+          <tr><td>Operator density</td><td class="dots" aria-label="5 of 5">●●●●●</td><td class="dots" aria-label="5 of 5">●●●●●</td><td class="dots" aria-label="2 of 5">●●<i>●●●</i></td><td class="t-12 mut">Rail frees the vertical for tables; C spends 100px on nav + tabs + cards.</td></tr>
+          <tr><td>Participant clarity</td><td class="dots" aria-label="5 of 5">●●●●●</td><td class="dots" aria-label="2 of 5">●●<i>●●●</i></td><td class="dots" aria-label="4 of 5">●●●●<i>●</i></td><td class="t-12 mut">A collapses to top-bar-only for participants (same tokens).</td></tr>
+          <tr><td>Extensibility / customization</td><td class="dots" aria-label="5 of 5">●●●●●</td><td class="dots" aria-label="3 of 5">●●●<i>●●</i></td><td class="dots" aria-label="3 of 5">●●●<i>●●</i></td><td class="t-12 mut">Rail groups + “Advanced” absorb extension pages; one accent leaves public themes free.</td></tr>
+          <tr><td>Accessibility</td><td class="dots" aria-label="5 of 5">●●●●●</td><td class="dots" aria-label="3 of 5">●●●<i>●●</i></td><td class="dots" aria-label="4 of 5">●●●●<i>●</i></td><td class="t-12 mut">B’s lowercase mono and dark-on-dark low-emphasis text erode contrast margins.</td></tr>
+          <tr><td>Resistance to visual slop</td><td class="dots" aria-label="5 of 5">●●●●●</td><td class="dots" aria-label="4 of 5">●●●●<i>●</i></td><td class="dots" aria-label="1 of 5">●<i>●●●●</i></td><td class="t-12 mut">Coloured icon tiles + KPI cards are C’s default grammar.</td></tr>
+          <tr><td>Scales to many features</td><td class="dots" aria-label="5 of 5">●●●●●</td><td class="dots" aria-label="3 of 5">●●●<i>●●</i></td><td class="dots" aria-label="2 of 5">●●<i>●●●</i></td><td class="t-12 mut">Grouped rail + ⌘K + saved views; top nav overflows past ~7 items.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- DATA SURFACE -->
+  <div class="pn">
+    <div class="pn-h"><h2>Organizer data surface</h2><span class="tag info">Selected: A · Grid + right inspector</span></div>
+    <div class="pn-b col g3">
+      <div class="row g4" style="align-items:flex-start">
+        <div class="col g2"><div class="thumb pick"><div class="in-" style="display:flex;background:var(--surface)"><div style="flex:1;min-width:0"><div class="toolbar" style="height:52px"><div class="in-wrap" style="width:220px"><i class="ic ic-search"></i><input class="in sm" value="Search"></div><button class="btn sm"><i class="ic ic-filter"></i>Filters</button><span class="t-12 mut sp">1,284 of 5,012</span></div><table class="tbl dense"><thead><tr><th class="ck"></th><th>Name</th><th>Team</th><th>Status</th></tr></thead><tbody><tr><td class="ck"><input type="checkbox"></td><td>Sofia M.</td><td>Northwind</td><td><span class="st ok"><i class="ic ic-okc"></i>In</span></td></tr><tr class="sel"><td class="ck"><input type="checkbox" checked></td><td>Dev P.</td><td>Latent</td><td><span class="st warn"><i class="ic ic-warn"></i>Waiver</span></td></tr><tr><td class="ck"><input type="checkbox"></td><td>Anja K.</td><td>BioSignal</td><td><span class="st ok"><i class="ic ic-okc"></i>In</span></td></tr><tr><td class="ck"><input type="checkbox"></td><td>Tomás R.</td><td>Kelvin</td><td><span class="st err"><i class="ic ic-xc"></i>No</span></td></tr></tbody></table></div><div style="width:320px;border-left:1px solid var(--line);padding:14px" class="col g2"><b>Dev Patel</b><span class="t-12 mut">Latent Space Cartographers</span><div class="bn warn"><i class="ic ic-warn"></i><span>Waiver missing</span></div></div></div></div><b class="t-13">A · Grid + right inspector</b><span class="t-12 mut">List stays put; detail beside it. Best density and keyboard flow.</span></div>
+        <div class="col g2"><div class="thumb"><div class="in-" style="background:var(--surface)"><div class="toolbar" style="height:52px"><button class="btn sm"><i class="ic ic-filter"></i>Filters</button></div><table class="tbl dense"><thead><tr><th>Name</th><th>Team</th><th>Status</th></tr></thead><tbody><tr><td>Sofia M.</td><td>Northwind</td><td>In</td></tr><tr class="sel"><td>Dev P.</td><td>Latent</td><td>Waiver</td></tr><tr><td>Anja K.</td><td>BioSignal</td><td>In</td></tr></tbody></table><div style="position:absolute;left:0;right:0;bottom:0;height:260px;border-top:2px solid var(--line-2);background:var(--surface-2);padding:14px"><b>Dev Patel</b> <span class="t-12 mut">Latent Space Cartographers · Waiver missing</span></div></div></div><b class="t-13">B · Master table + bottom drawer</b><span class="t-12 mut">Wide tables fit, but halves vertical rows and hides list when tall detail opens.</span></div>
+        <div class="col g2"><div class="thumb"><div class="in-" style="background:var(--bg);padding:18px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;align-content:start"><div class="card-m"><b>Sofia M.</b><div class="t-12 mut">Northwind</div><div class="tag ok" style="margin-top:8px">Checked in</div></div><div class="card-m"><b>Dev P.</b><div class="t-12 mut">Latent Space</div><div class="tag warn" style="margin-top:8px">Waiver</div></div><div class="card-m"><b>Anja K.</b><div class="t-12 mut">BioSignal</div><div class="tag ok" style="margin-top:8px">Checked in</div></div><div class="card-m"><b>Tomás R.</b><div class="t-12 mut">Kelvin</div><div class="tag err" style="margin-top:8px">Ineligible</div></div><div class="card-m"><b>Mei L.</b><div class="t-12 mut">Kelvin</div><div class="tag ok" style="margin-top:8px">Checked in</div></div><div class="card-m"><b>Luca B.</b><div class="t-12 mut">Northwind</div><div class="tag ok" style="margin-top:8px">Checked in</div></div></div></div><b class="t-13">C · Card board</b><span class="t-12 mut">~12 records per screen; no sort, no range select. Fails at 5,000.</span></div>
+      </div>
+      <table class="tbl dense sc">
+        <thead><tr><th style="width:230px">Criterion</th><th style="width:150px">A · Grid + inspector</th><th style="width:150px">B · Bottom drawer</th><th style="width:150px">C · Card board</th><th>Reasoning</th></tr></thead>
+        <tbody>
+          <tr><td>Operator density (rows in view)</td><td class="dots" aria-label="5 of 5">●●●●●</td><td class="dots" aria-label="3 of 5">●●●<i>●●</i></td><td class="dots" aria-label="1 of 5">●<i>●●●●</i></td><td class="t-12 mut">~24 rows @1440×900 vs ~12 vs ~10.</td></tr>
+          <tr><td>Keyboard / bulk / range select</td><td class="dots" aria-label="5 of 5">●●●●●</td><td class="dots" aria-label="4 of 5">●●●●<i>●</i></td><td class="dots" aria-label="1 of 5">●<i>●●●●</i></td><td class="t-12 mut">Cards have no linear scan order.</td></tr>
+          <tr><td>Scale to 5,000 records</td><td class="dots" aria-label="5 of 5">●●●●●</td><td class="dots" aria-label="4 of 5">●●●●<i>●</i></td><td class="dots" aria-label="1 of 5">●<i>●●●●</i></td><td class="t-12 mut">Virtualised rows + server query.</td></tr>
+          <tr><td>Accessibility (grid semantics, focus)</td><td class="dots" aria-label="5 of 5">●●●●●</td><td class="dots" aria-label="4 of 5">●●●●<i>●</i></td><td class="dots" aria-label="3 of 5">●●●<i>●●</i></td><td class="t-12 mut">Bottom drawer steals focus order and screen area at 200% zoom.</td></tr>
+          <tr><td>Narrow-screen fallback</td><td class="dots" aria-label="4 of 5">●●●●<i>●</i></td><td class="dots" aria-label="2 of 5">●●<i>●●●</i></td><td class="dots" aria-label="5 of 5">●●●●●</td><td class="t-12 mut">A → row-list + detail page. Board is offered as an <em>optional view</em> only for stage pipelines.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- JUDGE -->
+  <div class="pn">
+    <div class="pn-h"><h2>Judge review</h2><span class="tag info">Selected: A · Queue | Evidence | Rubric</span></div>
+    <div class="pn-b col g3">
+      <div class="row g4" style="align-items:flex-start">
+        <div class="col g2"><div class="thumb pick"><div class="in-" style="display:grid;grid-template-columns:200px 1fr 260px;background:var(--surface)"><div style="border-right:1px solid var(--line);padding:10px" class="col g2"><b class="t-12">Queue 7/24</b><div class="well t-12">Northwind Grid…</div><div class="t-12 mut">Latent Space…</div><div class="t-12 mut">BioSignal Edge…</div></div><div style="padding:14px" class="col g2"><b>Northwind Grid Forecaster</b><div class="ph-art" style="height:220px">artifact preview</div><div class="sk" style="width:80%"></div><div class="sk" style="width:60%"></div></div><div style="border-left:1px solid var(--line);padding:12px" class="col g2"><b class="t-12">Rubric</b><div class="seg"><button class="btn sm">1</button><button class="btn sm">2</button><button class="btn sm on">3</button><button class="btn sm">4</button><button class="btn sm">5</button></div><div class="seg"><button class="btn sm">1</button><button class="btn sm">2</button><button class="btn sm">3</button><button class="btn sm on">4</button><button class="btn sm">5</button></div></div></div></div><b class="t-13">A · Three panes</b><span class="t-12 mut">Evidence and score visible together; no page changes to score.</span></div>
+        <div class="col g2"><div class="thumb"><div class="in-" style="background:var(--bg);display:flex;justify-content:center;padding:26px"><div class="card-m" style="width:620px" data-x><div class="row"><b>Project 7 of 24</b><div class="bar sp" style="width:200px"><i style="width:29%"></i></div></div><div class="ph-art" style="height:160px;margin:14px 0">artifact preview</div><b>Innovation</b><div class="seg" style="margin-top:8px"><button class="btn">1</button><button class="btn">2</button><button class="btn on">3</button><button class="btn">4</button><button class="btn">5</button></div><div class="row" style="margin-top:14px"><button class="btn">Back</button><button class="btn pri sp">Next criterion</button></div></div></div></div><b class="t-13">B · Wizard, one criterion at a time</b><span class="t-12 mut">Focused, but hides context, slows expert judges and hampers comparison.</span></div>
+        <div class="col g2"><div class="thumb"><div class="in-" style="background:var(--surface);padding:20px 200px" class="col"><div class="tabs"><a aria-current="page">Story</a><a>Artifacts</a><a>Score</a></div><div class="col g2" style="margin-top:16px"><div class="sk" style="height:14px;width:90%"></div><div class="sk" style="height:14px;width:80%"></div><div class="sk" style="height:14px;width:85%"></div><div class="ph-art" style="height:140px">figure</div><div class="sk" style="height:14px;width:70%"></div></div></div></div><b class="t-13">C · Tabs, single column</b><span class="t-12 mut">Becomes the phone layout only; wastes width on desktop.</span></div>
+      </div>
+      <table class="tbl dense sc">
+        <thead><tr><th style="width:230px">Criterion</th><th style="width:150px">A · Three panes</th><th style="width:150px">B · Wizard</th><th style="width:150px">C · Tabs</th><th>Reasoning</th></tr></thead>
+        <tbody>
+          <tr><td>Judge speed</td><td class="dots" aria-label="5 of 5">●●●●●</td><td class="dots" aria-label="2 of 5">●●<i>●●●</i></td><td class="dots" aria-label="3 of 5">●●●<i>●●</i></td><td class="t-12 mut">A: zero navigation between evidence and score; J/K + 1–5 keys.</td></tr>
+          <tr><td>Mistake prevention</td><td class="dots" aria-label="5 of 5">●●●●●</td><td class="dots" aria-label="3 of 5">●●●<i>●●</i></td><td class="dots" aria-label="3 of 5">●●●<i>●●</i></td><td class="t-12 mut">Recusal, autosave and “scoring project X” stay pinned in A.</td></tr>
+          <tr><td>Pairwise / comparison extension</td><td class="dots" aria-label="5 of 5">●●●●●</td><td class="dots" aria-label="1 of 5">●<i>●●●●</i></td><td class="dots" aria-label="2 of 5">●●<i>●●●</i></td><td class="t-12 mut">Centre pane splits into two evidence columns.</td></tr>
+          <tr><td>Narrow / mobile</td><td class="dots" aria-label="4 of 5">●●●●<i>●</i></td><td class="dots" aria-label="4 of 5">●●●●<i>●</i></td><td class="dots" aria-label="5 of 5">●●●●●</td><td class="t-12 mut">A degrades to C below 1024 (tabs Queue · Evidence · Score with sticky score bar).</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="well t-13" style="line-height:1.55"><b>Convergence.</b> One system: A · Ledger shell, A · grid + inspector, A · three-pane judge; C-style tabs and B-style stepping survive only as <em>responsive fallbacks</em>. Dark chrome (B) survives as the optional dark theme, not a separate product identity. Card grids survive only for gallery/marketplace content that is genuinely browse-y (public project gallery).</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Public project mobile</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./v3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+body{margin:0}
+.phone{width:390px;height:1500px;background:#fbfbfc;border:1px solid var(--line-2);overflow:hidden;position:relative}
+.mnav{display:flex;align-items:center;height:52px;padding:0 8px 0 16px;background:#fff;border-bottom:1px solid var(--line)}
+.ml{display:flex;align-items:center;gap:10px;padding:0 16px;min-height:48px;border-bottom:1px solid var(--line);font-size:14px;background:#fff}
+.prose{font-size:16px;line-height:1.65;padding:0 16px}
+.eqn{display:flex;align-items:center;justify-content:center;font-family:"STIX Two Text","Cambria Math",var(--font-read);font-style:italic;font-size:16px;margin:12px 0;overflow-x:auto;position:relative;padding:6px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.frac{display:inline-flex;flex-direction:column;align-items:center;font-size:.85em;line-height:1.15;vertical-align:middle}.frac>span:first-child{border-bottom:1px solid var(--ink);padding:0 4px}
+</style>
+</helmet>
+<div style="width:860px;height:1500px;display:flex;gap:80px">
+  <div class="phone pub">
+    <div class="mnav"><button class="btn ghost icon" aria-label="Back to event" style="width:44px;height:44px;margin-left:-8px"><i class="ic ic-chev-l"></i></button><b class="grow t-13 trunc">Gauss Hack 2026 · Projects</b><button class="btn ghost icon" aria-label="Share" style="width:44px;height:44px"><i class="ic ic-link"></i></button></div>
+    <div style="background:var(--info-tint);border-bottom:1px solid var(--info-line);padding:8px 16px" class="t-12"><b>Living version.</b> Judged as r3 — <a>view as judged</a></div>
+    <header style="padding:16px" class="col g2"><h1 style="font-size:24px;line-height:1.2;letter-spacing:-.02em">Northwind Grid Forecaster</h1><p style="font-size:16px;color:var(--ink-2);line-height:1.45">Substation-level load forecasting 1–24 h ahead, 21.5 % better than NWP-Lite at 38 ms on one CPU core.</p><div class="row g2" style="flex-wrap:wrap"><span class="tag warn"><i class="ic ic-trophy"></i>Track winner</span><span class="tag">Climate &amp; Energy</span></div><div class="row g2" style="margin-top:4px"><a class="btn pri grow" style="text-decoration:none;height:44px"><i class="ic s ic-git"></i>Repository</a><a class="btn grow" style="text-decoration:none;height:44px"><i class="ic s ic-play"></i>Demo</a></div></header>
+    <div class="ml" style="border-top:1px solid var(--line)"><i class="ic s ic-users mut"></i><span class="grow t-13">Team Northwind · 4 members</span><i class="ic s ic-chev-r mut3"></i></div>
+    <div class="ml"><i class="ic s ic-db mut"></i><span class="grow t-13">Links, dataset, license</span><i class="ic s ic-chev-d mut3"></i></div>
+    <div class="ml"><i class="ic s ic-list mut"></i><span class="grow t-13">On this page</span><i class="ic s ic-chev-d mut3"></i></div>
+    <div class="prose" style="margin-top:16px">
+      <h2 style="font-family:var(--font-sans);font-size:20px;margin:0 0 8px">Summary</h2>
+      <p style="margin:0 0 12px">Grid operators plan dispatch from load forecasts, yet numerical weather models are too slow to refresh per substation. We forecast 412 substations jointly and cut 24-hour MAE from 0.780 to 0.612.</p>
+      <div class="ph-art" style="height:150px;border-radius:6px">Figure 1 · 100% width, srcset 480</div>
+      <p class="t-12 mut" style="font-family:var(--font-sans);margin:6px 0 12px"><b>Figure 1.</b> Data flow. <a>Long description</a></p>
+      <h2 style="font-family:var(--font-sans);font-size:20px;margin:18px 0 8px">Method</h2>
+      <div class="eqn"><span>MAE<sub><i>h</i></sub> = <span class="frac"><span>1</span><span><i>N</i></span></span> Σ | ŷ − <i>y</i> |</span></div>
+      <p class="t-12 mut" style="font-family:var(--font-sans);margin:0 0 12px">Long equations scroll inside their own box; the page never scrolls sideways. <a>Copy LaTeX</a></p>
+      <div class="codeblk" style="margin:12px 0;font-size:12px"><div class="cb-h">eval.py<span class="sp"><i class="ic s ic-copy"></i></span></div><pre><span style="display:block"><span class="ln">1</span><span class="k">def</span> <span class="f">mae</span>(pred, y, h):</span><span class="hl"><span class="ln">2</span>    err = np.abs(pred[:, h] - y[:, h])</span></pre></div>
+      <div style="overflow:hidden;border:1px solid var(--line);border-radius:6px;font-family:var(--font-sans)"><table class="tbl dense" style="font-size:12.5px"><thead><tr><th>Model</th><th class="num">h=6</th><th class="num">h=24</th></tr></thead><tbody><tr><td>NWP-Lite</td><td class="num">0.552</td><td class="num">0.780</td></tr><tr class="sel"><td><b>Northwind</b></td><td class="num"><b>0.441</b></td><td class="num"><b>0.612</b></td></tr></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="phone pub">
+    <div class="mnav"><button class="btn ghost icon" aria-label="Back to event" style="width:44px;height:44px;margin-left:-8px"><i class="ic ic-chev-l"></i></button><b class="grow t-13 trunc">Gauss Hack 2026 · Projects</b></div>
+    <div style="background:var(--warn-tint);border-bottom:1px solid var(--warn-line);padding:8px 16px" class="t-12"><i class="ic s ic-lock" style="color:var(--warn)"></i> <b>As judged · r3.</b> Frozen 12 Oct 13:00 — exactly what judges saw. <a>View living version</a></div>
+    <header style="padding:16px" class="col g2"><h1 style="font-size:24px;line-height:1.2;letter-spacing:-.02em">Northwind Grid Forecaster</h1><p style="font-size:16px;color:var(--ink-2);line-height:1.45">Substation-level load forecasting 1–24 h ahead.</p></header>
+    <div class="prose"><h2 style="font-family:var(--font-sans);font-size:20px;margin:0 0 8px">Evaluation</h2><p style="margin:0 0 12px">We compare against a persistence baseline over horizons h ∈ {1, 6, 24} hours. <span class="t-12 mut" style="font-family:var(--font-sans)">(This is the snapshot content; later edits — NWP-Lite comparison, Table 1 — appear only in the living version.)</span></p>
+      <div class="well t-12" style="font-family:var(--font-sans)"><b>Snapshot provenance</b><br>Revision r3 · renderer 2.3.1<br>Media digests: 5 · Sources: 1 repo @ 4e1c9a7</div></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":860,"height":1500}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

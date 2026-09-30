@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Judge dialogs and degraded states</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./v3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>body{margin:0}.opt{display:flex;gap:10px;padding:8px 10px;border:1px solid var(--line-2);border-radius:var(--r-2);align-items:flex-start;background:var(--surface)}.opt.on{border-color:var(--accent);background:var(--accent-tint);box-shadow:0 0 0 1px var(--accent)}</style>
+</helmet>
+<div style="width:1440px;height:800px;background:var(--surface-3);padding:28px 36px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto auto;gap:22px 28px;align-content:start;overflow:hidden">
+
+  <div class="col g2"><span class="eyebrow">Recusal (always reachable · R)</span>
+    <div class="dlg" role="alertdialog" aria-label="Recuse from project">
+      <div class="pn-h"><h2 style="font-size:16px">Recuse from “Latent Space Cartographers”?</h2></div>
+      <div class="pn-b col g3">
+        <div class="col g2">
+          <label class="opt on"><input type="radio" checked name="rc" style="margin-top:3px"><span class="col"><b class="t-13">Conflict of interest</b><span class="t-12 mut">Employer, advisor, co-author, family, financial</span></span></label>
+          <label class="opt"><input type="radio" name="rc" style="margin-top:3px"><span class="col"><b class="t-13">Can’t judge fairly</b><span class="t-12 mut">Prior knowledge of the team’s work</span></span></label>
+        </div>
+        <div class="fld"><label for="rn">Reason <span class="mut3" style="font-weight:400">· seen by organizers only</span></label><textarea id="rn" class="in ta" style="min-height:48px">Co-authored a paper with team member D. Patel (2024).</textarea></div>
+        <div class="t-12 mut">Your draft scores for this project (none yet) are discarded. The organizer reassigns it; you can’t undo this yourself but they can.</div>
+      </div>
+      <div class="row" style="padding:10px 16px;border-top:1px solid var(--line)"><span class="sp"></span><button class="btn">Keep reviewing</button><button class="btn dng">Recuse</button></div>
+    </div>
+  </div>
+
+  <div class="col g2"><span class="eyebrow">Flag for organizer (F) — never changes the score</span>
+    <div class="dlg" role="dialog" aria-label="Flag project">
+      <div class="pn-h"><h2 style="font-size:16px">Flag “Sepsis Sentinel”</h2></div>
+      <div class="pn-b col g3">
+        <div class="fld"><label for="fr">What’s wrong?</label><select id="fr" class="in"><option>Possible rule violation — pre-existing code</option></select></div>
+        <div class="fld"><label for="fd">Details</label><textarea id="fd" class="in ta" style="min-height:56px">Repo history predates the event start by 5 weeks (first commit Aug 21).</textarea><span class="hint">Attach evidence from Artifacts with “Link to flag”.</span></div>
+        <div class="row g2 t-12"><i class="ic s ic-info"></i><span class="mut">You can keep scoring. Organizers are notified; you’ll see their decision in Messages.</span></div>
+      </div>
+      <div class="row" style="padding:10px 16px;border-top:1px solid var(--line)"><span class="sp"></span><button class="btn">Cancel</button><button class="btn pri"><i class="ic s ic-flag"></i>Send flag</button></div>
+    </div>
+  </div>
+
+  <div class="col g2"><span class="eyebrow">Physical route · current stop</span>
+    <div class="pn">
+      <div class="pn-h"><h2>Route · Hall 2 north</h2><span class="t-12 mut3">4 of 9 stops</span></div>
+      <div class="pn-b col g3">
+        <div class="ph-art" style="height:96px;position:relative">floor plan · Hall 2 <span style="position:absolute;left:72%;top:62%;width:14px;height:14px;border-radius:50%;background:var(--accent);border:2px solid #fff;box-shadow:0 0 0 2px var(--accent)"></span></div>
+        <div class="row g3" style="align-items:flex-start"><span class="step now"><span class="n" style="background:var(--accent);color:#fff;border-color:var(--accent)">4</span></span><div class="col grow"><b class="t-13">A-14 Northwind Grid Forecaster</b><span class="t-12 mut">You are here · slot 12:40–12:50</span></div><span class="tag info">Now</span></div>
+        <div class="row g3" style="align-items:flex-start"><span class="step"><span class="n">5</span></span><div class="col grow"><b class="t-13">A-15 Solar Twin</b><span class="t-12 mut">Next · 4 m walk · slot 12:55</span></div></div>
+        <div class="row g3" style="align-items:flex-start"><span class="step"><span class="n">6</span></span><div class="col grow"><b class="t-13">A-18 Tidewater Salinity Mapper</b><span class="t-12 mut">13:10</span></div></div>
+        <div class="row g2"><button class="btn sm grow">Team not at table</button><button class="btn sm grow">Skip &amp; return later</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col g2" style="grid-column:1/3"><span class="eyebrow">Offline / conflict — deterministic reconciliation</span>
+    <div class="col g2">
+      <div class="bn warn"><i class="ic ic-offline"></i><div class="col"><b>You’re offline — scoring continues.</b><span class="t-12">4 changes buffered on this device (encrypted). They’ll upload in order when the connection returns; nothing is lost if you close the tab.</span></div><span class="st warn sp"><i class="ic ic-cloud s"></i>Not synced · 4 pending</span></div>
+      <div class="pn"><div class="pn-h"><i class="ic s ic-warn" style="color:var(--warn)"></i><h2>Your draft differs from the server for “Northwind Grid Forecaster”</h2></div>
+        <table class="tbl dense"><thead><tr><th>Criterion</th><th class="num" style="width:110px">This device<br><span class="t-11 mut3" style="font-weight:400">12:44 · offline</span></th><th class="num" style="width:110px">Server<br><span class="t-11 mut3" style="font-weight:400">12:41 · phone</span></th><th style="width:210px">Resolution</th></tr></thead><tbody>
+          <tr><td>Technical depth</td><td class="num">4</td><td class="num">4</td><td><span class="st ok"><i class="ic ic-check"></i>Same</span></td></tr>
+          <tr class="sel"><td>Execution &amp; demo</td><td class="num"><b>4</b></td><td class="num">3</td><td><span class="seg"><button class="btn sm on">Keep this device</button><button class="btn sm">Server</button></span></td></tr>
+          <tr><td>Feedback text</td><td class="num">edited</td><td class="num">edited</td><td><button class="btn sm">Review text diff</button></td></tr>
+        </tbody></table>
+        <div class="row" style="padding:8px 12px;border-top:1px solid var(--line)"><span class="t-12 mut">Newest edit wins by default per field; you always confirm when values differ. Submitted scores are never overwritten silently.</span><button class="btn sm pri sp">Apply choices</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col g2"><span class="eyebrow">Submitted state</span>
+    <div class="col g2">
+      <div class="bn ok"><i class="ic ic-okc"></i><div class="col"><b>Score submitted · Solar Twin</b><span class="t-12">3.85 raw · editable until judging closes 18:00</span></div></div>
+      <div class="bn err"><i class="ic ic-xc"></i><div class="col"><b>Couldn’t save</b><span class="t-12">Server unreachable. Your draft is safe on this device. <a>Retry now</a></span></div></div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":800}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

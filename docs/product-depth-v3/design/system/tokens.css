@@ -1,0 +1,64 @@
+/* Conflux v3 design tokens — r2. Production source of truth for :root values. */
+:root {
+  /* type */
+  --font-sans: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-read: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  --fs-11: 11px; --fs-12: 12px; --fs-13: 13px; --fs-14: 14px; --fs-16: 16px; --fs-20: 20px; --fs-24: 24px; --fs-32: 32px;
+  --lh-tight: 1.25; --lh-ui: 1.4; --lh-read: 1.65;
+
+  /* neutrals (cool, slightly blue-grey) */
+  --bg: #f5f6f8;            /* app canvas */
+  --surface: #ffffff;       /* panels, tables */
+  --surface-2: #f0f2f5;     /* table header, toolbars, wells */
+  --surface-3: #e6e9ee;     /* pressed / strong wells */
+  --line: #dcdfe5;          /* default hairline */
+  --line-2: #c3c8d1;        /* control borders */
+  --line-3: #8a929e;        /* focus-adjacent / strong control border (3:1 on white) */
+  --ink: #161a21;           /* primary text 16.9:1 */
+  --ink-2: #454e5b;         /* secondary text 8.2:1 */
+  --ink-3: #5e6772;         /* tertiary text 5.7:1 on white, 5.2:1 on --bg */
+
+  /* accent: action + selection + focus only */
+  --accent: #1d55c2;        /* 6.9:1 on white */
+  --accent-hover: #174aa8;
+  --accent-ink: #ffffff;
+  --accent-tint: #e8effc;   /* selected row, active nav */
+  --accent-line: #a9c1ef;
+
+  /* semantic (each has text-safe ink, tint bg, line) */
+  --ok: #17693c;   --ok-tint: #e5f4ea;   --ok-line: #9ccfae;
+  --warn: #7d4e00; --warn-tint: #fff2d1; --warn-line: #e6c36c;
+  --err: #b3261e;  --err-tint: #fcebe9;  --err-line: #eba9a4;
+  --info: #1d55c2; --info-tint: #e8effc; --info-line: #a9c1ef;
+  --mute: #5e6772; --mute-tint: #eef0f3; --mute-line: #cfd4db;
+
+  /* geometry */
+  --r-1: 3px; --r-2: 5px; --r-3: 8px; --r-pill: 999px;
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px; --sp-12: 48px;
+  --h-ctl: 32px; --h-ctl-sm: 28px; --h-ctl-lg: 40px; --h-row: 36px; --h-row-dense: 28px; --h-row-comfy: 44px; --h-top: 44px;
+  --sh-pop: 0 8px 24px rgba(16, 24, 40, .14), 0 0 0 1px rgba(16, 24, 40, .08);
+  --sh-dlg: 0 16px 48px rgba(16, 24, 40, .22), 0 0 0 1px rgba(16, 24, 40, .1);
+  --focus: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent);
+  --t-fast: 120ms; --t-base: 180ms;
+}
+
+[data-theme="dark"] {
+  --bg: #0f1216; --surface: #171b21; --surface-2: #1e232b; --surface-3: #2a313b;
+  --line: #2b323c; --line-2: #3c4552; --line-3: #7a8594;
+  --ink: #eceff3; --ink-2: #b4bcc8; --ink-3: #98a2b0;
+  --accent: #7ba6f4; --accent-hover: #93b7f7; --accent-ink: #0f1216; --accent-tint: #1c2a45; --accent-line: #35528a;
+  --ok: #6fd193; --ok-tint: #12291c; --ok-line: #26593a;
+  --warn: #f0bd5a; --warn-tint: #2e2410; --warn-line: #6b5219;
+  --err: #f59a92; --err-tint: #33191a; --err-line: #7a3733;
+  --info: #7ba6f4; --info-tint: #1c2a45; --info-line: #35528a;
+  --mute: #98a2b0; --mute-tint: #232932; --mute-line: #3a424e;
+  --focus: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent);
+  --sh-pop: 0 8px 24px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .08);
+  --sh-dlg: 0 16px 48px rgba(0, 0, 0, .65), 0 0 0 1px rgba(255, 255, 255, .1);
+  color-scheme: dark;
+  /* Theme scope must re-declare inherited colour/background (see decisions/008). */
+  color: var(--ink); background-color: var(--bg);
+}
+/* Dark elevation: raised layers are lighter than the page. Apply to popover/dialog/palette surfaces. */
+/* [data-theme="dark"] .popover, .dialog, .palette { background: var(--surface-2); } */

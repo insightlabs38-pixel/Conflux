@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Public event mobile</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./v3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+body{margin:0}
+.phone{width:390px;height:1420px;display:flex;flex-direction:column;background:var(--pub-bg,#fbfbfc);border:1px solid var(--line-2);overflow:hidden;position:relative}
+.mnav{display:flex;align-items:center;height:52px;padding:0 8px 0 16px;background:#fff;border-bottom:1px solid var(--line)}
+.chips{display:flex;gap:6px;overflow:hidden;padding:0 16px}
+.chips a{white-space:nowrap;height:36px;padding:0 12px;display:inline-flex;align-items:center;border:1px solid var(--line-2);border-radius:18px;font-size:13px;font-weight:500;color:var(--ink-2);text-decoration:none;background:#fff}
+.chips a[aria-current]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.pc{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:#fff;min-height:88px}
+.pc .th{width:88px;height:64px;flex:none}
+.pc.tx{min-height:0}
+</style>
+</helmet>
+<div style="width:860px;height:1420px;display:flex;gap:80px">
+  <div class="phone pub">
+    <div class="mnav"><b class="grow" style="font-size:14px">Gauss Hack 2026</b><button class="btn ghost icon" aria-label="Search" style="width:44px;height:44px"><i class="ic ic-search"></i></button><button class="btn ghost icon" aria-label="Menu" style="width:44px;height:44px"><i class="ic ic-menu"></i></button></div>
+    <header style="background:#fff;padding:16px;border-bottom:1px solid var(--line)" class="col g2">
+      <div class="row g3"><div class="mark" style="width:40px;height:40px">GH</div><div class="col"><h1 style="font-size:24px;line-height:1.15;letter-spacing:-.02em">Gauss Hack 2026</h1></div></div>
+      <div class="row"><span class="tag ok"><i class="ic ic-okc"></i>Results published</span><span class="t-12 mut sp">11–12 Oct · Berlin + online</span></div>
+      <a class="btn pri lg" style="text-decoration:none;width:100%;height:48px">See the winners</a>
+    </header>
+    <div style="padding:12px 0" class="chips" aria-label="Sections"><a aria-current="page">Overview</a><a>Projects</a><a>Schedule</a><a>Challenges</a><a>Sponsors</a></div>
+    <div style="padding:8px 16px 4px" class="eyebrow">Winners</div>
+    <div class="pc tx"><i class="ic l ic-trophy" style="color:var(--warn);margin-top:2px"></i><div class="col grow"><span class="t-12 mut">Grand Prize · €5,000</span><b style="font-size:15px">Solar Twin</b><span class="t-12 mut">Climate &amp; Energy · Twin Sun</span></div></div>
+    <div class="pc tx"><i class="ic l ic-trophy" style="margin-top:2px"></i><div class="col grow"><span class="t-12 mut">Track winner · Climate</span><b style="font-size:15px">Northwind Grid Forecaster</b></div></div>
+    <div class="pc tx"><i class="ic l ic-trophy" style="margin-top:2px"></i><div class="col grow"><span class="t-12 mut">Track winner · Health</span><b style="font-size:15px">Sepsis Sentinel</b></div></div>
+    <div style="padding:14px 16px 6px" class="row"><h2 style="font-size:18px">Projects</h2><span class="t-12 mut sp">1,041</span></div>
+    <div style="padding:0 16px 10px"><div class="in-wrap"><i class="ic s ic-search"></i><input class="in" style="height:44px;font-size:16px" placeholder="Search projects" aria-label="Search projects"></div></div>
+    <div style="padding:0 0 10px" class="chips"><a aria-current="page">All tracks</a><a>Climate</a><a>Health</a><a>Open</a><a>Hardware</a></div>
+    <div class="pc"><div class="ph-art th">img</div><div class="col grow" style="min-width:0"><b class="t-13">Solar Twin</b><span class="t-12 mut" style="line-height:1.4">Digital twin for rooftop solar dispatch.</span><span class="t-12 mut3" style="margin-top:auto">Climate · <b style="color:var(--warn)">Grand Prize</b></span></div></div>
+    <div class="pc"><div class="ph-art th">img</div><div class="col grow" style="min-width:0"><b class="t-13">Northwind Grid Forecaster</b><span class="t-12 mut" style="line-height:1.4">Substation-level load forecasting at 38 ms.</span><span class="t-12 mut3" style="margin-top:auto">Climate · Track winner</span></div></div>
+    <div class="pc"><div class="ph-art th">img</div><div class="col grow" style="min-width:0"><b class="t-13">Sepsis Sentinel</b><span class="t-12 mut" style="line-height:1.4">Early-warning score from streaming vitals.</span><span class="t-12 mut3" style="margin-top:auto">Health · Track winner</span></div></div>
+    <div class="pc"><div class="ph-art th">img</div><div class="col grow" style="min-width:0"><b class="t-13">Ember</b><span class="t-12 mut" style="line-height:1.4">Wildfire risk inference on microcontrollers.</span><span class="t-12 mut3" style="margin-top:auto">Climate · Community choice</span></div></div>
+    <div class="pc"><div class="ph-art th">img</div><div class="col grow" style="min-width:0"><b class="t-13">Grid Whisperers</b><span class="t-12 mut" style="line-height:1.4">Anomaly narration for SCADA streams.</span><span class="t-12 mut3" style="margin-top:auto">Climate</span></div></div>
+    <div style="padding:14px 16px"><button class="btn" style="width:100%;height:44px">Load more</button></div>
+    <div style="padding:6px 16px" class="row"><h2 style="font-size:18px">Schedule</h2></div>
+    <div class="pc tx"><span class="mono t-12 mut" style="width:44px">11:00</span><div class="col grow"><b class="t-13">Hacking begins</b><span class="t-12 mut">Hall 2</span></div></div>
+    <div class="pc tx"><span class="mono t-12 mut" style="width:44px">15:30</span><div class="col grow"><b class="t-13">Workshop: Reproducible benchmarks</b><span class="t-12 mut">Room 3</span></div></div>
+    <div class="pc tx"><span class="mono t-12 mut" style="width:44px">19:00</span><div class="col grow"><b class="t-13">Dinner &amp; mentor speed-rounds</b><span class="t-12 mut">Atrium</span></div></div>
+    <div style="padding:10px 16px 16px"><a class="t-13">Full schedule, add to calendar →</a></div>
+    <footer class="col g1 t-12 mut" style="margin-top:auto;padding:14px 16px;border-top:1px solid var(--line);background:#fff"><span>© 2026 Gauss e.V. · Powered by Conflux</span><span class="row g3"><a>Privacy</a><a>Accessibility</a><a>Contact organizers</a></span></footer>
+  </div>
+
+  <div class="phone pub" style="--pub-accent:#0a6b60;--pub-bg:#f7f5f0">
+    <div class="mnav"><b class="grow" style="font-size:14px;color:#0a6b60">Tidewater Data Jam</b><button class="btn ghost icon" aria-label="Menu" style="width:44px;height:44px"><i class="ic ic-menu"></i></button></div>
+    <header style="position:relative;background:#0a3d38;color:#fff;padding:20px 16px;overflow:hidden" class="col g2">
+      <div style="position:absolute;inset:0;background:repeating-radial-gradient(circle at 90% 140%,rgba(255,255,255,.10) 0 2px,transparent 2px 20px)" aria-hidden="true"></div>
+      <div class="col g2" style="position:relative"><span class="t-12" style="color:#cfe6e2">14–16 Nov · Rotterdam + online</span><h1 style="font-size:28px;line-height:1.12;letter-spacing:-.02em">Tidewater Data Jam</h1><span class="tag" style="background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.35);color:#fff;align-self:flex-start"><i class="ic ic-clock"></i>Closes in 6 days</span><a class="btn lg" style="background:#fff;color:#0a3d38;border-color:#fff;text-decoration:none;font-weight:600;height:48px;margin-top:6px">Register your team</a></div>
+    </header>
+    <div style="padding:16px" class="col g3">
+      <div class="pn"><dl class="dl" style="grid-template-columns:90px 1fr;padding:12px 14px"><dt>Venue</dt><dd>Fenix Warehouse, Rotterdam</dd><dt>Prize pool</dt><dd><b>€25,000</b></dd><dt>Teams</dt><dd>318 of 400 places</dd></dl></div>
+      <h2 style="font-size:18px">Challenges</h2>
+      <div class="pn"><div class="pn-b col g1"><span class="eyebrow">Port of Rotterdam</span><b>Predicting berth congestion</b><span class="t-12 mut">€6,000</span></div></div>
+      <div class="pn"><div class="pn-b col g1"><span class="eyebrow">Delft Hydraulics</span><b>Storm-surge downscaling</b><span class="t-12 mut">€6,000</span></div></div>
+      <div class="pn"><div class="pn-b col g1"><span class="eyebrow">Open</span><b>Open track</b><span class="t-12 mut">€3,000</span></div></div>
+    <div class="row" style="margin-top:6px"><h2 style="font-size:18px">Last year’s projects</h2><a class="t-13 sp" style="color:#0a6b60">All 212 →</a></div>
+      <div><div class="pc" style="padding:12px 0;background:transparent"><div class="ph-art th">art</div><div class="col grow" style="min-width:0"><b class="t-13">Quay Wall Fatigue Monitor</b><span class="t-12 mut" style="line-height:1.4">Acoustic emission classifier for quay walls.</span></div></div><div class="pc" style="padding:12px 0;background:transparent"><div class="ph-art th">art</div><div class="col grow" style="min-width:0"><b class="t-13">Ebb</b><span class="t-12 mut" style="line-height:1.4">Tidal-phase aware routing for barges.</span></div></div><div class="pc" style="padding:12px 0;background:transparent"><div class="ph-art th">art</div><div class="col grow" style="min-width:0"><b class="t-13">Silt Atlas</b><span class="t-12 mut" style="line-height:1.4">Sediment transport from open satellite data.</span></div></div><div class="pc" style="padding:12px 0;background:transparent"><div class="ph-art th">art</div><div class="col grow" style="min-width:0"><b class="t-13">Groundwater Whisper</b><span class="t-12 mut" style="line-height:1.4">Sensor fusion for polder water levels.</span></div></div></div>
+      <a class="btn lg" style="width:100%;height:48px;text-decoration:none;color:#0a6b60;border-color:#0a6b60">Read the challenges</a>
+    </div>
+    <footer class="col g1 t-12 mut" style="margin-top:auto;padding:14px 16px;border-top:1px solid var(--line);background:#fff"><span>© 2026 Tidewater Data Jam · Powered by Conflux</span><span class="row g3"><a>Privacy</a><a>Accessibility</a><a>Contact organizers</a></span></footer>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":860,"height":1420}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Public event page default</title>
+<link rel="stylesheet" href="../../../system/v3.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+body{margin:0}
+.w{width:1120px;margin:0 auto}
+.pcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-3);overflow:hidden;display:flex;flex-direction:column}
+.pcard .th{height:118px;border:0;border-bottom:1px solid var(--line);border-radius:0}
+.pcard .bd{padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px;flex:1}
+.sec-h{display:flex;align-items:baseline;gap:12px;margin:0 0 12px}
+.sec-h h2{font-size:20px;letter-spacing:-.01em}
+.sp-box{display:flex;align-items:center;justify-content:center;height:52px;border:1px solid var(--line);border-radius:var(--r-2);background:var(--surface);font-weight:600;color:var(--ink-2);letter-spacing:-.01em}
+</style>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div class="pub" style="width:1280px;height:1700px;overflow:hidden;position:relative">
+  <nav class="pub-nav" aria-label="Event">
+    <b style="font-size:14px">Gauss Hack 2026</b>
+    <a aria-current="page">Overview</a><a>Projects</a><a>Schedule</a><a>Challenges</a><a>Sponsors</a><a>Results</a><a>Resources</a>
+    <span class="sp row g3"><a>Sign in</a></span>
+  </nav>
+
+  <!-- compact hero: no artwork -->
+  <header style="background:var(--surface);border-bottom:1px solid var(--line)">
+    <div class="w" style="padding:28px 0 22px;display:flex;align-items:center;gap:20px">
+      <div class="mark" style="width:56px;height:56px;font-size:22px;border-radius:8px" aria-hidden="true">GH</div>
+      <div class="col grow g1">
+        <div class="row g2"><h1 style="font-size:32px;line-height:1.15;letter-spacing:-.02em">Gauss Hack 2026</h1><span class="tag ok" style="margin-left:6px"><i class="ic ic-okc"></i>Results published</span></div>
+        <p class="mut" style="font-size:16px">48 hours of applied problem-solving in energy, health and open science.</p>
+        <div class="row t-13 mut" style="gap:16px;margin-top:2px"><span><i class="ic s ic-cal"></i> 11–12 Oct 2026</span><span><i class="ic s ic-pin"></i> Tempelhof Hall 2, Berlin + online</span><span><i class="ic s ic-users"></i> 5,012 participants · 1,284 teams · 1,041 projects</span></div>
+      </div>
+      <div class="col g2" style="align-items:stretch;width:180px"><a class="btn pri lg" style="text-decoration:none">See the winners</a><a class="btn" style="text-decoration:none">Browse 1,041 projects</a></div>
+    </div>
+  </header>
+
+  <main class="w" style="padding:28px 0 0;display:flex;flex-direction:column;gap:36px">
+    <!-- results -->
+    <section aria-labelledby="h-res">
+      <div class="sec-h"><h2 id="h-res">Winners</h2><span class="t-13 mut">Announced Sun 12 Oct 20:30</span><a class="sp t-13">All results and honorable mentions →</a></div>
+      <div class="pn"><table class="tbl comfy" style="font-size:14px"><thead><tr><th style="width:190px">Award</th><th>Project</th><th style="width:200px">Track</th><th style="width:170px">Team</th><th class="num" style="width:100px">Prize</th></tr></thead><tbody>
+        <tr><td><i class="ic s ic-trophy" style="color:var(--warn)"></i> <b>Grand Prize</b></td><td><a><b>Solar Twin</b></a> <span class="mut">— digital twin for rooftop solar dispatch</span></td><td>Climate &amp; Energy</td><td>Twin Sun</td><td class="num">€5,000</td></tr>
+        <tr><td><i class="ic s ic-trophy"></i> Track winner · Climate</td><td><a><b>Northwind Grid Forecaster</b></a></td><td>Climate &amp; Energy</td><td>Northwind</td><td class="num">€2,000</td></tr>
+        <tr><td><i class="ic s ic-trophy"></i> Track winner · Health</td><td><a><b>Sepsis Sentinel</b></a></td><td>Health &amp; Bio</td><td>Sentinel</td><td class="num">€2,000</td></tr>
+        <tr><td><i class="ic s ic-trophy"></i> Community choice</td><td><a><b>Ember</b></a> <span class="mut">— wildfire risk edge inference</span></td><td>Climate &amp; Energy</td><td>Ember</td><td class="num">€1,000</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <!-- projects -->
+    <section aria-labelledby="h-proj">
+      <div class="sec-h"><h2 id="h-proj">Projects</h2><span class="t-13 mut">1,041 submitted</span></div>
+      <div class="row g2" style="margin-bottom:12px;flex-wrap:wrap"><div class="in-wrap" style="width:300px"><i class="ic s ic-search"></i><input class="in" placeholder="Search projects, teams, technologies" aria-label="Search projects"></div><select class="in" style="width:170px" aria-label="Track"><option>All tracks</option></select><select class="in" style="width:170px" aria-label="Award"><option>Any award</option></select><select class="in" style="width:150px" aria-label="Technology"><option>Technology</option></select><span class="sp t-13 mut">Sort <select class="in" style="width:130px;display:inline-block" aria-label="Sort"><option>Awards first</option></select></span></div>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px">
+        <article class="pcard"><div class="ph-art th">solar-twin.webp</div><div class="bd"><div class="row"><b style="font-size:14px">Solar Twin</b></div><p class="t-12 mut" style="line-height:1.45">Digital twin for rooftop solar dispatch, validated on 60 live sites.</p><div class="row t-12" style="margin-top:auto"><span class="mut">Climate &amp; Energy</span><span class="tag warn sp"><i class="ic ic-trophy"></i>Grand Prize</span></div></div></article>
+        <article class="pcard"><div class="ph-art th">northwind.webp</div><div class="bd"><b style="font-size:14px">Northwind Grid Forecaster</b><p class="t-12 mut" style="line-height:1.45">Substation-level load forecasting 1–24 h ahead at 38 ms on one CPU core.</p><div class="row t-12" style="margin-top:auto"><span class="mut">Climate &amp; Energy</span><span class="tag sp"><i class="ic ic-trophy"></i>Track winner</span></div></div></article>
+        <article class="pcard"><div class="ph-art th">sepsis.webp</div><div class="bd"><b style="font-size:14px">Sepsis Sentinel</b><p class="t-12 mut" style="line-height:1.45">Early-warning score from streaming vitals, calibrated across three hospitals.</p><div class="row t-12" style="margin-top:auto"><span class="mut">Health &amp; Bio</span><span class="tag sp"><i class="ic ic-trophy"></i>Track winner</span></div></div></article>
+        <article class="pcard"><div class="ph-art th">ember.webp</div><div class="bd"><b style="font-size:14px">Ember</b><p class="t-12 mut" style="line-height:1.45">Wildfire risk inference on microcontrollers using a 90 KB quantized model.</p><div class="row t-12" style="margin-top:auto"><span class="mut">Climate &amp; Energy</span><span class="tag sp"><i class="ic ic-trophy"></i>Community</span></div></div></article>
+        <article class="pcard"><div class="ph-art th">grid-whisperers.webp</div><div class="bd"><b style="font-size:14px">Grid Whisperers</b><p class="t-12 mut" style="line-height:1.45">Anomaly narration for SCADA streams in plain language.</p><div class="row t-12" style="margin-top:auto"><span class="mut">Climate &amp; Energy</span></div></div></article>
+        <article class="pcard"><div class="ph-art th">glucose.webp</div><div class="bd"><b style="font-size:14px">Glucose Nowcast</b><p class="t-12 mut" style="line-height:1.45">30-minute glucose prediction that runs fully on-device.</p><div class="row t-12" style="margin-top:auto"><span class="mut">Health &amp; Bio</span></div></div></article>
+        <article class="pcard"><div class="ph-art th">radiograph.webp</div><div class="bd"><b style="font-size:14px">Radiograph Second-Reader</b><p class="t-12 mut" style="line-height:1.45">Second-reader triage with calibrated uncertainty and audit trail.</p><div class="row t-12" style="margin-top:auto"><span class="mut">Health &amp; Bio</span></div></div></article>
+        <article class="pcard"><div class="ph-art th">load-shed.webp</div><div class="bd"><b style="font-size:14px" class="trunc">Load Shedding Game Theory Simulator</b><p class="t-12 mut" style="line-height:1.45">Stackelberg equilibria for demand response at neighborhood scale.</p><div class="row t-12" style="margin-top:auto"><span class="mut">Open Track</span></div></div></article>
+      </div>
+      <div class="row" style="margin-top:14px;justify-content:center;gap:12px"><span class="t-13 mut">Showing 8 of 1,041</span><button class="btn">Load more</button></div>
+    </section>
+
+    <!-- tracks + schedule -->
+    <div style="display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:28px">
+      <section aria-labelledby="h-tr">
+        <div class="sec-h"><h2 id="h-tr">Tracks &amp; challenges</h2></div>
+        <div class="pn"><table class="tbl comfy" style="font-size:14px"><thead><tr><th>Track</th><th>Challenge partner</th><th class="num" style="width:80px">Projects</th></tr></thead><tbody>
+          <tr><td><b>Climate &amp; Energy</b></td><td class="mut">Aster Grid — forecast under uncertainty</td><td class="num">412</td></tr>
+          <tr><td><b>Health &amp; Bio</b></td><td class="mut">Helio Labs — clinical decision support</td><td class="num">253</td></tr>
+          <tr><td><b>Open Track</b></td><td class="mut">Any technical problem worth solving</td><td class="num">284</td></tr>
+          <tr><td><b>Hardware &amp; Robotics</b></td><td class="mut">Kestrel Robotics — embedded inference</td><td class="num">92</td></tr>
+        </tbody></table></div>
+      </section>
+      <section aria-labelledby="h-sch">
+        <div class="sec-h"><h2 id="h-sch">Schedule</h2><div class="tabs sm sp" style="border:0"><a aria-current="page">Sat 11</a><a>Sun 12</a></div></div>
+        <div class="pn"><div class="rw" style="display:flex;gap:12px;padding:9px 14px;border-bottom:1px solid var(--line)"><span class="mono t-12 mut" style="width:44px">10:00</span><span class="t-13 grow">Opening &amp; rules</span><span class="t-12 mut3">Main hall</span></div><div class="rw" style="display:flex;gap:12px;padding:9px 14px;border-bottom:1px solid var(--line)"><span class="mono t-12 mut" style="width:44px">11:00</span><span class="t-13 grow"><b>Hacking begins</b></span><span class="t-12 mut3">Hall 2</span></div><div class="rw" style="display:flex;gap:12px;padding:9px 14px;border-bottom:1px solid var(--line)"><span class="mono t-12 mut" style="width:44px">15:30</span><span class="t-13 grow">Workshop: Reproducible benchmarks</span><span class="t-12 mut3">Room 3</span></div><div class="rw" style="display:flex;gap:12px;padding:9px 14px;border-bottom:1px solid var(--line)"><span class="mono t-12 mut" style="width:44px">19:00</span><span class="t-13 grow">Dinner &amp; mentor speed-rounds</span><span class="t-12 mut3">Atrium</span></div><div class="rw" style="display:flex;gap:12px;padding:9px 14px"><span class="mono t-12 mut" style="width:44px">02:00</span><span class="t-13 grow">Quiet hours begin</span><span class="t-12 mut3">Hall 2</span></div></div>
+        <a class="t-13" style="display:inline-block;margin-top:8px">Full schedule, add to calendar →</a>
+      </section>
+    </div>
+
+    <!-- sponsors + resources -->
+    <div style="display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:28px">
+      <section aria-labelledby="h-sp">
+        <div class="sec-h"><h2 id="h-sp">Sponsors &amp; partners</h2></div>
+        <div class="eyebrow" style="margin-bottom:8px">Presenting</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:14px"><div class="sp-box" style="height:64px;font-size:18px">Aster Grid</div><div class="sp-box" style="height:64px;font-size:18px">Helio Labs</div></div>
+        <div class="eyebrow" style="margin-bottom:8px">Partners</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px"><div class="sp-box">Kestrel</div><div class="sp-box">Tarn</div><div class="sp-box">Northbeam</div><div class="sp-box">Quill</div></div>
+      </section>
+      <section aria-labelledby="h-res2">
+        <div class="sec-h"><h2 id="h-res2">Resources</h2></div>
+        <div class="pn"><a class="row" style="padding:10px 14px;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none"><i class="ic s ic-file"></i><span class="grow t-13">Rules &amp; eligibility</span><i class="ic s ic-chev-r mut3"></i></a><a class="row" style="padding:10px 14px;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none"><i class="ic s ic-shield"></i><span class="grow t-13">Code of conduct</span><i class="ic s ic-chev-r mut3"></i></a><a class="row" style="padding:10px 14px;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none"><i class="ic s ic-trophy"></i><span class="grow t-13">Judging criteria &amp; process</span><i class="ic s ic-chev-r mut3"></i></a><a class="row" style="padding:10px 14px;color:var(--ink);text-decoration:none"><i class="ic s ic-db"></i><span class="grow t-13">Public datasets &amp; APIs</span><i class="ic s ic-chev-r mut3"></i></a></div>
+      </section>
+    </div>
+  </main>
+  <footer style="position:absolute;left:0;right:0;bottom:0;height:64px;border-top:1px solid var(--line);background:var(--surface)"><div class="w row t-12 mut" style="height:64px"><span>© 2026 Gauss e.V. · Powered by Conflux</span><span class="sp row g4"><a>Privacy</a><a>Accessibility</a><a>Contact organizers</a></span></div></footer>
+</div>
+</body>
+</html>

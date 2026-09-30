@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Deliberation decision room</title>
+<link rel="stylesheet" href="../../../system/v3.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+body{margin:0}
+.rg{position:relative;display:inline-block;width:74px;height:6px;border-radius:3px;background:var(--surface-3);vertical-align:middle}
+.rg i{position:absolute;top:0;bottom:0;border-radius:3px;background:var(--ink-3)}
+.rg b{position:absolute;top:-2px;width:2px;height:10px;background:var(--ink)}
+.rg.hi i{background:var(--warn)}
+.cmp td,.cmp th{height:32px}
+.lead{font-weight:700}
+.note{padding:10px 14px;border-bottom:1px solid var(--line);font-size:13px;line-height:1.45}
+.brk{position:relative}
+.brk::after{content:"";position:absolute;left:-1px;top:2px;bottom:2px;width:3px;border-radius:2px;background:var(--warn)}
+</style>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div class="shell slim" style="width:1440px;height:1080px">
+  <header class="top">
+    <div class="mark" aria-hidden="true">C</div>
+    <button class="ev-switch"><span class="trunc">Gauss Hack 2026</span><span class="tag ok">Judging closed</span></button>
+    <div class="crumbs"><span>Results &amp; publication</span><i class="ic s ic-chev-r"></i><span>Deliberation</span><i class="ic s ic-chev-r"></i><span class="cur">Climate &amp; Energy</span></div>
+    <div class="cmdk sp" style="width:300px"><i class="ic s ic-search"></i>Search or run a command<span class="kbd">⌘K</span></div><button class="btn ghost icon" aria-label="Notifications"><i class="ic ic-bell"></i></button><span class="avatar l">AO</span>
+  </header>
+  <nav class="rail" style="align-items:center" aria-label="Event (collapsed)"><a class="nav-i" style="width:36px;justify-content:center;padding:0" aria-label="Overview"><i class="ic ic-home"></i></a><a class="nav-i" style="width:36px;justify-content:center;padding:0" aria-label="Participants"><i class="ic ic-users"></i></a><a class="nav-i" style="width:36px;justify-content:center;padding:0" aria-label="Judging"><i class="ic ic-trophy"></i></a><a class="nav-i" aria-current="page" style="width:36px;justify-content:center;padding:0" aria-label="Results"><i class="ic ic-table"></i></a></nav>
+
+  <main style="display:grid;grid-template-columns:minmax(0,1fr) 372px;gap:1px;background:var(--line);min-height:0">
+    <section style="background:var(--bg);display:flex;flex-direction:column;min-width:0;min-height:0">
+      <div style="background:var(--surface);border-bottom:1px solid var(--line)" class="col">
+        <div class="row" style="padding:10px 20px 6px"><h1>Grand Prize · Climate &amp; Energy</h1><span class="tag ok" style="margin-left:6px"><i class="ic ic-lock"></i>Inputs frozen 18:00</span><span class="t-12 mut3 sp mono">normalization v4 · rubric r2 · scores snapshot #9c41</span></div>
+        <div class="tabs" style="padding:0 12px"><a aria-current="page">Grand Prize</a><a>Track winner</a><a>Best hardware <span class="cnt w">1</span></a><a>Community choice</a><a>Special: Student <span class="cnt w">2</span></a></div>
+        <div class="row" style="padding:8px 20px;gap:18px;background:var(--surface-2);border-top:1px solid var(--line)"><span class="t-12"><b>Panel</b> 6 judges · 5 scored · <span class="st warn"><i class="ic ic-ban"></i>1 recused (Iyer → Latent Space)</span></span><span class="t-12"><b>Coverage</b> 214 projects · 3.0× avg reviews</span><span class="t-12"><b>Finalists</b> 8 of 214</span><span class="sp t-12"><span class="st warn"><i class="ic ic-warn"></i>2 warnings before you can finalize</span></span></div>
+      </div>
+
+      <div style="padding:14px 20px 0" class="col g3">
+        <div class="pn">
+          <div class="pn-h"><h2>Finalists</h2><span class="t-12 mut3">Ranked by configured method: normalized score, then pairwise tiebreak</span><span class="sp seg"><button class="btn sm on">Normalized</button><button class="btn sm">Raw</button><button class="btn sm">Both</button></span></div>
+          <table class="tbl dense" role="grid">
+            <thead><tr><th class="ck"></th><th style="width:36px" class="num">#</th><th>Project</th><th class="num" style="width:70px">Normalized</th><th class="num" style="width:56px">Raw</th><th class="num" style="width:70px">Raw rank</th><th style="width:128px">Judge spread</th><th style="width:88px">Coverage</th><th style="width:150px">Eligibility</th><th style="width:96px" title="Panel stance: for · against">Stance f·a</th></tr></thead>
+            <tbody>
+              <tr class="sel"><td class="ck"><input type="checkbox" checked aria-label="Compare"></td><td class="num"><b>1</b></td><td><b>Northwind Grid Forecaster</b></td><td class="num"><b>87.4</b></td><td class="num">4.21</td><td class="num mut">2 <span class="t-11">▼1</span></td><td><span class="rg" style="width:56px"><i style="left:52%;width:40%"></i><b style="left:78%"></b></span> <span class="t-12 mut">σ 0.42</span></td><td><span class="st ok"><i class="ic ic-okc"></i>5/5 · 12</span></td><td><span class="st ok"><i class="ic ic-okc"></i>Eligible</span></td><td class="t-12">4 · 0</td></tr>
+              <tr class="sel brk"><td class="ck"><input type="checkbox" checked aria-label="Compare"></td><td class="num"><b>2</b></td><td><b>Solar Twin</b> <span class="tag warn" style="margin-left:4px"><i class="ic ic-warn"></i>Δ 0.5 close call</span></td><td class="num"><b>86.9</b></td><td class="num">4.15</td><td class="num mut">3 <span class="t-11">▲1</span></td><td><span class="rg" style="width:56px"><i style="left:48%;width:44%"></i><b style="left:72%"></b></span> <span class="t-12 mut">σ 0.51</span></td><td><span class="st ok"><i class="ic ic-okc"></i>5/5 · 12</span></td><td><span class="st ok"><i class="ic ic-okc"></i>Eligible</span></td><td class="t-12">3 · 1</td></tr>
+              <tr class="sel brk"><td class="ck"><input type="checkbox" checked aria-label="Compare"></td><td class="num"><b>3</b></td><td><b>Ember: wildfire risk edge inference</b></td><td class="num"><b>84.2</b></td><td class="num">4.30</td><td class="num mut">1 <span class="t-11">▲2 raw</span></td><td><span class="rg hi" style="width:56px"><i style="left:30%;width:66%"></i><b style="left:84%"></b></span> <span class="t-12" style="color:var(--warn)">σ 0.96 <i class="ic xs ic-warn"></i></span></td><td><span class="st ok"><i class="ic ic-okc"></i>5/5 · 12</span></td><td><span class="st ok"><i class="ic ic-okc"></i>Eligible</span></td><td class="t-12">2 · 2</td></tr>
+              <tr><td class="ck"><input type="checkbox" aria-label="Compare"></td><td class="num">4</td><td>Grid Whisperers</td><td class="num">81.0</td><td class="num">4.02</td><td class="num mut">4</td><td><span class="rg" style="width:56px"><i style="left:44%;width:36%"></i><b style="left:66%"></b></span> <span class="t-12 mut">σ 0.38</span></td><td><span class="st ok"><i class="ic ic-okc"></i>5/5 · 12</span></td><td><span class="st ok"><i class="ic ic-okc"></i>Eligible</span></td><td class="t-12 mut3">—</td></tr>
+              <tr><td class="ck"><input type="checkbox" aria-label="Compare"></td><td class="num">5</td><td>Heat Island Copilot</td><td class="num">79.8</td><td class="num">3.95</td><td class="num mut">5</td><td><span class="rg" style="width:56px"><i style="left:40%;width:38%"></i><b style="left:62%"></b></span> <span class="t-12 mut">σ 0.44</span></td><td><span class="st ok"><i class="ic ic-okc"></i>5/5 · 12</span></td><td><span class="st warn"><i class="ic ic-warn"></i>Student status</span></td><td class="t-12 mut3">—</td></tr>
+              <tr><td class="ck"><input type="checkbox" aria-label="Compare"></td><td class="num">6</td><td>Tidewater Salinity Mapper</td><td class="num">78.2</td><td class="num">3.91</td><td class="num mut">6</td><td><span class="rg" style="width:56px"><i style="left:38%;width:40%"></i><b style="left:60%"></b></span> <span class="t-12 mut">σ 0.47</span></td><td><span class="st warn"><i class="ic ic-warn"></i>4/5 · 10</span></td><td><span class="st ok"><i class="ic ic-okc"></i>Eligible</span></td><td class="t-12 mut3">—</td></tr>
+              <tr><td class="ck"><input type="checkbox" aria-label="Compare"></td><td class="num">7</td><td class="trunc" style="max-width:260px">Load Shedding Game Theory Simulator with Stackelberg Equilibria</td><td class="num">74.1</td><td class="num">3.80</td><td class="num mut">7</td><td><span class="rg" style="width:56px"><i style="left:36%;width:34%"></i><b style="left:58%"></b></span> <span class="t-12 mut">σ 0.40</span></td><td><span class="st warn"><i class="ic ic-warn"></i>3/5 · 8</span></td><td><span class="st ok"><i class="ic ic-okc"></i>Eligible</span></td><td class="t-12 mut3">—</td></tr>
+              <tr><td class="ck"><input type="checkbox" aria-label="Compare"></td><td class="num mut3">—</td><td class="mut">Kelvin</td><td class="num mut">72.3</td><td class="num mut">3.70</td><td class="num mut">8</td><td class="mut3 t-12">—</td><td><span class="st ok"><i class="ic ic-okc"></i>5/5 · 12</span></td><td><span class="st err"><i class="ic ic-xc"></i>Ineligible</span></td><td class="t-12 mut3">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pn" style="flex:1">
+          <div class="pn-h"><h2>Compare</h2><span class="t-12 mut3">3 selected</span><span class="sp tabs sm" style="border:0"><a aria-current="page">Criteria</a><a>Pairwise</a><a>Judge by judge</a><a>Sensitivity</a></span></div>
+          <table class="tbl cmp dense">
+            <thead><tr><th style="width:200px">Criterion · weight</th><th class="num">Northwind</th><th class="num">Solar Twin</th><th class="num">Ember</th><th style="width:230px">Read</th></tr></thead>
+            <tbody>
+              <tr><td>Technical depth · 30%</td><td class="num lead">4.4 → 90.1 ▲</td><td class="num">4.2 → 86.0</td><td class="num">4.6 → 85.2</td><td class="t-12 mut">Northwind +4.1 norm over Solar Twin</td></tr>
+              <tr><td>Impact &amp; relevance · 25%</td><td class="num">4.2 → 84.7</td><td class="num lead">4.3 → 88.0 ▲</td><td class="num">4.4 → 84.0</td><td class="t-12 mut">Solar Twin leads; 3.3 norm</td></tr>
+              <tr><td>Execution &amp; demo · 25%</td><td class="num lead">4.3 → 88.9 ▲</td><td class="num">4.0 → 85.3</td><td class="num">4.3 → 83.5</td><td class="t-12 mut">Raw tie with Ember; judge severity differs</td></tr>
+              <tr><td>Originality · 20%</td><td class="num">3.9 → 84.6</td><td class="num lead">4.1 → 88.5 ▲</td><td class="num">4.2 → 84.1</td><td class="t-12 mut">Solar Twin leads</td></tr>
+              <tr><td><b>Weighted total</b></td><td class="num lead">87.4</td><td class="num lead">86.9</td><td class="num lead">84.2</td><td class="t-12"><b>Δ 0.5</b> — inside close-call threshold (1.0)</td></tr>
+              <tr><td class="mut">Pairwise head-to-head</td><td class="num mut">5 – 3 vs Solar</td><td class="num mut">3 – 5 vs Northwind</td><td class="num mut">3 – 2 vs Solar</td><td class="t-12 mut">Used as tiebreaker only</td></tr>
+            </tbody>
+          </table>
+          <div class="row" style="padding:10px 14px;border-top:1px solid var(--line);align-items:flex-start;gap:12px"><i class="ic ic-info" style="margin-top:2px;color:var(--info)"></i><div class="t-13" style="line-height:1.5"><b>Why Northwind ranks above Solar Twin (deterministic).</b> +4.1 on Technical depth and +3.6 on Execution outweigh −3.3 on Impact and −3.9 on Originality at the configured weights. Rank holds in 3 of 4 sensitivity tests; it flips to Solar Twin if Judge J4 is dropped. <a>Open evidence graph</a></div></div>
+        </div>
+<div class="pn"><div class="pn-h"><h2>Sensitivity</h2><span class="t-12 mut3">does the top rank survive reasonable changes?</span></div><table class="tbl dense"><thead><tr><th>Scenario</th><th>#1</th><th>#2</th><th style="width:110px">Stable?</th></tr></thead><tbody><tr><td>Configured (v4, weights 30/25/25/20)</td><td>Northwind</td><td>Solar Twin</td><td><span class="st ok"><i class="ic ic-check"></i>Baseline</span></td></tr><tr><td>Equal weights</td><td>Solar Twin</td><td>Northwind</td><td><span class="st warn"><i class="ic ic-warn"></i>Flips</span></td></tr><tr><td>Raw scores, no normalization</td><td>Ember</td><td>Northwind</td><td><span class="st warn"><i class="ic ic-warn"></i>Flips</span></td></tr><tr><td>Drop most severe judge (J2)</td><td>Northwind</td><td>Solar Twin</td><td><span class="st ok"><i class="ic ic-check"></i>Stable</span></td></tr><tr><td>Drop judge J4</td><td>Solar Twin</td><td>Northwind</td><td><span class="st warn"><i class="ic ic-warn"></i>Flips</span></td></tr></tbody></table></div>
+      </div>
+    </section>
+
+    <!-- decision rail -->
+    <aside style="background:var(--surface);display:flex;flex-direction:column;min-height:0">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--line)" class="col g2">
+        <span class="eyebrow">Recommended by configured ranking</span>
+        <div class="row"><b style="font-size:16px">Northwind Grid Forecaster</b><span class="sp st ok"><i class="ic ic-okc"></i>Eligible</span></div>
+        <div class="t-12 mut">Grand Prize · €5,000 · one winner · no split</div>
+        <div class="row g2"><button class="btn pri grow">Prepare finalization…</button><button class="btn">Choose different…</button></div>
+        <div class="t-12 mut3">Choosing a different project requires a recorded override reason.</div>
+      </div>
+      <div style="padding:10px 16px;border-bottom:1px solid var(--line)" class="col g2">
+        <div class="row"><h3>Blocking checks</h3></div>
+        <div class="t-12 col g1"><span class="st warn"><i class="ic ic-warn"></i>Close call: #1 vs #2 (Δ 0.5) — note required</span><span class="st warn"><i class="ic ic-warn"></i>Heat Island Copilot: student proof pending</span><span class="st ok"><i class="ic ic-check"></i>No cross-award conflicts (Best Hardware separate)</span><span class="st ok"><i class="ic ic-check"></i>Every finalist meets min coverage of 3 (2 flagged)</span></div>
+      </div>
+      <div class="col" style="flex:1;min-height:0;overflow:hidden">
+        <div class="row" style="padding:10px 16px 6px"><h3>Deliberation notes</h3><span class="t-12 mut3 sp">4</span></div>
+        <div class="note"><div class="row t-12"><b>Priya Nair</b><span class="mut3">Sun 18:22</span><span class="tag sp">Panel</span></div>Solar Twin’s demo was the most convincing; Impact scores are 0.3 higher on average.</div>
+        <div class="note"><div class="row t-12"><b>Dr. Osei</b><span class="mut3">Sun 18:29</span><span class="tag sp">Panel</span></div>Ember’s spread is large — two judges scored it 5 on Execution, two scored 3. Recheck severity.</div>
+        <div class="note"><div class="row t-12"><b>You</b><span class="mut3">Sun 18:41</span><span class="tag sp">Organizers only</span></div>Northwind’s repo is public and frozen; eligibility verified.</div>
+        <div style="padding:8px 16px"><div class="in-wrap"><input class="in" placeholder="Add note (visible to: panel)" aria-label="Add note"></div></div>
+      </div>
+      <div style="padding:10px 16px;border-top:1px solid var(--line);background:var(--surface-2)" class="col g2">
+        <div class="row"><h3>Approvals</h3><span class="t-12 mut3 sp">2 required · no self-approval</span></div>
+        <div class="row g2 t-12"><span class="avatar">PN</span><span class="grow">Priya Nair</span><span class="st ok"><i class="ic ic-okc"></i>Approved 18:50</span></div>
+        <div class="row g2 t-12"><span class="avatar">AO</span><span class="grow">Amara Okafor <span class="mut3">(proposer)</span></span><span class="st mute"><i class="ic ic-ban"></i>Can’t approve own</span></div>
+        <div class="row g2 t-12"><span class="avatar">DO</span><span class="grow">Dr. Osei</span><span class="st mute"><i class="ic ic-circle"></i>Waiting</span></div>
+      </div>
+    </aside>
+  </main>
+</div>
+</body>
+</html>

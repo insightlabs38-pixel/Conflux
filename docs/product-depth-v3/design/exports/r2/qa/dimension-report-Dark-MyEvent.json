@@ -1,0 +1,11 @@
+[
+ {
+  "name": "Dark-MyEvent",
+  "declared": "860x1000",
+  "root": "860x1000",
+  "scrollH": 1000,
+  "scrollW": 860,
+  "contentBottom": 1000,
+  "contentRight": 860
+ }
+]

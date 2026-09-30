@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Participant My Event</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./v3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>body{margin:0}.act{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);align-items:center;min-height:60px}.act:last-child{border-bottom:0}.tl{display:flex;gap:12px;padding:8px 16px;border-bottom:1px solid var(--line);align-items:flex-start}.tl:last-child{border-bottom:0}.trk{display:grid;grid-template-columns:repeat(6,1fr);gap:0}.trk .s{display:flex;flex-direction:column;gap:6px;padding-right:8px;position:relative}.trk .s::before{content:"";position:absolute;top:9px;left:22px;right:0;height:2px;background:var(--line-2)}.trk .s:last-child::before{display:none}.trk .s.done::before{background:var(--ok)}.trk .n{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--surface);border:2px solid var(--line-3);z-index:1;font-size:11px;font-weight:600}.trk .done .n{background:var(--ok);border-color:var(--ok);color:#fff}.trk .now .n{border-color:var(--warn);color:var(--warn)}</style>
+</helmet>
+<div style="width:1280px;height:1090px;background:var(--bg);display:flex;flex-direction:column;overflow:hidden">
+  <header class="top" style="height:52px;flex:none;gap:20px;padding:0 24px">
+    <div class="mark" aria-hidden="true">C</div>
+    <div class="col" style="line-height:1.2"><b class="t-13">Gauss Hack 2026</b><span class="t-11 mut3">Participant</span></div>
+    <div class="tabs" style="border:0;height:52px;align-items:stretch;margin-left:12px"><a aria-current="page" style="height:52px;margin:0">My Event <span class="cnt w">3</span></a><a style="height:52px;margin:0">Team</a><a style="height:52px;margin:0">Project</a><a style="height:52px;margin:0">Schedule</a><a style="height:52px;margin:0">Resources</a><a style="height:52px;margin:0">Messages</a></div>
+    <span class="sp"></span><button class="btn sm"><i class="ic s ic-qr"></i>Event pass</button><button class="btn ghost icon" aria-label="Notifications"><i class="ic ic-bell"></i></button><span class="avatar l">SM</span>
+  </header>
+  <main style="padding:24px;display:grid;grid-template-columns:minmax(0,1fr) 352px;gap:24px;flex:1;min-height:0;align-content:start">
+    <div class="col g4">
+      <div class="row" style="align-items:flex-end"><div class="col g1"><h1>My Event</h1><span class="t-13 mut">Sofia Marín-Reyes · Northwind Grid Forecaster · Climate &amp; Energy</span></div><span class="sp t-12 mut3">Sunday 12 Oct · 12:38 Berlin</span></div>
+
+      <div class="pn"><div class="pn-b trk" role="list" aria-label="Progress">
+        <div class="s done" role="listitem"><span class="n"><i class="ic xs ic-check"></i></span><span class="t-12"><b>Accepted</b><br><span class="mut3">Sep 4</span></span></div>
+        <div class="s done" role="listitem"><span class="n"><i class="ic xs ic-check"></i></span><span class="t-12"><b>Checked in</b><br><span class="mut3">08:41</span></span></div>
+        <div class="s done" role="listitem"><span class="n"><i class="ic xs ic-check"></i></span><span class="t-12"><b>Team of 4</b><br><span class="mut3">All confirmed</span></span></div>
+        <div class="s now" role="listitem" aria-current="step"><span class="n">!</span><span class="t-12"><b>Project</b><br><span style="color:var(--warn)">2 items left</span></span></div>
+        <div class="s" role="listitem"><span class="n">5</span><span class="t-12"><b>Submit</b><br><span class="mut3">by 13:00</span></span></div>
+        <div class="s" role="listitem"><span class="n">6</span><span class="t-12"><b>Results</b><br><span class="mut3">20:30</span></span></div>
+      </div></div>
+
+      <div class="pn"><div class="pn-h"><h2>Do next</h2><span class="tag warn"><i class="ic ic-warn"></i>3 open</span><span class="t-12 mut3 sp">ordered by urgency</span></div>
+        <div class="act"><i class="ic l ic-clock" style="color:var(--warn)"></i><div class="col grow"><b class="t-13">Add your repository link</b><span class="t-12 mut">Required to submit · freezes <b>Sun 13:00</b> (22 min) · Berlin time, same as yours</span></div><button class="btn pri">Add link</button></div>
+        <div class="act"><i class="ic l ic-warn" style="color:var(--warn)"></i><div class="col grow"><b class="t-13">Team eligibility needs a document</b><span class="t-12 mut">Tomás Ribeiro’s student status is unverified — affects the <b>Student Prize</b> only. You can still submit.</span></div><button class="btn">Upload proof</button></div>
+        <div class="act"><i class="ic l ic-file" style="color:var(--ink-2)"></i><div class="col grow"><b class="t-13">Acknowledge the media release</b><span class="t-12 mut">Needed if your demo is recorded · 1 minute</span></div><button class="btn">Review</button></div>
+        <details><summary class="row" style="padding:10px 16px;border-top:1px solid var(--line);cursor:pointer;list-style:none;color:var(--ink-2)"><i class="ic s ic-chev-r"></i><span class="t-12">4 completed: Accepted · Code of conduct · Waiver · Team confirmed</span></summary></details>
+      </div>
+
+      <div class="pn"><div class="pn-h"><h2>Team &amp; project</h2><a class="t-12">Manage team</a></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr">
+          <div class="pn-b col g2" style="border-right:1px solid var(--line)"><b class="t-13">Northwind Grid Forecaster</b>
+            <div class="row g2"><span class="avatar">SM</span><span class="t-13 grow">Sofia Marín-Reyes <span class="mut3">(you)</span></span><span class="st ok"><i class="ic ic-okc"></i>In</span></div>
+            <div class="row g2"><span class="avatar">AN</span><span class="t-13 grow">Adaeze Nwosu</span><span class="st ok"><i class="ic ic-okc"></i>In</span></div>
+            <div class="row g2"><span class="avatar">LB</span><span class="t-13 grow">Luca Bianchi</span><span class="st ok"><i class="ic ic-okc"></i>In</span></div>
+            <div class="row g2"><span class="avatar">TR</span><span class="t-13 grow">Tomás Ribeiro</span><span class="st warn"><i class="ic ic-warn"></i>Proof</span></div>
+          </div>
+          <div class="pn-b col g2"><div class="row"><b class="t-13">Project</b><span class="tag sp">Draft</span></div>
+            <div class="col g1"><div class="row t-12"><span class="grow">Story completeness</span><b>78%</b></div><div class="bar"><i style="width:78%"></i></div></div>
+            <div class="t-12 mut" style="line-height:1.55"><span class="st ok"><i class="ic ic-check"></i>Summary · Architecture · Evaluation</span><br><span class="st warn"><i class="ic ic-warn"></i>Repository link · Demo video (recommended)</span></div>
+            <div class="row g2"><button class="btn sm">Open story</button><button class="btn sm ghost">Preview as judge</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pn"><div class="pn-h"><h2>Today for you</h2><a class="t-12">Full schedule</a></div>
+        <div class="tl"><span class="mono t-12 mut3" style="width:44px;padding-top:1px">10:00</span><span class="grow t-13 mut">Opening &amp; rules · Main hall</span><span class="st mute">Done</span></div>
+        <div class="tl" style="background:var(--accent-tint)"><span class="mono t-12" style="width:44px;padding-top:1px;font-weight:600">Now</span><span class="grow t-13"><b>Lunch</b> · Atrium · until 13:15</span></div>
+        <div class="tl"><span class="mono t-12 mut3" style="width:44px;padding-top:1px">13:00</span><span class="grow t-13"><b>Submissions freeze</b></span><span class="tag warn">22 min</span></div>
+        <div class="tl"><span class="mono t-12 mut3" style="width:44px;padding-top:1px">15:30</span><span class="grow t-13">Workshop: Reproducible benchmarks · Room 3 <span class="mut3">· RSVP’d</span></span></div>
+        <div class="tl"><span class="mono t-12 mut3" style="width:44px;padding-top:1px">16:00</span><span class="grow t-13">Mentor session with Kim H. · Table A-14 <span class="mut3">· Rust async</span></span></div>
+        <div class="tl"><span class="mono t-12 mut3" style="width:44px;padding-top:1px">17:10</span><span class="grow t-13"><b>Your demo</b> · Stage B · 5 min + 2 Q&amp;A</span></div>
+        <div class="tl"><span class="mono t-12 mut3" style="width:44px;padding-top:1px">20:30</span><span class="grow t-13">Results announced · Main hall + online</span></div>
+      </div>
+    </div>
+
+    <aside class="col g3">
+      <div class="pn"><div class="pn-h"><h2>Event pass</h2><span class="st ok"><i class="ic ic-okc"></i>Checked in</span></div>
+        <div class="pn-b col g3" style="align-items:center"><div class="qr-art" style="width:180px" role="img" aria-label="Event QR code for Sofia Marín-Reyes"></div><div class="col" style="align-items:center"><b class="t-13">Sofia Marín-Reyes</b><span class="mono t-12 mut3">P-04182 · Participant · Team T-0412</span></div><div class="row g2" style="width:100%"><button class="btn grow"><i class="ic s ic-down"></i>Save offline</button><button class="btn grow">Add to Wallet</button></div></div></div>
+      <div class="pn"><div class="pn-h"><h2>Where</h2></div><div class="pn-b col g2"><div class="row g2"><i class="ic ic-pin"></i><span class="t-13"><b>Table A-14</b> · Hall 2, north wall</span></div><div class="row g2"><i class="ic ic-globe"></i><span class="t-13">Wi-Fi <span class="mono">gauss-hack</span> · pw on badge</span></div><a class="t-12">Venue map &amp; travel <i class="ic xs ic-ext"></i></a></div></div>
+      <div class="pn"><div class="pn-h"><h2>Help</h2></div><div class="pn-b col g2"><div class="row g2"><i class="ic ic-hand"></i><span class="t-13 grow">Help queue: <b>no open request</b></span></div><div class="row g2"><i class="ic ic-cal"></i><span class="t-13 grow">Mentor Kim H. · 16:00</span></div><div class="row g2"><button class="btn grow"><i class="ic s ic-hand"></i>Ask for help</button><button class="btn ghost">Emergency</button></div></div></div>
+      <div class="pn"><div class="pn-h"><h2>What happens next</h2></div><div class="pn-b col g2 t-13"><div><b>13:00</b> Freeze — your <em>frozen revision</em> is what judges see</div><div><b>13:30–18:00</b> Judging · you may be visited at your table</div><div><b>20:30</b> Results on the public page</div></div></div>
+    </aside>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1090}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

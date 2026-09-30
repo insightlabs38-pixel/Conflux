@@ -1,0 +1,407 @@
+[
+ {
+  "name": "Main",
+  "declared": "1440x900",
+  "root": "1440x900",
+  "scrollH": 900,
+  "scrollW": 1440,
+  "contentBottom": 860,
+  "contentRight": 1392
+ },
+ {
+  "name": "Sys-Foundations",
+  "declared": "1440x1760",
+  "root": "1440x1760",
+  "scrollH": 1777,
+  "scrollW": 1440,
+  "contentBottom": 1737,
+  "contentRight": 1392
+ },
+ {
+  "name": "Sys-Components",
+  "declared": "1440x2540",
+  "root": "1440x2540",
+  "scrollH": 2540,
+  "scrollW": 1440,
+  "contentBottom": 2484,
+  "contentRight": 1392
+ },
+ {
+  "name": "Sys-Directions",
+  "declared": "1440x2050",
+  "root": "1440x2050",
+  "scrollH": 2050,
+  "scrollW": 1440,
+  "contentBottom": 1990,
+  "contentRight": 1392
+ },
+ {
+  "name": "Shell-Organizer",
+  "declared": "1440x900",
+  "root": "1440x900",
+  "scrollH": 900,
+  "scrollW": 1440,
+  "contentBottom": 900,
+  "contentRight": 1440
+ },
+ {
+  "name": "Shell-Dense",
+  "declared": "1440x900",
+  "root": "1440x900",
+  "scrollH": 900,
+  "scrollW": 1440,
+  "contentBottom": 970,
+  "contentRight": 1440
+ },
+ {
+  "name": "Shell-Overlays",
+  "declared": "1440x640",
+  "root": "1440x640",
+  "scrollH": 642,
+  "scrollW": 1440,
+  "contentBottom": 610,
+  "contentRight": 1400
+ },
+ {
+  "name": "Shell-Participant",
+  "declared": "1280x860",
+  "root": "1280x860",
+  "scrollH": 860,
+  "scrollW": 1280,
+  "contentBottom": 860,
+  "contentRight": 1280
+ },
+ {
+  "name": "Shell-Judge",
+  "declared": "1280x800",
+  "root": "1280x800",
+  "scrollH": 800,
+  "scrollW": 1280,
+  "contentBottom": 800,
+  "contentRight": 1280
+ },
+ {
+  "name": "Shell-Mobile",
+  "declared": "1250x844",
+  "root": "1250x844",
+  "scrollH": 844,
+  "scrollW": 1250,
+  "contentBottom": 844,
+  "contentRight": 1250
+ },
+ {
+  "name": "Data-Surface",
+  "declared": "1440x1000",
+  "root": "1440x1000",
+  "scrollH": 1000,
+  "scrollW": 1440,
+  "contentBottom": 1000,
+  "contentRight": 1440
+ },
+ {
+  "name": "Data-Filters",
+  "declared": "1350x1000",
+  "root": "1350x1000",
+  "scrollH": 1000,
+  "scrollW": 1350,
+  "contentBottom": 967,
+  "contentRight": 1314
+ },
+ {
+  "name": "MyEvent",
+  "declared": "1280x1090",
+  "root": "1280x1090",
+  "scrollH": 1090,
+  "scrollW": 1280,
+  "contentBottom": 1090,
+  "contentRight": 1280
+ },
+ {
+  "name": "MyEvent-Mobile",
+  "declared": "860x1000",
+  "root": "860x1000",
+  "scrollH": 1000,
+  "scrollW": 860,
+  "contentBottom": 1000,
+  "contentRight": 860
+ },
+ {
+  "name": "Story-Editor",
+  "declared": "1440x960",
+  "root": "1440x960",
+  "scrollH": 960,
+  "scrollW": 1440,
+  "contentBottom": 1222,
+  "contentRight": 1440
+ },
+ {
+  "name": "Story-Rich",
+  "declared": "1440x900",
+  "root": "1440x900",
+  "scrollH": 900,
+  "scrollW": 1440,
+  "contentBottom": 1081,
+  "contentRight": 1440
+ },
+ {
+  "name": "Story-History",
+  "declared": "1440x900",
+  "root": "1440x900",
+  "scrollH": 900,
+  "scrollW": 1440,
+  "contentBottom": 900,
+  "contentRight": 1440
+ },
+ {
+  "name": "Judge-Review",
+  "declared": "1440x920",
+  "root": "1440x920",
+  "scrollH": 920,
+  "scrollW": 1440,
+  "contentBottom": 1037,
+  "contentRight": 1440
+ },
+ {
+  "name": "Judge-Dialogs",
+  "declared": "1440x800",
+  "root": "1440x800",
+  "scrollH": 800,
+  "scrollW": 1440,
+  "contentBottom": 760,
+  "contentRight": 1404
+ },
+ {
+  "name": "Judge-Mobile",
+  "declared": "1250x844",
+  "root": "1250x844",
+  "scrollH": 844,
+  "scrollW": 1250,
+  "contentBottom": 844,
+  "contentRight": 1250
+ },
+ {
+  "name": "Deliberation",
+  "declared": "1440x1080",
+  "root": "1440x1080",
+  "scrollH": 1080,
+  "scrollW": 1440,
+  "contentBottom": 1080,
+  "contentRight": 1440
+ },
+ {
+  "name": "Deliberation-Finalize",
+  "declared": "1440x900",
+  "root": "1440x900",
+  "scrollH": 900,
+  "scrollW": 1440,
+  "contentBottom": 900,
+  "contentRight": 1440
+ },
+ {
+  "name": "Public-Event",
+  "declared": "1280x1700",
+  "root": "1280x1700",
+  "scrollH": 1701,
+  "scrollW": 1280,
+  "contentBottom": 1701,
+  "contentRight": 1280
+ },
+ {
+  "name": "Public-Event-Themed",
+  "declared": "1280x1000",
+  "root": "1280x1000",
+  "scrollH": 1000,
+  "scrollW": 1280,
+  "contentBottom": 1000,
+  "contentRight": 1280
+ },
+ {
+  "name": "Public-Event-Mobile",
+  "declared": "860x1420",
+  "root": "860x1420",
+  "scrollH": 1420,
+  "scrollW": 860,
+  "contentBottom": 1420,
+  "contentRight": 860
+ },
+ {
+  "name": "Public-Project",
+  "declared": "1200x2010",
+  "root": "1200x2010",
+  "scrollH": 2010,
+  "scrollW": 1200,
+  "contentBottom": 1969,
+  "contentRight": 1200
+ },
+ {
+  "name": "Public-Project-Mobile",
+  "declared": "860x1600",
+  "root": "860x1600",
+  "scrollH": 1600,
+  "scrollW": 860,
+  "contentBottom": 1600,
+  "contentRight": 860
+ },
+ {
+  "name": "Builder-Setup",
+  "declared": "1440x1180",
+  "root": "1440x1180",
+  "scrollH": 1180,
+  "scrollW": 1440,
+  "contentBottom": 1180,
+  "contentRight": 1440
+ },
+ {
+  "name": "Builder-Pages",
+  "declared": "1440x920",
+  "root": "1440x920",
+  "scrollH": 920,
+  "scrollW": 1440,
+  "contentBottom": 920,
+  "contentRight": 1440
+ },
+ {
+  "name": "Builder-Plan",
+  "declared": "1440x920",
+  "root": "1440x920",
+  "scrollH": 920,
+  "scrollW": 1440,
+  "contentBottom": 920,
+  "contentRight": 1440
+ },
+ {
+  "name": "Onsite-A",
+  "declared": "1250x844",
+  "root": "1250x844",
+  "scrollH": 844,
+  "scrollW": 1250,
+  "contentBottom": 844,
+  "contentRight": 1250
+ },
+ {
+  "name": "Onsite-B",
+  "declared": "1250x844",
+  "root": "1250x844",
+  "scrollH": 844,
+  "scrollW": 1250,
+  "contentBottom": 844,
+  "contentRight": 1250
+ },
+ {
+  "name": "States-1",
+  "declared": "1440x1770",
+  "root": "1440x1770",
+  "scrollH": 1787,
+  "scrollW": 1440,
+  "contentBottom": 1751,
+  "contentRight": 1392
+ },
+ {
+  "name": "States-2",
+  "declared": "1440x1560",
+  "root": "1440x1560",
+  "scrollH": 1574,
+  "scrollW": 1440,
+  "contentBottom": 1538,
+  "contentRight": 1392
+ },
+ {
+  "name": "Dark-Judge",
+  "declared": "1440x920",
+  "root": "1440x920",
+  "scrollH": 920,
+  "scrollW": 1440,
+  "contentBottom": 1037,
+  "contentRight": 1440
+ },
+ {
+  "name": "Dark-MyEvent",
+  "declared": "860x1000",
+  "root": "860x1000",
+  "scrollH": 1000,
+  "scrollW": 860,
+  "contentBottom": 1000,
+  "contentRight": 860
+ },
+ {
+  "name": "Dark-Organizer",
+  "declared": "1440x1000",
+  "root": "1440x1000",
+  "scrollH": 1000,
+  "scrollW": 1440,
+  "contentBottom": 1000,
+  "contentRight": 1440
+ },
+ {
+  "name": "Dark-Overlays",
+  "declared": "1440x900",
+  "root": "1440x900",
+  "scrollH": 900,
+  "scrollW": 1440,
+  "contentBottom": 970,
+  "contentRight": 1440
+ },
+ {
+  "name": "Sys-Dark",
+  "declared": "1440x1560",
+  "root": "1440x1560",
+  "scrollH": 1560,
+  "scrollW": 1440,
+  "contentBottom": 1442,
+  "contentRight": 1392
+ },
+ {
+  "name": "Resp-1024",
+  "declared": "1024x768",
+  "root": "1024x768",
+  "scrollH": 768,
+  "scrollW": 1024,
+  "contentBottom": 800,
+  "contentRight": 1024
+ },
+ {
+  "name": "Wide-1920",
+  "declared": "1920x1080",
+  "root": "1920x1080",
+  "scrollH": 1080,
+  "scrollW": 1920,
+  "contentBottom": 1112,
+  "contentRight": 1920
+ },
+ {
+  "name": "Resp-768",
+  "declared": "1176x1024",
+  "root": "1176x1024",
+  "scrollH": 1024,
+  "scrollW": 1176,
+  "contentBottom": 1151,
+  "contentRight": 1176
+ },
+ {
+  "name": "Pairwise-Compare",
+  "declared": "1440x900",
+  "root": "1440x900",
+  "scrollH": 900,
+  "scrollW": 1440,
+  "contentBottom": 900,
+  "contentRight": 1440
+ },
+ {
+  "name": "Pairwise-Narrow",
+  "declared": "1250x844",
+  "root": "1250x844",
+  "scrollH": 844,
+  "scrollW": 1250,
+  "contentBottom": 844,
+  "contentRight": 1250
+ },
+ {
+  "name": "Pairwise-States",
+  "declared": "1440x950",
+  "root": "1440x950",
+  "scrollH": 950,
+  "scrollW": 1440,
+  "contentBottom": 914,
+  "contentRight": 1408
+ }
+]

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Judge narrow mode</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./v3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>body{margin:0}.phone{width:390px;height:844px;background:var(--bg);border:1px solid var(--line-2);display:flex;flex-direction:column;overflow:hidden;position:relative}.appbar{height:52px;flex:none;display:flex;align-items:center;gap:8px;padding:0 8px 0 12px;background:var(--surface);border-bottom:1px solid var(--line)}.lst{display:flex;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);align-items:center;min-height:56px;background:var(--surface)}.sc5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.sc5 .btn{height:48px;font-size:16px;font-weight:600}.sc5 .btn.on{background:var(--accent);border-color:var(--accent);color:#fff}</style>
+</helmet>
+<div style="width:1250px;height:844px;display:flex;gap:40px">
+
+  <div class="phone">
+    <div class="appbar"><div class="col grow" style="line-height:1.2"><b class="t-13">Review queue</b><span class="t-11 mut3">7 of 24 scored · 3h 05m left</span></div><button class="btn ghost icon" aria-label="Conflicts and recusal" style="width:44px;height:44px"><i class="ic ic-ban"></i></button></div>
+    <div style="padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--line)"><div class="bar h8"><i style="width:29%"></i></div></div>
+    <div class="row" style="padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--line)"><span class="seg grow"><button class="btn grow" style="height:40px">All</button><button class="btn on grow" style="height:40px">To do 17</button><button class="btn grow" style="height:40px">Flag</button></span></div>
+    <div class="row" style="padding:8px 16px;background:var(--info-tint);border-bottom:1px solid var(--info-line)"><i class="ic s ic-route" style="color:var(--info)"></i><span class="t-12"><b>Next stop A-15</b> · 4 min walk</span></div>
+    <div style="flex:1;overflow:hidden">
+      <div class="lst" style="background:var(--accent-tint);box-shadow:inset 3px 0 0 var(--accent)"><span class="mono t-12 mut3" style="width:34px">A-14</span><div class="col grow"><b class="t-13">Northwind Grid Forecaster</b><span class="t-12 mut">Climate · draft saved</span></div><span class="st info"><i class="ic ic-half"></i>Draft</span></div>
+      <div class="lst"><span class="mono t-12 mut3" style="width:34px">A-15</span><div class="col grow"><b class="t-13">Solar Twin</b><span class="t-12 mut">Climate</span></div><span class="st mute"><i class="ic ic-circle"></i>To do</span></div>
+      <div class="lst"><span class="mono t-12 mut3" style="width:34px">A-18</span><div class="col grow"><b class="t-13">Tidewater Salinity Mapper</b><span class="t-12 mut">Climate</span></div><span class="st mute"><i class="ic ic-circle"></i>To do</span></div>
+      <div class="lst" style="background:var(--warn-tint)"><span class="mono t-12 mut3" style="width:34px">B-03</span><div class="col grow"><b class="t-13">Latent Space Cartographers</b><span class="t-12 mut">Confirm recusal first</span></div><span class="st warn"><i class="ic ic-ban"></i></span></div>
+      <div class="lst"><span class="mono t-12 mut3" style="width:34px">B-06</span><div class="col grow"><b class="t-13">Glucose Nowcast</b><span class="t-12 mut">Health</span></div><span class="st mute"><i class="ic ic-circle"></i>To do</span></div>
+      <div class="lst"><span class="mono t-12 mut3" style="width:34px">B-09</span><div class="col grow"><b class="t-13">Sepsis Sentinel</b><span class="t-12 mut">Health · flagged by you</span></div><span class="st warn"><i class="ic ic-flag"></i></span></div>
+    </div>
+    <nav class="bottom-nav"><a><i class="ic l ic-home"></i>Overview</a><a aria-current="page"><i class="ic l ic-list"></i>Queue</a><a><i class="ic l ic-route"></i>Route</a><a><i class="ic l ic-msg"></i>Messages</a></nav>
+  </div>
+
+  <div class="phone">
+    <div class="appbar"><button class="btn ghost icon" aria-label="Back to queue" style="width:44px;height:44px"><i class="ic ic-chev-l"></i></button><div class="col grow" style="line-height:1.2;min-width:0"><b class="t-13 trunc">Northwind Grid Forecaster</b><span class="t-11 mut3">A-14 · 8 of 24 · Frozen r3</span></div><button class="btn ghost icon" aria-label="Previous" style="width:44px;height:44px"><i class="ic ic-chev-u"></i></button><button class="btn ghost icon" aria-label="Next" style="width:44px;height:44px"><i class="ic ic-chev-d"></i></button></div>
+    <div class="tabs" style="background:var(--surface);padding:0 8px"><a aria-current="page" style="height:44px">Story</a><a style="height:44px">Artifacts</a><a style="height:44px">Score <span class="cnt w">1</span></a></div>
+    <div style="flex:1;overflow:hidden;padding:16px;background:var(--surface)" class="col g3">
+      <p style="font-family:var(--font-read);font-size:16px;line-height:1.6"><b>Summary.</b> Northwind forecasts substation-level load 1–24 h ahead, cutting 24 h MAE by 21.5 % against NWP-Lite on 412 substations while running in 38 ms on one CPU core.</p>
+      <div class="fig-chart"><div class="col" style="margin-bottom:4px;line-height:1.3"><b class="t-12" style="color:var(--ink)">Figure 2 · Forecast MAE by horizon</b><span class="t-11 mut3">Test MAE, lower is better · 5-seed mean, band = 95 % CI</span></div><svg viewBox="0 0 334 140" role="img" aria-label="Line chart: forecast MAE at horizons 1, 6 and 24 hours. Persistence 0.412, 0.688, 0.941; NWP-Lite 0.371, 0.552, 0.780; Northwind 0.298, 0.441, 0.612. Lower is better."><line class="ax" x1="34" x2="230" y1="118.0" y2="118.0"></line><text class="tk" x="28" y="121.5" text-anchor="end">0.2</text><line class="gl" x1="34" x2="230" y1="90.5" y2="90.5"></line><text class="tk" x="28" y="94.0" text-anchor="end">0.4</text><line class="gl" x1="34" x2="230" y1="63.0" y2="63.0"></line><text class="tk" x="28" y="66.5" text-anchor="end">0.6</text><line class="gl" x1="34" x2="230" y1="35.5" y2="35.5"></line><text class="tk" x="28" y="39.0" text-anchor="end">0.8</text><line class="gl" x1="34" x2="230" y1="8.0" y2="8.0"></line><text class="tk" x="28" y="11.5" text-anchor="end">1.0</text><text class="tk" x="48.0" y="134" text-anchor="middle">h = 1</text><text class="tk" x="132.0" y="134" text-anchor="middle">h = 6</text><text class="tk" x="216.0" y="134" text-anchor="middle">h = 24</text><polygon class="band" points="48.0,102.9 132.0,82.4 216.0,57.8 216.0,64.9 132.0,87.3 48.0,106.2"></polygon><polyline class="s0" points="48.0,88.9 132.0,50.9 216.0,16.1"></polyline><circle class="m0" cx="48.0" cy="88.9" r="4"></circle><circle class="m0" cx="132.0" cy="50.9" r="4"></circle><circle class="m0" cx="216.0" cy="16.1" r="4"></circle><text class="lb" x="226.0" y="19.6">Persistence 0.941</text><polyline class="s1" points="48.0,94.5 132.0,69.6 216.0,38.2"></polyline><circle class="m1" cx="48.0" cy="94.5" r="4"></circle><circle class="m1" cx="132.0" cy="69.6" r="4"></circle><circle class="m1" cx="216.0" cy="38.2" r="4"></circle><text class="lb" x="226.0" y="41.8">NWP-Lite 0.780</text><polyline class="s2" points="48.0,104.5 132.0,84.9 216.0,61.4"></polyline><circle class="m2" cx="48.0" cy="104.5" r="4"></circle><circle class="m2" cx="132.0" cy="84.9" r="4"></circle><circle class="m2" cx="216.0" cy="61.4" r="4"></circle><text class="lb hi" x="226.0" y="64.8">Northwind 0.612</text></svg></div>
+      <table class="tbl dense"><thead><tr><th>Model</th><th class="num">MAE 24h</th></tr></thead><tbody><tr><td>NWP-Lite</td><td class="num">0.780</td></tr><tr class="sel"><td><b>Northwind</b></td><td class="num"><b>0.612</b></td></tr></tbody></table>
+      <div class="row g2"><div class="well row g2 grow"><i class="ic ic-play"></i><span class="t-13">Demo 3:12</span></div><div class="well row g2 grow"><i class="ic ic-git"></i><span class="t-13">Repo</span></div></div>
+    </div>
+    <div style="background:var(--surface);border-top:1px solid var(--line-2);padding:10px 12px" class="col g2"><div class="row"><span class="st ok"><i class="ic ic-cloud s"></i>Draft saved</span><span class="t-12 mut sp">3 of 4 scored</span></div><button class="btn pri lg" style="width:100%;height:48px">Score this project</button></div>
+  </div>
+
+  <div class="phone">
+    <div class="appbar"><button class="btn ghost icon" aria-label="Back" style="width:44px;height:44px"><i class="ic ic-chev-l"></i></button><div class="col grow" style="line-height:1.2"><b class="t-13">Execution &amp; demo</b><span class="t-11 mut3">Criterion 3 of 4 · weight 25%</span></div><span class="st ok"><i class="ic ic-cloud s"></i></span></div>
+    <div style="flex:1;overflow:hidden;padding:16px;background:var(--surface)" class="col g4">
+      <div class="col g2"><span class="lbl">Score</span><div class="sc5" role="radiogroup" aria-label="Execution and demo"><button class="btn">1</button><button class="btn">2</button><button class="btn">3</button><button class="btn on" aria-pressed="true">4</button><button class="btn">5</button></div></div>
+      <div class="well col g1"><b class="t-13">4 — Working end-to-end demo</b><span class="t-12 mut" style="line-height:1.5">Runs on real data; minor rough edges; the team can explain trade-offs. Compare: <a>3</a> · <a>5</a></span></div>
+      <div class="fld"><label for="cm">Comment (optional)</label><textarea id="cm" class="in ta" style="font-size:16px;min-height:80px">Live demo ran on the held-out region.</textarea></div>
+      <div class="col g1 t-12 mut"><div class="row"><span class="grow">Technical depth</span><b style="color:var(--ink)">4</b></div><div class="row"><span class="grow">Impact &amp; relevance</span><b style="color:var(--ink)">4</b></div><div class="row"><span class="grow">Originality</span><b style="color:var(--ink)">3</b></div></div>
+    </div>
+    <div style="background:var(--surface);border-top:1px solid var(--line-2);padding:10px 12px" class="col g2"><div class="row g2"><button class="btn" style="height:44px"><i class="ic s ic-flag"></i>Flag</button><button class="btn dng-o" style="height:44px"><i class="ic s ic-ban"></i>Recuse</button><button class="btn pri grow" style="height:44px">Submit &amp; next</button></div></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1250,"height":844}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

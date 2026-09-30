@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pairwise judging compare</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./v3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+body{margin:0}
+.q{display:flex;gap:8px;align-items:center;padding:0 12px;border-bottom:1px solid var(--line);font-size:13px}
+.q.cur{background:var(--accent-tint);box-shadow:inset 3px 0 0 var(--accent)}
+.q .tb{font-family:var(--font-mono);font-size:11px;color:var(--ink-3);width:26px;flex:none}
+.side{background:var(--surface);min-width:0}
+.ab{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:var(--r-2);background:var(--ink);color:var(--surface);font-weight:600;font-size:13px;flex:none}
+.rd{font-family:var(--font-read);font-size:15px;line-height:1.6}
+.chs{display:flex;flex-direction:column;gap:6px;padding:12px}
+.choice{display:flex;align-items:center;gap:10px;min-height:64px;padding:8px 12px;border:1px solid var(--line-3);border-radius:var(--r-3);background:var(--surface);text-align:left;width:100%;cursor:pointer}
+.choice b{font-size:14px}
+.choice .kbd{margin-left:auto}
+.ev>*{flex:none}
+</style>
+</helmet>
+<div style="width:1440px;height:900px;background:var(--bg);display:flex;flex-direction:column;overflow:hidden">
+  <header class="top" style="height:52px;flex:none;gap:16px;padding:0 20px">
+    <div class="mark" aria-hidden="true">C</div>
+    <div class="col" style="line-height:1.2"><b class="t-13">Gauss Hack 2026</b><span class="t-11 mut3">Judge · Prof. Meera Iyer</span></div>
+    <div class="tabs" style="border:0;height:52px;align-items:stretch;margin-left:8px"><a style="height:52px;margin:0">Overview</a><a aria-current="page" style="height:52px;margin:0">Comparisons <span class="cnt a">28</span></a><a style="height:52px;margin:0">Schedule &amp; route</a><a style="height:52px;margin:0">Messages</a></div>
+    <span class="sp"></span>
+    <div class="col" style="width:240px;gap:3px"><div class="row t-12"><b>12 of 40 comparisons</b><span class="mut3 sp">28 left</span></div><div class="bar h8"><i style="width:30%"></i></div></div>
+    <span class="st ok" title="Pacing"><i class="ic ic-clock"></i>3h 05m · on pace</span>
+    <button class="btn sm"><i class="ic s ic-ban"></i>Conflicts &amp; recusal<span class="cnt">2</span></button>
+    <button class="btn ghost icon" aria-label="Display and accessibility"><i class="ic ic-sliders"></i></button>
+  </header>
+  <div style="display:grid;grid-template-columns:248px minmax(0,1fr) 352px;flex:1;min-height:0;gap:1px;background:var(--line)">
+    <aside class="side" style="display:flex;flex-direction:column;min-height:0" aria-label="Comparison queue">
+      <div class="row" style="padding:8px 12px;border-bottom:1px solid var(--line)"><span class="seg"><button class="btn sm on">Up next</button><button class="btn sm">Done 11</button><button class="btn sm">Skipped 1</button></span></div>
+      <div class="row t-12" style="padding:6px 12px;background:var(--info-tint);border-bottom:1px solid var(--info-line)"><i class="ic s ic-route" style="color:var(--info)"></i><span><b>Hall 2 north</b> · both tables nearby</span></div>
+      <div class="q" style="min-height:52px"><span class="tb">#9</span><span class="col grow" style="min-width:0;line-height:1.3;padding:5px 0"><span class="trunc">A · Grid Whisperers</span><span class="trunc mut3 t-12">vs Heat Island Copilot</span></span><span class="st ok"><i class="ic ic-okc"></i>A</span></div><div class="q" style="min-height:52px"><span class="tb">#10</span><span class="col grow" style="min-width:0;line-height:1.3;padding:5px 0"><span class="trunc">B · Ember: wildfire…</span><span class="trunc mut3 t-12">vs Radiograph Second-Reader</span></span><span class="st ok"><i class="ic ic-okc"></i>B</span></div><div class="q" style="min-height:52px"><span class="tb">#11</span><span class="col grow" style="min-width:0;line-height:1.3;padding:5px 0"><span class="trunc">A · Tidewater Salinity Mapper</span><span class="trunc mut3 t-12">vs Glucose Nowcast</span></span><span class="st ok"><i class="ic ic-okc"></i>A</span></div><div class="q cur" style="min-height:52px"><span class="tb">#12</span><span class="col grow" style="min-width:0;line-height:1.3;padding:5px 0"><span class="trunc">Northwind Grid Forecaster</span><span class="trunc mut3 t-12">vs Solar Twin</span></span><span class="st info"><i class="ic ic-half"></i>Now</span></div><div class="q" style="min-height:52px"><span class="tb">#13</span><span class="col grow" style="min-width:0;line-height:1.3;padding:5px 0"><span class="trunc">Ember: wildfire risk edge…</span><span class="trunc mut3 t-12">vs Tidewater Salinity Mapper</span></span><span class="st mute"><i class="ic ic-circle"></i>To do</span></div><div class="q" style="background:var(--warn-tint);min-height:52px"><span class="tb">#14</span><span class="col grow" style="min-width:0;line-height:1.3;padding:5px 0"><span class="trunc">Latent Space Cartographers</span><span class="trunc mut3 t-12">vs Sepsis Sentinel</span></span><span class="st warn"><i class="ic ic-ban"></i>Skip</span></div><div class="q" style="min-height:52px"><span class="tb">#15</span><span class="col grow" style="min-width:0;line-height:1.3;padding:5px 0"><span class="trunc">Heat Island Copilot</span><span class="trunc mut3 t-12">vs Load Shedding Game Theory…</span></span><span class="st mute"><i class="ic ic-circle"></i>To do</span></div><div class="q" style="min-height:52px"><span class="tb">#16</span><span class="col grow" style="min-width:0;line-height:1.3;padding:5px 0"><span class="trunc">Grid Whisperers</span><span class="trunc mut3 t-12">vs Glucose Nowcast</span></span><span class="st mute"><i class="ic ic-circle"></i>To do</span></div><div class="q" style="min-height:52px"><span class="tb">#17</span><span class="col grow" style="min-width:0;line-height:1.3;padding:5px 0"><span class="trunc">BioSignal Edge Triage</span><span class="trunc mut3 t-12">vs Radiograph Second-Reader</span></span><span class="st mute"><i class="ic ic-circle"></i>To do</span></div>
+      <div class="col g1 t-11 mut3" style="margin-top:auto;padding:8px 12px;border-top:1px solid var(--line);background:var(--surface-2);line-height:1.5"><span>Pairs are chosen adaptively. Total may change (34–46).</span><span>A/B order is randomised per judge and never implies a ranking.</span></div>
+    </aside>
+
+    <section class="side" style="display:flex;flex-direction:column;min-height:0">
+      <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line);flex:none">
+        <div class="row g3" style="padding:10px 16px;border-right:1px solid var(--line)"><span class="ab" aria-label="Project A">A</span><div class="col grow" style="min-width:0;line-height:1.25"><b style="font-size:16px" class="trunc">Northwind Grid Forecaster</b><span class="t-12 mut">A-14 · Team of 4 · <a>Open full page <i class="ic xs ic-ext"></i></a></span></div><span class="tag info"><i class="ic ic-lock"></i>Frozen r3 · 13:00</span></div>
+        <div class="row g3" style="padding:10px 16px"><span class="ab" aria-label="Project B">B</span><div class="col grow" style="min-width:0;line-height:1.25"><b style="font-size:16px" class="trunc">Solar Twin</b><span class="t-12 mut">A-15 · Team of 3 · <a>Open full page <i class="ic xs ic-ext"></i></a></span></div><span class="tag info"><i class="ic ic-lock"></i>Frozen r2 · 12:52</span></div>
+      </div>
+      <div class="row t-12" style="padding:5px 16px;background:var(--surface-2);border-bottom:1px solid var(--line);gap:10px;flex:none">
+        <span class="mut3">Jump</span><a>Facts</a><a>Summary</a><a>Key result</a><a>Method</a><a>Demo &amp; artifacts</a><a>Limitations</a>
+        <span class="sp row g2"><span class="st info"><i class="ic ic-link"></i>Linked scroll on</span><span class="kbd">L</span><span class="mut3">unlink</span></span>
+      </div>
+      <div style="flex:1;min-height:0;overflow:hidden;position:relative">
+        <div style="padding:14px 16px 0" class="col g3 ev">
+          <div class="col g1"><span class="eyebrow">At a glance · aligned from each project’s structured fields</span>
+            <table class="tbl dense" style="border:1px solid var(--line);border-radius:var(--r-2)"><tbody><tr><td class="mut" style="width:104px">Track</td><td>Climate &amp; Energy</td><td>Climate &amp; Energy</td></tr><tr><td class="mut" style="width:104px">Team</td><td>4 members</td><td>3 members</td></tr><tr><td class="mut" style="width:104px">Demo</td><td>3:12 · captions</td><td>2:40 · no captions</td></tr><tr><td class="mut" style="width:104px">Repository</td><td><span class="mono t-12">Apache-2.0 @4e1c9a7</span></td><td><span class="mono t-12">MIT @b71d02e</span></td></tr><tr><td class="mut" style="width:104px">Data</td><td>ENTSO-E · CC BY 4.0</td><td>Partner data · not public</td></tr><tr><td class="mut" style="width:104px">Story</td><td>100% · 3 artifacts</td><td>94% · 4 artifacts</td></tr></tbody></table></div>
+          <div class="col g1"><span class="eyebrow">Summary</span>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+              <p class="rd">Northwind forecasts substation-level load 1–24 h ahead with a weather-conditioned sequence model, cutting 24 h MAE by 21.5 % against NWP-Lite on 412 substations in 38 ms on one CPU core.</p>
+              <p class="rd">Solar Twin dispatches rooftop PV and batteries from a per-site digital twin, cutting dispatch regret by 14 % against a rule-based controller across 60 live sites over six weeks.</p></div></div>
+          <div class="col g1"><span class="eyebrow">Key result</span>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+              <table class="tbl dense" style="border:1px solid var(--line)"><thead><tr><th>Model</th><th class="num">MAE 24h</th><th class="num">Latency</th></tr></thead><tbody><tr><td>Persistence</td><td class="num">0.941</td><td class="num">&lt;1 ms</td></tr><tr><td>NWP-Lite</td><td class="num">0.780</td><td class="num">210 ms</td></tr><tr class="sel"><td><b>Northwind</b></td><td class="num"><b>0.612</b></td><td class="num">38 ms</td></tr></tbody></table>
+              <table class="tbl dense" style="border:1px solid var(--line)"><thead><tr><th>Controller</th><th class="num">Regret</th><th class="num">Sites</th></tr></thead><tbody><tr><td>Rule-based</td><td class="num">1.00</td><td class="num">60</td></tr><tr><td>MPC baseline</td><td class="num">0.91</td><td class="num">60</td></tr><tr class="sel"><td><b>Solar Twin</b></td><td class="num"><b>0.86</b></td><td class="num">60</td></tr></tbody></table></div></div>
+          <div class="col g1"><span class="eyebrow">Method · figures</span>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px"><div class="ph-art" style="height:150px;font-family:var(--font-mono);font-size:12px">Figure 1 · architecture (A)</div><div class="ph-art" style="height:150px;font-family:var(--font-mono);font-size:12px">Fig. 2 · site twin calibration (B)</div></div></div>
+          <div class="col g1"><span class="eyebrow">Demo &amp; artifacts</span>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px"><div class="row g2"><button class="btn"><i class="ic s ic-play"></i>Demo 3:12</button><button class="btn"><i class="ic s ic-git"></i>Repo</button><button class="btn"><i class="ic s ic-db"></i>Dataset</button></div><div class="row g2"><button class="btn"><i class="ic s ic-play"></i>Demo 2:40</button><button class="btn"><i class="ic s ic-git"></i>Repo</button></div></div></div>
+        </div>
+        <div aria-hidden="true" style="position:absolute;right:3px;top:12px;width:6px;height:210px;border-radius:3px;background:var(--line-3);opacity:.55"></div>
+      </div>
+      <div class="row t-12 mut3" style="flex:none;height:30px;padding:0 16px;border-top:1px solid var(--line);background:var(--surface-2)"><span class="kbd">[</span><span class="kbd">]</span><span>section</span><span class="kbd">J</span><span class="kbd">K</span><span>scroll both</span><span class="sp">Position kept per pair · reopening #12 returns to “Key result”</span></div>
+    </section>
+
+    <aside class="side" style="display:flex;flex-direction:column;min-height:0" aria-label="Decision">
+      <div class="col g1" style="padding:12px 14px;border-bottom:1px solid var(--line)"><span class="eyebrow">Configured question</span><b style="font-size:15px;line-height:1.3">Which project should advance in Climate &amp; Energy?</b><span class="t-12 mut">Overall merit · <a>criterion anchors <i class="ic xs ic-chev-d"></i></a></span></div>
+      <div class="chs">
+        <button class="choice"><span class="ab">A</span><span class="col" style="min-width:0;line-height:1.25"><b class="trunc">Northwind Grid Forecaster</b><span class="t-12 mut">Frozen r3</span></span><span class="kbd">A</span></button>
+        <button class="choice"><span class="ab">B</span><span class="col" style="min-width:0;line-height:1.25"><b class="trunc">Solar Twin</b><span class="t-12 mut">Frozen r2</span></span><span class="kbd">B</span></button>
+        <div class="row g2" style="margin-top:2px"><button class="btn grow" style="height:36px">Can’t separate (tie)<span class="kbd">T</span></button><button class="btn" style="height:36px">Skip<span class="kbd">S</span></button></div>
+        <div class="row t-12 mut3" style="gap:6px"><i class="ic s ic-info"></i>Ties allowed for this event · at most 20 % of your comparisons</div>
+      </div>
+      <div class="col g2" style="padding:0 14px 12px"><div class="fld"><label for="why">Reason <span class="mut3" style="font-weight:400">· optional · seen by organizers only</span></label><input id="why" class="in" placeholder="One line, e.g. stronger validation evidence"></div>
+        <button class="btn dng-o" style="height:32px"><i class="ic s ic-ban"></i>Recuse from A or B…<span class="kbd" style="margin-left:auto">R</span></button></div>
+      <div class="col g2" style="padding:12px 14px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface-2)"><div class="row t-12"><b>Why this pair?</b><span class="mut3 sp">adaptive</span></div><p class="t-12 mut" style="line-height:1.5">Chosen to separate ranks 3–5 in Climate &amp; Energy, where scores are closest. You have not seen either project before.</p></div>
+      <div class="col" style="flex:1;min-height:0"><div class="row" style="padding:8px 14px"><h3>Your last decisions</h3><span class="t-12 mut3 sp">editable until judging closes</span></div>
+        <div class="row t-12" style="padding:6px 14px;border-top:1px solid var(--line)"><span class="mono mut3">#11</span><span class="grow trunc">Tidewater over Glucose Nowcast</span><a>Change</a></div>
+        <div class="row t-12" style="padding:6px 14px;border-top:1px solid var(--line)"><span class="mono mut3">#10</span><span class="grow trunc">Radiograph… tie with Ember</span><a>Change</a></div>
+        <div class="row t-12" style="padding:6px 14px;border-top:1px solid var(--line)"><span class="mono mut3">#9</span><span class="grow trunc">Grid Whisperers over Heat Island</span><a>Change</a></div>
+        <div class="well col g2" style="margin:auto 14px 12px"><div class="row t-12"><b>Progress</b><span class="mut3 sp">1 min ahead of pace</span></div><div class="bar h4"><i style="width:30%"></i></div><span class="t-12 mut" style="line-height:1.5">12 of 40 · about 2.6 min each · 9 of 24 assigned projects compared at least once</span></div></div>
+      <div class="row t-11 mut3" style="padding:8px 14px;border-top:1px solid var(--line);flex:none;line-height:1.7;flex-wrap:wrap"><span class="kbd">A</span><span class="kbd">B</span> choose · <span class="kbd">T</span> tie · <span class="kbd">S</span> skip · <span class="kbd">R</span> recuse · <span class="kbd">Z</span> undo · <span class="kbd">L</span> link scroll</div>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

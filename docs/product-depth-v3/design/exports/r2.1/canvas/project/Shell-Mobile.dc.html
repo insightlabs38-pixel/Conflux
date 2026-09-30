@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mobile navigation</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./v3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>body{margin:0}.phone{width:390px;height:844px;background:var(--bg);border:1px solid var(--line-2);display:flex;flex-direction:column;overflow:hidden;position:relative}.appbar{height:52px;flex:none;display:flex;align-items:center;gap:8px;padding:0 12px 0 16px;background:var(--surface);border-bottom:1px solid var(--line)}.lst{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--surface);align-items:center;min-height:56px}</style>
+</helmet>
+<div style="width:1250px;height:844px;display:flex;gap:40px">
+
+  <!-- organizer -->
+  <div class="phone">
+    <div class="appbar"><div class="mark" style="width:28px;height:28px">C</div><div class="col grow" style="line-height:1.2;min-width:0"><b class="t-13 trunc">Gauss Hack 2026</b><span class="t-11 mut3">Judging · Organizer</span></div><button class="btn ghost icon" aria-label="Search" style="width:44px;height:44px"><i class="ic ic-search"></i></button><button class="btn ghost icon" aria-label="Notifications, 3" style="width:44px;height:44px"><i class="ic ic-bell"></i></button></div>
+    <div style="flex:1;overflow:hidden" class="col">
+      <div style="padding:16px" class="col g3"><h1>Overview</h1>
+        <div class="strip" style="flex-wrap:wrap"><div style="flex:1 1 45%;border-bottom:1px solid var(--line)"><div class="k">Checked in</div><div class="v">3,846</div></div><div style="flex:1 1 45%;border-bottom:1px solid var(--line)"><div class="k">Submitted</div><div class="v">1,041</div></div><div style="flex:1 1 45%;border-left:0"><div class="k">Judged</div><div class="v">62%</div></div><div style="flex:1 1 45%"><div class="k">Incidents</div><div class="v" style="color:var(--warn)">2</div></div></div>
+      </div>
+      <div class="eyebrow" style="padding:4px 16px 6px">Needs attention · 7</div>
+      <div class="lst"><i class="ic ic-warn" style="color:var(--warn)"></i><div class="col grow"><b class="t-13">6 judges haven’t started</b><span class="t-12 mut">Closes in 3h 13m</span></div><i class="ic s ic-chev-r mut3"></i></div>
+      <div class="lst"><i class="ic ic-xc" style="color:var(--err)"></i><div class="col grow"><b class="t-13">Webhook failing: sponsor-crm</b><span class="t-12 mut">3 deliveries · now</span></div><i class="ic s ic-chev-r mut3"></i></div>
+      <div class="lst"><i class="ic ic-warn" style="color:var(--warn)"></i><div class="col grow"><b class="t-13">Mentor queue waiting</b><span class="t-12 mut">5 teams · longest 14 min</span></div><i class="ic s ic-chev-r mut3"></i></div>
+      <div class="lst"><i class="ic ic-warn" style="color:var(--warn)"></i><div class="col grow"><b class="t-13">243 missing waivers</b><span class="t-12 mut">Checked in · by 17:00</span></div><i class="ic s ic-chev-r mut3"></i></div>
+      <div class="lst"><i class="ic ic-warn" style="color:var(--warn)"></i><div class="col grow"><b class="t-13">37 eligibility findings</b><span class="t-12 mut">12 need a decision · finalists</span></div><i class="ic s ic-chev-r mut3"></i></div>
+      <div class="lst"><i class="ic ic-half" style="color:var(--info)"></i><div class="col grow"><b class="t-13">Dinner headcount unconfirmed</b><span class="t-12 mut">Caterer cutoff 16:00</span></div><i class="ic s ic-chev-r mut3"></i></div>
+      <div class="lst"><i class="ic ic-circle mut3"></i><div class="col grow"><b class="t-13">Results page not reviewed</b><span class="t-12 mut">Publishes 20:30 Sun</span></div><i class="ic s ic-chev-r mut3"></i></div>
+    </div>
+    <nav class="bottom-nav" aria-label="Organizer"><a aria-current="page"><i class="ic l ic-home"></i>Overview</a><a><i class="ic l ic-users"></i>People</a><a><i class="ic l ic-flag"></i>Queue<span class="cnt w" style="position:absolute;top:6px;right:22%">7</span></a><a><i class="ic l ic-qr"></i>On-site</a><a><i class="ic l ic-menu"></i>More</a></nav>
+  </div>
+
+  <!-- more sheet -->
+  <div class="phone">
+    <div class="appbar"><div class="mark" style="width:28px;height:28px">C</div><div class="col grow" style="line-height:1.2"><b class="t-13">Gauss Hack 2026</b><span class="t-11 mut3">Judging · Organizer</span></div></div>
+    <div style="flex:1;background:var(--surface-3)"></div>
+    <div class="scrim" style="position:absolute;inset:52px 0 0 0"></div>
+    <div class="dlg" style="position:absolute;left:0;right:0;bottom:0;border-radius:12px 12px 0 0;max-height:640px" role="dialog" aria-label="All sections">
+      <div style="width:36px;height:4px;border-radius:2px;background:var(--line-2);margin:8px auto"></div>
+      <div class="row" style="padding:4px 16px 8px"><h2 style="font-size:16px">All sections</h2><button class="btn ghost icon sp" aria-label="Close" style="width:44px;height:44px"><i class="ic ic-x"></i></button></div>
+      <div style="padding:0 8px 8px" class="col">
+        <a class="nav-i" style="height:48px;font-size:14px"><i class="ic ic-sliders"></i>Event setup</a>
+        <a class="nav-i" style="height:48px;font-size:14px"><i class="ic ic-file"></i>Projects &amp; eligibility<span class="cnt w">37</span></a>
+        <a class="nav-i" style="height:48px;font-size:14px"><i class="ic ic-trophy"></i>Judging</a>
+        <a class="nav-i" style="height:48px;font-size:14px"><i class="ic ic-table"></i>Results &amp; publication</a>
+        <a class="nav-i" style="height:48px;font-size:14px"><i class="ic ic-msg"></i>Communications</a>
+        <div class="nav-g">Advanced</div>
+        <a class="nav-i" style="height:48px;font-size:14px"><i class="ic ic-box"></i>Integrations</a>
+        <a class="nav-i" style="height:48px;font-size:14px"><i class="ic ic-shield"></i>Operations &amp; audit</a>
+        <hr class="hr" style="margin:6px 8px">
+        <a class="nav-i" style="height:48px;font-size:14px"><span class="avatar">AO</span>Amara Okafor · Switch role</a>
+        <a class="nav-i" style="height:48px;font-size:14px"><i class="ic ic-globe"></i>Switch event</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- participant -->
+  <div class="phone">
+    <div class="appbar"><div class="col grow" style="line-height:1.2"><b class="t-13">My Event</b><span class="t-11 mut3">Gauss Hack 2026 · Northwind</span></div><button class="btn ghost icon" aria-label="Notifications" style="width:44px;height:44px"><i class="ic ic-bell"></i></button></div>
+    <div style="flex:1;overflow:hidden;padding:16px" class="col g3">
+      <div class="bn warn" style="flex-direction:column;gap:8px;padding:14px"><div class="row" style="align-items:flex-start"><i class="ic ic-warn"></i><div class="col"><b>Add a repository link</b><span class="t-12">Submissions freeze in 22 min · 13:00</span></div></div><button class="btn pri lg" style="width:100%">Add link</button></div>
+      <div class="pn"><div class="lst" style="border-bottom:1px solid var(--line)"><i class="ic ic-clock"></i><div class="col grow"><b class="t-13">Media release</b><span class="t-12 mut">Needs acknowledgement</span></div><i class="ic s ic-chev-r mut3"></i></div><div class="lst" style="border-bottom:0"><i class="ic ic-pin"></i><div class="col grow"><b class="t-13">Table A-14 · Hall 2</b><span class="t-12 mut">Checked in 08:41</span></div><i class="ic s ic-chev-r mut3"></i></div></div>
+      <div class="eyebrow">Later today</div>
+      <div class="pn"><div class="lst" style="border-bottom:1px solid var(--line)"><span class="mono t-12" style="width:42px">13:00</span><div class="col grow"><b class="t-13">Submissions freeze</b><span class="t-12 mut">Your frozen revision is what judges see</span></div></div><div class="lst" style="border-bottom:1px solid var(--line)"><span class="mono t-12" style="width:42px">13:30</span><div class="col grow"><b class="t-13">Judging opens</b><span class="t-12 mut">Stay near table A-14</span></div></div><div class="lst" style="border-bottom:1px solid var(--line)"><span class="mono t-12" style="width:42px">15:30</span><div class="col grow"><b class="t-13">Workshop: Reproducible benchmarks</b><span class="t-12 mut">Room 3 · RSVP’d</span></div></div><div class="lst" style="border-bottom:1px solid var(--line)"><span class="mono t-12" style="width:42px">17:10</span><div class="col grow"><b class="t-13">Your demo slot</b><span class="t-12 mut">Stage B · 5 min</span></div></div><div class="lst" style="border-bottom:0"><span class="mono t-12" style="width:42px">20:30</span><div class="col grow"><b class="t-13">Results announced</b><span class="t-12 mut">Main hall + online</span></div></div></div>
+    </div>
+    <nav class="bottom-nav" aria-label="Participant"><a aria-current="page"><i class="ic l ic-home"></i>Event</a><a><i class="ic l ic-users"></i>Team</a><a><i class="ic l ic-file"></i>Project</a><a><i class="ic l ic-cal"></i>Schedule</a><a><i class="ic l ic-qr"></i>Pass</a></nav>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1250,"height":844}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

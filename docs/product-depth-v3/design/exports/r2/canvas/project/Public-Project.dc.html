@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Public project page</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./v3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+body{margin:0}
+.w{width:1120px;margin:0 auto}
+.eqn{display:flex;align-items:center;justify-content:center;gap:6px;margin:16px 0;font-family:"STIX Two Text","Cambria Math",var(--font-read);font-size:20px;font-style:italic;position:relative;padding:8px 0}
+.eqn .no{position:absolute;right:0;font-style:normal;font-size:14px;color:var(--ink-3);font-family:var(--font-sans)}
+.frac{display:inline-flex;flex-direction:column;align-items:center;font-size:.85em;line-height:1.15;vertical-align:middle}.frac>span:first-child{border-bottom:1px solid var(--ink);padding:0 4px}
+.prose .tbl{font-family:var(--font-sans);font-size:13.5px}
+.meta-l{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--line);font-size:13px;color:var(--ink);text-decoration:none}
+.meta-l:last-child{border-bottom:0}
+.toc a{display:block;padding:4px 0 4px 12px;border-left:2px solid var(--line);font-size:13px;color:var(--ink-2);text-decoration:none}
+.toc a[aria-current]{border-left-color:var(--pub-accent);color:var(--ink);font-weight:600}
+sup a{font-family:var(--font-sans);font-size:.7em;text-decoration:none}
+</style>
+</helmet>
+<div class="pub" style="width:1200px;height:2110px;overflow:hidden;position:relative">
+  <nav class="pub-nav" style="padding:0 40px"><a style="font-weight:600;color:var(--ink)">Gauss Hack 2026</a><a>Overview</a><a aria-current="page">Projects</a><a>Results</a><span class="sp t-12 mut3">Permanent link · <span class="mono">gauss-hack-2026/p/northwind-grid-forecaster</span></span></nav>
+  <div style="background:var(--info-tint);border-bottom:1px solid var(--info-line)"><div class="w row" style="height:40px"><i class="ic s ic-info" style="color:var(--info)"></i><span class="t-13"><b>Living version</b> · updated 3 Nov 2026. This project was judged as <a>r3 (12 Oct 13:00)</a> — <a>view exactly as judged</a>.</span></div></div>
+
+  <header class="w" style="padding:28px 0 20px;border-bottom:1px solid var(--line)">
+    <div class="row t-13 mut" style="margin-bottom:8px"><a>Projects</a><i class="ic s ic-chev-r"></i><span>Climate &amp; Energy</span></div>
+    <div class="row" style="align-items:flex-start;gap:24px">
+      <div class="col g2 grow"><div class="row g2"><h1 style="font-size:32px;line-height:1.15;letter-spacing:-.02em">Northwind Grid Forecaster</h1></div>
+        <p style="font-size:18px;color:var(--ink-2);max-width:60ch;line-height:1.45">Substation-level load forecasting 1–24 hours ahead, 21.5 % better than NWP-Lite at 38 ms on a single CPU core.</p>
+        <div class="row g2" style="margin-top:4px"><span class="tag warn"><i class="ic ic-trophy"></i>Track winner · Climate &amp; Energy</span><span class="tag">Time series</span><span class="tag">PyTorch</span><span class="tag">Open data</span></div></div>
+      <div class="col g2" style="width:300px"><div class="row g2"><a class="btn pri grow" style="text-decoration:none"><i class="ic s ic-git"></i>Repository</a><a class="btn grow" style="text-decoration:none"><i class="ic s ic-play"></i>Demo</a></div><div class="row g1 t-12 mut" style="align-items:flex-start"><i class="ic s ic-users"></i><span>Sofia Marín-Reyes, Adaeze Nwosu, Luca Bianchi, Tomás Ribeiro — <b style="color:var(--ink)">Team Northwind</b>, University of Porto</span></div></div>
+    </div>
+  </header>
+
+  <div class="w" style="display:grid;grid-template-columns:minmax(0,720px) 340px;gap:60px;padding-top:28px">
+    <article class="prose" style="max-width:none">
+      <h2 id="s1" style="margin-top:0">Summary</h2>
+      <p>Grid operators plan dispatch from load forecasts, yet numerical weather models are too slow to refresh per substation. We built a weather-conditioned sequence model that forecasts 412 substations jointly, refreshes every 5 minutes<sup><a href="#r1">[1]</a></sup>, and reduces 24-hour mean absolute error from 0.780 to 0.612 relative to NWP-Lite.</p>
+
+      <h2 id="s2">Architecture</h2>
+      <figure><div class="ph-art" style="height:230px;border-radius:6px">Figure 1 · architecture (SVG, 1600×720) — ingest → embed → sequence model → calibrate</div><figcaption><b>Figure 1.</b> Data flow. Weather embeddings are computed once per cell and shared across substations. <span class="mono" style="font-size:12px">Alt text: block diagram of four stages…</span></figcaption></figure>
+
+      <h2 id="s3">Method</h2>
+      <p>For substation <i>i</i> and horizon <i>h</i> we minimize a pinball-smoothed absolute error, and evaluate with</p>
+      <div class="eqn"><span>MAE<sub><i>h</i></sub> = <span class="frac"><span>1</span><span><i>N</i></span></span> Σ<sub><i>i</i>=1</sub><sup><i>N</i></sup> | ŷ<sub><i>i,h</i></sub> − <i>y</i><sub><i>i,h</i></sub> |</span><span class="no">(1)</span></div>
+      <p>Drift in the weather embedding is bounded under a fixed horizon, ‖<i>r<sub>t</sub></i>‖ ≤ ε (Eq. 2, derivation in [1, §4]).</p>
+
+      <h2 id="s4">Evaluation</h2>
+      <p>We compare against persistence and NWP-Lite on held-out substations (Table 1); numbers are 5-seed means with 95 % bootstrap intervals.</p>
+      <table class="tbl comfy" style="margin:6px 0 4px;border:1px solid var(--line);border-radius:6px;overflow:hidden"><caption style="text-align:left;font-family:var(--font-sans);font-size:13px;color:var(--ink-2);padding:0 0 6px"><b>Table 1.</b> Test MAE by horizon (lower is better)</caption><thead><tr><th>Model</th><th class="num">h = 1</th><th class="num">h = 6</th><th class="num">h = 24</th><th class="num">Latency</th></tr></thead><tbody><tr><td>Persistence</td><td class="num">0.412</td><td class="num">0.688</td><td class="num">0.941</td><td class="num">&lt; 1 ms</td></tr><tr><td>NWP-Lite</td><td class="num">0.371</td><td class="num">0.552</td><td class="num">0.780</td><td class="num">210 ms</td></tr><tr class="sel"><td><b>Northwind</b></td><td class="num"><b>0.298</b></td><td class="num"><b>0.441</b></td><td class="num"><b>0.612</b></td><td class="num">38 ms</td></tr></tbody></table>
+      <div class="codeblk" style="margin:18px 0"><div class="cb-h"><i class="ic s ic-file"></i>eval.py<span class="t-12" style="margin-left:6px">Python · 3 lines</span><span class="sp row g1" style="cursor:pointer"><i class="ic s ic-copy"></i>Copy</span></div><pre><span style="display:block"><span class="ln">1</span><span class="k">def</span> <span class="f">mae</span>(pred, y, h):</span><span class="hl"><span class="ln">2</span>    err = np.abs(pred[:, h] - y[:, h])</span><span style="display:block"><span class="ln">3</span>    <span class="k">return</span> <span class="f">float</span>(err.mean())</span></pre></div>
+      <figure><div class="ph-art" style="height:200px;border-radius:6px">Figure 2 · error by horizon (PNG 1600×900, responsive 480/800/1200)</div><figcaption><b>Figure 2.</b> Error by horizon, 5-seed mean. Shaded band: 95 % bootstrap interval. <a>Long description</a></figcaption></figure>
+
+      <h2 id="s5">Limitations</h2>
+      <p>Performance drops on substations with under 18 months of history; extreme weather regimes are under-represented in training.</p>
+
+      <h2 id="s6">References</h2>
+      <ol style="font-family:var(--font-sans);font-size:13.5px;line-height:1.6;padding-left:20px;color:var(--ink-2)"><li id="r1">Zhou, L. et al. <i>Bounded-drift weather embeddings for grid load</i>. 2024. <a>doi:10.5555/gauss.2024.0117</a></li><li id="r2">NWP-Lite: a lightweight numerical weather pipeline. 2023. <a>arxiv.org/abs/2309.04411</a></li></ol>
+    </article>
+
+    <aside class="col g4" style="align-self:start;position:sticky;top:12px" aria-label="Project details">
+      <div class="pn"><div class="pn-h"><h2>Links &amp; data</h2></div>
+        <a class="meta-l"><i class="ic s ic-git mut"></i><span class="grow"><b>Repository</b><br><span class="t-12 mut mono">github.com/northwind/grid-fc @ 4e1c9a7</span></span><i class="ic xs ic-ext mut3"></i></a>
+        <a class="meta-l"><i class="ic s ic-play mut"></i><span class="grow"><b>Live demo</b><br><span class="t-12 mut">grid-fc.northwind.example</span></span><i class="ic xs ic-ext mut3"></i></a>
+        <a class="meta-l"><i class="ic s ic-db mut"></i><span class="grow"><b>Dataset</b><br><span class="t-12 mut">ENTSO-E load 2019–24 · CC BY 4.0</span></span></a>
+        <a class="meta-l"><i class="ic s ic-book mut"></i><span class="grow"><b>Paper</b><br><span class="t-12 mut">arXiv 2409.01337</span></span></a>
+        <div class="meta-l"><i class="ic s ic-box mut"></i><span class="grow"><b>Model &amp; hardware</b><br><span class="t-12 mut">3.1 M params · 1 CPU core</span></span></div>
+        <div class="meta-l"><i class="ic s ic-shield mut"></i><span class="grow"><b>License</b> · Apache-2.0</span></div>
+      </div>
+      <div class="pn"><div class="pn-h"><h2>Version</h2></div><div class="pn-b col g2">
+        <div class="seg" role="group" aria-label="Version" style="width:100%"><button class="btn sm on grow" aria-pressed="true">Living</button><button class="btn sm grow">As judged · r3</button></div>
+        <dl class="dl" style="grid-template-columns:90px 1fr;font-size:12px"><dt>Living</dt><dd>Updated 3 Nov 2026 · r9</dd><dt>As judged</dt><dd>Frozen 12 Oct, 13:00 · r3</dd><dt>Renderer</dt><dd class="mono">2.3.1</dd></dl>
+        <a class="t-12">Compare versions</a></div></div>
+      <div class="pn"><div class="pn-h"><h2>Awards</h2></div><div class="pn-b col g2 t-13"><span class="row g2"><i class="ic s ic-trophy" style="color:var(--warn)"></i><b>Track winner</b> · Climate &amp; Energy</span><span class="t-12 mut">Judged by a panel of 6 · normalization v4 · <a>How judging works</a></span></div></div>
+      <nav class="toc" aria-label="On this page"><div class="eyebrow" style="margin-bottom:6px">On this page</div><a aria-current="location">Summary</a><a>Architecture</a><a>Method</a><a>Evaluation</a><a>Limitations</a><a>References</a></nav>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1200,"height":2110}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

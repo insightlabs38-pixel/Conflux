@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pairwise judging states</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./v3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+body{margin:0}
+.ab{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:var(--r-2);background:var(--ink);color:var(--surface);font-weight:600;font-size:13px;flex:none}
+.choice{display:flex;align-items:center;gap:10px;min-height:56px;padding:8px 12px;border:1px solid var(--line-3);border-radius:var(--r-3);background:var(--surface);width:100%;text-align:left}
+.choice.on{border-color:var(--accent);background:var(--accent-tint);box-shadow:inset 0 0 0 1px var(--accent)}
+.choice.on .ab{background:var(--accent);color:var(--accent-ink)}
+.choice .kbd{margin-left:auto}
+.cap{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.stp{display:flex;flex-direction:column;gap:2px;flex:1;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r-2);background:var(--surface);font-size:12px;min-width:0}
+.stp.now{border-color:var(--accent);background:var(--accent-tint)}
+</style>
+</helmet>
+<div style="width:1440px;height:950px;background:var(--bg);padding:24px 32px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto auto;gap:20px 24px;align-content:start;overflow:hidden">
+
+  <div style="display:flex;flex-direction:column"><div class="cap">1 · Choice made · auto-advance with undo</div>
+    <div class="pn" style="flex:1"><div class="pn-b col g3">
+      <b style="font-size:14px">Which project should advance in Climate &amp; Energy?</b>
+      <button class="choice on" aria-pressed="true"><span class="ab">A</span><span class="col" style="line-height:1.25"><b>Northwind Grid Forecaster</b><span class="t-12 mut">Frozen r3</span></span><span class="st info" style="margin-left:auto"><i class="ic ic-check"></i>Chosen</span></button>
+      <button class="choice" disabled style="opacity:.7"><span class="ab">B</span><span class="col" style="line-height:1.25"><b>Solar Twin</b><span class="t-12 mut">Frozen r2</span></span><span class="kbd">B</span></button>
+      <div class="row t-13" style="background:var(--ink);color:var(--surface);border-radius:var(--r-2);padding:10px 12px;gap:10px"><i class="ic ic-okc" style="color:var(--ok)"></i><span class="grow">Northwind chosen over Solar Twin · #12 saved</span><b style="color:var(--accent)">Undo</b><span class="kbd" style="color:var(--ink)">Z</span></div>
+      <div class="col g1"><div class="row t-12"><b>Next: #13</b><span class="mut3 sp">Ember vs Tidewater · opens in 3 s</span></div><div class="bar h4"><i style="width:66%"></i></div></div>
+      <ul class="t-12 mut" style="margin:0;padding-left:16px;line-height:1.6"><li>One key press saves; no separate submit.</li><li>Undo stays available for 10 s and from “Your last decisions” until judging closes.</li><li>Reduced motion: no auto-advance timer bar — press <span class="kbd">↵</span> for next.</li></ul>
+    </div></div></div>
+
+  <div style="display:flex;flex-direction:column"><div class="cap">2 · Tie / can’t separate · only if configured</div>
+    <div class="pn" style="flex:1"><div class="pn-b col g3">
+      <div class="dlg" style="padding:14px;box-shadow:none;border:1px solid var(--line-2)"><h3 style="font-size:14px">Can’t separate Northwind and Solar Twin?</h3>
+        <div class="col g2" style="margin:10px 0"><label class="chk"><input type="radio" name="t" checked> Equal merit</label><label class="chk"><input type="radio" name="t"> Not enough evidence for one project</label></div>
+        <div class="fld"><label for="tr">Reason <span class="mut3" style="font-weight:400">· required for “not enough evidence”</span></label><input id="tr" class="in" placeholder="Which project lacks evidence?"></div>
+        <div class="row g2" style="justify-content:flex-end;margin-top:12px"><button class="btn">Cancel</button><button class="btn pri">Record tie</button></div></div>
+      <div class="bn"><i class="ic ic-info"></i><span class="t-12"><b>Ties left:</b> 3 of 8 allowed (20 % of 40). A tie counts as half a win for each project.</span></div>
+      <div class="well col g2"><b class="t-12">When the event forces a choice</b><div class="row g2"><button class="btn" disabled style="height:32px">Can’t separate (tie)</button><span class="kbd">T</span></div><span class="t-12 mut" style="line-height:1.5">The tie button is disabled with a visible reason: “This event requires a choice.” <b>Skip</b> stays available — a skipped pair is reassigned, never counted.</span></div>
+    </div></div></div>
+
+  <div style="display:flex;flex-direction:column"><div class="cap">3 · Conflict &amp; recusal</div>
+    <div class="pn" style="flex:1"><div class="pn-b col g3">
+      <div class="bn warn"><i class="ic ic-ban"></i><div class="col g1"><span><b>#14 skipped automatically.</b> You declared a co-author conflict with Latent Space Cartographers.</span><span class="t-12">Replacement pair #41 added · your total stays 40.</span></div></div>
+      <div class="dlg" style="padding:14px;box-shadow:none;border:1px solid var(--line-2)"><h3 style="font-size:14px">Recuse from one project in this pair?</h3>
+        <div class="col g2" style="margin:10px 0"><label class="chk"><input type="radio" name="r" checked> Recuse from <b>A · Northwind Grid Forecaster</b></label><label class="chk"><input type="radio" name="r"> Recuse from <b>B · Solar Twin</b></label></div>
+        <p class="t-12 mut" style="line-height:1.5">This pair is replaced. Any other pairs that include the project are removed and replaced. Your previous choices involving it are kept for the organizer to review.</p>
+        <div class="fld" style="margin-top:8px"><label for="rr">Reason · seen by organizers only</label><input id="rr" class="in" value="Co-authored a paper with a team member (2024)"></div>
+        <div class="row g2" style="justify-content:flex-end;margin-top:12px"><button class="btn">Keep comparing</button><button class="btn dng">Recuse from A</button></div></div>
+    </div></div></div>
+
+  <div style="display:flex;flex-direction:column"><div class="cap">4 · Progress &amp; history</div>
+    <div class="pn" style="flex:1"><div class="pn-b col g3" style="padding-bottom:0">
+      <div class="row t-13"><b>12 of 40 comparisons</b><span class="mut3 sp t-12">about 2.6 min each</span></div><div class="bar h8"><i style="width:30%"></i></div>
+      <div class="row t-12 mut" style="gap:16px"><span><i class="ic xs ic-check"></i> 10 chosen</span><span>1 tie</span><span>1 skipped</span><span class="sp">9 of 24 assigned projects seen</span></div>
+      <div class="bn"><i class="ic ic-info"></i><span class="t-12">Pairs are chosen adaptively, so “40” can settle between 34 and 46. The count you see is always exact for now.</span></div></div>
+      <table class="tbl dense" style="margin-top:8px"><thead><tr><th style="width:44px">#</th><th>Decision</th><th style="width:52px">Time</th><th style="width:64px"></th></tr></thead><tbody><tr><td class="mono t-12 mut3">#12</td><td class="trunc">Northwind over Solar Twin</td><td class="mut3 t-12">13:24</td><td><a class="t-12">Change</a></td></tr><tr><td class="mono t-12 mut3">#11</td><td class="trunc">Tidewater over Glucose Nowcast</td><td class="mut3 t-12">13:21</td><td><a class="t-12">Change</a></td></tr><tr><td class="mono t-12 mut3">#10</td><td class="trunc">Radiograph tie with Ember</td><td class="mut3 t-12">13:18</td><td><a class="t-12">Change</a></td></tr><tr><td class="mono t-12 mut3">#9</td><td class="trunc">Grid Whisperers over Heat Island</td><td class="mut3 t-12">13:14</td><td><a class="t-12">Change</a></td></tr><tr><td class="mono t-12 mut3">#8</td><td class="trunc">Sepsis Sentinel over BioSignal</td><td class="mut3 t-12">13:10</td><td><a class="t-12">Change</a></td></tr><tr><td class="mono t-12 mut3">#7</td><td class="trunc">Load Shedding over Zero Copy</td><td class="mut3 t-12">13:06</td><td><a class="t-12">Change</a></td></tr></tbody></table>
+    </div></div>
+
+  <div style="display:flex;flex-direction:column"><div class="cap">5 · Hybrid event · rubric first, pairwise tiebreak</div>
+    <div class="pn" style="flex:1"><div class="pn-b col g3">
+      <div class="row g2" style="align-items:stretch"><div class="stp"><b>1 Rubric</b><span class="mut3">Round 2 · closes 18:00</span></div><div class="stp"><b>2 Close calls</b><span class="mut3">Δ ≤ 1.0 after normalization</span></div><div class="stp now"><b>3 Tiebreak</b><span class="mut3">3 pairs · 18:10–18:40</span></div><div class="stp"><b>4 Decision</b><span class="mut3">Deliberation</span></div></div>
+      <div class="bn"><i class="ic ic-flag" style="color:var(--info)"></i><div class="col g1"><span><b>Tiebreak round · 3 comparisons</b> assigned to you</span><span class="t-12">Opens 18:10 · your rubric scores are locked · pairs come only from the organizer’s close-call list.</span><a class="t-12">Start comparing →</a></div></div>
+      <div class="col g2 t-12 mut" style="line-height:1.55"><span><b style="color:var(--ink)">Rubric scores of A and B are hidden</b> during tiebreak so the choice isn’t anchored. Your private notes on each project stay visible.</span><span><b style="color:var(--ink)">Same screen, fewer options:</b> no criterion anchors, ties disabled unless configured, no strength.</span><span><b style="color:var(--ink)">Result:</b> feeds the “Pairwise head-to-head” row in Deliberation as tiebreaker only — it never rewrites rubric scores.</span></div>
+    </div></div></div>
+
+  <div style="display:flex;flex-direction:column"><div class="cap">6 · Configured method · read-only for judges</div>
+    <div class="pn" style="flex:1"><div class="pn-h"><h2>How this event compares projects</h2><span class="tag">Set in Judging setup</span></div><div class="pn-b col g3">
+      <dl class="dl" style="grid-template-columns:118px 1fr;font-size:13px"><dt>Method</dt><dd>Pairwise (Bradley–Terry)</dd><dt>Question</dt><dd>Which project should advance in its track?</dd><dt>Comparisons</dt><dd>40 per judge · adaptive (34–46)</dd><dt>Ties</dt><dd>Allowed · ≤ 20 %</dd><dt>Strength</dt><dd>Off (binary choice)</dd><dt>Order</dt><dd>A/B randomised per judge</dd><dt>Criterion focus</dt><dd>Overall merit · anchors shown on request</dd><dt>Evidence</dt><dd>Each project’s frozen judged revision</dd><dt>Stops when</dt><dd>Ranking stable or 40 done</dd></dl>
+      <div class="row t-12 mut" style="gap:6px"><i class="ic s ic-lock"></i>Judges see this summary from “i” next to the question. Only organizers can change it, and only before judging opens.</div>
+    </div></div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":950}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

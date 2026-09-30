@@ -1,0 +1,24 @@
+bundle: Conflux Product Depth v3 Execution Bundle
+version: 1
+created: '2026-09-29'
+activation_state: FROZEN
+queue:
+  batches: 331
+  tasks: 3110
+prompts:
+  controller: prompts/STANDARD_CONTROLLER_PROMPT.md
+  worker: prompts/STANDARD_IMPLEMENTATION_PROMPT.md
+  claude_design: prompts/CLAUDE_DESIGN_FOUNDATION_PROMPT.md
+critical_docs:
+- docs/execution-v3/CONTROLLER_PROTOCOL.md
+- docs/execution-v3/COMPLETION_RULES.md
+- docs/execution-v3/RESUMABILITY_PROTOCOL.md
+- docs/execution-v3/LOCKING_AND_PARALLELISM.md
+- docs/execution-v3/ESCALATION_PROTOCOL.md
+- docs/execution-v3/CHECKPOINT_AND_HANDOFF_PROTOCOL.md
+- docs/execution-v3/ACTIVATION_PROCEDURE.md
+- docs/product-depth-v3/EXECUTION_PRINCIPLES.md
+- docs/product-depth-v3/design/DESIGN_HANDOFF_PROTOCOL.md
+- docs/execution-v3/LEGACY_INTEGRATION_POLICY.md
+- docs/execution-v3/RECONCILIATION_PREFLIGHT.md
+first_executable_batch: PD-R00

@@ -1,0 +1,11 @@
+[
+ {
+  "name": "Wide-1920",
+  "declared": "1920x1080",
+  "root": "1920x1080",
+  "scrollH": 1080,
+  "scrollW": 1920,
+  "contentBottom": 1112,
+  "contentRight": 1920
+ }
+]

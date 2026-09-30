@@ -1,0 +1,347 @@
+version: 3
+status: FOUNDATION_FROZEN_FOR_IMPLEMENTATION
+design_revision: r2.1
+date: 2026-09-30
+author: Claude Design pass (r2.1 micro-polish / final sign-off of Ledger)
+source:
+  workflow: Claude Design canvas + local export; local committed files are authoritative
+  hosted_canvas: https://claude.ai/artifact/1QngEyqM75wGYLRkASXPGh   # supplemental mirror; pages "v1 · original", "v2 · refined + new", "v2.1 · polish (changed boards)"
+  native_project: exports/r2.1/canvas/project/   # canvas.json + *.dc.html (45 boards) + v3.css
+  rebuild: node docs/product-depth-v3/design/exports/r2.1/tools/build-exports.mjs --shots
+  canvas_sync: python3 docs/product-depth-v3/design/exports/r2.1/tools/sync-canvas.py
+  index_board: exports/r2.1/html/Main.html
+  previous_revisions:
+    - revision: r2
+      native_project: exports/r2/canvas/project/
+      published_outputs: exports/r2/published/   # r2 HTML + screenshots as they were before r2.1
+      index: exports/r2/html/Main.html
+      qa_ledger: reviews/R2_BOARD_QA.md
+    - revision: r1
+      native_project: exports/r1/canvas/project/
+      published_outputs: exports/r1/published/
+      index: exports/r1/html/Main.html
+approval_note: "Every r2.1 reference was approved only after its final r2.1 screenshot was opened at full resolution in the r2.1 session (reviews/R2_1_BOARD_QA.md: 45/45 opened, 23 FIXED, 22 PASS, 0 BLOCKED). The overflow script was only a first filter. Foundation design is frozen for implementation; pixel-copying is NOT required; must_preserve lists the contract."
+qa:
+  ledger: reviews/R2_1_BOARD_QA.md
+  dimension_report: exports/r2.1/qa/dimension-report.json
+  manual_review: complete   # 45/45 boards opened in the r2.1 session
+  previous_ledger: reviews/R2_BOARD_QA.md
+prior_review: reviews/CONFLUX_R2_SIGNOFF_REVIEW.md
+prior_reviews: [reviews/CONFLUX_R1_DESIGN_REVIEW.md, reviews/CONFLUX_R2_SIGNOFF_REVIEW.md]
+prompt: prompts/CLAUDE_DESIGN_R2_1_POLISH_PROMPT.md
+prompts: [prompts/CLAUDE_DESIGN_R2_REFINEMENT_PROMPT.md, prompts/CLAUDE_DESIGN_R2_1_POLISH_PROMPT.md]
+later_design_passes: LATER_DESIGN_PASSES.md
+legacy_ui_policy:
+  authoritative: [domain behavior, role/workflow meaning, accessibility semantics, functional component inventory]
+  not_authoritative: [current visual styling, card usage, spacing/typography, hero scale, shell layout, density]
+tokens: system/tokens.css
+tokens_json: system/tokens.json
+component_mapping: system/component-mapping.md
+decisions: decisions/
+resolved_in_r2_1:
+  - "Outlined-button border: line-3 in light and dark; ghost/text borderless; hairlines unchanged; no toolbar variant needed (D-008)"
+  - "Density: Standard default; Dense explicit, suggested on ~1800px+ displays; never auto-switched by viewport (D-009)"
+  - "Public Dark base preset: kept as optional organizer-selectable preset, independent of the app theme; no extra board set (D-008)"
+  - "Pairwise tie-share cap default and strength-of-preference moved to the judging/product spec; UI parameterised (D-010)"
+open_questions: decisions/007-open-questions.md   # non-blocking only: brand mark, font hosting, wallet scope, immersive hero, co-editing, RTL
+changed_in_r2_1:
+  - "Figure 2 'Error by horizon' placeholders -> real inline chart 'Forecast MAE by horizon' (Story-Editor, Story-Rich, Story-History diff, Judge-Review, Judge-Mobile, Dark-Judge, Resp-768, Pairwise-Narrow, Public-Project, Public-Project-Mobile); failed-media specimen only in States-1"
+  - "Public-Project Figure 1 -> compact real architecture diagram (desktop + mobile)"
+  - "Data-Surface / Dark-Organizer: stray ellipsis fragment at inspector edge removed; row hairlines reach the inspector; Changed column 96px"
+  - "Outlined buttons line-3 (v3.css, all boards)"
+  - "Revision labels: Sys-Foundations, Sys-Components, Sys-Dark, Sys-Directions, States-1, States-2, Main"
+  - "Whitespace/fixture: Shell-Mobile, Public-Event-Themed, Public-Event-Mobile, Public-Project(-Mobile) artboard heights"
+  - "Small defects: Deliberation note-input icon, Sys-Foundations spacing labels and info glyph, Pairwise-Narrow bar heights"
+known_limitations_global: "Static comps; illustrative content (figure CI bands are illustrative); Google Fonts in prototypes (system fallbacks render if blocked; self-host in production); hover/focus/animation and axe runs belong to implementation QA."
+deferred:
+  - final logo/brand mark (placeholder C mark)
+  - immersive hero beyond its Advanced entry point
+  - full wallet-pass internals
+  - live collaborative cursors / co-editing
+  - exhaustive RTL and localization
+  - later Product Depth v3 surfaces (see LATER_DESIGN_PASSES.md)
+references:
+- id: design/system-v3
+  status: APPROVED
+  revision: r2.1
+  changed_in_r2: true
+  changed_in_r2_1: true
+  artifacts:
+    readme: system/README.md
+    html:
+      - system/prototypes/html/Sys-Components.html
+      - system/prototypes/html/Sys-Dark.html
+      - system/prototypes/html/Sys-Directions.html
+      - system/prototypes/html/Sys-Foundations.html
+    screenshots:
+      - system/prototypes/screenshots/Sys-Components.png
+      - system/prototypes/screenshots/Sys-Dark.png
+      - system/prototypes/screenshots/Sys-Directions.png
+      - system/prototypes/screenshots/Sys-Foundations.png
+  viewport_coverage: ["desktop 1440"]
+  state_coverage: ["light tokens", "dark tokens (defined and comped: Sys-Dark + Dark-* boards)", "density x3", "status", "icons", "components", "responsive rules", "anti-slop", "3 directions x3 decisions"]
+  must_preserve: "system/README.md + decisions/001-004 + 008-009"
+  adaptable_details: "see README.md section 'Adaptable implementation details'"
+  known_limitations: "see README.md sections 'Known limitations' and 'r2.1 changes'; global: static comps, illustrative content, Google Fonts in prototypes (system fallbacks render if blocked; self-host in production)"
+- id: design/app-shell
+  status: APPROVED
+  revision: r2.1
+  changed_in_r2: true
+  changed_in_r2_1: true
+  artifacts:
+    readme: references/app-shell/README.md
+    html:
+      - references/app-shell/html/Shell-Dense.html
+      - references/app-shell/html/Shell-Judge.html
+      - references/app-shell/html/Shell-Mobile.html
+      - references/app-shell/html/Shell-Organizer.html
+      - references/app-shell/html/Shell-Overlays.html
+      - references/app-shell/html/Shell-Participant.html
+    screenshots:
+      - references/app-shell/screenshots/Shell-Dense.png
+      - references/app-shell/screenshots/Shell-Judge.png
+      - references/app-shell/screenshots/Shell-Mobile.png
+      - references/app-shell/screenshots/Shell-Organizer.png
+      - references/app-shell/screenshots/Shell-Overlays.png
+      - references/app-shell/screenshots/Shell-Participant.png
+  viewport_coverage: ["desktop 1440x900", "desktop 1280x860", "desktop 1280x800", "mobile 390x844"]
+  state_coverage: ["organizer overview", "dense+command palette", "switcher/notifications/account/preview/shortcuts", "participant shell (ready state, realistic)", "judge shell (24-project workload)", "mobile nav + more sheet"]
+  must_preserve: "see README.md section 'Must preserve'"
+  adaptable_details: "see README.md section 'Adaptable implementation details'"
+  known_limitations: "see README.md sections 'Known limitations' and 'r2.1 changes'; global: static comps, illustrative content, Google Fonts in prototypes (system fallbacks render if blocked; self-host in production)"
+- id: design/organizer-data-surface
+  status: APPROVED
+  revision: r2.1
+  changed_in_r2: true
+  changed_in_r2_1: true
+  artifacts:
+    readme: references/organizer-data-surface/README.md
+    html:
+      - references/organizer-data-surface/html/Data-Filters.html
+      - references/organizer-data-surface/html/Data-Surface.html
+    screenshots:
+      - references/organizer-data-surface/screenshots/Data-Filters.png
+      - references/organizer-data-surface/screenshots/Data-Surface.png
+  viewport_coverage: ["desktop 1440x1000", "desktop 1350x1000 (popovers)"]
+  state_coverage: ["grid+inspector", "nested filters", "saved views", "columns/group", "selection+bulk plan", "async job", "inline edit", "destructive confirm", "undo toast"]
+  must_preserve: "see README.md section 'Must preserve'"
+  adaptable_details: "see README.md section 'Adaptable implementation details'"
+  known_limitations: "see README.md sections 'Known limitations' and 'r2.1 changes'; global: static comps, illustrative content, Google Fonts in prototypes (system fallbacks render if blocked; self-host in production)"
+- id: design/participant-my-event
+  status: APPROVED
+  revision: r2.1
+  changed_in_r2: true
+  changed_in_r2_1: false  # only the global line-3 outlined-button border
+  artifacts:
+    readme: references/participant-my-event/README.md
+    html:
+      - references/participant-my-event/html/MyEvent-Mobile.html
+      - references/participant-my-event/html/MyEvent.html
+    screenshots:
+      - references/participant-my-event/screenshots/MyEvent-Mobile.png
+      - references/participant-my-event/screenshots/MyEvent.png
+  viewport_coverage: ["desktop 1280x1090 (page height)", "mobile 390"]
+  state_coverage: ["action-needed", "ready", "eligibility issue", "pass", "schedule", "help"]
+  must_preserve: "see README.md section 'Must preserve'"
+  adaptable_details: "see README.md section 'Adaptable implementation details'"
+  known_limitations: "see README.md sections 'Known limitations' and 'r2.1 changes'; global: static comps, illustrative content, Google Fonts in prototypes (system fallbacks render if blocked; self-host in production)"
+- id: design/project-story-editor
+  status: APPROVED
+  revision: r2.1
+  changed_in_r2: true
+  changed_in_r2_1: true
+  artifacts:
+    readme: references/project-story-editor/README.md
+    html:
+      - references/project-story-editor/html/Story-Editor.html
+      - references/project-story-editor/html/Story-History.html
+      - references/project-story-editor/html/Story-Rich.html
+    screenshots:
+      - references/project-story-editor/screenshots/Story-Editor.png
+      - references/project-story-editor/screenshots/Story-History.png
+      - references/project-story-editor/screenshots/Story-Rich.png
+  viewport_coverage: ["desktop 1440"]
+  state_coverage: ["source+preview (long technical fixture)", "rich+comments+suggestions", "history/diff (folded context, moved block)", "judged vs living", "preflight", "autosave"]
+  must_preserve: "see README.md section 'Must preserve'"
+  adaptable_details: "see README.md section 'Adaptable implementation details'"
+  known_limitations: "see README.md sections 'Known limitations' and 'r2.1 changes'; global: static comps, illustrative content, Google Fonts in prototypes (system fallbacks render if blocked; self-host in production)"
+- id: design/judge-review
+  status: APPROVED
+  revision: r2.1
+  changed_in_r2: true
+  changed_in_r2_1: true
+  artifacts:
+    readme: references/judge-review/README.md
+    html:
+      - references/judge-review/html/Judge-Dialogs.html
+      - references/judge-review/html/Judge-Mobile.html
+      - references/judge-review/html/Judge-Review.html
+      - references/judge-review/html/Pairwise-Compare.html
+      - references/judge-review/html/Pairwise-Narrow.html
+      - references/judge-review/html/Pairwise-States.html
+    screenshots:
+      - references/judge-review/screenshots/Judge-Dialogs.png
+      - references/judge-review/screenshots/Judge-Mobile.png
+      - references/judge-review/screenshots/Judge-Review.png
+      - references/judge-review/screenshots/Pairwise-Compare.png
+      - references/judge-review/screenshots/Pairwise-Narrow.png
+      - references/judge-review/screenshots/Pairwise-States.png
+  viewport_coverage: ["desktop 1440x920", "desktop 1440x900 (pairwise)", "narrow 390", "narrow 768 (see responsive-wide)"]
+  state_coverage: ["queue+evidence+rubric (long evidence, scrolling)", "recusal", "flag", "route", "offline+conflict", "submitted/error", "pairwise compare", "pairwise tie/forced-choice", "pairwise recusal", "pairwise progress+history", "hybrid rubric->tiebreak", "pairwise narrow"]
+  must_preserve: "see README.md section 'Must preserve'"
+  adaptable_details: "see README.md section 'Adaptable implementation details'"
+  known_limitations: "see README.md sections 'Known limitations' and 'r2.1 changes'; global: static comps, illustrative content, Google Fonts in prototypes (system fallbacks render if blocked; self-host in production)"
+- id: design/deliberation-awards
+  status: APPROVED
+  revision: r2.1
+  changed_in_r2: true
+  changed_in_r2_1: true
+  artifacts:
+    readme: references/deliberation-awards/README.md
+    html:
+      - references/deliberation-awards/html/Deliberation-Finalize.html
+      - references/deliberation-awards/html/Deliberation.html
+    screenshots:
+      - references/deliberation-awards/screenshots/Deliberation-Finalize.png
+      - references/deliberation-awards/screenshots/Deliberation.png
+  viewport_coverage: ["desktop 1440"]
+  state_coverage: ["finalists", "compare", "close call", "eligibility", "notes", "override", "approvals", "publication preview", "receipt", "what changes for teams"]
+  must_preserve: "see README.md section 'Must preserve'"
+  adaptable_details: "see README.md section 'Adaptable implementation details'"
+  known_limitations: "see README.md sections 'Known limitations' and 'r2.1 changes'; global: static comps, illustrative content, Google Fonts in prototypes (system fallbacks render if blocked; self-host in production)"
+- id: design/public-event
+  status: APPROVED
+  revision: r2.1
+  changed_in_r2: false
+  changed_in_r2_1: true
+  artifacts:
+    readme: references/public-event/README.md
+    html:
+      - references/public-event/html/Public-Event-Mobile.html
+      - references/public-event/html/Public-Event-Themed.html
+      - references/public-event/html/Public-Event.html
+    screenshots:
+      - references/public-event/screenshots/Public-Event-Mobile.png
+      - references/public-event/screenshots/Public-Event-Themed.png
+      - references/public-event/screenshots/Public-Event.png
+  viewport_coverage: ["desktop 1280", "mobile 390"]
+  state_coverage: ["no-artwork compact hero", "organizer theme + standard hero", "results", "gallery", "sponsors"]
+  must_preserve: "see README.md section 'Must preserve'"
+  adaptable_details: "see README.md section 'Adaptable implementation details'"
+  known_limitations: "see README.md sections 'Known limitations' and 'r2.1 changes'; global: static comps, illustrative content, Google Fonts in prototypes (system fallbacks render if blocked; self-host in production)"
+- id: design/public-project
+  status: APPROVED
+  revision: r2.1
+  changed_in_r2: false
+  changed_in_r2_1: true
+  artifacts:
+    readme: references/public-project/README.md
+    html:
+      - references/public-project/html/Public-Project-Mobile.html
+      - references/public-project/html/Public-Project.html
+    screenshots:
+      - references/public-project/screenshots/Public-Project-Mobile.png
+      - references/public-project/screenshots/Public-Project.png
+  viewport_coverage: ["desktop 1200 (page height 2010)", "mobile 390 (page height 1600)"]
+  state_coverage: ["living", "as judged", "math/code/real figure (Forecast MAE by horizon)/architecture diagram/table", "metadata", "awards"]
+  must_preserve: "see README.md section 'Must preserve'"
+  adaptable_details: "see README.md section 'Adaptable implementation details'"
+  known_limitations: "see README.md sections 'Known limitations' and 'r2.1 changes'; global: static comps, illustrative content, Google Fonts in prototypes (system fallbacks render if blocked; self-host in production)"
+- id: design/event-builder
+  status: APPROVED
+  revision: r2.1
+  changed_in_r2: true
+  changed_in_r2_1: false  # only the global line-3 outlined-button border
+  artifacts:
+    readme: references/event-builder/README.md
+    html:
+      - references/event-builder/html/Builder-Pages.html
+      - references/event-builder/html/Builder-Plan.html
+      - references/event-builder/html/Builder-Setup.html
+    screenshots:
+      - references/event-builder/screenshots/Builder-Pages.png
+      - references/event-builder/screenshots/Builder-Plan.png
+      - references/event-builder/screenshots/Builder-Setup.png
+  viewport_coverage: ["desktop 1440"]
+  state_coverage: ["setup essentials/advanced", "diagnostics", "preview", "page+theme builder", "plan/apply impact", "EaC diff", "extension schema form"]
+  must_preserve: "see README.md section 'Must preserve'"
+  adaptable_details: "see README.md section 'Adaptable implementation details'"
+  known_limitations: "see README.md sections 'Known limitations' and 'r2.1 changes'; global: static comps, illustrative content, Google Fonts in prototypes (system fallbacks render if blocked; self-host in production)"
+- id: design/onsite-mobile
+  status: APPROVED
+  revision: r2.1
+  changed_in_r2: false
+  changed_in_r2_1: false  # only the global line-3 outlined-button border
+  artifacts:
+    readme: references/onsite-mobile/README.md
+    html:
+      - references/onsite-mobile/html/Onsite-A.html
+      - references/onsite-mobile/html/Onsite-B.html
+    screenshots:
+      - references/onsite-mobile/screenshots/Onsite-A.png
+      - references/onsite-mobile/screenshots/Onsite-B.png
+  viewport_coverage: ["mobile 390x844"]
+  state_coverage: ["scan", "desk", "pass", "judge route", "mentor queue", "pitch queue"]
+  must_preserve: "see README.md section 'Must preserve'"
+  adaptable_details: "see README.md section 'Adaptable implementation details'"
+  known_limitations: "see README.md sections 'Known limitations' and 'r2.1 changes'; global: static comps, illustrative content, Google Fonts in prototypes (system fallbacks render if blocked; self-host in production)"
+- id: design/state-matrix
+  status: APPROVED
+  revision: r2.1
+  changed_in_r2: false
+  changed_in_r2_1: true
+  artifacts:
+    readme: states/README.md
+    html:
+      - states/html/States-1.html
+      - states/html/States-2.html
+    screenshots:
+      - states/screenshots/States-1.png
+      - states/screenshots/States-2.png
+  viewport_coverage: ["desktop 1440", "mobile tiles"]
+  state_coverage: ["normal", "loading", "empty", "partial", "error", "permission", "validation", "large/dense", "destructive", "mobile", "offline/degraded"]
+  must_preserve: "see README.md section 'Must preserve'"
+  adaptable_details: "see README.md section 'Adaptable implementation details'"
+  known_limitations: "see README.md sections 'Known limitations' and 'r2.1 changes'; global: static comps, illustrative content, Google Fonts in prototypes (system fallbacks render if blocked; self-host in production)"
+- id: design/dark-mode
+  status: APPROVED
+  revision: r2.1
+  changed_in_r2: true
+  changed_in_r2_1: true
+  artifacts:
+    readme: references/dark-mode/README.md
+    html:
+      - references/dark-mode/html/Dark-Judge.html
+      - references/dark-mode/html/Dark-MyEvent.html
+      - references/dark-mode/html/Dark-Organizer.html
+      - references/dark-mode/html/Dark-Overlays.html
+    screenshots:
+      - references/dark-mode/screenshots/Dark-Judge.png
+      - references/dark-mode/screenshots/Dark-MyEvent.png
+      - references/dark-mode/screenshots/Dark-Organizer.png
+      - references/dark-mode/screenshots/Dark-Overlays.png
+  viewport_coverage: ["desktop 1440", "mobile 390"]
+  state_coverage: ["organizer shell + dense grid + inspector + bulk/job", "judge review (warning, autosave, disabled submit)", "participant My Event action-needed + ready", "overlay/palette/focus/selection", "foundations (Sys-Dark)"]
+  must_preserve: "see README.md section 'Must preserve'"
+  adaptable_details: "see README.md section 'Adaptable implementation details'"
+  known_limitations: "see README.md sections 'Known limitations' and 'r2.1 changes'; global: static comps, illustrative content, Google Fonts in prototypes (system fallbacks render if blocked; self-host in production)"
+- id: design/responsive-wide
+  status: APPROVED
+  revision: r2.1
+  changed_in_r2: true
+  changed_in_r2_1: true
+  artifacts:
+    readme: references/responsive-wide/README.md
+    html:
+      - references/responsive-wide/html/Resp-1024.html
+      - references/responsive-wide/html/Resp-768.html
+      - references/responsive-wide/html/Wide-1920.html
+    screenshots:
+      - references/responsive-wide/screenshots/Resp-1024.png
+      - references/responsive-wide/screenshots/Resp-768.png
+      - references/responsive-wide/screenshots/Wide-1920.png
+  viewport_coverage: ["tablet 1024x768", "narrow tablet 768x1024", "wide 1920x1080"]
+  state_coverage: ["docked inspector + folded toolbar", "queue drawer + two-pane review", "5,012-person virtualization stress fixture", "dense-mode recommendation"]
+  must_preserve: "see README.md section 'Must preserve'"
+  adaptable_details: "see README.md section 'Adaptable implementation details'"
+  known_limitations: "see README.md sections 'Known limitations' and 'r2.1 changes'; global: static comps, illustrative content, Google Fonts in prototypes (system fallbacks render if blocked; self-host in production)"

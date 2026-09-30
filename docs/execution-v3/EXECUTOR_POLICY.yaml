@@ -1,0 +1,59 @@
+version: 1
+policy: capability-class-first
+current_preference_2026_09_29:
+  design_foundation:
+    preferred: Claude Opus 5.5
+    thinking: high
+    fallback: Claude Opus 5.5 medium
+    note: Current use of Opus 5.5 is design-only. Use High for foundational design/system decisions when quota permits; Medium
+      for iterative design refinement.
+  design_iteration:
+    preferred: Claude Opus 5.5
+    thinking: medium
+    fallback: Claude Opus 5.5 high for unusually difficult design ambiguity
+    note: Design work only.
+  implementation:
+    preferred: Claude Sonnet 5
+    thinking: high
+    note: Current default for production implementation. Do not route implementation to Opus 5.5 under the present policy.
+  ui_implementation:
+    preferred: Claude Sonnet 5
+    thinking: high
+    note: Implement approved Claude Design artifacts with Sonnet 5 High.
+  frontier_architecture:
+    preferred: Claude Sonnet 5
+    thinking: high
+    note: Current architecture/implementation default is Sonnet 5 High. Opus 5.5 is reserved for design in the present policy;
+      revisit only if quota/cost conditions materially change in the future.
+  verification:
+    preferred: independent capable code/review agent
+    note: Prefer a context/model independent from the implementer for high-risk review when available; Opus 5.5 is not assumed
+      for implementation review under the current policy.
+executor_class_mapping:
+  frontier-architecture: frontier_architecture
+  architecture: implementation
+  implementation: implementation
+  ui-implementation: ui_implementation
+  platform-implementation: implementation
+  high-integrity-implementation: implementation
+  migration-implementation: implementation
+  security-review: verification
+  verification: verification
+  independent-frontier-review: verification
+  design-review: design_foundation
+concurrency_defaults:
+  max_parallel_mutating_workers: 3
+  max_frontier_architecture_workers: 1
+  max_design_foundation_workers: 1
+  max_high_risk_shared_primitive_mutators: 1
+  note: These are safety defaults, not throughput targets. Lock/dependency conflicts always reduce concurrency; owner may
+    raise/lower based on quota and observed coordination cost.
+rules:
+- Record the actual model and thinking level in receipts.
+- Under the current policy, Claude Opus 5.5 is reserved for Claude Design/design work; production implementation and architecture
+  default to Claude Sonnet 5 High.
+- Do not silently switch production implementation to Opus 5.5 unless the owner explicitly updates this policy after materially
+  changed quota/cost conditions.
+- Do not silently downgrade a high-risk task to a weaker executor because quota is low; pause or use the documented fallback.
+- Model/provider selection never overrides task risk, lock, design, verification or completion rules.
+- Revisit this mapping only when model quality, cost or quota changes materially.

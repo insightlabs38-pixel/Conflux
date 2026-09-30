@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Project story editor split view</title>
+<link rel="stylesheet" href="../../../system/v3.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+body{margin:0}
+.src{font-family:var(--font-mono);font-size:12.5px;line-height:1.7;color:var(--ink);padding:8px 0;white-space:normal}
+.src .l{display:flex}.src .t{white-space:pre-wrap}.src .n{width:44px;flex:none;text-align:right;padding-right:12px;color:var(--ink-3);user-select:none}.src .t{flex:1;min-width:0;padding-right:12px}
+.src .l.cur{background:var(--accent-tint)}.src .l.err{background:var(--err-tint)}
+.md-h{font-weight:600;color:var(--accent)}.md-m{color:var(--ink-3)}.md-math{color:#8a3d00}.md-code{color:#1b6b3a}.md-cite{color:#7a2ea3}.md-img{color:#0b6b73}
+.pv{font-family:var(--font-read);font-size:15px;line-height:1.65;padding:20px 28px;color:var(--ink)}
+.pv h2{font-family:var(--font-sans);font-size:20px;margin:0 0 8px;letter-spacing:-.01em}.pv p{margin:0 0 12px}
+.eq{display:flex;align-items:center;justify-content:center;gap:6px;margin:10px 0 14px;font-family:"STIX Two Text","Cambria Math",var(--font-read);font-size:17px;font-style:italic;position:relative}
+.eq .no{position:absolute;right:0;font-style:normal;font-size:13px;color:var(--ink-3);font-family:var(--font-sans)}
+.frac{display:inline-flex;flex-direction:column;align-items:center;font-size:.85em;line-height:1.1;vertical-align:middle}.frac>span:first-child{border-bottom:1px solid var(--ink);padding:0 3px}
+.callout{border:1px solid var(--info-line);background:var(--info-tint);border-radius:var(--r-2);padding:8px 12px;font-family:var(--font-sans);font-size:13px;line-height:1.5;margin:12px 0}
+.out{display:flex;align-items:center;gap:8px;height:28px;padding:0 10px;font-size:12px;border-bottom:1px solid var(--line);color:var(--ink-2)}
+.out.on{background:var(--accent-tint);color:var(--accent);font-weight:600}
+</style>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div style="width:1440px;height:960px;background:var(--bg);display:flex;flex-direction:column;overflow:hidden">
+  <header class="top" style="flex:none;gap:10px">
+    <button class="btn ghost sm"><i class="ic s ic-chev-l"></i>Project</button>
+    <div class="col" style="line-height:1.2;min-width:0"><b class="t-13 trunc">Northwind Grid Forecaster</b><span class="t-11 mut3">Story · Draft r7 · Climate &amp; Energy</span></div>
+    <span class="st ok" style="margin-left:6px"><i class="ic s ic-cloud"></i>Saved 12:36:41 · synced</span>
+    <span class="sp"></span>
+    <span class="seg" role="group" aria-label="Editing mode"><button class="btn sm">Source</button><button class="btn sm on" aria-pressed="true">Split</button><button class="btn sm">Rich</button></span>
+    <span class="seg" role="group" aria-label="Preview as"><button class="btn sm on" aria-pressed="true">Public</button><button class="btn sm">Judge</button><button class="btn sm">Frozen r3</button></span>
+    <button class="btn sm"><i class="ic s ic-history"></i>History</button>
+    <button class="btn sm"><i class="ic s ic-msg"></i>Comments<span class="cnt a">3</span></button>
+    <button class="btn sm pri"><i class="ic s ic-shield"></i>Preflight &amp; submit</button>
+  </header>
+
+  <div style="display:grid;grid-template-columns:248px minmax(0,1fr) 336px;flex:1;min-height:0;background:var(--line);gap:1px">
+    <!-- outline -->
+    <aside style="background:var(--surface);display:flex;flex-direction:column;min-height:0" aria-label="Structure">
+      <details open style="border-bottom:1px solid var(--line)"><summary class="row" style="height:36px;padding:0 10px;cursor:pointer;list-style:none"><i class="ic s ic-chev-d"></i><h2>Metadata</h2><span class="st warn sp"><i class="ic ic-warn"></i>1</span></summary>
+        <div class="col g2" style="padding:0 10px 10px;font-size:12px">
+          <div class="row g2"><i class="ic s ic-git"></i><span class="grow trunc mono">github.com/northwind/grid-fc</span><span class="st ok"><i class="ic ic-check"></i></span></div>
+          <div class="row g2"><i class="ic s ic-link"></i><span class="grow mut3">Live demo — add URL</span></div>
+          <div class="row g2"><i class="ic s ic-db"></i><span class="grow trunc">ENTSO-E load 2019–24 · CC BY 4.0</span></div>
+          <div class="row g2"><i class="ic s ic-book"></i><span class="grow trunc">arXiv 2409.01337</span></div>
+          <div class="row g2"><i class="ic s ic-shield"></i><span class="grow">License · Apache-2.0</span></div>
+          <a class="t-12">Edit metadata cards</a>
+        </div></details>
+      <div class="row" style="height:36px;padding:0 10px;border-bottom:1px solid var(--line)"><h2>Sections</h2><span class="t-12 mut3 sp">event schema v2</span></div>
+      <div class="out"><i class="ic s ic-check" style="color:var(--ok)"></i>Summary<i class="ic xs ic-globe sp mut3"></i></div>
+      <div class="out"><i class="ic s ic-check" style="color:var(--ok)"></i>Problem &amp; approach<i class="ic xs ic-globe sp mut3"></i></div>
+      <div class="out"><i class="ic s ic-check" style="color:var(--ok)"></i>Architecture<i class="ic xs ic-globe sp mut3"></i></div>
+      <div class="out"><i class="ic s ic-check" style="color:var(--ok)"></i>Data &amp; method<i class="ic xs ic-globe sp mut3"></i></div>
+      <div class="out on"><i class="ic s ic-warn" style="color:var(--warn)"></i>Evaluation<span class="cnt w sp">2</span></div>
+      <div class="out"><i class="ic s ic-circle mut3"></i>Results &amp; benchmark<span class="t-11 mut3 sp">required</span></div>
+      <div class="out"><i class="ic s ic-circle mut3"></i>Limitations<span class="t-11 mut3 sp">recommended</span></div>
+      <div class="out"><i class="ic s ic-check" style="color:var(--ok)"></i>Team &amp; credits<i class="ic xs ic-users sp mut3"></i></div>
+      <div class="out"><i class="ic s ic-file mut3"></i>Reproduction notes<i class="ic xs ic-lock sp mut3"></i></div>
+      <div class="out"><i class="ic s ic-book mut3"></i>References<span class="t-11 mut3 sp">7</span></div>
+      <div style="padding:8px 10px" class="col g2"><button class="btn sm"><i class="ic s ic-plus"></i>Add section</button><span class="t-11 mut3 row g1"><i class="ic xs ic-globe"></i>public <i class="ic xs ic-users" style="margin-left:6px"></i>judges <i class="ic xs ic-lock" style="margin-left:6px"></i>team only</span></div>
+      <div class="sp" style="border-top:1px solid var(--line);padding:10px" class="col"><div class="row t-12"><span class="grow">Completeness</span><b>78%</b></div><div class="bar" style="margin-top:6px"><i style="width:78%"></i></div><span class="t-11 mut3">Deterministic: 7 of 9 required items</span></div>
+    </aside>
+
+    <!-- editor -->
+    <section style="background:var(--surface);display:flex;flex-direction:column;min-width:0;min-height:0">
+      <div class="toolbar" style="padding:4px 10px;gap:2px">
+        <button class="btn ghost icon sm" aria-label="Bold"><b style="font-size:13px">B</b></button><button class="btn ghost icon sm" aria-label="Italic"><i style="font-size:13px;font-family:var(--font-read)">I</i></button><button class="btn ghost icon sm" aria-label="Code"><i class="ic s ic-code"></i></button><button class="btn ghost icon sm" aria-label="Link"><i class="ic s ic-link"></i></button>
+        <span style="width:1px;height:18px;background:var(--line);margin:0 6px"></span>
+        <button class="btn ghost sm"><i class="ic s ic-sigma"></i>Math</button><button class="btn ghost sm"><i class="ic s ic-image"></i>Figure</button><button class="btn ghost sm"><i class="ic s ic-table"></i>Table</button><button class="btn ghost sm"><i class="ic s ic-book"></i>Cite</button><button class="btn ghost sm"><i class="ic s ic-info"></i>Callout</button><button class="btn ghost sm"><i class="ic s ic-code"></i>Diagram</button>
+        <span class="sp t-12 mut3">Evaluation · Markdown (GFM + math + callouts)</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;flex:1;min-height:0">
+        <div style="border-right:1px solid var(--line);overflow:hidden" class="src" role="textbox" aria-label="Markdown source" aria-multiline="true">
+<div class="l"><span class="n">31</span><span class="t"><span class="md-h">## Evaluation</span></span></div>
+<div class="l"><span class="n">32</span><span class="t"> </span></div>
+<div class="l"><span class="n">33</span><span class="t">We compare against a persistence baseline and</span></div>
+<div class="l"><span class="n">34</span><span class="t">NWP-Lite on 412 substations (<span class="md-m">Table 1</span>) over</span></div>
+<div class="l"><span class="n">35</span><span class="t">horizons h ∈ {1, 6, 24} hours.</span></div>
+<div class="l"><span class="n">36</span><span class="t"> </span></div>
+<div class="l"><span class="n">37</span><span class="t"><span class="md-m">$$</span><span class="md-math">\mathrm{MAE}_h = \frac{1}{N}\sum_{i=1}^{N} |\hat y_{i,h} - y_{i,h}|</span><span class="md-m">$$ {#eq-mae}</span></span></div>
+<div class="l"><span class="n">38</span><span class="t"> </span></div>
+<div class="l"><span class="n">39</span><span class="t"><span class="md-m">```</span><span class="md-code">python {title="eval.py" hl=3}</span></span></div>
+<div class="l"><span class="n">40</span><span class="t"><span class="md-code">def mae(pred, y, h):</span></span></div>
+<div class="l"><span class="n">41</span><span class="t"><span class="md-code">    err = np.abs(pred[:, h] - y[:, h])</span></span></div>
+<div class="l"><span class="n">42</span><span class="t"><span class="md-code">    return float(err.mean())</span></span></div>
+<div class="l"><span class="n">43</span><span class="t"><span class="md-m">```</span></span></div>
+<div class="l"><span class="n">44</span><span class="t"> </span></div>
+<div class="l err"><span class="n">45</span><span class="t"><span class="md-img">![](figs/mae-by-horizon.png)</span> <span class="st err" style="font-family:var(--font-sans)"><i class="ic ic-xc"></i>missing alt text</span></span></div>
+<div class="l"><span class="n">46</span><span class="t"><span class="md-m">*Figure 2.* Error by horizon, 5-seed mean.</span></span></div>
+<div class="l"><span class="n">47</span><span class="t"> </span></div>
+<div class="l cur"><span class="n">48</span><span class="t"><span class="md-m">&gt; [!NOTE]</span><span style="border-left:2px solid var(--accent);margin-left:1px"></span></span></div>
+<div class="l"><span class="n">49</span><span class="t"><span class="md-m">&gt;</span> Errors are 5-seed means; Kalman drift bound in <span class="md-cite">[@zhou2024, §4]</span>.</span></div>
+<div class="l"><span class="n">50</span><span class="t"> </span></div>
+<div class="l"><span class="n">51</span><span class="t"><span class="md-h">#### Ablations</span> <span class="st warn" style="font-family:var(--font-sans)"><i class="ic ic-warn"></i>skips H3</span></span></div>
+<div class="l"><span class="n">52</span><span class="t">Removing the weather-embedding branch raises</span></div>
+<div class="l"><span class="n">53</span><span class="t">MAE by 11.4 % at h = 24 (<span class="md-cite">[@nwplite]</span>).</span></div>
+        </div>
+        <div style="overflow:hidden;background:var(--surface)" class="pv" aria-label="Rendered preview">
+          <div class="row" style="margin:-8px 0 10px;font-family:var(--font-sans)"><span class="tag info"><i class="ic ic-eye"></i>Public render · renderer 2.3.1</span></div>
+          <h2>Evaluation</h2>
+          <p>We compare against a persistence baseline and NWP-Lite on 412 substations (Table 1) over horizons <i>h</i> ∈ {1, 6, 24} hours.</p>
+          <div class="eq"><span>MAE<sub>h</sub> = <span class="frac"><span>1</span><span><i>N</i></span></span> Σ<sub><i>i</i>=1</sub><sup><i>N</i></sup> | ŷ<sub><i>i,h</i></sub> − <i>y</i><sub><i>i,h</i></sub> |</span><span class="no">(1)</span></div>
+          <div class="codeblk" style="font-size:12px;margin-bottom:12px"><div class="cb-h"><i class="ic s ic-file"></i>eval.py<span class="sp"><i class="ic s ic-copy"></i></span></div><pre><span style="display:block"><span class="ln">1</span><span class="k">def</span> <span class="f">mae</span>(pred, y, h):</span><span class="hl"><span class="ln">2</span>    err = np.abs(pred[:, h] - y[:, h])</span><span style="display:block"><span class="ln">3</span>    <span class="k">return</span> <span class="f">float</span>(err.mean())</span></pre></div>
+          <figure style="margin:0 0 12px"><div class="ph-art" style="height:120px">figs/mae-by-horizon.png · 1600×900</div><figcaption style="font-family:var(--font-sans);font-size:12px;color:var(--ink-2);margin-top:4px"><b>Figure 2.</b> Error by horizon, 5-seed mean. <span class="st warn" style="margin-left:4px"><i class="ic ic-warn"></i>no alt text</span></figcaption></figure>
+          <div class="callout"><b>Note</b> — Errors are 5-seed means; Kalman drift bound in [1, §4].</div>
+          <p style="font-size:13px;color:var(--ink-2)">Ablations. Removing the weather-embedding branch raises MAE by 11.4 % at <i>h</i> = 24 [2].</p>
+        </div>
+      </div>
+      <div class="row t-12 mut3" style="height:28px;padding:0 12px;border-top:1px solid var(--line);background:var(--surface-2)"><span>Ln 48, Col 12</span><span>Evaluation · 1,184 words · ~6 min read</span><span class="sp row g3"><span class="st warn"><i class="ic ic-warn"></i>2 warnings</span><span class="st err"><i class="ic ic-xc"></i>1 blocking</span><span class="row g1"><i class="ic s ic-cloud"></i>Draft r7 autosaved</span></span></div>
+    </section>
+
+    <!-- inspector -->
+    <aside style="background:var(--surface);display:flex;flex-direction:column;min-height:0" aria-label="Preflight and comments">
+      <div class="tabs sm" style="padding:0 8px"><a aria-current="page">Preflight <span class="cnt e">1</span></a><a>Comments <span class="cnt">3</span></a><a>Media</a><a>Cites</a></div>
+      <div style="padding:12px" class="col g3">
+        <div class="bn err"><i class="ic ic-xc"></i><div class="col g1"><span><b>1 blocking item</b> for submit</span><span class="t-12">Event requires a public demo link or video.</span><a class="t-12">Add demo link →</a></div></div>
+        <div class="col g2"><div class="row"><h3>Warnings</h3><span class="cnt w">2</span><span class="t-11 mut3 sp">advisory · won’t block</span></div>
+          <div class="well col g1" style="background:var(--surface)"><span class="st warn"><i class="ic ic-warn"></i>Figure 2 has no alt text</span><span class="t-12 mut">Line 45 · Required for accessibility profile</span><div class="row g2"><button class="btn sm">Add alt text</button><button class="btn sm ghost">Jump</button></div></div>
+          <div class="well col g1" style="background:var(--surface)"><span class="st warn"><i class="ic ic-warn"></i>Heading level skipped (H2 → H4)</span><span class="t-12 mut">Line 51 · Evaluation</span><div class="row g2"><button class="btn sm">Make H3</button><button class="btn sm ghost">Jump</button></div></div>
+        </div>
+        <div class="col g2"><div class="row"><h3>Checks</h3><span class="t-11 mut3 sp">ran 12:36 · <a>re-run</a></span></div>
+          <div class="row g2 t-12"><span class="st ok"><i class="ic ic-check"></i></span>Math parses (2 expressions, safe macros only)</div>
+          <div class="row g2 t-12"><span class="st ok"><i class="ic ic-check"></i></span>Code blocks: 3, syntax known</div>
+          <div class="row g2 t-12"><span class="st ok"><i class="ic ic-check"></i></span>Citations resolve (7 of 7)</div>
+          <div class="row g2 t-12"><span class="st warn"><i class="ic ic-warn"></i></span>1 link returns 404 (Table 1 dataset mirror)</div>
+          <div class="row g2 t-12"><span class="st ok"><i class="ic ic-check"></i></span>Media within size limits (5 files · 4.1 MB)</div>
+          <div class="row g2 t-12"><span class="st mute"><i class="ic ic-info"></i></span>Spelling: 3 suggestions (advisory)</div>
+        </div>
+        <div class="col g2"><h3>Requirements · 7 of 9</h3>
+          <div class="t-12 col g1"><span class="row g2"><i class="ic s ic-check" style="color:var(--ok)"></i>Summary ≤ 120 words</span><span class="row g2"><i class="ic s ic-check" style="color:var(--ok)"></i>Architecture diagram</span><span class="row g2"><i class="ic s ic-circle mut3"></i>Results &amp; benchmark section</span><span class="row g2"><i class="ic s ic-circle mut3"></i>Demo link or video</span></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+</body>
+</html>

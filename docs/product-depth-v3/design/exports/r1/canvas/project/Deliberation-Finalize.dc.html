@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Deliberation finalization plan</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./v3.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>body{margin:0}.pstep{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-bottom:1px solid var(--line)}.pstep.on{background:var(--accent-tint)}.rw{display:flex;gap:10px;padding:8px 14px;border-bottom:1px solid var(--line);align-items:center}</style>
+</helmet>
+<div style="width:1440px;height:900px;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;position:relative">
+  <header class="top" style="flex:none">
+    <button class="btn ghost sm"><i class="ic s ic-chev-l"></i>Deliberation</button>
+    <div class="col" style="line-height:1.2"><b class="t-13">Finalization plan #241 · Climate &amp; Energy</b><span class="t-11 mut3">plan → approve → apply · nothing is written until Apply</span></div>
+    <span class="sp"></span><span class="tag warn"><i class="ic ic-warn"></i>Override recorded</span><span class="tag">Draft plan</span>
+  </header>
+  <div style="display:grid;grid-template-columns:312px 500px minmax(0,1fr);gap:1px;background:var(--line);flex:1;min-height:0">
+    <aside style="background:var(--surface)" class="col">
+      <div class="pstep on"><span class="step now"><span class="n">1</span></span><div class="col"><b class="t-13">Plan</b><span class="t-12 mut">Choose winners · record overrides</span></div></div>
+      <div class="pstep"><span class="step"><span class="n">2</span></span><div class="col"><b class="t-13">Approve</b><span class="t-12 mut">1 of 2 approvals</span></div></div>
+      <div class="pstep"><span class="step"><span class="n">3</span></span><div class="col"><b class="t-13">Preview publication</b><span class="t-12 mut">Exact public page</span></div></div>
+      <div class="pstep" style="border-bottom:0"><span class="step"><span class="n">4</span></span><div class="col"><b class="t-13">Apply &amp; receipt</b><span class="t-12 mut">Immutable · amendments only after</span></div></div>
+      <div class="col g2" style="padding:14px;border-top:1px solid var(--line);margin-top:8px"><span class="eyebrow">Frozen inputs</span>
+        <dl class="dl" style="grid-template-columns:100px 1fr;font-size:12px"><dt>Scores</dt><dd class="mono">snapshot #9c41</dd><dt>Normalization</dt><dd class="mono">v4</dd><dt>Rubric</dt><dd class="mono">r2</dd><dt>Eligibility</dt><dd class="mono">as of 18:41</dd><dt>Renderer</dt><dd class="mono">2.3.1</dd></dl>
+        <span class="t-12 mut">If any input changes, this plan is invalidated and must be re-created.</span>
+      </div>
+      <div class="col g2" style="padding:14px;border-top:1px solid var(--line)"><span class="eyebrow">Receipt (after apply)</span>
+        <div class="well mono t-12" style="line-height:1.55;color:var(--ink-2)">receipt fin_241<br>applied 2026-10-12T19:04:11+02:00<br>inputs #9c41 · v4 · r2<br>approvers P. Nair, Dr. Osei<br>overrides 1 (reason kept)</div></div>
+    </aside>
+
+    <section style="background:var(--surface);display:flex;flex-direction:column;min-height:0">
+      <div class="pn-h"><h2>1 · Plan</h2><span class="t-12 mut3">Awards in Climate &amp; Energy</span></div>
+      <table class="tbl dense"><thead><tr><th>Award</th><th>Configured ranking</th><th>Selected</th></tr></thead><tbody>
+        <tr class="sel"><td>Grand Prize</td><td>Northwind Grid Forecaster</td><td><b>Solar Twin</b> <span class="tag warn" style="margin-left:4px"><i class="ic ic-pencil"></i>Override</span></td></tr>
+        <tr><td>Track winner</td><td>Northwind Grid Forecaster</td><td>Northwind Grid Forecaster <span class="st ok" style="margin-left:6px"><i class="ic ic-check"></i>Matches</span></td></tr>
+        <tr><td>Best hardware</td><td>Solar Twin</td><td><span class="st warn"><i class="ic ic-warn"></i>Conflicts with Grand Prize · resolve</span></td></tr>
+        <tr><td>Community choice</td><td>Ember</td><td>Ember <span class="st ok" style="margin-left:6px"><i class="ic ic-check"></i>Matches</span></td></tr>
+      </tbody></table>
+      <div style="padding:14px 16px" class="col g3">
+        <div class="bn warn"><i class="ic ic-warn"></i><span class="t-13"><b>Grand Prize differs from the configured ranking.</b> An override needs a category and a written reason. Both are kept in the receipt and visible to auditors, not to teams.</span></div>
+        <div class="row g3"><div class="fld grow"><label for="oc">Reason category</label><select id="oc" class="in"><option>Panel consensus on unmodelled factor</option></select></div><div class="fld" style="width:140px"><label for="oa">Approvals needed</label><input id="oa" class="in ro" value="2 of 3 (override)" readonly></div></div>
+        <div class="fld"><label for="ot">Written reason <span class="mut3" style="font-weight:400">· required · 40+ characters</span></label><textarea id="ot" class="in ta" style="min-height:76px">Panel voted 3–1 that Solar Twin’s field-validated results outweigh Northwind’s slightly higher weighted score; difference (0.5) is within the close-call threshold.</textarea><span class="hint">Recorded: Amara Okafor · 18:57 · panel notes linked (3)</span></div>
+        <div class="row g2 t-12"><i class="ic s ic-eye"></i><span class="mut">Preview shows what changes for teams: Solar Twin becomes Grand Prize; Northwind becomes Track winner only.</span></div>
+      </div>
+      <div class="col g2" style="margin-top:auto;padding:12px 16px;border-top:1px solid var(--line);background:var(--surface-2)">
+        <div class="row"><h3>Approvals</h3><span class="st warn sp"><i class="ic ic-clock"></i>1 of 2 · waiting on Dr. Osei</span></div>
+        <div class="row g2"><button class="btn">Save plan</button><button class="btn">Export plan</button><span class="sp"></span><button class="btn pri">Request approval</button><button class="btn" disabled>Apply (needs 2 approvals)</button></div>
+        <span class="t-12 mut3">Proposer can’t approve their own plan. Approvers see the same diff and the reason.</span>
+      </div>
+    </section>
+
+    <section style="background:var(--bg);display:flex;flex-direction:column;min-height:0;padding:12px 16px;gap:10px">
+      <div class="row"><h2>3 · Publication preview</h2><span class="tag info"><i class="ic ic-eye"></i>Not published</span><span class="sp seg"><button class="btn sm on">Desktop</button><button class="btn sm">Mobile</button></span></div>
+      <div class="pub" style="border:1px solid var(--line-2);border-radius:var(--r-3);overflow:hidden;background:#fbfbfc;flex:1">
+        <div class="pub-nav" style="padding:0 20px"><b>Gauss Hack 2026</b><a>Overview</a><a>Projects</a><a aria-current="page">Results</a></div>
+        <div style="padding:20px 24px" class="col g3">
+          <div class="col g1"><div class="eyebrow">Results · announced Sun 12 Oct 20:30</div><h1 style="font-size:24px">Climate &amp; Energy winners</h1></div>
+          <div class="pn"><div class="pn-b col g2"><div class="row"><i class="ic ic-trophy" style="color:var(--warn)"></i><b>Grand Prize</b><span class="sp t-12 mut3">€5,000</span></div><div class="row"><b style="font-size:16px">Solar Twin</b><a class="t-12 sp">As judged · r3 →</a></div><div class="t-13 mut">A digital twin for rooftop solar dispatch, validated on 60 live sites.</div></div></div>
+          <div class="pn"><div class="pn-b col g2"><div class="row"><i class="ic ic-trophy"></i><b>Track winner</b></div><div class="row"><b style="font-size:16px">Northwind Grid Forecaster</b><a class="t-12 sp">As judged · r3 →</a></div></div></div>
+          <div class="pn"><div class="pn-b col g2"><div class="row"><i class="ic ic-trophy"></i><b>Community choice</b></div><div class="row"><b style="font-size:16px">Ember</b></div></div></div>
+          <div class="t-12 mut">Scores and judge comments are not published. Teams see their own feedback after this page goes live.</div>
+        </div>
+      </div>
+      <div class="row t-12 mut3"><i class="ic s ic-clock"></i>Publishes automatically at 20:30 after Apply · <a>Change schedule</a></div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic { renderVals() { return {}; } }
+</script>
+</body>
+</html>

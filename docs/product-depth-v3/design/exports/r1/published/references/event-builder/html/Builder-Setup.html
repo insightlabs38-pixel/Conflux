@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Event builder setup</title>
+<link rel="stylesheet" href="../../../system/v3.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+body{margin:0}
+.acc{border-bottom:1px solid var(--line)}
+.acc:last-child{border-bottom:0}
+.acc-h{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 16px}
+.acc-b{padding:4px 16px 16px 42px}
+.dg{display:flex;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);font-size:12px;align-items:flex-start;line-height:1.4}
+</style>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<div class="shell" style="width:1440px;height:1180px">
+  <header class="top">
+    <div class="mark" aria-hidden="true">C</div>
+    <button class="ev-switch"><span class="trunc">Gauss Hack 2027</span><span class="tag">Draft</span><i class="ic s ic-chev-d"></i></button>
+    <div class="cmdk sp" style="width:340px"><i class="ic s ic-search"></i>Search or run a command<span class="kbd">⌘K</span></div><button class="btn ghost icon" aria-label="Notifications"><i class="ic ic-bell"></i></button><span class="avatar l">AO</span>
+  </header>
+  <nav class="rail" aria-label="Event">
+    <a class="nav-i"><i class="ic ic-home"></i>Overview</a>
+    <div class="nav-g">Manage event</div>
+    <a class="nav-i" aria-current="page"><i class="ic ic-sliders"></i>Event setup</a>
+    <a class="nav-i sub" style="color:var(--ink)"><span class="grow">Basics</span><i class="ic s ic-check" style="color:var(--ok)"></i></a>
+    <a class="nav-i sub" aria-current="page" style="background:none;color:var(--accent);font-weight:600">Registration &amp; forms</a>
+    <a class="nav-i sub">Stages &amp; schedule</a><a class="nav-i sub">Tracks &amp; prizes</a><a class="nav-i sub">Judging</a><a class="nav-i sub">Policies</a><a class="nav-i sub">Pages &amp; theme</a>
+    <a class="nav-i"><i class="ic ic-users"></i>Participants &amp; teams</a><a class="nav-i"><i class="ic ic-file"></i>Projects &amp; eligibility</a><a class="nav-i"><i class="ic ic-trophy"></i>Judging</a>
+    <div class="nav-g">Advanced</div>
+    <a class="nav-i"><i class="ic ic-box"></i>Extensions<span class="cnt">2</span></a><a class="nav-i"><i class="ic ic-term"></i>Event-as-Code</a>
+  </nav>
+  <main style="display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:1px;background:var(--line);min-height:0">
+    <section style="background:var(--bg);display:flex;flex-direction:column;min-width:0;min-height:0">
+      <div class="row" style="padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--line)"><h1>Registration &amp; forms</h1><span class="t-12 mut3" style="margin-left:6px">Gauss Hack 2027 · autosaved as draft</span><span class="sp row g2"><span class="seg" role="group" aria-label="Detail level"><button class="btn sm on" aria-pressed="true">Essentials</button><button class="btn sm">Advanced</button></span></span></div>
+      <div class="row" style="padding:8px 20px;background:var(--warn-tint);border-bottom:1px solid var(--warn-line)"><i class="ic s ic-info" style="color:var(--warn)"></i><span class="t-13"><b>4 unapplied changes</b> in this draft. Nothing is live until you review and apply the plan.</span><button class="btn sm sp">Discard</button><button class="btn sm pri">Review plan</button></div>
+      <div style="padding:16px 20px;display:flex;flex-direction:column;gap:14px;overflow:hidden">
+        <div class="pn"><div class="pn-h"><h2>Getting live · 3 of 5 essentials</h2><div class="bar" style="width:140px"><i style="width:60%"></i></div></div>
+          <div class="row" style="padding:10px 16px;gap:22px;flex-wrap:wrap"><span class="st ok"><i class="ic ic-okc"></i>Basics</span><span class="st ok"><i class="ic ic-okc"></i>Dates</span><span class="st warn"><i class="ic ic-warn"></i>Registration <span class="mut3" style="font-weight:400">· in progress</span></span><span class="st mute"><i class="ic ic-circle"></i>Tracks &amp; prizes</span><span class="st mute"><i class="ic ic-circle"></i>Publish event page</span><span class="t-12 mut sp">Defaults cover a weekend hackathon — everything else is optional.</span></div></div>
+
+        <div class="pn">
+          <div class="acc"><div class="acc-h"><i class="ic s ic-chev-d"></i><h2 class="grow">Registration window &amp; capacity</h2><span class="st ok"><i class="ic ic-okc"></i>Valid</span></div>
+            <div class="acc-b" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px 16px">
+              <div class="fld"><label for="a1">Opens</label><input id="a1" class="in" value="1 Sep 2027, 09:00"></div>
+              <div class="fld"><label for="a2">Closes</label><input id="a2" class="in" value="5 Oct 2027, 23:59"><span class="hint">Event timezone: Europe/Berlin</span></div>
+              <div class="fld"><label for="a3">Capacity</label><input id="a3" class="in" value="5,000"><span class="hint">Waitlist opens automatically at capacity</span></div>
+              <div class="fld" style="grid-column:1/3"><label for="a4">Who can register</label><select id="a4" class="in"><option>Anyone — approve automatically</option></select></div>
+            </div></div>
+          <div class="acc"><div class="acc-h"><i class="ic s ic-chev-d"></i><h2 class="grow">Forms</h2><span class="st warn"><i class="ic ic-warn"></i>1 issue</span></div>
+            <div class="acc-b"><table class="tbl dense" style="border:1px solid var(--line);border-radius:6px;overflow:hidden"><thead><tr><th>Form</th><th class="num" style="width:70px">Fields</th><th style="width:130px">Required for</th><th style="width:110px">Status</th><th style="width:70px"></th></tr></thead><tbody>
+              <tr><td>Participant application</td><td class="num">9</td><td>Registration</td><td><span class="st ok"><i class="ic ic-okc"></i>Valid</span></td><td><button class="btn sm ghost">Edit</button></td></tr>
+              <tr><td>Waiver &amp; code of conduct</td><td class="num">3</td><td>Check-in</td><td><span class="st ok"><i class="ic ic-okc"></i>Valid</span></td><td><button class="btn sm ghost">Edit</button></td></tr>
+              <tr class="sel"><td>Under-18 consent</td><td class="num">4</td><td>Check-in</td><td><span class="st warn"><i class="ic ic-warn"></i>No upload rule</span></td><td><button class="btn sm">Fix</button></td></tr>
+            </tbody></table><div class="row g2" style="margin-top:8px"><button class="btn sm"><i class="ic s ic-plus"></i>Add form</button><span class="t-12 mut3">Field types, conditional logic and validation live inside each form.</span></div></div></div>
+          <div class="acc"><div class="acc-h"><i class="ic s ic-chev-d"></i><h2 class="grow">Policies</h2><span class="t-12 mut3">4 defaults on</span></div>
+            <div class="acc-b col g2"><label class="chk"><input type="checkbox" checked> Teams of 2–5 people</label><label class="chk"><input type="checkbox" checked> Code of conduct acknowledgement required</label><label class="chk"><input type="checkbox" checked> One project per team</label><label class="chk"><input type="checkbox"> Allow late submissions (grace period)</label></div></div>
+          <div class="acc"><div class="acc-h"><i class="ic s ic-chev-r"></i><h2 class="grow">Advanced</h2><span class="t-12 mut3">Invite codes · custom eligibility rules · conditional waivers · data retention · 3 configured</span><a class="t-12">Show</a></div></div>
+        </div>
+
+        <div class="pn"><div class="pn-h"><h2>Stages</h2><span class="t-12 mut3">Drag to reorder · each stage opens and closes features automatically</span><button class="btn sm sp"><i class="ic s ic-plus"></i>Add stage</button></div>
+          <table class="tbl dense"><thead><tr><th style="width:28px"></th><th>Stage</th><th style="width:150px">Opens</th><th style="width:150px">Closes</th><th style="width:100px">Transition</th><th style="width:110px">Status</th></tr></thead><tbody>
+            <tr><td><i class="ic s ic-grip mut3"></i></td><td><b>Registration</b></td><td class="mono t-12">1 Sep 09:00</td><td class="mono t-12">5 Oct 23:59</td><td class="t-12">Auto</td><td><span class="st ok"><i class="ic ic-okc"></i>Valid</span></td></tr>
+            <tr><td><i class="ic s ic-grip mut3"></i></td><td><b>Hacking &amp; submissions</b></td><td class="mono t-12">11 Oct 11:00</td><td class="mono t-12">12 Oct 13:00</td><td class="t-12">Auto</td><td><span class="st ok"><i class="ic ic-okc"></i>Valid</span></td></tr>
+            <tr class="sel"><td><i class="ic s ic-grip mut3"></i></td><td><b>Judging · Round 1</b></td><td class="mono t-12">12 Oct 13:30</td><td class="mono t-12 " style="color:var(--err)">12 Oct 13:00</td><td class="t-12">Auto</td><td><span class="st err"><i class="ic ic-xc"></i>Closes before it opens</span></td></tr>
+            <tr><td><i class="ic s ic-grip mut3"></i></td><td><b>Deliberation &amp; results</b></td><td class="mono t-12">12 Oct 18:00</td><td class="mono t-12">—</td><td class="t-12">Manual</td><td><span class="st ok"><i class="ic ic-okc"></i>Valid</span></td></tr>
+          </tbody></table></div>
+      </div>
+    </section>
+
+    <aside style="background:var(--surface);display:flex;flex-direction:column;min-height:0">
+      <div class="tabs sm" style="padding:0 8px"><a aria-current="page">Diagnostics <span class="cnt e">1</span></a><a>Preview</a><a>Impact</a></div>
+      <div class="row" style="padding:8px 12px;border-bottom:1px solid var(--line)"><span class="t-12"><b>1 error · 2 warnings</b> · validated 12:41 by the same rules the API uses</span></div>
+      <div class="dg" style="background:var(--err-tint)"><i class="ic s ic-xc" style="color:var(--err);margin-top:1px"></i><div class="col grow"><b>Stages › Judging · Round 1</b><span>Closes (12 Oct 13:00) is before it opens (13:30).</span><div class="row g2" style="margin-top:4px"><button class="btn sm">Go to field</button><button class="btn sm ghost">Set close 15:00</button></div></div></div>
+      <div class="dg"><i class="ic s ic-warn" style="color:var(--warn);margin-top:1px"></i><div class="col grow"><b>Forms › Under-18 consent</b><span>Upload field has no size limit; default 10 MB will apply.</span><button class="btn sm" style="align-self:flex-start;margin-top:4px">Set limit</button></div></div>
+      <div class="dg"><i class="ic s ic-warn" style="color:var(--warn);margin-top:1px"></i><div class="col grow"><b>Registration › Capacity</b><span>5,000 exceeds venue capacity (4,200) in Basics.</span><button class="btn sm" style="align-self:flex-start;margin-top:4px">Review venue</button></div></div>
+      <div style="padding:12px" class="col g2"><span class="eyebrow">Preview · registration page</span>
+        <div class="pub" style="border:1px solid var(--line-2);border-radius:var(--r-2);overflow:hidden"><div class="pub-nav" style="height:32px;padding:0 12px;font-size:11px"><b>Gauss Hack 2027</b></div><div style="padding:12px" class="col g2"><b class="t-13">Register</b><div class="fld"><label style="font-size:11px">Full name</label><div class="in sm"></div></div><div class="fld"><label style="font-size:11px">Email</label><div class="in sm"></div></div><button class="btn pri sm" style="align-self:flex-start">Continue</button></div></div>
+        <div class="row g2"><span class="seg"><button class="btn sm on">Mobile</button><button class="btn sm">Desktop</button></span><span class="t-12 mut3 sp">Live · unsaved values shown</span></div></div>
+    </aside>
+  </main>
+</div>
+</body>
+</html>

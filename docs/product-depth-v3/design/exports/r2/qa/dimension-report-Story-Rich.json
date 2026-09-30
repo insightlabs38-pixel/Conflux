@@ -1,0 +1,11 @@
+[
+ {
+  "name": "Story-Rich",
+  "declared": "1440x900",
+  "root": "1440x900",
+  "scrollH": 900,
+  "scrollW": 1440,
+  "contentBottom": 1055,
+  "contentRight": 1440
+ }
+]

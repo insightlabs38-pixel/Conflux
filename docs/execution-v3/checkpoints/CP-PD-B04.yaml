@@ -1,0 +1,28 @@
+version: 1
+checkpoint_id: CP-PD-B04
+created_at: '2026-09-30T16:59:55Z'
+canonical_commit: 8ad7ec240f09bd4b904d5063febe9948d97dbe5e
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+- PD-B02
+- PD-B03
+- PD-B04
+active_batches:
+- PD-F001-B01
+active_claims: []
+open_escalations: []
+last_completed_task: PD-B04-T08
+ready_summary:
+- PD-F001-B01 (first foundation-v3 batch; promoted IN_PROGRESS, not started)
+verification_summary:
+- verify-fast pytest 1454/23, web 294 + embed 8, lint/format/build/sdk checks clean
+- make e2e-fast all tiers ok; route-drafts 36/36 on six fresh fixtures
+- validate_queue valid
+recovery_notes:
+- 'Web stack: src/web/lib/api.ts single transport, hooks/useLoad server state, lib/urlState.ts URL context; matrix docs/verification/PD-B04/'
+- 'ESC-20260930-001 resolved with option A (legacy unscoped judge outbox entries untouched); owner may revisit'
+- 'app container bakes source: docker compose up -d --build app; seed 7 untouched by fast path'
+- main unpushed; untracked design handoff zips untouched; .claude-supervisor is prettier-ignored

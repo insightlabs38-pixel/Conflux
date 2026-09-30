@@ -20,7 +20,7 @@
 | signin               | read-only         |              3 |             3 |                   0 |      0 |
 | uiv2-gate            | read-only         |             13 |             0 |                  13 |      0 |
 | uiv2-surfaces        | read-only         |              4 |             0 |                   4 |      0 |
-| workspace-shell      | read-only         |             13 |             1 |                  13 |      1 |
+| workspace-shell      | read-only         |             14 |             1 |                  13 |      0 |
 | auth-states          | self-isolating    |              5 |             0 |                   5 |      0 |
 | fixture-isolation    | self-isolating    |              3 |             0 |                   3 |      0 |
-| **total**            |                   |        **131** |        **24** |             **103** |  **1** |
+| **total**            |                   |        **132** |        **24** |             **103** |  **0** |

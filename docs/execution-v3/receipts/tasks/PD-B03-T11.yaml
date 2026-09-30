@@ -1,0 +1,69 @@
+version: 3
+task: PD-B03-T11
+batch: PD-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: da820d04371cdffe3b647f9ec9720dbbd186d3dc
+  head_commit: da820d04371cdffe3b647f9ec9720dbbd186d3dc
+changed_paths:
+- tests/e2e/workspace-shell.spec.ts
+- README.md
+- docs/verification/PD-B03/EQUIVALENCE.md
+- docs/verification/PD-B03/COVERAGE.md
+- docs/verification/PD-B03/MATRIX.md
+- docs/verification/PD-B03/logs/
+deliverables:
+- item: Verification matrix linking the 11 capability tasks to executable proofs
+  result: pass
+  evidence: docs/verification/PD-B03/MATRIX.md rows T01-T11 (positive, negative, authorization/isolation, concurrency)
+- item: Equivalent or stronger coverage with materially lower feedback latency
+  result: pass
+  evidence: EQUIVALENCE.md - 235 baseline test ids all present (0 missing), 54 new; 156 passed/103 skipped/0 failed vs baseline 144/91; PR loop 3m48s+12s reset -> 2m22s median without reset, smoke 11 s, affected 35-49 s
+- item: Tiers run repeatedly
+  result: pass
+  evidence: 21 full runs recorded; 10/10 consecutive clean after the final fix (median 142 s, max 143 s); canary repeat 2/2; serial demo-e2e 156 passed twice
+- item: Exact commands/results and limitations in the batch receipt
+  result: pass
+  evidence: docs/execution-v3/receipts/batches/PD-B03.md
+invariants:
+- item: No test, gate or assertion weakened
+  result: pass
+  evidence: zero baseline ids missing; every assertion retained; three specs got root-cause fixes documented in EQUIVALENCE.md
+- item: Authoritative domain behavior unchanged
+  result: pass
+  evidence: no product code changed in PD-B03 except the additive e2e_fixture management command and its module
+verification:
+- command: make e2e-fast x10 after the fix; make e2e-report --check
+  result: pass
+  note: 10/10 clean, no breach
+- command: make demo-reset demo-e2e
+  result: pass
+  note: 156 passed, 133 skipped, 0 failed, 9.0 min (run after the last code change)
+- command: DATABASE_URL=<confluxh00 PG17 :15432> uv run --frozen pytest -n auto --dist worksteal
+  result: pass
+  note: 1472 passed, 4 skipped, 47 s (password not logged)
+- command: make verify-fast
+  result: pass
+  note: pytest 1453 passed/23 skipped; web 169 + embed 8; lint, format, build, sdk clean
+- command: python3 scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid, 331 batches, 3110 tasks
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: full browser suite, serial and tiered
+migrations: []
+findings:
+- workspace-shell new-tab check lost the popup under load (run 11 of 21; reproduced 5-7/48 at 8 workers); fixed by asserting the link contract deterministically and retrying only the popup plumbing; 96/96 x3 after, 12/96 needed a second attempt (annotated popup-attempts)
+escalations: []
+limitations:
+- Targets and timings come from one 8-core host; sharded speedup across machines and a scheduled CI workflow are not exercised.
+- The popup step can need retries under heavy load (12/96 at 8 workers); it is annotated so drift is visible.
+- Same agent implemented and reviewed the batch.
+next: batch_close

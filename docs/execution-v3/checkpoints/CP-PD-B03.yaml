@@ -1,0 +1,30 @@
+version: 1
+checkpoint_id: CP-PD-B03
+created_at: '2026-09-30T10:33:07Z'
+canonical_commit: da820d04371cdffe3b647f9ec9720dbbd186d3dc
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+- PD-B02
+- PD-B03
+active_batches:
+- PD-B04
+active_claims: []
+open_escalations: []
+last_completed_task: PD-B03-T11
+ready_summary:
+- PD-B04-T01 (first task of frontend routing/server-state foundation; promoted IN_PROGRESS, not started)
+design_revision: r2.1
+verification_summary:
+- make e2e-fast x10 clean after final fix 156/103/0 median 142s (21 recorded runs, 1 flake fixed)
+- serial demo-reset demo-e2e 156 passed 9.0 min after last change
+- verify-fast 1453/23 + web 169+8; PG17 1472/4
+- validate_queue valid
+recovery_notes:
+- 'Browser suite: docs/operations/E2E.md (fixtures, tiers, smoke/affected, sharding, canary gate, targets); evidence docs/verification/PD-B03/'
+- 'Run history: artifacts/e2e-fast/history.jsonl (git-ignored; snapshot in docs/verification/PD-B03/logs/T10-history.jsonl); make e2e-report'
+- 'Stack: compose project conflux rebuilt once at PD-B03-T02 (e2e_fixture command); seed 7 reset to submitted after the final serial run; leftover fixtures none'
+- 'app container bakes source: docker compose up -d --build app after backend changes; scripts/e2e-stack status reports drift'
+- main unpushed; untracked design handoff zips untouched

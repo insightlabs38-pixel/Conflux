@@ -1,0 +1,56 @@
+bringing up nodes...
+bringing up nodes...
+
+...............s........................................................ [  5%]
+........................................................................ [ 10%]
+........................................................................ [ 15%]
+........................................................................ [ 20%]
+........................................................................ [ 25%]
+........................................................................ [ 30%]
+........................................................................ [ 35%]
+........................................................................ [ 40%]
+........................................................................ [ 45%]
+........................................................................ [ 50%]
+........................................................................ [ 55%]
+........................................................................ [ 60%]
+.................................s...................................... [ 65%]
+........................................................................ [ 70%]
+........................................................................ [ 75%]
+........................................................................ [ 80%]
+....sssssssssssss.......................................s............... [ 86%]
+........................................................................ [ 91%]
+......ss...s.....s...............................................ss..s.. [ 96%]
+.......................................................                  [100%]
+============================= slowest 30 durations =============================
+8.04s setup    tests/integration/test_assignment_rebalance.py::test_rebalance_endpoint_creates_a_new_version_and_records_an_audit_event
+7.85s setup    tests/integration/test_accessibility_conformance.py::test_each_defect_is_detected_with_evidence[<!doctype html><html lang="en"><head><title>T</title>\n<meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body>\n<a href="#main-content">Skip</a><main id="main-content"><h1>A</h1><h2>B</h2>\n<img src="x.png" ><a href="/x">Gallery</a>\n<label for="q">Search</label><input id="q" name="q"><button>Go</button></main></body></html>-image-alt]
+7.82s setup    tests/acceptance/test_acceptance_auth_config.py::test_dogfood_toml_declares_all_four_acceptance_roles
+7.78s setup    tests/integration/community/test_fraud_review.py::test_resolution_requires_note_is_single_use_and_records_actor
+7.67s setup    tests/integration/test_api_credentials.py::test_credential_creation_rejects_invalid_scope_and_wrong_event
+7.60s setup    tests/integration/test_artifact_portability.py::test_invalid_source_is_never_copied[ContentLength]
+7.54s setup    tests/integration/test_coi_relationships.py::test_relationship_api_scopes_self_declarations_and_rejects_invalid_targets
+7.48s setup    tests/integration/test_blind_judging_api.py::test_candidate_queue_anonymizes_the_name_when_blind_judging_is_enabled
+6.97s call     tests/security/test_session_csrf.py::test_login_throttles_guessing_per_account_and_resets_on_success
+3.32s call     tests/integration/test_demo_scenarios.py::test_submitted_checkpoint_starts_the_live_lifecycle_unpublished_and_open
+2.84s call     tests/integration/test_assignment_rebalance.py::test_rebalance_is_deterministic_and_preserves_connectivity
+2.40s call     tests/integration/test_demo_scenarios.py::test_optional_password_makes_accounts_loginable_and_public_flag_applies
+2.15s call     tests/security/test_route_sweep.py::test_adversarial_bodies_never_cause_a_server_error[organizer]
+2.07s call     tests/integration/test_onsite.py::test_qr_is_an_svg_of_the_pass_only_for_the_owner
+2.04s call     tests/security/test_route_sweep.py::test_adversarial_bodies_never_cause_a_server_error[judge]
+2.02s call     tests/security/test_route_sweep.py::test_adversarial_bodies_never_cause_a_server_error[participant]
+1.91s call     tests/integration/test_onsite.py::test_auto_assign_previews_then_places_in_person_projects_deterministically
+1.90s call     tests/integration/test_demo_scenarios.py::test_same_seed_reproduces_content_and_different_seed_differs
+1.83s call     tests/integration/test_assignment_rebalance.py::test_dropout_simulation_matches_rebalance_without_writing
+1.80s call     tests/integration/test_onsite.py::test_placement_capacity_moves_and_visibility_by_role
+1.79s call     tests/integration/test_onsite.py::test_rsvp_is_self_service_and_summary_counts_are_staff_only
+1.76s call     tests/integration/test_onsite.py::test_pass_is_signed_stable_event_bound_and_scannable_once
+1.75s call     tests/integration/test_onsite.py::test_locations_are_organizer_managed_validated_and_readable_by_members
+1.73s call     tests/integration/test_marketplace.py::test_full_and_team_locked_openings_disappear_from_discovery
+1.71s call     tests/integration/test_onsite.py::test_archived_events_freeze_onsite_changes
+1.63s call     tests/integration/test_assignment_rebalance.py::test_rebalance_endpoint_creates_a_new_version_and_records_an_audit_event
+1.63s call     tests/integration/community/test_abuse_controls.py::test_authenticated_voters_sharing_one_ip_are_throttled_per_account
+1.59s call     tests/integration/test_openapi_schema.py::test_live_schema_contains_workspace_routes_and_auth_schemes
+1.54s call     tests/integration/test_assignment_rebalance.py::test_rebalance_keeps_submitted_pairings_and_reassigns_pending_ones
+1.53s call     tests/test_generated_sdks.py::test_generated_catalog_matches_checked_openapi
+1400 passed, 23 skipped in 77.74s (0:01:17)
+exit=0

@@ -1,0 +1,47 @@
+bringing up nodes...
+bringing up nodes...
+
+...........................s............................................ [  5%]
+........................................................................ [ 10%]
+........................................................................ [ 15%]
+........................................................................ [ 20%]
+........................................................................ [ 25%]
+........................................................................ [ 30%]
+........................................................................ [ 35%]
+........................................................................ [ 40%]
+........................................................................ [ 45%]
+........................................................................ [ 50%]
+........................................................................ [ 55%]
+........................................................................ [ 60%]
+........................................................................ [ 65%]
+........................................................................ [ 70%]
+........................................................................ [ 75%]
+........................................................................ [ 80%]
+...........................................................s............ [ 86%]
+........................................................................ [ 91%]
+...............................................sss...................... [ 96%]
+.......................................................                  [100%]
+============================= slowest 15 durations =============================
+8.44s setup    tests/acceptance/test_acceptance_auth_config.py::test_dogfood_toml_declares_all_four_acceptance_roles
+8.43s setup    tests/integration/community/test_fraud_review.py::test_resolution_requires_note_is_single_use_and_records_actor
+8.42s setup    tests/integration/test_api_credentials.py::test_credential_creation_rejects_invalid_scope_and_wrong_event
+8.40s setup    tests/integration/test_blind_judging_api.py::test_candidate_queue_anonymizes_the_name_when_blind_judging_is_enabled
+8.39s setup    tests/integration/test_artifact_portability.py::test_invalid_source_is_never_copied[ContentLength]
+8.38s setup    tests/integration/test_assignment_rebalance.py::test_rebalance_endpoint_creates_a_new_version_and_records_an_audit_event
+8.32s setup    tests/integration/test_coi_relationships.py::test_relationship_api_scopes_self_declarations_and_rejects_invalid_targets
+8.31s setup    tests/integration/test_accessibility_conformance.py::test_each_defect_is_detected_with_evidence[<!doctype html><html lang="en"><head><title>T</title>\n<meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body>\n<a href="#main-content">Skip</a><main id="main-content"><h1>A</h1><h2>B</h2>\n<img src="x.png" ><a href="/x">Gallery</a>\n<label for="q">Search</label><input id="q" name="q"><button>Go</button></main></body></html>-image-alt]
+7.19s call     tests/security/test_session_csrf.py::test_login_throttles_guessing_per_account_and_resets_on_success
+5.47s call     tests/integration/test_demo_scenarios.py::test_same_seed_reproduces_content_and_different_seed_differs
+3.97s call     tests/integration/test_demo_showcase.py::test_showcase_is_idempotent_deterministic_and_purgeable
+3.51s teardown tests/test_public_service_worker.py::test_public_worker_respects_response_visibility_and_offline_history[offline]
+3.43s call     tests/integration/test_demo_scenarios.py::test_submitted_checkpoint_starts_the_live_lifecycle_unpublished_and_open
+3.26s call     tests/security/test_route_sweep.py::test_adversarial_bodies_never_cause_a_server_error[organizer]
+3.12s teardown tests/test_public_service_worker.py::test_public_worker_respects_response_visibility_and_offline_history[normal]
+=========================== short test summary info ============================
+SKIPPED [1] tests/integration/test_artifact_portability.py:262: Requires two disposable S3-compatible endpoints
+SKIPPED [1] tests/compatibility/test_prior_schema_migration_smoke.py: No prior released schema exists yet to smoke-test an upgrade from (see docs/operations/UPGRADES.md, 'Prior-schema migration smoke fixture').
+SKIPPED [1] tests/storage/test_s3_contract.py:40: Set CONFLUX_S3_TEST_ENDPOINT to run the storage contract
+SKIPPED [1] tests/storage/test_s3_contract.py:63: Set CONFLUX_S3_TEST_ENDPOINT to run the storage contract
+SKIPPED [1] tests/storage/test_s3_contract.py:90: Set CONFLUX_S3_TEST_ENDPOINT to run the storage contract
+1418 passed, 5 skipped in 96.97s (0:01:36)
+exit=0

@@ -1,0 +1,5 @@
+uv run --frozen python scripts/check_openapi_artifact.py
+uv run --frozen python scripts/generate_sdks.py --check
+pnpm --filter @conflux/sdk build
+$ tsc -p tsconfig.build.json
+6.22s

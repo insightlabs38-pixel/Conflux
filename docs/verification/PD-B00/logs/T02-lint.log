@@ -1,0 +1,7 @@
+uv run --frozen ruff check src/api tests
+All checks passed!
+pnpm lint
+$ pnpm --filter @conflux/web lint && pnpm --filter @conflux/embed lint
+$ tsc --noEmit
+$ tsc --noEmit
+5.32s

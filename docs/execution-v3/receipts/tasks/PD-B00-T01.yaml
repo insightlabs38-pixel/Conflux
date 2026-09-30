@@ -1,0 +1,58 @@
+version: 3
+task: PD-B00-T01
+batch: PD-B00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: b5f398dfc0c4330b34c894bd6d648da6213c83d4
+  head_commit: 94daaa2a0a1eea6ecc3d1715cd3f636ede517cf0
+changed_paths:
+- docs/verification/PD-B00/BASELINE_FREEZE.md
+deliverables:
+- item: Record exact main SHA
+  result: pass
+  evidence: Product baseline e1888de (UIV2-B10); repo HEAD recorded; product tree clean vs HEAD
+- item: Record supported deployment/test commands
+  result: pass
+  evidence: Command table in BASELINE_FREEZE.md; 15 make targets resolved via make -n; key scripts executable
+- item: Record documented claims and known limitations
+  result: pass
+  evidence: Claims from README/verification docs listed as to-be-measured; limitations copied from docs/verification/README.md
+- item: Record representative demo data
+  result: pass
+  evidence: demo-hackathon-7, release-freeze snapshot ids, official fixture; snapshot sha256 verified
+    against MANIFEST
+invariants:
+- item: Preserve current authoritative domain behavior
+  result: pass
+  evidence: no code changes
+- item: Do not weaken tests/gates
+  result: pass
+  evidence: none touched
+- item: Record exact evidence and limitations
+  result: pass
+  evidence: see freeze doc; image-to-SHA match flagged unverified
+verification:
+- command: cd demo/release-freeze && sha256sum db.dump objectstore.tar.gz
+  result: pass
+  note: matches MANIFEST.md hashes (realistic persisted data)
+- command: make -n <15 documented targets>; make -n nonexistent-target
+  result: pass
+  note: all documented targets resolve; nonexistent target fails with clear 'No rule to make target' (negative
+    case)
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs/evidence-only task
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Running conflux stack's image was not proven to be built from e1888de.
+- Commands recorded, not executed here; execution is T02-T07.
+next: review

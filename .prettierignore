@@ -20,3 +20,15 @@ src/api/onsite/templates
 # Authoritative queue preserves imported completed history and its YAML schema style.
 # Validate this queue with its schemas; avoid bulk reformatting historical records.
 docs/execution/*.yaml
+
+# Product Depth v3 control bundle: controller-managed plan/state/receipts, specs and prompts are
+# installed verbatim from the execution bundle; do not bulk-reformat (13 MB queue, frozen specs).
+/TASKS.yaml
+/BATCHES.yaml
+/BUNDLE_MANIFEST.yaml
+/AGENTS.md
+/conflux_deep_product_feature_research_v2.md
+/conflux_utility_filtered_opportunity_pass.md
+/prompts/
+docs/execution-v3/
+docs/product-depth-v3/

@@ -1,0 +1,2 @@
+uv run --frozen python scripts/generate_block_schemas.py --check
+0.16s

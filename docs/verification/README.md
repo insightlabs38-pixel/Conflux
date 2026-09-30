@@ -35,7 +35,7 @@ backup/restore, chaos, artifact portability, load and Dex evidence.
   by the Dex smoke; see [SSO](../operations/SSO.md).
 - Judges' deliberation notes/stances and technical operator features remain
   API/CLI-first; see [UI map](../operations/PVS_UI.md).
-- After uploading evidence, re-open the project to refresh the submission artifact picker.
+- After uploading evidence, use **Refresh included artifacts** on the Submission tab (or switch tabs) to refresh the artifact picker; it does not update live. (Corrected 2026-09-30, PD-B00-T06; previously said to re-open the project.)
 - Final archives carry sponsor resources in v3. v1 config/full and
   Event-as-Code have narrower configuration scope. Stored artifact bytes
   need the separate artifact portability/backup path.

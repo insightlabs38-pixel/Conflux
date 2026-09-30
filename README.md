@@ -36,9 +36,10 @@ of those automated assertions. Conflux's separate
 [extended verifier](docs/verification/dogfood-extended.txt) supplies reproducible
 T3/T4 and advanced-capability evidence: `make verify-dogfood-extended`.
 
-- Fast gate: **1373 backend tests passed**, 23 skipped; **137 web + 8 embed**
+- Fast gate (re-measured 2026-09-30, [PD-B00 baseline](docs/verification/PD-B00/BASELINE_RESULTS.md)):
+  **1400 backend tests passed**, 23 skipped (**1418 passed, 5 skipped** on PostgreSQL 17); **168 web + 8 embed**
   tests, format/lint/build, OpenAPI and SDK consistency clean.
-- Current PostgreSQL and Playwright results: [final targeted pass](docs/verification/final-pass/report.md).
+- Playwright (re-measured): **144 passed, 91 desktop-only mobile skips**, 0 failed. Earlier receipts: [final targeted pass](docs/verification/final-pass/report.md).
 - Prior release receipts: **Dex OIDC 18/18**; cold/offline Compose startup,
   backup/restore, chaos and artifact portability pass; load **149.6 req/s**
   with **zero 5xx or race violations**, integrity checks passing.

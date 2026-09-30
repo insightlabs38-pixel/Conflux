@@ -32,3 +32,5 @@ docs/execution/*.yaml
 /prompts/
 docs/execution-v3/
 docs/product-depth-v3/
+# Supervisor runtime files (git-ignored, written by the harness)
+.claude-supervisor

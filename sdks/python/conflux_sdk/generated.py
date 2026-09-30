@@ -1138,6 +1138,7 @@ class ConfigurationEntrySchema(TypedDict):
     source: SourceEnum
     editable: bool
     lock: ConfigurationLockSchema | None
+    constraint: str | None
     write: ConfigurationWriteSchema | None
     module_enabled: bool
 
@@ -1154,6 +1155,7 @@ class InputOfConfigurationEntrySchema(TypedDict):
     source: InputOfSourceEnum
     editable: bool
     lock: InputOfConfigurationLockSchema | None
+    constraint: str | None
     write: InputOfConfigurationWriteSchema | None
     module_enabled: bool
 

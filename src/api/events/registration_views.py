@@ -1,5 +1,7 @@
 from accounts.authentication import CookieSessionAuthentication
+from audit.services import diff_snapshots, record_mutation, snapshot_fields
 from django.core.exceptions import ValidationError as ModelValidationError
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from rest_framework.exceptions import ValidationError
@@ -37,11 +39,24 @@ class RegistrationSettingsView(OrganizerView):
         settings_obj = registration.get_settings(event)
         serializer = RegistrationSettingsSerializer(settings_obj, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
+        fields = list(serializer.validated_data)
+        before = snapshot_fields(settings_obj, fields)
         try:
-            for key, value in serializer.validated_data.items():
-                setattr(settings_obj, key, value)
-            settings_obj.full_clean()
-            settings_obj.save()
+            with transaction.atomic():
+                for key, value in serializer.validated_data.items():
+                    setattr(settings_obj, key, value)
+                settings_obj.full_clean()
+                settings_obj.save()
+                # A registration rule change is a configuration change like any other: on the
+                # record, with what it was before (it was the one event setting that was not).
+                changes = diff_snapshots(before, snapshot_fields(settings_obj, fields))
+                record_mutation(
+                    actor=request.user,
+                    workspace=self.get_workspace(),
+                    action="registration.settings_updated",
+                    target=settings_obj,
+                    metadata={"event_id": str(event.public_id), "changes": changes},
+                )
         except ModelValidationError as exc:
             raise _validation_error(exc) from exc
         return Response(RegistrationSettingsSerializer(settings_obj).data)

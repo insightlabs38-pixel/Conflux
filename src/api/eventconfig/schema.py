@@ -53,6 +53,7 @@ class ConfigurationEntrySchema(serializers.Serializer):
     )
     editable = serializers.BooleanField()
     lock = ConfigurationLockSchema(allow_null=True)
+    constraint = serializers.CharField(allow_null=True)
     write = ConfigurationWriteSchema(allow_null=True)
     module_enabled = serializers.BooleanField()
 

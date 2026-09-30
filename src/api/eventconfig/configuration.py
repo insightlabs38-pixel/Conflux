@@ -37,6 +37,7 @@ def effective_configuration(event, *, module=None, tier=None, source=None, key=N
         value = _plain(spec.read(event))
         entry_source = _source(spec, value, base, preset is not None)
         lock = spec.lock(event) if spec.lock else None
+        constraint = spec.constraint(event) if callable(spec.constraint) else spec.constraint
         entry = {
             "key": spec.key,
             "module": spec.module,
@@ -50,6 +51,7 @@ def effective_configuration(event, *, module=None, tier=None, source=None, key=N
             "source": entry_source,
             "editable": spec.write is not None and lock is None,
             "lock": {"code": lock.code, "message": lock.message} if lock else None,
+            "constraint": constraint.strip() if constraint else None,
             "write": (
                 {
                     "method": spec.write.method,

@@ -1,0 +1,80 @@
+version: 3
+task: PD-F001-B01-T07
+batch: PD-F001-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 08b78af
+  head_commit: 08b78af
+changed_paths:
+- src/api/eventconfig/ (registry.py locks and constraints, configuration.py, schema.py)
+- src/api/events/registration_views.py
+- src/web/features/event-builder/ConfigurationPanel.tsx
+- src/web/features/event-builder/ConfigurationPanel.test.tsx
+- tests/integration/test_event_overrides.py
+- tests/e2e/event-configuration.spec.ts
+- docs/api/openapi.yaml
+- sdks/
+deliverables:
+- item: Every default can be overridden where domain invariants permit
+  result: pass
+  evidence: test_event_overrides.py overrides every writable registry setting (15) through the write the configuration answer documents, and a proof-table coverage test fails when a setting is added without one; the value, the overridden source and the unchanged baseline are asserted
+- item: A lock is exactly what the domain refuses, with its reason
+  result: pass
+  evidence: for each setting an archived event reports editable false with lock code event_archived and the message the endpoint itself answers with (the event endpoint and the configuration endpoints word it differently and each is reported verbatim); the documented write is refused 400 with that message and leaves the value unchanged
+- item: Constraints shape a valid change
+  result: pass
+  evidence: entries state what a new value must satisfy, including state-dependent rules (dates required and end in the future while the event is open); the endpoints are shown to enforce the stated ones (crossed dates, capacity 0, min above max are 400)
+- item: Registration rule changes are on the record
+  result: pass
+  evidence: PUT registration-settings now writes a registration.settings_updated audit event with before/after in one transaction with the change; a rejected change writes nothing
+invariants:
+- item: Server-side validation, authorization and audit remain authoritative; no bypass
+  result: pass
+  evidence: overrides go through the existing endpoints; the registry only describes; no generic settings write exists
+- item: No silent failure
+  result: pass
+  evidence: a refusal always names its reason (lock message or the endpoint's validation)
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1528 passed, 23 skipped (adds 34 override and lock conformance tests)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 316 web tests; static checks clean
+- command: make e2e-fast
+  result: pass
+  note: read-only, isolated-mutation (event-configuration shows the rule text) and canary tiers ok on the rebuilt image
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: constraint and lock text in Defaults and overrides
+- surface: api
+  result: pass
+  evidence: configuration entries gain constraint; registration settings change audited
+- surface: audit
+  result: pass
+  evidence: registration.settings_updated with before/after (it appears in the event's configuration history)
+- surface: docs
+  result: pass
+  evidence: OpenAPI and SDKs regenerated
+- surface: sdk
+  result: pass
+  evidence: "not applicable for this task: not_required; generated artifacts regenerated only"
+migrations: []
+findings:
+- Pre-existing gap fixed - registration settings changes were the only event setting change with no audit record (an inseparable audit-invariant fix, additive)
+- The only lock the domain enforces today is the archived event; no further locks were invented. Consequences of a change (teams already larger than a new maximum, pending applications under a new mode) are not enforced by the domain and are F001-B02 consequence preview territory
+- Datetime values follow the API wire format (display zone), so they compare as instants, not strings
+- A write with body whole (eligibility rules) needs every input field; automation reads the endpoint's documented request schema (OpenAPI) and must drop read-only fields such as updated_at
+limitations:
+- No reset-to-format action; a value is returned to its baseline by writing it through the documented endpoint
+- Judging, stage and award settings are multi-instance and not in the registry yet
+escalations:
+- ESC-20260930-002 (resolved, option A)
+next: review

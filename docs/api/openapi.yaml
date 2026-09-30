@@ -18581,6 +18581,9 @@ components:
           allOf:
           - $ref: '#/components/schemas/ConfigurationLockSchema'
           nullable: true
+        constraint:
+          type: string
+          nullable: true
         write:
           allOf:
           - $ref: '#/components/schemas/ConfigurationWriteSchema'
@@ -18589,6 +18592,7 @@ components:
           type: boolean
       required:
       - baseline
+      - constraint
       - default
       - editable
       - help

@@ -15,6 +15,7 @@ type Entry = {
   source: "default" | "preset" | "overridden" | "set" | "unset" | "derived";
   editable: boolean;
   lock: { code: string; message: string } | null;
+  constraint: string | null;
   module_enabled: boolean;
 };
 type Configuration = {
@@ -117,7 +118,9 @@ export function ConfigurationPanel({
                   ` Started as ${show(entry.baseline ?? entry.default)}.`}
                 {!entry.module_enabled &&
                   ` Belongs to ${entry.module.replace(/_/g, " ")}, which is off.`}
-                {entry.lock && ` Locked: ${entry.lock.message}`}
+                {entry.lock
+                  ? ` Locked: ${entry.lock.message}`
+                  : entry.constraint && ` Rule: ${entry.constraint}`}
               </small>
             </li>
           ))}

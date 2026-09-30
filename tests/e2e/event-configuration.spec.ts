@@ -96,6 +96,10 @@ for (const width of [390, 1440]) {
     );
     await expect(panel).toContainText("Registration: invite only");
     await expect(panel).toContainText("Started as open.");
+    // What a valid new value must satisfy is stated next to the value.
+    await expect(panel).toContainText(
+      "Rule: Between 1 and 100, and not below the smallest team.",
+    );
     await panel.getByLabel("Show").selectOption("overridden");
     await expect(panel.getByRole("listitem")).toHaveCount(1);
     await expect(panel).toContainText("Registration: invite only");

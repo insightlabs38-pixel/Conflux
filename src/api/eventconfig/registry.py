@@ -14,6 +14,7 @@ from typing import Any
 from artifacts.models import ArtifactKind
 from eligibility.models import EligibilityRules
 from events.models import Event, EventRegistrationSettings, EventStatus, RegistrationMode
+from rest_framework import serializers
 
 BASE, ADVANCED, EXPERT = "base", "advanced", "expert"
 TIERS = (BASE, ADVANCED, EXPERT)
@@ -54,6 +55,9 @@ class SettingSpec:
     organizer_owned: bool = False
     derived: bool = False
     lock: Callable[[Event], Lock | None] | None = None
+    # What a valid new value must satisfy beyond its type: text, or a function of the event for
+    # rules that only apply in some states. A lock stops a change; a constraint shapes it.
+    constraint: str | Callable[[Event], str | None] | None = None
     # Free-form marker used by tests and docs, e.g. which task introduced the entry.
     tags: tuple = field(default_factory=tuple)
 
@@ -78,7 +82,9 @@ def _rules(event):
 
 
 def _iso(value):
-    return value.isoformat() if value else None
+    # The same wire format as the rest of the API (UTC as "Z"), so a value compares equal to what
+    # the event endpoint returns and accepts.
+    return serializers.DateTimeField().to_representation(value) if value else None
 
 
 def _duration_hours(event):
@@ -87,10 +93,34 @@ def _duration_hours(event):
     return round((event.ends_at - event.starts_at).total_seconds() / 3600, 2)
 
 
-def _archived_lock(event):
-    if event.status == EventStatus.ARCHIVED:
-        return Lock("event_archived", "Archived event configuration cannot be edited.")
+def _open_dates_constraint(event):
+    if event.status == EventStatus.OPEN:
+        return "Both dates are required while the event is open, and the end must be in the future."
     return None
+
+
+def _starts_constraint(event):
+    return "Must be before the end when both are set. " + (_open_dates_constraint(event) or "")
+
+
+def _ends_constraint(event):
+    return "Must be after the start. " + (_open_dates_constraint(event) or "")
+
+
+def _archived_lock(message):
+    """The lock the endpoint itself enforces, with the message it answers with."""
+
+    def lock(event):
+        if event.status == EventStatus.ARCHIVED:
+            return Lock("event_archived", message)
+        return None
+
+    return lock
+
+
+# The event endpoint and the configuration endpoints word the same refusal differently.
+_ARCHIVED_EVENT = _archived_lock("Archived events cannot be edited.")
+_ARCHIVED_CONFIG = _archived_lock("Archived event configuration cannot be edited.")
 
 
 SPECS = [
@@ -140,6 +170,7 @@ SPECS = [
         None,
         _w(_EVENT, "starts_at"),
         organizer_owned=True,
+        constraint=_starts_constraint,
     ),
     SettingSpec(
         "event.ends_at",
@@ -152,6 +183,7 @@ SPECS = [
         None,
         _w(_EVENT, "ends_at"),
         organizer_owned=True,
+        constraint=_ends_constraint,
     ),
     SettingSpec(
         "event.is_public",
@@ -185,6 +217,7 @@ SPECS = [
         lambda e: _registration(e).capacity,
         None,
         _w(_REGISTRATION, "capacity"),
+        constraint="At least 1; leave empty for no limit.",
     ),
     SettingSpec(
         "registration.waitlist_enabled",
@@ -207,6 +240,7 @@ SPECS = [
         lambda e: _rules(e).min_team_size,
         None,
         _w(_RULES, "min_team_size"),
+        constraint="Between 1 and 100, and not above the largest team.",
     ),
     SettingSpec(
         "team.max_size",
@@ -218,6 +252,7 @@ SPECS = [
         lambda e: _rules(e).max_team_size,
         None,
         _w(_RULES, "max_team_size"),
+        constraint="Between 1 and 100, and not below the smallest team.",
     ),
     SettingSpec(
         "submission.required_artifact_kinds",
@@ -233,6 +268,7 @@ SPECS = [
         lambda e: list(_rules(e).required_artifact_kinds or []),
         [],
         _w(_RULES, "required_artifact_kinds"),
+        constraint="Each kind at most once, from the known evidence kinds.",
     ),
     SettingSpec(
         "submission.require_finalized",
@@ -282,7 +318,11 @@ SPECS = [
 ]
 for _spec in SPECS:
     if _spec.lock is None and not _spec.derived:
-        object.__setattr__(_spec, "lock", _archived_lock)
+        object.__setattr__(
+            _spec,
+            "lock",
+            _ARCHIVED_EVENT if _spec.write.path.endswith("{event}/") else _ARCHIVED_CONFIG,
+        )
 
 BY_KEY = {spec.key: spec for spec in SPECS}
 assert len(BY_KEY) == len(SPECS), "duplicate setting key"

@@ -1260,6 +1260,7 @@ export type ConfigurationEntrySchema = {
   source: SourceEnum;
   editable: boolean;
   lock: ConfigurationLockSchema | null;
+  constraint: string | null;
   write: ConfigurationWriteSchema | null;
   module_enabled: boolean;
 };
@@ -1277,6 +1278,7 @@ export type InputOfConfigurationEntrySchema = {
   source: InputOfSourceEnum;
   editable: boolean;
   lock: InputOfConfigurationLockSchema | null;
+  constraint: string | null;
   write: InputOfConfigurationWriteSchema | null;
   module_enabled: boolean;
 };

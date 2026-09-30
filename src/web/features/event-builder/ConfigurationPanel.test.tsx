@@ -22,6 +22,7 @@ const entry = (over: Record<string, unknown>) => ({
   source: "preset",
   editable: true,
   lock: null,
+  constraint: null,
   module_enabled: true,
   ...over,
 });
@@ -70,6 +71,13 @@ describe("ConfigurationPanel", () => {
             },
           }),
           entry({
+            key: "team.max_size",
+            label: "Largest team",
+            value: 5,
+            source: "preset",
+            constraint: "Between 1 and 100, and not below the smallest team.",
+          }),
+          entry({
             key: "eligibility.require_clearance",
             label: "Require clearance",
             module: "eligibility_review",
@@ -92,6 +100,11 @@ describe("ConfigurationPanel", () => {
       "Locked: Archived event configuration cannot be edited.",
     );
     expect(text).toContain("Belongs to eligibility review, which is off.");
+    // A constraint says what a valid new value must satisfy; a lock takes its place when present.
+    expect(text).toContain(
+      "Rule: Between 1 and 100, and not below the smallest team.",
+    );
+    expect(text).not.toContain("Rule: Archived");
     act(() => root.unmount());
   });
 

@@ -11,7 +11,7 @@ Env: `E2E_BASE_URL`, `E2E_DEMO_SEED` (7), `E2E_DEMO_PASSWORD` (demo-pass-7). Chr
 
 - `signin`, `public`, `roles`: sign-in/out, public pages, organizer/judge/participant workspaces at 1280×800 and 390×844 — no console errors or failed requests, no horizontal overflow, axe WCAG 2 A/AA clean, skip-link and focus-ring keyboard checks. Loading states must resolve before assertions.
 - `scenes` (desktop): deterministic screenshots in `tests/e2e/artifacts/scenes/` and one video per scene under `artifacts/results/*/video.webm`. Failures keep traces (`npx playwright show-trace`).
-- `lifecycle` (desktop, serial, successful videos retained): the recorded demo lifecycle through the UI only — participant creates team and project, uploads a technical brief, submits and receives a signed receipt; organizer requests changes, participant remediates, organizer clears; three judges inspect artifacts and score; organizer publishes results, finalizes in the deliberation room, publishes the award; the public results page shows it. Needs a fresh `scripts/demo-reset submitted` (it consumes participant-24).
+- `lifecycle` (desktop, serial, successful videos retained): the recorded demo lifecycle through the UI only — participant creates team and project, uploads a technical brief, submits and receives a signed receipt; organizer requests changes, participant remediates, organizer clears; three judges inspect artifacts and score; organizer publishes results, finalizes in the deliberation room, publishes the award; the public results page shows it. Needs a fresh `scripts/demo-reset submitted` (it consumes participant-24); if the demo was not reset the first step fails within 10 s with a message saying so.
 - `pvs`: mentor desk, volunteer check-in by pass, participant RSVP/office hours/mentor request, deadline-exception request and decision, rules publish and acknowledge, and a layout/axe check of every organizer operations panel (also at 390×844). Workflows run on desktop only; run after a reset.
 - Addressing: people by username, the event through the API; the event's public ID is also stable across resets.
 
@@ -20,3 +20,5 @@ Env: `E2E_BASE_URL`, `E2E_DEMO_SEED` (7), `E2E_DEMO_PASSWORD` (demo-pass-7). Chr
 - Media handoff: `scripts/package-demo-media submitted` after a successful
   submitted run; repeat with `published` after its scene run, then use
   `scripts/package-demo-media --zip`. See [DEMO.md](DEMO.md).
+
+- `pdv3-baseline-census` (opt-in, `E2E_CENSUS=1`, run after `scripts/demo-reset`): measurement-only tour that writes full-page JPEGs and a `manifest.json` (console/HTTP problems, horizontal overflow, axe counts) for every role at 1280×800 and 390×844 to `docs/verification/PD-B00/ui-census/`. It asserts nothing about layout and is skipped in normal runs.

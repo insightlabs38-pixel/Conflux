@@ -48,7 +48,7 @@ migrations: []
 findings: []
 escalations: []
 limitations:
-- waitForTimeout is used in tests/e2e for animation/network settling; not changed (no failing flake evidence).
+- No existing e2e spec uses waitForTimeout (only the opt-in census harness, for settling before measurement).
   My earlier attempt to prove the negative ran on already-fresh state and passed; re-run on consumed state
   gave the recorded failure.
 next: review

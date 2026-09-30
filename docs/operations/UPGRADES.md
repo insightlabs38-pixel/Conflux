@@ -76,8 +76,12 @@ that decision gets recorded.
 
 ## Prior-schema migration smoke fixture
 
-Once a prior released schema/fixture exists to migrate _from_ (there is
-only one released version so far, so there is nothing to smoke-test yet),
-`tests/compatibility/` is where that regression fixture and test belong,
-following the same pattern as `test_canonical_archive.py` and
-`test_migration_discipline.py` already in this directory.
+`demo/release-freeze` (PostgreSQL 17 dump from the 2026-09-27 release rehearsal, checksum in its
+`MANIFEST.md`) is the recorded prior released schema. `tests/compatibility/test_prior_schema_migration_smoke.py`
+restores it into a scratch database, runs a normal `manage.py migrate` with the current code, checks
+`migrate --check` is clean, and asserts the five records named in the manifest (event, project,
+submission version, ballot, award) read back exactly once. It runs when `DATABASE_URL` is PostgreSQL
+and a `pg_restore` that can read the dump is available (local, else Docker `postgres:17`, override with
+`CONFLUX_PG_RESTORE_IMAGE`); otherwise it skips with the reason. A companion test pins the dump's
+SHA-256 so the fixture cannot drift silently. When a newer release ships, add its dump next to this one
+and extend the test rather than replacing the record of the older release.

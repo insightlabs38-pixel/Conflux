@@ -1,0 +1,46 @@
+version: 3
+task: PD-B01-T04
+batch: PD-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: b1dfac2161a78bcbc677f21282afda317336a1bc
+  head_commit: b1dfac2161a78bcbc677f21282afda317336a1bc
+changed_paths:
+- docs/operations/UPGRADES.md
+- docs/operations/E2E.md
+deliverables:
+- item: Update stale runbook/operator instructions only after behavior verified
+  result: pass
+  evidence: UPGRADES fixture section and E2E lifecycle note updated after the tests were run; census spec
+    documented
+- item: Preserve historical evidence as historical
+  result: pass
+  evidence: no receipts/reports rewritten
+invariants:
+- item: Docs describe verified behavior only
+  result: pass
+  evidence: each new statement corresponds to a run in T02/T03/T05 logs
+verification:
+- command: git diff of docs/operations/UPGRADES.md deletions
+  result: pass
+  note: only the superseded 'nothing to smoke-test yet' paragraph removed
+- command: make format-check
+  result: pass
+  note: clean
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs/evidence-only task
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Runbook claims about docker postgres:17 fallback were exercised locally where local pg_restore 16 is
+  too old.
+next: review

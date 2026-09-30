@@ -18,3 +18,19 @@ Append-only during PD-B00. IDs are stable. Severity: P1 blocks correctness/secur
 | D-12 | P2  | T07      | Load harness has no webhook delivery or API-credential/SDK traffic, so those subsystems have no capacity baseline                                                     | `loadtests/h02/mixed_load.py` has no webhook code                      | spec 051/055                        |
 | D-13 | P3  | T07      | `loadtests/run.js` (k6 scenarios) needs a hand-built profile; none is committed, so the five named scenarios are not reproducible from the repo                       | `loadtests/README.md`                                                  | spec 055/061                        |
 | D-14 | P3  | T07      | Gallery/search p95 at 2 workers is 35–45% above PVS-H02 after the UIV2 gallery/theme changes (single run; 4-worker runs improved)                                     | BASELINE_RESULTS T07 table                                             | re-measure in spec 038/055 work     |
+
+## Prioritized routing (T08) — input to PD-B01…PD-B04
+
+No P0/P1 defects were found: all gates pass, integrity checks pass, no security/data-integrity finding. Ordered by priority:
+
+| Order | IDs              | Sev       | Route                                                                         | Why                                                                                |
+| ----- | ---------------- | --------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| 1     | D-09             | P3→verify | **PD-B01** (root-cause first; may be harness-only)                            | Only finding that could be a real UI correctness defect (stuck "Loading stages…"). |
+| 2     | D-04             | P2        | **PD-B01** (add prior-schema fixture or record explicit escalation)           | Migration-heavy program has no upgrade-path smoke test.                            |
+| 3     | D-12             | P2        | Deferred to webhook/scale batches (spec 051/055) via **PD-B01** triage note   | No capacity baseline for webhooks/API traffic.                                     |
+| 4     | D-06, D-13       | P3        | **PD-B01** (run S3 contract vs RustFS; commit a k6 profile or drop the claim) | Never-run tests / non-reproducible scenarios.                                      |
+| 5     | D-03             | P3        | **PD-B02**                                                                    | Per-worker DB setup (~7.7 s ×8) dominates backend wall time.                       |
+| 6     | D-01, D-05       | P3        | **PD-B03**                                                                    | Lifecycle canary guard; isolated per-test event fixtures.                          |
+| 7     | D-08, D-10       | P3        | **PD-B04** (routing/deep links, signed-out shell)                             | Silent view fallback; console 401.                                                 |
+| 8     | D-14             | P3        | Re-measure in **PD-B01** load rerun; act only if reproduced                   | Single-run gallery/search p95 flag.                                                |
+| —     | D-02, D-07, D-11 | P3        | Closed in T06                                                                 | Docs corrected.                                                                    |

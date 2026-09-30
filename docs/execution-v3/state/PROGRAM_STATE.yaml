@@ -1,10 +1,10 @@
 version: 1
 program: Conflux Product Depth v3
-state: FROZEN
-controller_epoch: 0
-activated_at: null
+state: ACTIVE
+controller_epoch: 1
+activated_at: '2026-09-30T05:02:17.829727+00:00'
 canonical_branch: main
-canonical_commit_at_activation: null
+canonical_commit_at_activation: 5680dcd4bcb22cde5e9f4913eec122fd203f40b0
 last_checkpoint: null
 design_manifest: docs/product-depth-v3/design/DESIGN_MANIFEST.yaml
 notes:

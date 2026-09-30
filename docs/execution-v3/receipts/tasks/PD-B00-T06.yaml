@@ -1,0 +1,59 @@
+version: 3
+task: PD-B00-T06
+batch: PD-B00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: b5f398dfc0c4330b34c894bd6d648da6213c83d4
+  head_commit: 4992f793e81b82c93ea5fd8990e42f5015902260
+changed_paths:
+- README.md
+- docs/verification/README.md
+- docs/verification/PD-B00/BASELINE_RESULTS.md
+- docs/verification/PD-B00/DEFECT_REGISTER.md
+deliverables:
+- item: Find stale docs/claims/API-UI mismatches/limitations drift
+  result: pass
+  evidence: "link scan, OpenAPI path cross-check, count claims, limitations vs code \u2014 table in BASELINE_RESULTS\
+    \ T06"
+- item: Record concrete correction work, do not rewrite history
+  result: pass
+  evidence: README and verification README corrected with dated notes; historical receipts untouched;
+    product gaps routed via register D-11
+invariants:
+- item: Historical receipts preserved verbatim
+  result: pass
+  evidence: final-pass, PVS-H06, UIV2 reports unchanged
+- item: No product behavior changed
+  result: pass
+  evidence: docs only
+verification:
+- command: python link scan over 255 md files
+  result: pass
+  note: 0 broken of 84 relative links
+- command: python openapi cross-check of doc-quoted /api/v1 paths
+  result: pass
+  note: 0 missing of 338 paths (lenient match)
+- command: seeded broken link fed to scanner
+  result: pass
+  note: detected (negative case)
+- command: make format-check
+  result: pass
+  note: clean
+design_refs: []
+surface_matrix:
+- surface: docs
+  result: pass
+  evidence: docs/evidence-only task
+migrations: []
+findings:
+- D-11
+escalations: []
+limitations:
+- Prose claims in ARCHITECTURE/JUDGING/SECURITY not re-derived from code.
+- OpenAPI cross-check uses lenient prefix matching.
+next: review

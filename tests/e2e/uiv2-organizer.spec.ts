@@ -9,6 +9,7 @@ import {
   settled,
   signIn,
   watch,
+  capture,
 } from "./support";
 
 // Read-only tour of the organizer operations surfaces. It runs after the
@@ -38,7 +39,7 @@ for (const width of [390, 768, 1024, 1440]) {
     await settled(page);
     await accessible(page);
     await noHorizontalOverflow(page);
-    await page.screenshot({
+    await capture(page, {
       path: `tests/e2e/artifacts/uiv2-b08-overview-${width}.png`,
       fullPage: true,
     });
@@ -52,7 +53,7 @@ for (const width of [390, 768, 1024, 1440]) {
     ).toBeVisible();
     await accessible(page);
     await noHorizontalOverflow(page);
-    await page.screenshot({
+    await capture(page, {
       path: `tests/e2e/artifacts/uiv2-b08-eligibility-${width}.png`,
       fullPage: true,
     });
@@ -77,7 +78,7 @@ for (const width of [390, 768, 1024, 1440]) {
     ).toBeVisible();
     await accessible(page);
     await noHorizontalOverflow(page);
-    await page.screenshot({
+    await capture(page, {
       path: `tests/e2e/artifacts/uiv2-b08-deliberation-${width}.png`,
       fullPage: true,
     });
@@ -87,7 +88,7 @@ for (const width of [390, 768, 1024, 1440]) {
     ).toBeVisible();
     await accessible(page);
     await noHorizontalOverflow(page);
-    await page.screenshot({
+    await capture(page, {
       path: `tests/e2e/artifacts/uiv2-b08-publication-${width}.png`,
       fullPage: true,
     });
@@ -101,7 +102,7 @@ for (const width of [390, 768, 1024, 1440]) {
     ).toBeVisible();
     await accessible(page);
     await noHorizontalOverflow(page);
-    await page.screenshot({
+    await capture(page, {
       path: `tests/e2e/artifacts/uiv2-b08-onsite-${width}.png`,
       fullPage: true,
     });

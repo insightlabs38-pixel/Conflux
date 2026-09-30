@@ -1,0 +1,9 @@
+[read-only] exit 0: 52 skipped; 90 passed (2.1m)
+mode=failure wall=125s
+[read-only] exit 0: 52 skipped; 90 passed (2.3m)
+mode=visual wall=137s
+[read-only] exit 0: 52 skipped; 90 passed (2.0m)
+mode=failure wall=121s
+[read-only] exit 0: 52 skipped; 90 passed (2.2m)
+mode=visual wall=134s
+read-only trace=off wall=96s

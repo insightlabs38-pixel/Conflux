@@ -7,6 +7,7 @@ import {
   settled,
   signIn,
   watch,
+  capture,
 } from "./support";
 
 // Runs after the participant lifecycle (a submitted project exists) and before
@@ -33,7 +34,7 @@ for (const width of [390, 768, 1024, 1440]) {
     await settled(page);
     await accessible(page);
     await noHorizontalOverflow(page);
-    await page.screenshot({
+    await capture(page, {
       path: `tests/e2e/artifacts/uiv2-b07-overview-${width}.png`,
       fullPage: true,
     });
@@ -67,7 +68,7 @@ for (const width of [390, 768, 1024, 1440]) {
     await settled(page);
     await accessible(page);
     await noHorizontalOverflow(page);
-    await page.screenshot({
+    await capture(page, {
       path: `tests/e2e/artifacts/uiv2-b07-scoring-${width}.png`,
       fullPage: true,
     });

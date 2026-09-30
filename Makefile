@@ -121,7 +121,7 @@ demo-reset:
 
 # Regenerate demo screenshots and clips into tests/e2e/artifacts/ (needs a running, demo-reset stack).
 demo-e2e:
-	npx playwright test -c tests/e2e/playwright.config.ts
+	E2E_CAPTURE=visual npx playwright test -c tests/e2e/playwright.config.ts
 
 # Seconds: sign-in, role workspaces and public pages on desktop only.
 e2e-smoke:

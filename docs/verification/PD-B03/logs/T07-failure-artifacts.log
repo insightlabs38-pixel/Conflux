@@ -1,0 +1,21 @@
+[neg-read-only] exit 1: ✘  1 [desktop] › tests/e2e/zz-fail-ro.spec.ts:2:5 › deliberate read-only failure (2.1s); Error: expect(locator).toBeVisible() failed; 1 failed
+[neg-read-only] diagnostic re-run with trace: zz-fail-ro
+[neg-read-only] diagnostic re-run failed again; traces in artifacts/e2e-fast/neg-read-only-diagnose/results/**/trace.zip (npx playwright show-trace)
+exit 1
+[neg-iso] exit 1: ✘  2 [mobile] › tests/e2e/zz-fail-iso.spec.ts:2:5 › deliberate isolated failure (2.2s); Error: expect(locator).toBeVisible() failed; Error: expect(locator).toBeVisible() failed; 2 failed
+[neg-iso] diagnostic re-run with trace: zz-fail-iso
+[neg-iso] diagnostic re-run failed again; traces in artifacts/e2e-fast/neg-iso-diagnose/results/**/trace.zip (npx playwright show-trace)
+[neg-iso] kept fixture demo-hackathon-16903000 (seed 16903000); dispose: manage.py e2e_fixture dispose demo-hackathon-16903000
+exit 1
+--- artifacts: first run keeps screenshot + page snapshot only; the diagnostic re-run adds the trace
+artifacts/e2e-fast/neg-iso-diagnose/results/zz-fail-iso-deliberate-isolated-failure-desktop/error-context.md
+artifacts/e2e-fast/neg-iso-diagnose/results/zz-fail-iso-deliberate-isolated-failure-desktop/test-failed-1.png
+artifacts/e2e-fast/neg-iso-diagnose/results/zz-fail-iso-deliberate-isolated-failure-desktop/trace.zip
+artifacts/e2e-fast/neg-iso-diagnose/results/zz-fail-iso-deliberate-isolated-failure-mobile/error-context.md
+artifacts/e2e-fast/neg-iso-diagnose/results/zz-fail-iso-deliberate-isolated-failure-mobile/test-failed-1.png
+artifacts/e2e-fast/neg-iso-diagnose/results/zz-fail-iso-deliberate-isolated-failure-mobile/trace.zip
+artifacts/e2e-fast/neg-read-only-diagnose/results/zz-fail-ro-deliberate-read-only-failure-desktop/error-context.md
+artifacts/e2e-fast/neg-read-only-diagnose/results/zz-fail-ro-deliberate-read-only-failure-desktop/test-failed-1.png
+artifacts/e2e-fast/neg-read-only-diagnose/results/zz-fail-ro-deliberate-read-only-failure-desktop/trace.zip
+artifacts/e2e-fast/neg-read-only/results/zz-fail-ro-deliberate-read-only-failure-desktop/error-context.md
+artifacts/e2e-fast/neg-read-only/results/zz-fail-ro-deliberate-read-only-failure-desktop/test-failed-1.png

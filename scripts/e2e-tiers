@@ -70,7 +70,26 @@ def manage(*args):
     return out.stdout.strip().splitlines()[-1] if out.stdout.strip() else ""
 
 
-def playwright(group, specs, env=None, workers=1, extra=()):
+def failed_specs(group):
+    """Spec names with a failing test in the group's JSON report."""
+    try:
+        report = json.loads((LOGS / group / "report.json").read_text())
+    except (OSError, ValueError):
+        return []
+    found = set()
+
+    def walk(suite):
+        if any(not spec.get("ok", True) for spec in suite.get("specs", [])):
+            found.add(Path(suite.get("file", "")).name.removesuffix(".spec.ts"))
+        for child in suite.get("suites", []):
+            walk(child)
+
+    for suite in report.get("suites", []):
+        walk(suite)
+    return sorted(found - {""})
+
+
+def playwright(group, specs, env=None, workers=1, extra=(), diagnose=True):
     LOGS.mkdir(parents=True, exist_ok=True)
     log = LOGS / f"tier-{group}.log"
     with log.open("w") as fh:
@@ -80,7 +99,27 @@ def playwright(group, specs, env=None, workers=1, extra=()):
         ).returncode
     summary = [l.strip() for l in log.read_text().splitlines() if "✘" in l or " passed" in l or " failed" in l or " skipped" in l]
     say(f"[{group}] exit {code}: " + "; ".join(summary[-4:]))
+    if code and diagnose and not os.environ.get("E2E_NO_DIAGNOSE"):
+        diagnostic_rerun(group, env, extra)
     return code
+
+
+def diagnostic_rerun(group, env, extra):
+    """Failure-first tracing: nothing is recorded on the way in, so re-run only the failing files
+    once with a trace. Diagnostic only: the tier stays failed whatever the re-run does. Chains that
+    consume state (the canary) are not re-run; their fixture is kept instead."""
+    specs = failed_specs(group)
+    if not specs or any(tier_of(s) == "canary" for s in specs):
+        return
+    diag = f"{group}-diagnose"
+    say(f"[{group}] diagnostic re-run with trace: {', '.join(specs)}")
+    code = subprocess.run(
+        ["npx", "playwright", "test", "-c", CONFIG, "--workers=1", *extra, *specs],
+        cwd=ROOT, env={**os.environ, "E2E_GROUP": diag, "E2E_TRACE": "on", **(env or {})},
+        stdout=(LOGS / f"tier-{diag}.log").open("w"), stderr=subprocess.STDOUT,
+    ).returncode
+    verdict = "failed again" if code else "PASSED on re-run: treat as flaky/state-dependent, not as a pass"
+    say(f"[{group}] diagnostic re-run {verdict}; traces in artifacts/e2e-fast/{diag}/results/**/trace.zip (npx playwright show-trace)")
 
 
 def with_fixture(profile, group, specs):

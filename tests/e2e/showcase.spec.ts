@@ -5,6 +5,7 @@ import {
   noHorizontalOverflow,
   signIn,
   watch,
+  capture,
 } from "./support";
 
 let event = "";
@@ -71,7 +72,7 @@ for (const width of [360, 768, 1024, 1440, 1920]) {
     await page.goto(`/e/${event}/gallery/`);
     await accessible(page);
     await noHorizontalOverflow(page);
-    await page.screenshot({
+    await capture(page, {
       path: `tests/e2e/artifacts/uiv2-b05-gallery-${width}.png`,
       fullPage: true,
     });
@@ -83,7 +84,7 @@ for (const width of [360, 768, 1024, 1440, 1920]) {
       .click();
     await accessible(page);
     await noHorizontalOverflow(page);
-    await page.screenshot({
+    await capture(page, {
       path: `tests/e2e/artifacts/uiv2-b05-project-${width}.png`,
       fullPage: true,
     });
@@ -93,7 +94,7 @@ for (const width of [360, 768, 1024, 1440, 1920]) {
     );
     await accessible(page);
     await noHorizontalOverflow(page);
-    await page.screenshot({
+    await capture(page, {
       path: `tests/e2e/artifacts/uiv2-b05-results-${width}.png`,
       fullPage: true,
     });

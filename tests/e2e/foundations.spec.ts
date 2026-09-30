@@ -1,5 +1,11 @@
 import { expect, test } from "@playwright/test";
-import { accessible, noHorizontalOverflow, signIn, eventIds } from "./support";
+import {
+  accessible,
+  noHorizontalOverflow,
+  signIn,
+  eventIds,
+  capture,
+} from "./support";
 
 for (const width of [390, 768, 1440]) {
   for (const theme of ["default", "dark", "minimal"]) {
@@ -17,7 +23,7 @@ for (const width of [390, 768, 1440]) {
       await page.getByLabel("Username").focus();
       await page.keyboard.press("Tab");
       await expect(page.getByLabel("Password")).toBeFocused();
-      await page.screenshot({
+      await capture(page, {
         path: `tests/e2e/artifacts/uiv2-b01/signin-${theme}-${width}.png`,
         fullPage: true,
       });
@@ -31,7 +37,7 @@ for (const width of [390, 768, 1440]) {
       ).toBeVisible();
       await accessible(page);
       await noHorizontalOverflow(page);
-      await page.screenshot({
+      await capture(page, {
         path: `tests/e2e/artifacts/uiv2-b01/workspaces-${theme}-${width}.png`,
         fullPage: true,
       });

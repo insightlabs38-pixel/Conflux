@@ -1,0 +1,69 @@
+version: 3
+task: PD-B03-T07
+batch: PD-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: bfc969eb865afed783543d15119f9bc5a47301cd
+  head_commit: bfc969eb865afed783543d15119f9bc5a47301cd
+changed_paths:
+- tests/e2e/playwright.config.ts
+- tests/e2e/support.ts
+- tests/e2e/*.spec.ts (capture() in 12 specs; lifecycle, scenes, uiv2-final-states video gating; uiv2-gate and lifecycle race fixes)
+- scripts/e2e-tiers
+- Makefile
+- docs/operations/E2E.md
+- docs/operations/DEMO.md
+- docs/verification/PD-B03/MATRIX.md
+- docs/verification/PD-B03/logs/
+deliverables:
+- item: Routine runs capture nothing; rich artifacts only on failure or explicit visual campaigns
+  result: pass
+  evidence: default trace/video off, explicit screenshots and video behind E2E_CAPTURE=visual (make demo-e2e sets it); failing tests keep screenshot + page snapshot
+- item: Failure artifacts include traces
+  result: pass
+  evidence: e2e-tiers re-runs failing files of read-only/isolated tiers once with E2E_TRACE=on; logs/T07-failure-artifacts.log shows screenshot+snapshot in the first run and trace.zip in the diagnostic run; canary keeps its fixture instead
+- item: Measured cost
+  result: pass
+  evidence: trace off 96 s vs 121-125 s read-only; visual vs failure-first canary 148-149 s vs 138-139 s; full e2e-fast 138 s x3 (was 2m48)
+invariants:
+- item: A failure is never turned into a pass
+  result: pass
+  evidence: diagnostic re-run only reports; tier exit stays failed; a passing re-run is labelled flaky/state-dependent
+- item: Visual campaigns still produce media
+  result: pass
+  evidence: E2E_CAPTURE=visual canary x2 green with scenes PNGs and video.webm written
+- item: No weakened assertions
+  result: pass
+  evidence: capture() only gates screenshots/video; lifecycle locator made precise (region) not looser; uiv2-gate added a render wait, same assertions
+verification:
+- command: python3 scripts/e2e-tiers (3 consecutive, failure-first default)
+  result: pass
+  note: 138.5/137.8/138.1 s, 152 passed, 0 failed
+- command: deliberate failing specs in read-only and isolated tiers
+  result: pass
+  note: logs/T07-failure-artifacts.log
+- command: uiv2-gate skip-link race, 8 workers x 40 repeats per width, before/after
+  result: pass
+  note: 21 failed/219 passed before; 240 passed after (logs/T07-gate-race-fix.log)
+- command: make lint && pnpm format:check
+  result: pass
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: full browser suite
+migrations: []
+findings:
+- 'Test race (pre-existing, exposed by concurrency): uiv2-gate pressed Tab before the SPA mounted; fixed with a render wait.'
+- 'Test race (pre-existing): lifecycle getByText("Finalist comparison") strict-mode ambiguity once the finalize form renders; fixed to address the table region. One canary run failed on it before the fix; none in 3+ runs after.'
+- docs/operations/DEMO.md was edited outside owned paths because it documents the changed e2e-fast/media flow (small inseparable correctness fix).
+escalations: []
+limitations:
+- Canary failures have no automatic trace (state is consumed); the kept fixture plus screenshot/snapshot is the evidence.
+- Diagnostic re-run of a mutating spec runs against already-mutated fixture state.
+next: review

@@ -1,5 +1,9 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, type Page } from "@playwright/test";
+import {
+  expect,
+  type Page,
+  type PageScreenshotOptions,
+} from "@playwright/test";
 
 export const SEED = process.env.E2E_DEMO_SEED ?? "7";
 export const PASSWORD = process.env.E2E_DEMO_PASSWORD ?? "demo-pass-7";
@@ -8,6 +12,21 @@ export const account = (label: string, seed: string | number = SEED) =>
 
 /** Identity of a demo scenario; defaults to the shared reference (E2E_DEMO_SEED). */
 export type Who = { seed: string | number; password: string };
+
+/**
+ * Capture policy (PD-B03-T07). Routine runs are failure-first: Playwright keeps a screenshot and
+ * trace only for failing tests, and specs take no explicit screenshots or videos. A visual campaign
+ * (design review, demo media: `E2E_CAPTURE=visual`, which `make demo-e2e` sets) turns them on.
+ */
+export const VISUAL = process.env.E2E_CAPTURE === "visual";
+
+/** Explicit screenshot of a page or locator; a no-op outside visual campaigns. */
+export async function capture(
+  target: { screenshot(options?: PageScreenshotOptions): Promise<unknown> },
+  options: PageScreenshotOptions,
+) {
+  if (VISUAL) await target.screenshot(options);
+}
 
 /** Collects browser-side problems so a test can assert there were none. */
 export function watch(page: Page) {

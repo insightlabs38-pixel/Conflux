@@ -5,6 +5,7 @@ import {
   noHorizontalOverflow,
   signIn,
   watch,
+  capture,
 } from "./support";
 
 const variants = {
@@ -64,7 +65,7 @@ for (const width of [390, 768, 1024, 1440]) {
         );
         await accessible(page);
         await noHorizontalOverflow(page);
-        await page.screenshot({
+        await capture(page, {
           path: `tests/e2e/artifacts/uiv2-b03/${name}-${width}.png`,
           fullPage: true,
         });

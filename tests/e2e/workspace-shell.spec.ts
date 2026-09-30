@@ -8,6 +8,7 @@ import {
   settled,
   signIn,
   watch,
+  capture,
 } from "./support";
 
 const destinations: Record<string, string[]> = {
@@ -58,7 +59,7 @@ for (const width of [390, 768, 1024, 1440]) {
         await noHorizontalOverflow(page);
         await accessible(page);
         if (id === "overview")
-          await page.screenshot({
+          await capture(page, {
             path: `tests/e2e/artifacts/uiv2-b02/${role}-${width}.png`,
             fullPage: true,
           });

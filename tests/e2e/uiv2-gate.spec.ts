@@ -230,6 +230,8 @@ for (const width of WIDTHS) {
     desktopOnly(info);
     await page.setViewportSize({ width, height: 800 });
     await page.goto("/app/");
+    // The SPA mounts after `load`; under concurrent runs Tab could land before anything is focusable.
+    await expect(page.getByLabel("Username")).toBeVisible();
     await page.keyboard.press("Tab");
     const first = page.locator(":focus");
     await expect(first).toBeVisible();

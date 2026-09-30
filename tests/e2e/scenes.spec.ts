@@ -1,4 +1,4 @@
-import { chooseWorkspaceEvent, goToTask } from "./support";
+import { chooseWorkspaceEvent, goToTask, VISUAL } from "./support";
 import { expect, test } from "@playwright/test";
 import path from "node:path";
 import {
@@ -7,11 +7,13 @@ import {
   openWorkspace,
   settled,
   signIn,
+  capture,
 } from "./support";
 
-// Deterministic demo scenes: fixed viewport, reduced motion, seeded data. Screenshots land in
-// tests/e2e/artifacts/scenes; a video of each scene is kept because the config records it on demand.
-test.use({ video: "on", screenshot: "off" });
+// Deterministic demo scenes: fixed viewport, reduced motion, seeded data. Screenshots and one
+// video per scene are only produced in a visual campaign (E2E_CAPTURE=visual); they land in
+// tests/e2e/artifacts/scenes and artifacts/results.
+test.use({ video: VISUAL ? "on" : "off", screenshot: "off" });
 const shot = (name: string) =>
   path.join(__dirname, "artifacts", "scenes", `${name}.png`);
 
@@ -27,12 +29,12 @@ test("scene 01 — public event, gallery and results", async ({ page }) => {
   ]) {
     await page.goto(path);
     await settled(page);
-    await page.screenshot({ path: shot(name), fullPage: true });
+    await capture(page, { path: shot(name), fullPage: true });
   }
   await page.goto(`/e/${event}/gallery/`);
   await page.locator("main a[href*='/projects/']").first().click();
   await settled(page);
-  await page.screenshot({ path: shot("public-project"), fullPage: true });
+  await capture(page, { path: shot("public-project"), fullPage: true });
 });
 
 for (const [n, role] of [
@@ -42,7 +44,7 @@ for (const [n, role] of [
 ] as const) {
   test(`scene ${n} workspace`, async ({ page }) => {
     await signIn(page, role);
-    await page.screenshot({ path: shot(`${n}-selector`) });
+    await capture(page, { path: shot(`${n}-selector`) });
     await openWorkspace(page);
     await settled(page);
     if (role === "organizer") {
@@ -60,7 +62,7 @@ for (const [n, role] of [
       await page
         .getByRole("heading", { name: "Main judging", exact: true })
         .evaluate((heading) => heading.scrollIntoView({ block: "start" }));
-      await page.screenshot({ path: shot(`${n}-workspace`) });
+      await capture(page, { path: shot(`${n}-workspace`) });
       await goToTask(page, "Logistics");
       await page
         .getByRole("region", { name: "Judging logistics" })
@@ -83,9 +85,9 @@ for (const [n, role] of [
       ]) {
         await goToDestination(page, destination);
         if (region === "Judging logistics") await goToTask(page, "Logistics");
-        await page
-          .getByRole("region", { name: region })
-          .screenshot({ path: shot(name) });
+        await capture(page.getByRole("region", { name: region }), {
+          path: shot(name),
+        });
       }
     } else {
       await page
@@ -102,9 +104,12 @@ for (const [n, role] of [
         ).toBeVisible();
         await settled(page);
         await goToDestination(page, "schedule");
-        await page
-          .getByRole("region", { name: "Your judging route" })
-          .screenshot({ path: shot("judge-route") });
+        await capture(
+          page.getByRole("region", { name: "Your judging route" }),
+          {
+            path: shot("judge-route"),
+          },
+        );
         await goToDestination(page, "queue");
       } else {
         await goToDestination(page, "project");
@@ -117,15 +122,15 @@ for (const [n, role] of [
           .selectOption({ index: 1 });
       }
       await settled(page);
-      await page.screenshot({ path: shot(`${n}-workspace`) });
+      await capture(page, { path: shot(`${n}-workspace`) });
     }
   });
 }
 
 test("scene 09 — API explorer and sign-in", async ({ page }) => {
   await page.goto("/app/");
-  await page.screenshot({ path: shot("10-signin") });
+  await capture(page, { path: shot("10-signin") });
   await page.goto("/app/?api=explorer");
   await settled(page);
-  await page.screenshot({ path: shot("09-api-explorer"), fullPage: true });
+  await capture(page, { path: shot("09-api-explorer"), fullPage: true });
 });

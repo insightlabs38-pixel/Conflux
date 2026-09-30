@@ -32,17 +32,17 @@ Accounts: `demo-hackathon-7-organizer`, `-judge-01…06`, `-participant-01…24`
 
 ## Assets
 
-`make demo-reset && make e2e-fast` runs the same suite about twice as fast by running three file groups concurrently (`scripts/e2e-fast`; read-only navigation, theme/public checks, and the ordered stateful chain, each with its own output directory and no per-test video). `make demo-reset && make demo-e2e` is the authoritative serial run and runs the submitted checkpoint journeys,
-including create → submit → remediate → judge → publish. Successful scene
-and lifecycle clips are recorded, with screenshots in
-`tests/e2e/artifacts/scenes/` and clips under `tests/e2e/artifacts/results/`.
+`make e2e-fast` runs the same specs tiered and concurrently (`scripts/e2e-tiers`; see [E2E.md](E2E.md)): mutating specs and the lifecycle canary use throwaway fixtures, so no reset is needed and seed 7 stays untouched. `make demo-reset && make demo-e2e` is the authoritative serial run and runs the submitted checkpoint journeys,
+including create → submit → remediate → judge → publish. It sets `E2E_CAPTURE=visual`, which is what records
+scene and lifecycle clips and takes the screenshots in
+`tests/e2e/artifacts/scenes/` and clips under `tests/e2e/artifacts/results/`; other runs are failure-first and produce no media.
 The lifecycle is serial and consumes participant-24; reset before repeating.
 
 For published public screenshots and role views, run:
 
 ```sh
 scripts/demo-reset published
-npx playwright test -c tests/e2e/playwright.config.ts public roles scenes signin extended-embed
+E2E_CAPTURE=visual npx playwright test -c tests/e2e/playwright.config.ts public roles scenes signin extended-embed
 ```
 
 Each Playwright run clears its result directory, so copy successful submitted

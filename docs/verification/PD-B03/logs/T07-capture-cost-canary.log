@@ -1,0 +1,20 @@
+[canary-lifecycle] exit 0: 6 skipped; 6 passed (20.6s)
+[canary-scenes] exit 0: 5 passed (12.8s)
+[canary-uiv2-organizer] exit 0: 4 skipped; 4 passed (46.8s)
+[canary-uiv2-final-states] exit 0: 6 skipped; 6 passed (46.1s)
+canary mode=failure wall=139s
+[canary-lifecycle] exit 0: 6 skipped; 6 passed (20.4s)
+[canary-scenes] exit 0: 5 passed (15.3s)
+[canary-uiv2-organizer] exit 0: 4 skipped; 4 passed (49.5s)
+[canary-uiv2-final-states] exit 0: 6 skipped; 6 passed (49.3s)
+canary mode=visual wall=148s
+[canary-lifecycle] exit 0: 6 skipped; 6 passed (21.0s)
+[canary-scenes] exit 0: 5 passed (12.7s)
+[canary-uiv2-organizer] exit 0: 4 skipped; 4 passed (46.7s)
+[canary-uiv2-final-states] exit 0: 6 skipped; 6 passed (44.8s)
+canary mode=failure wall=138s
+[canary-lifecycle] exit 0: 6 skipped; 6 passed (21.9s)
+[canary-scenes] exit 0: 5 passed (15.2s)
+[canary-uiv2-organizer] exit 0: 4 skipped; 4 passed (49.0s)
+[canary-uiv2-final-states] exit 0: 6 skipped; 6 passed (49.8s)
+canary mode=visual wall=149s

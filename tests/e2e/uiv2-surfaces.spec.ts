@@ -9,6 +9,7 @@ import {
   settled,
   signIn,
   watch,
+  capture,
 } from "./support";
 
 // Read-only tour of secondary/developer/builder surfaces (UIV2-B09).
@@ -37,7 +38,7 @@ for (const width of [390, 768, 1024, 1440]) {
     await settled(page);
     await accessible(page);
     await noHorizontalOverflow(page);
-    await page.screenshot({
+    await capture(page, {
       path: `tests/e2e/artifacts/uiv2-b09-api-${width}.png`,
       fullPage: true,
     });
@@ -59,7 +60,7 @@ for (const width of [390, 768, 1024, 1440]) {
       await accessible(page);
       await noHorizontalOverflow(page);
       if (task === "Public page")
-        await page.screenshot({
+        await capture(page, {
           path: `tests/e2e/artifacts/uiv2-b09-page-builder-${width}.png`,
           fullPage: true,
         });
@@ -69,7 +70,7 @@ for (const width of [390, 768, 1024, 1440]) {
       await settled(page);
       await accessible(page);
       await noHorizontalOverflow(page);
-      await page.screenshot({
+      await capture(page, {
         path: `tests/e2e/artifacts/uiv2-b09-${dest}-${width}.png`,
         fullPage: true,
       });

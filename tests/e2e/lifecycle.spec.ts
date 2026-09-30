@@ -1,5 +1,5 @@
 import { chooseWorkspaceEvent } from "./support";
-import { goToDestination, goToTask } from "./support";
+import { goToDestination, goToTask, VISUAL } from "./support";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 import {
@@ -9,6 +9,7 @@ import {
   settled,
   signIn,
   watch,
+  capture,
 } from "./support";
 
 /**
@@ -18,12 +19,12 @@ import {
  * participant: approved, no team). Re-run the reset before repeating.
  */
 test.describe.configure({ mode: "serial" });
-test.use({ video: "on" });
+test.use({ video: VISUAL ? "on" : "off" });
 const shot = async (page: Page, name: string, region?: string) => {
   const target = region
     ? page.getByRole("region", { name: region, exact: true })
     : page;
-  await target.screenshot({
+  await capture(target, {
     path: path.join(__dirname, "artifacts/scenes", `${name}.png`),
   });
 };
@@ -144,7 +145,9 @@ test("organizer requests changes; participant remediates; organizer approves", a
 }) => {
   const org = await (
     await browser.newContext({
-      recordVideo: { dir: test.info().outputPath("clips") },
+      recordVideo: VISUAL
+        ? { dir: test.info().outputPath("clips") }
+        : undefined,
     })
   ).newPage();
   await signIn(org, "organizer");
@@ -163,7 +166,9 @@ test("organizer requests changes; participant remediates; organizer approves", a
 
   const part = await (
     await browser.newContext({
-      recordVideo: { dir: test.info().outputPath("clips") },
+      recordVideo: VISUAL
+        ? { dir: test.info().outputPath("clips") }
+        : undefined,
     })
   ).newPage();
   await signIn(part, LIVE);
@@ -227,10 +232,12 @@ test("organizer requests changes; participant remediates; organizer approves", a
   ).toContainText("cleared", { ignoreCase: true });
   await org.context().close();
   await part.context().close();
-  for (const [name, page] of [
-    ["remediation-organizer", org],
-    ["remediation-participant", part],
-  ] as const) {
+  for (const [name, page] of VISUAL
+    ? ([
+        ["remediation-organizer", org],
+        ["remediation-participant", part],
+      ] as const)
+    : []) {
     await test.info().attach(name, {
       path: await page.video()!.path(),
       contentType: "video/webm",
@@ -315,7 +322,10 @@ test("organizer publishes results and the public results page shows them", async
   });
   await room.getByLabel("Award").selectOption({ label: "Grand Prize" });
   await room.getByRole("button", { name: "Open deliberation room" }).click();
-  await expect(room.getByText("Finalist comparison")).toBeVisible();
+  // The form below repeats "finalist comparison" in prose, so address the table region, not the text.
+  await expect(
+    room.getByRole("region", { name: "Finalist comparison table" }),
+  ).toBeVisible();
   await expect(room.getByText("Max judge disagreement")).toBeVisible();
   await room.getByLabel(`Select ${PROJECT} as winner`).check();
   await room

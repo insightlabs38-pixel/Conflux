@@ -10,13 +10,15 @@ import {
   settled,
   signIn,
   watch,
+  capture,
+  VISUAL,
 } from "./support";
 
 // UIV2-B10: finalized / published / submitted (immutable) states. Requires the lifecycle
-// journey to have run first. In a plain `make demo-e2e` run `video: "on"` places this file
-// in the same late worker group as lifecycle/scenes (Playwright groups by fixture options);
-// `scripts/e2e-fast` runs it as an explicit step after the stateful group.
-test.use(process.env.E2E_GROUP ? {} : { video: "on" });
+// journey to have run first (alphabetical order serially; the canary chain in scripts/e2e-tiers).
+// In a visual campaign `video: "on"` keeps it in the same worker group as lifecycle/scenes
+// (Playwright groups by fixture options).
+test.use(VISUAL ? { video: "on" } : {});
 
 for (const width of [360, 390, 768, 1024, 1440, 1920]) {
   test(`finalized, published and submitted states at ${width}px`, async ({
@@ -50,7 +52,7 @@ for (const width of [360, 390, 768, 1024, 1440, 1920]) {
     await accessible(page);
     await noHorizontalOverflow(page);
     if ([390, 1440].includes(width))
-      await page.screenshot({
+      await capture(page, {
         path: `tests/e2e/artifacts/uiv2-b10-judge-submitted-${width}.png`,
         fullPage: true,
       });
@@ -76,7 +78,7 @@ for (const width of [360, 390, 768, 1024, 1440, 1920]) {
     await accessible(organizer);
     await noHorizontalOverflow(organizer);
     if ([390, 1440].includes(width))
-      await organizer.screenshot({
+      await capture(organizer, {
         path: `tests/e2e/artifacts/uiv2-b10-deliberation-final-${width}.png`,
         fullPage: true,
       });
@@ -96,7 +98,7 @@ for (const width of [360, 390, 768, 1024, 1440, 1920]) {
     await accessible(organizer);
     await noHorizontalOverflow(organizer);
     if ([390, 1440].includes(width))
-      await organizer.screenshot({
+      await capture(organizer, {
         path: `tests/e2e/artifacts/uiv2-b10-results-published-${width}.png`,
         fullPage: true,
       });

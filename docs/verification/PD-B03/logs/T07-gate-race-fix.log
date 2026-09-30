@@ -1,0 +1,5 @@
+### before the fix (committed spec), 8 workers, 40 repeats per width
+  21 failed
+  219 passed (40.8s)
+### after the fix, same load
+  240 passed (29.4s)

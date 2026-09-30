@@ -5,6 +5,7 @@ import {
   noHorizontalOverflow,
   openWorkspace,
   signIn,
+  capture,
 } from "./support";
 
 for (const width of [390, 1440]) {
@@ -86,7 +87,7 @@ for (const width of [390, 1440]) {
       ).json();
       expect(updated.username).toBe(original.username);
       expect(updated.skills).toEqual(["Python", "TypeScript"]);
-      await page.screenshot({
+      await capture(page, {
         path: `tests/e2e/artifacts/uiv2-b04/profile-${width}.png`,
         fullPage: true,
       });
@@ -112,7 +113,7 @@ for (const width of [390, 1440]) {
       ).toHaveAttribute("href", "https://github.com/example");
       await accessible(publicPage);
       await noHorizontalOverflow(publicPage);
-      await publicPage.screenshot({
+      await capture(publicPage, {
         path: `tests/e2e/artifacts/uiv2-b04/person-${width}.png`,
         fullPage: true,
       });

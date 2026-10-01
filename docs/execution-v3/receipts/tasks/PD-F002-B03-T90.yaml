@@ -1,0 +1,62 @@
+version: 3
+task: PD-F002-B03-T90
+batch: PD-F002-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: a0a36a5
+  head_commit: a0a36a5
+changed_paths:
+- docs/verification/PD-F002-B03/ (MATRIX.md, T90-e2e-fast.log)
+- tests/integration/test_shared_primitives_b03_regression.py
+deliverables:
+- item: Verification matrix for the capability task with an executable proof for each dimension
+  result: pass
+  evidence: "MATRIX.md covers positive, negative and boundary, authorization, lifecycle and compatibility, concurrency and idempotency, no impersonation, extension boundary and UI states; every cited pytest name and web or browser file was checked to exist by script and the forms regression count (96 tests) was measured, not assumed"
+- item: Positive, negative, authorization, lifecycle, migration and concurrency coverage
+  result: pass
+  evidence: "per-primitive tests carry the depth; the new cross-cutting file adds registry and inventory agreement, no other reader of a context, seven kinds of caller admitted or refused, a role request never widening the caller's reach, no trace left by a preview and forged contexts treated as data"
+- item: UI-facing states verified beyond screenshots
+  result: pass
+  evidence: loading, error with retry, empty, hidden-count, notice and busy states asserted in component tests, and the browser spec at 390 and 1440 with axe and overflow
+- item: Exact commands and unresolved limitations recorded
+  result: pass
+  evidence: matrix Commands and Unresolved limitations sections
+invariants:
+- item: Canonical source of truth, server authority
+  result: pass
+  evidence: the new tests run against the live API and registries; no product code changed in this task
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 2041 passed, 31 skipped (7 new cross-cutting tests)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check; makemigrations --check
+  result: pass
+  note: 648 web tests; static checks and drift clean; no migration changes
+- command: make e2e-fast
+  result: pass
+  note: read-only, isolated-mutation and canary ok; docs/verification/PD-F002-B03/T90-e2e-fast.log
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: states and viewports in the matrix
+- surface: api
+  result: pass
+  evidence: caller matrix and forged-context proofs
+- surface: audit
+  result: pass
+  evidence: a preview leaves no audit row or stored change
+- surface: docs
+  result: pass
+  evidence: matrix
+migrations: []
+findings: []
+limitations:
+- Listed in the matrix; none are new
+escalations: []
+next: review

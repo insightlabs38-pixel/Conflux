@@ -1,0 +1,86 @@
+version: 3
+task: PD-F002-B02-T04
+batch: PD-F002-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 6f0be2e
+  head_commit: 6f0be2e
+changed_paths:
+- src/api/core/ (notifications.py, notification_views.py, models.py NotificationPreference, migrations/0006_notification_preferences.py, urls.py)
+- src/api/communications/ (notifications.py, services.py, threads.py, apps.py)
+- src/web/lib/notifications.ts, features/profile/ (NotificationPreferences.tsx, ProfilePanel.tsx), the four workspaces that mount ProfilePanel, styles/components.css
+- tests/integration/ (test_notifications.py, concurrency/test_notification_races.py), src/web/features/profile/NotificationPreferences.test.tsx
+- tests/e2e/ (notifications.spec.ts, tiers.json, weights.json, affected.json)
+- docs/operations/NOTIFICATIONS.md, docs/api/openapi.yaml, generated SDKs, spec 002, PRIMITIVE_REGISTRY.yaml
+deliverables:
+- item: Canonical notification/subscription preference model as a platform primitive
+  result: pass
+  evidence: core/notifications.py with code-owned categories (register_category), channels inbox and email, wants and wanting (one query), describe and set_preference; table NotificationPreference unique per person, workspace, category and channel
+- item: Stable inputs/outputs, lifecycle, authorization, idempotency/concurrency, errors, extension boundary
+  result: pass
+  evidence: NOTIFICATIONS.md; a person reads and writes only their own choices (no user in the URL); a repeat choice is a no-op without an audit row; six simultaneous first choices leave one row and one audit row on PostgreSQL; 400 names the field; 403 outside the workspace
+- item: Reference consumer or contract test showing reuse without private coupling
+  result: pass
+  evidence: broadcasts and reminders (send_message) and mention notices consult wants through the real send path, plus a test where an independent feature registers its own category
+- item: Compatibility and migration expectations documented
+  result: pass
+  evidence: one additive migration; a person with no stored choice gets the category default, so broadcasts email exactly as before and mention notices stay inbox-only
+invariants:
+- item: An opt-out never removes the inbox copy and never applies to essential notices
+  result: pass
+  evidence: the inbox and essential channels are locked in code and ignore even a row written around the API (asserted); an opted-out person still has the MessageRecipient row and the inbox list shows the message
+- item: Server authoritative, audited, no content in audit
+  result: pass
+  evidence: notification_preference.changed records category, channel, before and after only
+- item: Design intent, accessibility, progressive disclosure
+  result: pass
+  evidence: Profile section closed behind a details control and loaded when opened, fieldset and legend per category, fixed channels disabled and explained, axe clean and no overflow at 390 and 1440
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1900 passed, 31 skipped (18 new in test_notifications.py, 1 race test)
+- command: DATABASE_URL=postgres pytest tests/integration/concurrency/test_notification_races.py tests/integration/test_notifications.py
+  result: pass
+  note: 19 passed on PostgreSQL, run three times
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check; makemigrations --check
+  result: pass
+  note: 540 web tests; OpenAPI validated with fail-on-warn and SDKs regenerated
+- command: npx playwright test notifications profiles --project=desktop on a fresh iso-min fixture
+  result: pass
+  note: notifications 2 passed (390 and 1440) covering defaults, fixed channels, save, reload, restore and a refused fixed channel; profiles passed
+- command: make e2e-affected
+  result: pass
+  note: read-only, isolated-mutation and canary ok
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: Profile > Notification preferences
+- surface: api
+  result: pass
+  evidence: GET and PUT notification-preferences
+- surface: audit
+  result: pass
+  evidence: notification_preference.changed audited and asserted
+- surface: docs
+  result: pass
+  evidence: NOTIFICATIONS.md, spec 002 B02 as built, registry IMPLEMENTED
+- surface: sdk
+  result: pass
+  evidence: "not required; generated clients regenerated, sdk-check clean"
+migrations:
+- core/0006_notification_preferences creates core_notificationpreference (additive)
+findings:
+- The contract named categories approval and job, but nothing sends them; they are not registered so the profile does not offer a toggle for an unsent notice (recorded in spec 002 and the guide)
+- The mention notice had no email before; it now emails only people who opted in (default off), the one place delivery gained behavior
+- An affected-spec rule that matched the whole profile folder broke an existing exact-selection test; narrowed to the notification files and ProfilePanel
+limitations:
+- No per-event or push notification choices, and no digest or quiet hours
+- Eligibility and deliberation notices stay inbox-only and are not yet part of a category
+escalations: []
+next: review

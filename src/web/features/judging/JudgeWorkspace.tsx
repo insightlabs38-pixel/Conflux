@@ -792,7 +792,7 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
         <Inbox workspaceId={workspaceId} />
       </Destination>
       <Destination id="profile" lazy>
-        <ProfilePanel />
+        <ProfilePanel workspaceId={workspaceId} />
         <JudgeInvitationInbox workspaceId={workspaceId} />
       </Destination>
       <Destination id="profile" lazy>

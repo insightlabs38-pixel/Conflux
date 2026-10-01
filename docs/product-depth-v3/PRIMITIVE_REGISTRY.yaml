@@ -2293,7 +2293,7 @@ primitives:
 - id: NOTIFICATIONS
   name: Notification/subscription preferences
   owner_task: PD-F002-B02-T04
-  status: PLANNED
+  status: IMPLEMENTED
   consumer_count: 147
   consumers:
   - PD-F005-B01-T07

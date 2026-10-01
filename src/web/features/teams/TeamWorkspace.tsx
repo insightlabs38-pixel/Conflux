@@ -63,7 +63,7 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
         <Inbox workspaceId={workspaceId} />
       </Destination>
       <Destination id="profile" lazy>
-        <ProfilePanel />
+        <ProfilePanel workspaceId={workspaceId} />
         <PortfolioPanel workspaceId={workspaceId} />
       </Destination>
       {loading && <LoadingState label="Loading events…" />}

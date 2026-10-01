@@ -17393,6 +17393,65 @@ paths:
               schema:
                 $ref: '#/components/schemas/JudgeInvitationSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/notification-preferences/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_notification_preferences
+      description: 'Only ever the caller''s own choices: there is no user in the URL
+        to change.'
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferencesSchema'
+          description: ''
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_notification_preferences
+      description: 'Only ever the caller''s own choices: there is no user in the URL
+        to change.'
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationChoiceInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificationChoiceInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificationChoiceInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreferencesSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/operator-console/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_operator_console
@@ -23161,6 +23220,71 @@ components:
           format: uuid
       required:
       - body
+    NotificationCategorySchema:
+      type: object
+      properties:
+        category:
+          type: string
+        label:
+          type: string
+        description:
+          type: string
+        essential:
+          type: boolean
+        channels:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationChannelSchema'
+      required:
+      - category
+      - channels
+      - description
+      - essential
+      - label
+    NotificationChannelSchema:
+      type: object
+      properties:
+        channel:
+          type: string
+        label:
+          type: string
+        enabled:
+          type: boolean
+        locked:
+          type: boolean
+        default:
+          type: boolean
+        chosen:
+          type: boolean
+      required:
+      - channel
+      - chosen
+      - default
+      - enabled
+      - label
+      - locked
+    NotificationChoiceInputSchema:
+      type: object
+      properties:
+        category:
+          type: string
+        channel:
+          type: string
+        enabled:
+          type: boolean
+      required:
+      - category
+      - channel
+      - enabled
+    NotificationPreferencesSchema:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationCategorySchema'
+      required:
+      - categories
     OidcConfigSchema:
       type: object
       properties:

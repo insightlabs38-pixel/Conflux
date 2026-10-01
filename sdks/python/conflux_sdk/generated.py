@@ -2987,6 +2987,52 @@ class InputOfNoteInput(TypedDict):
     body: str
     project: NotRequired[str]
 
+class NotificationCategorySchema(TypedDict):
+    category: str
+    label: str
+    description: str
+    essential: bool
+    channels: list[NotificationChannelSchema]
+
+class InputOfNotificationCategorySchema(TypedDict):
+    category: str
+    label: str
+    description: str
+    essential: bool
+    channels: list[InputOfNotificationChannelSchema]
+
+class NotificationChannelSchema(TypedDict):
+    channel: str
+    label: str
+    enabled: bool
+    locked: bool
+    default: bool
+    chosen: bool
+
+class InputOfNotificationChannelSchema(TypedDict):
+    channel: str
+    label: str
+    enabled: bool
+    locked: bool
+    default: bool
+    chosen: bool
+
+class NotificationChoiceInputSchema(TypedDict):
+    category: str
+    channel: str
+    enabled: bool
+
+class InputOfNotificationChoiceInputSchema(TypedDict):
+    category: str
+    channel: str
+    enabled: bool
+
+class NotificationPreferencesSchema(TypedDict):
+    categories: list[NotificationCategorySchema]
+
+class InputOfNotificationPreferencesSchema(TypedDict):
+    categories: list[InputOfNotificationCategorySchema]
+
 class OidcConfigSchema(TypedDict):
     enabled: bool
     provider_name: NotRequired[str]
@@ -7510,6 +7556,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                     'query_params': [],
                                                                     'request_body': False,
                                                                     'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_notification_preferences': {'method': 'GET',
+                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/notification-preferences/',
+                                                                        'path_params': ['workspace_public_id'],
+                                                                        'query_params': [],
+                                                                        'request_body': False,
+                                                                        'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_operator_console': {'method': 'GET',
                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/operator-console/',
                                                                 'path_params': ['workspace_public_id'],
@@ -9233,4 +9285,10 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                   'path_params': ['workspace_public_id'],
                                                                   'query_params': [],
                                                                   'request_body': True,
-                                                                  'response_kind': 'json'}}
+                                                                  'response_kind': 'json'},
+ 'put_api_v1_workspaces_workspace_public_id_notification_preferences': {'method': 'PUT',
+                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/notification-preferences/',
+                                                                        'path_params': ['workspace_public_id'],
+                                                                        'query_params': [],
+                                                                        'request_body': True,
+                                                                        'response_kind': 'json'}}

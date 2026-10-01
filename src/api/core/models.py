@@ -307,3 +307,30 @@ class ThreadComment(PublicIdModel):
     class Meta:
         indexes = [models.Index(fields=["thread", "created_at"])]
         ordering = ["created_at", "id"]
+
+
+class NotificationPreference(PublicIdModel):
+    """One person's choice for one category on one channel in one workspace (PD-F002-B02-T04).
+
+    A missing row means the category's default. Only channels a category allows to be turned off
+    are ever stored with `enabled=False`; the inbox copy and essential notices are not a choice.
+    """
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notification_preferences"
+    )
+    workspace = models.ForeignKey(
+        "workspaces.Workspace", on_delete=models.CASCADE, related_name="notification_preferences"
+    )
+    category = models.SlugField(max_length=40)
+    channel = models.SlugField(max_length=20)
+    enabled = models.BooleanField()
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "workspace", "category", "channel"],
+                name="unique_notification_preference",
+            )
+        ]

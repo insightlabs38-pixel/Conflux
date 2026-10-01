@@ -186,6 +186,18 @@
         "src/api/artifacts/*"
       ],
       "specs": ["artifact-preview", "jobs", "lifecycle", "uiv2-judge"]
+    },
+    {
+      "paths": [
+        "src/web/features/profile/Notification*",
+        "src/web/features/profile/ProfilePanel*",
+        "src/web/lib/notifications*",
+        "src/api/core/notification*",
+        "src/api/communications/notifications.py",
+        "src/api/communications/services.py",
+        "src/api/communications/threads.py"
+      ],
+      "specs": ["notifications", "profiles"]
     }
   ]
 }

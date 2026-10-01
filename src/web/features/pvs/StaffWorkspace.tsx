@@ -35,7 +35,7 @@ export function StaffWorkspace({
       />
       <WorkspaceViewTitle role={role} />
       <Destination id="profile" lazy>
-        <ProfilePanel />
+        <ProfilePanel workspaceId={workspaceId} />
       </Destination>
       <Destination id="messages">
         <Inbox workspaceId={workspaceId} />

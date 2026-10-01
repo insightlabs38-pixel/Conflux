@@ -1,8 +1,10 @@
 from audit.services import record_mutation
+from core import notifications
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
+from . import notifications as categories
 from .approvals import require_message_approval
 from .audiences import resolve_audience
 from .emailing import deliver_email
@@ -13,8 +15,10 @@ def send_message(*, event, actor, subject, body, audience_kind, audience_params=
     """Compose and deliver one message (OPS-003): resolves the audience
     *now*, persists an in-app `MessageRecipient` row for every match (the
     durable, offline-compatible baseline), then best-effort emails anyone
-    with an address on file. A recipient with no email, or a broken email
-    transport, still gets the in-app copy -- see `emailing.deliver_email`.
+    with an address on file who has not turned announcement email off
+    (`core.notifications`; the in-app copy is never optional). A recipient
+    with no email, or a broken email transport, still gets the in-app copy --
+    see `emailing.deliver_email`.
     """
     audience_params = audience_params or {}
     with transaction.atomic():
@@ -29,8 +33,18 @@ def send_message(*, event, actor, subject, body, audience_kind, audience_params=
 
     now = timezone.now()
     updated = []
-    for recipient in message.recipients.select_related("user").all():
-        if not recipient.user.email:
+    recipients = list(message.recipients.select_related("user").all())
+    wanted = {
+        user.pk
+        for user in notifications.wanting(
+            [r.user for r in recipients if r.user.email],
+            event.workspace,
+            categories.ANNOUNCEMENT,
+            notifications.EMAIL,
+        )
+    }
+    for recipient in recipients:
+        if recipient.user.pk not in wanted:
             continue
         error = deliver_email(to_email=recipient.user.email, subject=subject, body=body)
         recipient.email_error = error or ""

@@ -272,7 +272,7 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
       />
       <WorkspaceViewTitle role="organizer" />
       <Destination id="profile" lazy>
-        <ProfilePanel />
+        <ProfilePanel workspaceId={workspaceId} />
       </Destination>
       {error && <p role="alert">{error}</p>}
       {loadingEvents && <LoadingState label="Loading events…" />}

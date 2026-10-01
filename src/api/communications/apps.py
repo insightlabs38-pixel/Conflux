@@ -6,4 +6,4 @@ class CommunicationsConfig(AppConfig):
     name = "communications"
 
     def ready(self):
-        from . import approvals, threads  # noqa: F401 - policy and mention notifier
+        from . import approvals, notifications, threads  # noqa: F401 - policy, categories, notifier

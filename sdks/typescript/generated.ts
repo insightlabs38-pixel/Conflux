@@ -3214,6 +3214,60 @@ export type NoteInput = { body: string; project?: string };
 
 export type InputOfNoteInput = { body: string; project?: string };
 
+export type NotificationCategorySchema = {
+  category: string;
+  label: string;
+  description: string;
+  essential: boolean;
+  channels: NotificationChannelSchema[];
+};
+
+export type InputOfNotificationCategorySchema = {
+  category: string;
+  label: string;
+  description: string;
+  essential: boolean;
+  channels: InputOfNotificationChannelSchema[];
+};
+
+export type NotificationChannelSchema = {
+  channel: string;
+  label: string;
+  enabled: boolean;
+  locked: boolean;
+  default: boolean;
+  chosen: boolean;
+};
+
+export type InputOfNotificationChannelSchema = {
+  channel: string;
+  label: string;
+  enabled: boolean;
+  locked: boolean;
+  default: boolean;
+  chosen: boolean;
+};
+
+export type NotificationChoiceInputSchema = {
+  category: string;
+  channel: string;
+  enabled: boolean;
+};
+
+export type InputOfNotificationChoiceInputSchema = {
+  category: string;
+  channel: string;
+  enabled: boolean;
+};
+
+export type NotificationPreferencesSchema = {
+  categories: NotificationCategorySchema[];
+};
+
+export type InputOfNotificationPreferencesSchema = {
+  categories: InputOfNotificationCategorySchema[];
+};
+
 export type OidcConfigSchema = {
   enabled: boolean;
   provider_name?: string;
@@ -9701,6 +9755,17 @@ export interface Operations {
     };
     response: JudgeInvitationSchema;
   };
+  get_api_v1_workspaces_workspace_public_id_notification_preferences: {
+    request: { path: { workspace_public_id: string } };
+    response: NotificationPreferencesSchema;
+  };
+  put_api_v1_workspaces_workspace_public_id_notification_preferences: {
+    request: {
+      path: { workspace_public_id: string };
+      body: InputOfNotificationChoiceInputSchema;
+    };
+    response: NotificationPreferencesSchema;
+  };
   get_api_v1_workspaces_workspace_public_id_operator_console: {
     request: { path: { workspace_public_id: string } };
     response: OperatorConsoleSchema;
@@ -14670,6 +14735,22 @@ export const operations = {
       request_body: true,
       response_kind: "json",
     },
+  get_api_v1_workspaces_workspace_public_id_notification_preferences: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/notification-preferences/",
+    path_params: ["workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  put_api_v1_workspaces_workspace_public_id_notification_preferences: {
+    method: "PUT",
+    path: "/api/v1/workspaces/{workspace_public_id}/notification-preferences/",
+    path_params: ["workspace_public_id"],
+    query_params: [],
+    request_body: true,
+    response_kind: "json",
+  },
   get_api_v1_workspaces_workspace_public_id_operator_console: {
     method: "GET",
     path: "/api/v1/workspaces/{workspace_public_id}/operator-console/",

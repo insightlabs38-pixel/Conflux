@@ -15,6 +15,7 @@ import {
 } from "../../components/Person";
 import { Badge } from "../../components/Badge";
 import { apiRequest } from "../../lib/api";
+import { NotificationPreferences } from "./NotificationPreferences";
 
 type Profile = PersonIdentity & {
   visibility: "private" | "members" | "public";
@@ -64,7 +65,7 @@ async function request(
     throw new Error("Invalid profile response.");
   return data;
 }
-export function ProfilePanel() {
+export function ProfilePanel({ workspaceId }: { workspaceId?: string }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [draft, setDraft] = useState<Profile | null>(null);
   const [error, setError] = useState("");
@@ -72,6 +73,7 @@ export function ProfilePanel() {
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
   const [retry, setRetry] = useState(0);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [skillText, setSkillText] = useState("");
   const [interestText, setInterestText] = useState("");
   const [roleText, setRoleText] = useState("");
@@ -344,6 +346,17 @@ export function ProfilePanel() {
           </Button>
         </form>
       </details>
+      {workspaceId && (
+        <details
+          className="cx-profile-editor"
+          onToggle={(event) => setNotificationsOpen(event.currentTarget.open)}
+        >
+          <summary>Notification preferences</summary>
+          {notificationsOpen && (
+            <NotificationPreferences workspaceId={workspaceId} />
+          )}
+        </details>
+      )}
       <section aria-label="Event identity">
         <h3>Event interests & availability</h3>
         {profile.event_profiles.length === 0 ? (

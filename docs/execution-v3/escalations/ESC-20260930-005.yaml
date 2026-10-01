@@ -1,0 +1,37 @@
+version: 1
+id: ESC-20260930-005
+task: PD-F002-B02-T01
+batch: PD-F002-B02
+category: architecture
+severity: P2
+status: RESOLVED
+summary: The eight B02 primitives each overlap a near-implementation (two schema validators, two rich-content renderers, an artifact inspector, flat audit diffs, three explanation shapes, scattered provenance, extension registries), the batch has no contract task, and a missing preference model; adopt or migrate, and where the code lives, needed a decision before implementation.
+observed:
+- "Block schemas are validated by presentation.block_types.normalize_config and mirrored by hand in features/page-builder/configSchema.ts; the setting registry carries 18 JSON-schema descriptors that nothing edits (docs/verification/PD-F002-B02/T01-census.log)."
+- "Organizer rich text is allowlist HTML and participant text is CommonMark; both are public output that must not change."
+- "Artifacts are inspected statically and served as attachments only; there is no preview contract."
+- "No notification preference exists; messages email everyone in the audience."
+- "The queue has no T00 task for PD-F002-B02, while the registry marks these primitives PLANNED with 66 to 482 consumers each."
+attempts:
+- Census of existing implementations, their fields and counts (probe_census.py).
+- Reused the B01 resolution (ESC-20260930-004) as the precedent for adopt-versus-migrate and for code placement.
+decision_needed: Migrate each near-implementation into the primitive (changing stored values and public output), or absorb it behind byte-identical behavior and add the missing generic parts; and write the contract under T01 because no T00 exists.
+options:
+- option: A, absorb by adoption in core, byte-for-byte compatible, contract written under T01 (implemented as the default)
+  tradeoff: Existing behavior, stored data and public HTML stay identical and each primitive is proved against the real data; cost is that the old module keeps a thin delegating layer until a later batch removes it.
+- option: B, migrate stored values and rewrite public rendering and block validation onto new shapes now
+  tradeoff: one representation sooner, but a data migration and a visible output change across 12 block types, public pages and moderated content inside a primitives batch.
+- option: C, leave the near-implementations alone and add the primitives beside them without adopting
+  tradeoff: smallest change, but two schema validators and two renderers continue to drift, which is exactly what the batch exists to prevent.
+recommended: A now; removal of the thin legacy layers is follow-up work per feature batch.
+affected_invariants:
+- No duplicate source of truth.
+- Untrusted content stays data.
+- Existing supported API, stored data and public output are not silently changed.
+affected_tasks:
+- PD-F002-B02-T01..T08, T90, T91
+artifacts:
+- docs/product-depth-v3/specs/002-feature-depth-should-compound-through-shared-primitives.md
+- docs/verification/PD-F002-B02/T01-census.log
+resolution: |
+  Decision: option A. The per-primitive contract, forbidden list, compatibility boundary and verification strategy are in spec 002 (PD-F002-B02 canonical contract). One additive table; stored values, public output and the extension SDK facade are unchanged and proved by conformance tests; owner may choose B per area later and nothing built under A prevents it.

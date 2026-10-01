@@ -1,0 +1,30 @@
+146 objects imported automatically (use -v 2 for details).
+
+== SCHEMA_EDITOR: what already declares a schema
+   eventconfig settings: 18 by schema type {'string': 5, "['string', 'null']": 2, 'boolean': 6, "['integer', 'null']": 3, 'array': 1, "['number', 'null']": 1}
+   page block types: 12; property types {'string': 7, 'array': 3, 'integer': 1}
+== RICH_DOC: renderers in use
+   organizer allowlist HTML: tags=['a', 'blockquote', 'br', 'em', 'h2', 'h3', 'h4', 'li', 'ol', 'p', 'strong', 'ul'] attrs={'a': {'href'}}
+   participant markdown: html disabled, images disabled, tables on ({'maxNesting': 20, 'html': False, 'linkify': False, 'typographer': False, 'quotes': '“”‘’', 'xhtmlOut': True, 'breaks': False, 'langPrefix': 'language-', 'highlight': <function _highlight at 0xff7c641459e0>})
+== ARTIFACT_PREVIEW: inspection and kinds
+   kinds: ['file', 'image', 'video', 'external_video', 'repository', 'live_url', 'document', 'dataset', 'secret']
+   inspector version 1; preview chars 4000; max bytes 26214400
+== NOTIFICATIONS: delivery and preferences
+   communications.Message: id, public_id, event, sent_by, subject, body, audience_kind, audience_params, recipient_count, email_failure_count, created_at
+   communications.MessageRecipient: id, public_id, message, user, email_sent_at, email_error, read_at
+   accounts.UserProfile: id, public_id, user, display_name, avatar_url, bio, location, links, skills, interests, preferred_roles, visibility, updated_at
+   integrations.WebhookSubscription: id, public_id, workspace, event, url, event_types, platform, enabled, created_at
+   no preference or subscription model exists for people (opt-in, categories, channels)
+== VERSION_DIFF: what versions and diffs exist
+   audit.services: ['diff_snapshots', 'snapshot_fields']
+   models with a version field: ['SavedView', 'Announcement', 'Submission', 'FormResponse', 'Assignment', 'EventQuestion', 'RulesAcknowledgement', 'SubmissionReceipt']
+== POLICY_EXPLAIN: existing reason and evidence shapes
+   policy trace: ['_trace_value', 'trace_evaluate']
+   readiness item keys: ['return']
+== AUDIT_PROVENANCE: where origin and inputs are recorded today
+   AuditEvent: id, public_id, workspace, actor, action, target_type, target_id, metadata, created_at
+   AuditEvent rows: 647
+== EXTENSION_MANIFEST: registries that exist
+   BLOCK_TYPES=12 VALIDATORS=9
+   advancement strategies (subclass registry): ['ManualStrategy', 'EveryoneStrategy', 'TopNStrategy', 'ThresholdStrategy', 'PercentileStrategy', 'TopNPerTrackStrategy', 'PassFailStrategy', 'ExternalResultStrategy']
+   no manifest, version or capability declaration exists; extensions are deployment source

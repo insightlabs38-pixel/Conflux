@@ -19,6 +19,7 @@
   "isolated-mutation": [
     "event-advanced",
     "event-configuration",
+    "timeline",
     "threads",
     "approvals",
     "jobs",

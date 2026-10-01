@@ -5551,6 +5551,72 @@ export type TierEnum = "base" | "advanced" | "expert";
 
 export type InputOfTierEnum = "base" | "advanced" | "expert";
 
+export type TimelineConflictSchema = {
+  code: string;
+  severity: TimelineConflictSchemaSeverityEnum;
+  message: string;
+  items: string[];
+};
+
+export type InputOfTimelineConflictSchema = {
+  code: string;
+  severity: InputOfTimelineConflictSchemaSeverityEnum;
+  message: string;
+  items: string[];
+};
+
+export type TimelineConflictSchemaSeverityEnum = "advisory";
+
+export type InputOfTimelineConflictSchemaSeverityEnum = "advisory";
+
+export type TimelineItemSchema = {
+  kind: string;
+  kind_label: string;
+  key: string;
+  label: string;
+  starts_at: string;
+  ends_at: string | null;
+  local_starts_at: string;
+  local_ends_at: string | null;
+  dst_note: string | null;
+  source: Record<string, unknown>;
+  editable: boolean;
+  write: TimelineWriteSchema | null;
+  note: string;
+};
+
+export type InputOfTimelineItemSchema = {
+  kind: string;
+  kind_label: string;
+  key: string;
+  label: string;
+  starts_at: string;
+  ends_at: string | null;
+  local_starts_at: string;
+  local_ends_at: string | null;
+  dst_note: string | null;
+  source: Record<string, unknown>;
+  editable: boolean;
+  write: InputOfTimelineWriteSchema | null;
+  note: string;
+};
+
+export type TimelineSchema = {
+  event: string;
+  timezone: string;
+  total: number;
+  items: TimelineItemSchema[];
+  conflicts: TimelineConflictSchema[];
+};
+
+export type InputOfTimelineSchema = {
+  event: string;
+  timezone: string;
+  total: number;
+  items: InputOfTimelineItemSchema[];
+  conflicts: InputOfTimelineConflictSchema[];
+};
+
 export type TimelineWindowSchema = {
   label: string;
   opens_at: string | null;
@@ -5567,6 +5633,20 @@ export type InputOfTimelineWindowSchema = {
   event_local_opens_at: string | null;
   event_local_closes_at: string | null;
   dst_warning: string | null;
+};
+
+export type TimelineWriteSchema = {
+  method: string;
+  path: string;
+  fields: Record<string, string>;
+  extra: Record<string, unknown>;
+};
+
+export type InputOfTimelineWriteSchema = {
+  method: string;
+  path: string;
+  fields: Record<string, string>;
+  extra: Record<string, unknown>;
 };
 
 export type Track = {
@@ -9206,6 +9286,13 @@ export interface Operations {
       body: InputOfCommentInput;
     };
     response: ThreadCommentSchema;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_timeline: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      query?: { from?: string; kinds?: string; limit?: number; to?: string };
+    };
+    response: TimelineSchema;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_timezone_timeline: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -14039,6 +14126,14 @@ export const operations = {
       request_body: true,
       response_kind: "json",
     },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_timeline: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/timeline/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: ["from", "kinds", "limit", "to"],
+    request_body: false,
+    response_kind: "json",
+  },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_timezone_timeline:
     {
       method: "GET",

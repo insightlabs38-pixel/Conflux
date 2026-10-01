@@ -5138,6 +5138,66 @@ TierEnum = Literal['base', 'advanced', 'expert']
 
 InputOfTierEnum = Literal['base', 'advanced', 'expert']
 
+class TimelineConflictSchema(TypedDict):
+    code: str
+    severity: TimelineConflictSchemaSeverityEnum
+    message: str
+    items: list[str]
+
+class InputOfTimelineConflictSchema(TypedDict):
+    code: str
+    severity: InputOfTimelineConflictSchemaSeverityEnum
+    message: str
+    items: list[str]
+
+TimelineConflictSchemaSeverityEnum = Literal['advisory']
+
+InputOfTimelineConflictSchemaSeverityEnum = Literal['advisory']
+
+class TimelineItemSchema(TypedDict):
+    kind: str
+    kind_label: str
+    key: str
+    label: str
+    starts_at: str
+    ends_at: str | None
+    local_starts_at: str
+    local_ends_at: str | None
+    dst_note: str | None
+    source: dict[str, Any]
+    editable: bool
+    write: TimelineWriteSchema | None
+    note: str
+
+class InputOfTimelineItemSchema(TypedDict):
+    kind: str
+    kind_label: str
+    key: str
+    label: str
+    starts_at: str
+    ends_at: str | None
+    local_starts_at: str
+    local_ends_at: str | None
+    dst_note: str | None
+    source: dict[str, Any]
+    editable: bool
+    write: InputOfTimelineWriteSchema | None
+    note: str
+
+class TimelineSchema(TypedDict):
+    event: str
+    timezone: str
+    total: int
+    items: list[TimelineItemSchema]
+    conflicts: list[TimelineConflictSchema]
+
+class InputOfTimelineSchema(TypedDict):
+    event: str
+    timezone: str
+    total: int
+    items: list[InputOfTimelineItemSchema]
+    conflicts: list[InputOfTimelineConflictSchema]
+
 class TimelineWindowSchema(TypedDict):
     label: str
     opens_at: str | None
@@ -5153,6 +5213,18 @@ class InputOfTimelineWindowSchema(TypedDict):
     event_local_opens_at: str | None
     event_local_closes_at: str | None
     dst_warning: str | None
+
+class TimelineWriteSchema(TypedDict):
+    method: str
+    path: str
+    fields: dict[str, str]
+    extra: dict[str, Any]
+
+class InputOfTimelineWriteSchema(TypedDict):
+    method: str
+    path: str
+    fields: dict[str, str]
+    extra: dict[str, Any]
 
 class Track(TypedDict):
     public_id: str
@@ -7143,6 +7215,16 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                 'offset'],
                                                                                                                'request_body': False,
                                                                                                                'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_timeline': {'method': 'GET',
+                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/timeline/',
+                                                                               'path_params': ['event_public_id',
+                                                                                               'workspace_public_id'],
+                                                                               'query_params': ['from',
+                                                                                                'kinds',
+                                                                                                'limit',
+                                                                                                'to'],
+                                                                               'request_body': False,
+                                                                               'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_timezone_timeline': {'method': 'GET',
                                                                                         'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/timezone-timeline/',
                                                                                         'path_params': ['event_public_id',

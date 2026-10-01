@@ -66,7 +66,10 @@
         "src/api/core/tasks.py",
         "src/api/integrations/archive*",
         "src/api/core/approval*",
-        "src/api/core/thread*"
+        "src/api/core/thread*",
+        "src/api/core/timeline*",
+        "src/api/eventconfig/timeline.py",
+        "src/web/features/event-builder/OrganizerOverview*"
       ],
       "specs": [
         "uiv2-organizer",
@@ -74,7 +77,8 @@
         "uiv2-surfaces",
         "jobs",
         "approvals",
-        "threads"
+        "threads",
+        "timeline"
       ]
     },
     {

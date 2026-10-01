@@ -1,0 +1,87 @@
+version: 3
+task: PD-F002-B01-T08
+batch: PD-F002-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 9264bc2
+  head_commit: 9264bc2
+changed_paths:
+- src/api/core/ (timeline.py, timeline_views.py, urls.py)
+- src/api/eventconfig/ (timeline.py providers, apps.py ready)
+- src/web/lib/timeline.ts and test, features/operations/TimelinePanel.tsx and test, features/event-builder/ (OrganizerOverview.tsx Coming up card, test, EventDashboard.tsx)
+- tests/integration/test_timeline.py
+- tests/e2e/ (timeline.spec.ts, tiers.json, weights.json, affected.json)
+- docs/operations/TIMELINE.md, docs/api/openapi.yaml, sdks generated, spec 002, PRIMITIVE_REGISTRY.yaml
+deliverables:
+- item: Canonical event timeline/scheduling primitive
+  result: pass
+  evidence: derived and stateless; provider and rule registries in core/timeline.py, one endpoint GET events/{e}/timeline/ with from, to, kinds and limit; seven providers (event dates, gates, publication, agenda, office hours, voting, pending reminders) registered from the eventconfig app that already knows these domains
+- item: Stable inputs/outputs, ordering, authorization, error shape, extension boundary
+  result: pass
+  evidence: docs/operations/TIMELINE.md; items ordered by start, kind, key with stable keys; instants in UTC plus the event zone with offset and a daylight-saving note; organizer or admin only; bad range, kinds and limit are 400 with the reason; a provider only reads, caps its rows and may name a domain write
+- item: Deterministic advisory conflicts
+  result: pass
+  evidence: window_inverted, location, track and mentor overlap (touching ends are not an overlap), outside_event, publication_before_voting_closes; no clock or heuristic; judged on the whole event, shown when they touch the answer; never block anything
+- item: Changing a time goes through the existing domain write
+  result: pass
+  evidence: every item carries write {method, path, fields, extra}; test_every_editable_item_changes_through_its_own_domain_endpoint applies the documented write for event, gate, agenda, voting and publication and sees each move by exactly the shift; the web sends changes there and shows the domain's own refusal
+- item: Reference consumer or contract test showing reuse without private coupling
+  result: pass
+  evidence: test_a_domain_can_add_a_provider_and_a_rule_without_touching_the_timeline registers a toy provider and rule from outside; the real adopters are the Operations timeline view and the overview's Coming up card
+- item: Compatibility and migration expectations documented
+  result: pass
+  evidence: stateless, no table or migration; the existing timezone-timeline endpoint is unchanged; documented in TIMELINE.md and spec 002
+invariants:
+- item: One source of truth, no stored copy of time
+  result: pass
+  evidence: nothing is persisted; every read goes to the owning rows
+- item: Server authoritative, deterministic
+  result: pass
+  evidence: conflicts and ordering are server-side and repeatable (the same request returns the same answer, asserted); the web only converts wall times to UTC for the domain endpoint (zonedToUtc tested across both daylight-saving edges)
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1720 passed, 30 skipped (the real-database race tests skip on SQLite); timeline tests also cover access, filters, bounds and a 61-item query budget
+- command: pnpm --filter @conflux/web test
+  result: pass
+  note: 396 web tests (timeline client 4, TimelinePanel 5, overview card 2)
+- command: make format-check lint sdk-check block-schema-check; spectacular --validate --fail-on-warn; makemigrations --check
+  result: pass
+  note: static checks and OpenAPI/SDK drift clean, no migration needed
+- command: make e2e-fast
+  result: pass
+  note: read-only, isolated-mutation (incl. timeline at 390 and 1440 with axe, overflow, conflict flag and resolve, and the domain refusal) and canary ok; docs/verification/PD-F002-B01/T08-e2e-fast.log
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: TimelinePanel and the overview Coming up card
+- surface: api
+  result: pass
+  evidence: timeline endpoint
+- surface: audit
+  result: pass
+  evidence: "no timeline write exists; times change through the domain endpoints, which audit as before (the round trip test exercises them)"
+- surface: docs
+  result: pass
+  evidence: TIMELINE.md, spec 002, registry IMPLEMENTED
+- surface: sdk
+  result: pass
+  evidence: "not required; generated clients regenerated, sdk-check clean"
+migrations: []
+findings:
+- The existing overview tests stub every request with empty answers, which crashed the new panel until it degraded a malformed answer to an empty timeline; the panel is now tolerant
+- The publication endpoint rejects unknown fields, so the write descriptor gained an extra map (the stage of a finalists schedule) instead of a whole-body mode
+- Community voting stands in for the judging window because judging has no dates
+limitations:
+- No participant or public timeline, no calendar grid, no drag to reschedule
+- Office hours and reminders are shown but not editable here (no edit endpoint exists)
+- Stages carry no times, so they are not on the timeline
+- The overview card counts conflicts among the next five items only
+escalations: []
+next: review

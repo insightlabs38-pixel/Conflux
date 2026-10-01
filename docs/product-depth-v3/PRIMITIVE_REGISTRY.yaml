@@ -1012,7 +1012,7 @@ primitives:
 - id: TIMELINE
   name: Event timeline/scheduling
   owner_task: PD-F002-B01-T08
-  status: PLANNED
+  status: IMPLEMENTED
   consumer_count: 258
   consumers:
   - PD-F006-B03-T01

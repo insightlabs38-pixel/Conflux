@@ -33,5 +33,6 @@
   "read-only:workspace-shell": 26.2,
   "isolated-mutation:jobs": 20.0,
   "isolated-mutation:approvals": 20.0,
-  "isolated-mutation:threads": 20.0
+  "isolated-mutation:threads": 20.0,
+  "isolated-mutation:timeline": 20.0
 }

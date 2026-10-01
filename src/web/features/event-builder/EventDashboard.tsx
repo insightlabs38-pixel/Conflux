@@ -20,6 +20,7 @@ import { WebhooksPanel } from "../integrations/WebhooksPanel";
 import { AwardsPanel } from "../awards/AwardsPanel";
 import { OperationsCenter } from "../operations/OperationsCenter";
 import { ApprovalsPanel } from "../operations/ApprovalsPanel";
+import { TimelinePanel } from "../operations/TimelinePanel";
 import { JobsPanel } from "../operations/JobsPanel";
 import { OperatorConsole } from "../operations/OperatorConsole";
 import { CommunicationsPanel } from "../communications/CommunicationsPanel";
@@ -844,6 +845,18 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
                   content: (
                     <OperationsCenter
                       key={`operations-${selected.public_id}`}
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+                {
+                  id: "TimelinePanel",
+                  label: "Timeline",
+                  description: "Every date and window, with conflicts",
+                  content: (
+                    <TimelinePanel
+                      key={`timeline-${selected.public_id}`}
                       workspaceId={workspaceId}
                       eventId={selected.public_id}
                     />

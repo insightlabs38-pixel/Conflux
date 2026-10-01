@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Badge } from "../../components/Badge";
 import {
   DestinationLink,
@@ -6,6 +6,13 @@ import {
 } from "../../components/WorkspaceNavigation";
 import { unresolvedItems, type Readiness } from "../../hooks/useReadiness";
 import { useLoad, type Loaded } from "../pvs/http";
+import {
+  dayHeading,
+  rangeText,
+  timelineUrl,
+  wall,
+  type Timeline,
+} from "../../lib/timeline";
 
 type Application = { status: string };
 type Review = { status: string; open_findings: number };
@@ -27,12 +34,14 @@ function Metric({
   load,
   render,
   destination,
+  section,
   action,
 }: {
   label: string;
   load: Pick<Loaded<unknown>, "data" | "error" | "loading" | "reload">;
   render: () => ReactNode;
   destination: string;
+  section?: string;
   action: string;
 }) {
   return (
@@ -50,6 +59,7 @@ function Metric({
       {!load.loading && !load.error && load.data !== null && render()}
       <DestinationLink
         id={destination}
+        section={section}
         className="cx-button cx-button--secondary"
       >
         {action}
@@ -95,6 +105,13 @@ export function OrganizerOverview({
     `${base}result-publication-requests/`,
   );
   const onsite = useLoad<Onsite>(`${base}onsite-summary/`);
+  // "Coming up" is judged from the moment the overview opened (a stable request, not a clock tick).
+  const [openedAt] = useState(
+    () => new Date().toISOString().slice(0, 16) + ":00Z",
+  );
+  const upcoming = useLoad<Timeline>(
+    timelineUrl(workspaceId, eventId, { from: openedAt, limit: 5 }),
+  );
 
   const apps = list(applications.data);
   const rows = list(reviews.data);
@@ -145,6 +162,15 @@ export function OrganizerOverview({
       text: `${unplaced} project${unplaced === 1 ? "" : "s"} without a table or booth`,
       destination: "onsite",
     });
+  const clashes = list(upcoming.data?.conflicts ?? null).length;
+  const coming = list(upcoming.data?.items ?? null);
+  if (clashes > 0)
+    issues.push({
+      key: "timeline",
+      text: `${clashes} scheduling conflict${clashes === 1 ? "" : "s"} among what is coming up`,
+      destination: "operations",
+      section: "TimelinePanel",
+    });
   // What readiness says is missing (the same server list as Setup and operations), with its fix.
   unresolvedItems(readiness.data).forEach((item) =>
     issues.push({
@@ -186,6 +212,30 @@ export function OrganizerOverview({
         )}
       </section>
       <div className="cx-ops-grid">
+        <Metric
+          label="Coming up"
+          load={upcoming}
+          destination="operations"
+          section="TimelinePanel"
+          action="Open the timeline"
+          render={() =>
+            coming.length === 0 ? (
+              <p>Nothing else is scheduled.</p>
+            ) : (
+              <ul className="cx-plain-list">
+                {coming.map((item) => (
+                  <li key={item.key}>
+                    <span className="cx-muted">
+                      {dayHeading(wall(item.local_starts_at).date)}{" "}
+                      {rangeText(item)}
+                    </span>{" "}
+                    {item.label}
+                  </li>
+                ))}
+              </ul>
+            )
+          }
+        />
         <Metric
           label="Registrations"
           load={applications}

@@ -14,6 +14,7 @@ from .entity_views import EntityCatalogueView, EntityQueryView
 from .job_views import JobArtifactView, JobCancelView, JobDetailView, JobListView
 from .saved_view_views import SavedViewDetailView, SavedViewListView, SavedViewRunView
 from .thread_views import ThreadCommentView, ThreadView
+from .timeline_views import TimelineView
 from .views import health
 
 urlpatterns = [
@@ -53,6 +54,11 @@ urlpatterns = [
         "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/views/<uuid:view_public_id>/run/",
         SavedViewRunView.as_view(),
         name="saved-view-run",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/timeline/",
+        TimelineView.as_view(),
+        name="event-timeline",
     ),
     path(
         "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/threads/<slug:subject_type>/<str:subject_id>/<slug:audience>/",

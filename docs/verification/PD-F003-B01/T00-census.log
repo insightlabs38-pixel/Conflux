@@ -1,0 +1,69 @@
+147 objects imported automatically (use -v 2 for details).
+
+== domain models: 122
+   with public_id: 112
+   event-owned: 48
+   with a lifecycle field: 22
+   public_id AND event AND lifecycle: 6
+   artifacts: 4 models, 4 with public_id, 1 with lifecycle
+   awards: 6 models, 6 with public_id, 2 with lifecycle
+   communications: 6 models, 6 with public_id, 1 with lifecycle
+   community: 7 models, 6 with public_id, 0 with lifecycle
+   continuation: 2 models, 2 with public_id, 0 with lifecycle
+   deliberation: 3 models, 3 with public_id, 1 with lifecycle
+   eligibility: 3 models, 3 with public_id, 2 with lifecycle
+   evaluations: 19 models, 19 with public_id, 3 with lifecycle
+   eventconfig: 2 models, 2 with public_id, 0 with lifecycle
+   events: 8 models, 8 with public_id, 3 with lifecycle
+   forms: 4 models, 4 with public_id, 1 with lifecycle
+   governance: 8 models, 8 with public_id, 3 with lifecycle
+   integrations: 17 models, 9 with public_id, 1 with lifecycle
+   mentorship: 4 models, 4 with public_id, 1 with lifecycle
+   onsite: 4 models, 4 with public_id, 0 with lifecycle
+   participation: 5 models, 5 with public_id, 1 with lifecycle
+   policies: 4 models, 4 with public_id, 0 with lifecycle
+   presentation: 5 models, 4 with public_id, 0 with lifecycle
+   projects: 5 models, 5 with public_id, 2 with lifecycle
+   stages: 3 models, 3 with public_id, 0 with lifecycle
+   taxonomy: 3 models, 3 with public_id, 0 with lifecycle
+   without public_id: integrations.ImportedFixture, integrations.FixtureTrack, integrations.FixtureJudge, integrations.FixtureTeam, integrations.FixtureTeamMember, integrations.FixtureProject, integrations.FixtureScore, integrations.FixtureScoreCriterion, presentation.ProjectSearchTag, community.RateLimitEvent
+== REST
+   url patterns under api/v1: 373
+   addressed by a public uuid: 357
+   addressed by an integer id: 1 ['api/v1/workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/rules/<int:number>/']
+== audit
+   distinct audit actions in code: 165
+   by subject: {'account': 1, 'agenda': 3, 'announcement': 2, 'api_credential': 2, 'appeal': 2, 'approval': 4, 'artifact': 1, 'assignment': 3, 'auth': 1, 'award': 6, 'ballot': 1, 'base_prize': 3, 'calibration_ballot': 1, 'calibration_projects': 1, 'comment': 2, 'community_abuse': 2, 'conflict_of_interest': 1, 'conflict_project_attribute': 2, 'conflict_relationship': 2, 'conflict_rule': 1, 'continuation': 3, 'deliberation': 5, 'eligibility': 1, 'email_vote_token': 1, 'evaluation_plan': 1, 'event': 9, 'event_template': 4, 'exception_grant': 1, 'exception_request': 3, 'external_qualifiers': 1, 'form': 1, 'governance': 1, 'job': 2, 'judge_expertise': 1, 'judge_invitation': 2, 'judging': 1, 'marketplace': 3, 'mcp': 1, 'membership': 1, 'mentor_request': 5, 'message': 1, 'moderation': 1, 'normalization': 1, 'notification_preference': 1, 'office_hours': 2, 'onsite': 7, 'operations': 1, 'pairwise_comparison': 1, 'pairwise_results': 1, 'pairwise_run': 1, 'policy': 3, 'policy_binding': 2, 'privacy': 3, 'prize': 2, 'project': 3, 'publication': 2, 'question': 1, 'record': 1, 'registration': 1, 'reminder': 2, 'results': 4, 'rubric': 2, 'rules': 2, 'saved_view': 3, 'stage': 4, 'stage_transition': 2, 'submission': 2, 'taxonomy': 4, 'temporal_gate': 3, 'thread': 3, 'track': 3, 'vote_tokens': 1, 'voting_plan': 1, 'voting_results': 1, 'webhook': 3, 'workflow_preset': 1, 'workspace': 1}
+== idempotency
+   modules referencing core.idempotency or an Idempotency-Key: ['core/jobs.py', 'core/models.py', 'core/thread_views.py', 'integrations/archive_views.py', 'workspaces/views.py']
+== registries (shared primitives)
+   entities: ['applications', 'projects']
+   bulk actions: ['advance', 'assign', 'extend', 'move', 'send']
+   job kinds: ['archive_export']
+   approval policies: ['message_send']
+   thread subjects: ['application', 'project']
+   timeline providers: ['agenda', 'event', 'gate', 'office_hours', 'publication', 'reminder', 'voting']
+   preview sources: ['job_output', 'project_artifact']
+   version sources: ['form', 'rubric']
+   notification categories: ['announcement', 'essential', 'mention']
+   rich profiles: ['page', 'story']
+   preview surfaces: ['form']
+   manifest capabilities: 18 manifests: ['artifacts', 'communications', 'core', 'evaluations', 'eventconfig', 'events', 'forms', 'integrations', 'presentation', 'projects', 'stages']
+== webhook event types emitted
+   distinct: 40 ['announcement.deleted', 'appeal.decided', 'appeal.filed', 'award.created', 'award.published', 'award.sponsor_added', 'award.sponsor_removed', 'award.winner_selected', 'base_prize.deleted', 'event.archive_imported', 'event.cloned', 'event.deleted', 'event.status_changed', 'event_template.instantiated', 'event_template.library_instantiated', 'event_template.saved', 'exception_grant.created', 'external_qualifiers.imported', 'membership.granted', 'message.sent', 'policy.created', 'policy.deleted', 'policy.updated', 'policy_binding.created', 'policy_binding.deleted', 'prize.component_added', 'prize.fulfillment_advanced', 'record.issued', 'stage.created', 'stage.deleted', 'stage.updated', 'stage_transition.created', 'stage_transition.deleted', 'submission.finalized', 'temporal_gate.created', 'temporal_gate.deleted', 'temporal_gate.updated', 'track.deleted', 'workflow_preset.applied', 'workspace.created']
+== MCP tools
+   read: ['event_analytics', 'get_project', 'judge_workload', 'list_announcements', 'list_exception_requests', 'list_my_projects', 'list_result_corrections', 'list_stages', 'mentor_request_queue', 'plan_progress', 'plan_results', 'voting_results']
+   write: ['add_mentor_note', 'create_announcement']
+== Event-as-Code and archive
+   event-as-code sections: ['tracks', 'base_prizes', 'stages', 'stage_transitions', 'forms', 'policies', 'temporal_gates', 'policy_bindings', 'evaluation_plans', 'awards', 'page']
+   final archive schema constants: ['TABLES', 'V2_TABLES', 'V3_TABLES']
+== analytics and privacy
+   analytics-like endpoints: ['api/v1/workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/judge-workload/', 'api/v1/workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/operations/analytics/', 'api/v1/workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/stages/<uuid:stage_public_id>/evaluation-plans/<uuid:plan_public_id>/agreement/']
+   privacy endpoints: ['api/v1/workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/privacy/retention-policy/', 'api/v1/workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/privacy/retention/run/', 'api/v1/workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/privacy/subjects/<uuid:user_public_id>/erase/', 'api/v1/workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/privacy/subjects/<uuid:user_public_id>/export/']
+== SDK and CLI
+   openapi present in container: False
+== authorization (permission matrix)
+   entries: 484 by access: {'public': 31, 'any_authenticated': 10, 'roles': 443} unrecognized: 0
+   unknown: []
+== list endpoints: paginated or bare
+   pagination helpers: ['DEFAULT_LIMIT', 'MAX_LIMIT', 'MAX_OFFSET', 'Response', 'ValidationError', 'page_params', 'paged_response', 'urlencode']

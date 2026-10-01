@@ -1,0 +1,90 @@
+version: 3
+task: PD-F003-B01-T00
+batch: PD-F003-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: frontier-architecture
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: ffc2a7a
+  head_commit: ffc2a7a
+changed_paths:
+- docs/product-depth-v3/specs/003-a-cross-surface-completeness-contract.md
+- docs/execution-v3/escalations/ESC-20260930-006.yaml
+- docs/verification/PD-F003-B01/probe_census.py
+- docs/verification/PD-F003-B01/T00-census.log
+- .claude-supervisor/QUESTIONS.md
+deliverables:
+- item: Spec 003 updated with the canonical state and data model, lifecycle, authority boundary, migration plan and cross-surface applicability
+  result: pass
+  evidence: "section PD-F003-B01 canonical contract: census of what exists, six shape decisions (executable registry of features and claims with verifiers, registry-first in core, honest claims, bounded and additive, derived not duplicated, advisory at runtime and enforced in CI), the 21 properties with owner task and what each verifier proves, the claim, feature, verifier, report, web and authority contract, forbidden list, compatibility boundary, task order and verification strategy"
+- item: Reuse of shared primitives resolved and duplicate local representations forbidden
+  result: pass
+  evidence: "QUERY, AUDIT_PROVENANCE, EXTENSION_MANIFEST, ASYNC_JOB, POLICY_EXPLAIN, VERSION_DIFF and the generated SDKs are named per property; a Forbidden list bans a hand-written second matrix, unverifiable claims, surface-local business rules, retrofitting all models and runtime dependence on the registry; TYPED_CLIENT is deferred to its owner batch"
+- item: Unresolved architecture ambiguity recorded as an escalation
+  result: pass
+  evidence: ESC-20260930-006 (what the contract is, which features it covers, TYPED_CLIENT sequencing) resolved with the conservative default A; QUESTIONS.md entry
+invariants:
+- item: One canonical source of truth, server authority
+  result: pass
+  evidence: the contract derives facts from the live registries, permission matrix, OpenAPI and code and stores only claims; no request depends on it
+- item: Additive and compatible
+  result: pass
+  evidence: no code or schema changed; no migration planned; gap fixes are confined to the property a task owns
+verification:
+- command: docker compose exec -T app python manage.py shell < docs/verification/PD-F003-B01/probe_census.py
+  result: pass
+  note: "read-only; 122 domain models, 373 routes, 165 audit actions, 40 outbox event types, 484 permission matrix entries with none unknown, 14 MCP tools, 11 Event-as-Code sections, the registries of the shared primitives"
+- command: python3 scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid, 0 errors
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: contract covers the Operations Completeness grid
+- surface: api
+  result: pass
+  evidence: contract covers the completeness report endpoint
+- surface: sdk
+  result: pass
+  evidence: the sdk property and TYPED_CLIENT sequencing are defined
+- surface: cli
+  result: pass
+  evidence: assigned to PD-F003-B02-T04
+- surface: mcp
+  result: pass
+  evidence: assigned to PD-F003-B02-T05
+- surface: event_as_code
+  result: pass
+  evidence: assigned to PD-F003-B02-T06
+- surface: audit
+  result: pass
+  evidence: the audit property and the report writing nothing
+- surface: webhook
+  result: pass
+  evidence: assigned to PD-F003-B02-T07
+- surface: archive
+  result: pass
+  evidence: assigned to PD-F003-B02-T08
+- surface: analytics
+  result: pass
+  evidence: assigned to PD-F003-B03-T01
+- surface: search
+  result: pass
+  evidence: the search property over QUERY
+- surface: docs
+  result: pass
+  evidence: spec 003, census and escalation
+migrations:
+- none planned
+findings:
+- Most audited actions (165) do not reach the outbox (40 event types), idempotency keys cover five modules, and only two entities are queryable; these are recorded as the gaps the registry will state as planned claims rather than fixed in bulk
+limitations:
+- The initial feature set is fifteen features; later batches add more
+- The properties of PD-F003-B02 and B03 have no verifier yet
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

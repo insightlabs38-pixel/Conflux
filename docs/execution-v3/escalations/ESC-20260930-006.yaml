@@ -1,0 +1,36 @@
+version: 1
+id: ESC-20260930-006
+task: PD-F003-B01-T00
+batch: PD-F003-B01
+category: architecture
+severity: P2
+status: RESOLVED
+summary: "Spec 003 lists 21 properties a deep feature should have across every surface but does not say what the contract is as an artifact (a checklist, an executable registry, or a retrofit of every model), nor how a reused primitive that a later batch owns (TYPED_CLIENT) is handled."
+observed:
+- "The census (docs/verification/PD-F003-B01/T00-census.log) finds 122 domain models, 112 with a public id, 22 with a lifecycle field, 48 owned by an event; 373 REST routes (357 addressed by a public uuid, one by an event-scoped number); 165 audit actions across 80 subjects and 40 outbox event types; 5 modules using idempotency keys; 2 queryable entities; 14 MCP tools; a CLI for events only; 11 Event-as-Code sections; a permission matrix of 484 entries with none unknown."
+- "Nothing records which feature provides which of the 21 properties, so completeness cannot be stated, checked or steered; the properties live in many registries (entities, bulk actions, job kinds, MCP tools, EaC sections, archive tables, event types)."
+- "TYPED_CLIENT is PLANNED and owned by PD-F071-B01-T03, yet PD-F003-B01-T07 reuses it; the repository already has the generated SDKs and the typed web transport from PD-B04."
+attempts:
+- Census of models, routes, audit actions, outbox events, registries, MCP tools, the CLI, Event-as-Code sections and the permission matrix.
+- Read the research section, the 21 properties and the three batch scopes; reused the adopt-by-registry precedent of ESC-20260930-004 and ESC-20260930-005 and the domain-first precedent of ESC-20260930-002.
+decision_needed: "What artifact is the completeness contract, which features does it cover, and how does a batch that reuses a primitive owned later proceed?"
+options:
+- option: "A, an executable contract: a code-owned registry of features, each claiming every property as provided, not applicable or planned, with a verifier per property that checks a provided claim against the live registries (implemented as the default)"
+  tradeoff: "Completeness becomes stated, checked and steerable and composes with the extension manifest; cost is a claim set for each registered feature and a verifier per property, added by the tasks that own that property. Covers a bounded set of important features, not all 122 models."
+- option: "B, a documentation checklist only"
+  tradeoff: "No code, but the matrix drifts from the system the moment it is written and nothing prevents a false claim."
+- option: "C, retrofit every model and endpoint to all 21 properties now"
+  tradeoff: "Maximum uniformity, but a cross-domain rewrite and migrations far beyond the batch contract, and many properties do not apply to many models."
+recommended: "A. For TYPED_CLIENT, proceed with the existing generated SDKs (PD-B04) as the representation and adopt the primitive when its owner batch lands (same resolution as ESC-20260930-002)."
+affected_invariants:
+- No duplicate source of truth.
+- Server-side authorization, validation and audit remain authoritative.
+- Existing supported API and stored data are not silently changed.
+affected_tasks:
+- PD-F003-B01-T01..T08, T90, T91, T95
+- PD-F003-B02 and PD-F003-B03 add the verifiers for their properties
+artifacts:
+- docs/product-depth-v3/specs/003-a-cross-surface-completeness-contract.md
+- docs/verification/PD-F003-B01/T00-census.log
+resolution: |
+  Decision: option A, and for TYPED_CLIENT the existing generated SDK. The contract, the claim and verifier model, the initial feature set, per-task boundaries and the forbidden list are in spec 003 (PD-F003-B01 canonical contract). Additive code only; no migration; gaps found are recorded as planned claims with an owner, and only gaps inside a property owned by the current batch are fixed by it. Owner may choose a wider retrofit per area later; nothing built under A prevents it.

@@ -134,3 +134,74 @@ A feature is “deep” when these pieces compose naturally, not when it has a l
 - Cross-surface contract: Version/migration behavior
 - Cross-surface contract: Test-fixture/scenario support
 
+## PD-F003-B01 canonical contract (T00, 2026-10-01)
+
+Evidence for every statement about current behavior: `docs/verification/PD-F003-B01/T00-census.log` (`probe_census.py`, read-only, run against the live stack). Escalation for the architecture decision below: `docs/execution-v3/escalations/ESC-20260930-006.yaml` (resolved with the conservative default A).
+
+### What exists today (census)
+
+- 122 domain models: 112 have a public id, 22 a lifecycle field, 48 an owning event, 6 all three. The ten without a public id are internal (imported fixtures, a search-tag join, a rate-limit row) and never exposed.
+- 373 REST routes under `/api/v1/`; 357 are addressed by a public uuid and one by an event-scoped number (`rules/<int:number>/`, a version counter). The permission matrix has 484 entries, none unknown or unrecognized.
+- 165 audit actions in code across 80 subjects (`subject.verb`), and 40 outbox event types; so most audited actions do not reach webhooks.
+- Idempotency keys appear in five modules (jobs, thread comments, archive export jobs, workspace creation, the idempotency model); most mutations are idempotent by nature (PUT, forward-only state machines) or not at all.
+- Two queryable entities (`applications`, `projects`), five bulk actions, one job kind, 14 MCP tools (12 read, 2 write), a CLI for events only, 11 Event-as-Code sections, one retention policy and subject export and erasure.
+- The 966 generated TypeScript operations and the Python SDK are checked against the OpenAPI artifact (`make sdk-check`); `TYPED_CLIENT` is `PLANNED` and owned by a later batch, but the typed web transport and generated SDKs already exist (PD-B04).
+- Nothing records which feature provides which of the 21 properties of this spec, so completeness cannot be stated, checked or steered.
+
+### Shape decisions
+
+1. **The contract is executable, not a document.** `core/features.py`: a registry of **features**, each claiming every property as `provided`, `not_applicable` or `planned`, plus a **verifier** per property that checks a `provided` claim against the live registries. Documentation is generated from it, never written beside it.
+2. **Registry-first, same direction as F002.** Domains register from `<app>/features.py` in `AppConfig.ready()`; `core` imports no domain app and reaches models by label (`apps.get_model`). Features are declared in the app manifests (capability `feature`), so the extension inventory lists them and `manage.py check` agrees.
+3. **A claim is honest or it fails.** A `provided` claim names how (`refs`: registry keys, route names, audit actions, test ids); the property's verifier resolves every ref against the live system. `not_applicable` carries a reason; `planned` carries the owner task id, which must exist in `TASKS.yaml`. A property whose verifier does not exist yet cannot be claimed `provided`.
+4. **Bounded and additive.** The initial set is fifteen important features, not all 122 models: `event`, `track`, `application`, `announcement`, `team`, `project`, `submission`, `stage`, `form`, `artifact`, `evaluation_plan`, `award`, `message`, `webhook`, `policy`. More are added by the batches that deepen them. No model, endpoint or stored value changes for the registry's sake; a gap a task finds is fixed only inside a property that task owns, otherwise recorded as `planned` with its owner.
+5. **Derived, not duplicated.** A lifecycle's states come from the model's own choices; search fields from the entity registration; REST and SDK operations from the OpenAPI artifact; permissions from the permission matrix; audit actions and outbox events from the code. The registry stores only what cannot be derived (the claim, its refs and reasons).
+6. **Advisory at runtime, enforced in CI.** The report never gates a request. A test fails when a claim is unverifiable, a landed property is unclaimed for a registered feature, or a `planned` owner does not exist; a ratchet fails when the count of `planned` claims for landed properties grows.
+
+### The 21 properties and who owns them
+
+| Key | Property | Batch task | What a verifier proves |
+|---|---|---|---|
+| `identity` | Stable public identity and clear lifecycle | B01-T01 | the model has a unique, non-sequential public id used in every route; the declared lifecycle's states equal the model field's choices and its transitions name the service that makes them |
+| `validation` | Backend validation and invariants | B01-T02 | the named invariants exist as model or service checks and each has a test that refuses a bad value with a keyed message |
+| `authorization` | Authorization and scope rules | B01-T03 | every route of the feature is in the permission matrix with roles (none unknown) and a test shows a participant and an outsider refused |
+| `audit` | Audit events | B01-T04 | every mutation of the feature records a named audit action (in code) and the action follows `subject.verb` |
+| `idempotency` | Idempotency and concurrency | B01-T05 | each mutation declares its mode (natural, keyed, token, locked, none) and a retry test proves it |
+| `rest` | REST representation | B01-T06 | list and detail operations exist in OpenAPI, ids are public ids, lists are paged, errors use the shared shape |
+| `sdk` | Generated SDK representation | B01-T07 | every operation of the feature exists in both generated SDKs and the TypeScript types match OpenAPI |
+| `search` | Search, filter and index fields | B01-T08 | the feature is a registered `QUERY` entity whose fields are the declared ones, or says why not |
+| `ui_base`, `ui_advanced`, `bulk`, `cli`, `mcp`, `event_as_code`, `webhook`, `archive` | the eight surfaces | PD-F003-B02 | added there |
+| `analytics`, `privacy`, `extension`, `versioning`, `fixtures` | the five platform properties | PD-F003-B03 | added there |
+
+A property is *landed* once its verifier is registered (by its owner task); before that, a feature may leave it unclaimed.
+
+### Contract
+
+| Item | Decision |
+|---|---|
+| Claim | `Claim {state, refs[], reason, owner}`; `provided` needs refs; `not_applicable` needs a reason of at most 200 characters; `planned` needs an owner task that exists |
+| Feature | `Feature {key, label, model, claims: {property: Claim}, lifecycle?}`; `model` is an app label and name, resolved at check time |
+| Verifier | `verify(feature, claim, system) -> [Problem]`; `system` is a read-only snapshot (models, OpenAPI, permission matrix, audit actions, registries); a verifier never writes and never imports a domain app directly |
+| Report | `GET /workspaces/{id}/completeness/` for organizers and admins: features by property with state, refs and problems, plus totals; `Cache-Control: private, no-store`; no write method |
+| Web | Operations > Completeness: a dense features-by-properties grid with identity and lifecycle visible per feature (T01), problems first, claims closed behind details; no editing |
+| Authority | a claim describes the system and never changes it; no runtime behavior reads the registry |
+| Audit | the report writes nothing; features and claims change only through source review |
+| Extension boundary | a new feature registers from `<app>/features.py` and is declared in the manifest; a new property is a verifier plus an entry in the properties table |
+| Migration | none: no table, no endpoint changed; a gap fix inside an owned property follows the F001 and F002 rule of additive behavior with a compatibility test |
+
+### Forbidden in this batch
+
+A second matrix written by hand beside the registry; a `provided` claim without a verifier or with an unresolvable ref; business rules in a surface (CLI, MCP, UI) that the domain service does not own; retrofitting all 122 models or changing stored values or public routes to satisfy a property; making an unregistered feature fail a gate; LLM or heuristic judgement of completeness; a runtime request depending on the registry.
+
+### Compatibility and migration boundary
+
+- No migration. Existing routes, stored data, audit actions and outbox events are unchanged except where a task fixes a recorded gap inside its own property, with a test that the old behavior still holds.
+- `PRIMITIVE_REGISTRY.yaml` is not extended: this is a contract over primitives, not a new primitive; it reuses `QUERY`, `AUDIT_PROVENANCE`, `EXTENSION_MANIFEST`, `ASYNC_JOB`, `POLICY_EXPLAIN`, `VERSION_DIFF` and the generated SDKs (`TYPED_CLIENT` is adopted when its batch lands, ESC-20260930-006).
+
+### Task boundaries and order
+
+T01 identity and lifecycle (registry, report endpoint, Operations grid), T02 validation, T03 authorization (uses the permission matrix and explanations), T04 audit (uses the provenance envelope), T05 idempotency and concurrency (long operations are jobs), T06 REST, T07 SDK, T08 search (uses `QUERY` and the schema subset), then T90, T91, T95. **Not here:** the eight surfaces (PD-F003-B02), analytics, privacy, extension hooks, versioning and fixtures (PD-F003-B03), and any new feature capability.
+
+### Verification strategy
+
+Per property: a verifier unit suite on realistic and deliberately broken claims, a differential test of the derived facts against the live system (every one of the fifteen features resolves), a negative test per failure code, the role matrix of the report endpoint, the ratchet, and for the UI a component test and a browser spec at 390 and 1440 with axe. Gates: `make verify-fast`, `make e2e-fast`.
+

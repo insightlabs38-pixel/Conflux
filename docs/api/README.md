@@ -9,6 +9,8 @@ Use the [local API explorer](EXPLORER.md) to browse the live contract and send s
 See the [generated SDK guide](SDK.md) for TypeScript and Python clients derived from the checked schema.
 See the [CSV migration adapter](CSV_MIGRATION.md) for importing external project rows through the canonical archive.
 
+See [shared primitives](../architecture/SHARED_PRIMITIVES.md) for the generic entity query, saved views, bulk planner, background jobs, approval gates, threads and timeline that features build on ([entity query](ENTITY_QUERY.md), [saved views](SAVED_VIEWS.md), [bulk operations](BULK_OPERATIONS.md), [jobs](../operations/JOBS.md), [approvals](../operations/APPROVALS.md), [threads](../operations/THREADS.md), [timeline](../operations/TIMELINE.md)).
+
 See [webhooks](WEBHOOKS.md) for subscription, signing, retry, and replay behavior.
 See [awards](AWARDS.md) for winner selection, publication, typed prizes, and fulfillment.
 See [the canonical archive](../architecture/CANONICAL_ARCHIVE.md) for exporting and importing an event's configuration.

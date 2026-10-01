@@ -1,0 +1,67 @@
+version: 3
+task: PD-F002-B01-T91
+batch: PD-F002-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 1f2d513
+  head_commit: 1f2d513
+changed_paths:
+- docs/architecture/SHARED_PRIMITIVES.md
+- docs/api/README.md
+- docs/operations/UPGRADES.md
+- docs/product-depth-v3/specs/002-feature-depth-should-compound-through-shared-primitives.md
+- src/web/lib/primitives.contract.test.ts
+- docs/verification/PD-F002-B01/T91-verify-fast.log
+deliverables:
+- item: Close the batch surface matrix without undocumented skips
+  result: pass
+  evidence: spec 002 section "Surface matrix as closed (T91)" gives evidence for web, api, audit and docs, and a reason for every not_required surface (sdk, cli, mcp, event_as_code, webhook, archive, analytics, search)
+- item: Every required surface delegates to the same canonical operation and generated contracts stay synchronized
+  result: pass
+  evidence: the new primitives.contract.test.ts checks that all 18 requests the shared-primitive web clients make resolve to operations in the checked OpenAPI, so the web goes through the generated client; sdk-check and block-schema-check are clean; the grid, dialogs, panels and timeline only call the endpoints and render the server's answer
+- item: User, operator and developer documentation and migration notes
+  result: pass
+  evidence: one guide per primitive (JOBS, APPROVALS, THREADS, TIMELINE, DATA_GRID, BULK_OPERATIONS, ENTITY_QUERY, SAVED_VIEWS), the new developer page docs/architecture/SHARED_PRIMITIVES.md (rules and a consumer checklist), an upgrade note in docs/operations/UPGRADES.md (additive migrations core 0002 to 0005, restart worker and beat for the new tasks, gates off by default) and links from the API index
+- item: Desktop, mobile and accessibility polish
+  result: pass
+  evidence: every new surface is covered by a browser spec at 390 and 1440 with axe and overflow checks; a real defect was found and fixed along the way (the jobs table overflowed at 390, Escape did not close a dialog after its focused button vanished)
+invariants:
+- item: One source of truth, server authority
+  result: pass
+  evidence: no new product code in this task; nothing is stored or decided in the UI
+verification:
+- command: make format-check lint sdk-check block-schema-check
+  result: pass
+  note: clean; docs/verification/PD-F002-B01/T91-verify-fast.log
+- command: pnpm --filter @conflux/web test; uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 414 web tests and 1727 backend tests passed (30 skipped on SQLite, run on PostgreSQL in T90)
+- command: make e2e-fast
+  result: pass
+  note: no product or browser-spec code changed since the T90 run, so its log stands (docs/verification/PD-F002-B01/T90-e2e-fast.log)
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: all new surfaces listed in spec 002
+- surface: api
+  result: pass
+  evidence: all new endpoints in the checked OpenAPI
+- surface: audit
+  result: pass
+  evidence: MATRIX.md audit proof
+- surface: docs
+  result: pass
+  evidence: guides, developer page, upgrade note
+migrations: []
+findings:
+- The upgrade note records an operational fact worth having in one place, the worker and beat run the new tasks, so an app-only rebuild leaves started jobs queued
+limitations:
+- None beyond those recorded per primitive in MATRIX.md
+escalations: []
+next: review

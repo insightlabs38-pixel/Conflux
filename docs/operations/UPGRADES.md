@@ -3,6 +3,10 @@
 What an operator can expect when moving to a newer build of Conflux, and
 what stays stable across that move.
 
+## Moving to a build with the shared primitives (PD-F002-B01)
+
+Additive only: migrations `core/0002_saved_views`, `0003_jobs`, `0004_approvals` and `0005_threads` add tables and change nothing that exists, so they apply on the normal startup `migrate` and a rollback to the previous image simply leaves them unused. Two new Celery tasks need the **worker and beat to be restarted on the new image** (`docker compose up -d --build` rebuilds all three services; the `app` container alone does not carry them): `core.tasks.run_job` and the beat entries `sweep-jobs` (every 60 s: fails jobs that stopped reporting, re-sends queued ones that never started) and `sweep-approvals` (every 5 minutes: marks lapsed approvals). Until the worker is updated, a started job (an archive export) stays queued, and the sweep, once beat is current, re-sends it. Approval gates are off for every existing event, so no behavior changes until an organizer turns one on. See [shared primitives](../architecture/SHARED_PRIMITIVES.md).
+
 ## Application startup: normal migrations, no destructive hacks
 
 `infra/api.Dockerfile`'s entrypoint runs, in order, every time the `app`

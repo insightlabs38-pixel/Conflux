@@ -416,7 +416,7 @@ primitives:
 - id: BULK_PLAN
   name: Bulk operation plan/apply
   owner_task: PD-F002-B01-T04
-  status: PLANNED
+  status: IMPLEMENTED
   consumer_count: 59
   consumers:
   - PD-F003-B02-T03

@@ -19,6 +19,7 @@
   "isolated-mutation": [
     "event-advanced",
     "event-configuration",
+    "bulk-planner",
     "entity-grid",
     "event-consequences",
     "event-modules",

@@ -1,8 +1,20 @@
 from rest_framework import serializers
 
+from .bulk import ACTIONS
+
+
+class RegisteredActionField(serializers.ChoiceField):
+    """The five built-in actions are the documented enum; an action registered by another app
+    (`bulk.register_action`) is accepted too, so the planner can be extended without editing it."""
+
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data in ACTIONS:
+            return data
+        return super().to_internal_value(data)
+
 
 class BulkOperationInput(serializers.Serializer):
-    action = serializers.ChoiceField(choices=["assign", "advance", "extend", "move", "send"])
+    action = RegisteredActionField(choices=["assign", "advance", "extend", "move", "send"])
     plan = serializers.UUIDField(required=False)
     coverage = serializers.IntegerField(required=False, min_value=1, max_value=100)
     stage = serializers.UUIDField(required=False)
@@ -22,6 +34,9 @@ class BulkOperationInput(serializers.Serializer):
     body = serializers.CharField(required=False, max_length=10000)
     audience_kind = serializers.CharField(required=False, max_length=40)
     audience_params = serializers.DictField(required=False)
+    params = serializers.DictField(
+        required=False, help_text="Fields of an action registered by another app."
+    )
 
     def to_internal_value(self, data):
         if isinstance(data, dict) and data.keys() - self.fields.keys():
@@ -29,17 +44,15 @@ class BulkOperationInput(serializers.Serializer):
         return super().to_internal_value(data)
 
     def validate(self, attrs):
-        required = {
-            "assign": {"plan", "coverage"},
-            "advance": {"stage", "to_stage", "entries"},
-            "extend": {"gates", "seconds"},
-            "move": {"projects", "track"},
-            "send": {"subject", "body", "audience_kind"},
-        }[attrs["action"]]
-        allowed = required | {"action"}
-        if attrs["action"] == "send":
-            allowed.add("audience_params")
-        if required - attrs.keys() or attrs.keys() - allowed:
+        action = ACTIONS[attrs["action"]]
+        if action.params is not None:
+            if attrs.keys() - {"action", "params"} or "params" not in attrs:
+                raise serializers.ValidationError("Supply the action and its params object.")
+            checked = action.params(data=attrs["params"])
+            checked.is_valid(raise_exception=True)
+            return {"action": attrs["action"], "params": dict(checked.validated_data)}
+        allowed = action.required | action.optional | {"action"}
+        if action.required - attrs.keys() or attrs.keys() - allowed:
             raise serializers.ValidationError("Supply exactly the fields for this action.")
         for field in ("entries", "gates", "projects"):
             if field in attrs and len(set(attrs[field])) != len(attrs[field]):
@@ -65,3 +78,11 @@ class BulkResponse(serializers.Serializer):
     effects = serializers.ListField(child=serializers.JSONField())
     preview_token = serializers.CharField(required=False)
     expires_in = serializers.IntegerField(required=False)
+
+
+class BulkReceiptSchema(serializers.Serializer):
+    public_id = serializers.UUIDField()
+    actor = serializers.CharField()
+    created_at = serializers.DateTimeField()
+    actions = serializers.ListField(child=serializers.CharField())
+    effects = serializers.ListField(child=serializers.JSONField())

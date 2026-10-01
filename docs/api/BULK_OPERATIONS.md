@@ -37,3 +37,19 @@ Bulk send uses the inbox only; use the existing message API for best-effort
 email. There is no new bulk editor; this additive API is available through the
 generated SDKs and the API explorer. The event and selected records are locked
 on PostgreSQL; normal domain uniqueness constraints remain authoritative.
+
+## Adding an action (extension seam)
+
+The five actions above are registered in `communications/bulk.py` like any other. An app adds its own without editing the planner: `bulk.register_action(BulkAction(key, label, handler, params=SomeSerializer))`. `handler(event, actor, op)` does the domain work with its normal validation and audit, runs inside the planner's transaction (DB only, never external delivery) and returns `(effect, impact)`: a JSON description of exactly what changed and how many records it touched. A registered action is sent as `{"action": "<key>", "params": {...}}` and its `params` are validated by its serializer; the built-in actions keep their flat fields (a built-in given `params`, or a registered action given flat fields, is refused). Preview, the signed token, drift detection, atomic apply, per-action audit, receipts, replay by token and every limit apply to a registered action unchanged. The OpenAPI `action` enum documents the five built-ins; registered keys are accepted at runtime.
+
+## Receipts
+
+`GET .../operations/bulk/receipts/` lists what was applied in the event, newest first (`public_id`, `actor`, `created_at`, `actions`; `limit` 1-100 and `offset`, total in `X-Total-Count`), and `GET .../operations/bulk/receipts/{id}/` adds the exact `effects`. Organizer/admin only, scoped to the event.
+
+## Rollback and compensation
+
+Rollback is whole-batch and automatic: a failure at any step, a stale preview or an audit failure changes nothing. **Compensation after a successful apply is not generic**: undoing an applied batch is a new, deliberate operation using the domain's own inverse (move the projects back, extend the gates back), previewed and receipted like any other. The planner does not offer a one-click undo.
+
+## In the web
+
+Select projects in the Projects list (Participants > Projects), pick a track and **Preview move**. The dialog states the exact effects ("Move 3 projects to Hardware (1 from no track, 2 from Software)"), applies on an explicit button, shows the receipt, asks for a new preview when the old one is stale, and on a lost connection offers a retry of the same preview (a replay never applies twice). The reusable pieces are `lib/bulk.ts` and `components/BulkPlanner.tsx`.

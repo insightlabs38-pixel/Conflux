@@ -2,7 +2,7 @@ from django.urls import path
 
 from . import views
 from .analytics_views import EventAnalyticsView
-from .bulk_views import BulkOperationsView
+from .bulk_views import BulkOperationsView, BulkReceiptDetailView, BulkReceiptListView
 from .moderation_views import ModerationQueueView, ModerationReviewsView
 from .public_qa import (
     AnnouncementReviewView,
@@ -46,6 +46,16 @@ urlpatterns = [
         name="moderation-reviews",
     ),
     path(_prefix + "operations/bulk/", BulkOperationsView.as_view(), name="operations-bulk"),
+    path(
+        _prefix + "operations/bulk/receipts/",
+        BulkReceiptListView.as_view(),
+        name="operations-bulk-receipts",
+    ),
+    path(
+        _prefix + "operations/bulk/receipts/<uuid:receipt_public_id>/",
+        BulkReceiptDetailView.as_view(),
+        name="operations-bulk-receipt",
+    ),
     path(
         "workspaces/<uuid:workspace_public_id>/operator-console/",
         views.OperatorConsoleView.as_view(),

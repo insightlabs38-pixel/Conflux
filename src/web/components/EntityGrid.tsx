@@ -120,6 +120,7 @@ export function EntityGrid({
       first.current = false;
       return;
     }
+    setSelected(new Set()); // rows may be gone or changed: an earlier selection is stale
     void page.reload();
     // Only a change of the token reloads; `page` identity changes on every render.
   }, [refreshToken]);

@@ -1,0 +1,84 @@
+version: 3
+task: PD-F002-B01-T04
+batch: PD-F002-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: frontier-architecture
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: beb8068
+  head_commit: beb8068
+changed_paths:
+- src/api/communications/ (bulk.py action registry, bulk_schema.py, bulk_views.py receipts, urls.py)
+- src/web/lib/bulk.ts and test
+- src/web/components/ (BulkPlanner, Modal, ConsequenceDialog on Modal, EntityGrid selection reset)
+- src/web/features/event-builder/ (ProjectsGrid.tsx, EventDashboard.tsx)
+- tests/integration/test_bulk_planner_registry.py
+- tests/e2e/ (bulk-planner.spec.ts, tiers.json, weights.json)
+- docs/api/BULK_OPERATIONS.md, docs/api/openapi.yaml, sdks generated
+- docs/product-depth-v3/ (spec 002, PRIMITIVE_REGISTRY.yaml)
+deliverables:
+- item: Canonical bulk plan/apply contract as a reusable primitive
+  result: pass
+  evidence: the existing planner (rolled-back plan, signed token, drift 409, atomic apply, per-action audit, BulkReceipt, replay by token) is kept and its five actions are now registered through BulkAction and register_action, so other apps add actions without editing the planner
+- item: Stable inputs/outputs, lifecycle, authorization, idempotency, errors, extension boundary
+  result: pass
+  evidence: docs/api/BULK_OPERATIONS.md (extension seam, receipts, rollback and compensation); organizer-only, event-scoped; token replay never repeats work; refusals are 400 with diagnostics and write nothing
+- item: Reference consumer or contract test showing reuse without private coupling
+  result: pass
+  evidence: tests/integration/test_bulk_planner_registry.py registers an independent hide_projects action from outside communications and proves preview, apply, replay, rollback with a built-in, strict registration and receipt reads; web adopter is the track move in the Projects grid
+- item: Compatibility and migration expectations documented
+  result: pass
+  evidence: endpoint, token format, flat built-in fields and the OpenAPI enum are unchanged; spec 002 BULK_PLAN as built; no migration
+invariants:
+- item: One source of truth, server authoritative
+  result: pass
+  evidence: the web previews through the same endpoint, states the server's effects and applies with the previewed token; no client-side business rule
+- item: Audit and authorization remain authoritative
+  result: pass
+  evidence: each action audits through record_mutation plus operations.bulk_applied; receipts and the planner are organizer-only (judge gets 403)
+- item: Design intent, accessibility, progressive disclosure
+  result: pass
+  evidence: shared Modal (focus trap, Escape, focus return) also adopted by ConsequenceDialog; bulk bar appears only when rows are selected
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1630 passed, 23 skipped
+- command: pnpm --filter @conflux/web test
+  result: pass
+  note: 363 web tests (BulkPlanner 5, bulk 3) green
+- command: make format-check lint sdk-check block-schema-check; manage.py spectacular --validate --fail-on-warn
+  result: pass
+  note: clean after fixing two E501 in the new test
+- command: make e2e-fast
+  result: pass
+  note: read-only, isolated-mutation (incl. bulk-planner at 390 and 1440 with receipt and API checks) and canary ok; docs/verification/PD-F002-B01/T04-e2e-fast.log
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: BulkPlanner, Modal, Projects grid adopter
+- surface: api
+  result: pass
+  evidence: receipt list and detail endpoints, params actions
+- surface: audit
+  result: pass
+  evidence: per-action audit and receipts verified in the registry contract test
+- surface: docs
+  result: pass
+  evidence: BULK_OPERATIONS.md, spec 002, registry status IMPLEMENTED
+- surface: sdk
+  result: pass
+  evidence: "not required; generated clients regenerated for the new endpoints and sdk-check is clean"
+migrations: []
+findings:
+- The task was resumed from an interrupted session; the tree already held the implementation, which was reviewed and verified before closing
+- Loading, stale, refused and lost-connection states of the dialog are proved in unit tests; the browser spec proves the happy path at both viewports
+limitations:
+- Compensation after apply is not generic; it is a deliberate inverse operation per domain
+- No bulk history screen (receipts are API-only) and the web offers only the track move
+- The OpenAPI enum lists the five built-ins; registered keys are accepted at runtime
+escalations: []
+next: review

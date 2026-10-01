@@ -6988,6 +6988,80 @@ paths:
               schema:
                 $ref: '#/components/schemas/BulkResponse'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/bulk/receipts/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_bulk_receipts
+      description: What was applied through the planner in this event, newest first
+        (summaries).
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: limit
+        schema:
+          type: integer
+      - in: query
+        name: offset
+        schema:
+          type: integer
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BulkReceiptSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/bulk/receipts/{receipt_public_id}/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_bulk_receipts_receipt_public_id
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: receipt_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkReceiptSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/checklist/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_checklist
@@ -18438,8 +18512,36 @@ components:
         audience_params:
           type: object
           additionalProperties: {}
+        params:
+          type: object
+          additionalProperties: {}
+          description: Fields of an action registered by another app.
       required:
       - action
+    BulkReceiptSchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        actor:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        actions:
+          type: array
+          items:
+            type: string
+        effects:
+          type: array
+          items: {}
+      required:
+      - actions
+      - actor
+      - created_at
+      - effects
+      - public_id
     BulkRequest:
       type: object
       properties:

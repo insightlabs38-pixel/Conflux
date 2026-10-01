@@ -1,6 +1,8 @@
 import hashlib
 import json
 import uuid
+from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import timedelta
 
 from audit.services import diff_snapshots, record_mutation, snapshot_fields
@@ -28,6 +30,37 @@ SALT = "communications.bulk.v1"
 
 class StalePreview(Exception):
     pass
+
+
+@dataclass(frozen=True)
+class BulkAction:
+    """One kind of bulk operation the planner can preview, apply and receipt (PD-F002-B01-T04).
+
+    `handler(event, actor, op)` does the domain work with the normal validation and audit and
+    returns `(effect, impact)`: a JSON-serialisable description of exactly what changed and how
+    many records it touched. It runs inside the planner's transaction, so it must be DB-only and
+    never start external delivery. The built-in actions take flat `required`/`optional` fields
+    (the original request shape); a registered action takes a `params` object that its own
+    serializer class validates.
+    """
+
+    key: str
+    label: str
+    handler: Callable
+    required: frozenset = frozenset()
+    optional: frozenset = frozenset()
+    params: type | None = None
+
+
+ACTIONS: dict[str, BulkAction] = {}
+
+
+def register_action(action: BulkAction):
+    """Add an action once; a different registration under a taken key is a bug."""
+    if action.key in ACTIONS and ACTIONS[action.key] != action:
+        raise ValueError(f"Bulk action {action.key!r} is already registered")
+    ACTIONS[action.key] = action
+    return action
 
 
 def _digest(value):
@@ -174,14 +207,7 @@ def _execute(event, actor, operations):
     effects = []
     count = 0
     for op in operations:
-        handler = {
-            "assign": _assign,
-            "advance": _advance,
-            "extend": _extend,
-            "move": _move,
-            "send": _send,
-        }[op["action"]]
-        effect, impact = handler(event, actor, op)
+        effect, impact = ACTIONS[op["action"]].handler(event, actor, op)
         count += impact
         if count > MAX_EFFECTS:
             raise ValidationError("Batch exceeds the bulk impact limit.")
@@ -248,3 +274,19 @@ def run_bulk(*, event, actor, operations, preview_token=None):
             metadata={"event": str(event.public_id), "effects": effects},
         )
         return result
+
+
+for _action in (
+    BulkAction("assign", "Assign judges", _assign, frozenset({"plan", "coverage"})),
+    BulkAction("advance", "Advance entries", _advance, frozenset({"stage", "to_stage", "entries"})),
+    BulkAction("extend", "Extend gates", _extend, frozenset({"gates", "seconds"})),
+    BulkAction("move", "Move projects to a track", _move, frozenset({"projects", "track"})),
+    BulkAction(
+        "send",
+        "Send a message",
+        _send,
+        frozenset({"subject", "body", "audience_kind"}),
+        frozenset({"audience_params"}),
+    ),
+):
+    register_action(_action)

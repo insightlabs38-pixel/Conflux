@@ -768,6 +768,7 @@ class BulkOperationInput(TypedDict):
     body: NotRequired[str]
     audience_kind: NotRequired[str]
     audience_params: NotRequired[dict[str, Any]]
+    params: NotRequired[dict[str, Any]]
 
 class InputOfBulkOperationInput(TypedDict):
     action: InputOfBulkOperationAction
@@ -784,6 +785,21 @@ class InputOfBulkOperationInput(TypedDict):
     body: NotRequired[str]
     audience_kind: NotRequired[str]
     audience_params: NotRequired[dict[str, Any]]
+    params: NotRequired[dict[str, Any]]
+
+class BulkReceiptSchema(TypedDict):
+    public_id: str
+    actor: str
+    created_at: str
+    actions: list[str]
+    effects: list[Any]
+
+class InputOfBulkReceiptSchema(TypedDict):
+    public_id: str
+    actor: str
+    created_at: str
+    actions: list[str]
+    effects: list[Any]
 
 class BulkRequest(TypedDict):
     operations: list[BulkOperationInput]
@@ -6043,6 +6059,22 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                            'query_params': ['plan_offset'],
                                                                                            'request_body': False,
                                                                                            'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_bulk_receipts': {'method': 'GET',
+                                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/bulk/receipts/',
+                                                                                               'path_params': ['event_public_id',
+                                                                                                               'workspace_public_id'],
+                                                                                               'query_params': ['limit',
+                                                                                                                'offset'],
+                                                                                               'request_body': False,
+                                                                                               'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_bulk_receipts_receipt_public_id': {'method': 'GET',
+                                                                                                                 'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/bulk/receipts/{receipt_public_id}/',
+                                                                                                                 'path_params': ['event_public_id',
+                                                                                                                                 'receipt_public_id',
+                                                                                                                                 'workspace_public_id'],
+                                                                                                                 'query_params': [],
+                                                                                                                 'request_body': False,
+                                                                                                                 'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_operations_checklist': {'method': 'GET',
                                                                                            'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/operations/checklist/',
                                                                                            'path_params': ['event_public_id',

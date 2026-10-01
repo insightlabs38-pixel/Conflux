@@ -1,0 +1,84 @@
+version: 3
+task: PD-F002-B02-T03
+batch: PD-F002-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 49c2abc
+  head_commit: 49c2abc
+changed_paths:
+- src/api/core/ (previews.py, preview_views.py, urls.py, jobs.py visible_to, job_views.py)
+- src/api/artifacts/ (previews.py, access.py, apps.py, review_views.py delegates)
+- src/web/lib/preview.ts, components/ArtifactPreview.tsx, features/pvs/JudgingLogisticsPanels.tsx, features/operations/JobsPanel.tsx, styles/components.css
+- tests/integration/test_previews.py, src/web/components/ArtifactPreview.test.tsx, features/pvs/pvs.test.tsx, features/operations/JobsPanel.test.tsx
+- tests/e2e/ (artifact-preview.spec.ts, tiers.json, weights.json, affected.json)
+- docs/operations/ARTIFACT_PREVIEW.md, docs/api/openapi.yaml, generated SDKs, spec 002, PRIMITIVE_REGISTRY.yaml
+deliverables:
+- item: Canonical safe artifact preview pipeline contract as a platform primitive
+  result: pass
+  evidence: core/previews.py with a source registry, Subject, and a pure descriptor (kinds text, image, video, document, archive, data, link, unavailable; states ready, pending, unavailable), one endpoint GET workspaces/{id}/previews/{source}/
+- item: Stable inputs/outputs, lifecycle, authorization, idempotency, errors, extension boundary
+  result: pass
+  evidence: ARTIFACT_PREVIEW.md; derived on every read and never stored; visibility is the source's (404 when not visible, 400 names a missing parameter, no-store); bounds on findings, facts, text, entries; a feature adds a source with register_source
+- item: Reference consumer or contract test showing reuse without private coupling
+  result: pass
+  evidence: two sources (project_artifact, job_output) plus test_a_feature_registers_its_own_source; adopters are the reviewer artifact inspector and the Exports and jobs output list
+- item: Compatibility and migration expectations documented
+  result: pass
+  evidence: no migration or stored change; the inspector, serving, review list and job endpoints are unchanged; reviewer rules and job visibility moved to one definition each (artifacts/access.py, core.jobs.visible_to) and their existing tests pass
+invariants:
+- item: Nothing is rendered, executed or fetched; untrusted content stays text
+  result: pass
+  evidence: web pages, SVG, programs and checksum failures are withheld with no download; previewing creates no inspection or audit row and does no storage read or link fetch (asserted); excerpt, facts and names are text nodes (vitest and the inspector test with a script excerpt)
+- item: Server-side visibility authoritative
+  result: pass
+  evidence: role matrix for member, judge (visibility and assignment), organizer, other participant, outsider, signed out and other workspace; job output only for the requester and staff
+- item: Design intent, accessibility, progressive disclosure
+  result: pass
+  evidence: job previews open on request (aria-expanded), findings, facts and archive listing are labelled regions, axe clean and no overflow at 390 and 1440 (found and fixed a 24px target-size violation)
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1882 passed, 30 skipped (25 new in test_previews.py)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check; makemigrations --check
+  result: pass
+  note: 536 web tests; spectacular validate with fail-on-warn clean after regenerating OpenAPI and SDKs
+- command: npx playwright test artifact-preview jobs --project=desktop on a fresh iso-min fixture
+  result: pass
+  note: 4 passed (preview at 390 and 1440, no writes while previewing, the API answer uncached, 404 for a missing output)
+- command: make e2e-affected
+  result: pass
+  note: read-only, isolated-mutation and canary (including lifecycle, which drives the reviewer inspector) ok
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: ArtifactPreview and PreviewLoader in the reviewer inspector and the job output list
+- surface: api
+  result: pass
+  evidence: the previews endpoint
+- surface: audit
+  result: pass
+  evidence: previewing writes no audit row (asserted); running an inspection stays audited as artifact.inspected
+- surface: docs
+  result: pass
+  evidence: ARTIFACT_PREVIEW.md, spec 002 B02 as built, registry IMPLEMENTED
+- surface: sdk
+  result: pass
+  evidence: "not required; generated clients regenerated, sdk-check clean"
+migrations:
+- none (stateless, additive)
+findings:
+- Reuse of PREVIEW_CONTEXT is not possible yet (owner PD-F002-B03-T01 is later); previews carry no as-of or as-role context and the registry is the extension point when it lands
+- The first browser run failed axe target-size on the download link now beside a preview button; fixed with a flex row and minimum link height
+- The existing inspector unit test and the jobs list test assumed the old markup and were updated to the descriptor flow
+limitations:
+- Images, video and documents are not shown inline (the platform never renders a submitted file); the preview gives facts, findings and the existing download
+- A link artifact is previewed from its stored inspection only; previewing never fetches
+- The preview endpoint documents all sources' query parameters as optional in OpenAPI
+escalations: []
+next: review

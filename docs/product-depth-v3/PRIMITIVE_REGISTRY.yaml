@@ -2144,7 +2144,7 @@ primitives:
 - id: ARTIFACT_PREVIEW
   name: Safe artifact preview pipeline
   owner_task: PD-F002-B02-T03
-  status: PLANNED
+  status: IMPLEMENTED
   consumer_count: 143
   consumers:
   - PD-F002-B01-T05

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Badge } from "../../components/Badge";
 import { Button } from "../../components/Button";
+import { PreviewLoader } from "../../components/ArtifactPreview";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 import { DataTable } from "../../components/Foundation";
@@ -36,6 +37,38 @@ const TONE: Record<JobStatus, "neutral" | "info" | "success" | "danger"> = {
 const POLL_MS = 3000;
 
 type Exported = { mode: string; signed: boolean };
+
+/** A job output's safe preview, opened on request (the file is inspected when asked for). */
+function OutputPreview({
+  workspaceId,
+  jobId,
+  name,
+}: {
+  workspaceId: string;
+  jobId: string;
+  name: string;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button
+        variant="secondary"
+        aria-expanded={open}
+        onClick={() => setOpen((current) => !current)}
+      >
+        {open ? `Hide preview of ${name}` : `Preview ${name}`}
+      </Button>
+      {open && (
+        <PreviewLoader
+          workspaceId={workspaceId}
+          source="job_output"
+          reference={{ job: jobId, name }}
+          showDownload={false}
+        />
+      )}
+    </>
+  );
+}
 
 /**
  * Background jobs of the event (PD-F002-B01-T05): start an archive export that runs on the server
@@ -135,7 +168,7 @@ export function JobsPanel({
         onDismiss={exporting.reset}
       />
       {done?.artifacts[0] && (
-        <p>
+        <div className="cx-output">
           <a
             href={artifactUrl(
               workspaceId,
@@ -146,8 +179,13 @@ export function JobsPanel({
           >
             Download {done.artifacts[0].name}
           </a>{" "}
-          ({Math.max(1, Math.round(done.artifacts[0].size / 1024))} KB)
-        </p>
+          ({Math.max(1, Math.round(done.artifacts[0].size / 1024))} KB){" "}
+          <OutputPreview
+            workspaceId={workspaceId}
+            jobId={done.public_id}
+            name={done.artifacts[0].name}
+          />
+        </div>
       )}
       <h4>Recent jobs</h4>
       {problem && <p role="alert">{problem}</p>}
@@ -191,13 +229,19 @@ export function JobsPanel({
                 <td>
                   {job.error && <span role="note">{job.error.message}</span>}
                   {job.artifacts.map((a) => (
-                    <a
-                      key={a.name}
-                      href={artifactUrl(workspaceId, job.public_id, a.name)}
-                      download
-                    >
-                      {a.name}
-                    </a>
+                    <div key={a.name} className="cx-output">
+                      <a
+                        href={artifactUrl(workspaceId, job.public_id, a.name)}
+                        download
+                      >
+                        {a.name}
+                      </a>{" "}
+                      <OutputPreview
+                        workspaceId={workspaceId}
+                        jobId={job.public_id}
+                        name={a.name}
+                      />
+                    </div>
                   ))}
                   {job.cancellable && (
                     <Button

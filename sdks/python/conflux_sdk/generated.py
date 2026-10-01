@@ -2571,6 +2571,10 @@ class InputOfJudgeWorkloadRowSchema(TypedDict):
     submitted_count: int
     completion_ratio: float
 
+LevelEnum = Literal['info', 'warning', 'blocked']
+
+InputOfLevelEnum = Literal['info', 'warning', 'blocked']
+
 class LibraryInstantiateInput(TypedDict):
     name: str
     slug: NotRequired[str]
@@ -3692,6 +3696,88 @@ class PreflightSchema(TypedDict):
 class InputOfPreflightSchema(TypedDict):
     status: str
     checks: list[InputOfPreflightCheckSchema]
+
+class PreviewEntrySchema(TypedDict):
+    name: str
+    size: int | None
+
+class InputOfPreviewEntrySchema(TypedDict):
+    name: str
+    size: int | None
+
+class PreviewFindingSchema(TypedDict):
+    level: LevelEnum
+    code: str
+    message: str
+
+class InputOfPreviewFindingSchema(TypedDict):
+    level: InputOfLevelEnum
+    code: str
+    message: str
+
+class PreviewMediaSchema(TypedDict):
+    url: str
+    filename: str
+
+class InputOfPreviewMediaSchema(TypedDict):
+    url: str
+    filename: str
+
+class PreviewReasonSchema(TypedDict):
+    code: str
+    message: str
+
+class InputOfPreviewReasonSchema(TypedDict):
+    code: str
+    message: str
+
+class PreviewSchema(TypedDict):
+    source: str
+    ref: dict[str, str]
+    name: str
+    content_type: str
+    size: int | None
+    kind: PreviewSchemaKindEnum
+    detected_type: str
+    state: PreviewSchemaStateEnum
+    reason: PreviewReasonSchema | None
+    facts: dict[str, Any]
+    findings: list[PreviewFindingSchema]
+    findings_total: int
+    text: str
+    entries: list[PreviewEntrySchema]
+    entries_total: int
+    media: PreviewMediaSchema | None
+    link: str | None
+    inspected_at: str | None
+
+class InputOfPreviewSchema(TypedDict):
+    source: str
+    ref: dict[str, str]
+    name: str
+    content_type: str
+    size: int | None
+    kind: InputOfPreviewSchemaKindEnum
+    detected_type: str
+    state: InputOfPreviewSchemaStateEnum
+    reason: InputOfPreviewReasonSchema | None
+    facts: dict[str, Any]
+    findings: list[InputOfPreviewFindingSchema]
+    findings_total: int
+    text: str
+    entries: list[InputOfPreviewEntrySchema]
+    entries_total: int
+    media: InputOfPreviewMediaSchema | None
+    link: str | None
+    inspected_at: str | None
+
+PreviewSchemaKindEnum = Literal['text', 'image', 'video', 'document', 'archive', 'data', 'link', 'unavailable']
+
+InputOfPreviewSchemaKindEnum = Literal['text', 'image', 'video', 'document', 'archive', 'data', 'link', 'unavailable']
+
+PreviewSchemaStateEnum = Literal['ready', 'pending', 'unavailable']
+
+InputOfPreviewSchemaStateEnum = Literal['ready', 'pending', 'unavailable']
 
 class PrivacyApplyInput(TypedDict):
     apply: NotRequired[bool]
@@ -7467,6 +7553,17 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                    'status'],
                                                                   'request_body': False,
                                                                   'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_previews_source': {'method': 'GET',
+                                                               'path': '/api/v1/workspaces/{workspace_public_id}/previews/{source}/',
+                                                               'path_params': ['source',
+                                                                               'workspace_public_id'],
+                                                               'query_params': ['artifact',
+                                                                                'event',
+                                                                                'job',
+                                                                                'name',
+                                                                                'project'],
+                                                               'request_body': False,
+                                                               'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_taxonomies': {'method': 'GET',
                                                           'path': '/api/v1/workspaces/{workspace_public_id}/taxonomies/',
                                                           'path_params': ['workspace_public_id'],

@@ -21,6 +21,7 @@
     "event-configuration",
     "schema-form",
     "rich-preview",
+    "artifact-preview",
     "timeline",
     "threads",
     "approvals",

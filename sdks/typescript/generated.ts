@@ -2795,6 +2795,10 @@ export type InputOfJudgeWorkloadRowSchema = {
   completion_ratio: number;
 };
 
+export type LevelEnum = "info" | "warning" | "blocked";
+
+export type InputOfLevelEnum = "info" | "warning" | "blocked";
+
 export type LibraryInstantiateInput = {
   name: string;
   slug?: string;
@@ -4003,6 +4007,96 @@ export type InputOfPreflightSchema = {
   status: string;
   checks: InputOfPreflightCheckSchema[];
 };
+
+export type PreviewEntrySchema = { name: string; size: number | null };
+
+export type InputOfPreviewEntrySchema = { name: string; size: number | null };
+
+export type PreviewFindingSchema = {
+  level: LevelEnum;
+  code: string;
+  message: string;
+};
+
+export type InputOfPreviewFindingSchema = {
+  level: InputOfLevelEnum;
+  code: string;
+  message: string;
+};
+
+export type PreviewMediaSchema = { url: string; filename: string };
+
+export type InputOfPreviewMediaSchema = { url: string; filename: string };
+
+export type PreviewReasonSchema = { code: string; message: string };
+
+export type InputOfPreviewReasonSchema = { code: string; message: string };
+
+export type PreviewSchema = {
+  source: string;
+  ref: Record<string, string>;
+  name: string;
+  content_type: string;
+  size: number | null;
+  kind: PreviewSchemaKindEnum;
+  detected_type: string;
+  state: PreviewSchemaStateEnum;
+  reason: PreviewReasonSchema | null;
+  facts: Record<string, unknown>;
+  findings: PreviewFindingSchema[];
+  findings_total: number;
+  text: string;
+  entries: PreviewEntrySchema[];
+  entries_total: number;
+  media: PreviewMediaSchema | null;
+  link: string | null;
+  inspected_at: string | null;
+};
+
+export type InputOfPreviewSchema = {
+  source: string;
+  ref: Record<string, string>;
+  name: string;
+  content_type: string;
+  size: number | null;
+  kind: InputOfPreviewSchemaKindEnum;
+  detected_type: string;
+  state: InputOfPreviewSchemaStateEnum;
+  reason: InputOfPreviewReasonSchema | null;
+  facts: Record<string, unknown>;
+  findings: InputOfPreviewFindingSchema[];
+  findings_total: number;
+  text: string;
+  entries: InputOfPreviewEntrySchema[];
+  entries_total: number;
+  media: InputOfPreviewMediaSchema | null;
+  link: string | null;
+  inspected_at: string | null;
+};
+
+export type PreviewSchemaKindEnum =
+  | "text"
+  | "image"
+  | "video"
+  | "document"
+  | "archive"
+  | "data"
+  | "link"
+  | "unavailable";
+
+export type InputOfPreviewSchemaKindEnum =
+  | "text"
+  | "image"
+  | "video"
+  | "document"
+  | "archive"
+  | "data"
+  | "link"
+  | "unavailable";
+
+export type PreviewSchemaStateEnum = "ready" | "pending" | "unavailable";
+
+export type InputOfPreviewSchemaStateEnum = "ready" | "pending" | "unavailable";
 
 export type PrivacyApplyInput = { apply?: boolean };
 
@@ -9643,6 +9737,19 @@ export interface Operations {
     };
     response: Record<string, unknown>;
   };
+  get_api_v1_workspaces_workspace_public_id_previews_source: {
+    request: {
+      path: { source: string; workspace_public_id: string };
+      query?: {
+        artifact?: string;
+        event?: string;
+        job?: string;
+        name?: string;
+        project?: string;
+      };
+    };
+    response: PreviewSchema;
+  };
   post_api_v1_workspaces_workspace_public_id_rich_preview: {
     request: {
       path: { workspace_public_id: string };
@@ -14609,6 +14716,14 @@ export const operations = {
     path: "/api/v1/workspaces/{workspace_public_id}/portfolio/projects/",
     path_params: ["workspace_public_id"],
     query_params: ["event", "limit", "offset", "q", "status"],
+    request_body: false,
+    response_kind: "json",
+  },
+  get_api_v1_workspaces_workspace_public_id_previews_source: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/previews/{source}/",
+    path_params: ["source", "workspace_public_id"],
+    query_params: ["artifact", "event", "job", "name", "project"],
     request_body: false,
     response_kind: "json",
   },

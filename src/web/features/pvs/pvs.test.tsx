@@ -348,6 +348,30 @@ it("shows sponsor resources with safe links only", async () => {
 
 it("judge runs the artifact inspector and sees its verdict", async () => {
   let inspected = false;
+  const descriptor = (over: object) => ({
+    source: "project_artifact",
+    ref: {},
+    name: "Notes.pdf",
+    content_type: "application/pdf",
+    size: 10,
+    kind: "document",
+    detected_type: "",
+    state: "pending",
+    reason: {
+      code: "not_inspected",
+      message: "This has not been inspected yet; run the safe inspection.",
+    },
+    facts: {},
+    findings: [],
+    findings_total: 0,
+    text: "",
+    entries: [],
+    entries_total: 0,
+    media: null,
+    link: null,
+    inspected_at: null,
+    ...over,
+  });
   const calls = stubApi({
     "GET /api/v1/workspaces/w/events/e/projects/p1/review-artifacts/": () => [
       {
@@ -359,24 +383,29 @@ it("judge runs the artifact inspector and sees its verdict", async () => {
         status: "ready",
         byte_size: 10,
         download_url: null,
-        inspection: inspected
-          ? {
-              verdict: "warnings",
+        inspection: inspected ? { public_id: "i1", verdict: "warnings" } : null,
+      },
+    ],
+    "GET /api/v1/workspaces/w/previews/project_artifact/?event=e&project=p1&artifact=a1":
+      () =>
+        inspected
+          ? descriptor({
+              state: "ready",
+              reason: null,
               detected_type: "pdf",
               findings: [
                 {
-                  severity: "warning",
+                  level: "warning",
                   code: "pdf_active_content",
-                  detail: "Has JavaScript.",
+                  message: "Has JavaScript.",
                 },
               ],
+              findings_total: 1,
               facts: { pages: 2 },
-              preview: "<script>alert(1)</script>",
-              inspected_at: "",
-            }
-          : null,
-      },
-    ],
+              // The excerpt is a text node, never markup.
+              text: "<script>alert(1)</script>",
+            })
+          : descriptor({}),
     "POST /api/v1/workspaces/w/events/e/projects/p1/review-artifacts/a1/inspection/":
       () => {
         inspected = true;
@@ -386,11 +415,12 @@ it("judge runs the artifact inspector and sees its verdict", async () => {
   const root = await mount(
     <ArtifactInspector workspaceId="w" eventId="e" projectId="p1" />,
   );
-  await until(() => root.textContent?.includes("Not inspected yet") ?? false);
+  await until(() => root.textContent?.includes("not been inspected") ?? false);
   await act(async () => buttonNamed(root, "Inspect safely").click());
   await until(() => root.textContent?.includes("Has JavaScript.") ?? false);
   expect(calls.some((c) => c.method === "POST")).toBe(true);
-  // Preview is rendered as inert text, never as markup.
+  expect(root.textContent).toContain("Detected type: pdf");
+  expect(root.textContent).toContain("warnings");
   expect(root.querySelector("pre")?.textContent).toBe(
     "<script>alert(1)</script>",
   );

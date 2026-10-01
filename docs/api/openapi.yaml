@@ -17571,6 +17571,64 @@ paths:
               schema:
                 type: object
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/previews/{source}/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_previews_source
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: query
+        name: artifact
+        schema:
+          type: string
+        description: 'project_artifact: the artifact.'
+      - in: query
+        name: event
+        schema:
+          type: string
+        description: 'project_artifact: the event.'
+      - in: query
+        name: job
+        schema:
+          type: string
+        description: 'job_output: the job.'
+      - in: query
+        name: name
+        schema:
+          type: string
+        description: 'job_output: the output''s file name.'
+      - in: query
+        name: project
+        schema:
+          type: string
+        description: 'project_artifact: the project.'
+      - in: path
+        name: source
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/rich/preview/:
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_rich_preview
@@ -22413,6 +22471,16 @@ components:
       - completion_ratio
       - judge
       - submitted_count
+    LevelEnum:
+      enum:
+      - info
+      - warning
+      - blocked
+      type: string
+      description: |-
+        * `info` - info
+        * `warning` - warning
+        * `blocked` - blocked
     LibraryInstantiateInput:
       type: object
       description: |-
@@ -24284,6 +24352,152 @@ components:
       required:
       - checks
       - status
+    PreviewEntrySchema:
+      type: object
+      properties:
+        name:
+          type: string
+        size:
+          type: integer
+          nullable: true
+      required:
+      - name
+      - size
+    PreviewFindingSchema:
+      type: object
+      properties:
+        level:
+          $ref: '#/components/schemas/LevelEnum'
+        code:
+          type: string
+        message:
+          type: string
+      required:
+      - code
+      - level
+      - message
+    PreviewMediaSchema:
+      type: object
+      properties:
+        url:
+          type: string
+        filename:
+          type: string
+      required:
+      - filename
+      - url
+    PreviewReasonSchema:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+      - code
+      - message
+    PreviewSchema:
+      type: object
+      properties:
+        source:
+          type: string
+        ref:
+          type: object
+          additionalProperties:
+            type: string
+        name:
+          type: string
+        content_type:
+          type: string
+        size:
+          type: integer
+          nullable: true
+        kind:
+          $ref: '#/components/schemas/PreviewSchemaKindEnum'
+        detected_type:
+          type: string
+        state:
+          $ref: '#/components/schemas/PreviewSchemaStateEnum'
+        reason:
+          allOf:
+          - $ref: '#/components/schemas/PreviewReasonSchema'
+          nullable: true
+        facts:
+          type: object
+          additionalProperties: {}
+        findings:
+          type: array
+          items:
+            $ref: '#/components/schemas/PreviewFindingSchema'
+        findings_total:
+          type: integer
+        text:
+          type: string
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/PreviewEntrySchema'
+        entries_total:
+          type: integer
+        media:
+          allOf:
+          - $ref: '#/components/schemas/PreviewMediaSchema'
+          nullable: true
+        link:
+          type: string
+          nullable: true
+        inspected_at:
+          type: string
+          nullable: true
+      required:
+      - content_type
+      - detected_type
+      - entries
+      - entries_total
+      - facts
+      - findings
+      - findings_total
+      - inspected_at
+      - kind
+      - link
+      - media
+      - name
+      - reason
+      - ref
+      - size
+      - source
+      - state
+      - text
+    PreviewSchemaKindEnum:
+      enum:
+      - text
+      - image
+      - video
+      - document
+      - archive
+      - data
+      - link
+      - unavailable
+      type: string
+      description: |-
+        * `text` - text
+        * `image` - image
+        * `video` - video
+        * `document` - document
+        * `archive` - archive
+        * `data` - data
+        * `link` - link
+        * `unavailable` - unavailable
+    PreviewSchemaStateEnum:
+      enum:
+      - ready
+      - pending
+      - unavailable
+      type: string
+      description: |-
+        * `ready` - ready
+        * `pending` - pending
+        * `unavailable` - unavailable
     PrivacyApplyInput:
       type: object
       properties:

@@ -401,6 +401,16 @@ def sweep(now=None):
     return {"ended": failed, "redispatched": redispatched}
 
 
+def visible_to(user, workspace):
+    """The jobs `user` may see: their own; organizers and admins see every job of the workspace."""
+    from workspaces.models import Role
+
+    found = Job.objects.filter(workspace=workspace).select_related("event", "requested_by")
+    if has_any_role(user, workspace, Role.ORGANIZER, Role.ADMIN):
+        return found
+    return found.filter(requested_by=user)
+
+
 def describe(job, *, detail=False):
     """The one JSON shape of a job; `detail` adds the log trail."""
     progress = None

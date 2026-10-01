@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Badge } from "../../components/Badge";
 import { Button } from "../../components/Button";
+import { PreviewLoader } from "../../components/ArtifactPreview";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
@@ -498,12 +499,8 @@ export function OrganizerJudgingLogisticsPanel({
 }
 
 type Inspection = {
+  public_id: string;
   verdict: string;
-  detected_type: string;
-  findings: { severity: string; code: string; detail: string }[];
-  facts: Record<string, unknown>;
-  preview: string;
-  inspected_at: string;
 };
 type ReviewArtifact = {
   public_id: string;
@@ -612,65 +609,17 @@ export function ArtifactInspector({
                 Files are inspected as untrusted content — open with care.
               </p>
             )}
-            {artifact.inspection ? (
-              <>
-                <p>
-                  Detected type:{" "}
-                  {artifact.inspection.detected_type || "unknown"}
-                </p>
-                {artifact.inspection.findings.length > 0 && (
-                  <ul
-                    className="cx-artifact__findings"
-                    aria-label={`Findings for ${artifact.title}`}
-                  >
-                    {artifact.inspection.findings.map((finding, index) => (
-                      <li key={`${finding.code}-${index}`}>
-                        <Badge
-                          tone={
-                            finding.severity === "blocked"
-                              ? "danger"
-                              : finding.severity === "warning"
-                                ? "warning"
-                                : "neutral"
-                          }
-                        >
-                          {finding.severity}
-                        </Badge>{" "}
-                        {finding.detail || finding.code}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {Object.keys(artifact.inspection.facts).length > 0 && (
-                  <dl className="cx-artifact__facts">
-                    {Object.entries(artifact.inspection.facts).map(
-                      ([key, value]) => (
-                        <div key={key}>
-                          <dt>{key}</dt>
-                          <dd>
-                            {typeof value === "string" ||
-                            typeof value === "number"
-                              ? String(value)
-                              : JSON.stringify(value)}
-                          </dd>
-                        </div>
-                      ),
-                    )}
-                  </dl>
-                )}
-                {artifact.inspection.preview && (
-                  <pre
-                    className="cx-scroll-region cx-artifact__preview"
-                    aria-label={`Preview of ${artifact.title}`}
-                    tabIndex={0}
-                  >
-                    {artifact.inspection.preview}
-                  </pre>
-                )}
-              </>
-            ) : (
-              <p>Not inspected yet.</p>
-            )}
+            <PreviewLoader
+              key={`${artifact.public_id}-${artifact.inspection?.public_id ?? "none"}`}
+              workspaceId={workspaceId}
+              source="project_artifact"
+              reference={{
+                event: eventId,
+                project: projectId,
+                artifact: artifact.public_id,
+              }}
+              showDownload={false}
+            />
             <Button
               variant="secondary"
               disabled={running === artifact.public_id}

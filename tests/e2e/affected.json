@@ -175,6 +175,17 @@
         "tests/fixtures/rich_cases.json"
       ],
       "specs": ["rich-preview", "participant-workflow"]
+    },
+    {
+      "paths": [
+        "src/web/components/ArtifactPreview*",
+        "src/web/lib/preview*",
+        "src/web/features/pvs/JudgingLogisticsPanels*",
+        "src/web/features/operations/JobsPanel*",
+        "src/api/core/preview*",
+        "src/api/artifacts/*"
+      ],
+      "specs": ["artifact-preview", "jobs", "lifecycle", "uiv2-judge"]
     }
   ]
 }

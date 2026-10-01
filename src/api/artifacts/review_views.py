@@ -6,14 +6,11 @@ workspace. Participants inspect their own artifacts before anyone else does.
 """
 
 from accounts.authentication import CookieSessionAuthentication
-from core.authz import has_any_role
 from core.permissions import IsWorkspaceMember
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.shortcuts import get_object_or_404
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
-from evaluations.candidates import judge_candidates
-from evaluations.models import EvaluationPlan
 from events.models import Event
 from projects.models import Project
 from rest_framework.exceptions import NotFound, ValidationError
@@ -21,7 +18,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from workspaces.models import Role, Workspace
 
-from .models import Artifact, ArtifactStatus, ArtifactVisibility
+from . import access
+from .models import Artifact, ArtifactStatus
 from .services import inspection_data, run_inspection
 from .storage import S3Storage
 
@@ -46,22 +44,11 @@ class ReviewBase(APIView):
         return get_object_or_404(Project, event=event, public_id=self.kwargs["project_public_id"])
 
     def reviewer_scope(self, project):
-        """'all', 'judge' or None for the requester on this project."""
-        user, workspace = self.request.user, self.get_workspace()
-        if has_any_role(user, workspace, Role.ORGANIZER, Role.ADMIN):
-            return "all"
-        if project.memberships.filter(user=user).exists():
-            return "member"
-        if has_any_role(user, workspace, Role.JUDGE):
-            plans = EvaluationPlan.objects.filter(stage__event=project.event)
-            if any(judge_candidates(plan, user).filter(pk=project.pk).exists() for plan in plans):
-                return "judge"
-        return None
+        """'all', 'member', 'judge' or None for the requester on this project."""
+        return access.reviewer_scope(self.request.user, self.get_workspace(), project)
 
     def visible(self, artifact, scope):
-        if scope in ("all", "member"):
-            return True
-        return artifact.visibility in (ArtifactVisibility.PUBLIC, ArtifactVisibility.JUDGE)
+        return access.visible(artifact, scope)
 
     def get_artifact(self, project, scope):
         artifact = get_object_or_404(

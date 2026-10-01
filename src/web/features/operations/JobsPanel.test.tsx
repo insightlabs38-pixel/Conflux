@@ -114,6 +114,50 @@ describe("JobsPanel", () => {
     expect(link.textContent).toBe("Download e-config-archive.json");
   });
 
+  it("opens a safe preview of a job's output only when asked", async () => {
+    const calls = await mount((call) => {
+      if (call.url.includes("/previews/job_output/"))
+        return jsonResponse(200, {
+          source: "job_output",
+          ref: { job: "j1", name: FILE.name },
+          name: FILE.name,
+          content_type: FILE.content_type,
+          size: FILE.size,
+          kind: "data",
+          detected_type: "text",
+          state: "ready",
+          reason: null,
+          facts: { bytes: 2048 },
+          findings: [],
+          findings_total: 0,
+          text: '{"title":"<img src=x onerror=alert(1)>"}',
+          entries: [],
+          entries_total: 0,
+          media: null,
+          link: null,
+          inspected_at: null,
+        });
+      return jsonResponse(200, [
+        job({ status: "succeeded", artifacts: [FILE], cancellable: false }),
+      ]);
+    });
+    expect(calls.some((c) => c.url.includes("/previews/"))).toBe(false);
+    await act(async () => button(`Preview ${FILE.name}`).click());
+    await until(() => container.querySelector("pre") !== null);
+    const preview = calls.find((c) => c.url.includes("/previews/"))!;
+    expect(preview.url).toBe(
+      `/api/v1/workspaces/w/previews/job_output/?job=j1&name=${encodeURIComponent(FILE.name)}`,
+    );
+    expect(container.querySelector("pre")!.textContent).toContain(
+      "<img src=x onerror=alert(1)>",
+    );
+    expect(container.querySelector("pre img")).toBeNull();
+    expect(container.textContent).toContain("Size");
+    expect(container.textContent).toContain("2 KB");
+    await act(async () => button(`Hide preview of ${FILE.name}`).click());
+    expect(container.querySelector("pre")).toBeNull();
+  });
+
   it("explains a failed job in the server's words and lets the user try again", async () => {
     await mount((call) =>
       call.method === "POST"
@@ -174,11 +218,15 @@ describe("JobsPanel", () => {
     expect(rows[2].textContent).toContain(
       "The job stopped reporting progress.",
     );
-    expect(container.querySelectorAll("tbody button")).toHaveLength(1); // only the running one
-
-    await act(async () =>
-      container.querySelector<HTMLButtonElement>("tbody button")!.click(),
+    const cancels = [...container.querySelectorAll("tbody button")].filter(
+      (b) => b.textContent === "Cancel",
     );
+    expect(cancels).toHaveLength(1); // only the running one
+    expect(rows[1].querySelector("button")!.textContent).toBe(
+      `Preview ${FILE.name}`,
+    );
+
+    await act(async () => (cancels[0] as HTMLButtonElement).click());
     await settle();
     expect(calls.find((c) => c.method === "POST")!.url).toBe(
       "/api/v1/workspaces/w/jobs/j2/cancel/",

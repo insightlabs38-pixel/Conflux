@@ -78,10 +78,7 @@ class _JobView(WorkspaceLookupMixin, APIView):
         return has_any_role(self.request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
 
     def visible(self):
-        found = Job.objects.filter(workspace=self.get_workspace()).select_related(
-            "event", "requested_by"
-        )
-        return found if self.is_staff() else found.filter(requested_by=self.request.user)
+        return jobs.visible_to(self.request.user, self.get_workspace())
 
     def get_job(self):
         return get_object_or_404(self.visible(), public_id=self.kwargs["job_public_id"])

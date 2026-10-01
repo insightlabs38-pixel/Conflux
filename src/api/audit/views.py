@@ -1,5 +1,5 @@
 from accounts.authentication import CookieSessionAuthentication
-from core import version_diff
+from core import provenance, version_diff
 from core.mixins import WorkspaceLookupMixin
 from core.permissions import require_roles
 from django.core.exceptions import ValidationError as ModelValidationError
@@ -82,6 +82,7 @@ class EventConfigHistoryView(OrganizerView):
                     "resource_id": row.target_id,
                     "changes": row.metadata["changes"],
                     "diff": _field_diffs(row.metadata["changes"]),
+                    "provenance": row.metadata.get("provenance"),
                     "created_at": row.created_at.isoformat(),
                 }
                 for row in rows
@@ -163,11 +164,28 @@ class EventConfigHistoryRestoreView(OrganizerView):
                     target=instance,
                     event_type=action,
                     payload={"event": str(event.public_id)},
-                    metadata={
-                        "event_id": str(event.public_id),
-                        "changes": restore_changes,
-                        "restored_from": str(row.public_id),
-                    },
+                    metadata=provenance.attach(
+                        {
+                            "event_id": str(event.public_id),
+                            "changes": restore_changes,
+                            "restored_from": str(row.public_id),
+                        },
+                        provenance.envelope(
+                            by=request.user,
+                            source_kind="config_history",
+                            source_id=row.public_id,
+                            summary=f"Restored {len(fields)} field{'' if len(fields) == 1 else 's'}"
+                            f" of {row.target_type} from the earlier change {row.action}.",
+                            refs=[
+                                {"kind": "audit_event", "id": row.public_id, "label": row.action},
+                                {"kind": row.target_type.lower(), "id": row.target_id},
+                            ],
+                            rules=("restore_before_values", 1),
+                            changes=provenance.changes_of(
+                                version_diff.diff_json(before, snapshot_fields(instance, fields))
+                            ),
+                        ),
+                    ),
                 )
         except ModelValidationError as exc:
             raise ValidationError(

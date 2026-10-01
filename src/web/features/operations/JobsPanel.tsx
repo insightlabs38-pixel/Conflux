@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Badge } from "../../components/Badge";
 import { Button } from "../../components/Button";
 import { PreviewLoader } from "../../components/ArtifactPreview";
+import { ProvenanceView } from "../../components/ProvenanceView";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 import { DataTable } from "../../components/Foundation";
@@ -11,6 +12,7 @@ import { OperationStatus } from "../../components/OperationStatus";
 import { useLoad } from "../../hooks/useLoad";
 import { useOperation } from "../../hooks/useOperation";
 import { apiJson, describeProblem } from "../../lib/api";
+import { asProvenance } from "../../lib/provenance";
 import {
   artifactUrl,
   cancelJob,
@@ -243,6 +245,15 @@ export function JobsPanel({
                       />
                     </div>
                   ))}
+                  {asProvenance(job.result?.provenance) && (
+                    <details>
+                      <summary className="cx-summary">Provenance</summary>
+                      <ProvenanceView
+                        provenance={asProvenance(job.result?.provenance)!}
+                        label={`Provenance of ${job.label}`}
+                      />
+                    </details>
+                  )}
                   {job.cancellable && (
                     <Button
                       variant="secondary"

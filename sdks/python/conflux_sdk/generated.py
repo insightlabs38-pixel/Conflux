@@ -1211,6 +1211,7 @@ class ConfigHistoryEntrySchema(TypedDict):
     resource_id: str
     changes: Any
     diff: Any
+    provenance: Any
     created_at: str
 
 class InputOfConfigHistoryEntrySchema(TypedDict):
@@ -1221,6 +1222,7 @@ class InputOfConfigHistoryEntrySchema(TypedDict):
     resource_id: str
     changes: Any
     diff: Any
+    provenance: Any
     created_at: str
 
 class ConfigRestoreResultSchema(TypedDict):

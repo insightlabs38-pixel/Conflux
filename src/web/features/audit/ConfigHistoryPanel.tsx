@@ -2,10 +2,12 @@ import { useState } from "react";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { DiffView } from "../../components/DiffView";
+import { ProvenanceView } from "../../components/ProvenanceView";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 import { apiRequest } from "../../lib/api";
 import { useLoad } from "../../hooks/useLoad";
+import { asProvenance } from "../../lib/provenance";
 import type { Diff } from "../../lib/versions";
 
 type FieldChange = { before: unknown; after: unknown };
@@ -18,6 +20,8 @@ type HistoryEntry = {
   changes: Record<string, FieldChange>;
   /** The server's diff of each changed field (the flat before and after stay in `changes`). */
   diff?: Record<string, Diff>;
+  /** What a restore was made from and by whom, when the server recorded it. */
+  provenance?: unknown;
   created_at: string;
 };
 
@@ -124,6 +128,15 @@ export function ConfigHistoryPanel({
                   </div>
                 ))}
               </dl>
+              {asProvenance(entry.provenance) && (
+                <details>
+                  <summary className="cx-summary">Provenance</summary>
+                  <ProvenanceView
+                    provenance={asProvenance(entry.provenance)!}
+                    label={`Provenance of ${entry.action}`}
+                  />
+                </details>
+              )}
               {[
                 "Stage",
                 "TemporalGate",

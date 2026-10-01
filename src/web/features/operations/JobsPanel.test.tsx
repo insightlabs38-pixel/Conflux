@@ -158,6 +158,40 @@ describe("JobsPanel", () => {
     expect(container.querySelector("pre")).toBeNull();
   });
 
+  it("shows what an export was made from, and lets the download be checked", async () => {
+    await mount(() =>
+      jsonResponse(200, [
+        job({
+          status: "succeeded",
+          artifacts: [FILE],
+          cancellable: false,
+          result: {
+            provenance: {
+              version: 1,
+              by: { public_id: "u1", username: "org" },
+              at: "2026-10-01T10:00:00Z",
+              source: { kind: "archive_export", id: "j1" },
+              inputs: {
+                digest: null,
+                refs: [{ kind: "event", id: "e1", label: "Spring" }],
+              },
+              rules: { name: "event_archive", version: 4 },
+              output: { name: FILE.name, bytes: 2048, sha256: "b".repeat(64) },
+              summary: "Config archive of Spring.",
+              changes: null,
+            },
+          },
+        }),
+      ]),
+    );
+    const details = [...container.querySelectorAll("details")].find((d) =>
+      d.textContent?.includes("Provenance"),
+    )!;
+    expect(details.textContent).toContain("Config archive of Spring.");
+    expect(details.textContent).toContain("b".repeat(64));
+    expect(details.querySelector("input[type=file]")).not.toBeNull();
+  });
+
   it("explains a failed job in the server's words and lets the user try again", async () => {
     await mount((call) =>
       call.method === "POST"

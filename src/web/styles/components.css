@@ -2770,3 +2770,12 @@ html {
 .cx-explain__reasons li {
   margin-bottom: var(--space-1);
 }
+.cx-provenance__digest {
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+.cx-summary {
+  min-height: 1.5rem;
+  padding-block: var(--space-1);
+  cursor: pointer;
+}

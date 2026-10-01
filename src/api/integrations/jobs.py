@@ -2,7 +2,7 @@
 
 import json
 
-from core import jobs
+from core import jobs, provenance
 from django.core.exceptions import ValidationError as ModelValidationError
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
@@ -40,12 +40,23 @@ def export_archive(ctx):
     name = f"{ctx.event.slug}-{mode}{'-signed' if signed else ''}-archive.json"
     ctx.artifact(name, "application/json", body)
     ctx.log(f"Saved {name} ({len(body)} bytes)")
+    made = provenance.envelope(
+        by=ctx.actor,
+        source_kind="archive_export",
+        source_id=ctx.public_id,
+        summary=f"{archive.get('mode', mode).capitalize()} archive of {ctx.event.name}"
+        + (", signed." if signed else "."),
+        refs=[{"kind": "event", "id": ctx.event.public_id, "label": ctx.event.name}],
+        rules=("event_archive", archive.get("format_version", 0)),
+        output=provenance.describe_output(name, body),
+    )
     return {
         "mode": archive.get("mode", mode),
         "format_version": archive.get("format_version"),
         "signed": signed,
         "filename": name,
         "bytes": len(body),
+        "provenance": made,
     }
 
 

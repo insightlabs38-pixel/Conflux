@@ -2875,7 +2875,7 @@ primitives:
 - id: AUDIT_PROVENANCE
   name: Audit/provenance envelope
   owner_task: PD-F002-B02-T07
-  status: PLANNED
+  status: IMPLEMENTED
   consumer_count: 220
   consumers:
   - PD-F002-B01-T04

@@ -227,6 +227,16 @@
         "tests/fixtures/explain_cases.json"
       ],
       "specs": ["explanations", "event-consequences", "event-readiness"]
+    },
+    {
+      "paths": [
+        "src/web/components/Provenance*",
+        "src/web/lib/provenance*",
+        "src/api/core/provenance.py",
+        "src/api/integrations/jobs.py",
+        "src/api/core/jobs.py"
+      ],
+      "specs": ["provenance", "jobs"]
     }
   ]
 }

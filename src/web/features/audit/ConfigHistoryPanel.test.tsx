@@ -107,6 +107,56 @@ it("draws the server's diff of each field and falls back to before and after wit
   container.remove();
 });
 
+it("shows the provenance of a restore when the server recorded one", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () =>
+      jsonResponse(200, [
+        {
+          public_id: "h1",
+          actor: "organizer",
+          action: "event.restored",
+          resource_type: "Event",
+          resource_id: "e1",
+          changes: { name: { before: "Hack 2.0", after: "Hack" } },
+          provenance: {
+            version: 1,
+            by: { public_id: "u1", username: "organizer" },
+            at: "2026-10-01T10:00:00Z",
+            source: { kind: "config_history", id: "h0" },
+            inputs: {
+              digest: null,
+              refs: [{ kind: "audit_event", id: "h0", label: "event.updated" }],
+            },
+            rules: { name: "restore_before_values", version: 1 },
+            output: null,
+            summary:
+              "Restored 1 field of Event from the earlier change event.updated.",
+            changes: { total: 1, added: 0, removed: 0, changed: 1, moved: 0 },
+          },
+          created_at: "2026-09-27T00:00:00Z",
+        },
+      ]),
+    ),
+  );
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  act(() =>
+    root.render(
+      withQuery(<ConfigHistoryPanel workspaceId="w1" eventId="e1" />),
+    ),
+  );
+  await until(() => container.querySelector(".cx-provenance") !== null);
+  const text = container.querySelector(".cx-provenance")!.textContent!;
+  expect(text).toContain("Restored 1 field of Event");
+  expect(text).toContain("restore_before_values (version 1)");
+  expect(text).toContain("1 change (1 changed)");
+  expect(text).not.toContain("SHA-256");
+  act(() => root.unmount());
+  container.remove();
+});
+
 it("shows an empty state when there is no captured history yet", async () => {
   vi.stubGlobal(
     "fetch",

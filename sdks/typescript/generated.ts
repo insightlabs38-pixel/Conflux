@@ -1333,6 +1333,7 @@ export type ConfigHistoryEntrySchema = {
   resource_id: string;
   changes: unknown;
   diff: unknown;
+  provenance: unknown;
   created_at: string;
 };
 
@@ -1344,6 +1345,7 @@ export type InputOfConfigHistoryEntrySchema = {
   resource_id: string;
   changes: unknown;
   diff: unknown;
+  provenance: unknown;
   created_at: string;
 };
 

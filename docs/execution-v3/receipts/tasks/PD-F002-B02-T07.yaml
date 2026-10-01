@@ -1,0 +1,82 @@
+version: 3
+task: PD-F002-B02-T07
+batch: PD-F002-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: a1f8027
+  head_commit: a1f8027
+changed_paths:
+- src/api/core/ (provenance.py, jobs.py copies a result envelope to the job audit row)
+- src/api/integrations/jobs.py (archive export), src/api/audit/ (views.py restore and history, serializers.py)
+- src/web/lib/provenance.ts, components/ProvenanceView.tsx, features/operations/JobsPanel.tsx, features/audit/ConfigHistoryPanel.tsx, styles/components.css
+- tests/integration/test_provenance.py, src/web/components/ProvenanceView.test.tsx, features/operations/JobsPanel.test.tsx, features/audit/ConfigHistoryPanel.test.tsx
+- tests/e2e/ (provenance.spec.ts, tiers.json, weights.json, affected.json)
+- docs/operations/PROVENANCE.md, docs/api/openapi.yaml, generated SDKs, spec 002, PRIMITIVE_REGISTRY.yaml
+deliverables:
+- item: Canonical audit provenance envelope as a platform primitive
+  result: pass
+  evidence: core/provenance.py with envelope {version, by, at, source, inputs{digest, refs}, rules, output, summary, changes}, canonical JSON and digest, attach, describe_output, changes_of, verify_output and problems; recorded in AuditEvent.metadata["provenance"] and in job results with no new table
+- item: Stable inputs/outputs, lifecycle, authorization, idempotency, errors, extension boundary
+  result: pass
+  evidence: PROVENANCE.md; stateless helpers over the existing record_mutation, bounded (summary 300, 20 refs, labels 120), no content or secrets, no signature layer; a feature adds an envelope with two function calls; problems() validates one read back from storage
+- item: Reference consumer or contract test showing reuse without private coupling
+  result: pass
+  evidence: two real adopters (archive export job, configuration restore) and an independent feature recording its own audit row in test_provenance.py
+- item: Compatibility and migration expectations documented
+  result: pass
+  evidence: no migration; existing audit rows and job kinds without an envelope are unchanged (asserted); the configuration history gains provenance per entry (null for older rows)
+invariants:
+- item: A digest is kept only where a result must be checkable later
+  result: pass
+  evidence: the export file's SHA-256 is recorded and the downloaded bytes match it (asserted in pytest and in the browser, and an altered file is reported as not matching); inputs.digest exists only when a caller passes an inputs value
+- item: No redundant signature or hash layer, no content stored
+  result: pass
+  evidence: refs hold kind, id and label only (asserted that extra fields such as a body are dropped); signed archives keep their own signature and are described by the downloaded bytes
+- item: Design intent, accessibility, progressive disclosure
+  result: pass
+  evidence: provenance is closed behind a details control, the file check runs locally with a status announcement, axe clean and no overflow at 390 and 1440 (found and fixed a 24px target-size violation)
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1990 passed, 31 skipped (12 new in test_provenance.py)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check; makemigrations --check
+  result: pass
+  note: 615 web tests; OpenAPI validated with fail-on-warn and SDKs regenerated
+- command: npx playwright test provenance --project=desktop on a fresh iso-min fixture
+  result: pass
+  note: 2 passed (390 and 1440) with a real export on the worker, the file check, and a real restore
+- command: make e2e-affected
+  result: pass
+  note: read-only, isolated-mutation and canary ok
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: ProvenanceView in Exports and jobs and Configuration history
+- surface: api
+  result: pass
+  evidence: job result and configuration history carry the envelope
+- surface: audit
+  result: pass
+  evidence: job.succeeded and *.restored audit rows carry provenance in metadata
+- surface: docs
+  result: pass
+  evidence: PROVENANCE.md, spec 002 B02 as built, registry IMPLEMENTED
+- surface: sdk
+  result: pass
+  evidence: "not required; generated clients regenerated, sdk-check clean"
+migrations:
+- none (stateless, additive)
+findings:
+- The browser spec first matched the workspace audit log list instead of the configuration history and hit an axe target-size violation on the new summaries; both fixed (scoped selector, minimum summary height)
+- The contract's inputs digest has little use for an export (the file itself is the checkable thing), so the exact file's digest is recorded as an output block and inputs.digest stays opt-in
+limitations:
+- Only the archive export and configuration restore record an envelope; other job kinds and audit actions do not yet
+- There is no server endpoint for verifying a file; verification is offline or in the browser by design
+escalations: []
+next: review

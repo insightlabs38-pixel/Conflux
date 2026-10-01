@@ -20298,6 +20298,10 @@ components:
         diff:
           description: Per changed field, the structural or text diff of its before
             and after (`core.version_diff`).
+        provenance:
+          nullable: true
+          description: What a restore was made from and by whom (`core.provenance`),
+            when recorded.
         created_at:
           type: string
           format: date-time
@@ -20307,6 +20311,7 @@ components:
       - changes
       - created_at
       - diff
+      - provenance
       - public_id
       - resource_id
       - resource_type

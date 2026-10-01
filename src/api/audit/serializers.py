@@ -22,6 +22,10 @@ class ConfigHistoryEntrySchema(serializers.Serializer):
         help_text="Per changed field, the structural or text diff of its before and after "
         "(`core.version_diff`)."
     )
+    provenance = serializers.JSONField(
+        allow_null=True,
+        help_text="What a restore was made from and by whom (`core.provenance`), when recorded.",
+    )
     created_at = serializers.DateTimeField()
 
 

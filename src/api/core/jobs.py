@@ -286,7 +286,16 @@ def _finish(pk, target, *, result=None, error=None):
             workspace=job.workspace,
             action=f"job.{target}",
             target=job,
-            metadata={"kind": job.kind, **({"error": error["code"]} if error else {})},
+            metadata={
+                "kind": job.kind,
+                **({"error": error["code"]} if error else {}),
+                # A kind that says what its result was made from has it kept with the audit row.
+                **(
+                    {"provenance": result["provenance"]}
+                    if isinstance(result, dict) and isinstance(result.get("provenance"), dict)
+                    else {}
+                ),
+            },
         )
     return job
 

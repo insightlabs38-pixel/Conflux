@@ -1,0 +1,68 @@
+version: 3
+task: PD-F002-B01-T90
+batch: PD-F002-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: b5d12f3
+  head_commit: b5d12f3
+changed_paths:
+- docs/verification/PD-F002-B01/MATRIX.md
+- tests/integration/test_shared_primitives_b01_regression.py
+- src/api/core/ (approval_views.py, thread_views.py, timeline_views.py resolve the event through the shared entity view instead of importing the event model)
+deliverables:
+- item: Verification matrix for the 8 capability tasks, each with an executable proof
+  result: pass
+  evidence: docs/verification/PD-F002-B01/MATRIX.md has a row per primitive and a column each for positive, negative and boundary, authorization, lifecycle and migration, concurrency and idempotency, and UI states and viewports; every cited test name was checked to exist
+- item: Positive, negative, authorization, lifecycle, migration and concurrency coverage
+  result: pass
+  evidence: per-primitive tests carry the depth; the new cross-cutting file adds the dependency direction, registry contents, 14 routes refusing signed-out and outside callers, organizer-only routes refusing a participant, audit of every mutating primitive and archived-event behavior
+- item: UI-facing states verified beyond screenshots
+  result: pass
+  evidence: loading, empty, error, denied, read-only, held-for-approval and refusal states asserted in component tests, and browser specs at 390 and 1440 with axe and overflow checks for grid, bulk, jobs, approvals, threads and timeline
+- item: Exact commands and unresolved limitations recorded
+  result: pass
+  evidence: matrix Commands and Unresolved limitations sections
+invariants:
+- item: Canonical source of truth, server authority
+  result: pass
+  evidence: the new tests assert routes, audit and refusals against the live API; the one product change moves three core views onto the shared event lookup so core imports no domain app, now pinned by a test
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1727 passed, 30 skipped on SQLite
+- command: DATABASE_URL=postgres uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1753 passed, 4 skipped on PostgreSQL, including every race test
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 396 web tests; static checks and OpenAPI/SDK drift clean
+- command: make e2e-fast
+  result: pass
+  note: read-only, isolated-mutation and canary ok after rebuilding the stack; docs/verification/PD-F002-B01/T90-e2e-fast.log
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: states and viewports in the matrix
+- surface: api
+  result: pass
+  evidence: route refusal and archived-event proofs
+- surface: audit
+  result: pass
+  evidence: audit proof for every mutating primitive
+- surface: docs
+  result: pass
+  evidence: matrix
+migrations: []
+findings:
+- Review of my own work found three core views importing the event model, against the batch contract; fixed and pinned by test_core_depends_on_no_domain_app
+- The browser fixture has one organizer, so a second person's approval is proved in integration tests only
+limitations:
+- Saved column widths and inline editing, bulk compensation and history screen, job retention and retry, approval notifications, thread note counts and a people picker, participant timelines are not built and are listed in the matrix
+escalations: []
+next: review

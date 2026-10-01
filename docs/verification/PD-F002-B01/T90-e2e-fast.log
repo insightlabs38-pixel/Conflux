@@ -1,0 +1,33 @@
+./scripts/e2e-fast 
+ok   stack health — http://localhost:8080
+ok   reference scenario seed 7 — organizer signs in; event window open
+ok   source freshness — running API matches src/api
+warn leftover fixtures — 6 kept/leftover (`make e2e-fixture-sweep`)
+ok   playwright chromium
+preflight 1.9s
+[iso-event-advanced] exit 0: 1 skipped; 1 passed (8.2s)
+[iso-event-configuration] exit 0: 2 skipped; 2 passed (14.3s)
+[iso-timeline] exit 0: 2 skipped; 2 passed (18.7s)
+[canary-lifecycle] exit 0: 6 skipped; 6 passed (27.1s)
+[iso-threads] exit 0: 2 skipped; 2 passed (20.3s)
+[iso-approvals] exit 0: 2 skipped; 2 passed (19.2s)
+[iso-jobs] exit 0: 2 skipped; 2 passed (20.7s)
+[canary-scenes] exit 0: 5 passed (16.0s)
+[iso-bulk-planner] exit 0: 2 skipped; 2 passed (15.4s)
+[iso-event-consequences] exit 0: 2 skipped; 2 passed (18.2s)
+[iso-entity-grid] exit 0: 2 skipped; 2 passed (29.8s)
+[iso-event-modules] exit 0: 1 skipped; 1 passed (13.2s)
+[iso-event-presets] exit 0: ✓  3 [desktop] › tests/e2e/event-presets.spec.ts:98:5 › the create form explains a failed format list and recovers on retry (1.9s); -  6 [mobile] › tests/e2e/event-presets.spec.ts:98:5 › the create form explains a failed format list and recovers on retry; 3 skipped; 3 passed (10.9s)
+[iso-event-readiness] exit 0: 2 skipped; 2 passed (13.0s)
+[canary-uiv2-organizer] exit 0: 4 skipped; 4 passed (49.5s)
+[iso-event-workflow] exit 0: 2 skipped; 2 passed (10.4s)
+[iso-profiles] exit 0: 2 skipped; 2 passed (7.0s)
+[iso-event-themes] exit 0: 16 skipped; 16 passed (46.9s)
+[iso-participant-workflow] exit 0: 4 skipped; 4 passed (32.6s)
+[canary-uiv2-final-states] exit 0: 6 skipped; 6 passed (47.0s)
+[canary-release-integrity] exit 0: 4 skipped; 4 passed (3.1s)
+[read-only] exit 0: ✓    6 [desktop] › tests/e2e/async-operations.spec.ts:108:5 › a failed part is an alert with the reason, and Try again starts a fresh attempt (2.0s); -   73 [mobile] › tests/e2e/async-operations.spec.ts:108:5 › a failed part is an alert with the reason, and Try again starts a fresh attempt; 69 skipped; 107 passed (2.6m)
+[iso-uiv2-judge] exit 0: 4 skipped; 4 passed (13.2s)
+[iso-route-drafts] exit 0: 6 skipped; 6 passed (17.7s)
+[iso-pvs] exit 0: 5 skipped; 15 passed (38.5s)
+== read-only: ok, isolated-mutation: ok, canary: ok

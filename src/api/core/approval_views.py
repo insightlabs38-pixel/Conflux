@@ -4,24 +4,21 @@ Who sees a request: the person who asked and anyone holding a deciding role of i
 else gets 404, never 403. Gates are switched by organizers and admins.
 """
 
-from accounts.authentication import CookieSessionAuthentication
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, extend_schema
-from events.models import Event, EventStatus
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from workspaces.models import Role
 
 from . import approvals
 from .authz import has_any_role
-from .mixins import WorkspaceLookupMixin
+from .entity_views import _EntityView
 from .models import ApprovalDecision, ApprovalRequest
 from .pagination import page_params, paged_response
-from .permissions import IsWorkspaceMember, require_roles
+from .permissions import require_roles
 
 
 class ApprovalSubjectSchema(serializers.Serializer):
@@ -72,15 +69,7 @@ class GateInput(serializers.Serializer):
     enabled = serializers.BooleanField()
 
 
-class _EventView(WorkspaceLookupMixin, APIView):
-    authentication_classes = [CookieSessionAuthentication]
-    permission_classes = [IsWorkspaceMember]
-
-    def get_event(self):
-        return get_object_or_404(
-            Event, workspace=self.get_workspace(), public_id=self.kwargs["event_public_id"]
-        )
-
+class _EventView(_EntityView):
     def deciding_actions(self):
         return [
             key
@@ -199,7 +188,7 @@ class ApprovalGateView(_EventView):
     @extend_schema(request=GateInput, responses=GateSchema)
     def put(self, request, workspace_public_id, event_public_id, action):
         event = self.get_event()
-        if event.status == EventStatus.ARCHIVED:
+        if event.status == "archived":
             raise ValidationError({"status": "Archived event configuration cannot be edited."})
         data = GateInput(data=request.data)
         data.is_valid(raise_exception=True)

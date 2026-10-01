@@ -1,19 +1,14 @@
 """Thread endpoints (PD-F002-B01-T07). Who may read or write is decided by the registered subject
 and audience (`core.threads`), never by the client; everything else is 404."""
 
-from accounts.authentication import CookieSessionAuthentication
-from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiParameter, extend_schema
-from events.models import Event
 from rest_framework import serializers
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from . import threads
+from .entity_views import _EntityView
 from .idempotency import IdempotentMixin
-from .mixins import WorkspaceLookupMixin
 from .pagination import page_params
-from .permissions import IsWorkspaceMember
 
 
 class ThreadAuthorSchema(serializers.Serializer):
@@ -57,14 +52,8 @@ class CommentEditInput(serializers.Serializer):
     body = serializers.CharField(max_length=threads.MAX_BODY * 2)
 
 
-class _ThreadView(WorkspaceLookupMixin, APIView):
-    authentication_classes = [CookieSessionAuthentication]
-    permission_classes = [IsWorkspaceMember]
-
-    def get_event(self):
-        return get_object_or_404(
-            Event, workspace=self.get_workspace(), public_id=self.kwargs["event_public_id"]
-        )
+class _ThreadView(_EntityView):
+    pass
 
 
 class ThreadView(IdempotentMixin, _ThreadView):

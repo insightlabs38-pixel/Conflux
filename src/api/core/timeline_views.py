@@ -1,19 +1,15 @@
 """The timeline endpoint (PD-F002-B01-T08): derived, read-only, organizer-facing."""
 
-from accounts.authentication import CookieSessionAuthentication
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from drf_spectacular.utils import OpenApiParameter, extend_schema
-from events.models import Event
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from workspaces.models import Role
 
 from . import timeline
-from .mixins import WorkspaceLookupMixin
+from .entity_views import _EntityView
 from .permissions import require_roles
 
 
@@ -65,8 +61,7 @@ def _instant(request, name):
     return value
 
 
-class TimelineView(WorkspaceLookupMixin, APIView):
-    authentication_classes = [CookieSessionAuthentication]
+class TimelineView(_EntityView):
     permission_classes = [require_roles(Role.ORGANIZER, Role.ADMIN)]
 
     @extend_schema(
@@ -79,7 +74,7 @@ class TimelineView(WorkspaceLookupMixin, APIView):
         responses=TimelineSchema,
     )
     def get(self, request, workspace_public_id, event_public_id):
-        event = get_object_or_404(Event, workspace=self.get_workspace(), public_id=event_public_id)
+        event = self.get_event()
         start, end = _instant(request, "from"), _instant(request, "to")
         if start and end and end < start:
             raise ValidationError({"to": ["`to` must not be before `from`."]})

@@ -1,0 +1,33 @@
+version: 1
+checkpoint_id: CP-PD-F002-B02
+created_at: '2026-10-01T13:19:21Z'
+canonical_commit: 04785610e3014d28ed9b23ea85fdf22fd900e358
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+- PD-B02
+- PD-B03
+- PD-B04
+- PD-F001-B01
+- PD-F001-B02
+- PD-F002-B01
+- PD-F002-B02
+active_batches:
+- PD-F002-B03
+active_claims: []
+open_escalations: []
+last_completed_task: PD-F002-B02-T91
+ready_summary:
+- PD-F002-B03 (preview-as-role, as-of-time and frozen-version infrastructure; promoted IN_PROGRESS, not started)
+verification_summary:
+- pytest 2014 passed/31 skipped, web 630, lint/format/build/sdk/block-schema/makemigrations clean
+- make e2e-fast all tiers ok (T90 log) and make e2e-affected ok after T08
+- validate_queue valid
+recovery_notes:
+- 'Primitives live in src/api/core (schema_subset, rich, previews, notifications, version_diff, explain, provenance, manifest) with registrations in <app>/{previews,notifications,versions,manifest}.py loaded from AppConfig.ready(); developer page docs/architecture/SHARED_PRIMITIVES.md; matrix docs/verification/PD-F002-B02/MATRIX.md'
+- 'core now has an AppConfig (core/apps.py) whose ready() imports the manifest capabilities and the startup check; a new registry entry must be declared in its app manifest.py or manage.py check warns (errors on a false claim)'
+- 'New API endpoint => regenerate openapi (manage.py spectacular --validate --fail-on-warn --file docs/api/openapi.yaml) then make sdk-generate; new web panel inside EventDashboard must be vi.mock-ed in EventDashboard.modules.test.tsx and WorkflowStates.test.tsx'
+- 'Bash env vars do not persist: export E2E_DEMO_SEED/E2E_DEMO_PASSWORD in the same call as playwright; scripts/demo-reset submitted restores seed 7'
+- main unpushed; untracked design handoff zips untouched; .claude-supervisor is prettier-ignored

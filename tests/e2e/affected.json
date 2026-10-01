@@ -153,6 +153,16 @@
     {
       "paths": ["src/embed/*"],
       "specs": ["extended-embed", "public"]
+    },
+    {
+      "paths": [
+        "src/web/components/SchemaForm*",
+        "src/web/lib/schema*",
+        "src/web/features/event-builder/ConfigurationPanel*",
+        "src/api/core/schema_subset.py",
+        "tests/fixtures/*"
+      ],
+      "specs": ["schema-form", "event-configuration"]
     }
   ]
 }

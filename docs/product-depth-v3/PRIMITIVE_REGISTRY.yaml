@@ -1276,7 +1276,7 @@ primitives:
 - id: SCHEMA_EDITOR
   name: Schema-driven form/config editor
   owner_task: PD-F002-B02-T01
-  status: PLANNED
+  status: IMPLEMENTED
   consumer_count: 374
   consumers:
   - PD-F001-B01-T00

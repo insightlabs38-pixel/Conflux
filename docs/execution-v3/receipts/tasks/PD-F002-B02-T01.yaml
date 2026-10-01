@@ -1,0 +1,82 @@
+version: 3
+task: PD-F002-B02-T01
+batch: PD-F002-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: frontier-architecture
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: fcac729
+  head_commit: fcac729
+changed_paths:
+- src/api/core/schema_subset.py (check, validate, normalize, defaults, api_errors), src/api/presentation/block_types.py (normalize_config delegates)
+- src/web/lib/schema.ts (browser twin), src/web/lib/timeline.ts (utcToZonedInput), src/web/components/SchemaForm.tsx
+- src/web/features/page-builder/ (ConfigFields.tsx, configSchema.ts), src/web/features/event-builder/ConfigurationPanel.tsx
+- tests/fixtures/schema_cases.json, tests/integration/test_schema_subset.py, src/web/lib/schema.test.ts, components/SchemaForm.test.tsx, ConfigurationPanel.test.tsx
+- tests/e2e/ (schema-form.spec.ts, tiers.json, weights.json, affected.json)
+- docs/architecture/ (SCHEMA_SUBSET.md, BLOCK_CONFIG_SCHEMAS.md), spec 002, PRIMITIVE_REGISTRY.yaml
+deliverables:
+- item: Canonical schema-driven form/config editor as a platform primitive
+  result: pass
+  evidence: one documented JSON Schema subset validated by core/schema_subset.py and lib/schema.ts and edited by components/SchemaForm.tsx; check() names anything outside the subset
+- item: Stable inputs/outputs, state ownership, lifecycle, authorization, concurrency, errors, extension boundary
+  result: pass
+  evidence: SCHEMA_SUBSET.md; schemas are code-owned and never client-supplied; the owning endpoint re-validates, so authorization, locks, audit and versioning stay in the domain; errors are Problem(path, code, message) keyed by path; platform caps (100000 chars, 1000 items, depth 8)
+- item: Reference consumer or contract test showing reuse without private coupling
+  result: pass
+  evidence: three independent consumers - page builder (block schemas), Setup Defaults and overrides (registry setting schemas), and 42 shared fixtures run by pytest and vitest
+- item: Compatibility and migration expectations documented
+  result: pass
+  evidence: stateless and additive, no migration; differential test against a frozen copy of the previous normalize_config on all 12 block schemas is byte-identical; make block-schema-check clean
+invariants:
+- item: One source of truth, server authoritative
+  result: pass
+  evidence: the page builder and server share one validator; settings save through the write endpoint each setting names, and a value the schema refuses is never sent
+- item: Design intent, accessibility, progressive disclosure
+  result: pass
+  evidence: problems linked to fields by aria-describedby, form named, axe and no-overflow checks at 390 and 1440
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1798 passed, 30 skipped
+- command: pnpm --filter @conflux/web test; tsc --noEmit; make lint; ruff check and format check; prettier --check
+  result: pass
+  note: 471 web tests in 107 files
+- command: make block-schema-check sdk-check; python3 scripts/e2e-tiers check
+  result: pass
+  note: no drift
+- command: npx playwright test schema-form --project=desktop on a fresh iso-min fixture
+  result: pass
+  note: 2 passed (390 and 1440), boolean checkbox, bounded number refused in the form, date-time on the event clock, domain refusal shown with the form open
+- command: make e2e-affected
+  result: pass
+  note: read-only, isolated-mutation and canary ok
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: SchemaForm, page builder, Defaults and overrides in place editing
+- surface: api
+  result: pass
+  evidence: api_errors 400 body keyed by path for block configuration
+- surface: audit
+  result: pass
+  evidence: unchanged and authoritative, settings are written by the domain endpoints that audit them
+- surface: docs
+  result: pass
+  evidence: SCHEMA_SUBSET.md, spec 002 B02 as built, registry IMPLEMENTED
+- surface: sdk
+  result: pass
+  evidence: "not required; sdk-check clean"
+migrations:
+- none (stateless, additive)
+findings:
+- The differential test caught one message difference against the previous validator, fixed so output is byte-identical
+- Registry settings omit bounds and use date-time and uniqueItems, so the subset gained those and platform caps
+limitations:
+- No $ref, oneOf, conditionals or patterns by design
+- Setup edits only settings the configuration answer marks editable and whose module is on
+escalations: []
+next: review

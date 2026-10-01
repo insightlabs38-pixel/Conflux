@@ -1,5 +1,7 @@
-from copy import deepcopy
+import re
 
+from core.schema_subset import SchemaError
+from core.schema_subset import normalize as normalize_schema
 from django.core.exceptions import ValidationError
 
 
@@ -103,38 +105,18 @@ BLOCK_TYPES = {
 }
 
 
+def _leaf(path, fallback):
+    """The property a problem belongs to: `items[2].label` is `label`, a row is its array."""
+    leaf = re.sub(r"\[\d+\]", "", path).rsplit(".", 1)[-1]
+    return leaf or fallback
+
+
 def normalize_config(schema, value, path="config"):
-    kind = schema["type"]
-    if kind == "object":
-        if not isinstance(value, dict):
-            raise ValidationError({path: "Must be an object."})
-        properties = schema["properties"]
-        if not schema["additionalProperties"] and value.keys() - properties.keys():
-            raise ValidationError({path: "Unknown fields."})
-        return {
-            key: normalize_config(field, value.get(key, deepcopy(field["default"])), key)
-            for key, field in properties.items()
-        }
-    if kind == "string":
-        if not isinstance(value, str):
-            raise ValidationError({path: "Must be text."})
-        if schema.get("x-nonblank") and not value.strip():
-            raise ValidationError({path: "This field is required."})
-        if len(value) > schema["maxLength"]:
-            raise ValidationError({path: f"Must be at most {schema['maxLength']} characters."})
-        return value
-    if kind == "integer":
-        if (
-            not isinstance(value, int)
-            or isinstance(value, bool)
-            or not schema["minimum"] <= value <= schema["maximum"]
-        ):
-            raise ValidationError(
-                {path: f"Must be an integer from {schema['minimum']} to {schema['maximum']}."}
-            )
-        return value
-    if kind == "array":
-        if not isinstance(value, list) or len(value) > schema["maxItems"]:
-            raise ValidationError({path: f"Must be a list of at most {schema['maxItems']} items."})
-        return [normalize_config(schema["items"], item, path) for item in value]
-    raise ValidationError({path: "Unsupported configuration type."})
+    """Validate and normalise block configuration with the platform schema subset
+    (core.schema_subset, PD-F002-B02-T01). The first problem is reported under its property name,
+    the same keys and messages as before the validator was shared."""
+    try:
+        return normalize_schema(schema, value)
+    except SchemaError as exc:
+        problem = exc.problems[0]
+        raise ValidationError({_leaf(problem.path, path): problem.message}) from exc

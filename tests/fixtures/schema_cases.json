@@ -1,0 +1,643 @@
+{
+  "about": "Shared by pytest (tests/integration/test_schema_subset.py) and vitest (src/web/lib/schema.test.ts). Problems are compared by path and code, in order.",
+  "cases": [
+    {
+      "name": "a string within its bounds",
+      "schema": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 5
+      },
+      "value": "abc",
+      "normalized": "abc"
+    },
+    {
+      "name": "a string too long",
+      "schema": {
+        "type": "string",
+        "maxLength": 3
+      },
+      "value": "abcd",
+      "problems": [
+        {
+          "path": "",
+          "code": "max_length"
+        }
+      ]
+    },
+    {
+      "name": "a string too short",
+      "schema": {
+        "type": "string",
+        "minLength": 2
+      },
+      "value": "a",
+      "problems": [
+        {
+          "path": "",
+          "code": "min_length"
+        }
+      ]
+    },
+    {
+      "name": "text counted in characters not bytes",
+      "schema": {
+        "type": "string",
+        "maxLength": 2
+      },
+      "value": "\u00e9\ud83d\ude00",
+      "normalized": "\u00e9\ud83d\ude00"
+    },
+    {
+      "name": "a number is not text",
+      "schema": {
+        "type": "string",
+        "maxLength": 5
+      },
+      "value": 12,
+      "problems": [
+        {
+          "path": "",
+          "code": "type"
+        }
+      ]
+    },
+    {
+      "name": "a nonblank string refuses spaces",
+      "schema": {
+        "type": "string",
+        "maxLength": 5,
+        "x-nonblank": true
+      },
+      "value": "   ",
+      "problems": [
+        {
+          "path": "",
+          "code": "required"
+        }
+      ]
+    },
+    {
+      "name": "a string enum",
+      "schema": {
+        "type": "string",
+        "enum": ["a", "b"]
+      },
+      "value": "b",
+      "normalized": "b"
+    },
+    {
+      "name": "a string outside its enum",
+      "schema": {
+        "type": "string",
+        "enum": ["a", "b"]
+      },
+      "value": "c",
+      "problems": [
+        {
+          "path": "",
+          "code": "enum"
+        }
+      ]
+    },
+    {
+      "name": "a date-time with an offset",
+      "schema": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "value": "2027-03-06T10:00:00-05:00",
+      "normalized": "2027-03-06T10:00:00-05:00"
+    },
+    {
+      "name": "a date-time with Z",
+      "schema": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "value": "2027-03-06T15:00:00Z",
+      "normalized": "2027-03-06T15:00:00Z"
+    },
+    {
+      "name": "a date-time without an offset",
+      "schema": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "value": "2027-03-06T10:00:00",
+      "problems": [
+        {
+          "path": "",
+          "code": "format"
+        }
+      ]
+    },
+    {
+      "name": "not a date-time",
+      "schema": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "value": "soon",
+      "problems": [
+        {
+          "path": "",
+          "code": "format"
+        }
+      ]
+    },
+    {
+      "name": "an integer in range",
+      "schema": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10
+      },
+      "value": 10,
+      "normalized": 10
+    },
+    {
+      "name": "an integer above the range",
+      "schema": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 10
+      },
+      "value": 11,
+      "problems": [
+        {
+          "path": "",
+          "code": "range"
+        }
+      ]
+    },
+    {
+      "name": "only a minimum",
+      "schema": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "value": 0,
+      "problems": [
+        {
+          "path": "",
+          "code": "range"
+        }
+      ]
+    },
+    {
+      "name": "a boolean is not an integer",
+      "schema": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 5
+      },
+      "value": true,
+      "problems": [
+        {
+          "path": "",
+          "code": "type"
+        }
+      ]
+    },
+    {
+      "name": "a fraction is not an integer",
+      "schema": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 5
+      },
+      "value": 1.5,
+      "problems": [
+        {
+          "path": "",
+          "code": "type"
+        }
+      ]
+    },
+    {
+      "name": "a number accepts a fraction",
+      "schema": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 5
+      },
+      "value": 1.5,
+      "normalized": 1.5
+    },
+    {
+      "name": "a number accepts a whole number",
+      "schema": {
+        "type": "number"
+      },
+      "value": 3,
+      "normalized": 3
+    },
+    {
+      "name": "a boolean is not a number",
+      "schema": {
+        "type": "number"
+      },
+      "value": false,
+      "problems": [
+        {
+          "path": "",
+          "code": "type"
+        }
+      ]
+    },
+    {
+      "name": "a boolean",
+      "schema": {
+        "type": "boolean"
+      },
+      "value": true,
+      "normalized": true
+    },
+    {
+      "name": "a number is not a boolean",
+      "schema": {
+        "type": "boolean"
+      },
+      "value": 1,
+      "problems": [
+        {
+          "path": "",
+          "code": "type"
+        }
+      ]
+    },
+    {
+      "name": "null where null is allowed",
+      "schema": {
+        "type": ["integer", "null"],
+        "minimum": 1
+      },
+      "value": null,
+      "normalized": null
+    },
+    {
+      "name": "null where it is not allowed",
+      "schema": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "value": null,
+      "problems": [
+        {
+          "path": "",
+          "code": "type"
+        }
+      ]
+    },
+    {
+      "name": "a nullable value still obeys its bounds",
+      "schema": {
+        "type": ["integer", "null"],
+        "minimum": 1
+      },
+      "value": 0,
+      "problems": [
+        {
+          "path": "",
+          "code": "range"
+        }
+      ]
+    },
+    {
+      "name": "an array within its bounds",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "maxLength": 3
+        },
+        "minItems": 1,
+        "maxItems": 2
+      },
+      "value": ["a", "b"],
+      "normalized": ["a", "b"]
+    },
+    {
+      "name": "an array too long",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "maxLength": 3
+        },
+        "maxItems": 1
+      },
+      "value": ["a", "b"],
+      "problems": [
+        {
+          "path": "",
+          "code": "max_items"
+        }
+      ]
+    },
+    {
+      "name": "an array too short",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "maxLength": 3
+        },
+        "minItems": 2
+      },
+      "value": ["a"],
+      "problems": [
+        {
+          "path": "",
+          "code": "min_items"
+        }
+      ]
+    },
+    {
+      "name": "an array item is checked and located",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "maxLength": 1
+        }
+      },
+      "value": ["a", "bb", "c"],
+      "problems": [
+        {
+          "path": "[1]",
+          "code": "max_length"
+        }
+      ]
+    },
+    {
+      "name": "unique items refuse a repeat",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "uniqueItems": true
+      },
+      "value": ["a", "a"],
+      "problems": [
+        {
+          "path": "",
+          "code": "unique"
+        }
+      ]
+    },
+    {
+      "name": "a string is not an array",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "value": "abc",
+      "problems": [
+        {
+          "path": "",
+          "code": "max_items"
+        }
+      ]
+    },
+    {
+      "name": "an array of enum values",
+      "schema": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": ["x", "y"]
+        }
+      },
+      "value": ["x", "y"],
+      "normalized": ["x", "y"]
+    },
+    {
+      "name": "an object fills its defaults and keeps declared keys in order",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "b": {
+            "type": "string",
+            "maxLength": 5,
+            "default": "B"
+          },
+          "a": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9,
+            "default": 1
+          }
+        }
+      },
+      "value": {
+        "a": 2
+      },
+      "normalized": {
+        "b": "B",
+        "a": 2
+      }
+    },
+    {
+      "name": "a permissive object drops unknown keys",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "a": {
+            "type": "string",
+            "maxLength": 5,
+            "default": ""
+          }
+        }
+      },
+      "value": {
+        "a": "x",
+        "zzz": 1
+      },
+      "normalized": {
+        "a": "x"
+      }
+    },
+    {
+      "name": "a strict object refuses unknown keys",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "a": {
+            "type": "string",
+            "maxLength": 5,
+            "default": ""
+          }
+        },
+        "additionalProperties": false
+      },
+      "value": {
+        "a": "x",
+        "zzz": 1
+      },
+      "problems": [
+        {
+          "path": "",
+          "code": "unknown_fields"
+        }
+      ]
+    },
+    {
+      "name": "an object needs an object",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "a": {
+            "type": "string",
+            "default": ""
+          }
+        }
+      },
+      "value": [],
+      "problems": [
+        {
+          "path": "",
+          "code": "type"
+        }
+      ]
+    },
+    {
+      "name": "a missing required property",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "a": {
+            "type": "string",
+            "maxLength": 5
+          }
+        },
+        "required": ["a"]
+      },
+      "value": {},
+      "problems": [
+        {
+          "path": "a",
+          "code": "required"
+        }
+      ]
+    },
+    {
+      "name": "an omitted optional property stays absent",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "a": {
+            "type": "string",
+            "maxLength": 5
+          }
+        }
+      },
+      "value": {},
+      "normalized": {}
+    },
+    {
+      "name": "a nested problem names its whole path",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "maxLength": 2,
+                  "default": ""
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "value": {
+        "rows": [
+          {
+            "name": "ab"
+          },
+          {
+            "name": "abc"
+          }
+        ]
+      },
+      "problems": [
+        {
+          "path": "rows[1].name",
+          "code": "max_length"
+        }
+      ]
+    },
+    {
+      "name": "problems come in declaration order",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "first": {
+            "type": "string",
+            "maxLength": 1,
+            "default": ""
+          },
+          "second": {
+            "type": "string",
+            "maxLength": 1,
+            "default": ""
+          }
+        }
+      },
+      "value": {
+        "first": "aa",
+        "second": "bb"
+      },
+      "problems": [
+        {
+          "path": "first",
+          "code": "max_length"
+        },
+        {
+          "path": "second",
+          "code": "max_length"
+        }
+      ]
+    },
+    {
+      "name": "a required nonblank default fails until filled",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 9,
+            "default": "",
+            "x-nonblank": true
+          }
+        }
+      },
+      "value": {},
+      "problems": [
+        {
+          "path": "title",
+          "code": "required"
+        }
+      ]
+    },
+    {
+      "name": "an object enum on a number",
+      "schema": {
+        "type": "integer",
+        "enum": [1, 2, 3]
+      },
+      "value": 2,
+      "normalized": 2
+    }
+  ]
+}

@@ -112,6 +112,21 @@ function offsetMinutes(utcMs: number, timeZone: string): number {
   return (asUtc - Math.floor(utcMs / 1000) * 1000) / 60000;
 }
 
+/** `<input type="datetime-local">` value (event wall time) for a UTC instant. */
+export function utcToZonedInput(iso: string, timeZone: string): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    hourCycle: "h23",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).formatToParts(new Date(iso));
+  const n = (type: string) => parts.find((p) => p.type === type)!.value;
+  return `${n("year")}-${n("month")}-${n("day")}T${n("hour")}:${n("minute")}`;
+}
+
 /**
  * The UTC instant of a wall time in the event's zone (`YYYY-MM-DDTHH:mm`). A time that does not
  * exist (the hour skipped when clocks go forward) lands just after the gap; a time that happens

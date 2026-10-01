@@ -6,6 +6,8 @@ Each type declares a title and a bounded configuration schema. The server's
 uses the checked generated catalog to render its controls and validate edits.
 Organizer requests cannot supply schemas or execute extension code.
 
+Validation, defaults and the editor controls are the platform's shared schema subset (see [SCHEMA_SUBSET.md](SCHEMA_SUBSET.md)); the notes below describe how block schemas use it.
+
 Supported shapes are objects, bounded strings, bounded integers, and bounded
 arrays of objects. This is a documented JSON Schema subset, not a general JSON
 Schema implementation. `additionalProperties` controls unknown-field rejection;

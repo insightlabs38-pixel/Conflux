@@ -33,7 +33,15 @@ const config = (settings: unknown[]) => ({
 });
 
 async function mount(respond: (url: string) => Response) {
-  const fetchMock = vi.fn(async (input: unknown) => respond(String(input)));
+  return mountWith((url) => respond(url));
+}
+
+async function mountWith(
+  respond: (url: string, init?: RequestInit) => Response,
+) {
+  const fetchMock = vi.fn(async (input: unknown, init?: RequestInit) =>
+    respond(String(input), init),
+  );
   vi.stubGlobal("fetch", fetchMock);
   const container = document.createElement("div");
   document.body.appendChild(container);
@@ -135,5 +143,194 @@ describe("ConfigurationPanel", () => {
     expect(container.querySelector('[role="alert"]')).not.toBeNull();
     expect(container.textContent).toContain("Try again");
     act(() => root.unmount());
+  });
+
+  describe("changing a setting", () => {
+    const write = (field: string, over = {}) => ({
+      method: "PATCH",
+      path: "workspaces/{workspace}/events/{event}/registration-settings/",
+      field,
+      body: "partial",
+      ...over,
+    });
+    const mode = entry({
+      schema: { type: "string", enum: ["open", "application", "invite_only"] },
+      write: write("mode", { method: "PUT" }),
+    });
+    const maxSize = entry({
+      key: "team.max_size",
+      label: "Largest team",
+      value: 5,
+      schema: { type: ["integer", "null"], minimum: 1, maximum: 100 },
+      write: write("max_size"),
+    });
+    const button = (container: HTMLElement, label: string) =>
+      [...container.querySelectorAll("button")].find(
+        (b) =>
+          b.textContent === label || b.getAttribute("aria-label") === label,
+      ) as HTMLButtonElement | undefined;
+    const settle = () =>
+      act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+    async function set(el: HTMLElement, value: string) {
+      await act(async () => {
+        const input = el as HTMLInputElement;
+        const proto =
+          el instanceof HTMLSelectElement
+            ? HTMLSelectElement.prototype
+            : HTMLInputElement.prototype;
+        Object.getOwnPropertyDescriptor(proto, "value")!.set!.call(
+          input,
+          value,
+        );
+        el.dispatchEvent(
+          new Event(el instanceof HTMLSelectElement ? "change" : "input", {
+            bubbles: true,
+          }),
+        );
+      });
+    }
+
+    it("saves through the endpoint the answer names and reloads what the server now says", async () => {
+      let value = "open";
+      const sent: { url: string; method: string; body: unknown }[] = [];
+      const { container, root } = await mountWith((url, init) => {
+        if (init?.method && init.method !== "GET") {
+          sent.push({
+            url,
+            method: init.method,
+            body: JSON.parse(String(init.body)),
+          });
+          value = (sent.at(-1)!.body as { mode: string }).mode;
+          return jsonResponse(200, {});
+        }
+        return jsonResponse(200, config([{ ...mode, value }]));
+      });
+      await act(async () => button(container, "Change Registration")!.click());
+      const select = container.querySelector(
+        'form[aria-label="Change Registration"] select',
+      ) as HTMLSelectElement;
+      await set(select, "invite_only");
+      await act(async () => button(container, "Save")!.click());
+      await settle();
+      expect(sent).toEqual([
+        {
+          url: "/api/v1/workspaces/w/events/e1/registration-settings/",
+          method: "PUT",
+          body: { mode: "invite_only" },
+        },
+      ]);
+      expect(container.querySelector("form")).toBeNull();
+      expect(container.textContent).toContain("Registration: invite only");
+      act(() => root.unmount());
+    });
+
+    it("reads an endpoint that replaces everything first and sends the one field changed", async () => {
+      const sent: { method: string; body: unknown }[] = [];
+      const rules = entry({
+        key: "eligibility.require_track",
+        label: "Require a track",
+        value: false,
+        schema: { type: "boolean" },
+        write: write("require_track", {
+          method: "PUT",
+          path: "workspaces/{workspace}/events/{event}/eligibility-rules/",
+          body: "whole",
+        }),
+      });
+      const { container, root } = await mountWith((url, init) => {
+        if (init?.method === "PUT") {
+          sent.push({ method: "PUT", body: JSON.parse(String(init.body)) });
+          return jsonResponse(200, {});
+        }
+        if (url.endsWith("eligibility-rules/"))
+          return jsonResponse(200, {
+            require_track: false,
+            require_clearance: true,
+            updated_at: "x",
+          });
+        return jsonResponse(200, config([rules]));
+      });
+      await act(async () =>
+        button(container, "Change Require a track")!.click(),
+      );
+      await act(async () =>
+        (
+          container.querySelector(
+            'form input[type="checkbox"]',
+          ) as HTMLInputElement
+        ).click(),
+      );
+      await act(async () => button(container, "Save")!.click());
+      await settle();
+      expect(sent).toEqual([
+        {
+          method: "PUT",
+          body: { require_track: true, require_clearance: true },
+        },
+      ]);
+      act(() => root.unmount());
+    });
+
+    it("does not send a value the schema refuses, and shows the domain's own refusal", async () => {
+      const sent: unknown[] = [];
+      const { container, root } = await mountWith((_url, init) => {
+        if (init?.method && init.method !== "GET") {
+          sent.push(init.body);
+          return jsonResponse(400, {
+            max_size: ["Cannot be below the smallest team."],
+          });
+        }
+        return jsonResponse(200, config([maxSize]));
+      });
+      await act(async () => button(container, "Change Largest team")!.click());
+      const input = container.querySelector(
+        'form input[type="number"]',
+      ) as HTMLInputElement;
+      await set(input, "500");
+      expect(container.querySelector("[role=alert]")!.textContent).toContain(
+        "from 1 to 100",
+      );
+      expect(button(container, "Save")!.disabled).toBe(true);
+      await set(input, "3");
+      await act(async () => button(container, "Save")!.click());
+      await settle();
+      expect(sent).toHaveLength(1);
+      expect(
+        container.querySelector("form [role=alert]")!.textContent,
+      ).toContain("Cannot be below the smallest team.");
+      expect(container.querySelector("form")).not.toBeNull(); // stays open for another try
+      await act(async () => button(container, "Cancel")!.click());
+      expect(container.querySelector("form")).toBeNull();
+      act(() => root.unmount());
+    });
+
+    it("offers no change for a locked setting, a derived one or a module that is off", async () => {
+      const { container, root } = await mountWith(() =>
+        jsonResponse(
+          200,
+          config([
+            {
+              ...mode,
+              editable: false,
+              lock: { code: "event_archived", message: "Locked." },
+            },
+            {
+              ...maxSize,
+              key: "dates.duration_hours",
+              write: null,
+              editable: false,
+            },
+            {
+              ...maxSize,
+              key: "eligibility.require_clearance",
+              module: "eligibility_review",
+              module_enabled: false,
+            },
+          ]),
+        ),
+      );
+      expect(container.textContent).not.toContain("Change");
+      act(() => root.unmount());
+    });
   });
 });

@@ -481,7 +481,7 @@ primitives:
 - id: ASYNC_JOB
   name: Durable async job
   owner_task: PD-F002-B01-T05
-  status: PLANNED
+  status: IMPLEMENTED
   consumer_count: 319
   consumers:
   - PD-F001-B01-T00

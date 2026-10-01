@@ -59,8 +59,14 @@
       ]
     },
     {
-      "paths": ["src/web/features/operations/*", "src/api/eligibility/*"],
-      "specs": ["uiv2-organizer", "pvs", "uiv2-surfaces"]
+      "paths": [
+        "src/web/features/operations/*",
+        "src/api/eligibility/*",
+        "src/api/core/job*",
+        "src/api/core/tasks.py",
+        "src/api/integrations/archive*"
+      ],
+      "specs": ["uiv2-organizer", "pvs", "uiv2-surfaces", "jobs"]
     },
     {
       "paths": [

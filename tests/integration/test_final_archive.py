@@ -352,6 +352,8 @@ EXCLUDED_EVENT_MODELS = {
     "integrations.eventretentionpolicy",
     "taxonomy.taxonomyassignment",
     "onsite.attendance",
+    # Operational state of background work (PD-F002-B01-T05); the audit trail is the record.
+    "core.job",
     # Preset provenance only (PD-F001-B01); not part of the archive contract yet (see spec 001).
     "eventconfig.eventprofile",
     "eventconfig.eventmodulesetting",

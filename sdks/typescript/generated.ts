@@ -272,6 +272,20 @@ export type ApplyToEventInputSchema = { note?: string; code?: string };
 
 export type InputOfApplyToEventInputSchema = { note?: string; code?: string };
 
+export type ArchiveExportJobInput = {
+  mode?: ArchiveExportJobInputModeEnum;
+  signed?: boolean;
+};
+
+export type InputOfArchiveExportJobInput = {
+  mode?: InputOfArchiveExportJobInputModeEnum;
+  signed?: boolean;
+};
+
+export type ArchiveExportJobInputModeEnum = "config" | "full" | "final";
+
+export type InputOfArchiveExportJobInputModeEnum = "config" | "full" | "final";
+
 export type ArchiveImportInput = {
   name: string;
   slug: string;
@@ -2392,6 +2406,120 @@ export type InputOfInboxMessageSchema = {
 export type InstantiateInput = { name: string; slug: string };
 
 export type InputOfInstantiateInput = { name: string; slug: string };
+
+export type JobArtifactSchema = {
+  name: string;
+  content_type: string;
+  size: number;
+};
+
+export type InputOfJobArtifactSchema = {
+  name: string;
+  content_type: string;
+  size: number;
+};
+
+export type JobDetailSchema = {
+  public_id: string;
+  kind: string;
+  label: string;
+  status: JobStatus;
+  event: string | null;
+  requested_by: string;
+  progress: JobProgressSchema | null;
+  result: unknown;
+  error: JobErrorSchema | null;
+  cancellable: boolean;
+  created_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+  artifacts: JobArtifactSchema[];
+  params: unknown;
+  logs: JobLogSchema[];
+};
+
+export type InputOfJobDetailSchema = {
+  public_id: string;
+  kind: string;
+  label: string;
+  status: InputOfJobStatus;
+  event: string | null;
+  requested_by: string;
+  progress: InputOfJobProgressSchema | null;
+  result: unknown;
+  error: InputOfJobErrorSchema | null;
+  cancellable: boolean;
+  created_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+  artifacts: InputOfJobArtifactSchema[];
+  params: unknown;
+  logs: InputOfJobLogSchema[];
+};
+
+export type JobErrorSchema = { code: string; message: string };
+
+export type InputOfJobErrorSchema = { code: string; message: string };
+
+export type JobLogSchema = { level: string; message: string; at: string };
+
+export type InputOfJobLogSchema = {
+  level: string;
+  message: string;
+  at: string;
+};
+
+export type JobProgressSchema = {
+  done: number | null;
+  total: number | null;
+  message: string;
+};
+
+export type InputOfJobProgressSchema = {
+  done: number | null;
+  total: number | null;
+  message: string;
+};
+
+export type JobSchema = {
+  public_id: string;
+  kind: string;
+  label: string;
+  status: JobStatus;
+  event: string | null;
+  requested_by: string;
+  progress: JobProgressSchema | null;
+  result: unknown;
+  error: JobErrorSchema | null;
+  cancellable: boolean;
+  created_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+  artifacts: JobArtifactSchema[];
+};
+
+export type InputOfJobSchema = {
+  public_id: string;
+  kind: string;
+  label: string;
+  status: InputOfJobStatus;
+  event: string | null;
+  requested_by: string;
+  progress: InputOfJobProgressSchema | null;
+  result: unknown;
+  error: InputOfJobErrorSchema | null;
+  cancellable: boolean;
+  created_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+  artifacts: InputOfJobArtifactSchema[];
+};
+
+export type JobStatus =
+  "queued" | "running" | "cancelling" | "succeeded" | "failed" | "cancelled";
+
+export type InputOfJobStatus =
+  "queued" | "running" | "cancelling" | "succeeded" | "failed" | "cancelled";
 
 export type JsonRpcMessage = {
   jsonrpc: string;
@@ -5888,6 +6016,20 @@ export interface Operations {
     };
     response: ArchiveOutput;
   };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_export_jobs: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      query?: { mode?: "config" | "final" | "full" };
+    };
+    response: ArchiveOutput;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_export_jobs: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      body?: InputOfArchiveExportJobInput;
+    };
+    response: JobSchema;
+  };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_signed: {
     request: {
       path: { event_public_id: string; workspace_public_id: string };
@@ -8986,6 +9128,43 @@ export interface Operations {
     };
     response: InboxMessageSchema;
   };
+  get_api_v1_workspaces_workspace_public_id_jobs: {
+    request: {
+      path: { workspace_public_id: string };
+      query?: {
+        event?: string;
+        kind?: string;
+        limit?: number;
+        offset?: number;
+        status?:
+          | "cancelled"
+          | "cancelling"
+          | "failed"
+          | "queued"
+          | "running"
+          | "succeeded";
+      };
+    };
+    response: JobSchema[];
+  };
+  get_api_v1_workspaces_workspace_public_id_jobs_job_public_id: {
+    request: { path: { job_public_id: string; workspace_public_id: string } };
+    response: JobDetailSchema;
+  };
+  get_api_v1_workspaces_workspace_public_id_jobs_job_public_id_artifacts_artifact_name: {
+    request: {
+      path: {
+        artifact_name: string;
+        job_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: string;
+  };
+  post_api_v1_workspaces_workspace_public_id_jobs_job_public_id_cancel: {
+    request: { path: { job_public_id: string; workspace_public_id: string } };
+    response: JobSchema;
+  };
   get_api_v1_workspaces_workspace_public_id_judge_directory: {
     request: { path: { workspace_public_id: string } };
     response: JudgeDirectorySchema[];
@@ -9724,6 +9903,24 @@ export const operations = {
     request_body: false,
     response_kind: "json",
   },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_export_jobs:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/archive/export-jobs/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: ["mode"],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_export_jobs:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/archive/export-jobs/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_signed:
     {
       method: "GET",
@@ -13721,6 +13918,39 @@ export const operations = {
     method: "POST",
     path: "/api/v1/workspaces/{workspace_public_id}/inbox/{recipient_public_id}/read/",
     path_params: ["recipient_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  get_api_v1_workspaces_workspace_public_id_jobs: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/jobs/",
+    path_params: ["workspace_public_id"],
+    query_params: ["event", "kind", "limit", "offset", "status"],
+    request_body: false,
+    response_kind: "json",
+  },
+  get_api_v1_workspaces_workspace_public_id_jobs_job_public_id: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/jobs/{job_public_id}/",
+    path_params: ["job_public_id", "workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
+  get_api_v1_workspaces_workspace_public_id_jobs_job_public_id_artifacts_artifact_name:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/jobs/{job_public_id}/artifacts/{artifact_name}/",
+      path_params: ["artifact_name", "job_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "text",
+    },
+  post_api_v1_workspaces_workspace_public_id_jobs_job_public_id_cancel: {
+    method: "POST",
+    path: "/api/v1/workspaces/{workspace_public_id}/jobs/{job_public_id}/cancel/",
+    path_params: ["job_public_id", "workspace_public_id"],
     query_params: [],
     request_body: false,
     response_kind: "json",

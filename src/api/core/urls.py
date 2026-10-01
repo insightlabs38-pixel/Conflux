@@ -3,6 +3,7 @@ from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView
 
 from .entity_views import EntityCatalogueView, EntityQueryView
+from .job_views import JobArtifactView, JobCancelView, JobDetailView, JobListView
 from .saved_view_views import SavedViewDetailView, SavedViewListView, SavedViewRunView
 from .views import health
 
@@ -43,6 +44,22 @@ urlpatterns = [
         "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/views/<uuid:view_public_id>/run/",
         SavedViewRunView.as_view(),
         name="saved-view-run",
+    ),
+    path("workspaces/<uuid:workspace_public_id>/jobs/", JobListView.as_view(), name="job-list"),
+    path(
+        "workspaces/<uuid:workspace_public_id>/jobs/<uuid:job_public_id>/",
+        JobDetailView.as_view(),
+        name="job-detail",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/jobs/<uuid:job_public_id>/cancel/",
+        JobCancelView.as_view(),
+        name="job-cancel",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/jobs/<uuid:job_public_id>/artifacts/<str:artifact_name>/",
+        JobArtifactView.as_view(),
+        name="job-artifact",
     ),
     path("accounts/", include("accounts.urls")),
     path("workspaces/", include("workspaces.urls")),

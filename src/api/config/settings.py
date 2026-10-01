@@ -149,6 +149,7 @@ CELERY_BEAT_SCHEDULE = {
         "task": "communications.tasks.dispatch_due_reminders",
         "schedule": 30.0,
     },
+    "sweep-jobs": {"task": "core.tasks.sweep_jobs", "schedule": 60.0},
 }
 
 # Generic S3 adapter settings; RustFS is the default local object store.
@@ -217,6 +218,7 @@ SPECTACULAR_SETTINGS = {
         "COIRuleKind": "evaluations.models.COIRuleKind",
         "ProjectCOIAttributeKind": ["institution", "domain"],
         "SavedViewVisibility": "core.models.SavedView.Visibility",
+        "JobStatus": "core.models.Job.Status",
     },
 }
 

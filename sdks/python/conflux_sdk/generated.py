@@ -258,6 +258,18 @@ class InputOfApplyToEventInputSchema(TypedDict):
     note: NotRequired[str]
     code: NotRequired[str]
 
+class ArchiveExportJobInput(TypedDict):
+    mode: NotRequired[ArchiveExportJobInputModeEnum]
+    signed: NotRequired[bool]
+
+class InputOfArchiveExportJobInput(TypedDict):
+    mode: NotRequired[InputOfArchiveExportJobInputModeEnum]
+    signed: NotRequired[bool]
+
+ArchiveExportJobInputModeEnum = Literal['config', 'full', 'final']
+
+InputOfArchiveExportJobInputModeEnum = Literal['config', 'full', 'final']
+
 class ArchiveImportInput(TypedDict):
     name: str
     slug: str
@@ -2187,6 +2199,116 @@ class InstantiateInput(TypedDict):
 class InputOfInstantiateInput(TypedDict):
     name: str
     slug: str
+
+class JobArtifactSchema(TypedDict):
+    name: str
+    content_type: str
+    size: int
+
+class InputOfJobArtifactSchema(TypedDict):
+    name: str
+    content_type: str
+    size: int
+
+class JobDetailSchema(TypedDict):
+    public_id: str
+    kind: str
+    label: str
+    status: JobStatus
+    event: str | None
+    requested_by: str
+    progress: JobProgressSchema | None
+    result: Any
+    error: JobErrorSchema | None
+    cancellable: bool
+    created_at: str
+    started_at: str | None
+    finished_at: str | None
+    artifacts: list[JobArtifactSchema]
+    params: Any
+    logs: list[JobLogSchema]
+
+class InputOfJobDetailSchema(TypedDict):
+    public_id: str
+    kind: str
+    label: str
+    status: InputOfJobStatus
+    event: str | None
+    requested_by: str
+    progress: InputOfJobProgressSchema | None
+    result: Any
+    error: InputOfJobErrorSchema | None
+    cancellable: bool
+    created_at: str
+    started_at: str | None
+    finished_at: str | None
+    artifacts: list[InputOfJobArtifactSchema]
+    params: Any
+    logs: list[InputOfJobLogSchema]
+
+class JobErrorSchema(TypedDict):
+    code: str
+    message: str
+
+class InputOfJobErrorSchema(TypedDict):
+    code: str
+    message: str
+
+class JobLogSchema(TypedDict):
+    level: str
+    message: str
+    at: str
+
+class InputOfJobLogSchema(TypedDict):
+    level: str
+    message: str
+    at: str
+
+class JobProgressSchema(TypedDict):
+    done: int | None
+    total: int | None
+    message: str
+
+class InputOfJobProgressSchema(TypedDict):
+    done: int | None
+    total: int | None
+    message: str
+
+class JobSchema(TypedDict):
+    public_id: str
+    kind: str
+    label: str
+    status: JobStatus
+    event: str | None
+    requested_by: str
+    progress: JobProgressSchema | None
+    result: Any
+    error: JobErrorSchema | None
+    cancellable: bool
+    created_at: str
+    started_at: str | None
+    finished_at: str | None
+    artifacts: list[JobArtifactSchema]
+
+class InputOfJobSchema(TypedDict):
+    public_id: str
+    kind: str
+    label: str
+    status: InputOfJobStatus
+    event: str | None
+    requested_by: str
+    progress: InputOfJobProgressSchema | None
+    result: Any
+    error: InputOfJobErrorSchema | None
+    cancellable: bool
+    created_at: str
+    started_at: str | None
+    finished_at: str | None
+    artifacts: list[InputOfJobArtifactSchema]
+
+JobStatus = Literal['queued', 'running', 'cancelling', 'succeeded', 'failed', 'cancelled']
+
+InputOfJobStatus = Literal['queued', 'running', 'cancelling', 'succeeded', 'failed', 'cancelled']
 
 class JsonRpcMessage(TypedDict):
     jsonrpc: str
@@ -5613,6 +5735,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                               'query_params': ['mode'],
                                                                               'request_body': False,
                                                                               'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_export_jobs': {'method': 'GET',
+                                                                                          'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/archive/export-jobs/',
+                                                                                          'path_params': ['event_public_id',
+                                                                                                          'workspace_public_id'],
+                                                                                          'query_params': ['mode'],
+                                                                                          'request_body': False,
+                                                                                          'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_signed': {'method': 'GET',
                                                                                      'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/archive/signed/',
                                                                                      'path_params': ['event_public_id',
@@ -6913,6 +7042,31 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                      'query_params': [],
                                                      'request_body': False,
                                                      'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_jobs': {'method': 'GET',
+                                                    'path': '/api/v1/workspaces/{workspace_public_id}/jobs/',
+                                                    'path_params': ['workspace_public_id'],
+                                                    'query_params': ['event',
+                                                                     'kind',
+                                                                     'limit',
+                                                                     'offset',
+                                                                     'status'],
+                                                    'request_body': False,
+                                                    'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_jobs_job_public_id': {'method': 'GET',
+                                                                  'path': '/api/v1/workspaces/{workspace_public_id}/jobs/{job_public_id}/',
+                                                                  'path_params': ['job_public_id',
+                                                                                  'workspace_public_id'],
+                                                                  'query_params': [],
+                                                                  'request_body': False,
+                                                                  'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_jobs_job_public_id_artifacts_artifact_name': {'method': 'GET',
+                                                                                          'path': '/api/v1/workspaces/{workspace_public_id}/jobs/{job_public_id}/artifacts/{artifact_name}/',
+                                                                                          'path_params': ['artifact_name',
+                                                                                                          'job_public_id',
+                                                                                                          'workspace_public_id'],
+                                                                                          'query_params': [],
+                                                                                          'request_body': False,
+                                                                                          'response_kind': 'text'},
  'get_api_v1_workspaces_workspace_public_id_judge_directory': {'method': 'GET',
                                                                'path': '/api/v1/workspaces/{workspace_public_id}/judge-directory/',
                                                                'path_params': ['workspace_public_id'],
@@ -7334,6 +7488,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                  'query_params': [],
                                                                                                                  'request_body': True,
                                                                                                                  'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_export_jobs': {'method': 'POST',
+                                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/archive/export-jobs/',
+                                                                                           'path_params': ['event_public_id',
+                                                                                                           'workspace_public_id'],
+                                                                                           'query_params': [],
+                                                                                           'request_body': True,
+                                                                                           'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_as_code_apply': {'method': 'POST',
                                                                                      'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/as-code/apply/',
                                                                                      'path_params': ['event_public_id',
@@ -8388,6 +8549,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                'query_params': [],
                                                                                'request_body': False,
                                                                                'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_jobs_job_public_id_cancel': {'method': 'POST',
+                                                                          'path': '/api/v1/workspaces/{workspace_public_id}/jobs/{job_public_id}/cancel/',
+                                                                          'path_params': ['job_public_id',
+                                                                                          'workspace_public_id'],
+                                                                          'query_params': [],
+                                                                          'request_body': False,
+                                                                          'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_members': {'method': 'POST',
                                                         'path': '/api/v1/workspaces/{workspace_public_id}/members/',
                                                         'path_params': ['workspace_public_id'],

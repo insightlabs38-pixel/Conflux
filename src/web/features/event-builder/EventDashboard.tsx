@@ -19,6 +19,7 @@ import { CommunityVotingBuilder } from "../community-voting/CommunityVotingBuild
 import { WebhooksPanel } from "../integrations/WebhooksPanel";
 import { AwardsPanel } from "../awards/AwardsPanel";
 import { OperationsCenter } from "../operations/OperationsCenter";
+import { JobsPanel } from "../operations/JobsPanel";
 import { OperatorConsole } from "../operations/OperatorConsole";
 import { CommunicationsPanel } from "../communications/CommunicationsPanel";
 import { ConfigHistoryPanel } from "../audit/ConfigHistoryPanel";
@@ -842,6 +843,18 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
                   content: (
                     <OperationsCenter
                       key={`operations-${selected.public_id}`}
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+                {
+                  id: "JobsPanel",
+                  label: "Exports and jobs",
+                  description: "Archive export and background work",
+                  content: (
+                    <JobsPanel
+                      key={`jobs-${selected.public_id}`}
                       workspaceId={workspaceId}
                       eventId={selected.public_id}
                     />

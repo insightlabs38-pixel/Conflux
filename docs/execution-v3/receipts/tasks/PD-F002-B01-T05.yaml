@@ -1,0 +1,86 @@
+version: 3
+task: PD-F002-B01-T05
+batch: PD-F002-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: frontier-architecture
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: bb5afd0
+  head_commit: bb5afd0
+changed_paths:
+- src/api/core/ (jobs.py, job_views.py, tasks.py, models.py Job JobLog JobArtifact, migrations/0003_jobs.py, urls.py)
+- src/api/integrations/ (jobs.py archive_export kind, apps.py ready, archive_views.py export-jobs endpoint, urls.py)
+- src/api/config/settings.py (sweep-jobs beat entry, JobStatus enum name)
+- src/web/lib/jobs.ts and test, src/web/features/operations/JobsPanel.tsx and test, EventDashboard.tsx
+- tests/integration/ (test_jobs.py, test_archive_export_job.py, concurrency/test_job_races.py, test_final_archive.py exclusion)
+- tests/e2e/ (jobs.spec.ts, tiers.json, weights.json, affected.json)
+- docs/operations/JOBS.md, docs/api/openapi.yaml, sdks generated, spec 002, PRIMITIVE_REGISTRY.yaml
+deliverables:
+- item: Canonical durable async job contract as a reusable platform primitive
+  result: pass
+  evidence: one Job/JobLog/JobArtifact model, a kinds registry (register_kind), enqueue/run/cancel/sweep/describe in core/jobs.py, Celery tasks run_job and sweep_jobs, four endpoints; a feature adds a kind, never a table
+- item: Stable inputs/outputs, lifecycle, authorization, idempotency/concurrency, errors, extension boundary
+  result: pass
+  evidence: docs/operations/JOBS.md; forward-only transition graph under row locks; kind roles checked at enqueue and again at run; requester/organizer visibility with 404 for others; idempotency by (requester, kind, key); failure shape {code, message} with internals hidden
+- item: Reference consumer or contract test showing reuse without private coupling
+  result: pass
+  evidence: test_jobs.py registers independent test kinds from outside core and drives the whole lifecycle; the event archive export is the first real adopter (integrations app, API and web), output equals the synchronous export
+- item: Compatibility and migration expectations documented
+  result: pass
+  evidence: additive migration core/0003_jobs, synchronous archive GET unchanged, recurring Celery tasks left as they are; documented in JOBS.md and spec 002 as built
+invariants:
+- item: One source of truth, no UI-only rules
+  result: pass
+  evidence: the web only starts through the feature endpoint and follows GET jobs/id; state, cancel and results are the server's
+- item: Server-side authorization, validation and audit authoritative
+  result: pass
+  evidence: audited job.requested, cancel_requested, cancelled, succeeded and failed; role re-check at run time (forbidden); secret keys refused in params and results; bounded params, result, logs, artifacts
+- item: Not a placeholder; real worker path
+  result: pass
+  evidence: the browser spec runs the export on the compose Celery worker and downloads the real file
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1658 passed, 26 skipped (3 new skips are the real-database race tests)
+- command: DATABASE_URL=postgres pytest tests/integration/test_jobs.py test_archive_export_job.py concurrency/test_job_races.py
+  result: pass
+  note: 31 on PostgreSQL including 3 race tests (duplicate delivery runs once, one key makes one job, cancel racing the start ends consistent); the race file repeated 6 times clean
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check; spectacular --validate --fail-on-warn; makemigrations --check
+  result: pass
+  note: 372 web tests (jobs 5, JobsPanel 4); static checks and OpenAPI/SDK drift clean
+- command: make e2e-fast
+  result: pass
+  note: read-only, isolated-mutation (incl. jobs at 390 and 1440) and canary ok; docs/verification/PD-F002-B01/T05-e2e-fast.log
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: JobsPanel (start, progress, cancel, download, list) and followJob over useOperation
+- surface: api
+  result: pass
+  evidence: jobs list/detail/cancel/artifact and archive export-jobs
+- surface: audit
+  result: pass
+  evidence: lifecycle events audited and asserted in test_jobs.py
+- surface: docs
+  result: pass
+  evidence: JOBS.md, spec 002, registry status IMPLEMENTED
+- surface: sdk
+  result: pass
+  evidence: "not required; generated clients regenerated, sdk-check clean"
+migrations:
+- core/0003_jobs creates core_job, core_joblog, core_jobartifact (additive; no data change)
+findings:
+- A first browser run found a real defect, the jobs table overflowed at 390 px; it now uses the shared DataTable scroll region
+- The existing guards caught two things in review, the event-owned-model archive test (core.job excluded as operational state) and the select_for_update of-self rule
+- A serializer silently drops unknown keys, so the secret check runs on the raw params before validation
+limitations:
+- Artifacts live in the database (25 MB cap) because the object store has no generated-file path yet
+- No retention sweep, no automatic retry, no push channel (polling) and no scheduling or priorities
+- Archive import and preview, the event simulator and dropout simulation stay synchronous and are listed in spec 002
+- The web start does not send Idempotency-Key (the typed client has no header support); API callers should
+escalations: []
+next: review

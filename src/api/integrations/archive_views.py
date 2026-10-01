@@ -1,5 +1,7 @@
 from accounts.authentication import CookieSessionAuthentication
 from audit.services import record_mutation
+from core import jobs
+from core.job_views import JobSchema
 from core.mixins import WorkspaceLookupMixin
 from core.permissions import require_roles
 from django.core.exceptions import ValidationError as ModelValidationError
@@ -118,6 +120,32 @@ class EventSignedArchiveExportView(EventArchiveExportView):
     @extend_schema(responses=SignedArchiveOutput, parameters=[ARCHIVE_MODE])
     def get(self, request, workspace_public_id, event_public_id):
         return Response(sign_archive(_export(self.get_event(), request.query_params.get("mode"))))
+
+
+class ArchiveExportJobInput(serializers.Serializer):
+    mode = serializers.ChoiceField(choices=["config", "full", "final"], required=False)
+    signed = serializers.BooleanField(required=False)
+
+
+class EventArchiveExportJobView(EventArchiveExportView):
+    """Start the same export as a background job (large events): 202 and the job to follow.
+
+    Send `Idempotency-Key` so a retried request returns the job it already started.
+    """
+
+    @extend_schema(request=ArchiveExportJobInput, responses={202: JobSchema})
+    def post(self, request, workspace_public_id, event_public_id):
+        data = ArchiveExportJobInput(data=request.data)
+        data.is_valid(raise_exception=True)
+        job, created = jobs.enqueue(
+            kind="archive_export",
+            actor=request.user,
+            workspace=self.get_workspace(),
+            event=self.get_event(),
+            params=dict(data.validated_data),
+            idempotency_key=request.META.get("HTTP_IDEMPOTENCY_KEY", ""),
+        )
+        return Response(jobs.describe(job), status=202 if created else 200)
 
 
 class WorkspaceArchivePreviewView(WorkspaceLookupMixin, APIView):

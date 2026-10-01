@@ -49,6 +49,11 @@ urlpatterns = [
         name="event-archive-export",
     ),
     path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/archive/export-jobs/",
+        archive_views.EventArchiveExportJobView.as_view(),
+        name="event-archive-export-job",
+    ),
+    path(
         "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/archive/signed/",
         archive_views.EventSignedArchiveExportView.as_view(),
         name="event-signed-archive-export",

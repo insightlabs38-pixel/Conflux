@@ -2000,6 +2000,88 @@ paths:
               schema:
                 $ref: '#/components/schemas/ArchiveOutput'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/archive/export-jobs/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_export_jobs
+      description: |-
+        Start the same export as a background job (large events): 202 and the job to follow.
+
+        Send `Idempotency-Key` so a retried request returns the job it already started.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: mode
+        schema:
+          type: string
+          enum:
+          - config
+          - final
+          - full
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchiveOutput'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_export_jobs
+      description: |-
+        Start the same export as a background job (large events): 202 and the job to follow.
+
+        Send `Idempotency-Key` so a retried request returns the job it already started.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchiveExportJobInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ArchiveExportJobInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ArchiveExportJobInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/archive/signed/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_signed
@@ -16219,6 +16301,172 @@ paths:
               schema:
                 $ref: '#/components/schemas/InboxMessageSchema'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/jobs/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_jobs
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: query
+        name: event
+        schema:
+          type: string
+        description: Only jobs of this event.
+      - in: query
+        name: kind
+        schema:
+          type: string
+      - in: query
+        name: limit
+        schema:
+          type: integer
+      - in: query
+        name: offset
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - cancelled
+          - cancelling
+          - failed
+          - queued
+          - running
+          - succeeded
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JobSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/jobs/{job_public_id}/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_jobs_job_public_id
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: job_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobDetailSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/jobs/{job_public_id}/artifacts/{artifact_name}/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_jobs_job_public_id_artifacts_artifact_name
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: artifact_name
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: job_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/jobs/{job_public_id}/cancel/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_jobs_job_public_id_cancel
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: job_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/judge-directory/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_judge_directory
@@ -17592,6 +17840,23 @@ components:
         code:
           type: string
           maxLength: 32
+    ArchiveExportJobInput:
+      type: object
+      properties:
+        mode:
+          $ref: '#/components/schemas/ArchiveExportJobInputModeEnum'
+        signed:
+          type: boolean
+    ArchiveExportJobInputModeEnum:
+      enum:
+      - config
+      - full
+      - final
+      type: string
+      description: |-
+        * `config` - config
+        * `full` - full
+        * `final` - final
     ArchiveImportInput:
       type: object
       properties:
@@ -20943,6 +21208,201 @@ components:
       required:
       - name
       - slug
+    JobArtifactSchema:
+      type: object
+      properties:
+        name:
+          type: string
+        content_type:
+          type: string
+        size:
+          type: integer
+      required:
+      - content_type
+      - name
+      - size
+    JobDetailSchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+        label:
+          type: string
+        status:
+          $ref: '#/components/schemas/JobStatus'
+        event:
+          type: string
+          format: uuid
+          nullable: true
+        requested_by:
+          type: string
+        progress:
+          allOf:
+          - $ref: '#/components/schemas/JobProgressSchema'
+          nullable: true
+        result:
+          nullable: true
+        error:
+          allOf:
+          - $ref: '#/components/schemas/JobErrorSchema'
+          nullable: true
+        cancellable:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        finished_at:
+          type: string
+          format: date-time
+          nullable: true
+        artifacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobArtifactSchema'
+        params: {}
+        logs:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobLogSchema'
+      required:
+      - artifacts
+      - cancellable
+      - created_at
+      - error
+      - event
+      - finished_at
+      - kind
+      - label
+      - logs
+      - params
+      - progress
+      - public_id
+      - requested_by
+      - result
+      - started_at
+      - status
+    JobErrorSchema:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+      - code
+      - message
+    JobLogSchema:
+      type: object
+      properties:
+        level:
+          type: string
+        message:
+          type: string
+        at:
+          type: string
+          format: date-time
+      required:
+      - at
+      - level
+      - message
+    JobProgressSchema:
+      type: object
+      properties:
+        done:
+          type: integer
+          nullable: true
+        total:
+          type: integer
+          nullable: true
+        message:
+          type: string
+      required:
+      - done
+      - message
+      - total
+    JobSchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        kind:
+          type: string
+        label:
+          type: string
+        status:
+          $ref: '#/components/schemas/JobStatus'
+        event:
+          type: string
+          format: uuid
+          nullable: true
+        requested_by:
+          type: string
+        progress:
+          allOf:
+          - $ref: '#/components/schemas/JobProgressSchema'
+          nullable: true
+        result:
+          nullable: true
+        error:
+          allOf:
+          - $ref: '#/components/schemas/JobErrorSchema'
+          nullable: true
+        cancellable:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        finished_at:
+          type: string
+          format: date-time
+          nullable: true
+        artifacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobArtifactSchema'
+      required:
+      - artifacts
+      - cancellable
+      - created_at
+      - error
+      - event
+      - finished_at
+      - kind
+      - label
+      - progress
+      - public_id
+      - requested_by
+      - result
+      - started_at
+      - status
+    JobStatus:
+      enum:
+      - queued
+      - running
+      - cancelling
+      - succeeded
+      - failed
+      - cancelled
+      type: string
+      description: |-
+        * `queued` - Queued
+        * `running` - Running
+        * `cancelling` - Cancelling
+        * `succeeded` - Succeeded
+        * `failed` - Failed
+        * `cancelled` - Cancelled
     JsonRpcMessage:
       type: object
       properties:

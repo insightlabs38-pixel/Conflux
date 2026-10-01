@@ -70,3 +70,86 @@ class SavedView(PublicIdModel):
             )
         ]
         ordering = ["name", "id"]
+
+
+class Job(PublicIdModel):
+    """One unit of durable background work (PD-F002-B01-T05); the platform's only job table.
+
+    A feature never adds its own: it registers a *kind* (`core.jobs.register_kind`) and enqueues.
+    State moves forward only along `core.jobs.TRANSITIONS`, always under a row lock, so a duplicate
+    delivery, a cancel racing a finish and the stale-job sweep cannot disagree. `params` and
+    `result` are bounded JSON and never hold secrets; anything larger is a `JobArtifact`.
+    """
+
+    class Status(models.TextChoices):
+        QUEUED = "queued", "Queued"
+        RUNNING = "running", "Running"
+        CANCELLING = "cancelling", "Cancelling"
+        SUCCEEDED = "succeeded", "Succeeded"
+        FAILED = "failed", "Failed"
+        CANCELLED = "cancelled", "Cancelled"
+
+    workspace = models.ForeignKey(
+        "workspaces.Workspace", on_delete=models.CASCADE, related_name="jobs"
+    )
+    event = models.ForeignKey(
+        "events.Event", null=True, blank=True, on_delete=models.CASCADE, related_name="jobs"
+    )
+    kind = models.SlugField(max_length=60)
+    status = models.CharField(max_length=12, choices=Status.choices, default=Status.QUEUED)
+    params = models.JSONField(default=dict)
+    result = models.JSONField(null=True, blank=True)
+    error = models.JSONField(null=True, blank=True)
+    progress_done = models.PositiveIntegerField(null=True, blank=True)
+    progress_total = models.PositiveIntegerField(null=True, blank=True)
+    progress_message = models.CharField(max_length=200, blank=True)
+    requested_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="jobs"
+    )
+    idempotency_key = models.CharField(max_length=100, blank=True)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    heartbeat_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["requested_by", "kind", "idempotency_key"],
+                condition=~models.Q(idempotency_key=""),
+                name="unique_job_idempotency_key",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["workspace", "-created_at"]),
+            models.Index(fields=["status", "heartbeat_at"]),
+        ]
+        ordering = ["-created_at", "-id"]
+
+
+class JobLog(models.Model):
+    """A bounded, human-readable trail of a job (the newest `core.jobs.MAX_LOG_LINES`)."""
+
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="logs")
+    level = models.CharField(max_length=8, default="info")
+    message = models.CharField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["id"]
+
+
+class JobArtifact(models.Model):
+    """A named output of a job (an export, a report), kept as long as the job."""
+
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name="artifacts")
+    name = models.CharField(max_length=120)
+    content_type = models.CharField(max_length=100)
+    size = models.PositiveIntegerField()
+    body = models.BinaryField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["job", "name"], name="unique_job_artifact")]
+        ordering = ["id"]

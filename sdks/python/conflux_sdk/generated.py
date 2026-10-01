@@ -3713,6 +3713,10 @@ class InputOfPrivacyReportOutput(TypedDict):
     retained_reason: NotRequired[str]
     due: NotRequired[dict[str, Any]]
 
+ProfileEnum = Literal['page', 'story']
+
+InputOfProfileEnum = Literal['page', 'story']
+
 class ProfileLinkSchema(TypedDict):
     label: str
     url: str
@@ -4316,6 +4320,26 @@ class InputOfReviewSummaryOutput(TypedDict):
     open_findings: int
     addressed_findings: int
     revision: int
+
+class RichPreviewInputSchema(TypedDict):
+    profile: ProfileEnum
+    source: str
+
+class InputOfRichPreviewInputSchema(TypedDict):
+    profile: InputOfProfileEnum
+    source: str
+
+class RichPreviewSchema(TypedDict):
+    profile: str
+    length: int
+    max_length: int
+    tree: Any
+
+class InputOfRichPreviewSchema(TypedDict):
+    profile: str
+    length: int
+    max_length: int
+    tree: Any
 
 class RoomOutput(TypedDict):
     public_id: str
@@ -8893,6 +8917,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                   'query_params': [],
                                                                                                   'request_body': True,
                                                                                                   'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_rich_preview': {'method': 'POST',
+                                                             'path': '/api/v1/workspaces/{workspace_public_id}/rich/preview/',
+                                                             'path_params': ['workspace_public_id'],
+                                                             'query_params': [],
+                                                             'request_body': True,
+                                                             'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_taxonomies': {'method': 'POST',
                                                            'path': '/api/v1/workspaces/{workspace_public_id}/taxonomies/',
                                                            'path_params': ['workspace_public_id'],

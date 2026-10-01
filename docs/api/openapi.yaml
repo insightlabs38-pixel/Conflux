@@ -17571,6 +17571,42 @@ paths:
               schema:
                 type: object
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/rich/preview/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_rich_preview
+      description: A signed-in workspace member sees how a piece of text will render;
+        nothing is saved.
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RichPreviewInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RichPreviewInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RichPreviewInputSchema'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RichPreviewSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/taxonomies/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_taxonomies
@@ -24273,6 +24309,14 @@ components:
       required:
       - applied
       - erased
+    ProfileEnum:
+      enum:
+      - page
+      - story
+      type: string
+      description: |-
+        * `page` - page
+        * `story` - story
     ProfileLinkSchema:
       type: object
       properties:
@@ -25346,6 +25390,32 @@ components:
       - project_name
       - revision
       - status
+    RichPreviewInputSchema:
+      type: object
+      properties:
+        profile:
+          $ref: '#/components/schemas/ProfileEnum'
+        source:
+          type: string
+      required:
+      - profile
+      - source
+    RichPreviewSchema:
+      type: object
+      properties:
+        profile:
+          type: string
+        length:
+          type: integer
+        max_length:
+          type: integer
+        tree:
+          description: Closed node tree; see docs/operations/RICH_CONTENT.md.
+      required:
+      - length
+      - max_length
+      - profile
+      - tree
     RoomOutput:
       type: object
       properties:

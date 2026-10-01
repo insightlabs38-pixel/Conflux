@@ -1,0 +1,83 @@
+version: 3
+task: PD-F002-B02-T02
+batch: PD-F002-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: frontier-architecture
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 02c7c53
+  head_commit: 02c7c53
+changed_paths:
+- src/api/core/ (rich.py, rich_page.py, rich_views.py, urls.py)
+- src/api/presentation/ (technical.py and sanitize.py now delegate)
+- src/web/lib/rich.ts, components/ (RichDoc.tsx, RichEditor.tsx), features/artifacts/ (ProjectStoryEditor.tsx, ProjectWorkspace.tsx), styles/components.css
+- tests/integration/test_rich.py, tests/fixtures/rich_cases.json, src/web/lib/rich.test.tsx, components/RichEditor.test.tsx, ProjectStoryEditor.test.tsx
+- tests/e2e/ (rich-preview.spec.ts, tiers.json, weights.json, affected.json)
+- docs/operations/RICH_CONTENT.md, docs/api/openapi.yaml, generated SDKs, spec 002, PRIMITIVE_REGISTRY.yaml
+deliverables:
+- item: Canonical rich technical document model and renderer as a platform primitive
+  result: pass
+  evidence: core/rich.py profiles story (CommonMark) and page (allowlist HTML) with render_html for pages and render_tree for the browser (closed node set), RichError codes, size 100000 and node 20000 and depth 32 limits
+- item: Stable inputs/outputs, state ownership, lifecycle, authorization, idempotency, errors, extension boundary
+  result: pass
+  evidence: RICH_CONTENT.md; stateless; POST workspaces/{id}/rich/preview/ for workspace members only (403 otherwise), deterministic, stores and audits nothing, 400 bodies keyed by field; a new profile is added only in core/rich.py
+- item: Reference consumer or contract test showing reuse without private coupling
+  result: pass
+  evidence: presentation.technical and presentation.sanitize delegate, the participant story editor uses RichEditor and RichDoc, and test_a_consumer_outside_presentation_uses_only_the_public_functions
+- item: Compatibility and migration expectations documented
+  result: pass
+  evidence: no migration or stored change; story HTML byte-identical to a frozen copy of the old renderer over 300 generated documents; one intended difference (only http, https, mailto and relative links), pinned by a test and documented
+invariants:
+- item: Untrusted content stays data
+  result: pass
+  evidence: hostile corpus (script, handlers, javascript, data and vbscript URLs, svg, iframe) stays inside the node set in pytest, vitest and the browser (window flag not set, no script or javascript link in the DOM); React draws text children only
+- item: Server authoritative and deterministic
+  result: pass
+  evidence: the browser never decides what is kept, it draws the server tree; no score, permission or deadline involved
+- item: Design intent, accessibility, progressive disclosure
+  result: pass
+  evidence: preview collapsed behind a button with aria-expanded, status and alert states, code and table regions focusable, axe clean and no overflow at 390 and 1440
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1857 passed, 30 skipped (59 new in test_rich.py)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check; makemigrations --check
+  result: pass
+  note: 516 web tests; spectacular validate with fail-on-warn clean after regenerating OpenAPI and SDKs
+- command: npx playwright test rich-preview --project=desktop on a fresh iso-min fixture
+  result: pass
+  note: 2 passed (390 and 1440) covering empty, hostile text, too long refusal, no writes while previewing, save and reload
+- command: make e2e-affected
+  result: pass
+  note: read-only, isolated-mutation and canary ok
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: RichEditor and RichDoc on the project story
+- surface: api
+  result: pass
+  evidence: rich preview endpoint
+- surface: audit
+  result: pass
+  evidence: previewing writes no audit row (asserted); saving the story stays audited by update_project as before
+- surface: docs
+  result: pass
+  evidence: RICH_CONTENT.md, spec 002 B02 as built, registry IMPLEMENTED
+- surface: sdk
+  result: pass
+  evidence: "not required; generated clients regenerated, sdk-check clean"
+migrations:
+- none (stateless, additive)
+findings:
+- The old story renderer linked ftp, tel and git URLs; the shared rule allows only http, https, mailto and relative, deliberately tightening it (documented, tested)
+- A void br tag in the page parser left a stale stack entry that mis-nested the next block; found by reading sample output and fixed before commit
+limitations:
+- No WYSIWYG editor, no images, no embeds by design
+- The page profile has no web adopter yet (page text is still rendered by the server template)
+- The save endpoint does not cap description length; only the preview refuses over 100000 characters
+escalations: []
+next: review

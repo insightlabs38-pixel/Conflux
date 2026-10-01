@@ -1,0 +1,797 @@
+{
+  "cases": [
+    {
+      "name": "plain paragraph",
+      "profile": "story",
+      "source": "Grades things.",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "Grades things."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "inline marks",
+      "profile": "story",
+      "source": "Uses `pytest`, *em* and **strong**.",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "Uses "
+              },
+              {
+                "type": "code_span",
+                "text": "pytest"
+              },
+              {
+                "type": "text",
+                "text": ", "
+              },
+              {
+                "type": "emphasis",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "em"
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "text": " and "
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "strong"
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "text": "."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "headings are demoted",
+      "profile": "story",
+      "source": "# One\n\n## Two\n\n###### Six",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "heading",
+            "level": 2,
+            "children": [
+              {
+                "type": "text",
+                "text": "One"
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "level": 3,
+            "children": [
+              {
+                "type": "text",
+                "text": "Two"
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "level": 6,
+            "children": [
+              {
+                "type": "text",
+                "text": "Six"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "tight list",
+      "profile": "story",
+      "source": "- a\n- b",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "list",
+            "ordered": false,
+            "start": 1,
+            "children": [
+              {
+                "type": "item",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "a"
+                  }
+                ]
+              },
+              {
+                "type": "item",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "b"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "loose ordered list from 3",
+      "profile": "story",
+      "source": "3. one\n\n4. two",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "list",
+            "ordered": true,
+            "start": 3,
+            "children": [
+              {
+                "type": "item",
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "text",
+                        "text": "one"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "item",
+                "children": [
+                  {
+                    "type": "paragraph",
+                    "children": [
+                      {
+                        "type": "text",
+                        "text": "two"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "nested list",
+      "profile": "story",
+      "source": "- a\n  - b\n- c",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "list",
+            "ordered": false,
+            "start": 1,
+            "children": [
+              {
+                "type": "item",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "a"
+                  },
+                  {
+                    "type": "list",
+                    "ordered": false,
+                    "start": 1,
+                    "children": [
+                      {
+                        "type": "item",
+                        "children": [
+                          {
+                            "type": "text",
+                            "text": "b"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "item",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "c"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "quote with a paragraph",
+      "profile": "story",
+      "source": "> quoted *text*",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "quote",
+            "children": [
+              {
+                "type": "paragraph",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "quoted "
+                  },
+                  {
+                    "type": "emphasis",
+                    "children": [
+                      {
+                        "type": "text",
+                        "text": "text"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "table with alignment",
+      "profile": "story",
+      "source": "| T | R |\n|:-|-:|\n| a | b |",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "table",
+            "children": [
+              {
+                "type": "row",
+                "header": true,
+                "children": [
+                  {
+                    "type": "cell",
+                    "align": "left",
+                    "children": [
+                      {
+                        "type": "text",
+                        "text": "T"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "cell",
+                    "align": "right",
+                    "children": [
+                      {
+                        "type": "text",
+                        "text": "R"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "row",
+                "header": false,
+                "children": [
+                  {
+                    "type": "cell",
+                    "align": "left",
+                    "children": [
+                      {
+                        "type": "text",
+                        "text": "a"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "cell",
+                    "align": "right",
+                    "children": [
+                      {
+                        "type": "text",
+                        "text": "b"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "fenced code with language",
+      "profile": "story",
+      "source": "```python\nprint(1)\n```",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "code",
+            "language": "python",
+            "text": "print(1)\n",
+            "tokens": [
+              ["nb", "print"],
+              ["p", "("],
+              ["mi", "1"],
+              ["p", ")"],
+              ["w", "\n"]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "fenced code in an unknown language",
+      "profile": "story",
+      "source": "```nope\n<img src=x onerror=alert(1)>\n```",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "code",
+            "language": "nope",
+            "text": "<img src=x onerror=alert(1)>\n",
+            "tokens": [["", "<img src=x onerror=alert(1)>\n"]]
+          }
+        ]
+      }
+    },
+    {
+      "name": "raw html stays text",
+      "profile": "story",
+      "source": "<script>alert(1)</script> <b>x</b>",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "<script>alert(1)</script> <b>x</b>"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "an image is never drawn, its link remains",
+      "profile": "story",
+      "source": "![alt](https://example.com/t.png)",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "!"
+              },
+              {
+                "type": "link",
+                "href": "https://example.com/t.png",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "alt"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "javascript link is text",
+      "profile": "story",
+      "source": "[bad](javascript:alert(1))",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "[bad](javascript:alert(1))"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "data and vbscript links are text",
+      "profile": "story",
+      "source": "[a](data:text/html,x) [b](vbscript:x)",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "[a](data:text/html,x) [b](vbscript:x)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "ftp link is text",
+      "profile": "story",
+      "source": "[f](ftp://example.com/x)",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "[f](ftp://example.com/x)"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "safe links",
+      "profile": "story",
+      "source": "[a](https://e.com) [b](mailto:x@e.com) [c](/relative) <https://auto.example.com>",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "link",
+                "href": "https://e.com",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "a"
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "text": " "
+              },
+              {
+                "type": "link",
+                "href": "mailto:x@e.com",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "b"
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "text": " "
+              },
+              {
+                "type": "link",
+                "href": "/relative",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "c"
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "text": " "
+              },
+              {
+                "type": "link",
+                "href": "https://auto.example.com",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "https://auto.example.com"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "hard break and rule",
+      "profile": "story",
+      "source": "a\\\nb\n\n---",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "a"
+              },
+              {
+                "type": "break"
+              },
+              {
+                "type": "text",
+                "text": "b"
+              }
+            ]
+          },
+          {
+            "type": "rule"
+          }
+        ]
+      }
+    },
+    {
+      "name": "empty",
+      "profile": "story",
+      "source": "",
+      "tree": {
+        "type": "doc",
+        "children": []
+      }
+    },
+    {
+      "name": "page paragraphs and marks",
+      "profile": "page",
+      "source": "<h2>H</h2><p>Hi <strong>x</strong> <em>y</em><br>z</p>",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "heading",
+            "level": 2,
+            "children": [
+              {
+                "type": "text",
+                "text": "H"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "Hi "
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "x"
+                  }
+                ]
+              },
+              {
+                "type": "text",
+                "text": " "
+              },
+              {
+                "type": "emphasis",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "y"
+                  }
+                ]
+              },
+              {
+                "type": "break"
+              },
+              {
+                "type": "text",
+                "text": "z"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "page lists and quote",
+      "profile": "page",
+      "source": "<ul><li>a</li><li>b</li></ul><ol><li>c</li></ol><blockquote><p>q</p></blockquote>",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "list",
+            "children": [
+              {
+                "type": "item",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "a"
+                  }
+                ]
+              },
+              {
+                "type": "item",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "b"
+                  }
+                ]
+              }
+            ],
+            "ordered": false,
+            "start": 1
+          },
+          {
+            "type": "list",
+            "children": [
+              {
+                "type": "item",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "c"
+                  }
+                ]
+              }
+            ],
+            "ordered": true,
+            "start": 1
+          },
+          {
+            "type": "quote",
+            "children": [
+              {
+                "type": "paragraph",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "q"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "page drops script, handlers and bad links",
+      "profile": "page",
+      "source": "<p onclick=\"x()\">Hi <script>alert(1)</script><a href=\"javascript:x\">z</a> <a href=\"/g\">g</a></p>",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "Hi "
+              },
+              {
+                "type": "text",
+                "text": "z"
+              },
+              {
+                "type": "text",
+                "text": " "
+              },
+              {
+                "type": "link",
+                "href": "/g",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "g"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "page drops unknown tags and keeps their text",
+      "profile": "page",
+      "source": "<div>hello <img src=x></div>",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "text",
+            "text": "hello "
+          }
+        ]
+      }
+    },
+    {
+      "name": "page closes unbalanced tags",
+      "profile": "page",
+      "source": "<p>one <strong>two",
+      "tree": {
+        "type": "doc",
+        "children": [
+          {
+            "type": "paragraph",
+            "children": [
+              {
+                "type": "text",
+                "text": "one "
+              },
+              {
+                "type": "strong",
+                "children": [
+                  {
+                    "type": "text",
+                    "text": "two"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

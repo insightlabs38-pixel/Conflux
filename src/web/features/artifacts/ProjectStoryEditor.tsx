@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Button } from "../../components/Button";
 import { Field } from "../../components/Foundation";
+import { RichEditor } from "../../components/RichEditor";
 import { api, messageOf } from "../pvs/http";
 
 type Project = {
@@ -13,10 +14,12 @@ type Project = {
 export function ProjectStoryEditor({
   project,
   base,
+  workspaceId,
   onSaved,
 }: {
   project: Project;
   base: string;
+  workspaceId: string;
   onSaved: (project: Project) => void;
 }) {
   const [name, setName] = useState(project.name);
@@ -62,19 +65,14 @@ export function ProjectStoryEditor({
             />
           )}
         </Field>
-        <Field
+        <RichEditor
           label="Project description"
           hint="Use headings, paragraphs, links, and code to tell the project story."
-        >
-          {(props) => (
-            <textarea
-              {...props}
-              rows={12}
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-            />
-          )}
-        </Field>
+          profile="story"
+          workspaceId={workspaceId}
+          value={description}
+          onChange={setDescription}
+        />
         <Button type="submit" disabled={busy}>
           {busy ? "Saving story…" : "Save project story"}
         </Button>

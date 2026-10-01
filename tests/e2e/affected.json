@@ -163,6 +163,18 @@
         "tests/fixtures/*"
       ],
       "specs": ["schema-form", "event-configuration"]
+    },
+    {
+      "paths": [
+        "src/web/components/Rich*",
+        "src/web/lib/rich*",
+        "src/web/features/artifacts/ProjectStoryEditor*",
+        "src/api/core/rich*",
+        "src/api/presentation/technical.py",
+        "src/api/presentation/sanitize.py",
+        "tests/fixtures/rich_cases.json"
+      ],
+      "specs": ["rich-preview", "participant-workflow"]
     }
   ]
 }

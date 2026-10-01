@@ -29,12 +29,17 @@ it("saves the project story through the existing scoped PATCH and reports the re
       <ProjectStoryEditor
         project={project}
         base="/api/v1/workspaces/w/events/e/"
+        workspaceId="w"
         onSaved={onSaved}
       />,
     ),
   );
-  expect(container.querySelector("button")?.getAttribute("type")).toBe(
-    "submit",
+  // The preview button never submits the form; saving is the one submit button.
+  expect(
+    container.querySelector("button[aria-expanded]")?.getAttribute("type"),
+  ).toBe("button");
+  expect(container.querySelector("button[type=submit]")?.textContent).toBe(
+    "Save project story",
   );
   await act(async () =>
     container

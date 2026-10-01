@@ -182,6 +182,7 @@ export function ProjectWorkspace({
                         (project) => project.public_id === selectedId,
                       )!}
                       base={base}
+                      workspaceId={workspaceId}
                       onSaved={(next) =>
                         projectsLoad.update((items) =>
                           (items ?? []).map((item) =>

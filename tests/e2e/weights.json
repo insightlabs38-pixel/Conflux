@@ -35,5 +35,6 @@
   "isolated-mutation:approvals": 20.0,
   "isolated-mutation:threads": 20.0,
   "isolated-mutation:timeline": 20.0,
-  "isolated-mutation:schema-form": 20.0
+  "isolated-mutation:schema-form": 20.0,
+  "isolated-mutation:rich-preview": 20.0
 }

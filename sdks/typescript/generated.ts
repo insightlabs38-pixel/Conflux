@@ -4024,6 +4024,10 @@ export type InputOfPrivacyReportOutput = {
   due?: Record<string, unknown>;
 };
 
+export type ProfileEnum = "page" | "story";
+
+export type InputOfProfileEnum = "page" | "story";
+
 export type ProfileLinkSchema = { label: string; url: string };
 
 export type InputOfProfileLinkSchema = { label: string; url: string };
@@ -4675,6 +4679,27 @@ export type InputOfReviewSummaryOutput = {
   open_findings: number;
   addressed_findings: number;
   revision: number;
+};
+
+export type RichPreviewInputSchema = { profile: ProfileEnum; source: string };
+
+export type InputOfRichPreviewInputSchema = {
+  profile: InputOfProfileEnum;
+  source: string;
+};
+
+export type RichPreviewSchema = {
+  profile: string;
+  length: number;
+  max_length: number;
+  tree: unknown;
+};
+
+export type InputOfRichPreviewSchema = {
+  profile: string;
+  length: number;
+  max_length: number;
+  tree: unknown;
 };
 
 export type RoomOutput = {
@@ -9617,6 +9642,13 @@ export interface Operations {
       };
     };
     response: Record<string, unknown>;
+  };
+  post_api_v1_workspaces_workspace_public_id_rich_preview: {
+    request: {
+      path: { workspace_public_id: string };
+      body: InputOfRichPreviewInputSchema;
+    };
+    response: RichPreviewSchema;
   };
   get_api_v1_workspaces_workspace_public_id_taxonomies: {
     request: { path: { workspace_public_id: string } };
@@ -14578,6 +14610,14 @@ export const operations = {
     path_params: ["workspace_public_id"],
     query_params: ["event", "limit", "offset", "q", "status"],
     request_body: false,
+    response_kind: "json",
+  },
+  post_api_v1_workspaces_workspace_public_id_rich_preview: {
+    method: "POST",
+    path: "/api/v1/workspaces/{workspace_public_id}/rich/preview/",
+    path_params: ["workspace_public_id"],
+    query_params: [],
+    request_body: true,
     response_kind: "json",
   },
   get_api_v1_workspaces_workspace_public_id_taxonomies: {

@@ -1656,7 +1656,7 @@ primitives:
 - id: RICH_DOC
   name: Rich technical document model/renderer
   owner_task: PD-F002-B02-T02
-  status: PLANNED
+  status: IMPLEMENTED
   consumer_count: 482
   consumers:
   - PD-F001-B01-T01

@@ -6,4 +6,9 @@ class CommunicationsConfig(AppConfig):
     name = "communications"
 
     def ready(self):
-        from . import approvals, notifications, threads  # noqa: F401 - policy, categories, notifier
+        from . import (  # noqa: F401 - policy, categories, notifier
+            approvals,
+            manifest,  # noqa: F401 - declares what this app provides
+            notifications,
+            threads,
+        )

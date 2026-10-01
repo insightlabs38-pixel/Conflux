@@ -22,6 +22,7 @@ import { OperationsCenter } from "../operations/OperationsCenter";
 import { ApprovalsPanel } from "../operations/ApprovalsPanel";
 import { TimelinePanel } from "../operations/TimelinePanel";
 import { JobsPanel } from "../operations/JobsPanel";
+import { ExtensionsPanel } from "../operations/ExtensionsPanel";
 import { OperatorConsole } from "../operations/OperatorConsole";
 import { CommunicationsPanel } from "../communications/CommunicationsPanel";
 import { ConfigHistoryPanel } from "../audit/ConfigHistoryPanel";
@@ -921,6 +922,12 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
                       eventId={selected.public_id}
                     />
                   ),
+                },
+                {
+                  id: "ExtensionsPanel",
+                  label: "Extensions",
+                  description: "What this deployment provides",
+                  content: <ExtensionsPanel workspaceId={workspaceId} />,
                 },
               ]}
             />

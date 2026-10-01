@@ -3101,7 +3101,7 @@ primitives:
 - id: EXTENSION_MANIFEST
   name: Extension manifest/capability model
   owner_task: PD-F002-B02-T08
-  status: PLANNED
+  status: IMPLEMENTED
   consumer_count: 66
   consumers:
   - PD-F003-B03-T03

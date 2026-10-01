@@ -9,3 +9,4 @@ class EvaluationsConfig(AppConfig):
         from . import versions
 
         versions.register()
+        from . import manifest  # noqa: F401 - declares what this app provides

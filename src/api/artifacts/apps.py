@@ -9,3 +9,4 @@ class ArtifactsConfig(AppConfig):
         from . import previews
 
         previews.register()
+        from . import manifest  # noqa: F401 - declares what this app provides

@@ -101,16 +101,20 @@ for (const width of [390, 1440]) {
     await goToDestination(page, "operations");
     await goToTask(page, "Configuration history");
     await settled(page);
+    const restores = page
+      .locator(".cx-config-history > li")
+      .filter({ hasText: "event.restored" });
+    // The history refreshes after the restore; an earlier restore (the other viewport) must not
+    // be mistaken for the new one while it is still the first row.
+    const before = await restores.count();
     await page
       .getByRole("button", { name: "Restore before values" })
       .first()
       .click();
     await page.getByRole("button", { name: "Confirm restore" }).click();
     await expect(page.getByText(/Configuration restored/)).toBeVisible();
-    const restored = page
-      .locator(".cx-config-history > li")
-      .filter({ hasText: "event.restored" })
-      .first();
+    await expect(restores).toHaveCount(before + 1);
+    const restored = restores.first();
     await restored.getByText("Provenance", { exact: true }).click();
     const record = restored.getByRole("region", {
       name: "Provenance of event.restored",

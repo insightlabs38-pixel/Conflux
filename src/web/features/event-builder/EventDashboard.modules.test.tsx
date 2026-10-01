@@ -31,6 +31,9 @@ vi.mock("../awards/AwardsPanel", () => ({ AwardsPanel: () => null }));
 vi.mock("../operations/OperationsCenter", () => ({
   OperationsCenter: () => null,
 }));
+vi.mock("../operations/ExtensionsPanel", () => ({
+  ExtensionsPanel: () => null,
+}));
 vi.mock("../operations/OperatorConsole", () => ({
   OperatorConsole: () => null,
 }));

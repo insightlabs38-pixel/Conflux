@@ -6,4 +6,7 @@ class EventsConfig(AppConfig):
     name = "events"
 
     def ready(self):
-        from . import threads  # noqa: F401 - registers the application notes subject
+        from . import (
+            manifest,  # noqa: F401 - declares what this app provides
+            threads,  # noqa: F401 - registers the application notes subject
+        )

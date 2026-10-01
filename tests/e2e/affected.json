@@ -237,6 +237,16 @@
         "src/api/core/jobs.py"
       ],
       "specs": ["provenance", "jobs"]
+    },
+    {
+      "paths": [
+        "src/web/lib/extensions*",
+        "src/web/features/operations/ExtensionsPanel*",
+        "src/api/core/manifest*",
+        "src/api/core/checks.py",
+        "src/api/core/apps.py"
+      ],
+      "specs": ["extensions"]
     }
   ]
 }

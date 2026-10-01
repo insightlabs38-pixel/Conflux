@@ -16784,6 +16784,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkflowPresetResult'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/extensions/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_extensions
+      description: Organizers and admins of the workspace may read it; there is no
+        write.
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtensionsSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/inbox/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_inbox
@@ -20027,6 +20051,41 @@ components:
       - project
       type: string
       description: '* `project` - Project'
+    CapabilityEntrySchema:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        manifest:
+          type: string
+          nullable: true
+      required:
+      - id
+      - label
+      - manifest
+    CapabilitySchema:
+      type: object
+      properties:
+        kind:
+          type: string
+        label:
+          type: string
+        description:
+          type: string
+        declared_only:
+          type: boolean
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/CapabilityEntrySchema'
+      required:
+      - declared_only
+      - description
+      - entries
+      - kind
+      - label
     CategoryEnum:
       enum:
       - contrast
@@ -21762,6 +21821,36 @@ components:
       - summary
       - total
       - truncated
+    ExtensionsSchema:
+      type: object
+      properties:
+        api_version:
+          type: integer
+        supported_api_versions:
+          type: array
+          items:
+            type: integer
+        manifests:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManifestSchema'
+        capabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/CapabilitySchema'
+        problems:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManifestProblemSchema'
+        ok:
+          type: boolean
+      required:
+      - api_version
+      - capabilities
+      - manifests
+      - ok
+      - problems
+      - supported_api_versions
     ExternalArtifactInputSchema:
       type: object
       properties:
@@ -22917,6 +23006,93 @@ components:
           maxLength: 300
       required:
       - read_only
+    ManifestProblemSchema:
+      type: object
+      properties:
+        code:
+          type: string
+        severity:
+          $ref: '#/components/schemas/ManifestProblemSchemaSeverityEnum'
+        manifest:
+          type: string
+          nullable: true
+        message:
+          type: string
+      required:
+      - code
+      - manifest
+      - message
+      - severity
+    ManifestProblemSchemaSeverityEnum:
+      enum:
+      - error
+      - warning
+      type: string
+      description: |-
+        * `error` - error
+        * `warning` - warning
+    ManifestProvidesSchema:
+      type: object
+      properties:
+        kind:
+          type: string
+        id:
+          type: string
+        label:
+          type: string
+        state:
+          $ref: '#/components/schemas/ManifestProvidesSchemaStateEnum'
+      required:
+      - id
+      - kind
+      - label
+      - state
+    ManifestProvidesSchemaStateEnum:
+      enum:
+      - live
+      - declared
+      - missing
+      type: string
+      description: |-
+        * `live` - live
+        * `declared` - declared
+        * `missing` - missing
+    ManifestRequiresSchema:
+      type: object
+      properties:
+        kind:
+          type: string
+        id:
+          type: string
+      required:
+      - id
+      - kind
+    ManifestSchema:
+      type: object
+      properties:
+        id:
+          type: string
+        version:
+          type: string
+        label:
+          type: string
+        api_version:
+          type: integer
+        provides:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManifestProvidesSchema'
+        requires:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManifestRequiresSchema'
+      required:
+      - api_version
+      - id
+      - label
+      - provides
+      - requires
+      - version
     MarketplaceProfileInput:
       type: object
       properties:

@@ -1067,6 +1067,30 @@ CandidateTypeEnum = Literal['project']
 
 InputOfCandidateTypeEnum = Literal['project']
 
+class CapabilityEntrySchema(TypedDict):
+    id: str
+    label: str
+    manifest: str | None
+
+class InputOfCapabilityEntrySchema(TypedDict):
+    id: str
+    label: str
+    manifest: str | None
+
+class CapabilitySchema(TypedDict):
+    kind: str
+    label: str
+    description: str
+    declared_only: bool
+    entries: list[CapabilityEntrySchema]
+
+class InputOfCapabilitySchema(TypedDict):
+    kind: str
+    label: str
+    description: str
+    declared_only: bool
+    entries: list[InputOfCapabilityEntrySchema]
+
 CategoryEnum = Literal['contrast', 'heading', 'accessible-name', 'keyboard']
 
 InputOfCategoryEnum = Literal['contrast', 'heading', 'accessible-name', 'keyboard']
@@ -2032,6 +2056,22 @@ class InputOfExplanationSchema(TypedDict):
     total: int
     truncated: bool
 
+class ExtensionsSchema(TypedDict):
+    api_version: int
+    supported_api_versions: list[int]
+    manifests: list[ManifestSchema]
+    capabilities: list[CapabilitySchema]
+    problems: list[ManifestProblemSchema]
+    ok: bool
+
+class InputOfExtensionsSchema(TypedDict):
+    api_version: int
+    supported_api_versions: list[int]
+    manifests: list[InputOfManifestSchema]
+    capabilities: list[InputOfCapabilitySchema]
+    problems: list[InputOfManifestProblemSchema]
+    ok: bool
+
 class ExternalArtifactInputSchema(TypedDict):
     kind: str
     visibility: str
@@ -2738,6 +2778,62 @@ class MaintenanceInput(TypedDict):
 class InputOfMaintenanceInput(TypedDict):
     read_only: bool
     message: NotRequired[str]
+
+class ManifestProblemSchema(TypedDict):
+    code: str
+    severity: ManifestProblemSchemaSeverityEnum
+    manifest: str | None
+    message: str
+
+class InputOfManifestProblemSchema(TypedDict):
+    code: str
+    severity: InputOfManifestProblemSchemaSeverityEnum
+    manifest: str | None
+    message: str
+
+ManifestProblemSchemaSeverityEnum = Literal['error', 'warning']
+
+InputOfManifestProblemSchemaSeverityEnum = Literal['error', 'warning']
+
+class ManifestProvidesSchema(TypedDict):
+    kind: str
+    id: str
+    label: str
+    state: ManifestProvidesSchemaStateEnum
+
+class InputOfManifestProvidesSchema(TypedDict):
+    kind: str
+    id: str
+    label: str
+    state: InputOfManifestProvidesSchemaStateEnum
+
+ManifestProvidesSchemaStateEnum = Literal['live', 'declared', 'missing']
+
+InputOfManifestProvidesSchemaStateEnum = Literal['live', 'declared', 'missing']
+
+class ManifestRequiresSchema(TypedDict):
+    kind: str
+    id: str
+
+class InputOfManifestRequiresSchema(TypedDict):
+    kind: str
+    id: str
+
+class ManifestSchema(TypedDict):
+    id: str
+    version: str
+    label: str
+    api_version: int
+    provides: list[ManifestProvidesSchema]
+    requires: list[ManifestRequiresSchema]
+
+class InputOfManifestSchema(TypedDict):
+    id: str
+    version: str
+    label: str
+    api_version: int
+    provides: list[InputOfManifestProvidesSchema]
+    requires: list[InputOfManifestRequiresSchema]
 
 class MarketplaceProfileInput(TypedDict):
     skills: list[str]
@@ -7572,6 +7668,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                        'query_params': [],
                                                                                        'request_body': False,
                                                                                        'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_extensions': {'method': 'GET',
+                                                          'path': '/api/v1/workspaces/{workspace_public_id}/extensions/',
+                                                          'path_params': ['workspace_public_id'],
+                                                          'query_params': [],
+                                                          'request_body': False,
+                                                          'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_inbox': {'method': 'GET',
                                                      'path': '/api/v1/workspaces/{workspace_public_id}/inbox/',
                                                      'path_params': ['workspace_public_id'],

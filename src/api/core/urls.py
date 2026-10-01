@@ -12,6 +12,7 @@ from .approval_views import (
 )
 from .entity_views import EntityCatalogueView, EntityQueryView
 from .job_views import JobArtifactView, JobCancelView, JobDetailView, JobListView
+from .manifest_views import ExtensionsView
 from .notification_views import NotificationPreferenceView
 from .preview_views import PreviewView
 from .rich_views import RichPreviewView
@@ -33,6 +34,11 @@ urlpatterns = [
         "workspaces/<uuid:workspace_public_id>/api-credentials/<uuid:credential_public_id>/revoke/",
         CredentialRevokeView.as_view(),
         name="api-credential-revoke",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/extensions/",
+        ExtensionsView.as_view(),
+        name="extensions",
     ),
     path(
         "workspaces/<uuid:workspace_public_id>/versions/<slug:source>/",

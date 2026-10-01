@@ -1184,6 +1184,34 @@ export type CandidateTypeEnum = "project";
 
 export type InputOfCandidateTypeEnum = "project";
 
+export type CapabilityEntrySchema = {
+  id: string;
+  label: string;
+  manifest: string | null;
+};
+
+export type InputOfCapabilityEntrySchema = {
+  id: string;
+  label: string;
+  manifest: string | null;
+};
+
+export type CapabilitySchema = {
+  kind: string;
+  label: string;
+  description: string;
+  declared_only: boolean;
+  entries: CapabilityEntrySchema[];
+};
+
+export type InputOfCapabilitySchema = {
+  kind: string;
+  label: string;
+  description: string;
+  declared_only: boolean;
+  entries: InputOfCapabilityEntrySchema[];
+};
+
 export type CategoryEnum =
   "contrast" | "heading" | "accessible-name" | "keyboard";
 
@@ -2228,6 +2256,24 @@ export type InputOfExplanationSchema = {
   truncated: boolean;
 };
 
+export type ExtensionsSchema = {
+  api_version: number;
+  supported_api_versions: number[];
+  manifests: ManifestSchema[];
+  capabilities: CapabilitySchema[];
+  problems: ManifestProblemSchema[];
+  ok: boolean;
+};
+
+export type InputOfExtensionsSchema = {
+  api_version: number;
+  supported_api_versions: number[];
+  manifests: InputOfManifestSchema[];
+  capabilities: InputOfCapabilitySchema[];
+  problems: InputOfManifestProblemSchema[];
+  ok: boolean;
+};
+
 export type ExternalArtifactInputSchema = {
   kind: string;
   visibility: string;
@@ -2968,6 +3014,65 @@ export type InputOfLoginResponseSchema = { user: InputOfUserSummarySchema };
 export type MaintenanceInput = { read_only: boolean; message?: string };
 
 export type InputOfMaintenanceInput = { read_only: boolean; message?: string };
+
+export type ManifestProblemSchema = {
+  code: string;
+  severity: ManifestProblemSchemaSeverityEnum;
+  manifest: string | null;
+  message: string;
+};
+
+export type InputOfManifestProblemSchema = {
+  code: string;
+  severity: InputOfManifestProblemSchemaSeverityEnum;
+  manifest: string | null;
+  message: string;
+};
+
+export type ManifestProblemSchemaSeverityEnum = "error" | "warning";
+
+export type InputOfManifestProblemSchemaSeverityEnum = "error" | "warning";
+
+export type ManifestProvidesSchema = {
+  kind: string;
+  id: string;
+  label: string;
+  state: ManifestProvidesSchemaStateEnum;
+};
+
+export type InputOfManifestProvidesSchema = {
+  kind: string;
+  id: string;
+  label: string;
+  state: InputOfManifestProvidesSchemaStateEnum;
+};
+
+export type ManifestProvidesSchemaStateEnum = "live" | "declared" | "missing";
+
+export type InputOfManifestProvidesSchemaStateEnum =
+  "live" | "declared" | "missing";
+
+export type ManifestRequiresSchema = { kind: string; id: string };
+
+export type InputOfManifestRequiresSchema = { kind: string; id: string };
+
+export type ManifestSchema = {
+  id: string;
+  version: string;
+  label: string;
+  api_version: number;
+  provides: ManifestProvidesSchema[];
+  requires: ManifestRequiresSchema[];
+};
+
+export type InputOfManifestSchema = {
+  id: string;
+  version: string;
+  label: string;
+  api_version: number;
+  provides: InputOfManifestProvidesSchema[];
+  requires: InputOfManifestRequiresSchema[];
+};
 
 export type MarketplaceProfileInput = {
   skills: string[];
@@ -9754,6 +9859,10 @@ export interface Operations {
     };
     response: WorkflowPresetResult;
   };
+  get_api_v1_workspaces_workspace_public_id_extensions: {
+    request: { path: { workspace_public_id: string } };
+    response: ExtensionsSchema;
+  };
   get_api_v1_workspaces_workspace_public_id_inbox: {
     request: { path: { workspace_public_id: string } };
     response: InboxMessageSchema[];
@@ -14722,6 +14831,14 @@ export const operations = {
       request_body: true,
       response_kind: "json",
     },
+  get_api_v1_workspaces_workspace_public_id_extensions: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/extensions/",
+    path_params: ["workspace_public_id"],
+    query_params: [],
+    request_body: false,
+    response_kind: "json",
+  },
   get_api_v1_workspaces_workspace_public_id_inbox: {
     method: "GET",
     path: "/api/v1/workspaces/{workspace_public_id}/inbox/",

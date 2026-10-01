@@ -1,0 +1,82 @@
+version: 3
+task: PD-F002-B02-T08
+batch: PD-F002-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 48e8f50
+  head_commit: 48e8f50
+changed_paths:
+- src/api/core/ (manifest.py, manifest_core.py, manifest_views.py, checks.py, apps.py, urls.py)
+- src/api/<app>/manifest.py and apps.py for artifacts, communications, evaluations, eventconfig, events, forms, integrations, presentation, projects, stages
+- src/web/lib/extensions.ts, features/operations/ExtensionsPanel.tsx, features/event-builder/EventDashboard.tsx (Operations > Extensions)
+- tests/integration/test_extension_manifest.py, src/web/features/operations/ExtensionsPanel.test.tsx, EventDashboard.modules.test.tsx and WorkflowStates.test.tsx (mock the new panel)
+- tests/e2e/ (extensions.spec.ts, tiers.json, weights.json, affected.json, provenance.spec.ts race fix)
+- docs/operations/EXTENSIONS.md, docs/architecture/EXTENSION_SDK.md, docs/api/openapi.yaml, generated SDKs, spec 002, PRIMITIVE_REGISTRY.yaml
+deliverables:
+- item: Canonical extension manifest and capability model as a platform primitive
+  result: pass
+  evidence: core/manifest.py with Capability (kind, label, description, live registry reader), Manifest (id, version, label, api_version, provides, requires), idempotent register_*, check() with seven codes and snapshot(); 17 capabilities (13 read live from the real registries, 4 declared only) and 11 app manifests
+- item: Stable inputs/outputs, lifecycle, authorization, idempotency, errors, extension boundary
+  result: pass
+  evidence: EXTENSIONS.md; stateless, derived at startup and checked against the live registries; errors fail manage.py check (core.manifest.<code>), unclaimed entries warn; registration idempotent and a conflicting re-registration raises; endpoint organizers and admins only, no-store, no write method
+- item: Reference consumer or contract test showing reuse without private coupling
+  result: pass
+  evidence: ten apps declare themselves from AppConfig.ready() and test_a_new_deployment_source_declares_itself_without_touching_the_platform adds an independent registry entry and manifest that resolve against the platform without editing it
+- item: Compatibility and migration expectations documented
+  result: pass
+  evidence: no migration; api_version with SUPPORTED_API_VERSIONS is the contract lever; existing registries and the internal extension SDK unchanged; core gained its first AppConfig
+invariants:
+- item: One source of truth, existing registries unchanged, no loader
+  result: pass
+  evidence: the inventory reads the registries that exist; a claim must be true and every live entry claimed once; there is no loader, no runtime permission model, no client-supplied manifest or code (POST/PUT/PATCH/DELETE return 405)
+- item: Server-side authorization and audit
+  result: pass
+  evidence: require_roles(organizer, admin) on the workspace; participants and other workspaces get 403; nothing mutates so no audit row is written and a provided entry only changes through reviewed source
+- item: Progressive disclosure and accessibility
+  result: pass
+  evidence: capabilities closed behind details, findings first, axe clean and no overflow at 390 and 1440
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 2006 passed, 31 skipped (16 new in test_extension_manifest.py, incl. the manage.py check gate, happy path on the real deployment, each failure code, role boundaries)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check; makemigrations --check
+  result: pass
+  note: 620 web tests (5 new); OpenAPI validated with fail-on-warn, SDKs regenerated; no migration changes
+- command: npx playwright test extensions --project=desktop on a fresh iso-min fixture
+  result: pass
+  note: 2 passed (390 and 1440), no non-GET requests
+- command: make e2e-affected
+  result: pass
+  note: read-only, isolated-mutation and canary ok (final run after the provenance race fix)
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: Operations > Extensions (ExtensionsPanel) with states loading, error with retry, consistent, errors, warnings
+- surface: api
+  result: pass
+  evidence: GET /workspaces/{id}/extensions/ in OpenAPI, read-only
+- surface: audit
+  result: pass
+  evidence: read-only and stateless by design so no audit row; the startup check is the integrity control and a change to what is provided is a source change
+- surface: docs
+  result: pass
+  evidence: EXTENSIONS.md, EXTENSION_SDK.md pointer, spec 002 B02 as built, registry IMPLEMENTED
+- surface: sdk
+  result: pass
+  evidence: "not required; generated clients regenerated, sdk-check clean"
+migrations:
+- none (stateless, additive)
+findings:
+- The first make e2e-affected run reported iso-provenance flaky under load; the spec took the first event.restored row before the history had refreshed and opened the other viewport's restore. Fixed in the spec (wait for the row count to grow); 16 serial repeats passed and the final full run was clean
+- Adding a panel to EventDashboard broke three dashboard tests whose fetch stub returns [] for unknown URLs; they mock operations panels, so the new panel is mocked the same way
+limitations:
+- Assignment strategy, archive exporter, importer and converter are declared only; there is no runtime registry to verify them against
+- An organizer cannot enable, disable or install anything; that is intentional
+escalations: []
+next: review

@@ -6,4 +6,7 @@ class ProjectsConfig(AppConfig):
     name = "projects"
 
     def ready(self):
-        from . import threads  # noqa: F401 - registers the project notes subject
+        from . import (
+            manifest,  # noqa: F401 - declares what this app provides
+            threads,  # noqa: F401 - registers the project notes subject
+        )

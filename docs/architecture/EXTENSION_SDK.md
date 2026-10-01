@@ -73,3 +73,5 @@ schema/sanitization/UI tests, or importer rollback/roundtrip tests as appropriat
 Regenerate/check OpenAPI/SDK artifacts for HTTP changes and block schemas for
 schema changes. Run affected Core gates when their invariants change. The facade
 adds no alternate authentication, persistence, publication or audit path.
+
+`core.manifest` inventories what the deployment provides across these families and the platform registries, and fails startup when a declaration and its registry disagree; see `docs/operations/EXTENSIONS.md`.

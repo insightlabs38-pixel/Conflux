@@ -34,6 +34,19 @@ describe("policy debugger", () => {
                   expected: true,
                   children: [],
                 },
+                explanation: {
+                  outcome: "blocked",
+                  summary: "Denied by policy 'Window'.",
+                  reasons: [
+                    {
+                      code: "gate_closed",
+                      severity: "blocker",
+                      message: "The submit window is not open.",
+                    },
+                  ],
+                  total: 1,
+                  truncated: false,
+                },
               }
             : path.endsWith("policy-presets/")
               ? {}
@@ -65,6 +78,11 @@ describe("policy debugger", () => {
     expect(container.textContent).toContain(
       "gate_open:submit = false; expected true",
     );
+    // The explanation names the outcome in words and each blocking reason.
+    const why = container.querySelector('[aria-label="Why this decision"]')!;
+    expect(why.textContent).toContain("Blocked");
+    expect(why.textContent).toContain("Blocker");
+    expect(why.textContent).toContain("The submit window is not open.");
     await act(async () => root.unmount());
     container.remove();
     vi.unstubAllGlobals();

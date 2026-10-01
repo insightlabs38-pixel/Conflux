@@ -12,6 +12,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from community.models import VotingPlan
+from core import explain
 from eligibility.models import EligibilityRules
 from evaluations.models import EvaluationPlan, EvaluationPoolStrategy
 from events.models import RegistrationInviteCode, RegistrationMode
@@ -193,10 +194,13 @@ def compute_readiness(event) -> dict:
         )
     blocked = any(not i["passed"] and i["severity"] == "blocker" for i in items)
     warned = any(not i["passed"] and i["severity"] == "warning" for i in items)
-    return {
+    readiness = {
         "status": "blocked" if blocked else "warning" if warned else "ready",
         "items": items,
     }
+    # The same answer in the platform's one explanation shape (`core.explain`), beside the items.
+    readiness["explanation"] = explain.from_readiness(readiness)
+    return readiness
 
 
 def unresolved(readiness) -> dict:

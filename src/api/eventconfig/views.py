@@ -1,4 +1,5 @@
 from audit.services import record_mutation
+from core import explain
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import transaction
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -191,4 +192,5 @@ class EventConsequencesView(OrganizerView):
                 target = None
             if target is None:
                 raise ValidationError({"target": "Name the existing item the action applies to."})
-        return Response(preview(action, event, target))
+        shown = preview(action, event, target)
+        return Response({**shown, "explanation": explain.from_consequences(shown)})

@@ -213,6 +213,20 @@
         "tests/fixtures/diff_cases.json"
       ],
       "specs": ["version-diff"]
+    },
+    {
+      "paths": [
+        "src/web/components/ExplanationView*",
+        "src/web/components/ConsequenceDialog*",
+        "src/web/lib/explain*",
+        "src/web/features/policy-builder/*",
+        "src/api/core/explain*",
+        "src/api/policies/*",
+        "src/api/eventconfig/consequences.py",
+        "src/api/eventconfig/readiness.py",
+        "tests/fixtures/explain_cases.json"
+      ],
+      "specs": ["explanations", "event-consequences", "event-readiness"]
     }
   ]
 }

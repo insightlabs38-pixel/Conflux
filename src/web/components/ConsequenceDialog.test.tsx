@@ -20,6 +20,25 @@ const allowed = {
   ],
   reversible: false,
   confirm_label: "Delete stage Build",
+  explanation: {
+    outcome: "allowed",
+    summary: "This will have the effects below.",
+    reasons: [
+      {
+        code: "removed",
+        severity: "info",
+        message: "1 stage link will be deleted.",
+        facts: { count: 1 },
+      },
+      {
+        code: "irreversible",
+        severity: "warning",
+        message: "This cannot be undone.",
+      },
+    ],
+    total: 2,
+    truncated: false,
+  },
 };
 const refused = {
   ...allowed,
@@ -38,6 +57,20 @@ const refused = {
   ],
   consequences: [],
   confirm_label: "Delete stage Judging",
+  explanation: {
+    outcome: "blocked",
+    summary: "This cannot be done right now.",
+    reasons: [
+      {
+        code: "published_rubric",
+        severity: "blocker",
+        message:
+          "Its judging has 1 published rubric version, which is permanent.",
+      },
+    ],
+    total: 1,
+    truncated: false,
+  },
 };
 
 async function mount(

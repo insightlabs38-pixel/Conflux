@@ -1,3 +1,4 @@
+from core import explain
 from django.utils import timezone
 
 from .evaluator import trace_evaluate
@@ -19,7 +20,7 @@ def debug_action(event, action, *, subject_type=None, subject_id=None):
     trace = None
     if binding is not None:
         policy_allowed, error, trace = trace_evaluate(binding.policy.ast, facts)
-    return {
+    shown = {
         "action": action,
         "subject_type": subject_type,
         "subject_id": subject_id,
@@ -37,3 +38,5 @@ def debug_action(event, action, *, subject_type=None, subject_id=None):
         "error": error,
         "trace": trace,
     }
+    shown["explanation"] = explain.from_policy_debug(shown)
+    return shown

@@ -1504,6 +1504,7 @@ export type ConsequencesSchema = {
   reversible: boolean;
   severity: ConsequencesSchemaSeverityEnum;
   confirm_label: string;
+  explanation: ExplanationSchema;
 };
 
 export type InputOfConsequencesSchema = {
@@ -1517,6 +1518,7 @@ export type InputOfConsequencesSchema = {
   reversible: boolean;
   severity: InputOfConsequencesSchemaSeverityEnum;
   confirm_label: string;
+  explanation: InputOfExplanationSchema;
 };
 
 export type ConsequencesSchemaSeverityEnum = "medium" | "high";
@@ -2174,6 +2176,54 @@ export type InputOfExpertiseOutputSchema = {
   judge: string;
   tags: string[];
   updated_at: string | null;
+};
+
+export type ExplanationFixSchema = {
+  destination: string;
+  section: string | null;
+};
+
+export type InputOfExplanationFixSchema = {
+  destination: string;
+  section: string | null;
+};
+
+export type ExplanationReasonSchema = {
+  code: string;
+  severity: ExplanationReasonSchemaSeverityEnum;
+  message: string;
+  facts?: Record<string, unknown>;
+  fix?: ExplanationFixSchema;
+};
+
+export type InputOfExplanationReasonSchema = {
+  code: string;
+  severity: InputOfExplanationReasonSchemaSeverityEnum;
+  message: string;
+  facts?: Record<string, unknown>;
+  fix?: InputOfExplanationFixSchema;
+};
+
+export type ExplanationReasonSchemaSeverityEnum =
+  "info" | "warning" | "blocker";
+
+export type InputOfExplanationReasonSchemaSeverityEnum =
+  "info" | "warning" | "blocker";
+
+export type ExplanationSchema = {
+  outcome: OutcomeEnum;
+  summary: string;
+  reasons: ExplanationReasonSchema[];
+  total: number;
+  truncated: boolean;
+};
+
+export type InputOfExplanationSchema = {
+  outcome: InputOfOutcomeEnum;
+  summary: string;
+  reasons: InputOfExplanationReasonSchema[];
+  total: number;
+  truncated: boolean;
 };
 
 export type ExternalArtifactInputSchema = {
@@ -3374,6 +3424,11 @@ export type OriginEnum = "preset" | "default";
 
 export type InputOfOriginEnum = "preset" | "default";
 
+export type OutcomeEnum = "allowed" | "blocked" | "needs_action" | "unknown";
+
+export type InputOfOutcomeEnum =
+  "allowed" | "blocked" | "needs_action" | "unknown";
+
 export type Page = {
   public_id: string;
   theme?: ThemeEnum;
@@ -4002,6 +4057,7 @@ export type PolicyDebugResponse = {
   exception_grant_reason: string | null;
   error: string | null;
   trace: unknown;
+  explanation: ExplanationSchema;
 };
 
 export type InputOfPolicyDebugResponse = {
@@ -4017,6 +4073,7 @@ export type InputOfPolicyDebugResponse = {
   exception_grant_reason: string | null;
   error: string | null;
   trace: unknown;
+  explanation: InputOfExplanationSchema;
 };
 
 export type PoolMembership = {
@@ -4606,11 +4663,13 @@ export type InputOfReadinessItemSchemaSeverityEnum = "blocker" | "warning";
 export type ReadinessSchema = {
   status: ReadinessSchemaStatusEnum;
   items: ReadinessItemSchema[];
+  explanation: ExplanationSchema;
 };
 
 export type InputOfReadinessSchema = {
   status: InputOfReadinessSchemaStatusEnum;
   items: InputOfReadinessItemSchema[];
+  explanation: InputOfExplanationSchema;
 };
 
 export type ReadinessSchemaStatusEnum = "ready" | "warning" | "blocked";

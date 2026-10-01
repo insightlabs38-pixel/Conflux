@@ -1,5 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { ExplanationView } from "../../components/ExplanationView";
 import { apiJson } from "../../lib/api";
+import type { Explanation } from "../../lib/explain";
 
 type PolicyRow = { public_id: string; name: string; ast: object };
 type Binding = { public_id: string; action: string; policy: string };
@@ -44,6 +46,7 @@ type DebugResult = {
   exception_grant_reason: string | null;
   error: string | null;
   trace: TraceNode | null;
+  explanation: Explanation;
 };
 
 const ACTIONS = ["submit", "join", "advance", "vote", "award"];
@@ -416,10 +419,17 @@ export function PolicyBuilder({
             <p>Exception grant: {debugResult.exception_grant_reason}</p>
           )}
           {debugResult.error && <p>Evaluation error: {debugResult.error}</p>}
+          <ExplanationView
+            explanation={debugResult.explanation}
+            label="Why this decision"
+          />
           {debugResult.trace && (
-            <ul aria-label="Policy trace">
-              <Trace node={debugResult.trace} />
-            </ul>
+            <details>
+              <summary>Policy trace</summary>
+              <ul aria-label="Policy trace">
+                <Trace node={debugResult.trace} />
+              </ul>
+            </details>
           )}
         </div>
       )}

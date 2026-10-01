@@ -1372,6 +1372,7 @@ class ConsequencesSchema(TypedDict):
     reversible: bool
     severity: ConsequencesSchemaSeverityEnum
     confirm_label: str
+    explanation: ExplanationSchema
 
 class InputOfConsequencesSchema(TypedDict):
     action: str
@@ -1384,6 +1385,7 @@ class InputOfConsequencesSchema(TypedDict):
     reversible: bool
     severity: InputOfConsequencesSchemaSeverityEnum
     confirm_label: str
+    explanation: InputOfExplanationSchema
 
 ConsequencesSchemaSeverityEnum = Literal['medium', 'high']
 
@@ -1987,6 +1989,46 @@ class InputOfExpertiseOutputSchema(TypedDict):
     judge: str
     tags: list[str]
     updated_at: str | None
+
+class ExplanationFixSchema(TypedDict):
+    destination: str
+    section: str | None
+
+class InputOfExplanationFixSchema(TypedDict):
+    destination: str
+    section: str | None
+
+class ExplanationReasonSchema(TypedDict):
+    code: str
+    severity: ExplanationReasonSchemaSeverityEnum
+    message: str
+    facts: NotRequired[dict[str, Any]]
+    fix: NotRequired[ExplanationFixSchema]
+
+class InputOfExplanationReasonSchema(TypedDict):
+    code: str
+    severity: InputOfExplanationReasonSchemaSeverityEnum
+    message: str
+    facts: NotRequired[dict[str, Any]]
+    fix: NotRequired[InputOfExplanationFixSchema]
+
+ExplanationReasonSchemaSeverityEnum = Literal['info', 'warning', 'blocker']
+
+InputOfExplanationReasonSchemaSeverityEnum = Literal['info', 'warning', 'blocker']
+
+class ExplanationSchema(TypedDict):
+    outcome: OutcomeEnum
+    summary: str
+    reasons: list[ExplanationReasonSchema]
+    total: int
+    truncated: bool
+
+class InputOfExplanationSchema(TypedDict):
+    outcome: InputOfOutcomeEnum
+    summary: str
+    reasons: list[InputOfExplanationReasonSchema]
+    total: int
+    truncated: bool
 
 class ExternalArtifactInputSchema(TypedDict):
     kind: str
@@ -3129,6 +3171,10 @@ OriginEnum = Literal['preset', 'default']
 
 InputOfOriginEnum = Literal['preset', 'default']
 
+OutcomeEnum = Literal['allowed', 'blocked', 'needs_action', 'unknown']
+
+InputOfOutcomeEnum = Literal['allowed', 'blocked', 'needs_action', 'unknown']
+
 class Page(TypedDict):
     public_id: str
     theme: NotRequired[ThemeEnum]
@@ -3691,6 +3737,7 @@ class PolicyDebugResponse(TypedDict):
     exception_grant_reason: str | None
     error: str | None
     trace: Any
+    explanation: ExplanationSchema
 
 class InputOfPolicyDebugResponse(TypedDict):
     action: InputOfActionEnum
@@ -3705,6 +3752,7 @@ class InputOfPolicyDebugResponse(TypedDict):
     exception_grant_reason: str | None
     error: str | None
     trace: Any
+    explanation: InputOfExplanationSchema
 
 class PoolMembership(TypedDict):
     public_id: str
@@ -4250,10 +4298,12 @@ InputOfReadinessItemSchemaSeverityEnum = Literal['blocker', 'warning']
 class ReadinessSchema(TypedDict):
     status: ReadinessSchemaStatusEnum
     items: list[ReadinessItemSchema]
+    explanation: ExplanationSchema
 
 class InputOfReadinessSchema(TypedDict):
     status: InputOfReadinessSchemaStatusEnum
     items: list[InputOfReadinessItemSchema]
+    explanation: InputOfExplanationSchema
 
 ReadinessSchemaStatusEnum = Literal['ready', 'warning', 'blocked']
 

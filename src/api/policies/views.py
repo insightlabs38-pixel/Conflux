@@ -1,4 +1,5 @@
 from audit.services import diff_snapshots, record_mutation, snapshot_fields
+from core.explain_schema import ExplanationSchema
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
@@ -55,6 +56,7 @@ class PolicyDebugResponse(serializers.Serializer):
     exception_grant_reason = serializers.CharField(allow_null=True)
     error = serializers.CharField(allow_null=True)
     trace = serializers.JSONField(allow_null=True)
+    explanation = ExplanationSchema()
 
 
 class PolicyDebugView(OrganizerView):

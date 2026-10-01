@@ -1,3 +1,4 @@
+from core.explain_schema import ExplanationSchema
 from rest_framework import serializers
 
 
@@ -18,6 +19,7 @@ class ReadinessItemSchema(serializers.Serializer):
 class ReadinessSchema(serializers.Serializer):
     status = serializers.ChoiceField(choices=["ready", "warning", "blocked"])
     items = ReadinessItemSchema(many=True)
+    explanation = ExplanationSchema()
 
 
 class ConfigurationLockSchema(serializers.Serializer):
@@ -132,3 +134,4 @@ class ConsequencesSchema(serializers.Serializer):
     reversible = serializers.BooleanField()
     severity = serializers.ChoiceField(choices=["medium", "high"])
     confirm_label = serializers.CharField()
+    explanation = ExplanationSchema()

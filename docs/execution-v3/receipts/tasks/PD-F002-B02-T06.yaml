@@ -1,0 +1,83 @@
+version: 3
+task: PD-F002-B02-T06
+batch: PD-F002-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: frontier-architecture
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 76d65f2
+  head_commit: 76d65f2
+changed_paths:
+- src/api/core/ (explain.py, explain_schema.py)
+- src/api/policies/ (debugger.py, views.py), src/api/eventconfig/ (readiness.py, views.py, schema.py)
+- src/web/lib/explain.ts, components/ (ExplanationView.tsx, ConsequenceDialog.tsx), features/policy-builder/PolicyBuilder.tsx, styles/components.css
+- tests/integration/test_explain.py, tests/fixtures/explain_cases.json, src/web/components/ (ExplanationView.test.tsx, ConsequenceDialog.test.tsx), features/policy-builder/PolicyDebugger.interaction.test.tsx
+- tests/e2e/ (explanations.spec.ts, tiers.json, weights.json, affected.json)
+- docs/operations/EXPLANATIONS.md, docs/api/openapi.yaml, generated SDKs, spec 002, PRIMITIVE_REGISTRY.yaml
+deliverables:
+- item: Canonical policy and reason explanation model as a platform primitive
+  result: pass
+  evidence: core/explain.py defines Explanation {outcome, summary, reasons[{code, severity, message, facts, fix}]}, builders reason, explanation and unknown, and adapters for the policy trace, readiness items and consequence previews; OpenAPI shape in core/explain_schema.py
+- item: Stable inputs/outputs, lifecycle, authorization, idempotency, errors, extension boundary
+  result: pass
+  evidence: EXPLANATIONS.md; derived on every read and never stored, pure and deterministic, bounded (50 reasons, 500 character messages, 10 facts); it reports a decision the domain made and decides nothing; a feature explains itself with the two builders and needs no adapter
+- item: Reference consumer or contract test showing reuse without private coupling
+  result: pass
+  evidence: three adapters over three existing payload shapes, two UI adopters (policy debugger, consequence dialog) and test_an_independent_feature_builds_an_explanation_with_no_adapter
+- item: Compatibility and migration expectations documented
+  result: pass
+  evidence: no migration; every existing key of the debug, consequences and readiness payloads is unchanged (asserted for the debugger, and readiness plus its legacy checklist stay identical); explanation is added beside them
+invariants:
+- item: It never decides
+  result: pass
+  evidence: adapters only read the payload the domain produced; the property test requires blocked exactly when the domain denied (600 random policies against the real evaluator)
+- item: Facts respect the reader
+  result: pass
+  evidence: detailed=False yields no fact values anywhere (asserted on a secret fact value and name); the debugger is organizer-only and uses the detailed form
+- item: Design intent, accessibility, progressive disclosure
+  result: pass
+  evidence: outcome and severity are words as well as colour, a blocked consequence is announced as an alert, the raw trace stays available behind a details control, axe clean and no overflow at 390 and 1440
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1978 passed, 31 skipped (33 new in test_explain.py)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check; makemigrations --check
+  result: pass
+  note: 607 web tests; OpenAPI validated with fail-on-warn and SDKs regenerated
+- command: npx playwright test explanations event-consequences event-readiness --project=desktop on a fresh iso-min fixture
+  result: pass
+  note: explanations 2 passed (390 and 1440) with a real closed window and bound policy, the API answer with its legacy keys, readiness explanation, and no writes by looking
+- command: make e2e-affected
+  result: pass
+  note: read-only, isolated-mutation and canary ok
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: ExplanationView in the policy debugger and the consequence dialog
+- surface: api
+  result: pass
+  evidence: explanation on policy-debug, consequences and readiness
+- surface: audit
+  result: pass
+  evidence: explaining writes nothing (asserted for the debugger); the underlying operations stay audited as before
+- surface: docs
+  result: pass
+  evidence: EXPLANATIONS.md, spec 002 B02 as built, registry IMPLEMENTED
+- surface: sdk
+  result: pass
+  evidence: "not required; generated clients regenerated, sdk-check clean"
+migrations:
+- none (stateless, additive)
+findings:
+- The property test caught that a fixed true or false check under a not was explained with the wrong severity; constants now explain the decision they are part of
+- Adding explanation to the readiness endpoint alone broke the invariant that the legacy checklist equals the canonical answer; it now lives inside compute_readiness so every projection carries it
+- The debugger e2e first used facts the evaluator does not provide (team_size); the real facts are now and gate_open names, so it uses a closed temporal gate
+limitations:
+- Only the policy debugger and the consequence dialog draw explanations in the UI; the readiness panel keeps its own list
+- Explanations are English sentences from fixed templates, not localized
+escalations: []
+next: review

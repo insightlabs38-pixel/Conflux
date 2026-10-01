@@ -20572,12 +20572,15 @@ components:
           $ref: '#/components/schemas/ConsequencesSchemaSeverityEnum'
         confirm_label:
           type: string
+        explanation:
+          $ref: '#/components/schemas/ExplanationSchema'
       required:
       - action
       - allowed
       - blockers
       - confirm_label
       - consequences
+      - explanation
       - refusal
       - reversible
       - severity
@@ -21694,6 +21697,66 @@ components:
       - judge
       - tags
       - updated_at
+    ExplanationFixSchema:
+      type: object
+      properties:
+        destination:
+          type: string
+        section:
+          type: string
+          nullable: true
+      required:
+      - destination
+      - section
+    ExplanationReasonSchema:
+      type: object
+      properties:
+        code:
+          type: string
+        severity:
+          $ref: '#/components/schemas/ExplanationReasonSchemaSeverityEnum'
+        message:
+          type: string
+        facts:
+          type: object
+          additionalProperties: {}
+        fix:
+          $ref: '#/components/schemas/ExplanationFixSchema'
+      required:
+      - code
+      - message
+      - severity
+    ExplanationReasonSchemaSeverityEnum:
+      enum:
+      - info
+      - warning
+      - blocker
+      type: string
+      description: |-
+        * `info` - info
+        * `warning` - warning
+        * `blocker` - blocker
+    ExplanationSchema:
+      type: object
+      properties:
+        outcome:
+          $ref: '#/components/schemas/OutcomeEnum'
+        summary:
+          type: string
+        reasons:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExplanationReasonSchema'
+        total:
+          type: integer
+        truncated:
+          type: boolean
+      required:
+      - outcome
+      - reasons
+      - summary
+      - total
+      - truncated
     ExternalArtifactInputSchema:
       type: object
       properties:
@@ -23527,6 +23590,18 @@ components:
       description: |-
         * `preset` - preset
         * `default` - default
+    OutcomeEnum:
+      enum:
+      - allowed
+      - blocked
+      - needs_action
+      - unknown
+      type: string
+      description: |-
+        * `allowed` - allowed
+        * `blocked` - blocked
+        * `needs_action` - needs_action
+        * `unknown` - unknown
     Page:
       type: object
       properties:
@@ -24501,12 +24576,15 @@ components:
           nullable: true
         trace:
           nullable: true
+        explanation:
+          $ref: '#/components/schemas/ExplanationSchema'
       required:
       - action
       - allowed
       - checked_at
       - error
       - exception_grant_reason
+      - explanation
       - facts
       - policy
       - policy_allowed
@@ -25486,7 +25564,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ReadinessItemSchema'
+        explanation:
+          $ref: '#/components/schemas/ExplanationSchema'
       required:
+      - explanation
       - items
       - status
     ReadinessSchemaStatusEnum:

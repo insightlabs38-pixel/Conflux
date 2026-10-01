@@ -2760,3 +2760,13 @@ html {
   color: var(--color-text-muted);
   text-align: right;
 }
+.cx-explain__summary {
+  margin: 0 0 var(--space-2);
+}
+.cx-explain__reasons {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+.cx-explain__reasons li {
+  margin-bottom: var(--space-1);
+}

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { describeProblem } from "../lib/api";
 import { useLoad } from "../hooks/useLoad";
+import type { Explanation } from "../lib/explain";
 import { Button } from "./Button";
+import { ExplanationView } from "./ExplanationView";
 import { Modal } from "./Modal";
 
 type Consequences = {
@@ -12,6 +14,7 @@ type Consequences = {
   consequences: { code: string; message: string; count: number | null }[];
   reversible: boolean;
   confirm_label: string;
+  explanation: Explanation;
 };
 
 /**
@@ -59,29 +62,16 @@ export function ConsequenceDialog({
           </button>
         </p>
       )}
-      {data && !data.allowed && (
+      {data && (
         <>
-          <p role="alert">This cannot be done right now:</p>
-          <ul>
-            {data.blockers.map((blocker) => (
-              <li key={blocker.code + blocker.message}>{blocker.message}</li>
-            ))}
-          </ul>
-        </>
-      )}
-      {data && data.allowed && (
-        <>
-          <p>This will:</p>
-          <ul>
-            {data.consequences.map((item) => (
-              <li key={item.code + item.message}>{item.message}</li>
-            ))}
-          </ul>
-          <p className="cx-muted">
-            {data.reversible
-              ? "You can add it back afterwards."
-              : "This cannot be undone."}
-          </p>
+          <ExplanationView
+            explanation={data.explanation}
+            label={data.allowed ? "What this will do" : "Why this is refused"}
+            alert
+          />
+          {data.allowed && data.reversible && (
+            <p className="cx-muted">You can add it back afterwards.</p>
+          )}
         </>
       )}
       {failure && <p role="alert">{failure}</p>}

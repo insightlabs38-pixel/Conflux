@@ -1,0 +1,1155 @@
+{
+  "cases": [
+    {
+      "name": "no policy gates the action",
+      "adapter": "policy",
+      "detailed": true,
+      "input": {
+        "action": "submit",
+        "policy": null,
+        "policy_allowed": null,
+        "allowed": true,
+        "reason": "'submit' is allowed (no policy configured for it).",
+        "exception_grant_reason": null,
+        "error": null,
+        "trace": null
+      },
+      "output": {
+        "outcome": "allowed",
+        "summary": "No policy gates this action.",
+        "reasons": [
+          {
+            "code": "no_policy",
+            "severity": "info",
+            "message": "No policy is attached to this action, so it is not gated."
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "and: only the failing check is named",
+      "adapter": "policy",
+      "detailed": true,
+      "input": {
+        "action": "submit",
+        "policy": {
+          "public_id": "p1",
+          "name": "Gate"
+        },
+        "policy_allowed": false,
+        "allowed": false,
+        "reason": "Denied by policy 'Gate' on action 'submit'.",
+        "exception_grant_reason": null,
+        "error": null,
+        "trace": {
+          "path": [],
+          "op": "and",
+          "children": [
+            {
+              "path": [0],
+              "op": "gte",
+              "fact": "team_size",
+              "expected": 2,
+              "actual": 1,
+              "children": [],
+              "status": "evaluated",
+              "result": false
+            },
+            {
+              "path": [1],
+              "op": "eq",
+              "status": "skipped"
+            }
+          ],
+          "status": "evaluated",
+          "result": false
+        }
+      },
+      "output": {
+        "outcome": "blocked",
+        "summary": "Denied by policy 'Gate' on action 'submit'.",
+        "reasons": [
+          {
+            "code": "fact:team_size",
+            "severity": "blocker",
+            "message": "team_size is 1, but it must be at least 2.",
+            "facts": {
+              "fact": "team_size",
+              "actual": 1,
+              "expected": 2
+            }
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "and: the first failure ends it",
+      "adapter": "policy",
+      "detailed": true,
+      "input": {
+        "action": "submit",
+        "policy": {
+          "public_id": "p1",
+          "name": "Gate"
+        },
+        "policy_allowed": false,
+        "allowed": false,
+        "reason": "Denied by policy 'Gate' on action 'submit'.",
+        "exception_grant_reason": null,
+        "error": null,
+        "trace": {
+          "path": [],
+          "op": "and",
+          "children": [
+            {
+              "path": [0],
+              "op": "eq",
+              "fact": "gate_open:submit",
+              "expected": true,
+              "actual": false,
+              "children": [],
+              "status": "evaluated",
+              "result": false
+            },
+            {
+              "path": [1],
+              "op": "gte",
+              "status": "skipped"
+            }
+          ],
+          "status": "evaluated",
+          "result": false
+        }
+      },
+      "output": {
+        "outcome": "blocked",
+        "summary": "Denied by policy 'Gate' on action 'submit'.",
+        "reasons": [
+          {
+            "code": "gate_closed",
+            "severity": "blocker",
+            "message": "The submit window is not open.",
+            "facts": {
+              "fact": "gate_open:submit",
+              "actual": false,
+              "expected": true
+            }
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "a closed window is named as a window",
+      "adapter": "policy",
+      "detailed": true,
+      "input": {
+        "action": "submit",
+        "policy": {
+          "public_id": "p1",
+          "name": "Gate"
+        },
+        "policy_allowed": false,
+        "allowed": false,
+        "reason": "Denied by policy 'Gate' on action 'submit'.",
+        "exception_grant_reason": null,
+        "error": null,
+        "trace": {
+          "path": [],
+          "op": "eq",
+          "fact": "gate_open:submit",
+          "expected": true,
+          "actual": false,
+          "children": [],
+          "status": "evaluated",
+          "result": false
+        }
+      },
+      "output": {
+        "outcome": "blocked",
+        "summary": "Denied by policy 'Gate' on action 'submit'.",
+        "reasons": [
+          {
+            "code": "gate_closed",
+            "severity": "blocker",
+            "message": "The submit window is not open.",
+            "facts": {
+              "fact": "gate_open:submit",
+              "actual": false,
+              "expected": true
+            }
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "or: every branch is named",
+      "adapter": "policy",
+      "detailed": true,
+      "input": {
+        "action": "submit",
+        "policy": {
+          "public_id": "p1",
+          "name": "Gate"
+        },
+        "policy_allowed": false,
+        "allowed": false,
+        "reason": "Denied by policy 'Gate' on action 'submit'.",
+        "exception_grant_reason": null,
+        "error": null,
+        "trace": {
+          "path": [],
+          "op": "or",
+          "children": [
+            {
+              "path": [0],
+              "op": "eq",
+              "fact": "role",
+              "expected": "judge",
+              "actual": "participant",
+              "children": [],
+              "status": "evaluated",
+              "result": false
+            },
+            {
+              "path": [1],
+              "op": "in",
+              "fact": "track",
+              "expected": ["ai", "web"],
+              "actual": "iot",
+              "children": [],
+              "status": "evaluated",
+              "result": false
+            }
+          ],
+          "status": "evaluated",
+          "result": false
+        }
+      },
+      "output": {
+        "outcome": "blocked",
+        "summary": "Denied by policy 'Gate' on action 'submit'.",
+        "reasons": [
+          {
+            "code": "fact:role",
+            "severity": "blocker",
+            "message": "role is 'participant', but it must equal 'judge'.",
+            "facts": {
+              "fact": "role",
+              "actual": "participant",
+              "expected": "judge"
+            }
+          },
+          {
+            "code": "fact:track",
+            "severity": "blocker",
+            "message": "track is 'iot', but it must be one of ['ai', 'web'].",
+            "facts": {
+              "fact": "track",
+              "actual": "iot",
+              "expected": "[\"ai\", \"web\"]"
+            }
+          }
+        ],
+        "total": 2,
+        "truncated": false
+      }
+    },
+    {
+      "name": "or: the branch that passed is named",
+      "adapter": "policy",
+      "detailed": true,
+      "input": {
+        "action": "submit",
+        "policy": {
+          "public_id": "p1",
+          "name": "Gate"
+        },
+        "policy_allowed": true,
+        "allowed": true,
+        "reason": null,
+        "exception_grant_reason": null,
+        "error": null,
+        "trace": {
+          "path": [],
+          "op": "or",
+          "children": [
+            {
+              "path": [0],
+              "op": "eq",
+              "fact": "role",
+              "expected": "judge",
+              "actual": "participant",
+              "children": [],
+              "status": "evaluated",
+              "result": false
+            },
+            {
+              "path": [1],
+              "op": "lt",
+              "fact": "team_size",
+              "expected": 5,
+              "actual": 3,
+              "children": [],
+              "status": "evaluated",
+              "result": true
+            }
+          ],
+          "status": "evaluated",
+          "result": true
+        }
+      },
+      "output": {
+        "outcome": "allowed",
+        "summary": "Allowed by policy 'Gate'.",
+        "reasons": [
+          {
+            "code": "fact:team_size",
+            "severity": "info",
+            "message": "team_size is 3; it must be less than 5.",
+            "facts": {
+              "fact": "team_size",
+              "actual": 3,
+              "expected": 5
+            }
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "and: every check that held is named",
+      "adapter": "policy",
+      "detailed": true,
+      "input": {
+        "action": "submit",
+        "policy": {
+          "public_id": "p1",
+          "name": "Gate"
+        },
+        "policy_allowed": true,
+        "allowed": true,
+        "reason": null,
+        "exception_grant_reason": null,
+        "error": null,
+        "trace": {
+          "path": [],
+          "op": "and",
+          "children": [
+            {
+              "path": [0],
+              "op": "gte",
+              "fact": "team_size",
+              "expected": 2,
+              "actual": 3,
+              "children": [],
+              "status": "evaluated",
+              "result": true
+            },
+            {
+              "path": [1],
+              "op": "lte",
+              "fact": "team_size",
+              "expected": 5,
+              "actual": 3,
+              "children": [],
+              "status": "evaluated",
+              "result": true
+            }
+          ],
+          "status": "evaluated",
+          "result": true
+        }
+      },
+      "output": {
+        "outcome": "allowed",
+        "summary": "Allowed by policy 'Gate'.",
+        "reasons": [
+          {
+            "code": "fact:team_size",
+            "severity": "info",
+            "message": "team_size is 3; it must be at least 2.",
+            "facts": {
+              "fact": "team_size",
+              "actual": 3,
+              "expected": 2
+            }
+          },
+          {
+            "code": "fact:team_size",
+            "severity": "info",
+            "message": "team_size is 3; it must be at most 5.",
+            "facts": {
+              "fact": "team_size",
+              "actual": 3,
+              "expected": 5
+            }
+          }
+        ],
+        "total": 2,
+        "truncated": false
+      }
+    },
+    {
+      "name": "not: the requirement is turned around",
+      "adapter": "policy",
+      "detailed": true,
+      "input": {
+        "action": "submit",
+        "policy": {
+          "public_id": "p1",
+          "name": "Gate"
+        },
+        "policy_allowed": false,
+        "allowed": false,
+        "reason": "Denied by policy 'Gate' on action 'submit'.",
+        "exception_grant_reason": null,
+        "error": null,
+        "trace": {
+          "path": [],
+          "op": "not",
+          "children": [
+            {
+              "path": [0],
+              "op": "eq",
+              "fact": "role",
+              "expected": "banned",
+              "actual": "banned",
+              "children": [],
+              "status": "evaluated",
+              "result": true
+            }
+          ],
+          "status": "evaluated",
+          "result": false
+        }
+      },
+      "output": {
+        "outcome": "blocked",
+        "summary": "Denied by policy 'Gate' on action 'submit'.",
+        "reasons": [
+          {
+            "code": "fact:role",
+            "severity": "blocker",
+            "message": "role is 'banned', but it must not equal 'banned'.",
+            "facts": {
+              "fact": "role",
+              "actual": "banned",
+              "expected": "banned"
+            }
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "not: satisfied",
+      "adapter": "policy",
+      "detailed": true,
+      "input": {
+        "action": "submit",
+        "policy": {
+          "public_id": "p1",
+          "name": "Gate"
+        },
+        "policy_allowed": true,
+        "allowed": true,
+        "reason": null,
+        "exception_grant_reason": null,
+        "error": null,
+        "trace": {
+          "path": [],
+          "op": "not",
+          "children": [
+            {
+              "path": [0],
+              "op": "eq",
+              "fact": "role",
+              "expected": "banned",
+              "actual": "participant",
+              "children": [],
+              "status": "evaluated",
+              "result": false
+            }
+          ],
+          "status": "evaluated",
+          "result": true
+        }
+      },
+      "output": {
+        "outcome": "allowed",
+        "summary": "Allowed by policy 'Gate'.",
+        "reasons": [
+          {
+            "code": "fact:role",
+            "severity": "info",
+            "message": "role is 'participant'; it must not equal 'banned'.",
+            "facts": {
+              "fact": "role",
+              "actual": "participant",
+              "expected": "banned"
+            }
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "an unknown fact fails closed",
+      "adapter": "policy",
+      "detailed": true,
+      "input": {
+        "action": "submit",
+        "policy": {
+          "public_id": "p1",
+          "name": "Gate"
+        },
+        "policy_allowed": false,
+        "allowed": false,
+        "reason": "Denied by policy 'Gate' on action 'submit'.",
+        "exception_grant_reason": null,
+        "error": "Unknown fact: 'missing'",
+        "trace": {
+          "path": [],
+          "op": "eq",
+          "fact": "missing",
+          "expected": true,
+          "children": [],
+          "status": "error",
+          "error": "Unknown fact: 'missing'"
+        }
+      },
+      "output": {
+        "outcome": "blocked",
+        "summary": "Denied: the policy could not be evaluated.",
+        "reasons": [
+          {
+            "code": "policy_error",
+            "severity": "blocker",
+            "message": "The policy could not be evaluated: Unknown fact: 'missing'"
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "a constant",
+      "adapter": "policy",
+      "detailed": true,
+      "input": {
+        "action": "submit",
+        "policy": {
+          "public_id": "p1",
+          "name": "Gate"
+        },
+        "policy_allowed": false,
+        "allowed": false,
+        "reason": "Denied by policy 'Gate' on action 'submit'.",
+        "exception_grant_reason": null,
+        "error": null,
+        "trace": {
+          "path": [],
+          "op": "false",
+          "children": [],
+          "status": "evaluated",
+          "result": false
+        }
+      },
+      "output": {
+        "outcome": "blocked",
+        "summary": "Denied by policy 'Gate' on action 'submit'.",
+        "reasons": [
+          {
+            "code": "policy_false",
+            "severity": "blocker",
+            "message": "The policy always denies this."
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "an exception grant overrides a failed policy",
+      "adapter": "policy",
+      "detailed": true,
+      "input": {
+        "action": "submit",
+        "policy": {
+          "public_id": "p1",
+          "name": "Gate"
+        },
+        "policy_allowed": false,
+        "allowed": true,
+        "reason": "Allowed via exception grant (Late approval by Sam).",
+        "exception_grant_reason": "Late approval by Sam",
+        "error": null,
+        "trace": {
+          "path": [],
+          "op": "and",
+          "children": [
+            {
+              "path": [0],
+              "op": "gte",
+              "fact": "team_size",
+              "expected": 2,
+              "actual": 1,
+              "children": [],
+              "status": "evaluated",
+              "result": false
+            }
+          ],
+          "status": "evaluated",
+          "result": false
+        }
+      },
+      "output": {
+        "outcome": "allowed",
+        "summary": "Allowed by an exception grant although policy 'Gate' would deny it.",
+        "reasons": [
+          {
+            "code": "exception_grant",
+            "severity": "info",
+            "message": "An exception grant allows it (Late approval by Sam)."
+          },
+          {
+            "code": "fact:team_size",
+            "severity": "info",
+            "message": "team_size is 1, but it must be at least 2.",
+            "facts": {
+              "fact": "team_size",
+              "actual": 1,
+              "expected": 2
+            }
+          }
+        ],
+        "total": 2,
+        "truncated": false
+      }
+    },
+    {
+      "name": "an exception grant overrides an unevaluable policy",
+      "adapter": "policy",
+      "detailed": true,
+      "input": {
+        "action": "submit",
+        "policy": {
+          "public_id": "p1",
+          "name": "Gate"
+        },
+        "policy_allowed": false,
+        "allowed": true,
+        "reason": "Allowed via exception grant (Approved correction).",
+        "exception_grant_reason": "Approved correction",
+        "error": "Unknown fact: 'missing'",
+        "trace": {
+          "path": [],
+          "op": "eq",
+          "fact": "missing",
+          "expected": true,
+          "children": [],
+          "status": "error",
+          "error": "Unknown fact: 'missing'"
+        }
+      },
+      "output": {
+        "outcome": "allowed",
+        "summary": "Allowed by an exception grant although the policy could not be evaluated.",
+        "reasons": [
+          {
+            "code": "exception_grant",
+            "severity": "info",
+            "message": "An exception grant allows it (Approved correction)."
+          },
+          {
+            "code": "policy_error",
+            "severity": "info",
+            "message": "The policy could not be evaluated: Unknown fact: 'missing'"
+          }
+        ],
+        "total": 2,
+        "truncated": false
+      }
+    },
+    {
+      "name": "hidden: blocked shows only the domain sentence",
+      "adapter": "policy",
+      "detailed": false,
+      "input": {
+        "action": "submit",
+        "policy": {
+          "public_id": "p1",
+          "name": "Gate"
+        },
+        "policy_allowed": false,
+        "allowed": false,
+        "reason": "Denied by policy 'Gate' on action 'submit'.",
+        "exception_grant_reason": null,
+        "error": null,
+        "trace": {
+          "path": [],
+          "op": "and",
+          "children": [
+            {
+              "path": [0],
+              "op": "gte",
+              "fact": "team_size",
+              "expected": 2,
+              "actual": 1,
+              "children": [],
+              "status": "evaluated",
+              "result": false
+            }
+          ],
+          "status": "evaluated",
+          "result": false
+        }
+      },
+      "output": {
+        "outcome": "blocked",
+        "summary": "Denied by policy 'Gate' on action 'submit'.",
+        "reasons": [
+          {
+            "code": "policy_denied",
+            "severity": "blocker",
+            "message": "Denied by policy 'Gate' on action 'submit'."
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "hidden: allowed shows only the domain sentence",
+      "adapter": "policy",
+      "detailed": false,
+      "input": {
+        "action": "submit",
+        "policy": {
+          "public_id": "p1",
+          "name": "Gate"
+        },
+        "policy_allowed": true,
+        "allowed": true,
+        "reason": null,
+        "exception_grant_reason": null,
+        "error": null,
+        "trace": {
+          "path": [],
+          "op": "and",
+          "children": [
+            {
+              "path": [0],
+              "op": "gte",
+              "fact": "team_size",
+              "expected": 2,
+              "actual": 4,
+              "children": [],
+              "status": "evaluated",
+              "result": true
+            }
+          ],
+          "status": "evaluated",
+          "result": true
+        }
+      },
+      "output": {
+        "outcome": "allowed",
+        "summary": "Allowed by policy 'Gate'.",
+        "reasons": [
+          {
+            "code": "policy_allowed",
+            "severity": "info",
+            "message": "Allowed by policy."
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "readiness: nothing open",
+      "adapter": "readiness",
+      "detailed": true,
+      "input": {
+        "status": "ready",
+        "items": [
+          {
+            "id": "dates",
+            "severity": "blocker",
+            "passed": true,
+            "detail": "Dates are set.",
+            "module": "core",
+            "fix": {
+              "destination": "setup",
+              "section": "Settings"
+            }
+          },
+          {
+            "id": "page",
+            "severity": "warning",
+            "passed": true,
+            "detail": "Page is public.",
+            "module": "core",
+            "fix": {
+              "destination": "setup",
+              "section": "Settings"
+            }
+          }
+        ]
+      },
+      "output": {
+        "outcome": "allowed",
+        "summary": "Nothing is unresolved.",
+        "reasons": [],
+        "total": 0,
+        "truncated": false
+      }
+    },
+    {
+      "name": "readiness: warnings need a look",
+      "adapter": "readiness",
+      "detailed": true,
+      "input": {
+        "status": "warning",
+        "items": [
+          {
+            "id": "dates",
+            "severity": "blocker",
+            "passed": true,
+            "detail": "Dates are set.",
+            "module": "core",
+            "fix": {
+              "destination": "setup",
+              "section": "Settings"
+            }
+          },
+          {
+            "id": "page",
+            "severity": "warning",
+            "passed": false,
+            "detail": "The public page is empty.",
+            "module": "core",
+            "fix": {
+              "destination": "setup",
+              "section": "Public page"
+            }
+          }
+        ]
+      },
+      "output": {
+        "outcome": "needs_action",
+        "summary": "1 warning to look at.",
+        "reasons": [
+          {
+            "code": "page",
+            "severity": "warning",
+            "message": "The public page is empty.",
+            "fix": {
+              "destination": "setup",
+              "section": "Public page"
+            }
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "readiness: blockers first, then warnings",
+      "adapter": "readiness",
+      "detailed": true,
+      "input": {
+        "status": "blocked",
+        "items": [
+          {
+            "id": "page",
+            "severity": "warning",
+            "passed": false,
+            "detail": "The public page is empty.",
+            "module": "core",
+            "fix": {
+              "destination": "setup",
+              "section": "Public page"
+            }
+          },
+          {
+            "id": "dates",
+            "severity": "blocker",
+            "passed": false,
+            "detail": "Set the event start and end dates.",
+            "module": "core",
+            "fix": {
+              "destination": "setup",
+              "section": "Settings"
+            }
+          },
+          {
+            "id": "rubric",
+            "severity": "blocker",
+            "passed": false,
+            "detail": "Publish the rubric.",
+            "module": "judging",
+            "fix": {
+              "destination": "judging",
+              "section": "Rubric"
+            }
+          }
+        ]
+      },
+      "output": {
+        "outcome": "blocked",
+        "summary": "2 blockers to resolve and 1 warning.",
+        "reasons": [
+          {
+            "code": "dates",
+            "severity": "blocker",
+            "message": "Set the event start and end dates.",
+            "fix": {
+              "destination": "setup",
+              "section": "Settings"
+            }
+          },
+          {
+            "code": "rubric",
+            "severity": "blocker",
+            "message": "Publish the rubric.",
+            "facts": {
+              "module": "judging"
+            },
+            "fix": {
+              "destination": "judging",
+              "section": "Rubric"
+            }
+          },
+          {
+            "code": "page",
+            "severity": "warning",
+            "message": "The public page is empty.",
+            "fix": {
+              "destination": "setup",
+              "section": "Public page"
+            }
+          }
+        ],
+        "total": 3,
+        "truncated": false
+      }
+    },
+    {
+      "name": "readiness: one blocker",
+      "adapter": "readiness",
+      "detailed": true,
+      "input": {
+        "status": "blocked",
+        "items": [
+          {
+            "id": "dates",
+            "severity": "blocker",
+            "passed": false,
+            "detail": "Set the event start and end dates.",
+            "module": "core",
+            "fix": {
+              "destination": "setup",
+              "section": "Settings"
+            }
+          }
+        ]
+      },
+      "output": {
+        "outcome": "blocked",
+        "summary": "1 blocker to resolve.",
+        "reasons": [
+          {
+            "code": "dates",
+            "severity": "blocker",
+            "message": "Set the event start and end dates.",
+            "fix": {
+              "destination": "setup",
+              "section": "Settings"
+            }
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "consequences: refused",
+      "adapter": "consequences",
+      "detailed": true,
+      "input": {
+        "action": "stage.delete",
+        "title": "Delete stage Finals",
+        "allowed": false,
+        "refusal": {
+          "code": "has_participants",
+          "message": "A stage that has ever held a participant cannot be deleted.",
+          "count": null
+        },
+        "blockers": [
+          {
+            "code": "has_participants",
+            "message": "A stage that has ever held a participant cannot be deleted.",
+            "count": null
+          },
+          {
+            "code": "protected",
+            "message": "2 judging plans still depend on it and are protected.",
+            "count": 2
+          }
+        ],
+        "consequences": [],
+        "reversible": false,
+        "severity": "high",
+        "confirm_label": "Delete stage Finals"
+      },
+      "output": {
+        "outcome": "blocked",
+        "summary": "This cannot be done right now.",
+        "reasons": [
+          {
+            "code": "has_participants",
+            "severity": "blocker",
+            "message": "A stage that has ever held a participant cannot be deleted."
+          },
+          {
+            "code": "protected",
+            "severity": "blocker",
+            "message": "2 judging plans still depend on it and are protected.",
+            "facts": {
+              "count": 2
+            }
+          }
+        ],
+        "total": 2,
+        "truncated": false
+      }
+    },
+    {
+      "name": "consequences: irreversible with effects",
+      "adapter": "consequences",
+      "detailed": true,
+      "input": {
+        "action": "track.delete",
+        "title": "Delete track AI",
+        "allowed": true,
+        "refusal": null,
+        "blockers": [],
+        "consequences": [
+          {
+            "code": "removed",
+            "message": "3 prizes will be deleted.",
+            "count": 3
+          },
+          {
+            "code": "updated",
+            "message": "1 project will no longer be linked to it.",
+            "count": 1
+          }
+        ],
+        "reversible": false,
+        "severity": "high",
+        "confirm_label": "Delete track AI"
+      },
+      "output": {
+        "outcome": "allowed",
+        "summary": "This will have the effects below.",
+        "reasons": [
+          {
+            "code": "removed",
+            "severity": "info",
+            "message": "3 prizes will be deleted.",
+            "facts": {
+              "count": 3
+            }
+          },
+          {
+            "code": "updated",
+            "severity": "info",
+            "message": "1 project will no longer be linked to it.",
+            "facts": {
+              "count": 1
+            }
+          },
+          {
+            "code": "irreversible",
+            "severity": "warning",
+            "message": "This cannot be undone."
+          }
+        ],
+        "total": 3,
+        "truncated": false
+      }
+    },
+    {
+      "name": "consequences: reversible",
+      "adapter": "consequences",
+      "detailed": true,
+      "input": {
+        "action": "stage_transition.delete",
+        "title": "Delete the link A → B",
+        "allowed": true,
+        "refusal": null,
+        "blockers": [],
+        "consequences": [
+          {
+            "code": "advancement",
+            "message": "Participants can no longer be advanced from A to B.",
+            "count": null
+          }
+        ],
+        "reversible": true,
+        "severity": "medium",
+        "confirm_label": "Delete the link A → B"
+      },
+      "output": {
+        "outcome": "allowed",
+        "summary": "This will have the effects below.",
+        "reasons": [
+          {
+            "code": "advancement",
+            "severity": "info",
+            "message": "Participants can no longer be advanced from A to B."
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "consequences: nothing depends on it",
+      "adapter": "consequences",
+      "detailed": true,
+      "input": {
+        "action": "base_prize.delete",
+        "title": "Delete prize Best",
+        "allowed": true,
+        "refusal": null,
+        "blockers": [],
+        "consequences": [],
+        "reversible": true,
+        "severity": "medium",
+        "confirm_label": "Delete prize Best"
+      },
+      "output": {
+        "outcome": "allowed",
+        "summary": "Nothing else depends on it.",
+        "reasons": [],
+        "total": 0,
+        "truncated": false
+      }
+    }
+  ]
+}

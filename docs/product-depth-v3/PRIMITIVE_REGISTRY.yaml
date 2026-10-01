@@ -2626,7 +2626,7 @@ primitives:
 - id: POLICY_EXPLAIN
   name: Policy/reason explanation model
   owner_task: PD-F002-B02-T06
-  status: PLANNED
+  status: IMPLEMENTED
   consumer_count: 243
   consumers:
   - PD-F001-B01-T01

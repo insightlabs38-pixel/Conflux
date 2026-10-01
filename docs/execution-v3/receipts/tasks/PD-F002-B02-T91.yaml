@@ -1,0 +1,61 @@
+version: 3
+task: PD-F002-B02-T91
+batch: PD-F002-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 14f2f2e
+  head_commit: 14f2f2e
+changed_paths:
+- docs/architecture/SHARED_PRIMITIVES.md (second batch table, registration rule, migration range)
+- docs/api/README.md, docs/operations/UPGRADES.md, docs/product-depth-v3/specs/002-feature-depth-should-compound-through-shared-primitives.md
+- src/web/lib/primitives.b02.contract.test.ts
+- docs/verification/PD-F002-B02/T91-verify-fast.log
+deliverables:
+- item: Close the batch's explicit surface matrix
+  result: pass
+  evidence: web, api, audit and docs required and each closed by the task receipts T01 to T08 and the matrix (MATRIX.md); sdk, cli, mcp, event_as_code, webhook, archive, analytics and search are not_required and untouched (the generated SDKs were regenerated only for the new read-only endpoints and sdk-check is clean)
+- item: Every required surface delegates to the same canonical operation and generated contracts stay synchronized
+  result: pass
+  evidence: primitives.b02.contract.test.ts resolves ten web requests (rich and artifact preview, version list and diff, notification preferences, extensions, configuration history and restore) against the generated OpenAPI operations; make sdk-check and the OpenAPI artifact check pass; web goes through lib/api.ts only
+- item: User, operator and developer documentation and migration notes
+  result: pass
+  evidence: SHARED_PRIMITIVES.md covers all sixteen primitives with registration and capability rule; UPGRADES.md note (core/0006 additive, no worker or beat change, startup manifest check); api README links; one guide per primitive from T01 to T08
+invariants:
+- item: One source of truth, server authority
+  result: pass
+  evidence: documentation and a contract test only; no product behavior changed
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 2014 passed, 31 skipped
+- command: pnpm --filter @conflux/web test
+  result: pass
+  note: 630 passed (10 new contract cases)
+- command: make format-check lint sdk-check block-schema-check
+  result: pass
+  note: clean, log in docs/verification/PD-F002-B02/T91-verify-fast.log
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: contract test and per-task browser specs
+- surface: api
+  result: pass
+  evidence: OpenAPI and SDKs synchronized
+- surface: audit
+  result: pass
+  evidence: matrix cross-cutting audit proofs
+- surface: docs
+  result: pass
+  evidence: guides, upgrade note, developer guide
+migrations: []
+findings: []
+limitations:
+- Carried from the matrix; none new
+escalations: []
+next: review

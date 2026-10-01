@@ -1261,6 +1261,10 @@ export type Comment = {
 
 export type InputOfComment = { body: string };
 
+export type CommentInput = { body: string; parent?: string };
+
+export type InputOfCommentInput = { body: string; parent?: string };
+
 export type CommentVisibilityEnum =
   "organizer" | "organizer_judge" | "everyone";
 
@@ -3503,6 +3507,10 @@ export type InputOfPatchedBasePrize = {
   position?: number;
 };
 
+export type PatchedCommentEditInput = { body?: string };
+
+export type InputOfPatchedCommentEditInput = { body?: string };
+
 export type PatchedEvaluationPlan = {
   public_id?: string;
   name?: string;
@@ -5484,6 +5492,60 @@ export type InputOfTermOutput = {
 export type ThemeEnum = "default" | "dark" | "minimal";
 
 export type InputOfThemeEnum = "default" | "dark" | "minimal";
+
+export type ThreadAuthorSchema = { public_id: string; username: string };
+
+export type InputOfThreadAuthorSchema = { public_id: string; username: string };
+
+export type ThreadCommentSchema = {
+  public_id: string;
+  author: ThreadAuthorSchema;
+  body: string;
+  removed: boolean;
+  edited: boolean;
+  mentions: string[];
+  created_at: string;
+  can_edit: boolean;
+  can_remove: boolean;
+  replies: Record<string, unknown>[];
+};
+
+export type InputOfThreadCommentSchema = {
+  public_id: string;
+  author: InputOfThreadAuthorSchema;
+  body: string;
+  removed: boolean;
+  edited: boolean;
+  mentions: string[];
+  created_at: string;
+  can_edit: boolean;
+  can_remove: boolean;
+  replies: Record<string, unknown>[];
+};
+
+export type ThreadSchema = {
+  subject: ThreadSubjectSchema;
+  audience: string;
+  can_post: boolean;
+  total: number;
+  comments: ThreadCommentSchema[];
+};
+
+export type InputOfThreadSchema = {
+  subject: InputOfThreadSubjectSchema;
+  audience: string;
+  can_post: boolean;
+  total: number;
+  comments: InputOfThreadCommentSchema[];
+};
+
+export type ThreadSubjectSchema = { type: string; id: string; label: string };
+
+export type InputOfThreadSubjectSchema = {
+  type: string;
+  id: string;
+  label: string;
+};
 
 export type TierEnum = "base" | "advanced" | "expert";
 
@@ -9097,6 +9159,53 @@ export interface Operations {
       body?: InputOfPatchedTemporalGate;
     };
     response: TemporalGate;
+  };
+  patch_api_v1_workspaces_workspace_public_id_events_event_public_id_thread_comments_comment_public_id: {
+    request: {
+      path: {
+        comment_public_id: string;
+        event_public_id: string;
+        workspace_public_id: string;
+      };
+      body?: InputOfPatchedCommentEditInput;
+    };
+    response: ThreadCommentSchema;
+  };
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_thread_comments_comment_public_id: {
+    request: {
+      path: {
+        comment_public_id: string;
+        event_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: null;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_threads_subject_type_subject_id_audience: {
+    request: {
+      path: {
+        audience: string;
+        event_public_id: string;
+        subject_id: string;
+        subject_type: string;
+        workspace_public_id: string;
+      };
+      query?: { limit?: number; offset?: number };
+    };
+    response: ThreadSchema;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_threads_subject_type_subject_id_audience: {
+    request: {
+      path: {
+        audience: string;
+        event_public_id: string;
+        subject_id: string;
+        subject_type: string;
+        workspace_public_id: string;
+      };
+      body: InputOfCommentInput;
+    };
+    response: ThreadCommentSchema;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_timezone_timeline: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -13870,6 +13979,62 @@ export const operations = {
       method: "PATCH",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/temporal-gates/{gate_public_id}/",
       path_params: ["event_public_id", "gate_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  patch_api_v1_workspaces_workspace_public_id_events_event_public_id_thread_comments_comment_public_id:
+    {
+      method: "PATCH",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/thread-comments/{comment_public_id}/",
+      path_params: [
+        "comment_public_id",
+        "event_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  delete_api_v1_workspaces_workspace_public_id_events_event_public_id_thread_comments_comment_public_id:
+    {
+      method: "DELETE",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/thread-comments/{comment_public_id}/",
+      path_params: [
+        "comment_public_id",
+        "event_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "none",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_threads_subject_type_subject_id_audience:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/threads/{subject_type}/{subject_id}/{audience}/",
+      path_params: [
+        "audience",
+        "event_public_id",
+        "subject_id",
+        "subject_type",
+        "workspace_public_id",
+      ],
+      query_params: ["limit", "offset"],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_threads_subject_type_subject_id_audience:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/threads/{subject_type}/{subject_id}/{audience}/",
+      path_params: [
+        "audience",
+        "event_public_id",
+        "subject_id",
+        "subject_type",
+        "workspace_public_id",
+      ],
       query_params: [],
       request_body: true,
       response_kind: "json",

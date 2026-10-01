@@ -247,3 +247,63 @@ class ApprovalDecision(models.Model):
             models.UniqueConstraint(fields=["request", "actor"], name="unique_approval_decision")
         ]
         ordering = ["id"]
+
+
+class Thread(PublicIdModel):
+    """A conversation about one thing, visible to one closed audience (PD-F002-B01-T07).
+
+    What it is about (`subject_type`, `subject_id`) and who may read and write (`audience`) are
+    decided by the registration in `core.threads`, never by the client. A subject can have one
+    thread per audience (organizer notes next to a team conversation).
+    """
+
+    class Audience(models.TextChoices):
+        ORGANIZERS = "organizers", "Organizers"
+        JUDGES = "judges", "Judges"
+        PARTICIPANTS = "participants", "Participants"
+        PROJECT_TEAM = "project_team", "Project team"
+        PUBLIC = "public", "Public"
+
+    workspace = models.ForeignKey(
+        "workspaces.Workspace", on_delete=models.CASCADE, related_name="threads"
+    )
+    event = models.ForeignKey("events.Event", on_delete=models.CASCADE, related_name="threads")
+    subject_type = models.SlugField(max_length=60)
+    subject_id = models.CharField(max_length=64)
+    audience = models.CharField(max_length=14, choices=Audience.choices)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event", "subject_type", "subject_id", "audience"],
+                name="unique_thread_per_subject_audience",
+            )
+        ]
+
+
+class ThreadComment(PublicIdModel):
+    """One plain-text comment. Removal is a tombstone: the text and mentions are erased, the row
+    stays so replies keep their place and the audit trail still points at something."""
+
+    thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name="comments")
+    parent = models.ForeignKey(
+        "self", null=True, blank=True, on_delete=models.CASCADE, related_name="replies"
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="thread_comments"
+    )
+    body = models.TextField(blank=True)
+    mentions = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, blank=True, related_name="thread_mentions"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    edited_at = models.DateTimeField(null=True, blank=True)
+    removed_at = models.DateTimeField(null=True, blank=True)
+    removed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    class Meta:
+        indexes = [models.Index(fields=["thread", "created_at"])]
+        ordering = ["created_at", "id"]

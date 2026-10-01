@@ -957,7 +957,7 @@ primitives:
 - id: THREADS
   name: Notes/comments/mentions with visibility
   owner_task: PD-F002-B01-T07
-  status: PLANNED
+  status: IMPLEMENTED
   consumer_count: 49
   consumers:
   - PD-S012-B02-T05

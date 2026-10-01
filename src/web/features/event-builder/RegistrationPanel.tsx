@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { EntityGrid } from "../../components/EntityGrid";
+import { NotesDialog } from "../../components/NotesDialog";
 import { apiRequest } from "../../lib/api";
 import type { EntityRow } from "../../lib/entityQuery";
 
@@ -46,6 +47,7 @@ export function RegistrationPanel({
   const [codes, setCodes] = useState<InviteCode[]>([]);
   const [maxUses, setMaxUses] = useState("1");
   const [listVersion, setListVersion] = useState(0);
+  const [notes, setNotes] = useState<{ id: string; name: string } | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -221,37 +223,65 @@ export function RegistrationPanel({
         empty={<p>People who apply will appear here.</p>}
         actions={(row: EntityRow) => {
           const application = row as unknown as Application;
-          return application.status === "pending" ||
-            application.status === "waitlisted" ? (
+          const decidable =
+            application.status === "pending" ||
+            application.status === "waitlisted";
+          return (
             <>
               <button
                 type="button"
-                disabled={busy}
-                aria-label={`Approve ${application.username}`}
-                onClick={() => decide(application, "approved")}
+                aria-label={`Notes on ${application.username}`}
+                onClick={() =>
+                  setNotes({ id: application.id, name: application.username })
+                }
               >
-                Approve
+                Notes
               </button>
-              <button
-                type="button"
-                disabled={busy}
-                aria-label={`Waitlist ${application.username}`}
-                onClick={() => decide(application, "waitlisted")}
-              >
-                Waitlist
-              </button>
-              <button
-                type="button"
-                disabled={busy}
-                aria-label={`Reject ${application.username}`}
-                onClick={() => decide(application, "rejected")}
-              >
-                Reject
-              </button>
+              {decidable && (
+                <>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    aria-label={`Approve ${application.username}`}
+                    onClick={() => decide(application, "approved")}
+                  >
+                    Approve
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    aria-label={`Waitlist ${application.username}`}
+                    onClick={() => decide(application, "waitlisted")}
+                  >
+                    Waitlist
+                  </button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    aria-label={`Reject ${application.username}`}
+                    onClick={() => decide(application, "rejected")}
+                  >
+                    Reject
+                  </button>
+                </>
+              )}
             </>
-          ) : null;
+          );
         }}
       />
+      {notes && (
+        <NotesDialog
+          title={`Organizer notes on ${notes.name}`}
+          subject={{
+            workspaceId,
+            eventId,
+            type: "application",
+            id: notes.id,
+            audience: "organizers",
+          }}
+          onClose={() => setNotes(null)}
+        />
+      )}
     </section>
   );
 }

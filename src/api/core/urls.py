@@ -13,6 +13,7 @@ from .approval_views import (
 from .entity_views import EntityCatalogueView, EntityQueryView
 from .job_views import JobArtifactView, JobCancelView, JobDetailView, JobListView
 from .saved_view_views import SavedViewDetailView, SavedViewListView, SavedViewRunView
+from .thread_views import ThreadCommentView, ThreadView
 from .views import health
 
 urlpatterns = [
@@ -52,6 +53,16 @@ urlpatterns = [
         "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/views/<uuid:view_public_id>/run/",
         SavedViewRunView.as_view(),
         name="saved-view-run",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/threads/<slug:subject_type>/<str:subject_id>/<slug:audience>/",
+        ThreadView.as_view(),
+        name="thread",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/thread-comments/<uuid:comment_public_id>/",
+        ThreadCommentView.as_view(),
+        name="thread-comment",
     ),
     path(
         "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/approvals/",

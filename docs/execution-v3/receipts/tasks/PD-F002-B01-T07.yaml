@@ -1,0 +1,86 @@
+version: 3
+task: PD-F002-B01-T07
+batch: PD-F002-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 643ac81
+  head_commit: 643ac81
+changed_paths:
+- src/api/core/ (threads.py, thread_views.py, models.py Thread ThreadComment, migrations/0005_threads.py, urls.py)
+- src/api/events/ (apps.py, threads.py application notes), src/api/projects/ (apps.py ready, threads.py project notes)
+- src/api/communications/ (threads.py mention notifier, apps.py, views.py sent-list filter), src/api/config/settings.py (enum name)
+- src/web/lib/threads.ts, components/ (ThreadPanel, NotesDialog, Modal Escape, tests), features/event-builder/ (RegistrationPanel.tsx, ProjectsGrid.tsx), styles/components.css
+- tests/integration/ (test_threads.py, concurrency/test_thread_races.py, test_final_archive.py exclusion)
+- tests/e2e/ (threads.spec.ts, tiers.json, weights.json, affected.json)
+- docs/operations/THREADS.md, docs/api/openapi.yaml, sdks generated, spec 002, PRIMITIVE_REGISTRY.yaml
+deliverables:
+- item: Canonical comments/notes/mentions/thread contract as a reusable platform primitive
+  result: pass
+  evidence: core/threads.py subject registry with one rule per audience (closed set of five), post, edit, remove, view; two models, endpoints GET/POST thread and PATCH/DELETE comment; a feature registers a subject and never adds a *Note model
+- item: Stable inputs/outputs, lifecycle, authorization, idempotency/concurrency, errors, extension boundary
+  result: pass
+  evidence: docs/operations/THREADS.md; access decided by the registration only, unknown or unreadable is 404 and a read-only reader 403; plain text 1-4000, one reply level, 500 per thread; tombstone removal erases text and mentions; archived events read-only; Idempotency-Key on posts; thread creation race handled by a unique constraint
+- item: Mentions only for people who can read the thread, notified through the existing inbox
+  result: pass
+  evidence: "@username resolved on the server against the thread's own read rule, no existence leak, ten at most, author ignored; notice via Message and MessageRecipient (the deliberation precedent) without the comment text, hidden from the organizers' sent list"
+- item: Reference consumer or contract test showing reuse without private coupling
+  result: pass
+  evidence: test_threads.py registers a toy subject with all five audiences outside core and checks the whole audience matrix; the real adopters are organizer notes on applications and projects (API and the Notes dialog in two grids)
+- item: Compatibility and migration expectations documented
+  result: pass
+  evidence: additive migration core/0005_threads; the four existing note and comment models are not migrated or dual-written; documented in THREADS.md and spec 002
+invariants:
+- item: Server authoritative, explicit visibility, untrusted content
+  result: pass
+  evidence: no client-declared audience or visibility; the web renders comment text as text (browser spec asserts a markup note stays literal); audit holds ids not text
+- item: Existing behavior preserved
+  result: pass
+  evidence: full backend suite 1699 passed; only the organizers' sent-message list changed (leaves out thread_mention notices); Modal gained document-level Escape and all dialogs still pass their tests
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1699 passed, 30 skipped (the real-database race tests skip on SQLite)
+- command: DATABASE_URL=postgres pytest tests/integration/concurrency/test_thread_races.py tests/integration/test_threads.py
+  result: pass
+  note: 20 on PostgreSQL, run three times clean; four simultaneous first comments share one thread and all land
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check; spectacular --validate --fail-on-warn; makemigrations --check
+  result: pass
+  note: 385 web tests (ThreadPanel 7, Modal 1); static checks and OpenAPI/SDK drift clean
+- command: make e2e-fast
+  result: pass
+  note: read-only, isolated-mutation (incl. threads at 390 and 1440 with axe and overflow checks) and canary ok; docs/verification/PD-F002-B01/T07-e2e-fast.log
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: ThreadPanel and NotesDialog on the applications and projects grids
+- surface: api
+  result: pass
+  evidence: thread and comment endpoints
+- surface: audit
+  result: pass
+  evidence: posted, edited and removed audited without text, asserted in test_threads.py
+- surface: docs
+  result: pass
+  evidence: THREADS.md, spec 002, registry IMPLEMENTED
+- surface: sdk
+  result: pass
+  evidence: "not required; generated clients regenerated, sdk-check clean"
+migrations:
+- core/0005_threads creates core_thread and core_threadcomment (additive)
+findings:
+- The first browser run found that Escape did not close a dialog after the focused confirmation button had been removed (focus fell to the body); Modal now listens for Escape on the document
+- The typed serializer coerces a number to text, so the type-error test sends a list
+- An attempted focus-regain handler could not be proved in the test DOM, so it was removed rather than kept untested
+limitations:
+- No note count or indicator in the grids; the Notes button always opens the thread
+- Mentions are @username text with chips for people already in the thread, no people picker
+- The public audience is a rule for workspace members; there is no signed-out thread surface
+- Threads are excluded from the event archive and have no attachments, reactions or edit history
+escalations: []
+next: review

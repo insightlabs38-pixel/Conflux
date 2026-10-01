@@ -1143,6 +1143,14 @@ class Comment(TypedDict):
 class InputOfComment(TypedDict):
     body: str
 
+class CommentInput(TypedDict):
+    body: str
+    parent: NotRequired[str]
+
+class InputOfCommentInput(TypedDict):
+    body: str
+    parent: NotRequired[str]
+
 CommentVisibilityEnum = Literal['organizer', 'organizer_judge', 'everyone']
 
 InputOfCommentVisibilityEnum = Literal['organizer', 'organizer_judge', 'everyone']
@@ -3233,6 +3241,12 @@ class InputOfPatchedBasePrize(TypedDict):
     track: NotRequired[str | None]
     position: NotRequired[int]
 
+class PatchedCommentEditInput(TypedDict):
+    body: NotRequired[str]
+
+class InputOfPatchedCommentEditInput(TypedDict):
+    body: NotRequired[str]
+
 class PatchedEvaluationPlan(TypedDict):
     public_id: NotRequired[str]
     name: NotRequired[str]
@@ -5064,6 +5078,62 @@ ThemeEnum = Literal['default', 'dark', 'minimal']
 
 InputOfThemeEnum = Literal['default', 'dark', 'minimal']
 
+class ThreadAuthorSchema(TypedDict):
+    public_id: str
+    username: str
+
+class InputOfThreadAuthorSchema(TypedDict):
+    public_id: str
+    username: str
+
+class ThreadCommentSchema(TypedDict):
+    public_id: str
+    author: ThreadAuthorSchema
+    body: str
+    removed: bool
+    edited: bool
+    mentions: list[str]
+    created_at: str
+    can_edit: bool
+    can_remove: bool
+    replies: list[dict[str, Any]]
+
+class InputOfThreadCommentSchema(TypedDict):
+    public_id: str
+    author: InputOfThreadAuthorSchema
+    body: str
+    removed: bool
+    edited: bool
+    mentions: list[str]
+    created_at: str
+    can_edit: bool
+    can_remove: bool
+    replies: list[dict[str, Any]]
+
+class ThreadSchema(TypedDict):
+    subject: ThreadSubjectSchema
+    audience: str
+    can_post: bool
+    total: int
+    comments: list[ThreadCommentSchema]
+
+class InputOfThreadSchema(TypedDict):
+    subject: InputOfThreadSubjectSchema
+    audience: str
+    can_post: bool
+    total: int
+    comments: list[InputOfThreadCommentSchema]
+
+class ThreadSubjectSchema(TypedDict):
+    type: str
+    id: str
+    label: str
+
+class InputOfThreadSubjectSchema(TypedDict):
+    type: str
+    id: str
+    label: str
+
 TierEnum = Literal['base', 'advanced', 'expert']
 
 InputOfTierEnum = Literal['base', 'advanced', 'expert']
@@ -5551,6 +5621,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                                                                 'query_params': [],
                                                                                                                                                                 'request_body': False,
                                                                                                                                                                 'response_kind': 'none'},
+ 'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_thread_comments_comment_public_id': {'method': 'DELETE',
+                                                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/thread-comments/{comment_public_id}/',
+                                                                                                           'path_params': ['comment_public_id',
+                                                                                                                           'event_public_id',
+                                                                                                                           'workspace_public_id'],
+                                                                                                           'query_params': [],
+                                                                                                           'request_body': False,
+                                                                                                           'response_kind': 'none'},
  'delete_api_v1_workspaces_workspace_public_id_events_event_public_id_timezone_timeline': {'method': 'DELETE',
                                                                                            'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/timezone-timeline/',
                                                                                            'path_params': ['event_public_id',
@@ -7054,6 +7132,17 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                      'query_params': [],
                                                                                      'request_body': False,
                                                                                      'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_threads_subject_type_subject_id_audience': {'method': 'GET',
+                                                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/threads/{subject_type}/{subject_id}/{audience}/',
+                                                                                                               'path_params': ['audience',
+                                                                                                                               'event_public_id',
+                                                                                                                               'subject_id',
+                                                                                                                               'subject_type',
+                                                                                                                               'workspace_public_id'],
+                                                                                                               'query_params': ['limit',
+                                                                                                                                'offset'],
+                                                                                                               'request_body': False,
+                                                                                                               'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_timezone_timeline': {'method': 'GET',
                                                                                         'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/timezone-timeline/',
                                                                                         'path_params': ['event_public_id',
@@ -7441,6 +7530,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                       'query_params': [],
                                                                                                       'request_body': True,
                                                                                                       'response_kind': 'json'},
+ 'patch_api_v1_workspaces_workspace_public_id_events_event_public_id_thread_comments_comment_public_id': {'method': 'PATCH',
+                                                                                                          'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/thread-comments/{comment_public_id}/',
+                                                                                                          'path_params': ['comment_public_id',
+                                                                                                                          'event_public_id',
+                                                                                                                          'workspace_public_id'],
+                                                                                                          'query_params': [],
+                                                                                                          'request_body': True,
+                                                                                                          'response_kind': 'json'},
  'patch_api_v1_workspaces_workspace_public_id_events_event_public_id_tracks_track_public_id': {'method': 'PATCH',
                                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/tracks/{track_public_id}/',
                                                                                                'path_params': ['event_public_id',
@@ -8620,6 +8717,16 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                       'query_params': [],
                                                                                       'request_body': True,
                                                                                       'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_threads_subject_type_subject_id_audience': {'method': 'POST',
+                                                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/threads/{subject_type}/{subject_id}/{audience}/',
+                                                                                                                'path_params': ['audience',
+                                                                                                                                'event_public_id',
+                                                                                                                                'subject_id',
+                                                                                                                                'subject_type',
+                                                                                                                                'workspace_public_id'],
+                                                                                                                'query_params': [],
+                                                                                                                'request_body': True,
+                                                                                                                'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_tracks': {'method': 'POST',
                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/tracks/',
                                                                               'path_params': ['event_public_id',

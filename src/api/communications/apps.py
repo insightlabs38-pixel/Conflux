@@ -6,4 +6,4 @@ class CommunicationsConfig(AppConfig):
     name = "communications"
 
     def ready(self):
-        from . import approvals  # noqa: F401 - registers the message approval policy
+        from . import approvals, threads  # noqa: F401 - policy and mention notifier

@@ -15450,6 +15450,217 @@ paths:
               schema:
                 $ref: '#/components/schemas/TemporalGate'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/thread-comments/{comment_public_id}/:
+    patch:
+      operationId: patch_api_v1_workspaces_workspace_public_id_events_event_public_id_thread_comments_comment_public_id
+      description: |-
+        Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
+
+        Put before the DRF view class in the MRO. Requests without the header are
+        passed through untouched. A key is private to the caller and to one
+        method+path; reusing it for a different request is rejected (422), a
+        duplicate while the first is still running is refused (409) instead of
+        running twice, and server errors are never cached so they can be retried.
+      parameters:
+      - in: path
+        name: comment_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCommentEditInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCommentEditInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCommentEditInput'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThreadCommentSchema'
+          description: ''
+    delete:
+      operationId: delete_api_v1_workspaces_workspace_public_id_events_event_public_id_thread_comments_comment_public_id
+      description: |-
+        Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
+
+        Put before the DRF view class in the MRO. Requests without the header are
+        passed through untouched. A key is private to the caller and to one
+        method+path; reusing it for a different request is rejected (422), a
+        duplicate while the first is still running is refused (409) instead of
+        running twice, and server errors are never cached so they can be retried.
+      parameters:
+      - in: path
+        name: comment_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/threads/{subject_type}/{subject_id}/{audience}/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_threads_subject_type_subject_id_audience
+      description: |-
+        Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
+
+        Put before the DRF view class in the MRO. Requests without the header are
+        passed through untouched. A key is private to the caller and to one
+        method+path; reusing it for a different request is rejected (422), a
+        duplicate while the first is still running is refused (409) instead of
+        running twice, and server errors are never cached so they can be retried.
+      parameters:
+      - in: path
+        name: audience
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: limit
+        schema:
+          type: integer
+      - in: query
+        name: offset
+        schema:
+          type: integer
+      - in: path
+        name: subject_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: subject_type
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThreadSchema'
+          description: ''
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_threads_subject_type_subject_id_audience
+      description: |-
+        Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
+
+        Put before the DRF view class in the MRO. Requests without the header are
+        passed through untouched. A key is private to the caller and to one
+        method+path; reusing it for a different request is rejected (422), a
+        duplicate while the first is still running is refused (409) instead of
+        running twice, and server errors are never cached so they can be retried.
+      parameters:
+      - in: path
+        name: audience
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: subject_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: subject_type
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CommentInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CommentInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThreadCommentSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/timezone-timeline/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_timezone_timeline
@@ -19657,6 +19868,17 @@ components:
       - created_at
       - hidden_at
       - public_id
+    CommentInput:
+      type: object
+      properties:
+        body:
+          type: string
+          maxLength: 8000
+        parent:
+          type: string
+          format: uuid
+      required:
+      - body
     CommentVisibilityEnum:
       enum:
       - organizer
@@ -23233,6 +23455,12 @@ components:
           maximum: 9223372036854775807
           minimum: 0
           format: int64
+    PatchedCommentEditInput:
+      type: object
+      properties:
+        body:
+          type: string
+          maxLength: 8000
     PatchedEvaluationPlan:
       type: object
       properties:
@@ -26422,6 +26650,92 @@ components:
         * `default` - Default
         * `dark` - Dark
         * `minimal` - Minimal
+    ThreadAuthorSchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        username:
+          type: string
+      required:
+      - public_id
+      - username
+    ThreadCommentSchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        author:
+          $ref: '#/components/schemas/ThreadAuthorSchema'
+        body:
+          type: string
+        removed:
+          type: boolean
+        edited:
+          type: boolean
+        mentions:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+        can_edit:
+          type: boolean
+        can_remove:
+          type: boolean
+        replies:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+      required:
+      - author
+      - body
+      - can_edit
+      - can_remove
+      - created_at
+      - edited
+      - mentions
+      - public_id
+      - removed
+      - replies
+    ThreadSchema:
+      type: object
+      properties:
+        subject:
+          $ref: '#/components/schemas/ThreadSubjectSchema'
+        audience:
+          type: string
+        can_post:
+          type: boolean
+        total:
+          type: integer
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThreadCommentSchema'
+      required:
+      - audience
+      - can_post
+      - comments
+      - subject
+      - total
+    ThreadSubjectSchema:
+      type: object
+      properties:
+        type:
+          type: string
+        id:
+          type: string
+        label:
+          type: string
+      required:
+      - id
+      - label
+      - type
     TierEnum:
       enum:
       - base

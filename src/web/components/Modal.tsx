@@ -24,12 +24,19 @@ export function Modal({
     return () => opener?.focus?.();
   }, []);
 
-  function keydown(event: KeyboardEvent) {
-    if (event.key === "Escape") {
+  // Escape works wherever focus is, including after the focused button was removed by the
+  // dialog's own content (a confirmation that closes): the keystroke then lands on the body.
+  useEffect(() => {
+    function escape(event: globalThis.KeyboardEvent) {
+      if (event.key !== "Escape" || event.defaultPrevented) return;
       event.stopPropagation();
       close.current();
-      return;
     }
+    document.addEventListener("keydown", escape);
+    return () => document.removeEventListener("keydown", escape);
+  }, []);
+
+  function keydown(event: KeyboardEvent) {
     if (event.key !== "Tab" || !dialog.current) return;
     const focusable = [
       ...dialog.current.querySelectorAll<HTMLElement>(

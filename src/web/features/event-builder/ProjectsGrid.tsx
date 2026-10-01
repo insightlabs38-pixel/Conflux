@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { BulkPlanner } from "../../components/BulkPlanner";
+import { NotesDialog } from "../../components/NotesDialog";
 import { EntityGrid } from "../../components/EntityGrid";
 import { Button } from "../../components/Button";
 
@@ -22,6 +23,7 @@ export function ProjectsGrid({
   const [track, setTrack] = useState("");
   const [planning, setPlanning] = useState(false);
   const [version, setVersion] = useState(0);
+  const [notes, setNotes] = useState<{ id: string; name: string } | null>(null);
   const ids = useMemo(() => [...selected], [selected]);
   const names = useMemo(
     () => ({
@@ -78,9 +80,33 @@ export function ProjectsGrid({
         rowLabel={(row) => String(row.name ?? row.id)}
         selectable
         onSelect={setSelected}
+        actions={(row) => (
+          <Button
+            variant="secondary"
+            aria-label={`Notes on ${String(row.name ?? row.id)}`}
+            onClick={() =>
+              setNotes({ id: String(row.id), name: String(row.name ?? row.id) })
+            }
+          >
+            Notes
+          </Button>
+        )}
         refreshToken={version}
         empty={<p>Projects appear here once teams create them.</p>}
       />
+      {notes && (
+        <NotesDialog
+          title={`Organizer notes on ${notes.name}`}
+          subject={{
+            workspaceId,
+            eventId,
+            type: "project",
+            id: notes.id,
+            audience: "organizers",
+          }}
+          onClose={() => setNotes(null)}
+        />
+      )}
       {planning && (
         <BulkPlanner
           workspaceId={workspaceId}

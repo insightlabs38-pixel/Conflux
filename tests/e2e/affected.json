@@ -65,9 +65,17 @@
         "src/api/core/job*",
         "src/api/core/tasks.py",
         "src/api/integrations/archive*",
-        "src/api/core/approval*"
+        "src/api/core/approval*",
+        "src/api/core/thread*"
       ],
-      "specs": ["uiv2-organizer", "pvs", "uiv2-surfaces", "jobs", "approvals"]
+      "specs": [
+        "uiv2-organizer",
+        "pvs",
+        "uiv2-surfaces",
+        "jobs",
+        "approvals",
+        "threads"
+      ]
     },
     {
       "paths": [

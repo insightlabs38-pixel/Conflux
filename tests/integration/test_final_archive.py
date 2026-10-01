@@ -357,6 +357,8 @@ EXCLUDED_EVENT_MODELS = {
     # Approval gates and requests are operational state of the event's own operations (T06).
     "core.approvalgate",
     "core.approvalrequest",
+    # Internal notes and conversations (T07): private by design, not part of the archive contract.
+    "core.thread",
     # Preset provenance only (PD-F001-B01); not part of the archive contract yet (see spec 001).
     "eventconfig.eventprofile",
     "eventconfig.eventmodulesetting",

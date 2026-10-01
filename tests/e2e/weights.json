@@ -32,5 +32,6 @@
   "read-only:url-state": 8.0,
   "read-only:workspace-shell": 26.2,
   "isolated-mutation:jobs": 20.0,
-  "isolated-mutation:approvals": 20.0
+  "isolated-mutation:approvals": 20.0,
+  "isolated-mutation:threads": 20.0
 }

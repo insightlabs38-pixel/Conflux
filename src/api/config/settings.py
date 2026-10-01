@@ -220,6 +220,7 @@ SPECTACULAR_SETTINGS = {
         "ProjectCOIAttributeKind": ["institution", "domain"],
         "SavedViewVisibility": "core.models.SavedView.Visibility",
         "JobStatus": "core.models.Job.Status",
+        "ThreadAudience": "core.models.Thread.Audience",
         "ApprovalStatus": "core.models.ApprovalRequest.Status",
         "ApprovalDecisionKind": "core.models.ApprovalDecision.Decision",
     },

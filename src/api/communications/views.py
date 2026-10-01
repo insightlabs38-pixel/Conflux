@@ -143,7 +143,9 @@ class MessageListCreateView(OrganizerView):
     @extend_schema(responses=MessageSchema(many=True))
     def get(self, request, workspace_public_id, event_public_id):
         offset = _offset(request)
-        messages = self.get_event().messages.all()[offset : offset + _PAGE_SIZE]
+        # Mention notices are inbox deliveries, not organizer broadcasts.
+        shown = self.get_event().messages.exclude(audience_kind="thread_mention")
+        messages = shown[offset : offset + _PAGE_SIZE]
         return Response([_message_data(message) for message in messages])
 
     @extend_schema(request=MessageInputSchema, responses={201: MessageSchema})

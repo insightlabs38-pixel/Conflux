@@ -1,0 +1,33 @@
+version: 1
+checkpoint_id: CP-PD-F002-B03
+created_at: '2026-10-01T13:45:10Z'
+canonical_commit: 9d1bf7442cdab789bd2a47d66db6256b1e2ef3a8
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+- PD-B02
+- PD-B03
+- PD-B04
+- PD-F001-B01
+- PD-F001-B02
+- PD-F002-B01
+- PD-F002-B02
+- PD-F002-B03
+active_batches:
+- PD-F003-B01
+active_claims: []
+open_escalations: []
+last_completed_task: PD-F002-B03-T91
+ready_summary:
+- PD-F003-B01 (cross-surface completeness contract; promoted IN_PROGRESS, not started)
+verification_summary:
+- pytest 2041 passed/31 skipped, web 648, lint/format/build/sdk/block-schema/makemigrations clean
+- make e2e-fast all tiers ok (T90 log) and make e2e-affected ok after T01
+- validate_queue valid
+recovery_notes:
+- 'PD-F002 (shared primitives) is complete: 17 primitives in src/api/core, registrations in <app>/*.py loaded from AppConfig.ready(), declared in <app>/manifest.py; developer page docs/architecture/SHARED_PRIMITIVES.md; matrices docs/verification/PD-F002-B0{1,2,3}/MATRIX.md'
+- 'PREVIEW_CONTEXT: core/preview_context.py + preview_context_views.py, surface forms/preview.py, web lib/previewContext.ts + components/PreviewBar.tsx + features/form-builder/FormPreviewAs.tsx; a context is request data only, never read outside that endpoint'
+- 'Bash env vars do not persist: export E2E_DEMO_SEED/E2E_DEMO_PASSWORD in the same call as playwright; scripts/demo-reset submitted restores seed 7. Quote every receipt string containing a colon and a space; lint_receipt.py before the DONE line, chained with &&'
+- main unpushed; untracked design handoff zips untouched; .claude-supervisor is prettier-ignored

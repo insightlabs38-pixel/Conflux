@@ -20401,12 +20401,19 @@ components:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/CompletenessClaimSchema'
+        facts:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties: {}
+          description: 'Per property: what the system itself shows.'
         problems:
           type: array
           items:
             $ref: '#/components/schemas/CompletenessProblemSchema'
       required:
       - claims
+      - facts
       - id_field
       - id_type
       - key

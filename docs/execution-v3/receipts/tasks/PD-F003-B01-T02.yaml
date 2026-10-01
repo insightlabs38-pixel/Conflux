@@ -1,0 +1,98 @@
+version: 3
+task: PD-F003-B01-T02
+batch: PD-F003-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 761fc54
+  head_commit: 761fc54
+changed_paths:
+- src/api/core/ (features_validation.py, features.py facts and static hooks and resolve_method, feature_views.py facts, apps.py)
+- src/api/<app>/features.py for the fifteen features (validation claims)
+- src/api/projects/models.py (Submission.clean no longer crashes on unset relations)
+- src/web/lib/completeness.ts, features/operations/CompletenessPanel.tsx (claim cells with refs and facts)
+- tests/integration/ (test_feature_validation.py new, test_feature_contract.py extended), src/web/features/operations/CompletenessPanel.test.tsx
+- tests/e2e/completeness.spec.ts, docs/operations/COMPLETENESS.md, docs/api/openapi.yaml, generated SDKs, spec 003 (as built)
+deliverables:
+- item: Backend validation and invariants added to the completeness contract and applied to domain work
+  result: pass
+  evidence: "validation verifier proves each claim names an enforcement point (check: or constraint:, resolved against the code and the models' own constraints) and a test (test:, existence checked in CI), and derives that a blank record is refused with a message per required field and never crashes clean(); all fifteen features claim it with no findings"
+- item: Gaps found are fixed inside the property or recorded
+  result: pass
+  evidence: "the probe found Submission.clean() raising RelatedObjectDoesNotExist on unset relations, fixed with a guard and proved by a test; three features without a refusal test (track, announcement, message) gained one that sends invalid input through the API and sees a keyed 400 and no row"
+- item: Shared primitives reused and no duplicate local rules
+  result: pass
+  evidence: "claims point at the existing model clean methods, services, validators and constraints; no rule is restated in the registry; derived facts come from the model"
+invariants:
+- item: Server-side validation authoritative, one source of truth
+  result: pass
+  evidence: "the registry names enforcement points and derives facts; nothing validates in a surface; the report is advisory and query-free (full_clean probed without database checks)"
+- item: Existing behavior compatible
+  result: pass
+  evidence: "the only product change is a guard in Submission.clean() that returns a blank record to field validation; the full suite passes unchanged"
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 2083 passed, 31 skipped (14 new, incl. a failure code per ref kind, the blank probes with stand-in models, and the CI file and name check)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 658 web tests (2 new claim-detail tests); OpenAPI validated with fail-on-warn and SDKs regenerated
+- command: npx playwright test completeness --project=desktop on a fresh iso-min fixture
+  result: pass
+  note: 2 passed (390 and 1440) with the Validation column opened to its refs and facts
+- command: make e2e-affected
+  result: pass
+  note: read-only, isolated-mutation and canary ok
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: Validation column with closed details in Operations > Completeness
+- surface: api
+  result: pass
+  evidence: report gains facts per feature in OpenAPI
+- surface: sdk
+  result: pass
+  evidence: generated clients regenerated, sdk-check clean
+- surface: cli
+  result: pass
+  evidence: assigned to PD-F003-B02-T04
+- surface: mcp
+  result: pass
+  evidence: assigned to PD-F003-B02-T05
+- surface: event_as_code
+  result: pass
+  evidence: assigned to PD-F003-B02-T06
+- surface: audit
+  result: pass
+  evidence: the report writes nothing; audit coverage is T04
+- surface: webhook
+  result: pass
+  evidence: assigned to PD-F003-B02-T07
+- surface: archive
+  result: pass
+  evidence: assigned to PD-F003-B02-T08
+- surface: analytics
+  result: pass
+  evidence: assigned to PD-F003-B03-T01
+- surface: search
+  result: pass
+  evidence: assigned to T08 of this batch
+- surface: docs
+  result: pass
+  evidence: COMPLETENESS.md validation section and spec 003 as built
+migrations:
+- none
+findings:
+- A first run of the blank probe failed for every feature because full_clean also queries the database; it now runs with unique and constraint checks off, keeping the report query-free
+- The browser spec matched the wrong row once refs contained the word events; rows are now found by their row header
+limitations:
+- A test ref names one proving test per feature, not every invariant; deeper per-invariant coverage stays in the domain suites
+- Whether a named check function really enforces the invariant is proved by the referenced test, not by the verifier
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

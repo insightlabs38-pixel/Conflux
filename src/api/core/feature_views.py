@@ -57,6 +57,9 @@ class CompletenessFeatureSchema(serializers.Serializer):
     states = CompletenessStateSchema(many=True)
     lifecycle = CompletenessLifecycleSchema(allow_null=True)
     claims = serializers.DictField(child=CompletenessClaimSchema())
+    facts = serializers.DictField(
+        child=serializers.DictField(), help_text="Per property: what the system itself shows."
+    )
     problems = CompletenessProblemSchema(many=True)
 
 

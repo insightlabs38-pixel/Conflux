@@ -7,7 +7,14 @@ register_feature(
         key="artifact",
         label="Artifact",
         model="artifacts.Artifact",
-        claims={"identity": provided("field:public_id", "route:artifact-detail")},
+        claims={
+            "identity": provided("field:public_id", "route:artifact-detail"),
+            "validation": provided(
+                "check:artifacts.models.Artifact.clean",
+                "check:artifacts.validators.validate_artifact",
+                "test:tests/integration/test_artifact_api.py::test_external_artifact_api_rejects_bad_url_and_nonmember",
+            ),
+        },
         lifecycle=Lifecycle(
             "choice",
             field="status",

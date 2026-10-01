@@ -9,6 +9,7 @@ from accounts.models import Session, User
 from audit.models import AuditEvent
 from core import features as ft
 from core import manifest
+from django.core.exceptions import ValidationError
 from django.test import Client
 from workspaces.models import Membership, Role, Workspace
 
@@ -46,6 +47,13 @@ def isolated(monkeypatch):
     return ft
 
 
+VALID = ft.provided(
+    "check:core.saved_views.validate_name",
+    "constraint:core.SavedView.unique_saved_view_name",
+    "test:tests/integration/test_saved_views.py::test_defaults_and_validation_happen_at_save_time",
+)
+
+
 def identity(*refs):
     return ft.provided(*(refs or ("field:public_id",)))
 
@@ -56,10 +64,14 @@ def only(feature_key="x", **over):
         "key": feature_key,
         "label": "X",
         "model": "core.SavedView",
-        "claims": {"identity": identity("field:public_id", "route:saved-view-detail")},
+        "claims": {
+            "identity": identity("field:public_id", "route:saved-view-detail"),
+            "validation": VALID,
+        },
         "lifecycle": ft.Lifecycle("none", note="Edited in place."),
     }
     values.update(over)
+    values["claims"] = {"validation": VALID, **values["claims"]}
     ft.FEATURES.clear()
     ft.register_feature(ft.Feature(**values))
     # every other landed property must be claimed for the registry to be quiet about it
@@ -72,7 +84,7 @@ def only(feature_key="x", **over):
 def test_the_fifteen_features_agree_with_the_live_system():
     assert sorted(ft.FEATURES) == KEYS
     assert ft.check() == []
-    assert ft.landed() == ["identity"]
+    assert ft.landed() == ["identity", "validation"]
 
 
 def test_every_feature_resolves_to_its_model_and_a_uuid_public_id():
@@ -180,7 +192,7 @@ def test_a_well_formed_independent_feature_passes(isolated):
         "x",
         "X",
         "core.SavedView",
-        {"identity": identity("field:public_id", "route:saved-view-detail")},
+        {"identity": identity("field:public_id", "route:saved-view-detail"), "validation": VALID},
         ft.Lifecycle("none", note="Edited in place and deleted."),
     )
     assert ft.check() == []
@@ -389,10 +401,112 @@ def test_the_endpoint_reports_a_broken_claim_instead_of_hiding_it(world, isolate
         "event",
         "Event",
         "events.Event",
-        {"identity": identity("field:public_id", "route:nope")},
+        {
+            "identity": identity("field:public_id", "route:nope"),
+            "validation": ft.FEATURES["event"].claims["validation"],
+        },
         ft.FEATURES["event"].lifecycle,
     )
     body = client_for(world["people"]["org"]).get(world["url"]).json()
     assert body["ok"] is False and [p["code"] for p in body["problems"]] == ["route_missing"]
     broken = next(f for f in body["features"] if f["key"] == "event")
     assert [p["code"] for p in broken["problems"]] == ["route_missing"]
+
+
+# --- the validation verifier (T02) --------------------------------------------------------------
+
+
+class Blank:
+    """A model-like stand-in that behaves as told, for the probes a real model never fails."""
+
+    class _meta:
+        constraints = ()
+
+    def __init__(self, fields=None, full=None):
+        self._fields, self._full = fields, full
+
+    def clean_fields(self):
+        if isinstance(self._fields, Exception):
+            raise self._fields
+        if self._fields:
+            raise ValidationError({name: ["Required."] for name in self._fields})
+
+    def full_clean(self, **kwargs):
+        if self._full:
+            raise self._full
+
+
+class Probe(ft.System):
+    def __init__(self, behaviour):
+        super().__init__()
+        self.behaviour = behaviour
+
+    def model(self, label):
+        if label == "stub.Blank":
+            behaviour = self.behaviour
+            return type("Stub", (Blank,), {"__init__": lambda me: Blank.__init__(me, *behaviour)})
+        return super().model(label)
+
+
+def verify_validation(refs, behaviour=(["name"], None)):
+    feature = ft.Feature("s", "S", "stub.Blank", {"validation": ft.provided(*refs)})
+    return ft.VERIFIERS["validation"](feature, feature.claims["validation"], Probe(behaviour))
+
+
+GOOD = ("check:core.saved_views.validate_name", "test:tests/integration/test_x.py::test_y")
+
+
+def test_a_real_claim_is_enforced_proved_and_derived_from_the_model():
+    assert ft.check() == [] and ft.check_static(ROOT) == []
+    row = {f["key"]: f for f in ft.report()["features"]}
+    assert row["submission"]["facts"]["validation"]["blank_refused"] == [
+        "project",
+        "stage",
+        "updated_by",
+    ]
+    assert row["event"]["facts"]["validation"] == {
+        "blank_refused": ["name", "slug", "workspace"],
+        "constraints": ["unique_event_slug_workspace"],
+        "own_clean": True,
+    }
+    for feature in ft.FEATURES.values():
+        kinds = {r.partition(":")[0] for r in feature.claims["validation"].refs}
+        assert "test" in kinds and kinds & {"check", "constraint"}, feature.key
+
+
+@pytest.mark.parametrize(
+    ("refs", "code"),
+    [
+        (("color:red",) + GOOD, "bad_ref"),
+        (("check:core.saved_views.nope",) + GOOD, "check_missing"),
+        (("constraint:core.SavedView.nope",) + GOOD, "constraint_missing"),
+        (("constraint:core.Nope.x",) + GOOD, "constraint_missing"),
+        (("test:somewhere/test_x.py::test_y",) + GOOD, "test_ref"),
+        (("test:tests/integration/test_x.py::test_y",), "no_enforcement"),
+        (("check:core.saved_views.validate_name",), "no_test"),
+    ],
+)
+def test_each_validation_ref_failure_has_a_code(refs, code):
+    assert code in codes(verify_validation(refs))
+
+
+def test_the_blank_probe_catches_a_model_that_accepts_or_crashes_on_a_blank_record():
+    assert verify_validation(GOOD) == []
+    assert "blank_accepted" in codes(verify_validation(GOOD, ([], None)))
+    assert "blank_error" in codes(verify_validation(GOOD, (RuntimeError("boom"), None)))
+    assert "blank_crashes" in codes(verify_validation(GOOD, (["name"], KeyError("stage"))))
+    assert codes(verify_validation(GOOD, (["name"], ValidationError("keyed")))) == []
+
+
+def test_the_ci_check_finds_a_missing_test_file_or_name(isolated, tmp_path):
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests" / "test_there.py").write_text("def test_present():\n    pass\n")
+    claim = ft.provided(
+        "check:core.saved_views.validate_name",
+        "test:tests/test_there.py::test_present",
+        "test:tests/test_there.py::test_absent",
+        "test:tests/test_gone.py::test_anything",
+    )
+    ft.FEATURES.clear()
+    ft.register_feature(ft.Feature("x", "X", "core.SavedView", {"validation": claim}))
+    assert codes(ft.check_static(tmp_path)) == ["test_file", "test_name"]

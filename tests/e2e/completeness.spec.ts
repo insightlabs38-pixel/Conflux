@@ -43,21 +43,30 @@ for (const width of [390, 1440]) {
       name: "Features and what they provide",
     });
     await expect(table.locator("tbody tr")).toHaveCount(15);
-    const event = table
-      .locator("tbody tr")
-      .filter({ hasText: "Event" })
-      .first();
+    const event = table.locator("tbody tr").filter({
+      has: page.getByRole("rowheader", { name: /^Event \(event\)/ }),
+    });
     await expect(event).toContainText("Provided · public id (public_id)");
     await expect(event).toContainText("Draft, Open, Closed, Archived");
     // A lifecycle opens to the transitions the code allows.
     await event.getByText("Draft, Open, Closed, Archived").click();
     await expect(event.getByText("Draft → Open")).toBeVisible();
     await expect(event.getByText("Closed → Archived")).toBeVisible();
+    // Validation is checked too: where it is enforced, a test that proves it, and what the model shows.
+    await expect(
+      table.getByRole("columnheader", { name: "Validation and invariants" }),
+    ).toBeVisible();
+    await event.getByText("Provided", { exact: true }).last().click();
+    await expect(
+      event.getByText("check:events.models.Event.clean"),
+    ).toBeVisible();
+    await expect(
+      event.getByText("A blank record is refused for: name, slug, workspace"),
+    ).toBeVisible();
     // A feature without a state machine says how its records change.
-    const track = table
-      .locator("tbody tr")
-      .filter({ hasText: "Track" })
-      .first();
+    const track = table.locator("tbody tr").filter({
+      has: page.getByRole("rowheader", { name: /^Track \(track\)/ }),
+    });
     await track.getByText("No states").click();
     await expect(track).toContainText("Edited in place and deleted");
     await panel.getByText(/properties are not checked yet/).click();

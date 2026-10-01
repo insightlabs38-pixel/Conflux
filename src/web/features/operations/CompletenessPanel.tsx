@@ -8,11 +8,52 @@ import { describeProblem } from "../../lib/api";
 import {
   CLAIM_TEXT,
   completenessUrl,
+  factText,
   stateList,
   transitionLines,
   type Completeness,
   type CompletenessFeature,
 } from "../../lib/completeness";
+
+function ClaimCell({
+  feature,
+  property,
+}: {
+  feature: CompletenessFeature;
+  property: string;
+}) {
+  const claim = feature.claims[property];
+  const facts = Object.entries(feature.facts?.[property] ?? {});
+  const text = CLAIM_TEXT[claim?.state ?? "unclaimed"];
+  if (
+    !claim ||
+    (!claim.refs.length && !claim.reason && !claim.owner && !facts.length)
+  )
+    return <>{text}</>;
+  return (
+    <details>
+      <summary className="cx-summary">{text}</summary>
+      {claim.owner && <p className="cx-muted">Owned by {claim.owner}.</p>}
+      {claim.reason && <p className="cx-muted">{claim.reason}</p>}
+      {claim.refs.length > 0 && (
+        <ul aria-label={`How ${feature.label} provides it`}>
+          {claim.refs.map((ref) => (
+            <li key={ref}>
+              <code>{ref}</code>
+            </li>
+          ))}
+        </ul>
+      )}
+      {facts.length > 0 && (
+        <ul aria-label={`What the system shows for ${feature.label}`}>
+          {facts.map(([key, value]) => (
+            <li key={key}>{factText(key, value)}</li>
+          ))}
+        </ul>
+      )}
+    </details>
+  );
+}
 
 function lifecycleSummary(feature: CompletenessFeature) {
   const life = feature.lifecycle;
@@ -138,11 +179,7 @@ export function CompletenessPanel({ workspaceId }: { workspaceId: string }) {
                       .filter((p) => p.key !== "identity")
                       .map((p) => (
                         <td key={p.key}>
-                          {
-                            CLAIM_TEXT[
-                              feature.claims[p.key]?.state ?? "unclaimed"
-                            ]
-                          }
+                          <ClaimCell feature={feature} property={p.key} />
                         </td>
                       ))}
                   </tr>

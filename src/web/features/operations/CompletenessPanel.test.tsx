@@ -6,6 +6,7 @@ import { CompletenessPanel } from "./CompletenessPanel";
 import { jsonResponse } from "../../lib/test-http";
 import { withQuery } from "../../lib/test-router";
 import {
+  factText,
   stateLabel,
   stateList,
   transitionLines,
@@ -214,7 +215,9 @@ describe("CompletenessPanel", () => {
     const cells = [...container.querySelectorAll("tbody tr")].map(
       (tr) => tr.lastElementChild!.textContent,
     );
-    expect(cells).toEqual(["Planned", "Not claimed"]);
+    expect(cells[0]).toContain("Planned");
+    expect(cells[0]).toContain("Owned by PD-F003-B01-T06.");
+    expect(cells[1]).toBe("Not claimed");
   });
 
   it("shows a failure with Try again", async () => {
@@ -235,6 +238,98 @@ describe("CompletenessPanel", () => {
   });
 });
 
+describe("claim details", () => {
+  it("shows how a claim is provided and what the system itself shows, closed by default", async () => {
+    await mount(() =>
+      jsonResponse(200, {
+        ...REPORT,
+        properties: [
+          ...REPORT.properties.slice(0, 1),
+          {
+            key: "validation",
+            label: "Validation and invariants",
+            batch: "PD-F003-B01",
+            landed: true,
+          },
+        ],
+        features: [
+          {
+            ...EVENT,
+            claims: {
+              ...EVENT.claims,
+              validation: {
+                state: "provided",
+                refs: [
+                  "check:events.models.Event.clean",
+                  "test:tests/x.py::test_y",
+                ],
+                reason: "",
+                owner: "",
+              },
+            },
+            facts: {
+              validation: {
+                blank_refused: ["name", "slug"],
+                constraints: [],
+                own_clean: true,
+              },
+            },
+          },
+        ],
+      }),
+    );
+    const cell = container.querySelector("tbody tr")!.lastElementChild!;
+    expect(cell.querySelector("details")!.open).toBe(false);
+    const refs = [...cell.querySelectorAll("code")].map((c) => c.textContent);
+    expect(refs).toEqual([
+      "check:events.models.Event.clean",
+      "test:tests/x.py::test_y",
+    ]);
+    const facts = [
+      ...cell.querySelectorAll('ul[aria-label^="What the system"] li'),
+    ].map((li) => li.textContent);
+    expect(facts).toEqual([
+      "A blank record is refused for: name, slug",
+      "Constraints: none",
+      "Model checks its own rules: yes",
+    ]);
+  });
+
+  it("writes a not-applicable claim with its reason", async () => {
+    await mount(() =>
+      jsonResponse(200, {
+        ...REPORT,
+        properties: [
+          ...REPORT.properties.slice(0, 1),
+          {
+            key: "rest",
+            label: "REST representation",
+            batch: "PD-F003-B01",
+            landed: true,
+          },
+        ],
+        features: [
+          {
+            ...EVENT,
+            claims: {
+              ...EVENT.claims,
+              rest: {
+                state: "not_applicable",
+                refs: [],
+                reason: "Internal only.",
+                owner: "",
+              },
+            },
+          },
+        ],
+      }),
+    );
+    expect(
+      container.querySelector("tbody tr")!.lastElementChild!.textContent,
+    ).toContain("Not applicableInternal only.");
+  });
+});
+
 describe("completeness helpers", () => {
   it("reads states and transitions in words", () => {
     expect(stateList(EVENT)).toBe("Draft, Open, Closed");
@@ -242,5 +337,8 @@ describe("completeness helpers", () => {
     expect(stateLabel(EVENT, "ghost")).toBe("ghost");
     expect(transitionLines(EVENT)).toEqual(["Draft → Open", "Open → Closed"]);
     expect(transitionLines(TRACK)).toEqual([]);
+    expect(factText("constraints", ["a", "b"])).toBe("Constraints: a, b");
+    expect(factText("own_clean", false)).toBe("Model checks its own rules: no");
+    expect(factText("odd_key", 3)).toBe("odd key: 3");
   });
 });

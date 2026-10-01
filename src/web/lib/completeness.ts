@@ -46,6 +46,8 @@ export type CompletenessFeature = {
   states: { value: string; label: string }[];
   lifecycle: Lifecycle | null;
   claims: Record<string, Claim>;
+  /** What the system itself says per property (derived, never declared). */
+  facts?: Record<string, Record<string, unknown>>;
   problems: CompletenessProblem[];
 };
 
@@ -84,4 +86,19 @@ export function transitionLines(feature: CompletenessFeature): string[] {
       (to) => `${stateLabel(feature, from)} → ${stateLabel(feature, to)}`,
     ),
   );
+}
+
+const FACT_LABEL: Record<string, string> = {
+  blank_refused: "A blank record is refused for",
+  constraints: "Constraints",
+  own_clean: "Model checks its own rules",
+};
+
+/** One derived fact as a sentence fragment: lists joined, booleans as yes or no. */
+export function factText(key: string, value: unknown): string {
+  const label = FACT_LABEL[key] ?? key.replace(/_/g, " ");
+  if (Array.isArray(value))
+    return `${label}: ${value.length ? value.join(", ") : "none"}`;
+  if (typeof value === "boolean") return `${label}: ${value ? "yes" : "no"}`;
+  return `${label}: ${String(value)}`;
 }

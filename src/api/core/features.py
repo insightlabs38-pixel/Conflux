@@ -123,6 +123,8 @@ class Feature:
 
 FEATURES: dict[str, Feature] = {}
 VERIFIERS: dict[str, Callable] = {}
+FACTS: dict[str, Callable] = {}  # property -> facts(feature, system) -> dict, derived and shown
+STATIC_CHECKS: dict[str, Callable] = {}  # property -> check(feature, claim, root) -> [problem]
 
 
 def register_feature(feature: Feature) -> None:
@@ -131,12 +133,21 @@ def register_feature(feature: Feature) -> None:
     FEATURES[feature.key] = feature
 
 
-def register_verifier(prop: str, verifier: Callable) -> None:
+def register_verifier(
+    prop: str, verifier: Callable, *, facts: Callable | None = None, static: Callable | None = None
+) -> None:
+    """`verifier(feature, claim, system)` runs with the report. `facts(feature, system)` adds
+    derived facts to the report. `static(feature, claim, root)` checks refs that only the source
+    tree can answer (a test file and name) and runs in CI, not in the deployed app."""
     if prop not in PROPERTIES:
         raise ValueError(f"Unknown property '{prop}'.")
     if prop in VERIFIERS and VERIFIERS[prop] is not verifier:
         raise ValueError(f"Property '{prop}' already has a verifier.")
     VERIFIERS[prop] = verifier
+    if facts:
+        FACTS[prop] = facts
+    if static:
+        STATIC_CHECKS[prop] = static
 
 
 def landed() -> list[str]:
@@ -193,6 +204,12 @@ class System:
             return getattr(import_module(module), name)
         except (ImportError, AttributeError, ValueError):
             return None
+
+    def resolve_method(self, dotted: str):
+        """`pkg.module.Class.method` to the attribute of the class, or None."""
+        owner, _, name = dotted.rpartition(".")
+        cls = self.resolve(owner)
+        return getattr(cls, name, None) if cls is not None else None
 
 
 # --- checking ---------------------------------------------------------------------------------
@@ -259,6 +276,18 @@ def check(system: System | None = None) -> list[dict]:
     return found
 
 
+def check_static(root, system: System | None = None) -> list[dict]:
+    """The checks that need the source tree (CI). `root` is the repository root."""
+    system = system or System()
+    found = []
+    for feature in sorted(FEATURES.values(), key=lambda f: f.key):
+        for prop, check_fn in STATIC_CHECKS.items():
+            claim = feature.claims.get(prop)
+            if claim is not None and claim.state == "provided":
+                found += check_fn(feature, claim, root)
+    return found
+
+
 def derived(feature: Feature, system: System) -> dict:
     """What the system itself says about a feature (nothing here is declared)."""
     model = system.model(feature.model)
@@ -317,6 +346,11 @@ def report(system: System | None = None) -> dict:
                     "via": list(life.via),
                     "note": life.note,
                     "transitions": {k: list(v) for k, v in transition_graph(life, system).items()},
+                },
+                "facts": {
+                    prop: fn(feature, system)
+                    for prop, fn in FACTS.items()
+                    if feature.claims.get(prop) is not None
                 },
                 "claims": {
                     prop: {

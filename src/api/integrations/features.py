@@ -7,7 +7,13 @@ register_feature(
         key="webhook",
         label="Webhook subscription",
         model="integrations.WebhookSubscription",
-        claims={"identity": provided("field:public_id", "route:webhook-detail")},
+        claims={
+            "identity": provided("field:public_id", "route:webhook-detail"),
+            "validation": provided(
+                "check:integrations.webhooks.validate_destination",
+                "test:tests/integration/test_webhooks.py::test_unsafe_destination_is_rejected_at_creation_and_delivery",
+            ),
+        },
         lifecycle=Lifecycle(
             "flag",
             field="enabled",

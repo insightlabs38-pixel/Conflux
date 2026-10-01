@@ -7,7 +7,15 @@ register_feature(
         key="evaluation_plan",
         label="Evaluation plan",
         model="evaluations.EvaluationPlan",
-        claims={"identity": provided("field:public_id", "route:evaluation-plan-detail")},
+        claims={
+            "identity": provided("field:public_id", "route:evaluation-plan-detail"),
+            "validation": provided(
+                "check:evaluations.models.EvaluationPlan.clean",
+                "check:evaluations.rubric.clean_criteria",
+                "constraint:evaluations.EvaluationPlan.unique_evaluation_plan_name",
+                "test:tests/integration/test_evaluation_api.py::test_rubric_validation_rejects_bad_weights_and_ranges",
+            ),
+        },
         lifecycle=Lifecycle(
             "none",
             note=(

@@ -31,6 +31,19 @@ register_feature(Feature(
 
 Failure codes: `model_missing`, `id_missing`, `id_type`, `id_unique`, `id_editable`, `id_ref`, `bad_ref`, `route_missing`, `route_id`, `route_sequential`, `lifecycle_missing`, `lifecycle_note`, `lifecycle_kind`, `lifecycle_field`, `lifecycle_states`, `lifecycle_unknown_state`, `lifecycle_initial`, `lifecycle_terminal`, `lifecycle_unreachable`, `lifecycle_via`, `lifecycle_hidden`; and for claims `bad_state`, `no_refs`, `no_reason`, `no_owner`, `reason_too_long`, `no_verifier`, `unknown_property`, `unclaimed`.
 
+## Validation and invariants (T02)
+
+Validation is server-side and keyed: a record the domain refuses is refused with a message naming the part that is wrong. `features_validation.verify` checks a `validation` claim that names **where** it is enforced and **what proves it**:
+
+- `check:<dotted path>`: the function, class or model method that enforces an invariant (must resolve);
+- `constraint:<app.Model>.<name>`: a database or model constraint, read from the model's own meta (must exist);
+- `test:<path>::<name>`: a test that sends something invalid and sees it refused (the format is checked at runtime and that the file and the test exist is checked in CI by `check_static(root)`);
+- at least one of `check:` or `constraint:` and at least one `test:`.
+
+It also **derives** two facts that cannot be declared falsely: an unsaved blank record fails `clean_fields()` with a message per required field (`blank_accepted` if it passes, `blank_error` if it raises something else), and `full_clean()` on a blank record never crashes the model's own `clean()` (`blank_crashes`). The page shows, per feature, the refs, the fields a blank record is refused for, the constraints and whether the model checks its own rules. Codes: `bad_ref`, `check_missing`, `constraint_missing`, `test_ref`, `no_enforcement`, `no_test`, `blank_accepted`, `blank_error`, `blank_crashes`; CI: `test_file`, `test_name`.
+
+The probe found one real gap, fixed here: `Submission.clean()` read unset relations and raised `RelatedObjectDoesNotExist` for a blank record; it now leaves that to field validation, which names every required part (`tests/integration/test_feature_validation.py`). Three features had no refusal test and gained one (track, announcement, message).
+
 ## The report
 
 `GET /api/v1/workspaces/{id}/completeness/` (organizers and admins; `Cache-Control: private, no-store`; no write method) returns `{properties[], features[], totals, problems[], ok}`. Each feature carries its derived id type and states, its lifecycle graph, its claims and its findings. The page shows findings first (an alert), then a dense features table with identity and a closed lifecycle per row, and the properties not checked yet behind details.

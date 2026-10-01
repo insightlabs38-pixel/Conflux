@@ -1218,6 +1218,7 @@ class CompletenessFeatureSchema(TypedDict):
     states: list[CompletenessStateSchema]
     lifecycle: CompletenessLifecycleSchema | None
     claims: dict[str, CompletenessClaimSchema]
+    facts: dict[str, dict[str, Any]]
     problems: list[CompletenessProblemSchema]
 
 class InputOfCompletenessFeatureSchema(TypedDict):
@@ -1229,6 +1230,7 @@ class InputOfCompletenessFeatureSchema(TypedDict):
     states: list[InputOfCompletenessStateSchema]
     lifecycle: InputOfCompletenessLifecycleSchema | None
     claims: dict[str, InputOfCompletenessClaimSchema]
+    facts: dict[str, dict[str, Any]]
     problems: list[InputOfCompletenessProblemSchema]
 
 class CompletenessLifecycleSchema(TypedDict):

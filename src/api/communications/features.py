@@ -7,7 +7,13 @@ register_feature(
         key="message",
         label="Message",
         model="communications.Message",
-        claims={"identity": provided("field:public_id")},
+        claims={
+            "identity": provided("field:public_id"),
+            "validation": provided(
+                "check:communications.models.Message.clean",
+                "test:tests/integration/test_feature_validation.py::test_a_message_needs_a_known_audience_and_a_subject_and_leaves_nothing_behind",
+            ),
+        },
         lifecycle=Lifecycle(
             "none",
             note=(

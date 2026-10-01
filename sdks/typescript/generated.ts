@@ -1344,6 +1344,7 @@ export type CompletenessFeatureSchema = {
   states: CompletenessStateSchema[];
   lifecycle: CompletenessLifecycleSchema | null;
   claims: Record<string, CompletenessClaimSchema>;
+  facts: Record<string, Record<string, unknown>>;
   problems: CompletenessProblemSchema[];
 };
 
@@ -1356,6 +1357,7 @@ export type InputOfCompletenessFeatureSchema = {
   states: InputOfCompletenessStateSchema[];
   lifecycle: InputOfCompletenessLifecycleSchema | null;
   claims: Record<string, InputOfCompletenessClaimSchema>;
+  facts: Record<string, Record<string, unknown>>;
   problems: InputOfCompletenessProblemSchema[];
 };
 

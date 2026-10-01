@@ -96,7 +96,8 @@ class Submission(PublicIdModel):
         ]
 
     def clean(self):
-        if self.stage.event_id != self.project.event_id:
+        # A blank record is refused by field validation; this must not crash on unset relations.
+        if self.stage_id and self.project_id and self.stage.event_id != self.project.event_id:
             raise ValidationError("Submission stage must belong to the project's event.")
         if self.current_version_id and self.current_version.submission_id != self.pk:
             raise ValidationError("Current version must belong to this submission.")

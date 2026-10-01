@@ -16,6 +16,7 @@ pytestmark = pytest.mark.django_db
 # A different valid value for every writable setting (the proof that each one can be overridden).
 ALTERNATIVE = {
     "event.name": "Renamed",
+    "approvals.message_send": True,
     "event.description": "A new description",
     "event.timezone": "Europe/Berlin",
     "event.starts_at": "2027-03-06T09:00:00Z",

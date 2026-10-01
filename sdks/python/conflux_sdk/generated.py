@@ -258,6 +258,76 @@ class InputOfApplyToEventInputSchema(TypedDict):
     note: NotRequired[str]
     code: NotRequired[str]
 
+class ApprovalDecisionInput(TypedDict):
+    decision: ApprovalDecisionKind
+    note: NotRequired[str]
+
+class InputOfApprovalDecisionInput(TypedDict):
+    decision: InputOfApprovalDecisionKind
+    note: NotRequired[str]
+
+ApprovalDecisionKind = Literal['approve', 'reject']
+
+InputOfApprovalDecisionKind = Literal['approve', 'reject']
+
+class ApprovalDecisionSchema(TypedDict):
+    actor: str
+    decision: ApprovalDecisionKind
+    note: str
+    at: str
+
+class InputOfApprovalDecisionSchema(TypedDict):
+    actor: str
+    decision: InputOfApprovalDecisionKind
+    note: str
+    at: str
+
+class ApprovalSchema(TypedDict):
+    public_id: str
+    action: str
+    label: str
+    subject: ApprovalSubjectSchema | None
+    summary: list[str]
+    status: ApprovalStatus
+    requested_by: str
+    required_approvals: int
+    approvals: int
+    decisions: list[ApprovalDecisionSchema]
+    expires_at: str
+    created_at: str
+    executed_at: str | None
+    can_decide: bool
+    can_cancel: bool
+
+class InputOfApprovalSchema(TypedDict):
+    public_id: str
+    action: str
+    label: str
+    subject: InputOfApprovalSubjectSchema | None
+    summary: list[str]
+    status: InputOfApprovalStatus
+    requested_by: str
+    required_approvals: int
+    approvals: int
+    decisions: list[InputOfApprovalDecisionSchema]
+    expires_at: str
+    created_at: str
+    executed_at: str | None
+    can_decide: bool
+    can_cancel: bool
+
+ApprovalStatus = Literal['pending', 'approved', 'rejected', 'cancelled', 'expired', 'executed']
+
+InputOfApprovalStatus = Literal['pending', 'approved', 'rejected', 'cancelled', 'expired', 'executed']
+
+class ApprovalSubjectSchema(TypedDict):
+    type: str
+    id: str
+
+class InputOfApprovalSubjectSchema(TypedDict):
+    type: str
+    id: str
+
 class ArchiveExportJobInput(TypedDict):
     mode: NotRequired[ArchiveExportJobInputModeEnum]
     signed: NotRequired[bool]
@@ -826,12 +896,14 @@ class BulkResponse(TypedDict):
     effects: list[Any]
     preview_token: NotRequired[str]
     expires_in: NotRequired[int]
+    approvals: NotRequired[list[dict[str, Any]]]
 
 class InputOfBulkResponse(TypedDict):
     applied: bool
     effects: list[Any]
     preview_token: NotRequired[str]
     expires_in: NotRequired[int]
+    approvals: NotRequired[list[dict[str, Any]]]
 
 COIRelationshipKind = Literal['team', 'institution', 'domain']
 
@@ -2075,6 +2147,28 @@ class InputOfGalleryProjectSchema(TypedDict):
     team: str
     track: str
     repo_url: str
+
+class GateInput(TypedDict):
+    enabled: bool
+
+class InputOfGateInput(TypedDict):
+    enabled: bool
+
+class GateSchema(TypedDict):
+    action: str
+    label: str
+    description: str
+    deciders: list[str]
+    min_approvals: int
+    enabled: bool
+
+class InputOfGateSchema(TypedDict):
+    action: str
+    label: str
+    description: str
+    deciders: list[str]
+    min_approvals: int
+    enabled: bool
 
 class GeneratedConfigurationSchema(TypedDict):
     event: str
@@ -5728,6 +5822,31 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                    'query_params': [],
                                                                                    'request_body': False,
                                                                                    'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_approval_gates': {'method': 'GET',
+                                                                                     'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/approval-gates/',
+                                                                                     'path_params': ['event_public_id',
+                                                                                                     'workspace_public_id'],
+                                                                                     'query_params': [],
+                                                                                     'request_body': False,
+                                                                                     'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_approvals': {'method': 'GET',
+                                                                                'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/approvals/',
+                                                                                'path_params': ['event_public_id',
+                                                                                                'workspace_public_id'],
+                                                                                'query_params': ['action',
+                                                                                                 'limit',
+                                                                                                 'offset',
+                                                                                                 'status'],
+                                                                                'request_body': False,
+                                                                                'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_approvals_approval_public_id': {'method': 'GET',
+                                                                                                   'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/approvals/{approval_public_id}/',
+                                                                                                   'path_params': ['approval_public_id',
+                                                                                                                   'event_public_id',
+                                                                                                                   'workspace_public_id'],
+                                                                                                   'query_params': [],
+                                                                                                   'request_body': False,
+                                                                                                   'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive': {'method': 'GET',
                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/archive/',
                                                                               'path_params': ['event_public_id',
@@ -7488,6 +7607,22 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                  'query_params': [],
                                                                                                                  'request_body': True,
                                                                                                                  'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_approvals_approval_public_id_cancel': {'method': 'POST',
+                                                                                                           'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/approvals/{approval_public_id}/cancel/',
+                                                                                                           'path_params': ['approval_public_id',
+                                                                                                                           'event_public_id',
+                                                                                                                           'workspace_public_id'],
+                                                                                                           'query_params': [],
+                                                                                                           'request_body': False,
+                                                                                                           'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_events_event_public_id_approvals_approval_public_id_decision': {'method': 'POST',
+                                                                                                             'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/approvals/{approval_public_id}/decision/',
+                                                                                                             'path_params': ['approval_public_id',
+                                                                                                                             'event_public_id',
+                                                                                                                             'workspace_public_id'],
+                                                                                                             'query_params': [],
+                                                                                                             'request_body': True,
+                                                                                                             'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_events_event_public_id_archive_export_jobs': {'method': 'POST',
                                                                                            'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/archive/export-jobs/',
                                                                                            'path_params': ['event_public_id',
@@ -8589,6 +8724,14 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                      'query_params': [],
                                                                                                                      'request_body': False,
                                                                                                                      'response_kind': 'json'},
+ 'put_api_v1_workspaces_workspace_public_id_events_event_public_id_approval_gates_action': {'method': 'PUT',
+                                                                                            'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/approval-gates/{action}/',
+                                                                                            'path_params': ['action',
+                                                                                                            'event_public_id',
+                                                                                                            'workspace_public_id'],
+                                                                                            'query_params': [],
+                                                                                            'request_body': True,
+                                                                                            'response_kind': 'json'},
  'put_api_v1_workspaces_workspace_public_id_events_event_public_id_awards_award_public_id_deliberation_projects_project_public_id_stance': {'method': 'PUT',
                                                                                                                                             'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/awards/{award_public_id}/deliberation/projects/{project_public_id}/stance/',
                                                                                                                                             'path_params': ['award_public_id',

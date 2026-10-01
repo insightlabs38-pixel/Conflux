@@ -13,6 +13,8 @@ export type BulkPreview = {
   effects: BulkEffect[];
   preview_token: string;
   expires_in: number;
+  /** Approvals the apply will need first (an event gate is on); see lib/approvals.ts. */
+  approvals?: { action: string; label: string; summary: string[] }[];
 };
 export type BulkApplied = { applied: true; effects: BulkEffect[] };
 
@@ -38,9 +40,25 @@ export function applyBulk(
   });
 }
 
+/** 409 `approval_required`: held until another person approves; not a stale preview. */
+export function needsApproval(error: unknown): boolean {
+  return (
+    error instanceof ApiError &&
+    error.status === 409 &&
+    (error.detail as { code?: string } | undefined)?.code ===
+      "approval_required"
+  );
+}
+/** The sentence the server gave for a held operation. */
+export function approvalMessage(error: unknown): string {
+  const detail = (error as ApiError).detail as { detail?: string } | undefined;
+  return detail?.detail ?? "It needs approval from another person first.";
+}
 /** 409: the preview no longer matches (expired, or the data changed); preview again. */
 export function isStale(error: unknown): boolean {
-  return error instanceof ApiError && error.status === 409;
+  return (
+    error instanceof ApiError && error.status === 409 && !needsApproval(error)
+  );
 }
 /** A refusal that retrying the same request cannot fix (validation, permission). */
 export function isRefusal(error: unknown): boolean {

@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
+from .approvals import require_message_approval
 from .audiences import resolve_audience
 from .emailing import deliver_email
 from .models import Message, MessageRecipient
@@ -60,6 +61,15 @@ def create_inbox_message(*, event, actor, subject, body, audience_kind, audience
     message.save()
     MessageRecipient.objects.bulk_create(
         [MessageRecipient(message=message, user=user) for user in recipients]
+    )
+    require_message_approval(
+        event=event,
+        actor=actor,
+        subject=subject,
+        body=body,
+        audience_kind=audience_kind,
+        audience_params=audience_params,
+        count=len(recipients),
     )
     record_mutation(
         actor=actor,

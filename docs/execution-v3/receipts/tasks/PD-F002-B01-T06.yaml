@@ -1,0 +1,89 @@
+version: 3
+task: PD-F002-B01-T06
+batch: PD-F002-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: frontier-architecture
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 83fa76d
+  head_commit: 83fa76d
+changed_paths:
+- src/api/core/ (approvals.py, approval_views.py, models.py ApprovalGate ApprovalRequest ApprovalDecision, migrations/0004_approvals.py, tasks.py, urls.py)
+- src/api/communications/ (approvals.py policy, services.py gate point, views.py, bulk.py dry run, bulk_views.py, bulk_schema.py, apps.py)
+- src/api/eventconfig/registry.py (setting approvals.message_send), src/api/config/settings.py (sweep, enum names)
+- src/web/lib/approvals.ts, lib/bulk.ts, components/BulkPlanner.tsx (held state), features/operations/ApprovalsPanel.tsx and tests, EventDashboard.tsx, styles/components.css
+- tests/integration/ (test_approvals.py, test_message_approval.py, concurrency/test_approval_races.py, test_event_overrides.py, test_final_archive.py)
+- tests/e2e/ (approvals.spec.ts, tiers.json, weights.json, affected.json)
+- docs/operations/APPROVALS.md, docs/api/BULK_OPERATIONS.md, docs/api/openapi.yaml, sdks generated, spec 002, PRIMITIVE_REGISTRY.yaml
+deliverables:
+- item: Canonical approval/gate contract as a reusable platform primitive
+  result: pass
+  evidence: policies registry, require_approval, dry_run, decide, cancel, sweep and describe in core/approvals.py, three models, six endpoints; an operation adds a policy and one call, never its own approval table
+- item: Stable inputs/outputs, lifecycle, authorization, idempotency/concurrency, errors, extension boundary
+  result: pass
+  evidence: docs/operations/APPROVALS.md; forward-only transition graph under row locks; one pending request per operation by a database constraint; digest-bound, single-use, consumed inside the operation's transaction; asker cannot approve; no deciding role gives 404; expiry enforced on decide and consume plus a sweep; 409 approval_required and approval_closed
+- item: Reference consumer or contract test showing reuse without private coupling
+  result: pass
+  evidence: test_approvals.py gates a toy operation registered outside core and drives the whole lifecycle; sending a message (endpoint and bulk planner) is the real adopter with one approval covering both doors
+- item: Off by default, enabled per event through the eventconfig registry
+  result: pass
+  evidence: setting approvals.message_send (advanced, default false) with a documented write to the gates endpoint; the override-proof and archive-classification guards were extended; with the gate off no existing response changes
+- item: Compatibility and migration expectations documented
+  result: pass
+  evidence: additive migration core/0004_approvals; docs and spec 002 as built
+invariants:
+- item: Approval gates an unchanged operation and never decides an official outcome
+  result: pass
+  evidence: the adopter is message sending only; no score, winner, permission, deadline or publication path calls it
+- item: Server authoritative, audited
+  result: pass
+  evidence: every transition and gate change audited and asserted; the UI only shows can_decide and can_cancel from the server
+- item: No duplicate source of truth
+  result: pass
+  evidence: gate state lives in ApprovalGate and the setting registry only describes it; the bulk planner reuses create_inbox_message rather than its own check
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1680 passed, 29 skipped (the real-database race tests skip on SQLite)
+- command: DATABASE_URL=postgres pytest tests/integration/concurrency/test_approval_races.py test_approvals.py test_message_approval.py
+  result: pass
+  note: 23 on PostgreSQL, run three times clean; races prove one approval is spent once, simultaneous asks share one request and two approvers reach one approval
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check; spectacular --validate --fail-on-warn; makemigrations --check
+  result: pass
+  note: 377 web tests (ApprovalsPanel 4, BulkPlanner held case); static checks and OpenAPI/SDK drift clean
+- command: make e2e-fast
+  result: pass
+  note: read-only, isolated-mutation (incl. approvals and jobs at 390 and 1440) and canary ok; docs/verification/PD-F002-B01/T06-e2e-fast.log
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: ApprovalsPanel (gates, queue, approve, reject, withdraw) and the bulk dialog's held state
+- surface: api
+  result: pass
+  evidence: approvals list, detail, decision, cancel and gates endpoints
+- surface: audit
+  result: pass
+  evidence: lifecycle and gate changes audited, asserted in test_approvals.py
+- surface: docs
+  result: pass
+  evidence: APPROVALS.md, BULK_OPERATIONS.md, spec 002, registry IMPLEMENTED
+- surface: sdk
+  result: pass
+  evidence: "not required; generated clients regenerated, sdk-check clean"
+migrations:
+- core/0004_approvals creates core_approvalgate, core_approvalrequest, core_approvaldecision (additive)
+findings:
+- Review found that an expired request refused on decide was not persisted because the refusal rolled back the same transaction; the expiry is now recorded and reported after commit
+- The browser fixture has one organizer, so the second person's approval is proved by integration tests; the browser spec proves the hold, the visibility, the missing self-approval and the withdrawal
+- A controlled checkbox follows the server answer, so the spec clicks and then asserts the state rather than using check
+limitations:
+- Deciders are not notified; they find requests in Operations > Approvals
+- No delegation, thresholds or gating of the other bulk actions; two different send operations in one batch need one approval each, one after another
+- The request stores a summary and a digest instead of a payload snapshot
+- On a single-organizer event only an admin can approve, so gates stay opt-in
+escalations: []
+next: review

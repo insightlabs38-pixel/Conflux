@@ -78,6 +78,11 @@ class BulkResponse(serializers.Serializer):
     effects = serializers.ListField(child=serializers.JSONField())
     preview_token = serializers.CharField(required=False)
     expires_in = serializers.IntegerField(required=False)
+    approvals = serializers.ListField(
+        child=serializers.DictField(),
+        required=False,
+        help_text="Approvals the apply will need first (a preview only).",
+    )
 
 
 class BulkReceiptSchema(serializers.Serializer):

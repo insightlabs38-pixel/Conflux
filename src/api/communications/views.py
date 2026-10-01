@@ -1,5 +1,6 @@
 from accounts.authentication import CookieSessionAuthentication
 from audit.services import record_mutation
+from core.approvals import ApprovalRequired
 from core.permissions import IsWorkspaceMember
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import transaction
@@ -158,6 +159,8 @@ class MessageListCreateView(OrganizerView):
                 audience_kind=data.validated_data["audience_kind"],
                 audience_params=data.validated_data.get("audience_params", {}),
             )
+        except ApprovalRequired as needed:
+            return needed.respond(request.user)
         except ModelValidationError as exc:
             raise ValidationError(
                 exc.message_dict if hasattr(exc, "message_dict") else exc.messages

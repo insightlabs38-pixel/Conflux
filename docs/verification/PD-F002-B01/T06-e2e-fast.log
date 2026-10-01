@@ -1,0 +1,31 @@
+./scripts/e2e-fast 
+ok   stack health — http://localhost:8080
+ok   reference scenario seed 7 — organizer signs in; event window open
+ok   source freshness — running API matches src/api
+warn leftover fixtures — 6 kept/leftover (`make e2e-fixture-sweep`)
+ok   playwright chromium
+preflight 1.9s
+[iso-event-advanced] exit 0: 1 skipped; 1 passed (7.8s)
+[iso-event-configuration] exit 0: 2 skipped; 2 passed (13.8s)
+[iso-approvals] exit 0: 2 skipped; 2 passed (19.2s)
+[canary-lifecycle] exit 0: 6 skipped; 6 passed (28.8s)
+[iso-jobs] exit 0: 2 skipped; 2 passed (19.8s)
+[iso-bulk-planner] exit 0: 2 skipped; 2 passed (15.7s)
+[canary-scenes] exit 0: 5 passed (16.5s)
+[iso-entity-grid] exit 0: 2 skipped; 2 passed (29.0s)
+[iso-event-modules] exit 0: 1 skipped; 1 passed (14.3s)
+[iso-event-consequences] exit 0: 2 skipped; 2 passed (19.3s)
+[iso-event-presets] exit 0: ✓  3 [desktop] › tests/e2e/event-presets.spec.ts:98:5 › the create form explains a failed format list and recovers on retry (2.5s); -  6 [mobile] › tests/e2e/event-presets.spec.ts:98:5 › the create form explains a failed format list and recovers on retry; 3 skipped; 3 passed (12.2s)
+[iso-event-readiness] exit 0: 2 skipped; 2 passed (16.1s)
+[iso-event-workflow] exit 0: 2 skipped; 2 passed (10.4s)
+[canary-uiv2-organizer] exit 0: 4 skipped; 4 passed (47.0s)
+[iso-profiles] exit 0: 2 skipped; 2 passed (7.0s)
+[iso-event-themes] exit 0: 16 skipped; 16 passed (47.0s)
+[iso-participant-workflow] exit 0: 4 skipped; 4 passed (32.8s)
+[iso-route-drafts] exit 0: 6 skipped; 6 passed (19.2s)
+[read-only] exit 0: ✓    7 [desktop] › tests/e2e/async-operations.spec.ts:108:5 › a failed part is an alert with the reason, and Try again starts a fresh attempt (1.6s); -   73 [mobile] › tests/e2e/async-operations.spec.ts:108:5 › a failed part is an alert with the reason, and Try again starts a fresh attempt; 69 skipped; 107 passed (2.5m)
+[iso-uiv2-judge] exit 0: 4 skipped; 4 passed (13.6s)
+[canary-uiv2-final-states] exit 0: 6 skipped; 6 passed (46.1s)
+[canary-release-integrity] exit 0: 4 skipped; 4 passed (2.9s)
+[iso-pvs] exit 0: 5 skipped; 15 passed (40.2s)
+== read-only: ok, isolated-mutation: ok, canary: ok

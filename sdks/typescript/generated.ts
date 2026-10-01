@@ -272,6 +272,80 @@ export type ApplyToEventInputSchema = { note?: string; code?: string };
 
 export type InputOfApplyToEventInputSchema = { note?: string; code?: string };
 
+export type ApprovalDecisionInput = {
+  decision: ApprovalDecisionKind;
+  note?: string;
+};
+
+export type InputOfApprovalDecisionInput = {
+  decision: InputOfApprovalDecisionKind;
+  note?: string;
+};
+
+export type ApprovalDecisionKind = "approve" | "reject";
+
+export type InputOfApprovalDecisionKind = "approve" | "reject";
+
+export type ApprovalDecisionSchema = {
+  actor: string;
+  decision: ApprovalDecisionKind;
+  note: string;
+  at: string;
+};
+
+export type InputOfApprovalDecisionSchema = {
+  actor: string;
+  decision: InputOfApprovalDecisionKind;
+  note: string;
+  at: string;
+};
+
+export type ApprovalSchema = {
+  public_id: string;
+  action: string;
+  label: string;
+  subject: ApprovalSubjectSchema | null;
+  summary: string[];
+  status: ApprovalStatus;
+  requested_by: string;
+  required_approvals: number;
+  approvals: number;
+  decisions: ApprovalDecisionSchema[];
+  expires_at: string;
+  created_at: string;
+  executed_at: string | null;
+  can_decide: boolean;
+  can_cancel: boolean;
+};
+
+export type InputOfApprovalSchema = {
+  public_id: string;
+  action: string;
+  label: string;
+  subject: InputOfApprovalSubjectSchema | null;
+  summary: string[];
+  status: InputOfApprovalStatus;
+  requested_by: string;
+  required_approvals: number;
+  approvals: number;
+  decisions: InputOfApprovalDecisionSchema[];
+  expires_at: string;
+  created_at: string;
+  executed_at: string | null;
+  can_decide: boolean;
+  can_cancel: boolean;
+};
+
+export type ApprovalStatus =
+  "pending" | "approved" | "rejected" | "cancelled" | "expired" | "executed";
+
+export type InputOfApprovalStatus =
+  "pending" | "approved" | "rejected" | "cancelled" | "expired" | "executed";
+
+export type ApprovalSubjectSchema = { type: string; id: string };
+
+export type InputOfApprovalSubjectSchema = { type: string; id: string };
+
 export type ArchiveExportJobInput = {
   mode?: ArchiveExportJobInputModeEnum;
   signed?: boolean;
@@ -927,6 +1001,7 @@ export type BulkResponse = {
   effects: unknown[];
   preview_token?: string;
   expires_in?: number;
+  approvals?: Record<string, unknown>[];
 };
 
 export type InputOfBulkResponse = {
@@ -934,6 +1009,7 @@ export type InputOfBulkResponse = {
   effects: unknown[];
   preview_token?: string;
   expires_in?: number;
+  approvals?: Record<string, unknown>[];
 };
 
 export type COIRelationshipKind = "team" | "institution" | "domain";
@@ -2271,6 +2347,28 @@ export type InputOfGalleryProjectSchema = {
   team: string;
   track: string;
   repo_url: string;
+};
+
+export type GateInput = { enabled: boolean };
+
+export type InputOfGateInput = { enabled: boolean };
+
+export type GateSchema = {
+  action: string;
+  label: string;
+  description: string;
+  deciders: string[];
+  min_approvals: number;
+  enabled: boolean;
+};
+
+export type InputOfGateSchema = {
+  action: string;
+  label: string;
+  description: string;
+  deciders: string[];
+  min_approvals: number;
+  enabled: boolean;
 };
 
 export type GeneratedConfigurationSchema = {
@@ -6008,6 +6106,70 @@ export interface Operations {
       body: InputOfApplicationDecisionInputSchema;
     };
     response: EventApplication;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_approval_gates: {
+    request: { path: { event_public_id: string; workspace_public_id: string } };
+    response: GateSchema[];
+  };
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_approval_gates_action: {
+    request: {
+      path: {
+        action: string;
+        event_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfGateInput;
+    };
+    response: GateSchema;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_approvals: {
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      query?: {
+        action?: string;
+        limit?: number;
+        offset?: number;
+        status?:
+          | "approved"
+          | "cancelled"
+          | "executed"
+          | "expired"
+          | "pending"
+          | "rejected";
+      };
+    };
+    response: ApprovalSchema[];
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_approvals_approval_public_id: {
+    request: {
+      path: {
+        approval_public_id: string;
+        event_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: ApprovalSchema;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_approvals_approval_public_id_cancel: {
+    request: {
+      path: {
+        approval_public_id: string;
+        event_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: ApprovalSchema;
+  };
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_approvals_approval_public_id_decision: {
+    request: {
+      path: {
+        approval_public_id: string;
+        event_public_id: string;
+        workspace_public_id: string;
+      };
+      body: InputOfApprovalDecisionInput;
+    };
+    response: ApprovalSchema;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive: {
     request: {
@@ -9888,6 +10050,71 @@ export const operations = {
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/applications/{application_public_id}/decide/",
       path_params: [
         "application_public_id",
+        "event_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_approval_gates:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/approval-gates/",
+      path_params: ["event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  put_api_v1_workspaces_workspace_public_id_events_event_public_id_approval_gates_action:
+    {
+      method: "PUT",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/approval-gates/{action}/",
+      path_params: ["action", "event_public_id", "workspace_public_id"],
+      query_params: [],
+      request_body: true,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_approvals: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/approvals/",
+    path_params: ["event_public_id", "workspace_public_id"],
+    query_params: ["action", "limit", "offset", "status"],
+    request_body: false,
+    response_kind: "json",
+  },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_approvals_approval_public_id:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/approvals/{approval_public_id}/",
+      path_params: [
+        "approval_public_id",
+        "event_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_approvals_approval_public_id_cancel:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/approvals/{approval_public_id}/cancel/",
+      path_params: [
+        "approval_public_id",
+        "event_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
+      request_body: false,
+      response_kind: "json",
+    },
+  post_api_v1_workspaces_workspace_public_id_events_event_public_id_approvals_approval_public_id_decision:
+    {
+      method: "POST",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/approvals/{approval_public_id}/decision/",
+      path_params: [
+        "approval_public_id",
         "event_public_id",
         "workspace_public_id",
       ],

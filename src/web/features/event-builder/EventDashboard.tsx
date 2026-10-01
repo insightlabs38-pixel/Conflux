@@ -19,6 +19,7 @@ import { CommunityVotingBuilder } from "../community-voting/CommunityVotingBuild
 import { WebhooksPanel } from "../integrations/WebhooksPanel";
 import { AwardsPanel } from "../awards/AwardsPanel";
 import { OperationsCenter } from "../operations/OperationsCenter";
+import { ApprovalsPanel } from "../operations/ApprovalsPanel";
 import { JobsPanel } from "../operations/JobsPanel";
 import { OperatorConsole } from "../operations/OperatorConsole";
 import { CommunicationsPanel } from "../communications/CommunicationsPanel";
@@ -843,6 +844,18 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
                   content: (
                     <OperationsCenter
                       key={`operations-${selected.public_id}`}
+                      workspaceId={workspaceId}
+                      eventId={selected.public_id}
+                    />
+                  ),
+                },
+                {
+                  id: "ApprovalsPanel",
+                  label: "Approvals",
+                  description: "Second-person gates and waiting requests",
+                  content: (
+                    <ApprovalsPanel
+                      key={`approvals-${selected.public_id}`}
                       workspaceId={workspaceId}
                       eventId={selected.public_id}
                     />

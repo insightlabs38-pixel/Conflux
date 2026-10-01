@@ -806,7 +806,7 @@ primitives:
 - id: APPROVAL
   name: Approval/gate
   owner_task: PD-F002-B01-T06
-  status: PLANNED
+  status: IMPLEMENTED
   consumer_count: 145
   consumers:
   - PD-F001-B02-T02

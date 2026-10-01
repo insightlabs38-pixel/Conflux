@@ -125,6 +125,50 @@ describe("BulkPlanner", () => {
     await act(async () => root.unmount());
   });
 
+  it("says when a second person must approve, and holds without calling it stale", async () => {
+    const approval = {
+      code: "approval_required",
+      detail: "Sending a message needs approval from another person first.",
+    };
+    const { container, calls, onApplied, root } = await mount((call) =>
+      call.body.preview_token
+        ? jsonResponse(409, { ...approval, approval: { public_id: "a1" } })
+        : jsonResponse(200, {
+            ...PREVIEW,
+            approvals: [
+              {
+                action: "message_send",
+                label: "Sending a message",
+                summary: [],
+              },
+            ],
+          }),
+    );
+    expect(container.querySelector("[role=note]")?.textContent).toContain(
+      "Another person has to approve this first",
+    );
+    await act(async () => button(container, "Move to Hardware").click());
+    await settle();
+    expect(container.querySelector("[role=status]")?.textContent).toContain(
+      "Waiting for approval",
+    );
+    expect(container.textContent).toContain(
+      "needs approval from another person first",
+    );
+    expect(container.textContent).not.toContain(
+      "Things changed since the preview",
+    );
+    expect(onApplied).not.toHaveBeenCalled();
+    // Once approved, applying again re-sends the same preview.
+    await act(async () => button(container, "Apply again").click());
+    await settle();
+    expect(calls.at(-1)!.body).toEqual({
+      operations: OPS,
+      preview_token: "tok",
+    });
+    await act(async () => root.unmount());
+  });
+
   it("explains a refusal without offering to apply", async () => {
     const { container, root } = await mount(() =>
       jsonResponse(400, {

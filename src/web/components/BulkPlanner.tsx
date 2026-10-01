@@ -4,7 +4,9 @@ import {
   bulkUrl,
   describeEffect,
   isRefusal,
+  approvalMessage,
   isStale,
+  needsApproval,
   previewBulk,
   type BulkApplied,
   type BulkOperation,
@@ -19,6 +21,7 @@ type Phase =
   | { kind: "ready"; preview: BulkPreview }
   | { kind: "applying"; preview: BulkPreview }
   | { kind: "applied"; result: BulkApplied }
+  | { kind: "held"; preview: BulkPreview; message: string }
   | { kind: "stale"; message: string }
   | { kind: "refused"; message: string }
   | { kind: "unsure"; preview: BulkPreview; message: string };
@@ -80,7 +83,9 @@ export function BulkPlanner({
     } catch (cause) {
       const message =
         cause instanceof Error ? cause.message : "Request failed.";
-      if (isStale(cause)) setPhase({ kind: "stale", message });
+      if (needsApproval(cause))
+        setPhase({ kind: "held", preview: from, message });
+      else if (isStale(cause)) setPhase({ kind: "stale", message });
       else if (isRefusal(cause)) setPhase({ kind: "refused", message });
       else setPhase({ kind: "unsure", preview: from, message });
     }
@@ -112,6 +117,13 @@ export function BulkPlanner({
               <li key={index}>{describeEffect(effect, names)}</li>
             ))}
           </ul>
+          {phase.preview.approvals?.length ? (
+            <p role="note">
+              Another person has to approve this first:{" "}
+              {phase.preview.approvals.map((a) => a.label).join(", ")}. Applying
+              asks for that approval and changes nothing yet.
+            </p>
+          ) : null}
           <p className="cx-muted">
             All or nothing: if any step fails, nothing is changed. The preview
             is valid for {Math.round(phase.preview.expires_in / 60)} minutes.
@@ -129,6 +141,17 @@ export function BulkPlanner({
           <p className="cx-muted">
             The change is on the audit record, and the receipt is listed under
             the event&apos;s bulk operations.
+          </p>
+        </>
+      )}
+      {phase.kind === "held" && (
+        <>
+          <p role="status">
+            Waiting for approval. Nothing was applied: {phase.message}
+          </p>
+          <p>
+            Once another person approves it under Operations, apply again with
+            the same preview.
           </p>
         </>
       )}
@@ -167,6 +190,9 @@ export function BulkPlanner({
         )}
         {phase.kind === "unsure" && (
           <Button onClick={() => void apply(phase.preview)}>Try again</Button>
+        )}
+        {phase.kind === "held" && (
+          <Button onClick={() => void apply(phase.preview)}>Apply again</Button>
         )}
         {(phase.kind === "ready" || phase.kind === "applying") && (
           <Button

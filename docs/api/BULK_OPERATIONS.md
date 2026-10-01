@@ -53,3 +53,7 @@ Rollback is whole-batch and automatic: a failure at any step, a stale preview or
 ## In the web
 
 Select projects in the Projects list (Participants > Projects), pick a track and **Preview move**. The dialog states the exact effects ("Move 3 projects to Hardware (1 from no track, 2 from Software)"), applies on an explicit button, shows the receipt, asks for a new preview when the old one is stale, and on a lost connection offers a retry of the same preview (a replay never applies twice). The reusable pieces are `lib/bulk.ts` and `components/BulkPlanner.tsx`.
+
+## Approvals
+
+When an event has turned on an approval gate for an action (today: `send`, see [APPROVALS.md](../operations/APPROVALS.md)), a preview lists it under `approvals` and applying without an approval answers **409 `approval_required`** with the pending request; nothing is applied. After another person approves it, send the same apply again with the same preview token. This 409 is not a stale preview.

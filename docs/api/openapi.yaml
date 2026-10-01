@@ -1958,6 +1958,284 @@ paths:
               schema:
                 $ref: '#/components/schemas/EventApplication'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/approval-gates/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_approval_gates
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GateSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/approval-gates/{action}/:
+    put:
+      operationId: put_api_v1_workspaces_workspace_public_id_events_event_public_id_approval_gates_action
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: action
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GateInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GateInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GateInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GateSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/approvals/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_approvals
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: query
+        name: action
+        schema:
+          type: string
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: limit
+        schema:
+          type: integer
+      - in: query
+        name: offset
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - approved
+          - cancelled
+          - executed
+          - expired
+          - pending
+          - rejected
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApprovalSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/approvals/{approval_public_id}/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_approvals_approval_public_id
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: approval_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/approvals/{approval_public_id}/cancel/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_approvals_approval_public_id_cancel
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: approval_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/approvals/{approval_public_id}/decision/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_approvals_approval_public_id_decision
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: path
+        name: approval_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalDecisionInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ApprovalDecisionInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ApprovalDecisionInput'
+        required: true
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/archive/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_archive
@@ -17840,6 +18118,127 @@ components:
         code:
           type: string
           maxLength: 32
+    ApprovalDecisionInput:
+      type: object
+      properties:
+        decision:
+          $ref: '#/components/schemas/ApprovalDecisionKind'
+        note:
+          type: string
+          maxLength: 500
+      required:
+      - decision
+    ApprovalDecisionKind:
+      enum:
+      - approve
+      - reject
+      type: string
+      description: |-
+        * `approve` - Approve
+        * `reject` - Reject
+    ApprovalDecisionSchema:
+      type: object
+      properties:
+        actor:
+          type: string
+        decision:
+          $ref: '#/components/schemas/ApprovalDecisionKind'
+        note:
+          type: string
+        at:
+          type: string
+          format: date-time
+      required:
+      - actor
+      - at
+      - decision
+      - note
+    ApprovalSchema:
+      type: object
+      properties:
+        public_id:
+          type: string
+          format: uuid
+        action:
+          type: string
+        label:
+          type: string
+        subject:
+          allOf:
+          - $ref: '#/components/schemas/ApprovalSubjectSchema'
+          nullable: true
+        summary:
+          type: array
+          items:
+            type: string
+        status:
+          $ref: '#/components/schemas/ApprovalStatus'
+        requested_by:
+          type: string
+        required_approvals:
+          type: integer
+        approvals:
+          type: integer
+        decisions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApprovalDecisionSchema'
+        expires_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        executed_at:
+          type: string
+          format: date-time
+          nullable: true
+        can_decide:
+          type: boolean
+        can_cancel:
+          type: boolean
+      required:
+      - action
+      - approvals
+      - can_cancel
+      - can_decide
+      - created_at
+      - decisions
+      - executed_at
+      - expires_at
+      - label
+      - public_id
+      - requested_by
+      - required_approvals
+      - status
+      - subject
+      - summary
+    ApprovalStatus:
+      enum:
+      - pending
+      - approved
+      - rejected
+      - cancelled
+      - expired
+      - executed
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `approved` - Approved
+        * `rejected` - Rejected
+        * `cancelled` - Cancelled
+        * `expired` - Expired
+        * `executed` - Executed
+    ApprovalSubjectSchema:
+      type: object
+      properties:
+        type:
+          type: string
+        id:
+          type: string
+      required:
+      - id
+      - type
     ArchiveExportJobInput:
       type: object
       properties:
@@ -18831,6 +19230,12 @@ components:
           type: string
         expires_in:
           type: integer
+        approvals:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          description: Approvals the apply will need first (a preview only).
       required:
       - applied
       - effects
@@ -21013,6 +21418,37 @@ components:
       - team
       - title
       - track
+    GateInput:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+      required:
+      - enabled
+    GateSchema:
+      type: object
+      properties:
+        action:
+          type: string
+        label:
+          type: string
+        description:
+          type: string
+        deciders:
+          type: array
+          items:
+            type: string
+        min_approvals:
+          type: integer
+        enabled:
+          type: boolean
+      required:
+      - action
+      - deciders
+      - description
+      - enabled
+      - label
+      - min_approvals
     GeneratedConfigurationSchema:
       type: object
       properties:

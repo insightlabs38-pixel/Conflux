@@ -12,6 +12,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from artifacts.models import ArtifactKind
+from core import approvals
 from eligibility.models import EligibilityRules
 from events.models import Event, EventRegistrationSettings, EventStatus, RegistrationMode
 from rest_framework import serializers
@@ -308,6 +309,20 @@ SPECS = [
         lambda e: _rules(e).require_clearance,
         False,
         _w(_RULES, "require_clearance"),
+    ),
+    SettingSpec(
+        "approvals.message_send",
+        "core",
+        ADVANCED,
+        "Approve messages before they are sent",
+        "Another organizer or admin must confirm a message and its audience before it is sent. "
+        "Off by default; it never changes what a message says or who receives it.",
+        {"type": "boolean"},
+        lambda e: approvals.gate_enabled(e, "message_send"),
+        False,
+        Write(
+            "PUT", "workspaces/{workspace}/events/{event}/approval-gates/message_send/", "enabled"
+        ),
     ),
     SettingSpec(
         "workflow.source",

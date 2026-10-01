@@ -153,3 +153,97 @@ class JobArtifact(models.Model):
     class Meta:
         constraints = [models.UniqueConstraint(fields=["job", "name"], name="unique_job_artifact")]
         ordering = ["id"]
+
+
+class ApprovalGate(models.Model):
+    """Whether one registered operation needs approval in one event (PD-F002-B01-T06).
+
+    Off by default: no row, or `enabled=False`, means the operation behaves exactly as before.
+    """
+
+    event = models.ForeignKey(
+        "events.Event", on_delete=models.CASCADE, related_name="approval_gates"
+    )
+    action = models.SlugField(max_length=60)
+    enabled = models.BooleanField(default=False)
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["event", "action"], name="unique_gate")]
+
+
+class ApprovalRequest(PublicIdModel):
+    """One request to perform one exact operation (PD-F002-B01-T06).
+
+    `digest` binds the approval to the operation's content, so an approval can never be spent on
+    something other than what the approvers read in `summary`. Transitions only follow
+    `core.approvals.TRANSITIONS`, under a row lock.
+    """
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        APPROVED = "approved", "Approved"
+        REJECTED = "rejected", "Rejected"
+        CANCELLED = "cancelled", "Cancelled"
+        EXPIRED = "expired", "Expired"
+        EXECUTED = "executed", "Executed"
+
+    workspace = models.ForeignKey(
+        "workspaces.Workspace", on_delete=models.CASCADE, related_name="approval_requests"
+    )
+    event = models.ForeignKey(
+        "events.Event", on_delete=models.CASCADE, related_name="approval_requests"
+    )
+    action = models.SlugField(max_length=60)
+    subject_type = models.SlugField(max_length=60, blank=True)
+    subject_id = models.CharField(max_length=64, blank=True)
+    summary = models.JSONField(default=list)
+    digest = models.CharField(max_length=64)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
+    requested_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="approval_requests"
+    )
+    required_approvals = models.PositiveSmallIntegerField(default=1)
+    expires_at = models.DateTimeField()
+    closed_at = models.DateTimeField(null=True, blank=True)
+    executed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event", "action", "digest"],
+                condition=models.Q(status="pending"),
+                name="one_pending_approval_per_operation",
+            )
+        ]
+        indexes = [
+            models.Index(fields=["event", "status", "-created_at"]),
+            models.Index(fields=["event", "action", "digest", "status"]),
+        ]
+        ordering = ["-created_at", "-id"]
+
+
+class ApprovalDecision(models.Model):
+    """One person's answer on a request; a person decides once."""
+
+    class Decision(models.TextChoices):
+        APPROVE = "approve", "Approve"
+        REJECT = "reject", "Reject"
+
+    request = models.ForeignKey(ApprovalRequest, on_delete=models.CASCADE, related_name="decisions")
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="approval_decisions"
+    )
+    decision = models.CharField(max_length=8, choices=Decision.choices)
+    note = models.CharField(max_length=500, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["request", "actor"], name="unique_approval_decision")
+        ]
+        ordering = ["id"]

@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import timedelta
 
 from audit.services import diff_snapshots, record_mutation, snapshot_fields
+from core import approvals
 from django.core import signing
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -242,11 +243,15 @@ def run_bulk(*, event, actor, operations, preview_token=None):
         with transaction.atomic():
             # Every handler is DB-only: the preview savepoint must also roll back
             # domain/audit intent, and must never initiate external delivery.
-            effects = _execute(event, actor, operations)
-            if not claim:
+            if claim:
+                effects = _execute(event, actor, operations)
+                if claim["effects"] != _digest(effects):
+                    raise StalePreview("Preview effects changed; preview again.")
+            else:
+                # A preview shows which approvals the apply will need instead of failing on them.
+                with approvals.dry_run() as needed:
+                    effects = _execute(event, actor, operations)
                 transaction.set_rollback(True)
-            elif claim["effects"] != _digest(effects):
-                raise StalePreview("Preview effects changed; preview again.")
         if not claim:
             token = signing.dumps(
                 {
@@ -256,12 +261,15 @@ def run_bulk(*, event, actor, operations, preview_token=None):
                 },
                 salt=SALT,
             )
-            return {
+            preview = {
                 "applied": False,
                 "effects": effects,
                 "preview_token": token,
                 "expires_in": TOKEN_TTL,
             }
+            if needed:
+                preview["approvals"] = needed
+            return preview
         result = {"applied": True, "effects": effects}
         receipt = BulkReceipt.objects.create(
             event=event, actor=actor, token_digest=token_digest, result=result

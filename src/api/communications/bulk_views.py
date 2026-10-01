@@ -1,3 +1,4 @@
+from core.approvals import ApprovalRequired
 from core.pagination import page_params, paged_response
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError
@@ -23,6 +24,8 @@ class BulkOperationsView(OrganizerView):
             )
         except StalePreview as exc:
             return Response({"detail": str(exc)}, status=409)
+        except ApprovalRequired as needed:
+            return needed.respond(request.user)
         except (ModelValidationError, ValueError, IntegrityError, OverflowError) as exc:
             detail = (
                 exc.messages

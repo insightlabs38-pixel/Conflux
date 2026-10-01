@@ -64,9 +64,10 @@
         "src/api/eligibility/*",
         "src/api/core/job*",
         "src/api/core/tasks.py",
-        "src/api/integrations/archive*"
+        "src/api/integrations/archive*",
+        "src/api/core/approval*"
       ],
-      "specs": ["uiv2-organizer", "pvs", "uiv2-surfaces", "jobs"]
+      "specs": ["uiv2-organizer", "pvs", "uiv2-surfaces", "jobs", "approvals"]
     },
     {
       "paths": [

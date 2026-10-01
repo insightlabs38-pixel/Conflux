@@ -1,6 +1,6 @@
 from celery import shared_task
 
-from . import jobs
+from . import approvals, jobs
 
 
 @shared_task(name="core.tasks.run_job")
@@ -13,3 +13,8 @@ def run_job(public_id):
 @shared_task(name="core.tasks.sweep_jobs")
 def sweep_jobs():
     return jobs.sweep()
+
+
+@shared_task(name="core.tasks.sweep_approvals")
+def sweep_approvals():
+    return approvals.sweep()

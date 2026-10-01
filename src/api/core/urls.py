@@ -2,6 +2,14 @@ from accounts.credential_views import CredentialRevokeView, CredentialView
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView
 
+from .approval_views import (
+    ApprovalCancelView,
+    ApprovalDecisionView,
+    ApprovalDetailView,
+    ApprovalGateListView,
+    ApprovalGateView,
+    ApprovalListView,
+)
 from .entity_views import EntityCatalogueView, EntityQueryView
 from .job_views import JobArtifactView, JobCancelView, JobDetailView, JobListView
 from .saved_view_views import SavedViewDetailView, SavedViewListView, SavedViewRunView
@@ -44,6 +52,36 @@ urlpatterns = [
         "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/views/<uuid:view_public_id>/run/",
         SavedViewRunView.as_view(),
         name="saved-view-run",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/approvals/",
+        ApprovalListView.as_view(),
+        name="approval-list",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/approvals/<uuid:approval_public_id>/",
+        ApprovalDetailView.as_view(),
+        name="approval-detail",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/approvals/<uuid:approval_public_id>/decision/",
+        ApprovalDecisionView.as_view(),
+        name="approval-decision",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/approvals/<uuid:approval_public_id>/cancel/",
+        ApprovalCancelView.as_view(),
+        name="approval-cancel",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/approval-gates/",
+        ApprovalGateListView.as_view(),
+        name="approval-gate-list",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/approval-gates/<slug:action>/",
+        ApprovalGateView.as_view(),
+        name="approval-gate",
     ),
     path("workspaces/<uuid:workspace_public_id>/jobs/", JobListView.as_view(), name="job-list"),
     path(

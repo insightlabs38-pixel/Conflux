@@ -6,6 +6,7 @@ from . import (
     jobs,
     manifest,
     notifications,
+    preview_context,
     previews,
     rich,
     threads,
@@ -66,6 +67,12 @@ CAPABILITIES = (
         "Notification category",
         "A kind of notice people tune (`core.notifications`).",
         _labels(lambda: notifications.CATEGORIES),
+    ),
+    (
+        "preview_surface",
+        "Preview surface",
+        "Something previewed as a role, a time or a version (`core.preview_context`).",
+        _labels(lambda: preview_context.SURFACES),
     ),
     (
         "rich_profile",

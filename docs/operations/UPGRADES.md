@@ -11,6 +11,10 @@ Additive only: migrations `core/0002_saved_views`, `0003_jobs`, `0004_approvals`
 
 Additive only. One migration, `core/0006_notification_preferences`, adds a table that stays empty until a person changes a notification choice; until then every category keeps its default, so mail goes out exactly as before, and a rollback to the previous image leaves the table unused. No new Celery task or beat entry, so the worker and beat need no restart for this batch. Existing audit rows, job results and configuration history are unchanged (older rows simply have no provenance). New read-only endpoints (rich preview, artifact preview, version history and comparison, notification preferences, extensions) appear in the OpenAPI contract and the generated SDKs. **Startup now runs the extension manifest check**: `manage.py check` (so `migrate` and `runserver`) fails with `core.manifest.<code>` when a source declares something that is not registered, a requirement is unresolved, or a manifest asks for an unsupported `api_version`. A deployment that adds its own registry entries should declare them in a `<app>/manifest.py`; an entry that is registered but not declared is only a warning. See [extensions](EXTENSIONS.md) and [shared primitives](../architecture/SHARED_PRIMITIVES.md).
 
+## Moving to a build with preview contexts (PD-F002-B03)
+
+Additive only: no migration, no new Celery task and no change to an existing endpoint. One new read-only endpoint, `POST /api/v1/workspaces/{id}/preview-as/{surface}/` (organizers and admins), appears in the OpenAPI contract and the generated SDKs; it stores and sends nothing. The extensions inventory gains a `preview_surface` capability, and a deployment that registers its own preview surface must declare it in its `manifest.py` or `manage.py check` fails. See [preview contexts](PREVIEW_CONTEXT.md).
+
 ## Application startup: normal migrations, no destructive hacks
 
 `infra/api.Dockerfile`'s entrypoint runs, in order, every time the `app`

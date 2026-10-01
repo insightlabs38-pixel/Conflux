@@ -6,7 +6,8 @@ class FormsConfig(AppConfig):
     name = "forms"
 
     def ready(self):
-        from . import versions
+        from . import preview, versions
 
         versions.register()
+        preview.register()
         from . import manifest  # noqa: F401 - declares what this app provides

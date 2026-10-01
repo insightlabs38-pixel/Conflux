@@ -26,9 +26,14 @@ def field_scopes(field):
     return set(field.get("visible_to", ["participant", "judge", "organizer"]))
 
 
-def field_visible(field, scope, answers):
+def field_in_scope(field, scope):
+    """Whether this kind of person is ever shown the field (before its condition is considered)."""
     scopes = field_scopes(field)
-    if scope not in scopes and "public" not in scopes:
+    return scope in scopes or "public" in scopes
+
+
+def field_visible(field, scope, answers):
+    if not field_in_scope(field, scope):
         return False
     condition = field.get("visible_if")
     return condition is None or answers.get(condition["field"]) == condition["equals"]

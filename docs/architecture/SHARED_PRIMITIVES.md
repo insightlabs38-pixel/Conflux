@@ -1,6 +1,6 @@
 # Shared primitives
 
-Sixteen platform primitives that features build on instead of adding bespoke screens, tables and endpoints: eight in PD-F002-B01 and eight in PD-F002-B02 (below). Each is a registry plus, where it has one, a generic endpoint family, lives in the `core` app (web code in `src/web/lib` and `src/web/components`), and has one guide.
+Seventeen platform primitives that features build on instead of adding bespoke screens, tables and endpoints: eight in PD-F002-B01, eight in PD-F002-B02 and one in PD-F002-B03 (below). Each is a registry plus, where it has one, a generic endpoint family, lives in the `core` app (web code in `src/web/lib` and `src/web/components`), and has one guide.
 
 | Primitive   | What a feature registers                                                 | Stored state                                          | Guide                                        |
 | ----------- | ------------------------------------------------------------------------ | ----------------------------------------------------- | -------------------------------------------- |
@@ -17,16 +17,17 @@ Sixteen platform primitives that features build on instead of adding bespoke scr
 
 These are mostly stateless: they validate, render, compare, explain and describe, and the server stays the only authority.
 
-| Primitive          | What a feature registers or calls                                                        | Stored state             | Guide                                                 |
-| ------------------ | ---------------------------------------------------------------------------------------- | ------------------------ | ----------------------------------------------------- |
-| SCHEMA_EDITOR      | a bounded JSON Schema in the supported subset; the browser draws it with `SchemaForm`    | none                     | [SCHEMA_SUBSET](SCHEMA_SUBSET.md)                     |
-| RICH_DOC           | a content profile (`core.rich`); text is rendered by the server to a closed node tree    | none                     | [RICH_CONTENT](../operations/RICH_CONTENT.md)         |
-| ARTIFACT_PREVIEW   | a preview source (`previews.register_source`) returning a bounded descriptor             | none                     | [ARTIFACT_PREVIEW](../operations/ARTIFACT_PREVIEW.md) |
-| NOTIFICATIONS      | a category (`notifications.register_category`) and one `wants()` call at delivery        | `NotificationPreference` | [NOTIFICATIONS](../operations/NOTIFICATIONS.md)       |
-| VERSION_DIFF       | a version source (`version_diff.register_source`) listing and loading versions           | none                     | [VERSION_DIFF](../operations/VERSION_DIFF.md)         |
-| POLICY_EXPLAIN     | an adapter building an `explanation` from a decision, never deciding                     | none                     | [EXPLANATIONS](../operations/EXPLANATIONS.md)         |
-| AUDIT_PROVENANCE   | `provenance.envelope` and `attach` on a job result or audit row                          | none (in existing rows)  | [PROVENANCE](../operations/PROVENANCE.md)             |
-| EXTENSION_MANIFEST | a `<app>/manifest.py` declaring what the app provides and needs, imported from `ready()` | none                     | [EXTENSIONS](../operations/EXTENSIONS.md)             |
+| Primitive                     | What a feature registers or calls                                                                                         | Stored state             | Guide                                                 |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------------------ | ----------------------------------------------------- |
+| SCHEMA_EDITOR                 | a bounded JSON Schema in the supported subset; the browser draws it with `SchemaForm`                                     | none                     | [SCHEMA_SUBSET](SCHEMA_SUBSET.md)                     |
+| RICH_DOC                      | a content profile (`core.rich`); text is rendered by the server to a closed node tree                                     | none                     | [RICH_CONTENT](../operations/RICH_CONTENT.md)         |
+| ARTIFACT_PREVIEW              | a preview source (`previews.register_source`) returning a bounded descriptor                                              | none                     | [ARTIFACT_PREVIEW](../operations/ARTIFACT_PREVIEW.md) |
+| NOTIFICATIONS                 | a category (`notifications.register_category`) and one `wants()` call at delivery                                         | `NotificationPreference` | [NOTIFICATIONS](../operations/NOTIFICATIONS.md)       |
+| VERSION_DIFF                  | a version source (`version_diff.register_source`) listing and loading versions                                            | none                     | [VERSION_DIFF](../operations/VERSION_DIFF.md)         |
+| POLICY_EXPLAIN                | an adapter building an `explanation` from a decision, never deciding                                                      | none                     | [EXPLANATIONS](../operations/EXPLANATIONS.md)         |
+| AUDIT_PROVENANCE              | `provenance.envelope` and `attach` on a job result or audit row                                                           | none (in existing rows)  | [PROVENANCE](../operations/PROVENANCE.md)             |
+| EXTENSION_MANIFEST            | a `<app>/manifest.py` declaring what the app provides and needs, imported from `ready()`                                  | none                     | [EXTENSIONS](../operations/EXTENSIONS.md)             |
+| PREVIEW_CONTEXT (PD-F002-B03) | a `Surface` (`preview_context.register_surface`): the roles it can be viewed as, an optional version source and `resolve` | none                     | [PREVIEW_CONTEXT](../operations/PREVIEW_CONTEXT.md)   |
 
 A new registry in this family is also a **capability** of the extension manifest (`manifest.register_capability`), so adding one entry means adding it to its app's manifest; `manage.py check` fails until the two agree.
 

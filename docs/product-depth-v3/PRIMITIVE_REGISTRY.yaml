@@ -3173,7 +3173,7 @@ primitives:
 - id: PREVIEW_CONTEXT
   name: Preview-as-role/as-of/frozen context
   owner_task: PD-F002-B03-T01
-  status: PLANNED
+  status: IMPLEMENTED
   consumer_count: 73
   consumers:
   - PD-F002-B01-T04

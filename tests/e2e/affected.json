@@ -247,6 +247,17 @@
         "src/api/core/apps.py"
       ],
       "specs": ["extensions"]
+    },
+    {
+      "paths": [
+        "src/web/lib/previewContext*",
+        "src/web/components/PreviewBar*",
+        "src/web/features/form-builder/*",
+        "src/api/core/preview_context*",
+        "src/api/forms/preview.py",
+        "src/api/forms/validation.py"
+      ],
+      "specs": ["preview-context"]
     }
   ]
 }

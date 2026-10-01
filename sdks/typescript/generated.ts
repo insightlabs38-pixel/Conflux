@@ -4228,6 +4228,52 @@ export type InputOfPreflightSchema = {
   checks: InputOfPreflightCheckSchema[];
 };
 
+export type PreviewAsInputSchema = {
+  ref?: Record<string, string>;
+  context?: PreviewContextInputSchema;
+  input?: unknown;
+};
+
+export type InputOfPreviewAsInputSchema = {
+  ref?: Record<string, string>;
+  context?: InputOfPreviewContextInputSchema;
+  input?: unknown;
+};
+
+export type PreviewAsSchema = {
+  surface: string;
+  label: string;
+  summary: string;
+  roles: string[];
+  versions: PreviewVersionSchema[];
+  resolved: PreviewResolvedSchema;
+  notices: PreviewNoticeSchema[];
+  data: unknown;
+};
+
+export type InputOfPreviewAsSchema = {
+  surface: string;
+  label: string;
+  summary: string;
+  roles: string[];
+  versions: InputOfPreviewVersionSchema[];
+  resolved: InputOfPreviewResolvedSchema;
+  notices: InputOfPreviewNoticeSchema[];
+  data: unknown;
+};
+
+export type PreviewContextInputSchema = {
+  role?: string | null;
+  at?: string | null;
+  version?: string | null;
+};
+
+export type InputOfPreviewContextInputSchema = {
+  role?: string | null;
+  at?: string | null;
+  version?: string | null;
+};
+
 export type PreviewEntrySchema = { name: string; size: number | null };
 
 export type InputOfPreviewEntrySchema = { name: string; size: number | null };
@@ -4248,9 +4294,27 @@ export type PreviewMediaSchema = { url: string; filename: string };
 
 export type InputOfPreviewMediaSchema = { url: string; filename: string };
 
+export type PreviewNoticeSchema = { code: string; message: string };
+
+export type InputOfPreviewNoticeSchema = { code: string; message: string };
+
 export type PreviewReasonSchema = { code: string; message: string };
 
 export type InputOfPreviewReasonSchema = { code: string; message: string };
+
+export type PreviewResolvedSchema = {
+  role: string | null;
+  at: string | null;
+  version: PreviewVersionSchema | null;
+  live: boolean;
+};
+
+export type InputOfPreviewResolvedSchema = {
+  role: string | null;
+  at: string | null;
+  version: InputOfPreviewVersionSchema | null;
+  live: boolean;
+};
 
 export type PreviewSchema = {
   source: string;
@@ -4317,6 +4381,22 @@ export type InputOfPreviewSchemaKindEnum =
 export type PreviewSchemaStateEnum = "ready" | "pending" | "unavailable";
 
 export type InputOfPreviewSchemaStateEnum = "ready" | "pending" | "unavailable";
+
+export type PreviewVersionSchema = {
+  id: string;
+  label: string;
+  at: string | null;
+  by: string | null;
+  current: boolean;
+};
+
+export type InputOfPreviewVersionSchema = {
+  id: string;
+  label: string;
+  at: string | null;
+  by: string | null;
+  current: boolean;
+};
 
 export type PrivacyApplyInput = { apply?: boolean };
 
@@ -10016,6 +10096,13 @@ export interface Operations {
     };
     response: Record<string, unknown>;
   };
+  post_api_v1_workspaces_workspace_public_id_preview_as_surface: {
+    request: {
+      path: { surface: string; workspace_public_id: string };
+      body?: InputOfPreviewAsInputSchema;
+    };
+    response: PreviewAsSchema;
+  };
   get_api_v1_workspaces_workspace_public_id_previews_source: {
     request: {
       path: { source: string; workspace_public_id: string };
@@ -15040,6 +15127,14 @@ export const operations = {
     path_params: ["workspace_public_id"],
     query_params: ["event", "limit", "offset", "q", "status"],
     request_body: false,
+    response_kind: "json",
+  },
+  post_api_v1_workspaces_workspace_public_id_preview_as_surface: {
+    method: "POST",
+    path: "/api/v1/workspaces/{workspace_public_id}/preview-as/{surface}/",
+    path_params: ["surface", "workspace_public_id"],
+    query_params: [],
+    request_body: true,
     response_kind: "json",
   },
   get_api_v1_workspaces_workspace_public_id_previews_source: {

@@ -17654,6 +17654,46 @@ paths:
               schema:
                 type: object
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/preview-as/{surface}/:
+    post:
+      operationId: post_api_v1_workspaces_workspace_public_id_preview_as_surface
+      description: Organizers and admins resolve what someone else would see; nothing
+        is saved or sent.
+      parameters:
+      - in: path
+        name: surface
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreviewAsInputSchema'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PreviewAsInputSchema'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PreviewAsInputSchema'
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreviewAsSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/previews/{source}/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_previews_source
@@ -24845,6 +24885,63 @@ components:
       required:
       - checks
       - status
+    PreviewAsInputSchema:
+      type: object
+      properties:
+        ref:
+          type: object
+          additionalProperties:
+            type: string
+        context:
+          $ref: '#/components/schemas/PreviewContextInputSchema'
+        input: {}
+    PreviewAsSchema:
+      type: object
+      properties:
+        surface:
+          type: string
+        label:
+          type: string
+        summary:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PreviewVersionSchema'
+        resolved:
+          $ref: '#/components/schemas/PreviewResolvedSchema'
+        notices:
+          type: array
+          items:
+            $ref: '#/components/schemas/PreviewNoticeSchema'
+        data:
+          description: The surface's own payload.
+      required:
+      - data
+      - label
+      - notices
+      - resolved
+      - roles
+      - summary
+      - surface
+      - versions
+    PreviewContextInputSchema:
+      type: object
+      properties:
+        role:
+          type: string
+          nullable: true
+        at:
+          type: string
+          nullable: true
+          description: ISO time with offset.
+        version:
+          type: string
+          nullable: true
     PreviewEntrySchema:
       type: object
       properties:
@@ -24879,6 +24976,16 @@ components:
       required:
       - filename
       - url
+    PreviewNoticeSchema:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+      - code
+      - message
     PreviewReasonSchema:
       type: object
       properties:
@@ -24889,6 +24996,26 @@ components:
       required:
       - code
       - message
+    PreviewResolvedSchema:
+      type: object
+      properties:
+        role:
+          type: string
+          nullable: true
+        at:
+          type: string
+          nullable: true
+        version:
+          allOf:
+          - $ref: '#/components/schemas/PreviewVersionSchema'
+          nullable: true
+        live:
+          type: boolean
+      required:
+      - at
+      - live
+      - role
+      - version
     PreviewSchema:
       type: object
       properties:
@@ -24991,6 +25118,27 @@ components:
         * `ready` - ready
         * `pending` - pending
         * `unavailable` - unavailable
+    PreviewVersionSchema:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        at:
+          type: string
+          nullable: true
+        by:
+          type: string
+          nullable: true
+        current:
+          type: boolean
+      required:
+      - at
+      - by
+      - current
+      - id
+      - label
     PrivacyApplyInput:
       type: object
       properties:

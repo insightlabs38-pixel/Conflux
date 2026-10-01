@@ -3891,6 +3891,46 @@ class InputOfPreflightSchema(TypedDict):
     status: str
     checks: list[InputOfPreflightCheckSchema]
 
+class PreviewAsInputSchema(TypedDict):
+    ref: NotRequired[dict[str, str]]
+    context: NotRequired[PreviewContextInputSchema]
+    input: NotRequired[Any]
+
+class InputOfPreviewAsInputSchema(TypedDict):
+    ref: NotRequired[dict[str, str]]
+    context: NotRequired[InputOfPreviewContextInputSchema]
+    input: NotRequired[Any]
+
+class PreviewAsSchema(TypedDict):
+    surface: str
+    label: str
+    summary: str
+    roles: list[str]
+    versions: list[PreviewVersionSchema]
+    resolved: PreviewResolvedSchema
+    notices: list[PreviewNoticeSchema]
+    data: Any
+
+class InputOfPreviewAsSchema(TypedDict):
+    surface: str
+    label: str
+    summary: str
+    roles: list[str]
+    versions: list[InputOfPreviewVersionSchema]
+    resolved: InputOfPreviewResolvedSchema
+    notices: list[InputOfPreviewNoticeSchema]
+    data: Any
+
+class PreviewContextInputSchema(TypedDict):
+    role: NotRequired[str | None]
+    at: NotRequired[str | None]
+    version: NotRequired[str | None]
+
+class InputOfPreviewContextInputSchema(TypedDict):
+    role: NotRequired[str | None]
+    at: NotRequired[str | None]
+    version: NotRequired[str | None]
+
 class PreviewEntrySchema(TypedDict):
     name: str
     size: int | None
@@ -3917,6 +3957,14 @@ class InputOfPreviewMediaSchema(TypedDict):
     url: str
     filename: str
 
+class PreviewNoticeSchema(TypedDict):
+    code: str
+    message: str
+
+class InputOfPreviewNoticeSchema(TypedDict):
+    code: str
+    message: str
+
 class PreviewReasonSchema(TypedDict):
     code: str
     message: str
@@ -3924,6 +3972,18 @@ class PreviewReasonSchema(TypedDict):
 class InputOfPreviewReasonSchema(TypedDict):
     code: str
     message: str
+
+class PreviewResolvedSchema(TypedDict):
+    role: str | None
+    at: str | None
+    version: PreviewVersionSchema | None
+    live: bool
+
+class InputOfPreviewResolvedSchema(TypedDict):
+    role: str | None
+    at: str | None
+    version: InputOfPreviewVersionSchema | None
+    live: bool
 
 class PreviewSchema(TypedDict):
     source: str
@@ -3972,6 +4032,20 @@ InputOfPreviewSchemaKindEnum = Literal['text', 'image', 'video', 'document', 'ar
 PreviewSchemaStateEnum = Literal['ready', 'pending', 'unavailable']
 
 InputOfPreviewSchemaStateEnum = Literal['ready', 'pending', 'unavailable']
+
+class PreviewVersionSchema(TypedDict):
+    id: str
+    label: str
+    at: str | None
+    by: str | None
+    current: bool
+
+class InputOfPreviewVersionSchema(TypedDict):
+    id: str
+    label: str
+    at: str | None
+    by: str | None
+    current: bool
 
 class PrivacyApplyInput(TypedDict):
     apply: NotRequired[bool]
@@ -9278,6 +9352,13 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                   'query_params': [],
                                                                                                   'request_body': True,
                                                                                                   'response_kind': 'json'},
+ 'post_api_v1_workspaces_workspace_public_id_preview_as_surface': {'method': 'POST',
+                                                                   'path': '/api/v1/workspaces/{workspace_public_id}/preview-as/{surface}/',
+                                                                   'path_params': ['surface',
+                                                                                   'workspace_public_id'],
+                                                                   'query_params': [],
+                                                                   'request_body': True,
+                                                                   'response_kind': 'json'},
  'post_api_v1_workspaces_workspace_public_id_rich_preview': {'method': 'POST',
                                                              'path': '/api/v1/workspaces/{workspace_public_id}/rich/preview/',
                                                              'path_params': ['workspace_public_id'],

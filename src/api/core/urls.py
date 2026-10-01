@@ -14,6 +14,7 @@ from .entity_views import EntityCatalogueView, EntityQueryView
 from .job_views import JobArtifactView, JobCancelView, JobDetailView, JobListView
 from .manifest_views import ExtensionsView
 from .notification_views import NotificationPreferenceView
+from .preview_context_views import PreviewAsView
 from .preview_views import PreviewView
 from .rich_views import RichPreviewView
 from .saved_view_views import SavedViewDetailView, SavedViewListView, SavedViewRunView
@@ -39,6 +40,11 @@ urlpatterns = [
         "workspaces/<uuid:workspace_public_id>/extensions/",
         ExtensionsView.as_view(),
         name="extensions",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/preview-as/<slug:surface>/",
+        PreviewAsView.as_view(),
+        name="preview-as",
     ),
     path(
         "workspaces/<uuid:workspace_public_id>/versions/<slug:source>/",

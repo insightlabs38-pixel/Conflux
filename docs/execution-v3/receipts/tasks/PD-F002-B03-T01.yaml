@@ -1,0 +1,80 @@
+version: 3
+task: PD-F002-B03-T01
+batch: PD-F002-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 46e445e
+  head_commit: 46e445e
+changed_paths:
+- src/api/core/ (preview_context.py, preview_context_views.py, manifest_core.py capability, urls.py)
+- src/api/forms/ (preview.py surface, validation.py field_in_scope split out of field_visible, apps.py, manifest.py)
+- src/web/lib/previewContext.ts, components/PreviewBar.tsx, features/form-builder/ (FormPreviewAs.tsx, FormBuilder.tsx), styles/components.css
+- tests/integration/test_preview_context.py, src/web/components/PreviewBar.test.tsx, features/form-builder/ (FormPreviewAs.test.tsx, FormBuilder.previewas.test.tsx), lib/primitives.b03.contract.test.ts
+- tests/e2e/ (preview-context.spec.ts, tiers.json, weights.json, affected.json)
+- docs/operations/PREVIEW_CONTEXT.md, docs/architecture/SHARED_PRIMITIVES.md, docs/operations/UPGRADES.md, docs/api/README.md, docs/api/openapi.yaml, generated SDKs, spec 002 (B03 contract and as built), PRIMITIVE_REGISTRY.yaml
+deliverables:
+- item: Canonical preview-as-role, as-of and frozen-version context contract as a platform primitive
+  result: pass
+  evidence: core/preview_context.py with Context {role, at, version}, registered Surface (roles, version source, input schema, resolve), parse with keyed errors, version choice by id or by time through core.version_diff, one endpoint family POST preview-as/{surface}/ and a one-sentence summary; contract written in spec 002 before the code
+- item: Stable inputs/outputs, lifecycle, authorization, idempotency, errors, extension boundary
+  result: pass
+  evidence: PREVIEW_CONTEXT.md; stateless and deterministic (pinned version or time gives the same answer, live names the version it resolved); organizers and admins only; 400 keyed context.role/at/version, ref.<param>, input.<path>; 404 for what is not visible; surfaces register from AppConfig.ready() and are declared in the app manifest (new capability preview_surface)
+- item: Reference consumer or contract test showing reuse without private coupling
+  result: pass
+  evidence: the form surface is the real adopter (form builder gains a closed Preview section) and an independent non-form surface with its own version source and input schema runs through the same primitive in test_preview_context.py
+- item: Compatibility and migration expectations documented
+  result: pass
+  evidence: no migration and no existing endpoint changed; forms.validation.field_visible split into field_in_scope plus the condition check with identical behavior (property test against it); UPGRADES.md note
+invariants:
+- item: No impersonation, one source of truth, server authority
+  result: pass
+  evidence: "a context lives only in this endpoint's body (test scans the source: no header, cookie, session or other reader); the caller stays the actor; role preview never exceeds the organizer view (40 random forms); visibility is the form's own rule, not a second one; nothing stored (no audit row, no form or version change, asserted)"
+- item: Design intent, accessibility, progressive disclosure
+  result: pass
+  evidence: closed details section, who and when stated in words with a Back to live button, axe clean and no overflow at 390 and 1440, loading, error with retry, empty and hidden-count states
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 2034 passed, 31 skipped (20 new in test_preview_context.py)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check; makemigrations --check
+  result: pass
+  note: 648 web tests (18 new); OpenAPI validated with fail-on-warn and SDKs regenerated; no migration changes
+- command: npx playwright test preview-context --project=desktop on a fresh iso-min fixture
+  result: pass
+  note: 2 passed (390 and 1440) after fixing a plural in the hidden-fields sentence found by the spec
+- command: make e2e-affected
+  result: pass
+  note: read-only, isolated-mutation and canary ok
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: PreviewBar and the saved-form preview in the form builder
+- surface: api
+  result: pass
+  evidence: POST /workspaces/{id}/preview-as/{surface}/ in OpenAPI, read-only
+- surface: audit
+  result: pass
+  evidence: a preview writes nothing (asserted); the underlying operations are unchanged and audited as before
+- surface: docs
+  result: pass
+  evidence: PREVIEW_CONTEXT.md, SHARED_PRIMITIVES.md, UPGRADES.md, spec 002, registry IMPLEMENTED
+- surface: sdk
+  result: pass
+  evidence: "not required; generated clients regenerated, sdk-check clean"
+migrations:
+- none (stateless, additive)
+findings:
+- Spec 002 had no B03 contract, so the design (context as request data, surfaces, one endpoint, adopter, forbidden list) was written into the spec first, as for B02; no escalation condition applied because no second source of truth or migration was needed
+- The existing form-builder preview shows unsaved edits and decides visibility in the browser; it is kept as the live editor preview and the server-resolved saved-form preview sits beside it rather than replacing it
+limitations:
+- Only forms are previewable; rubric and page surfaces are not registered yet
+- The preview does not persist in the URL, so it cannot be shared as a link
+- The saved-form preview shows fields and conditions, it does not evaluate answers
+escalations: []
+next: review

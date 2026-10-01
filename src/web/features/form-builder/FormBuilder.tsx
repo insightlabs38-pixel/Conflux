@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { VersionCompare } from "../../components/VersionCompare";
+import { FormPreviewAs } from "./FormPreviewAs";
 import { apiJson } from "../../lib/api";
 
 type Field = {
@@ -59,6 +60,8 @@ export function FormBuilder({
   const [forms, setForms] = useState<Form[]>([]);
   const [selectedId, setSelectedId] = useState("");
   const [compareOpen, setCompareOpen] = useState(false);
+  const [previewAsOpen, setPreviewAsOpen] = useState(false);
+  const [saves, setSaves] = useState(0);
   const [fields, setFields] = useState<Field[]>([]);
   const [versions, setVersions] = useState<Version[]>([]);
   const [formName, setFormName] = useState("");
@@ -209,6 +212,7 @@ export function FormBuilder({
         forms.map((form) => (form.public_id === selectedId ? updated : form)),
       );
       setFields(updated.draft_schema.fields);
+      setSaves((n) => n + 1);
       setNotice(
         `Version ${version.number} restored to draft. Publish to make it live.`,
       );
@@ -223,6 +227,7 @@ export function FormBuilder({
       setForms(
         forms.map((form) => (form.public_id === selectedId ? updated : form)),
       );
+      setSaves((n) => n + 1);
       if (publish) {
         const version = await apiJson<Version>(
           base + `${selectedId}/publish/`,
@@ -581,6 +586,23 @@ export function FormBuilder({
               )}
             </details>
           )}
+          <details
+            key={selectedId}
+            onToggle={(event) => setPreviewAsOpen(event.currentTarget.open)}
+          >
+            <summary>
+              Preview the saved form as a person, version or time
+            </summary>
+            {previewAsOpen && (
+              <FormPreviewAs
+                key={selectedId}
+                workspaceId={workspaceId}
+                eventId={eventId}
+                formId={selectedId}
+                refreshKey={saves + versions.length}
+              />
+            )}
+          </details>
         </>
       )}
     </section>

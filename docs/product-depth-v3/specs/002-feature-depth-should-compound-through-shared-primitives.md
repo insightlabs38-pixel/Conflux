@@ -272,6 +272,50 @@ Per primitive: a conformance suite against the real near-implementation (differe
 
 **AUDIT_PROVENANCE as built (T07).** `core/provenance.py` (`envelope`, `attach`, `describe_output`, `changes_of`, `digest`, `canonical`, `verify_output`, `problems`); web `lib/provenance.ts` and `ProvenanceView`; guide `docs/operations/PROVENANCE.md`. The envelope lives in `AuditEvent.metadata["provenance"]` and in a job's result; `_finish` copies a result's envelope onto the `job.succeeded` audit row. Adopters: the archive export job (source, event reference, `event_archive` rules at the archive format version, and the exact file's SHA-256) and configuration restore (source change, references, `restore_before_values`, change counts from `core.version_diff`), both shown in the UI with a browser-side "Check a downloaded file". Deviations from the table: an `output` block (name, bytes, SHA-256) carries the one digest kept by default, because a downloaded export is the case that must be checkable offline, while `inputs.digest` exists only when a caller passes an `inputs` value; the configuration history gains `provenance` per entry (additive).
 
-**EXTENSION_MANIFEST as built (T08).** `core/manifest.py` (`Capability`, `Manifest`, `register_*`, `check`, `snapshot`), `core/manifest_core.py`, `core/checks.py` (system check, errors fail startup), `core/manifest_views.py` (`GET /workspaces/{id}/extensions/`, organizers and admins); every app with extension points declares itself in `<app>/manifest.py` from `AppConfig.ready()`; web `lib/extensions.ts` and Operations > Extensions; guide `docs/operations/EXTENSIONS.md`. 17 capabilities: 13 read live from their registries, the archive exporter/importer/converter and assignment strategy are declared only. Deviations from the table: the inventory is derived from live registries and *checked* against declarations rather than derived alone (a claim must be true, every live entry must be claimed once; an unclaimed entry is a warning); `core` gained an `AppConfig` (its first) to hold the startup check.
+**EXTENSION_MANIFEST as built (T08).** `core/manifest.py` (`Capability`, `Manifest`, `register_*`, `check`, `snapshot`), `core/manifest_core.py`, `core/checks.py` (system check, errors fail startup), `core/manifest_views.py` (`GET /workspaces/{id}/extensions/`, organizers and admins); every app with extension points declares itself in `<app>/manifest.py` from `AppConfig.ready()`; web `lib/extensions.ts` and Operations > Extensions; guide `docs/operations/EXTENSIONS.md`. 18 capabilities: 14 read live from their registries, the archive exporter/importer/converter and assignment strategy are declared only. Deviations from the table: the inventory is derived from live registries and *checked* against declarations rather than derived alone (a claim must be true, every live entry must be claimed once; an unclaimed entry is a warning); `core` gained an `AppConfig` (its first) to hold the startup check.
 
 **PD-F002-B02 closure (T90, T91).** Verification matrix `docs/verification/PD-F002-B02/MATRIX.md` and cross-cutting `test_shared_primitives_b02_regression.py`; developer guide `docs/architecture/SHARED_PRIMITIVES.md` covers all sixteen primitives; `primitives.b02.contract.test.ts` pins the web clients to the OpenAPI contract; upgrade note in `docs/operations/UPGRADES.md`.
+
+## PD-F002-B03 canonical contract (2026-10-01)
+
+One primitive, `PREVIEW_CONTEXT` (T01), reusing `VERSION_DIFF` (version sources) and `SCHEMA_EDITOR` (surface input). It answers "what would this look like to a participant, a judge or the public, as of that time, or at that kept version?" without anyone impersonating anyone.
+
+### What exists today (census)
+
+- The form builder previews the form being edited in the browser, with a "View as" role select; it decides field visibility itself and shows unsaved edits. The server's own rule is `forms.validation.field_visible`.
+- The permission matrix and authorization dry run answer "may this role call this endpoint" (`core/permission_matrix.py`); they do not show content.
+- Forms and rubrics keep versions with `published_at`, already listed through `core.version_diff` sources (`form`, `rubric`).
+- There is no notion of an effective role, an as-of time or a pinned version in any request, and no session switching: a request is always the signed-in person.
+
+### Shape decisions
+
+1. **A context is data, never an identity.** `Context {role, at, version}`: `role` is one of the roles the surface declares it can be viewed as, `at` an instant (UTC, explicit offset), `version` a version id of the surface's version source; `at` and `version` are two ways to pick one version and are exclusive. It exists only inside one request body; it is not a header, cookie, session value or stored row, and no domain endpoint reads it.
+2. **One endpoint family, read-only.** `POST /workspaces/{id}/preview-as/{surface}/` with `{ref, context, input?}`; POST only because the reference and input are structured, and it stores and sends nothing. Organizers and admins only. The caller stays the actor throughout, so authorization is the caller's: a role preview can only show a subset of what the organizer could already read, never more.
+3. **Surfaces are code-owned and registered** (`preview_context.register_surface`): key, label, reference parameters, the roles it can be viewed as, an optional version source, an optional input schema (a `schema_subset` schema) and `resolve(user, workspace, ref, resolved, input)`. The primitive resolves and validates the context, picks the version through `core.version_diff` and loads its snapshot; the surface only turns a value, a role and an input into a payload. A surface that returns nothing is 404, like anything a caller may not see.
+4. **Deterministic.** An explicit `at` or `version` gives the same answer every time while the stored versions are unchanged; the live default is the surface's own rule (for forms, the latest published version, which is what participants get) and the response names the version it resolved so a caller can pin it.
+5. **Unambiguous in the UI.** A preview always shows who and when it is for, in words and not colour, with a way back to the live view. Same error shape as before: 400 keyed by the offending part, 404 for what is not visible.
+
+### Contract
+
+| Item | Decision |
+|---|---|
+| Request | `{ref: {param: value}, context: {role?, at?, version?}, input?}`; unknown context keys, a role the surface does not declare, a bad or out-of-range time (2000 to 2100), `at` with `version`, and either on an unversioned surface are 400 keyed `context.role`, `context.at`, `context.version` |
+| Response | `{surface, label, summary, roles[], versions[], resolved {role, at, version, live}, notices[{code, message}], data}`; `summary` is one sentence ("Previewing as judge, Version 2. Nothing is saved or sent.") the UI shows verbatim |
+| Versions | `at` selects the latest version kept at or before that instant; nothing yet is 400 `context.at` with the first version's time; an unknown version id is 400 `context.version`; the unsaved draft is only reachable as `version: "draft"` where the source lists it |
+| Authorization | organizer or admin of the workspace; the surface adds its own visibility; 404 for a reference the caller cannot see |
+| Audit | a preview writes nothing; the underlying operations are unchanged and audited as before; no session, token or header changes |
+| Extension boundary | register a surface from `<app>/preview.py` in `AppConfig.ready()` and declare `("preview_surface", key)` in the app manifest; the capability `preview_surface` is listed by the extensions inventory |
+| Adopter | `form` surface: a saved form (a kept version, the saved draft or as of a time) as a participant, judge, organizer or public, with the fields that role would see and the conditions that show them; the form builder gains a closed "Preview as" section. The editor's live preview of unsaved edits stays local (it shows what is not saved, which a server cannot know) |
+
+### Forbidden in this batch
+
+Impersonation or any way for one person's request to act as another; a context carried in a header, cookie, session or stored row; a domain write that reads a preview context; showing a role more than the organizer can read; a client-supplied surface, schema or version snapshot; a second visibility rule beside `forms.validation`; persisting preview results.
+
+### Compatibility
+
+No migration and no existing endpoint changes. `forms.validation.field_visible` is split into a role check and the condition check with the same behavior. Registry status moves to `IMPLEMENTED` when T01 is DONE.
+
+### B03 as built
+
+**PREVIEW_CONTEXT as built (T01).** `core/preview_context.py` (`Context`, `Resolved`, `Surface`, `register_surface`, `parse`, `preview`, `PreviewError`, `NotVisible`), `core/preview_context_views.py` (`POST /workspaces/{id}/preview-as/{surface}/`), `forms/preview.py` (surface `form`; roles participant, judge, organizer, public; version source `form`), `forms.validation.field_in_scope` (split out of `field_visible`); web `lib/previewContext.ts`, `components/PreviewBar.tsx`, `features/form-builder/FormPreviewAs.tsx`; guide `docs/operations/PREVIEW_CONTEXT.md`. A new capability `preview_surface` joins the extensions inventory. Conformance: an independent non-form surface with its own version source through the same primitive, a property test of 40 random forms against the form's own visibility rule, and a scan that no other code reads a context. Deviations from the contract table: none in behavior; `input` is validated by the surface's schema-subset schema and capped at 20,000 characters; the saved-form preview is a closed section beside the editor's local live preview rather than a replacement for it, because the local one shows unsaved edits.
+

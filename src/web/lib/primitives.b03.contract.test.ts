@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { resolveOperation } from "./api";
+import { completenessUrl } from "./completeness";
 import { previewAsUrl } from "./previewContext";
 
 // The request the preview-as client makes must be an operation the checked OpenAPI contract
@@ -9,5 +10,9 @@ const W = "00000000-0000-4000-8000-000000000001";
 describe("preview-as client and the OpenAPI contract", () => {
   it("POST preview-as is a documented operation", () => {
     expect(resolveOperation("POST", previewAsUrl(W, "form"))).not.toBeNull();
+  });
+
+  it("GET completeness is a documented operation", () => {
+    expect(resolveOperation("GET", completenessUrl(W))).not.toBeNull();
   });
 });

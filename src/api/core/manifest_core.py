@@ -3,6 +3,7 @@
 from . import (
     approvals,
     entities,
+    features,
     jobs,
     manifest,
     notifications,
@@ -67,6 +68,12 @@ CAPABILITIES = (
         "Notification category",
         "A kind of notice people tune (`core.notifications`).",
         _labels(lambda: notifications.CATEGORIES),
+    ),
+    (
+        "feature",
+        "Feature",
+        "A feature whose completeness across surfaces is stated and checked (`core.features`).",
+        _labels(lambda: features.FEATURES),
     ),
     (
         "preview_surface",

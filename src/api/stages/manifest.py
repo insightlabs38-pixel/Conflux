@@ -2,6 +2,7 @@
 
 from core import manifest
 
+from . import features  # noqa: F401 - registers this app's features
 from .advancement import REGISTRY
 
 manifest.register_capability(
@@ -17,7 +18,8 @@ manifest.register_manifest(
         id="stages",
         version="1.0.0",
         label="Stages",
-        provides=tuple(
+        provides=(("feature", "stage"),)
+        + tuple(
             ("advancement_strategy", slug)
             for slug in (
                 "everyone",

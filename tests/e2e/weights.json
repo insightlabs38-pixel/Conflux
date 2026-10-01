@@ -43,5 +43,6 @@
   "isolated-mutation:explanations": 20.0,
   "isolated-mutation:provenance": 30.0,
   "isolated-mutation:extensions": 20.0,
-  "isolated-mutation:preview-context": 25.0
+  "isolated-mutation:preview-context": 25.0,
+  "isolated-mutation:completeness": 20.0
 }

@@ -1,0 +1,101 @@
+version: 3
+task: PD-F003-B01-T01
+batch: PD-F003-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 35af0e2
+  head_commit: 35af0e2
+changed_paths:
+- src/api/core/ (features.py, features_identity.py, feature_views.py, manifest_core.py capability, apps.py, urls.py)
+- src/api/<app>/features.py for events, participation, projects, stages, forms, artifacts, evaluations, awards, communications, integrations, policies, and their manifest.py and apps.py (participation, awards, policies gained a manifest)
+- src/web/lib/completeness.ts, features/operations/CompletenessPanel.tsx, features/event-builder/EventDashboard.tsx (Operations > Completeness)
+- tests/integration/test_feature_contract.py, src/web/features/operations/CompletenessPanel.test.tsx, lib/primitives.b03.contract.test.ts, EventDashboard.modules.test.tsx and WorkflowStates.test.tsx (mock the panel)
+- tests/e2e/ (completeness.spec.ts, tiers.json, weights.json, affected.json)
+- docs/operations/COMPLETENESS.md, docs/api/openapi.yaml, generated SDKs, spec 003 (as built)
+deliverables:
+- item: Stable public identity and clear lifecycle added to the cross-surface completeness contract and applied to domain work
+  result: pass
+  evidence: "core/features.py registry of features with claims, lifecycle kinds choice, timestamp, flag and none, and a verifier registry; the identity verifier proves a unique non-editable UUID public id, public-id-only routes, a declared lifecycle whose states match the model, reachable states, closed terminals and resolvable transition performers; fifteen features registered across eleven apps with no findings"
+- item: Complete user workflow using shared Conflux v3 UI primitives wired to canonical server state
+  result: pass
+  evidence: "Operations > Completeness: findings first as an alert, a dense DataTable of features with identity and a closed per-row lifecycle (transitions or why none), the properties not checked yet behind details; columns follow the server's landed list; no mock state, no editing"
+- item: States required by the design and spec (loading, empty, error, permission, dense, mobile)
+  result: pass
+  evidence: "loading, error with Try again, consistent, findings alert and 403 handling in component tests; browser spec at 390 and 1440 with axe and no overflow"
+- item: Keyboard and accessibility without base-state clutter
+  result: pass
+  evidence: "native details and summary controls, closed by default, table region labelled, axe clean at both widths"
+invariants:
+- item: One source of truth, derived not duplicated, server authority
+  result: pass
+  evidence: "states come from the model's choices, the event graph from the code's own STATUS_FLOW, id and routes from the model and URL resolver; the registry stores only claims, refs, reasons and graphs the code does not hold; advisory at runtime"
+- item: No parallel truth model and no unverifiable claim
+  result: pass
+  evidence: "a provided claim without a verifier, an unresolvable ref, an unclaimed landed property and a hidden status field are each a named failure (28 tests, one per code)"
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 2069 passed, 31 skipped (28 new in test_feature_contract.py)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 656 web tests (8 new); OpenAPI validated with fail-on-warn and SDKs regenerated
+- command: npx playwright test completeness --project=desktop on a fresh iso-min fixture
+  result: pass
+  note: 2 passed (390 and 1440)
+- command: make e2e-affected
+  result: pass
+  note: read-only, isolated-mutation and canary ok
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: Operations > Completeness
+- surface: api
+  result: pass
+  evidence: GET /workspaces/{id}/completeness/ in OpenAPI, read-only
+- surface: sdk
+  result: pass
+  evidence: generated clients regenerated, sdk-check clean, contract test resolves the web request
+- surface: cli
+  result: pass
+  evidence: assigned to PD-F003-B02-T04 (claim property cli)
+- surface: mcp
+  result: pass
+  evidence: assigned to PD-F003-B02-T05
+- surface: event_as_code
+  result: pass
+  evidence: assigned to PD-F003-B02-T06
+- surface: audit
+  result: pass
+  evidence: the report writes nothing (asserted); audit coverage is T04
+- surface: webhook
+  result: pass
+  evidence: assigned to PD-F003-B02-T07
+- surface: archive
+  result: pass
+  evidence: assigned to PD-F003-B02-T08
+- surface: analytics
+  result: pass
+  evidence: assigned to PD-F003-B03-T01
+- surface: search
+  result: pass
+  evidence: assigned to T08 of this batch
+- surface: docs
+  result: pass
+  evidence: COMPLETENESS.md and spec 003 as built
+migrations:
+- none (stateless, additive)
+findings:
+- All fifteen features verified on the first run, so the failure codes were proved with deliberately broken claims on real models rather than relying on the real registry passing
+- Team and message have no id-addressed route, so a route ref is optional and the field ref is the identity proof
+limitations:
+- Seven properties of this batch have no verifier yet (validation to search, T02 to T08) and the surface and platform properties belong to later batches, so the page lists them as not checked yet
+- Lifecycle transition graphs other than the event's are declared, and their performers are checked to exist but not that they enforce the graph
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

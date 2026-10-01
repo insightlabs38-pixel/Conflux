@@ -1217,6 +1217,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/ImportedEventOutput'
           description: ''
+  /api/v1/workspaces/{workspace_public_id}/completeness/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_completeness
+      description: Organizers and admins read it; nothing about it can be written
+        or changes a request.
+      parameters:
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompletenessSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/event-templates/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_event_templates
@@ -20323,6 +20347,182 @@ components:
       - created_at
       - detail
       - public_id
+    CompletenessClaimSchema:
+      type: object
+      properties:
+        state:
+          $ref: '#/components/schemas/CompletenessClaimSchemaStateEnum'
+        refs:
+          type: array
+          items:
+            type: string
+        reason:
+          type: string
+        owner:
+          type: string
+      required:
+      - owner
+      - reason
+      - refs
+      - state
+    CompletenessClaimSchemaStateEnum:
+      enum:
+      - provided
+      - not_applicable
+      - planned
+      type: string
+      description: |-
+        * `provided` - provided
+        * `not_applicable` - not_applicable
+        * `planned` - planned
+    CompletenessFeatureSchema:
+      type: object
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        model:
+          type: string
+        id_field:
+          type: string
+        id_type:
+          type: string
+          nullable: true
+        states:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompletenessStateSchema'
+        lifecycle:
+          allOf:
+          - $ref: '#/components/schemas/CompletenessLifecycleSchema'
+          nullable: true
+        claims:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/CompletenessClaimSchema'
+        problems:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompletenessProblemSchema'
+      required:
+      - claims
+      - id_field
+      - id_type
+      - key
+      - label
+      - lifecycle
+      - model
+      - problems
+      - states
+    CompletenessLifecycleSchema:
+      type: object
+      properties:
+        kind:
+          type: string
+        field:
+          type: string
+        initial:
+          type: array
+          items:
+            type: string
+        terminal:
+          type: array
+          items:
+            type: string
+        via:
+          type: array
+          items:
+            type: string
+        note:
+          type: string
+        transitions:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+      required:
+      - field
+      - initial
+      - kind
+      - note
+      - terminal
+      - transitions
+      - via
+    CompletenessProblemSchema:
+      type: object
+      properties:
+        code:
+          type: string
+        feature:
+          type: string
+          nullable: true
+        property:
+          type: string
+          nullable: true
+        message:
+          type: string
+      required:
+      - code
+      - feature
+      - message
+      - property
+    CompletenessPropertySchema:
+      type: object
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        batch:
+          type: string
+        landed:
+          type: boolean
+      required:
+      - batch
+      - key
+      - label
+      - landed
+    CompletenessSchema:
+      type: object
+      properties:
+        properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompletenessPropertySchema'
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompletenessFeatureSchema'
+        totals:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: integer
+        problems:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompletenessProblemSchema'
+        ok:
+          type: boolean
+      required:
+      - features
+      - ok
+      - problems
+      - properties
+      - totals
+    CompletenessStateSchema:
+      type: object
+      properties:
+        value:
+          type: string
+        label:
+          type: string
+      required:
+      - label
+      - value
     ComponentInput:
       type: object
       properties:

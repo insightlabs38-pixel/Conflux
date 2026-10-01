@@ -23,6 +23,7 @@ import { ApprovalsPanel } from "../operations/ApprovalsPanel";
 import { TimelinePanel } from "../operations/TimelinePanel";
 import { JobsPanel } from "../operations/JobsPanel";
 import { ExtensionsPanel } from "../operations/ExtensionsPanel";
+import { CompletenessPanel } from "../operations/CompletenessPanel";
 import { OperatorConsole } from "../operations/OperatorConsole";
 import { CommunicationsPanel } from "../communications/CommunicationsPanel";
 import { ConfigHistoryPanel } from "../audit/ConfigHistoryPanel";
@@ -928,6 +929,12 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
                   label: "Extensions",
                   description: "What this deployment provides",
                   content: <ExtensionsPanel workspaceId={workspaceId} />,
+                },
+                {
+                  id: "CompletenessPanel",
+                  label: "Completeness",
+                  description: "What each feature provides, checked",
+                  content: <CompletenessPanel workspaceId={workspaceId} />,
                 },
               ]}
             />

@@ -6,6 +6,8 @@ declared only: listed, and requirements resolve against them, with nothing to ve
 
 from core import manifest
 
+from . import features  # noqa: F401 - registers this app's features
+
 for kind, label, description in (
     (
         "archive_exporter",
@@ -27,6 +29,7 @@ manifest.register_manifest(
         version="1.0.0",
         label="Archives and integrations",
         provides=(
+            ("feature", "webhook"),
             ("job_kind", "archive_export"),
             ("archive_exporter", "config"),
             ("archive_exporter", "full"),

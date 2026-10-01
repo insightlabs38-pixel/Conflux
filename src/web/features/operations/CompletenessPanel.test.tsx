@@ -1,0 +1,246 @@
+// @vitest-environment happy-dom
+import { act } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { CompletenessPanel } from "./CompletenessPanel";
+import { jsonResponse } from "../../lib/test-http";
+import { withQuery } from "../../lib/test-router";
+import {
+  stateLabel,
+  stateList,
+  transitionLines,
+  type Completeness,
+  type CompletenessFeature,
+} from "../../lib/completeness";
+
+(
+  globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true;
+
+let container: HTMLDivElement;
+let root: Root;
+beforeEach(() => {
+  container = document.createElement("div");
+  document.body.appendChild(container);
+  root = createRoot(container);
+});
+afterEach(() => {
+  act(() => root.unmount());
+  container.remove();
+  vi.unstubAllGlobals();
+});
+
+const EVENT: CompletenessFeature = {
+  key: "event",
+  label: "Event",
+  model: "events.Event",
+  id_field: "public_id",
+  id_type: "UUIDField",
+  states: [
+    { value: "draft", label: "Draft" },
+    { value: "open", label: "Open" },
+    { value: "closed", label: "Closed" },
+  ],
+  lifecycle: {
+    kind: "choice",
+    field: "status",
+    initial: ["draft"],
+    terminal: ["closed"],
+    via: ["events.views.EventStatusView"],
+    note: "",
+    transitions: { draft: ["open"], open: ["closed"] },
+  },
+  claims: {
+    identity: {
+      state: "provided",
+      refs: ["field:public_id"],
+      reason: "",
+      owner: "",
+    },
+  },
+  problems: [],
+};
+const TRACK: CompletenessFeature = {
+  ...EVENT,
+  key: "track",
+  label: "Track",
+  model: "events.Track",
+  states: [],
+  lifecycle: {
+    kind: "none",
+    field: "",
+    initial: [],
+    terminal: [],
+    via: [],
+    note: "Edited in place and deleted.",
+    transitions: {},
+  },
+};
+const REPORT: Completeness = {
+  properties: [
+    {
+      key: "identity",
+      label: "Identity and lifecycle",
+      batch: "PD-F003-B01",
+      landed: true,
+    },
+    {
+      key: "rest",
+      label: "REST representation",
+      batch: "PD-F003-B01",
+      landed: false,
+    },
+    { key: "cli", label: "CLI", batch: "PD-F003-B02", landed: false },
+  ],
+  features: [EVENT, TRACK],
+  totals: {},
+  problems: [],
+  ok: true,
+};
+
+const settle = () => act(async () => new Promise((r) => setTimeout(r, 0)));
+async function mount(response: () => Response) {
+  const urls: string[] = [];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: string) => {
+      urls.push(String(url));
+      return response();
+    }),
+  );
+  await act(async () =>
+    root.render(withQuery(<CompletenessPanel workspaceId="w" />)),
+  );
+  await settle();
+  return urls;
+}
+
+describe("CompletenessPanel", () => {
+  it("lists each feature with its identity and lifecycle and says the claims agree", async () => {
+    const urls = await mount(() => jsonResponse(200, REPORT));
+    expect(urls).toEqual(["/api/v1/workspaces/w/completeness/"]);
+    const text = container.textContent!;
+    expect(text).toContain("Consistent");
+    expect(text).toContain("2 features");
+    expect(text).toContain("Event");
+    expect(text).toContain("Provided · public id (public_id)");
+    expect(text).toContain("Draft, Open, Closed");
+    expect(text).toContain("No states");
+    expect(container.querySelectorAll("tbody tr")).toHaveLength(2);
+  });
+
+  it("opens a lifecycle to its transitions, or to why there is none", async () => {
+    await mount(() => jsonResponse(200, REPORT));
+    const details = [...container.querySelectorAll("details")];
+    expect(details[0].textContent).toContain(
+      "Starts as draft; ends at closed.",
+    );
+    const transitions = [
+      ...details[0].querySelectorAll(
+        'ul[aria-label="Transitions of Event"] li',
+      ),
+    ].map((li) => li.textContent);
+    expect(transitions).toEqual(["Draft → Open", "Open → Closed"]);
+    expect(details[1].textContent).toContain("Edited in place and deleted.");
+  });
+
+  it("names the properties that are not checked yet and keeps them closed", async () => {
+    await mount(() => jsonResponse(200, REPORT));
+    const closed = [...container.querySelectorAll("summary")].find((s) =>
+      s.textContent?.includes("2 properties are not checked yet"),
+    )!;
+    expect(closed).toBeDefined();
+    expect(closed.parentElement!.textContent).toContain("CLI (PD-F003-B02)");
+  });
+
+  it("shows a finding as an alert with the feature that carries it", async () => {
+    await mount(() =>
+      jsonResponse(200, {
+        ...REPORT,
+        ok: false,
+        problems: [
+          {
+            code: "route_missing",
+            feature: "event",
+            property: "identity",
+            message: "There is no route named 'nope'.",
+          },
+        ],
+      }),
+    );
+    const alert = container.querySelector('[role="alert"]')!;
+    expect(alert.textContent).toContain("Inconsistent");
+    expect(alert.textContent).toContain("1 finding.");
+    expect(alert.textContent).toContain(
+      "event: There is no route named 'nope'.",
+    );
+    expect(container.textContent).not.toContain("Consistent");
+  });
+
+  it("adds a column for each property that has landed", async () => {
+    await mount(() =>
+      jsonResponse(200, {
+        ...REPORT,
+        properties: [
+          ...REPORT.properties.slice(0, 1),
+          {
+            key: "rest",
+            label: "REST representation",
+            batch: "PD-F003-B01",
+            landed: true,
+          },
+        ],
+        features: [
+          {
+            ...EVENT,
+            claims: {
+              ...EVENT.claims,
+              rest: {
+                state: "planned",
+                refs: [],
+                reason: "",
+                owner: "PD-F003-B01-T06",
+              },
+            },
+          },
+          TRACK,
+        ],
+      }),
+    );
+    const headers = [...container.querySelectorAll("thead th")].map(
+      (th) => th.textContent,
+    );
+    expect(headers).toContain("REST representation");
+    const cells = [...container.querySelectorAll("tbody tr")].map(
+      (tr) => tr.lastElementChild!.textContent,
+    );
+    expect(cells).toEqual(["Planned", "Not claimed"]);
+  });
+
+  it("shows a failure with Try again", async () => {
+    let fail = true;
+    await mount(() =>
+      fail ? jsonResponse(403, { detail: "No." }) : jsonResponse(200, REPORT),
+    );
+    expect(container.querySelector('[role="alert"]')!.textContent).toContain(
+      "No.",
+    );
+    fail = false;
+    const retry = [...container.querySelectorAll("button")].find(
+      (b) => b.textContent === "Try again",
+    )!;
+    await act(async () => retry.click());
+    await settle();
+    expect(container.textContent).toContain("Consistent");
+  });
+});
+
+describe("completeness helpers", () => {
+  it("reads states and transitions in words", () => {
+    expect(stateList(EVENT)).toBe("Draft, Open, Closed");
+    expect(stateLabel(EVENT, "open")).toBe("Open");
+    expect(stateLabel(EVENT, "ghost")).toBe("ghost");
+    expect(transitionLines(EVENT)).toEqual(["Draft → Open", "Open → Closed"]);
+    expect(transitionLines(TRACK)).toEqual([]);
+  });
+});

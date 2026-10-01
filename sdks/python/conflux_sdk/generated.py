@@ -1193,6 +1193,108 @@ class InputOfCommunityAuditSchema(TypedDict):
     detail: str
     created_at: str
 
+class CompletenessClaimSchema(TypedDict):
+    state: CompletenessClaimSchemaStateEnum
+    refs: list[str]
+    reason: str
+    owner: str
+
+class InputOfCompletenessClaimSchema(TypedDict):
+    state: InputOfCompletenessClaimSchemaStateEnum
+    refs: list[str]
+    reason: str
+    owner: str
+
+CompletenessClaimSchemaStateEnum = Literal['provided', 'not_applicable', 'planned']
+
+InputOfCompletenessClaimSchemaStateEnum = Literal['provided', 'not_applicable', 'planned']
+
+class CompletenessFeatureSchema(TypedDict):
+    key: str
+    label: str
+    model: str
+    id_field: str
+    id_type: str | None
+    states: list[CompletenessStateSchema]
+    lifecycle: CompletenessLifecycleSchema | None
+    claims: dict[str, CompletenessClaimSchema]
+    problems: list[CompletenessProblemSchema]
+
+class InputOfCompletenessFeatureSchema(TypedDict):
+    key: str
+    label: str
+    model: str
+    id_field: str
+    id_type: str | None
+    states: list[InputOfCompletenessStateSchema]
+    lifecycle: InputOfCompletenessLifecycleSchema | None
+    claims: dict[str, InputOfCompletenessClaimSchema]
+    problems: list[InputOfCompletenessProblemSchema]
+
+class CompletenessLifecycleSchema(TypedDict):
+    kind: str
+    field: str
+    initial: list[str]
+    terminal: list[str]
+    via: list[str]
+    note: str
+    transitions: dict[str, list[str]]
+
+class InputOfCompletenessLifecycleSchema(TypedDict):
+    kind: str
+    field: str
+    initial: list[str]
+    terminal: list[str]
+    via: list[str]
+    note: str
+    transitions: dict[str, list[str]]
+
+class CompletenessProblemSchema(TypedDict):
+    code: str
+    feature: str | None
+    property: str | None
+    message: str
+
+class InputOfCompletenessProblemSchema(TypedDict):
+    code: str
+    feature: str | None
+    property: str | None
+    message: str
+
+class CompletenessPropertySchema(TypedDict):
+    key: str
+    label: str
+    batch: str
+    landed: bool
+
+class InputOfCompletenessPropertySchema(TypedDict):
+    key: str
+    label: str
+    batch: str
+    landed: bool
+
+class CompletenessSchema(TypedDict):
+    properties: list[CompletenessPropertySchema]
+    features: list[CompletenessFeatureSchema]
+    totals: dict[str, dict[str, int]]
+    problems: list[CompletenessProblemSchema]
+    ok: bool
+
+class InputOfCompletenessSchema(TypedDict):
+    properties: list[InputOfCompletenessPropertySchema]
+    features: list[InputOfCompletenessFeatureSchema]
+    totals: dict[str, dict[str, int]]
+    problems: list[InputOfCompletenessProblemSchema]
+    ok: bool
+
+class CompletenessStateSchema(TypedDict):
+    value: str
+    label: str
+
+class InputOfCompletenessStateSchema(TypedDict):
+    value: str
+    label: str
+
 class ComponentInput(TypedDict):
     kind: BasePrizeKind
     name: str
@@ -6327,6 +6429,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                'query_params': [],
                                                                'request_body': False,
                                                                'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_completeness': {'method': 'GET',
+                                                            'path': '/api/v1/workspaces/{workspace_public_id}/completeness/',
+                                                            'path_params': ['workspace_public_id'],
+                                                            'query_params': [],
+                                                            'request_body': False,
+                                                            'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_event_templates': {'method': 'GET',
                                                                'path': '/api/v1/workspaces/{workspace_public_id}/event-templates/',
                                                                'path_params': ['workspace_public_id'],

@@ -2,6 +2,7 @@
 
 from core import manifest
 
+from . import features  # noqa: F401 - registers this app's features
 from .validators import VALIDATORS
 
 manifest.register_capability(
@@ -18,6 +19,7 @@ manifest.register_manifest(
         version="1.0.0",
         label="Submitted artifacts",
         provides=(
+            ("feature", "artifact"),
             *(
                 ("artifact_validator", kind)
                 for kind in (

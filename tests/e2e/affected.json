@@ -258,6 +258,16 @@
         "src/api/forms/validation.py"
       ],
       "specs": ["preview-context"]
+    },
+    {
+      "paths": [
+        "src/web/lib/completeness*",
+        "src/web/features/operations/CompletenessPanel*",
+        "src/api/core/features*",
+        "src/api/core/feature_views.py",
+        "src/api/*/features.py"
+      ],
+      "specs": ["completeness"]
     }
   ]
 }

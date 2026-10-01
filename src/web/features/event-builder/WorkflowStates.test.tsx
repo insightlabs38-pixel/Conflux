@@ -29,6 +29,9 @@ vi.mock("../operations/OperationsCenter", () => ({
 vi.mock("../operations/ExtensionsPanel", () => ({
   ExtensionsPanel: () => null,
 }));
+vi.mock("../operations/CompletenessPanel", () => ({
+  CompletenessPanel: () => null,
+}));
 vi.mock("../operations/OperatorConsole", () => ({
   OperatorConsole: () => null,
 }));

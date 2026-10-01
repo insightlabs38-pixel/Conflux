@@ -2,6 +2,7 @@
 
 from core import manifest
 
+from . import features  # noqa: F401 - registers this app's features
 from .bulk import ACTIONS
 
 manifest.register_capability(
@@ -18,6 +19,7 @@ manifest.register_manifest(
         version="1.0.0",
         label="Communications",
         provides=(
+            ("feature", "message"),
             *(("bulk_action", key) for key in ("advance", "assign", "extend", "move", "send")),
             ("approval_policy", "message_send"),
             ("notification_category", "announcement"),

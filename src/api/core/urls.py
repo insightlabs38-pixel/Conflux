@@ -11,6 +11,7 @@ from .approval_views import (
     ApprovalListView,
 )
 from .entity_views import EntityCatalogueView, EntityQueryView
+from .feature_views import CompletenessView
 from .job_views import JobArtifactView, JobCancelView, JobDetailView, JobListView
 from .manifest_views import ExtensionsView
 from .notification_views import NotificationPreferenceView
@@ -45,6 +46,11 @@ urlpatterns = [
         "workspaces/<uuid:workspace_public_id>/preview-as/<slug:surface>/",
         PreviewAsView.as_view(),
         name="preview-as",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/completeness/",
+        CompletenessView.as_view(),
+        name="completeness",
     ),
     path(
         "workspaces/<uuid:workspace_public_id>/versions/<slug:source>/",

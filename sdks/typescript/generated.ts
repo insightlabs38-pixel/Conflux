@@ -1315,6 +1315,118 @@ export type InputOfCommunityAuditSchema = {
   created_at: string;
 };
 
+export type CompletenessClaimSchema = {
+  state: CompletenessClaimSchemaStateEnum;
+  refs: string[];
+  reason: string;
+  owner: string;
+};
+
+export type InputOfCompletenessClaimSchema = {
+  state: InputOfCompletenessClaimSchemaStateEnum;
+  refs: string[];
+  reason: string;
+  owner: string;
+};
+
+export type CompletenessClaimSchemaStateEnum =
+  "provided" | "not_applicable" | "planned";
+
+export type InputOfCompletenessClaimSchemaStateEnum =
+  "provided" | "not_applicable" | "planned";
+
+export type CompletenessFeatureSchema = {
+  key: string;
+  label: string;
+  model: string;
+  id_field: string;
+  id_type: string | null;
+  states: CompletenessStateSchema[];
+  lifecycle: CompletenessLifecycleSchema | null;
+  claims: Record<string, CompletenessClaimSchema>;
+  problems: CompletenessProblemSchema[];
+};
+
+export type InputOfCompletenessFeatureSchema = {
+  key: string;
+  label: string;
+  model: string;
+  id_field: string;
+  id_type: string | null;
+  states: InputOfCompletenessStateSchema[];
+  lifecycle: InputOfCompletenessLifecycleSchema | null;
+  claims: Record<string, InputOfCompletenessClaimSchema>;
+  problems: InputOfCompletenessProblemSchema[];
+};
+
+export type CompletenessLifecycleSchema = {
+  kind: string;
+  field: string;
+  initial: string[];
+  terminal: string[];
+  via: string[];
+  note: string;
+  transitions: Record<string, string[]>;
+};
+
+export type InputOfCompletenessLifecycleSchema = {
+  kind: string;
+  field: string;
+  initial: string[];
+  terminal: string[];
+  via: string[];
+  note: string;
+  transitions: Record<string, string[]>;
+};
+
+export type CompletenessProblemSchema = {
+  code: string;
+  feature: string | null;
+  property: string | null;
+  message: string;
+};
+
+export type InputOfCompletenessProblemSchema = {
+  code: string;
+  feature: string | null;
+  property: string | null;
+  message: string;
+};
+
+export type CompletenessPropertySchema = {
+  key: string;
+  label: string;
+  batch: string;
+  landed: boolean;
+};
+
+export type InputOfCompletenessPropertySchema = {
+  key: string;
+  label: string;
+  batch: string;
+  landed: boolean;
+};
+
+export type CompletenessSchema = {
+  properties: CompletenessPropertySchema[];
+  features: CompletenessFeatureSchema[];
+  totals: Record<string, Record<string, number>>;
+  problems: CompletenessProblemSchema[];
+  ok: boolean;
+};
+
+export type InputOfCompletenessSchema = {
+  properties: InputOfCompletenessPropertySchema[];
+  features: InputOfCompletenessFeatureSchema[];
+  totals: Record<string, Record<string, number>>;
+  problems: InputOfCompletenessProblemSchema[];
+  ok: boolean;
+};
+
+export type CompletenessStateSchema = { value: string; label: string };
+
+export type InputOfCompletenessStateSchema = { value: string; label: string };
+
 export type ComponentInput = {
   kind: BasePrizeKind;
   name: string;
@@ -6569,6 +6681,10 @@ export interface Operations {
     };
     response: ImportedEventOutput;
   };
+  get_api_v1_workspaces_workspace_public_id_completeness: {
+    request: { path: { workspace_public_id: string } };
+    response: CompletenessSchema;
+  };
   get_api_v1_workspaces_workspace_public_id_event_templates: {
     request: { path: { workspace_public_id: string } };
     response: EventTemplateOutput[];
@@ -10568,6 +10684,14 @@ export const operations = {
     path_params: ["workspace_public_id"],
     query_params: [],
     request_body: true,
+    response_kind: "json",
+  },
+  get_api_v1_workspaces_workspace_public_id_completeness: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/completeness/",
+    path_params: ["workspace_public_id"],
+    query_params: [],
+    request_body: false,
     response_kind: "json",
   },
   get_api_v1_workspaces_workspace_public_id_event_templates: {

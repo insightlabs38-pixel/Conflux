@@ -2,12 +2,21 @@
 
 from core import manifest
 
+from . import features  # noqa: F401 - registers this app's features
+
 manifest.register_manifest(
     manifest.Manifest(
         id="events",
         version="1.0.0",
         label="Events and applications",
-        provides=(("entity", "applications"), ("thread_subject", "application")),
+        provides=(
+            ("feature", "event"),
+            ("feature", "track"),
+            ("feature", "application"),
+            ("feature", "announcement"),
+            ("entity", "applications"),
+            ("thread_subject", "application"),
+        ),
         requires=(("manifest", "core"),),
     )
 )

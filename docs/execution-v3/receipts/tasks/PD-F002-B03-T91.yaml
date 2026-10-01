@@ -1,0 +1,59 @@
+version: 3
+task: PD-F002-B03-T91
+batch: PD-F002-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: acaca69
+  head_commit: acaca69
+changed_paths:
+- docs/architecture/SHARED_PRIMITIVES.md (surface and manifest checklist line)
+- docs/verification/PD-F002-B03/T91-verify-fast.log
+deliverables:
+- item: Close the batch's explicit surface matrix
+  result: pass
+  evidence: "web, api, audit and docs required and closed by the T01 receipt and the matrix; sdk, cli, mcp, event_as_code, webhook, archive, analytics and search are not_required and untouched (generated SDKs were regenerated only for the new read-only endpoint and sdk-check is clean)"
+- item: Every required surface delegates to the same canonical operation and generated contracts stay synchronized
+  result: pass
+  evidence: "the form surface reuses forms.validation.field_in_scope and the form version source, so visibility and versions have one definition; lib/primitives.b03.contract.test.ts resolves the web request against the generated OpenAPI operation; make sdk-check and the OpenAPI artifact check pass"
+- item: User, operator and developer documentation and migration notes
+  result: pass
+  evidence: "PREVIEW_CONTEXT.md, SHARED_PRIMITIVES.md (table row, surface checklist), UPGRADES.md note (no migration, new read-only endpoint, manifest declaration), api README link; relative links in the changed docs were checked to resolve"
+invariants:
+- item: One source of truth, server authority
+  result: pass
+  evidence: documentation only in this task; no product behavior changed
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 2041 passed, 31 skipped
+- command: pnpm --filter @conflux/web test
+  result: pass
+  note: 648 passed
+- command: make format-check lint sdk-check block-schema-check
+  result: pass
+  note: clean, log in docs/verification/PD-F002-B03/T91-verify-fast.log
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: contract test and the T01 browser spec
+- surface: api
+  result: pass
+  evidence: OpenAPI and SDKs synchronized
+- surface: audit
+  result: pass
+  evidence: matrix proof that a preview leaves no trace
+- surface: docs
+  result: pass
+  evidence: guide, developer page, upgrade note
+migrations: []
+findings: []
+limitations:
+- Carried from the matrix; none new
+escalations: []
+next: review

@@ -48,6 +48,7 @@ A new registry in this family is also a **capability** of the extension manifest
 - Add the real adopter surface (a grid action, a panel) rather than a demo.
 - Tests: a happy path on realistic rows, the refusal cases, who may and may not see it, the lifecycle edge, and (for shared state) a race on PostgreSQL (`tests/integration/concurrency`).
 - New event-owned model? Classify it in `EXCLUDED_EVENT_MODELS` (`test_final_archive.py`) or the archive tables. New writable setting? Add its proof to `test_event_overrides.py`.
+- A new preview surface or extension entry is declared in the app's `manifest.py` (`manage.py check` fails until it agrees with the registry); a preview reuses the domain's own visibility function and never reads a context outside `core.preview_context`.
 - Regenerate the contract: `manage.py spectacular --validate --fail-on-warn --file docs/api/openapi.yaml`, `scripts/generate_sdks.py`, then `make sdk-check`.
 - A browser spec (isolated fixture) at 390 and 1440 with axe and an overflow check, listed in `tests/e2e/tiers.json`, `weights.json` and `affected.json`.
 

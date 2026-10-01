@@ -1,0 +1,19 @@
+uv run --frozen ruff format --check src/api tests
+753 files already formatted
+pnpm format:check
+$ prettier --check .
+Checking formatting...
+All matched files use Prettier code style!
+uv run --frozen ruff check src/api tests
+All checks passed!
+pnpm lint
+$ pnpm --filter @conflux/web lint && pnpm --filter @conflux/embed lint
+$ tsc --noEmit
+$ tsc --noEmit
+python3 scripts/e2e-tiers check
+tiers: OK
+uv run --frozen python scripts/check_openapi_artifact.py
+uv run --frozen python scripts/generate_sdks.py --check
+pnpm --filter @conflux/sdk build
+$ tsc -p tsconfig.build.json
+uv run --frozen python scripts/generate_block_schemas.py --check

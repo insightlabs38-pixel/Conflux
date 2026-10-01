@@ -18,6 +18,10 @@ class ConfigHistoryEntrySchema(serializers.Serializer):
     resource_type = serializers.CharField(allow_blank=True)
     resource_id = serializers.CharField(allow_blank=True)
     changes = serializers.JSONField()
+    diff = serializers.JSONField(
+        help_text="Per changed field, the structural or text diff of its before and after "
+        "(`core.version_diff`)."
+    )
     created_at = serializers.DateTimeField()
 
 

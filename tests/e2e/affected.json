@@ -198,6 +198,21 @@
         "src/api/communications/threads.py"
       ],
       "specs": ["notifications", "profiles"]
+    },
+    {
+      "paths": [
+        "src/web/components/DiffView*",
+        "src/web/components/VersionCompare*",
+        "src/web/lib/versions*",
+        "src/web/features/audit/*",
+        "src/web/features/form-builder/*",
+        "src/api/core/version_*",
+        "src/api/forms/versions.py",
+        "src/api/evaluations/versions.py",
+        "src/api/audit/*",
+        "tests/fixtures/diff_cases.json"
+      ],
+      "specs": ["version-diff"]
     }
   ]
 }

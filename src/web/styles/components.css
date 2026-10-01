@@ -2685,3 +2685,78 @@ html {
   gap: var(--space-2);
   min-height: var(--control-height-compact);
 }
+.cx-version-compare__pick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-3);
+}
+.cx-diff__summary {
+  margin: 0 0 var(--space-2);
+  color: var(--color-text-muted);
+}
+.cx-diff__changes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.cx-diff__change {
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--color-border-strong);
+  margin-bottom: var(--space-1);
+  overflow-wrap: anywhere;
+}
+.cx-diff__change--added {
+  border-left-color: var(--color-success);
+}
+.cx-diff__change--removed {
+  border-left-color: var(--color-danger);
+}
+.cx-diff__change--changed,
+.cx-diff__change--moved {
+  border-left-color: var(--color-warning);
+}
+.cx-diff__op {
+  font-weight: var(--font-weight-semibold);
+}
+.cx-diff__path {
+  font-family: var(--font-mono);
+}
+.cx-diff__values del,
+.cx-diff__values ins {
+  display: block;
+  text-decoration: none;
+}
+.cx-diff__values del code::before {
+  content: "− ";
+}
+.cx-diff__values ins code::before {
+  content: "+ ";
+}
+.cx-diff__hunk {
+  margin: 0 0 var(--space-2);
+  padding: var(--space-2);
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  font-family: var(--font-mono);
+  line-height: var(--line-height-code);
+  overflow-x: auto;
+}
+.cx-diff__line {
+  display: block;
+  text-decoration: none;
+  white-space: pre;
+}
+.cx-diff__line--add {
+  background: var(--color-success-bg);
+}
+.cx-diff__line--remove {
+  background: var(--color-danger-bg);
+}
+.cx-diff__no {
+  display: inline-block;
+  min-width: 2.5ch;
+  margin-right: var(--space-1);
+  color: var(--color-text-muted);
+  text-align: right;
+}

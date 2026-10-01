@@ -23,6 +23,7 @@
     "rich-preview",
     "artifact-preview",
     "notifications",
+    "version-diff",
     "timeline",
     "threads",
     "approvals",

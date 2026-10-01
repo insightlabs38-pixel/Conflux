@@ -2446,7 +2446,7 @@ primitives:
 - id: VERSION_DIFF
   name: Version/diff model
   owner_task: PD-F002-B02-T05
-  status: PLANNED
+  status: IMPLEMENTED
   consumer_count: 174
   consumers:
   - PD-F002-B01-T04

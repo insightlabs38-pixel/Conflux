@@ -18,6 +18,7 @@ from .rich_views import RichPreviewView
 from .saved_view_views import SavedViewDetailView, SavedViewListView, SavedViewRunView
 from .thread_views import ThreadCommentView, ThreadView
 from .timeline_views import TimelineView
+from .version_views import VersionDiffView, VersionListView
 from .views import health
 
 urlpatterns = [
@@ -32,6 +33,16 @@ urlpatterns = [
         "workspaces/<uuid:workspace_public_id>/api-credentials/<uuid:credential_public_id>/revoke/",
         CredentialRevokeView.as_view(),
         name="api-credential-revoke",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/versions/<slug:source>/",
+        VersionListView.as_view(),
+        name="version-list",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/versions/<slug:source>/diff/",
+        VersionDiffView.as_view(),
+        name="version-diff",
     ),
     path(
         "workspaces/<uuid:workspace_public_id>/notification-preferences/",

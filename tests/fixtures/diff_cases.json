@@ -1,0 +1,968 @@
+{
+  "cases": [
+    {
+      "name": "nothing changed",
+      "kind": "json",
+      "before": {
+        "a": 1,
+        "b": [1, 2]
+      },
+      "after": {
+        "a": 1,
+        "b": [1, 2]
+      },
+      "diff": {
+        "kind": "json",
+        "changes": [],
+        "total": 0,
+        "truncated": false
+      }
+    },
+    {
+      "name": "a scalar changed",
+      "kind": "json",
+      "before": {
+        "name": "A"
+      },
+      "after": {
+        "name": "B"
+      },
+      "diff": {
+        "kind": "json",
+        "changes": [
+          {
+            "path": "/name",
+            "op": "changed",
+            "before": "A",
+            "after": "B",
+            "clipped": false
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "true is not one",
+      "kind": "json",
+      "before": {
+        "x": true
+      },
+      "after": {
+        "x": 1
+      },
+      "diff": {
+        "kind": "json",
+        "changes": [
+          {
+            "path": "/x",
+            "op": "changed",
+            "before": true,
+            "after": 1,
+            "clipped": false
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "one and one point zero are the same",
+      "kind": "json",
+      "before": {
+        "x": 1
+      },
+      "after": {
+        "x": 1.0
+      },
+      "diff": {
+        "kind": "json",
+        "changes": [],
+        "total": 0,
+        "truncated": false
+      }
+    },
+    {
+      "name": "keys added and removed in key order",
+      "kind": "json",
+      "before": {
+        "b": 1,
+        "z": 2
+      },
+      "after": {
+        "a": 1,
+        "b": 1
+      },
+      "diff": {
+        "kind": "json",
+        "changes": [
+          {
+            "path": "/a",
+            "op": "added",
+            "before": null,
+            "after": 1,
+            "clipped": false
+          },
+          {
+            "path": "/z",
+            "op": "removed",
+            "before": 2,
+            "after": null,
+            "clipped": false
+          }
+        ],
+        "total": 2,
+        "truncated": false
+      }
+    },
+    {
+      "name": "a nested value",
+      "kind": "json",
+      "before": {
+        "a": {
+          "b": {
+            "c": 1
+          }
+        }
+      },
+      "after": {
+        "a": {
+          "b": {
+            "c": 2
+          }
+        }
+      },
+      "diff": {
+        "kind": "json",
+        "changes": [
+          {
+            "path": "/a/b/c",
+            "op": "changed",
+            "before": 1,
+            "after": 2,
+            "clipped": false
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "pointer escaping",
+      "kind": "json",
+      "before": {
+        "a/b": {
+          "c~d": 1
+        }
+      },
+      "after": {
+        "a/b": {
+          "c~d": 2
+        }
+      },
+      "diff": {
+        "kind": "json",
+        "changes": [
+          {
+            "path": "/a~1b/c~0d",
+            "op": "changed",
+            "before": 1,
+            "after": 2,
+            "clipped": false
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "a type change",
+      "kind": "json",
+      "before": {
+        "v": [1]
+      },
+      "after": {
+        "v": {
+          "a": 1
+        }
+      },
+      "diff": {
+        "kind": "json",
+        "changes": [
+          {
+            "path": "/v",
+            "op": "changed",
+            "before": [1],
+            "after": {
+              "a": 1
+            },
+            "clipped": false
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "null is a value",
+      "kind": "json",
+      "before": {
+        "v": null
+      },
+      "after": {
+        "v": 0
+      },
+      "diff": {
+        "kind": "json",
+        "changes": [
+          {
+            "path": "/v",
+            "op": "changed",
+            "before": null,
+            "after": 0,
+            "clipped": false
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "lists without identity compare by position",
+      "kind": "json",
+      "before": [1, 2, 3],
+      "after": [1, 5, 3, 4],
+      "diff": {
+        "kind": "json",
+        "changes": [
+          {
+            "path": "/1",
+            "op": "changed",
+            "before": 2,
+            "after": 5,
+            "clipped": false
+          },
+          {
+            "path": "/3",
+            "op": "added",
+            "before": null,
+            "after": 4,
+            "clipped": false
+          }
+        ],
+        "total": 2,
+        "truncated": false
+      }
+    },
+    {
+      "name": "a shorter list",
+      "kind": "json",
+      "before": ["a", "b", "c"],
+      "after": ["a"],
+      "diff": {
+        "kind": "json",
+        "changes": [
+          {
+            "path": "/1",
+            "op": "removed",
+            "before": "b",
+            "after": null,
+            "clipped": false
+          },
+          {
+            "path": "/2",
+            "op": "removed",
+            "before": "c",
+            "after": null,
+            "clipped": false
+          }
+        ],
+        "total": 2,
+        "truncated": false
+      }
+    },
+    {
+      "name": "keyed list: insert in the middle",
+      "kind": "json",
+      "before": {
+        "fields": [
+          {
+            "id": "a"
+          },
+          {
+            "id": "c"
+          }
+        ]
+      },
+      "after": {
+        "fields": [
+          {
+            "id": "a"
+          },
+          {
+            "id": "b"
+          },
+          {
+            "id": "c"
+          }
+        ]
+      },
+      "diff": {
+        "kind": "json",
+        "changes": [
+          {
+            "path": "/fields/1",
+            "op": "added",
+            "before": null,
+            "after": {
+              "id": "b"
+            },
+            "clipped": false
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "keyed list: remove the first",
+      "kind": "json",
+      "before": {
+        "fields": [
+          {
+            "id": "a",
+            "l": 1
+          },
+          {
+            "id": "b",
+            "l": 2
+          }
+        ]
+      },
+      "after": {
+        "fields": [
+          {
+            "id": "b",
+            "l": 2
+          }
+        ]
+      },
+      "diff": {
+        "kind": "json",
+        "changes": [
+          {
+            "path": "/fields/0",
+            "op": "removed",
+            "before": {
+              "id": "a",
+              "l": 1
+            },
+            "after": null,
+            "clipped": false
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "keyed list: one item moved to the front",
+      "kind": "json",
+      "before": {
+        "fields": [
+          {
+            "id": "a"
+          },
+          {
+            "id": "b"
+          },
+          {
+            "id": "c"
+          }
+        ]
+      },
+      "after": {
+        "fields": [
+          {
+            "id": "c"
+          },
+          {
+            "id": "a"
+          },
+          {
+            "id": "b"
+          }
+        ]
+      },
+      "diff": {
+        "kind": "json",
+        "changes": [
+          {
+            "path": "/fields/0",
+            "op": "moved",
+            "before": 2,
+            "after": 0,
+            "clipped": false
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "keyed list: moved and changed",
+      "kind": "json",
+      "before": {
+        "fields": [
+          {
+            "id": "a",
+            "label": "A"
+          },
+          {
+            "id": "b",
+            "label": "B"
+          }
+        ]
+      },
+      "after": {
+        "fields": [
+          {
+            "id": "b",
+            "label": "B2"
+          },
+          {
+            "id": "a",
+            "label": "A"
+          }
+        ]
+      },
+      "diff": {
+        "kind": "json",
+        "changes": [
+          {
+            "path": "/fields/0",
+            "op": "moved",
+            "before": 1,
+            "after": 0,
+            "clipped": false
+          },
+          {
+            "path": "/fields/0/label",
+            "op": "changed",
+            "before": "B",
+            "after": "B2",
+            "clipped": false
+          }
+        ],
+        "total": 2,
+        "truncated": false
+      }
+    },
+    {
+      "name": "duplicate ids fall back to position",
+      "kind": "json",
+      "before": [
+        {
+          "id": "a",
+          "v": 1
+        },
+        {
+          "id": "a",
+          "v": 2
+        }
+      ],
+      "after": [
+        {
+          "id": "a",
+          "v": 1
+        },
+        {
+          "id": "a",
+          "v": 3
+        }
+      ],
+      "diff": {
+        "kind": "json",
+        "changes": [
+          {
+            "path": "/1/v",
+            "op": "changed",
+            "before": 2,
+            "after": 3,
+            "clipped": false
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "a missing id falls back to position",
+      "kind": "json",
+      "before": [
+        {
+          "id": "a"
+        },
+        {
+          "name": "x"
+        }
+      ],
+      "after": [
+        {
+          "name": "x"
+        },
+        {
+          "id": "a"
+        }
+      ],
+      "diff": {
+        "kind": "json",
+        "changes": [
+          {
+            "path": "/0/id",
+            "op": "removed",
+            "before": "a",
+            "after": null,
+            "clipped": false
+          },
+          {
+            "path": "/0/name",
+            "op": "added",
+            "before": null,
+            "after": "x",
+            "clipped": false
+          },
+          {
+            "path": "/1/id",
+            "op": "added",
+            "before": null,
+            "after": "a",
+            "clipped": false
+          },
+          {
+            "path": "/1/name",
+            "op": "removed",
+            "before": "x",
+            "after": null,
+            "clipped": false
+          }
+        ],
+        "total": 4,
+        "truncated": false
+      }
+    },
+    {
+      "name": "key and public_id also identify",
+      "kind": "json",
+      "before": [
+        {
+          "key": "k1",
+          "v": 1
+        },
+        {
+          "key": "k2",
+          "v": 1
+        }
+      ],
+      "after": [
+        {
+          "key": "k2",
+          "v": 2
+        },
+        {
+          "key": "k1",
+          "v": 1
+        }
+      ],
+      "diff": {
+        "kind": "json",
+        "changes": [
+          {
+            "path": "/0",
+            "op": "moved",
+            "before": 1,
+            "after": 0,
+            "clipped": false
+          },
+          {
+            "path": "/0/v",
+            "op": "changed",
+            "before": 1,
+            "after": 2,
+            "clipped": false
+          }
+        ],
+        "total": 2,
+        "truncated": false
+      }
+    },
+    {
+      "name": "identical text",
+      "kind": "text",
+      "before": "a\nb\n",
+      "after": "a\nb\n",
+      "diff": {
+        "kind": "text",
+        "hunks": [],
+        "added": 0,
+        "removed": 0,
+        "truncated": false
+      }
+    },
+    {
+      "name": "one line changed",
+      "kind": "text",
+      "before": "a\nb\nc\n",
+      "after": "a\nX\nc\n",
+      "diff": {
+        "kind": "text",
+        "hunks": [
+          {
+            "lines": [
+              {
+                "op": "equal",
+                "text": "a",
+                "before_line": 1,
+                "after_line": 1
+              },
+              {
+                "op": "remove",
+                "text": "b",
+                "before_line": 2,
+                "after_line": null
+              },
+              {
+                "op": "add",
+                "text": "X",
+                "before_line": null,
+                "after_line": 2
+              },
+              {
+                "op": "equal",
+                "text": "c",
+                "before_line": 3,
+                "after_line": 3
+              }
+            ]
+          }
+        ],
+        "added": 1,
+        "removed": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "appended and removed lines",
+      "kind": "text",
+      "before": "a\nb\nc\nd\ne\nf\ng\nh\ni\nj\n",
+      "after": "a\nb\nc\nX\ne\nf\ng\nh\ni\nj\nk\n",
+      "diff": {
+        "kind": "text",
+        "hunks": [
+          {
+            "lines": [
+              {
+                "op": "equal",
+                "text": "a",
+                "before_line": 1,
+                "after_line": 1
+              },
+              {
+                "op": "equal",
+                "text": "b",
+                "before_line": 2,
+                "after_line": 2
+              },
+              {
+                "op": "equal",
+                "text": "c",
+                "before_line": 3,
+                "after_line": 3
+              },
+              {
+                "op": "remove",
+                "text": "d",
+                "before_line": 4,
+                "after_line": null
+              },
+              {
+                "op": "add",
+                "text": "X",
+                "before_line": null,
+                "after_line": 4
+              },
+              {
+                "op": "equal",
+                "text": "e",
+                "before_line": 5,
+                "after_line": 5
+              },
+              {
+                "op": "equal",
+                "text": "f",
+                "before_line": 6,
+                "after_line": 6
+              },
+              {
+                "op": "equal",
+                "text": "g",
+                "before_line": 7,
+                "after_line": 7
+              },
+              {
+                "op": "equal",
+                "text": "h",
+                "before_line": 8,
+                "after_line": 8
+              },
+              {
+                "op": "equal",
+                "text": "i",
+                "before_line": 9,
+                "after_line": 9
+              },
+              {
+                "op": "equal",
+                "text": "j",
+                "before_line": 10,
+                "after_line": 10
+              },
+              {
+                "op": "add",
+                "text": "k",
+                "before_line": null,
+                "after_line": 11
+              }
+            ]
+          }
+        ],
+        "added": 2,
+        "removed": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "two separate hunks",
+      "kind": "text",
+      "before": "line 1\nline 2\nline 3\nline 4\nline 5\nline 6\nline 7\nline 8\nline 9\nline 10\nline 11\nline 12\nline 13\nline 14\nline 15\nline 16\nline 17\nline 18\nline 19\nline 20",
+      "after": "line 1\nCHANGED 2\nline 3\nline 4\nline 5\nline 6\nline 7\nline 8\nline 9\nline 10\nline 11\nline 12\nline 13\nline 14\nline 15\nline 16\nline 17\nline 18\nCHANGED 19\nline 20",
+      "diff": {
+        "kind": "text",
+        "hunks": [
+          {
+            "lines": [
+              {
+                "op": "equal",
+                "text": "line 1",
+                "before_line": 1,
+                "after_line": 1
+              },
+              {
+                "op": "remove",
+                "text": "line 2",
+                "before_line": 2,
+                "after_line": null
+              },
+              {
+                "op": "add",
+                "text": "CHANGED 2",
+                "before_line": null,
+                "after_line": 2
+              },
+              {
+                "op": "equal",
+                "text": "line 3",
+                "before_line": 3,
+                "after_line": 3
+              },
+              {
+                "op": "equal",
+                "text": "line 4",
+                "before_line": 4,
+                "after_line": 4
+              },
+              {
+                "op": "equal",
+                "text": "line 5",
+                "before_line": 5,
+                "after_line": 5
+              }
+            ]
+          },
+          {
+            "lines": [
+              {
+                "op": "equal",
+                "text": "line 16",
+                "before_line": 16,
+                "after_line": 16
+              },
+              {
+                "op": "equal",
+                "text": "line 17",
+                "before_line": 17,
+                "after_line": 17
+              },
+              {
+                "op": "equal",
+                "text": "line 18",
+                "before_line": 18,
+                "after_line": 18
+              },
+              {
+                "op": "remove",
+                "text": "line 19",
+                "before_line": 19,
+                "after_line": null
+              },
+              {
+                "op": "add",
+                "text": "CHANGED 19",
+                "before_line": null,
+                "after_line": 19
+              },
+              {
+                "op": "equal",
+                "text": "line 20",
+                "before_line": 20,
+                "after_line": 20
+              }
+            ]
+          }
+        ],
+        "added": 2,
+        "removed": 2,
+        "truncated": false
+      }
+    },
+    {
+      "name": "from nothing",
+      "kind": "text",
+      "before": "",
+      "after": "first\nsecond",
+      "diff": {
+        "kind": "text",
+        "hunks": [
+          {
+            "lines": [
+              {
+                "op": "add",
+                "text": "first",
+                "before_line": null,
+                "after_line": 1
+              },
+              {
+                "op": "add",
+                "text": "second",
+                "before_line": null,
+                "after_line": 2
+              }
+            ]
+          }
+        ],
+        "added": 2,
+        "removed": 0,
+        "truncated": false
+      }
+    },
+    {
+      "name": "to nothing",
+      "kind": "text",
+      "before": "first\nsecond",
+      "after": "",
+      "diff": {
+        "kind": "text",
+        "hunks": [
+          {
+            "lines": [
+              {
+                "op": "remove",
+                "text": "first",
+                "before_line": 1,
+                "after_line": null
+              },
+              {
+                "op": "remove",
+                "text": "second",
+                "before_line": 2,
+                "after_line": null
+              }
+            ]
+          }
+        ],
+        "added": 0,
+        "removed": 2,
+        "truncated": false
+      }
+    },
+    {
+      "name": "a trailing newline is not a line",
+      "kind": "text",
+      "before": "a\nb",
+      "after": "a\nb\n",
+      "diff": {
+        "kind": "text",
+        "hunks": [],
+        "added": 0,
+        "removed": 0,
+        "truncated": false
+      }
+    },
+    {
+      "name": "short text is compared as a value",
+      "kind": "value",
+      "before": "Old title",
+      "after": "New title",
+      "diff": {
+        "kind": "json",
+        "changes": [
+          {
+            "path": "",
+            "op": "changed",
+            "before": "Old title",
+            "after": "New title",
+            "clipped": false
+          }
+        ],
+        "total": 1,
+        "truncated": false
+      }
+    },
+    {
+      "name": "multi-line text is compared as lines",
+      "kind": "value",
+      "before": "a\nb",
+      "after": "a\nc",
+      "diff": {
+        "kind": "text",
+        "hunks": [
+          {
+            "lines": [
+              {
+                "op": "equal",
+                "text": "a",
+                "before_line": 1,
+                "after_line": 1
+              },
+              {
+                "op": "remove",
+                "text": "b",
+                "before_line": 2,
+                "after_line": null
+              },
+              {
+                "op": "add",
+                "text": "c",
+                "before_line": null,
+                "after_line": 2
+              }
+            ]
+          }
+        ],
+        "added": 1,
+        "removed": 1,
+        "truncated": false
+      }
+    }
+  ]
+}

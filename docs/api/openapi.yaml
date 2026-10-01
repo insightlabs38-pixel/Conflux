@@ -17870,6 +17870,112 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/workspaces/{workspace_public_id}/versions/{source}/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_versions_source
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: query
+        name: event
+        schema:
+          type: string
+        description: 'form and rubric: the event.'
+      - in: query
+        name: form
+        schema:
+          type: string
+        description: 'form: the form.'
+      - in: query
+        name: plan
+        schema:
+          type: string
+        description: 'rubric: the evaluation plan.'
+      - in: path
+        name: source
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionListSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/versions/{source}/diff/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_versions_source_diff
+      description: |-
+        Resolves `self.get_workspace()` from a `workspace_public_id` URL kwarg
+        before permission checks run, so `HasWorkspaceRole`/`IsWorkspaceMember`
+        can evaluate role membership against the right tenant. Shared by every
+        app with workspace-scoped endpoints (workspaces, audit, and later
+        event/stage/policy views) to keep the lookup identical everywhere.
+      parameters:
+      - in: query
+        name: event
+        schema:
+          type: string
+        description: 'form and rubric: the event.'
+      - in: query
+        name: form
+        schema:
+          type: string
+        description: 'form: the form.'
+      - in: query
+        name: newer
+        schema:
+          type: string
+        description: The version id to compare to.
+      - in: query
+        name: older
+        schema:
+          type: string
+        description: The version id to compare from.
+      - in: query
+        name: plan
+        schema:
+          type: string
+        description: 'rubric: the evaluation plan.'
+      - in: path
+        name: source
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionDiffSchema'
+          description: ''
   /api/v1/workspaces/{workspace_public_id}/webhooks/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_webhooks
@@ -20189,6 +20295,9 @@ components:
         resource_id:
           type: string
         changes: {}
+        diff:
+          description: Per changed field, the structural or text diff of its before
+            and after (`core.version_diff`).
         created_at:
           type: string
           format: date-time
@@ -20197,6 +20306,7 @@ components:
       - actor
       - changes
       - created_at
+      - diff
       - public_id
       - resource_id
       - resource_type
@@ -27502,6 +27612,59 @@ components:
           type: string
       required:
       - valid
+    VersionDiffSchema:
+      type: object
+      properties:
+        source:
+          type: string
+        older:
+          $ref: '#/components/schemas/VersionInfoSchema'
+        newer:
+          $ref: '#/components/schemas/VersionInfoSchema'
+        diff:
+          description: 'Either {kind: json, changes: [{path, op, before, after, clipped}],
+            total, truncated} or {kind: text, hunks: [{lines}], added, removed, truncated}.'
+      required:
+      - diff
+      - newer
+      - older
+      - source
+    VersionInfoSchema:
+      type: object
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        at:
+          type: string
+          nullable: true
+        by:
+          type: string
+          nullable: true
+        current:
+          type: boolean
+      required:
+      - at
+      - by
+      - current
+      - id
+      - label
+    VersionListSchema:
+      type: object
+      properties:
+        source:
+          type: string
+        label:
+          type: string
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/VersionInfoSchema'
+      required:
+      - label
+      - source
+      - versions
     VisibilityInput:
       type: object
       properties:

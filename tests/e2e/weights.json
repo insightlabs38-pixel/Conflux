@@ -38,5 +38,6 @@
   "isolated-mutation:schema-form": 20.0,
   "isolated-mutation:rich-preview": 20.0,
   "isolated-mutation:artifact-preview": 20.0,
-  "isolated-mutation:notifications": 20.0
+  "isolated-mutation:notifications": 20.0,
+  "isolated-mutation:version-diff": 25.0
 }

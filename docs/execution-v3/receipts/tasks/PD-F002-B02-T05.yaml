@@ -1,0 +1,84 @@
+version: 3
+task: PD-F002-B02-T05
+batch: PD-F002-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: frontier-architecture
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 4627922
+  head_commit: 4627922
+changed_paths:
+- src/api/core/ (version_diff.py, version_views.py, urls.py)
+- src/api/forms/ (versions.py, apps.py), src/api/evaluations/ (versions.py, apps.py), src/api/audit/ (views.py, serializers.py diff per field)
+- src/web/lib/versions.ts, components/ (DiffView.tsx, VersionCompare.tsx), features/form-builder/FormBuilder.tsx, features/audit/ConfigHistoryPanel.tsx, styles/components.css
+- tests/integration/test_version_diff.py, tests/fixtures/diff_cases.json, src/web/components/ (DiffView.test.tsx, VersionCompare.test.tsx), features/audit/ConfigHistoryPanel.test.tsx
+- tests/e2e/ (version-diff.spec.ts, tiers.json, weights.json, affected.json)
+- docs/operations/VERSION_DIFF.md, docs/api/openapi.yaml, generated SDKs, spec 002, PRIMITIVE_REGISTRY.yaml
+deliverables:
+- item: Canonical version/diff model as a platform primitive
+  result: pass
+  evidence: core/version_diff.py with diff_json (RFC 6901 paths, ops added, removed, changed, moved, identity-keyed lists), diff_text (hunks with context), diff_value, and a VersionSource registry with endpoints GET versions/{source}/ and versions/{source}/diff/
+- item: Stable inputs/outputs, lifecycle, authorization, idempotency, errors, extension boundary
+  result: pass
+  evidence: VERSION_DIFF.md; pure and deterministic, read-only, uncached; the source decides visibility (404 when not visible, 400 naming a missing parameter); bounds of 500 changes, 1,000 characters per value, depth 24, 5,000 lines or 200,000 characters of text; a feature adds a source with register_source
+- item: Reference consumer or contract test showing reuse without private coupling
+  result: pass
+  evidence: two sources (form, rubric), an independent text source registered by a test, and the configuration history reading the same diff functions
+- item: Compatibility and migration expectations documented
+  result: pass
+  evidence: no migration; audit snapshots, immutable versions and the history endpoint's flat changes are unchanged; the history gains an additive diff per field that an older client ignores
+invariants:
+- item: Diffs are produced by the server and only drawn by the browser
+  result: pass
+  evidence: DiffView and VersionCompare compute nothing; the shared fixtures run in pytest against the server and are drawn by vitest
+- item: Read-only, deterministic, no effect on restore, scoring or permissions
+  result: pass
+  evidence: comparing writes no audit or version row (asserted); restore endpoints untouched; repeated calls and key-order permutations give identical output
+- item: Design intent, accessibility, progressive disclosure
+  result: pass
+  evidence: compare control closed behind a details element and loaded when opened, changes named in words (Added, Removed, Changed, Moved) as well as colour, ins and del with hidden Before and After text, text hunks focusable, axe clean and no overflow at 390 and 1440
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 1945 passed, 31 skipped (45 new in test_version_diff.py)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check; makemigrations --check
+  result: pass
+  note: 579 web tests; OpenAPI validated with fail-on-warn and SDKs regenerated and importable
+- command: npx playwright test version-diff --project=desktop on a fresh iso-min fixture
+  result: pass
+  note: 2 passed (390 and 1440) covering a form moved and edited across versions, a form compared with its draft, the uncached API answer, a configuration rename in the history, and no writes by looking
+- command: make e2e-affected
+  result: pass
+  note: read-only, isolated-mutation and canary ok
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: Setup > Forms > Compare versions and Operations > Configuration history
+- surface: api
+  result: pass
+  evidence: version list and diff endpoints; history diff
+- surface: audit
+  result: pass
+  evidence: reads the existing audit capture and writes nothing (asserted)
+- surface: docs
+  result: pass
+  evidence: VERSION_DIFF.md, spec 002 B02 as built, registry IMPLEMENTED
+- surface: sdk
+  result: pass
+  evidence: "not required; generated clients regenerated, sdk-check clean"
+migrations:
+- none (stateless, additive)
+findings:
+- The first draft named the query parameters and response keys from and to; the generated Python SDK emitted from as a field name and failed to import (caught by tests/test_generated_sdks.py), so they are older and newer
+- Comparing a published rubric version with an uncleaned draft reports a spurious removed anchors; the stored draft is the cleaned form, so real data does not differ, and the test now uses it
+- The form builder crashes on API-created fields without visible_to (pre-existing); the browser spec sends the field the builder always writes
+limitations:
+- The rubric source has an API but no screen yet (the Evaluation builder keeps its own version list)
+- Text diffs are line based with no intra-line highlighting
+- Lists of objects without a unique id, key or public_id are compared by position
+escalations: []
+next: review

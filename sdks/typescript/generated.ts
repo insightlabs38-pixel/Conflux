@@ -1332,6 +1332,7 @@ export type ConfigHistoryEntrySchema = {
   resource_type: string;
   resource_id: string;
   changes: unknown;
+  diff: unknown;
   created_at: string;
 };
 
@@ -1342,6 +1343,7 @@ export type InputOfConfigHistoryEntrySchema = {
   resource_type: string;
   resource_id: string;
   changes: unknown;
+  diff: unknown;
   created_at: string;
 };
 
@@ -5925,6 +5927,48 @@ export type InputOfVerifyRecordOutput = {
   error?: string;
 };
 
+export type VersionDiffSchema = {
+  source: string;
+  older: VersionInfoSchema;
+  newer: VersionInfoSchema;
+  diff: unknown;
+};
+
+export type InputOfVersionDiffSchema = {
+  source: string;
+  older: InputOfVersionInfoSchema;
+  newer: InputOfVersionInfoSchema;
+  diff: unknown;
+};
+
+export type VersionInfoSchema = {
+  id: string;
+  label: string;
+  at: string | null;
+  by: string | null;
+  current: boolean;
+};
+
+export type InputOfVersionInfoSchema = {
+  id: string;
+  label: string;
+  at: string | null;
+  by: string | null;
+  current: boolean;
+};
+
+export type VersionListSchema = {
+  source: string;
+  label: string;
+  versions: VersionInfoSchema[];
+};
+
+export type InputOfVersionListSchema = {
+  source: string;
+  label: string;
+  versions: InputOfVersionInfoSchema[];
+};
+
 export type VisibilityInput = {
   gallery_visible?: boolean;
   blocked?: boolean;
@@ -9851,6 +9895,26 @@ export interface Operations {
       path: { taxonomy_public_id: string; workspace_public_id: string };
     };
     response: null;
+  };
+  get_api_v1_workspaces_workspace_public_id_versions_source: {
+    request: {
+      path: { source: string; workspace_public_id: string };
+      query?: { event?: string; form?: string; plan?: string };
+    };
+    response: VersionListSchema;
+  };
+  get_api_v1_workspaces_workspace_public_id_versions_source_diff: {
+    request: {
+      path: { source: string; workspace_public_id: string };
+      query?: {
+        event?: string;
+        form?: string;
+        newer?: string;
+        older?: string;
+        plan?: string;
+      };
+    };
+    response: VersionDiffSchema;
   };
   get_api_v1_workspaces_workspace_public_id_webhooks: {
     request: { path: { workspace_public_id: string } };
@@ -14855,6 +14919,22 @@ export const operations = {
     query_params: [],
     request_body: false,
     response_kind: "none",
+  },
+  get_api_v1_workspaces_workspace_public_id_versions_source: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/versions/{source}/",
+    path_params: ["source", "workspace_public_id"],
+    query_params: ["event", "form", "plan"],
+    request_body: false,
+    response_kind: "json",
+  },
+  get_api_v1_workspaces_workspace_public_id_versions_source_diff: {
+    method: "GET",
+    path: "/api/v1/workspaces/{workspace_public_id}/versions/{source}/diff/",
+    path_params: ["source", "workspace_public_id"],
+    query_params: ["event", "form", "newer", "older", "plan"],
+    request_body: false,
+    response_kind: "json",
   },
   get_api_v1_workspaces_workspace_public_id_webhooks: {
     method: "GET",

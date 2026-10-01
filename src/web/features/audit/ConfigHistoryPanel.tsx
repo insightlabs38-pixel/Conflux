@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
+import { DiffView } from "../../components/DiffView";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 import { apiRequest } from "../../lib/api";
 import { useLoad } from "../../hooks/useLoad";
+import type { Diff } from "../../lib/versions";
 
 type FieldChange = { before: unknown; after: unknown };
 type HistoryEntry = {
@@ -14,6 +16,8 @@ type HistoryEntry = {
   resource_type: string;
   resource_id: string;
   changes: Record<string, FieldChange>;
+  /** The server's diff of each changed field (the flat before and after stay in `changes`). */
+  diff?: Record<string, Diff>;
   created_at: string;
 };
 
@@ -104,9 +108,18 @@ export function ConfigHistoryPanel({
                   <div key={field}>
                     <dt>{field}</dt>
                     <dd>
-                      <pre>{JSON.stringify(change.before)}</pre>
-                      {" → "}
-                      <pre>{JSON.stringify(change.after)}</pre>
+                      {entry.diff?.[field] ? (
+                        <DiffView
+                          diff={entry.diff[field]}
+                          label={`Changes to ${field}`}
+                        />
+                      ) : (
+                        <>
+                          <pre>{JSON.stringify(change.before)}</pre>
+                          {" → "}
+                          <pre>{JSON.stringify(change.after)}</pre>
+                        </>
+                      )}
                     </dd>
                   </div>
                 ))}

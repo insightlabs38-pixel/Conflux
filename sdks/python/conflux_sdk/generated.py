@@ -1210,6 +1210,7 @@ class ConfigHistoryEntrySchema(TypedDict):
     resource_type: str
     resource_id: str
     changes: Any
+    diff: Any
     created_at: str
 
 class InputOfConfigHistoryEntrySchema(TypedDict):
@@ -1219,6 +1220,7 @@ class InputOfConfigHistoryEntrySchema(TypedDict):
     resource_type: str
     resource_id: str
     changes: Any
+    diff: Any
     created_at: str
 
 class ConfigRestoreResultSchema(TypedDict):
@@ -5485,6 +5487,42 @@ class InputOfVerifyRecordOutput(TypedDict):
     claims: NotRequired[dict[str, Any]]
     error: NotRequired[str]
 
+class VersionDiffSchema(TypedDict):
+    source: str
+    older: VersionInfoSchema
+    newer: VersionInfoSchema
+    diff: Any
+
+class InputOfVersionDiffSchema(TypedDict):
+    source: str
+    older: InputOfVersionInfoSchema
+    newer: InputOfVersionInfoSchema
+    diff: Any
+
+class VersionInfoSchema(TypedDict):
+    id: str
+    label: str
+    at: str | None
+    by: str | None
+    current: bool
+
+class InputOfVersionInfoSchema(TypedDict):
+    id: str
+    label: str
+    at: str | None
+    by: str | None
+    current: bool
+
+class VersionListSchema(TypedDict):
+    source: str
+    label: str
+    versions: list[VersionInfoSchema]
+
+class InputOfVersionListSchema(TypedDict):
+    source: str
+    label: str
+    versions: list[InputOfVersionInfoSchema]
+
 class VisibilityInput(TypedDict):
     gallery_visible: NotRequired[bool]
     blocked: NotRequired[bool]
@@ -7629,6 +7667,26 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                              'query_params': [],
                                                                              'request_body': False,
                                                                              'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_versions_source': {'method': 'GET',
+                                                               'path': '/api/v1/workspaces/{workspace_public_id}/versions/{source}/',
+                                                               'path_params': ['source',
+                                                                               'workspace_public_id'],
+                                                               'query_params': ['event',
+                                                                                'form',
+                                                                                'plan'],
+                                                               'request_body': False,
+                                                               'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_versions_source_diff': {'method': 'GET',
+                                                                    'path': '/api/v1/workspaces/{workspace_public_id}/versions/{source}/diff/',
+                                                                    'path_params': ['source',
+                                                                                    'workspace_public_id'],
+                                                                    'query_params': ['event',
+                                                                                     'form',
+                                                                                     'newer',
+                                                                                     'older',
+                                                                                     'plan'],
+                                                                    'request_body': False,
+                                                                    'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_webhooks': {'method': 'GET',
                                                         'path': '/api/v1/workspaces/{workspace_public_id}/webhooks/',
                                                         'path_params': ['workspace_public_id'],

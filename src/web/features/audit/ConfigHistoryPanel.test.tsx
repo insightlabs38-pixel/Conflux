@@ -56,6 +56,57 @@ it("renders each entry's field-level before/after diff", async () => {
   container.remove();
 });
 
+it("draws the server's diff of each field and falls back to before and after without one", async () => {
+  const entry = (id: string, diff?: object) => ({
+    public_id: id,
+    actor: "organizer",
+    action: "event.updated",
+    resource_type: "Event",
+    resource_id: "e1",
+    changes: { name: { before: "Hack", after: "Hack 2.0" } },
+    ...(diff ? { diff } : {}),
+    created_at: "2026-09-27T00:00:00Z",
+  });
+  const diff = {
+    name: {
+      kind: "json",
+      total: 1,
+      truncated: false,
+      changes: [
+        {
+          path: "",
+          op: "changed",
+          before: "Hack",
+          after: "Hack 2.0",
+          clipped: false,
+        },
+      ],
+    },
+  };
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async () => jsonResponse(200, [entry("h1", diff), entry("h2")])),
+  );
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  act(() =>
+    root.render(
+      withQuery(<ConfigHistoryPanel workspaceId="w1" eventId="e1" />),
+    ),
+  );
+  await until(() => container.querySelector(".cx-diff") !== null);
+  const group = container.querySelector('[role="group"]')!;
+  expect(group.getAttribute("aria-label")).toBe("Changes to name");
+  expect(group.textContent).toContain("Changed");
+  expect(group.textContent).toContain('"Hack 2.0"');
+  // An entry from an older server has no diff: the flat before and after still show.
+  expect(container.querySelectorAll("li")[1].textContent).toContain('"Hack"');
+  expect(container.querySelectorAll(".cx-diff")).toHaveLength(1);
+  act(() => root.unmount());
+  container.remove();
+});
+
 it("shows an empty state when there is no captured history yet", async () => {
   vi.stubGlobal(
     "fetch",

@@ -1,4 +1,5 @@
 from accounts.authentication import CookieSessionAuthentication
+from core import version_diff
 from core.mixins import WorkspaceLookupMixin
 from core.permissions import require_roles
 from django.core.exceptions import ValidationError as ModelValidationError
@@ -20,6 +21,15 @@ from workspaces.models import Role
 from .models import AuditEvent
 from .serializers import AuditEventSchema, ConfigHistoryEntrySchema, ConfigRestoreResultSchema
 from .services import diff_snapshots, record_mutation, snapshot_fields
+
+
+def _field_diffs(changes):
+    """The structural diff of each recorded `{before, after}`, produced here and drawn as given."""
+    return {
+        field: version_diff.diff_value(change.get("before"), change.get("after"))
+        for field, change in changes.items()
+        if isinstance(change, dict)
+    }
 
 
 def _serialize(event):
@@ -71,6 +81,7 @@ class EventConfigHistoryView(OrganizerView):
                     "resource_type": row.target_type,
                     "resource_id": row.target_id,
                     "changes": row.metadata["changes"],
+                    "diff": _field_diffs(row.metadata["changes"]),
                     "created_at": row.created_at.isoformat(),
                 }
                 for row in rows

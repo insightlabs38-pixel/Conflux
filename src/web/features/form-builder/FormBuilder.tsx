@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { VersionCompare } from "../../components/VersionCompare";
 import { apiJson } from "../../lib/api";
 
 type Field = {
@@ -57,6 +58,7 @@ export function FormBuilder({
   const base = `/api/v1/workspaces/${workspaceId}/events/${eventId}/forms/`;
   const [forms, setForms] = useState<Form[]>([]);
   const [selectedId, setSelectedId] = useState("");
+  const [compareOpen, setCompareOpen] = useState(false);
   const [fields, setFields] = useState<Field[]>([]);
   const [versions, setVersions] = useState<Version[]>([]);
   const [formName, setFormName] = useState("");
@@ -562,6 +564,22 @@ export function FormBuilder({
                 </li>
               ))}
             </ul>
+          )}
+          {versions.length > 0 && (
+            <details
+              onToggle={(event) => setCompareOpen(event.currentTarget.open)}
+            >
+              <summary>Compare versions</summary>
+              {compareOpen && (
+                <VersionCompare
+                  key={`${selectedId}-${versions.length}`}
+                  workspaceId={workspaceId}
+                  source="form"
+                  reference={{ event: eventId, form: selectedId }}
+                  label="Compare form versions"
+                />
+              )}
+            </details>
           )}
         </>
       )}

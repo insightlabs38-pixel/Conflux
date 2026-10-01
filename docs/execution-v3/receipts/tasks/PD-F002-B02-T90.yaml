@@ -1,0 +1,62 @@
+version: 3
+task: PD-F002-B02-T90
+batch: PD-F002-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 0fa18da
+  head_commit: 0fa18da
+changed_paths:
+- docs/verification/PD-F002-B02/ (MATRIX.md, T90-e2e-fast.log)
+- tests/integration/test_shared_primitives_b02_regression.py
+deliverables:
+- item: Verification matrix for the 8 capability tasks, each with an executable proof
+  result: pass
+  evidence: MATRIX.md has a section per primitive with positive, negative and boundary, authorization, lifecycle and compatibility, concurrency and idempotency, and UI-state proofs; every cited pytest name and web or browser file was checked to exist by script
+- item: Positive, negative, authorization, lifecycle, migration and concurrency coverage
+  result: pass
+  evidence: per-primitive tests carry the depth (incl. the notification race test on PostgreSQL); the new cross-cutting file adds registry contents, manifest inventory agreement, nine routes refusing signed-out and outside callers, participant boundaries, reads writing no audit row and the one mutation audited
+- item: UI-facing states verified beyond screenshots
+  result: pass
+  evidence: loading, empty, error with retry, refused, read-only and pending states asserted in component tests, and browser specs at 390 and 1440 with axe and overflow for every primitive
+- item: Exact commands and unresolved limitations recorded
+  result: pass
+  evidence: MATRIX.md Commands and Unresolved limitations sections
+invariants:
+- item: Canonical source of truth, server authority
+  result: pass
+  evidence: the new tests run against the live API and registries; no product code changed in this task
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 2014 passed, 31 skipped (8 new cross-cutting tests)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check; makemigrations --check
+  result: pass
+  note: 620 web tests; static checks and drift clean; no migration changes
+- command: make e2e-fast
+  result: pass
+  note: read-only, isolated-mutation and canary ok; docs/verification/PD-F002-B02/T90-e2e-fast.log
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: states and viewports in the matrix
+- surface: api
+  result: pass
+  evidence: route refusal and participant boundary proofs
+- surface: audit
+  result: pass
+  evidence: reads write nothing, the notification choice is audited with before and after only
+- surface: docs
+  result: pass
+  evidence: matrix
+migrations: []
+findings: []
+limitations:
+- Listed in the matrix; none are new
+escalations: []
+next: review

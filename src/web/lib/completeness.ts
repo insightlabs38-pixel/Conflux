@@ -92,13 +92,20 @@ const FACT_LABEL: Record<string, string> = {
   blank_refused: "A blank record is refused for",
   constraints: "Constraints",
   own_clean: "Model checks its own rules",
+  readers: "Who can read",
+  writers: "Who can change",
+  scope_path: "Scoped through",
 };
 
 /** One derived fact as a sentence fragment: lists joined, booleans as yes or no. */
 export function factText(key: string, value: unknown): string {
   const label = FACT_LABEL[key] ?? key.replace(/_/g, " ");
+  if (key === "scope_path" && Array.isArray(value))
+    return `${label}: ${value.length ? value.join(" → ") : "no chain"}`;
   if (Array.isArray(value))
     return `${label}: ${value.length ? value.join(", ") : "none"}`;
+  if (value && typeof value === "object" && "summary" in value)
+    return String((value as { summary: unknown }).summary);
   if (typeof value === "boolean") return `${label}: ${value ? "yes" : "no"}`;
   return `${label}: ${String(value)}`;
 }

@@ -1,0 +1,94 @@
+version: 3
+task: PD-F003-B01-T03
+batch: PD-F003-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: d58549b
+  head_commit: d58549b
+changed_paths:
+- src/api/core/ (features_authorization.py new, features.py permission_matrix, fk_path and shared static_test_refs, features_validation.py uses it, apps.py)
+- src/api/<app>/features.py for the fifteen features (authorization claims)
+- src/api/artifacts/views.py (UploadIntentView resolves the project before reading the body)
+- src/web/lib/completeness.ts (authorization fact text), src/web/features/operations/CompletenessPanel.test.tsx
+- tests/integration/ (test_feature_authorization.py new, test_feature_contract.py extended), tests/e2e/completeness.spec.ts
+- docs/operations/COMPLETENESS.md, spec 003 (as built)
+deliverables:
+- item: Authorization and scope rules added to the completeness contract and applied to domain work
+  result: pass
+  evidence: "authorization verifier holds each claim (routes, scope, readers, writers, object rule, tests) to the live permission matrix and the model's foreign keys; all fifteen features claim it with no findings; readers and writers are derived and cannot differ from the gates"
+- item: Adversarial tests for unauthorized scope and object access, malformed input and replay or secret-leak cases
+  result: pass
+  evidence: "test_feature_authorization.py sends every claimed route and method as each excluded role, a stranger and a signed-out caller (more than 100 refusals), a workspace member who is not on a project against project, submission and artifact writes, cross-workspace and cross-event ids, and compares the refusal body for a real and an unknown id; verifier suite has a failure code per claim defect"
+- item: Residual risk recorded
+  result: pass
+  evidence: "own: object rules are declared and proven by named tests rather than derived; recorded under limitations and in spec 003"
+invariants:
+- item: One source of truth, server-side authorization authoritative
+  result: pass
+  evidence: "the registry reads the permission matrix and models; no rule is restated; the report is advisory, read-only and query-free"
+- item: Existing behavior compatible
+  result: pass
+  evidence: "only product change refuses a non-member before validating the upload-intent body (404 instead of 400); full suite passes"
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 2104 passed, 31 skipped (21 new)
+- command: pnpm web vitest run; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 658 web tests; OpenAPI and SDKs unchanged and clean
+- command: npx playwright test completeness --project=desktop (seed 7, read-only, app rebuilt)
+  result: pass
+  note: 2 passed (390 and 1440) with the Authorization column opened to routes, readers, writers and scope
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: Authorization column with closed details in Operations > Completeness
+- surface: api
+  result: pass
+  evidence: report facts carry authorization; schema unchanged
+- surface: sdk
+  result: pass
+  evidence: no schema change, sdk-check clean
+- surface: cli
+  result: pass
+  evidence: assigned to PD-F003-B02-T04
+- surface: mcp
+  result: pass
+  evidence: assigned to PD-F003-B02-T05
+- surface: event_as_code
+  result: pass
+  evidence: assigned to PD-F003-B02-T06
+- surface: audit
+  result: pass
+  evidence: the report writes nothing; audit coverage is T04
+- surface: webhook
+  result: pass
+  evidence: assigned to PD-F003-B02-T07
+- surface: archive
+  result: pass
+  evidence: assigned to PD-F003-B02-T08
+- surface: analytics
+  result: pass
+  evidence: assigned to PD-F003-B03-T01
+- surface: search
+  result: pass
+  evidence: assigned to T08 of this batch
+- surface: docs
+  result: pass
+  evidence: COMPLETENESS.md authorization section and spec 003 as built
+migrations:
+- none
+findings:
+- The upload-intent endpoint validated the body before resolving the project; a non-member got a 400 instead of the project's 404. No data leaked, fixed by resolving the project first
+limitations:
+- own: object rules (project_member, team_member, self) live in view code the matrix cannot read, so they are declared and proven by named refusal tests, not derived
+- the verifier does not send requests itself; the integration tests do, so the deployed report stays query-free
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

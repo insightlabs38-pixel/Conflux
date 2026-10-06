@@ -53,6 +53,16 @@ VALID = ft.provided(
     "test:tests/integration/test_saved_views.py::test_defaults_and_validation_happen_at_save_time",
 )
 
+AUTHZ = ft.provided(
+    "route:saved-view-list",
+    "route:saved-view-detail",
+    "scope:event",
+    "readers:members",
+    "writers:members",
+    "own:self",
+    "test:tests/integration/test_saved_views.py::test_private_views_belong_to_the_owner_and_organizers_views_are_shared_for_reading",
+)
+
 
 def identity(*refs):
     return ft.provided(*(refs or ("field:public_id",)))
@@ -67,11 +77,12 @@ def only(feature_key="x", **over):
         "claims": {
             "identity": identity("field:public_id", "route:saved-view-detail"),
             "validation": VALID,
+            "authorization": AUTHZ,
         },
         "lifecycle": ft.Lifecycle("none", note="Edited in place."),
     }
     values.update(over)
-    values["claims"] = {"validation": VALID, **values["claims"]}
+    values["claims"] = {"validation": VALID, "authorization": AUTHZ, **values["claims"]}
     ft.FEATURES.clear()
     ft.register_feature(ft.Feature(**values))
     # every other landed property must be claimed for the registry to be quiet about it
@@ -84,7 +95,7 @@ def only(feature_key="x", **over):
 def test_the_fifteen_features_agree_with_the_live_system():
     assert sorted(ft.FEATURES) == KEYS
     assert ft.check() == []
-    assert ft.landed() == ["identity", "validation"]
+    assert ft.landed() == ["identity", "validation", "authorization"]
 
 
 def test_every_feature_resolves_to_its_model_and_a_uuid_public_id():
@@ -192,7 +203,11 @@ def test_a_well_formed_independent_feature_passes(isolated):
         "x",
         "X",
         "core.SavedView",
-        {"identity": identity("field:public_id", "route:saved-view-detail"), "validation": VALID},
+        {
+            "identity": identity("field:public_id", "route:saved-view-detail"),
+            "validation": VALID,
+            "authorization": AUTHZ,
+        },
         ft.Lifecycle("none", note="Edited in place and deleted."),
     )
     assert ft.check() == []
@@ -404,6 +419,7 @@ def test_the_endpoint_reports_a_broken_claim_instead_of_hiding_it(world, isolate
         {
             "identity": identity("field:public_id", "route:nope"),
             "validation": ft.FEATURES["event"].claims["validation"],
+            "authorization": ft.FEATURES["event"].claims["authorization"],
         },
         ft.FEATURES["event"].lifecycle,
     )
@@ -510,3 +526,79 @@ def test_the_ci_check_finds_a_missing_test_file_or_name(isolated, tmp_path):
     ft.FEATURES.clear()
     ft.register_feature(ft.Feature("x", "X", "core.SavedView", {"validation": claim}))
     assert codes(ft.check_static(tmp_path)) == ["test_file", "test_name"]
+
+
+# --- authorization (T03) --------------------------------------------------------------------------
+
+
+def verify_authorization(refs, model="core.SavedView"):
+    feature = ft.Feature("s", "S", model, {"authorization": ft.provided(*refs)})
+    return ft.VERIFIERS["authorization"](feature, feature.claims["authorization"], ft.System())
+
+
+def swap(old, new):
+    return tuple(new if r == old else r for r in AUTHZ.refs if new or r != old)
+
+
+def test_a_real_authorization_claim_is_derived_from_the_permission_matrix():
+    assert verify_authorization(AUTHZ.refs) == []
+    row = {f["key"]: f for f in ft.report()["features"]}
+    facts = row["track"]["facts"]["authorization"]
+    assert (facts["readers"], facts["writers"]) == ("members", "admin,organizer")
+    assert facts["scope_path"] == ["Track", "Event"]
+    assert facts["explanation"]["outcome"] == "allowed"
+    assert facts["explanation"]["summary"].startswith("Read: members. Change: admin,organizer.")
+    for feature in ft.FEATURES.values():
+        refs = {r.partition(":")[0] for r in feature.claims["authorization"].refs}
+        assert {"route", "scope", "readers", "writers", "test"} <= refs, feature.key
+
+
+@pytest.mark.parametrize(
+    ("refs", "code"),
+    [
+        (swap("readers:members", "readers:admin,organizer"), "readers_mismatch"),
+        (swap("writers:members", "writers:admin,organizer"), "writers_mismatch"),
+        (swap("readers:members", "readers:none"), "readers_mismatch"),
+        (swap("own:self", ""), "own_missing"),
+        (swap("own:self", "own:anybody"), "own_ref"),
+        (swap("scope:event", ""), "scope_ref"),
+        (swap("scope:event", "scope:planet"), "scope_ref"),
+        (swap("route:saved-view-detail", "route:nope"), "route_missing"),
+        (swap("route:saved-view-detail", "route:accounts-me"), "route_tenant"),
+        (swap("route:saved-view-detail", "route:public-event-state"), "route_open"),
+        (tuple(r for r in AUTHZ.refs if not r.startswith("route:")), "no_routes"),
+        (tuple(r for r in AUTHZ.refs if not r.startswith("test:")), "no_test"),
+        (swap("scope:event", "color:red"), "bad_ref"),
+    ],
+)
+def test_each_authorization_failure_has_a_code(refs, code):
+    found = codes(verify_authorization(refs))
+    assert code in found
+
+
+def test_an_open_route_must_be_acknowledged_and_organizer_only_writes_declare_no_object_rule():
+    refs = swap("route:saved-view-detail", "route:public-event-state")
+    assert "route_open" in codes(verify_authorization(refs))
+    assert "route_open" not in codes(verify_authorization((*refs, "open:public-event-state")))
+    only_organizers = (
+        "route:track-list",
+        "scope:event",
+        "readers:members",
+        "writers:admin,organizer",
+        "test:tests/x.py::test_y",
+    )
+    assert verify_authorization(only_organizers, "events.Track") == []
+    assert "own_unused" in codes(
+        verify_authorization((*only_organizers, "own:self"), "events.Track")
+    )
+
+
+def test_a_model_with_no_chain_to_its_scope_is_refused():
+    refs = swap("scope:event", "scope:event")
+    assert "scope_path" in codes(verify_authorization(refs, "accounts.User"))
+
+
+def test_the_authorization_ci_check_finds_a_missing_test(isolated, tmp_path):
+    ft.FEATURES.clear()
+    ft.register_feature(ft.Feature("x", "X", "core.SavedView", {"authorization": AUTHZ}))
+    assert codes(ft.check_static(tmp_path)) == ["test_file"]

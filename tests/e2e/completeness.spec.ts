@@ -56,12 +56,24 @@ for (const width of [390, 1440]) {
     await expect(
       table.getByRole("columnheader", { name: "Validation and invariants" }),
     ).toBeVisible();
-    await event.getByText("Provided", { exact: true }).last().click();
+    await event.getByText("Provided", { exact: true }).first().click();
     await expect(
       event.getByText("check:events.models.Event.clean"),
     ).toBeVisible();
     await expect(
       event.getByText("A blank record is refused for: name, slug, workspace"),
+    ).toBeVisible();
+    // Authorization is held against the permission matrix: who reads, who changes, where it is scoped.
+    await expect(
+      table.getByRole("columnheader", { name: "Authorization and scope" }),
+    ).toBeVisible();
+    await event.getByText("Provided", { exact: true }).last().click();
+    await expect(event.getByText("route:event-status")).toBeVisible();
+    await expect(
+      event.getByText("Who can change: admin,organizer"),
+    ).toBeVisible();
+    await expect(
+      event.getByText("Scoped through: Event → Workspace"),
     ).toBeVisible();
     // A feature without a state machine says how its records change.
     const track = table.locator("tbody tr").filter({

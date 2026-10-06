@@ -168,6 +168,7 @@ class System:
 
     def __init__(self):
         self._routes = None
+        self._matrix = None
 
     def model(self, label: str):
         try:
@@ -204,6 +205,42 @@ class System:
             return getattr(import_module(module), name)
         except (ImportError, AttributeError, ValueError):
             return None
+
+    def permission_matrix(self) -> list[dict]:
+        """The role gates the code applies, one entry per (view, method) in the URL tree."""
+        if self._matrix is None:
+            from .permission_matrix import build_permission_matrix
+
+            self._matrix = build_permission_matrix()
+        return self._matrix
+
+    def fk_path(self, model, target_label: str, depth: int = 4) -> list[str] | None:
+        """Model labels along the shortest chain of foreign keys from `model` to `target_label`
+        (the model itself counts), or None."""
+        start = model._meta.label
+        if start == target_label:
+            return [start]
+        seen, queue = {start}, [[start]]
+        while queue:
+            path = queue.pop(0)
+            if len(path) > depth:
+                continue
+            current = self.model(path[-1])
+            for f in current._meta.get_fields() if current else ():
+                related = (
+                    f.related_model
+                    if getattr(f, "many_to_one", False) or getattr(f, "one_to_one", False)
+                    else None
+                )
+                if getattr(f, "auto_created", False) and not getattr(f, "concrete", False):
+                    continue
+                if related is None or related._meta.label in seen:
+                    continue
+                if related._meta.label == target_label:
+                    return [*path, target_label]
+                seen.add(related._meta.label)
+                queue.append([*path, related._meta.label])
+        return None
 
     def resolve_method(self, dotted: str):
         """`pkg.module.Class.method` to the attribute of the class, or None."""
@@ -273,6 +310,29 @@ def check(system: System | None = None) -> list[dict]:
         for prop, claim in feature.claims.items():
             if prop in PROPERTIES and prop not in landed():
                 found += _claim_problems(feature, prop, claim)
+    return found
+
+
+def static_test_refs(feature, claim, root, prop: str) -> list[dict]:
+    """CI: every `test:<path>::<name>` ref names a file and a test function that exist."""
+    from pathlib import Path
+
+    found = []
+    for ref in claim.refs:
+        if not ref.startswith("test:"):
+            continue
+        path, _, name = ref[5:].partition("::")
+        file = Path(root) / path
+        if not file.is_file():
+            found.append(
+                problem("test_file", f"'{path}' does not exist.", feature=feature.key, prop=prop)
+            )
+        elif not re.search(rf"^(?:async )?def {re.escape(name)}\b", file.read_text(), flags=re.M):
+            found.append(
+                problem(
+                    "test_name", f"'{name}' is not in '{path}'.", feature=feature.key, prop=prop
+                )
+            )
     return found
 
 

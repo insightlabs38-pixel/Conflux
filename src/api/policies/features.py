@@ -15,6 +15,15 @@ register_feature(
                 "constraint:policies.Policy.unique_policy_name_event",
                 "test:tests/integration/test_policy_bindings.py::test_a_malformed_ast_is_rejected_at_save_time",
             ),
+            "authorization": provided(
+                "route:policy-list",
+                "route:policy-detail",
+                "scope:event",
+                "readers:admin,organizer",
+                "writers:admin,organizer",
+                "test:tests/integration/test_feature_authorization.py::test_every_matrix_gate_holds_for_a_wrong_role_a_stranger_and_a_signed_out_caller",
+                "test:tests/integration/test_feature_authorization.py::test_objects_of_another_workspace_or_event_are_not_found",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

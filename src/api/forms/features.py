@@ -15,6 +15,15 @@ register_feature(
                 "constraint:forms.FormDefinition.unique_form_name_event",
                 "test:tests/integration/test_form_versions.py::test_form_rejects_cross_event_stage_and_duplicate_field_ids",
             ),
+            "authorization": provided(
+                "route:form-list",
+                "route:form-detail",
+                "scope:event",
+                "readers:admin,organizer",
+                "writers:admin,organizer",
+                "test:tests/integration/test_feature_authorization.py::test_every_matrix_gate_holds_for_a_wrong_role_a_stranger_and_a_signed_out_caller",
+                "test:tests/integration/test_feature_authorization.py::test_objects_of_another_workspace_or_event_are_not_found",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

@@ -340,5 +340,18 @@ describe("completeness helpers", () => {
     expect(factText("constraints", ["a", "b"])).toBe("Constraints: a, b");
     expect(factText("own_clean", false)).toBe("Model checks its own rules: no");
     expect(factText("odd_key", 3)).toBe("odd key: 3");
+    expect(factText("writers", "admin,organizer")).toBe(
+      "Who can change: admin,organizer",
+    );
+    expect(factText("scope_path", ["Track", "Event"])).toBe(
+      "Scoped through: Track → Event",
+    );
+    expect(factText("scope_path", [])).toBe("Scoped through: no chain");
+    expect(
+      factText("explanation", {
+        outcome: "allowed",
+        summary: "Read: members.",
+      }),
+    ).toBe("Read: members.");
   });
 });

@@ -44,6 +44,20 @@ It also **derives** two facts that cannot be declared falsely: an unsaved blank 
 
 The probe found one real gap, fixed here: `Submission.clean()` read unset relations and raised `RelatedObjectDoesNotExist` for a blank record; it now leaves that to field validation, which names every required part (`tests/integration/test_feature_validation.py`). Three features had no refusal test and gained one (track, announcement, message).
 
+## Authorization and scope (T03)
+
+Authorization is decided once, on the server, and the platform already records it: the permission matrix (`core.permission_matrix`) reads the role gates the views really apply. `features_authorization.verify` holds an `authorization` claim to that matrix, so a claim can never say more or less than the code does:
+
+- `route:<url name>` (one or more): each route must exist, carry the workspace in its URL (and the event, for event scope) and appear in the matrix; a route open to anyone signed in or to the public needs an explicit `open:<url name>` acknowledgement;
+- `scope:event` or `scope:workspace`: where records live, confirmed by the model's own foreign keys (`System.fk_path` finds the chain to `events.Event` or `workspaces.Workspace`);
+- `readers:<roles>` and `writers:<roles>`: who the matrix lets reach the GET routes and the writing routes (`members` for every role, `none`, or a comma list); the claim must equal the matrix, so widening a gate without updating the claim fails;
+- `own:<rule>` (`project_member`, `team_member`, `self`): required exactly when roles other than organizers and admins may write, and refused when only they do;
+- `test:<path>::<name>`: adversarial tests (checked in CI by `check_static`).
+
+The page shows the derived readers, writers, the scope chain and an Explanation (`core.explain`) in words. Codes: `bad_ref`, `no_routes`, `scope_ref`, `readers_ref`, `writers_ref`, `no_test`, `route_missing`, `route_tenant`, `route_scope`, `route_unmatrixed`, `route_open`, `access_unknown`, `scope_path`, `readers_mismatch`, `writers_mismatch`, `own_missing`, `own_unused`, `own_ref`; CI: `test_file`, `test_name`.
+
+`tests/integration/test_feature_authorization.py` sends the requests: every claimed route and method is refused for each role the matrix excludes, for a signed-in stranger and for a signed-out caller; a workspace member who is not on a project cannot change it, its submissions or its artifacts; and records of another workspace or event are not found. It found one ordering gap, fixed here: the upload-intent endpoint validated the body before resolving the project, so a non-member got a 400 instead of the project's 404.
+
 ## The report
 
 `GET /api/v1/workspaces/{id}/completeness/` (organizers and admins; `Cache-Control: private, no-store`; no write method) returns `{properties[], features[], totals, problems[], ok}`. Each feature carries its derived id type and states, its lifecycle graph, its claims and its findings. The page shows findings first (an alert), then a dense features table with identity and a closed lifecycle per row, and the properties not checked yet behind details.

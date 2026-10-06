@@ -13,7 +13,6 @@ Derived, not declared: an unsaved blank record is refused with a message per req
 """
 
 import re
-from pathlib import Path
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -104,28 +103,7 @@ def verify(feature, claim, system) -> list[dict]:
 
 def static(feature, claim, root) -> list[dict]:
     """CI: every `test:` ref names a file and a test function that exist."""
-    found = []
-    for ref in claim.refs:
-        if not ref.startswith("test:"):
-            continue
-        path, _, name = ref[5:].partition("::")
-        file = Path(root) / path
-        if not file.is_file():
-            found.append(
-                problem(
-                    "test_file", f"'{path}' does not exist.", feature=feature.key, prop="validation"
-                )
-            )
-        elif not re.search(rf"^(?:async )?def {re.escape(name)}\b", file.read_text(), flags=re.M):
-            found.append(
-                problem(
-                    "test_name",
-                    f"'{name}' is not in '{path}'.",
-                    feature=feature.key,
-                    prop="validation",
-                )
-            )
-    return found
+    return features.static_test_refs(feature, claim, root, "validation")
 
 
 features.register_verifier("validation", verify, facts=facts, static=static)

@@ -107,6 +107,7 @@ class ArtifactListView(ProjectArtifactView):
 class UploadIntentView(ProjectArtifactView):
     @extend_schema(request=UploadIntentInputSchema, responses={201: UploadIntentSchema})
     def post(self, request, workspace_public_id, event_public_id, project_public_id):
+        project = self.get_project()  # refuse a non-member before reading the body
         if isinstance(request.data.get("byte_size"), bool):
             raise ValidationError({"byte_size": "A valid byte size is required."})
         try:
@@ -115,7 +116,7 @@ class UploadIntentView(ProjectArtifactView):
             raise ValidationError({"byte_size": "A valid byte size is required."}) from exc
         try:
             artifact, intent, upload = begin_upload(
-                self.get_project(),
+                project,
                 request.user,
                 kind=request.data.get("kind"),
                 visibility=request.data.get("visibility"),

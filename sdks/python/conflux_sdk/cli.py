@@ -15,6 +15,20 @@ EVENTS = "api_v1_workspaces_workspace_public_id_events"
 DETAIL = EVENTS + "_event_public_id"
 ARCHIVE = "api_v1_workspaces_workspace_public_id_archive"
 
+# The one table of what the CLI can do: each command and the generated operation(s) it calls
+# (`events import` previews, or applies with --apply). The completeness contract reads it
+# (src/api/core/features_cli.py) to hold each command to a feature's own routes.
+COMMANDS = {
+    "whoami": ("get_api_v1_accounts_me",),
+    "events list": ("get_" + EVENTS,),
+    "events get": ("get_" + DETAIL,),
+    "events create": ("post_" + EVENTS,),
+    "events update": ("patch_" + DETAIL,),
+    "events status": ("post_" + DETAIL + "_status",),
+    "events export": ("get_" + DETAIL + "_archive",),
+    "events import": ("post_" + ARCHIVE + "_preview", "post_" + ARCHIVE + "_import"),
+}
+
 
 class NoRedirect(HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
@@ -112,7 +126,7 @@ def parser():
 
 def execute(args, client):
     if args.command == "whoami":
-        return client.call("get_api_v1_accounts_me")
+        return client.call(COMMANDS["whoami"][0])
     if args.workspace is None:
         raise ValueError("Supply --workspace or CONFLUX_WORKSPACE for event commands.")
     path = {"workspace_public_id": str(args.workspace)}
@@ -120,12 +134,12 @@ def execute(args, client):
         path["event_public_id"] = str(args.event)
     action = args.action
     if action == "list":
-        return client.call("get_" + EVENTS, path=path)
+        return client.call(COMMANDS["events list"][0], path=path)
     if action == "get":
-        return client.call("get_" + DETAIL, path=path)
+        return client.call(COMMANDS["events get"][0], path=path)
     if action == "create":
         return client.call(
-            "post_" + EVENTS,
+            COMMANDS["events create"][0],
             path=path,
             body={
                 "name": args.name,
@@ -136,19 +150,23 @@ def execute(args, client):
             },
         )
     if action == "update":
-        return client.call("patch_" + DETAIL, path=path, body=read_object(args.input))
+        return client.call(
+            COMMANDS["events update"][0], path=path, body=read_object(args.input)
+        )
     if action == "status":
-        return client.call("post_" + DETAIL + "_status", path=path, body={"status": args.status})
+        return client.call(
+            COMMANDS["events status"][0], path=path, body={"status": args.status}
+        )
     if action == "export":
         if args.output != "-" and Path(args.output).exists():
             raise ValueError("Export output already exists; choose a new path.")
-        result = client.call("get_" + DETAIL + "_archive", path=path, query={"mode": args.mode})
+        result = client.call(COMMANDS["events export"][0], path=path, query={"mode": args.mode})
         write_result(result, args.output)
         return None
     if action == "import":
         archive = read_object(args.input)
         return client.call(
-            "post_" + ARCHIVE + ("_import" if args.apply else "_preview"),
+            COMMANDS["events import"][1 if args.apply else 0],
             path=path,
             body={
                 "archive": archive,

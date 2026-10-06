@@ -64,6 +64,10 @@ register_feature(
                 "action:advance=stage.advanced",
                 "test:tests/integration/test_bulk_operations.py::test_full_preview_apply_and_retry_are_atomic_and_audited",
             ),
+            "cli": provided(
+                "no_cli@stages are configured with the event and advanced through the bulk "
+                "planner; the CLI administers events only",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

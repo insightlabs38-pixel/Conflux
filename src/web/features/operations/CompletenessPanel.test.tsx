@@ -366,6 +366,10 @@ describe("completeness helpers", () => {
       "Bulk actions: move (Move projects)",
     );
     expect(factText("bulk", "not offered")).toBe("Bulk: not offered");
+    expect(factText("commands", ["conflux-admin events list"])).toBe(
+      "Commands: conflux-admin events list",
+    );
+    expect(factText("cli", "no command")).toBe("CLI: no command");
     expect(factText("advanced", "none beyond the base screen")).toBe(
       "Advanced: none beyond the base screen",
     );

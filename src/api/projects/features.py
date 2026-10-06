@@ -69,6 +69,10 @@ register_feature(
                 "action:move=project.track_moved",
                 "test:tests/integration/test_bulk_operations.py::test_full_preview_apply_and_retry_are_atomic_and_audited",
             ),
+            "cli": provided(
+                "no_cli@projects are written by their teams and read on organizer grids; the "
+                "CLI administers events only",
+            ),
         },
         lifecycle=Lifecycle(
             "none",
@@ -145,6 +149,10 @@ register_feature(
             "bulk": provided(
                 "no_bulk@a submission is one draft and one final per stage, written by its team "
                 "and never in a batch",
+            ),
+            "cli": provided(
+                "no_cli@submissions are written and finalized by their team; the CLI is an "
+                "organizer tool for events only",
             ),
         },
         lifecycle=Lifecycle(

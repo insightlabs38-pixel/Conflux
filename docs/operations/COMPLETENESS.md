@@ -175,3 +175,13 @@ The platform has one bulk planner (`communications.bulk`): an action is register
 - `no_bulk@<reason>`: a batch does not fit the feature, and why; a feature whose actions are owed is `planned` with the owning task (registration decisions, PD-S012-B03-T08).
 
 Codes: `bad_ref`, `both`, `no_reason`, `no_action`, `no_test`, `test_ref`, `planner_missing`, `action_unknown`, `action_twice`, `audit_shape`, `audit_unknown`, `audit_foreign`, `audit_not_written`, `action_shared`; CI: `test_file`, `test_name`. `tests/integration/test_feature_bulk.py` proves the registry side: every registered action belongs to exactly one claimed feature (a new action without a claim fails), and the audit actions the claims name are exactly the ones a real preview and apply leaves behind. Five features own the five actions (message, project, stage, policy, evaluation plan), registrations are planned, nine say why a batch does not fit.
+
+## CLI commands (T04)
+
+The CLI (`conflux-admin`, `sdks/python/conflux_sdk/cli.py`) is a thin client of the generated Python SDK. Its one table `COMMANDS` maps each command to the generated operation(s) it calls, and `execute` reads the same table, so it holds no rule of its own and every request still passes the API's authorization, validation and audit. `features_cli` holds a `cli` claim to the table:
+
+- `command:<name>` (one or more, `events list`): the command is in the table, every operation it calls is in the generated Python client and is an operation of the feature's own routes; the claimed commands equal the derived set, so a command added for a feature without a claim fails, and so does a claim of a command the CLI does not have;
+- `test:<path>::<name>`: the proof (CI checks it exists);
+- `no_cli@<reason>`: the CLI has nothing for the feature, and why; a feature whose commands are owed is `planned` with the owning task.
+
+The SDK is not part of the running API, so the report shows the claim and the table checks run in CI (`check_static`). Codes: `bad_ref`, `both`, `no_reason`, `no_command`, `no_test`, `test_ref`, `command_shape`, `command_twice`, `command_shared`; CI: `table_unreadable`, `command_missing`, `op_not_generated`, `command_foreign`, `command_unclaimed`, `cli_exists`, `test_file`, `test_name`. `tests/integration/test_feature_cli.py` proves the table against the API: each command is claimed by exactly one feature or named in `OUTSIDE` (`whoami`, and `events export`/`import`, which run through the archive routes that PD-F003-B02-T08 claims), and each claimed command sends the request its operation describes. The event feature owns five commands; fourteen features say why the CLI has nothing for them.

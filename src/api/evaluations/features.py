@@ -65,6 +65,10 @@ register_feature(
                 "action:assign=assignment.activated",
                 "test:tests/integration/test_bulk_operations.py::test_full_preview_apply_and_retry_are_atomic_and_audited",
             ),
+            "cli": provided(
+                "no_cli@evaluation plans are built and activated on the judging screens; the "
+                "CLI administers events only",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

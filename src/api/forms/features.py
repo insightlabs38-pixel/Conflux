@@ -63,6 +63,10 @@ register_feature(
                 "no_bulk@a form is built and versioned one at a time, and its versions are "
                 "compared, not batched",
             ),
+            "cli": provided(
+                "no_cli@forms are built and versioned on the builder screen with a preview; the "
+                "CLI administers events only",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

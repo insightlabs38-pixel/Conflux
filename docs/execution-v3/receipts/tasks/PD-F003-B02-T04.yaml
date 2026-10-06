@@ -1,0 +1,97 @@
+version: 3
+task: PD-F003-B02-T04
+batch: PD-F003-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: f51fbf9
+  head_commit: f51fbf9
+changed_paths:
+- src/api/core/features_cli.py (new), core/apps.py
+- sdks/python/conflux_sdk/cli.py (one COMMANDS table that execute reads; behavior unchanged)
+- src/api/<app>/features.py for the fifteen features (cli claims)
+- src/web/lib/completeness.ts, features/operations/CompletenessPanel.test.tsx, tests/e2e/completeness.spec.ts
+- tests/integration/ (test_feature_cli.py new, test_feature_contract.py, test_completeness_regression.py)
+- docs/operations/COMPLETENESS.md, spec 003 (CLI as built)
+deliverables:
+- item: CLI inspect/action support added to the completeness contract and applied to domain work
+  result: pass
+  evidence: "features_cli verifies command:<name>, test: and no_cli@ claims; in CI the command table is loaded from the source tree and each command is held to the generated Python client and to operations of the feature's own routes, the claimed commands equal the derived set; the event feature owns five commands (list, get, create, update, status), fourteen features say why the CLI has nothing for them"
+- item: Observable state and diagnostics
+  result: pass
+  evidence: "the Operations completeness page gains a CLI column listing each feature's conflux-admin commands or why none"
+- item: Contract tests proving parity with the canonical API and authorization path
+  result: pass
+  evidence: "test_feature_cli.py: every command claimed by exactly one feature or named OUTSIDE, each claimed command sends the method and path its operation describes through the real API, a failure code per defect, CI table checks against a temporary tree; test_admin_cli.py still passes (authorization, redaction, 403 and 404 paths)"
+invariants:
+- item: One source of truth, no business rule in a surface
+  result: pass
+  evidence: "the CLI stays a client of the generated operations; COMMANDS is the only list and execute reads it; no rule moved into the CLI or the registry"
+- item: Server-side authorization, validation and audit remain authoritative
+  result: pass
+  evidence: "no API change; commands still go through the same routes and the existing CLI tests cover the 403 and 404 paths"
+verification:
+- command: "uv run --frozen pytest tests/integration/test_feature_cli.py test_feature_bulk.py test_feature_contract.py test_completeness_regression.py tests/test_admin_cli.py -n auto"
+  result: pass
+  note: "235 passed"
+- command: "features.check() and check_static on the real tree; manage.py check"
+  result: pass
+  note: "no problems, no issues"
+- command: "pnpm web vitest features/operations; tsc --noEmit; make format-check lint sdk-check block-schema-check"
+  result: pass
+  note: "31 passed, clean"
+- command: "npx playwright test completeness --project=desktop (seed 7, app rebuilt)"
+  result: pass
+  note: "2 passed (390 and 1440) with the CLI column"
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: "CLI column on Operations > Completeness"
+- surface: api
+  result: pass
+  evidence: "report facts carry cli"
+- surface: sdk
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: cli
+  result: pass
+  evidence: "COMMANDS table read by execute and by the contract"
+- surface: mcp
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: event_as_code
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: audit
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: webhook
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: archive
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: analytics
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: search
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: docs
+  result: pass
+  evidence: "COMPLETENESS.md and the B02 contract in spec 003"
+migrations:
+- none
+findings:
+- "sdks/python is outside the task's owned paths; the COMMANDS table is the small inseparable change the contract needs (behavior unchanged, test_admin_cli passes)"
+limitations:
+- "the table check runs in CI only because the SDK is not in the application image"
+- "events export and import are named OUTSIDE until the archive task (PD-F003-B02-T08) claims their routes"
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

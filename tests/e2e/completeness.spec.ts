@@ -203,6 +203,14 @@ for (const width of [390, 1440]) {
         has: page.getByRole("rowheader", { name: /^Registration application/ }),
       }),
     ).toContainText("Planned");
+    // CLI: the commands that administer a feature, or why the terminal has nothing for it.
+    await expect(
+      table.getByRole("columnheader", { name: "CLI" }),
+    ).toBeVisible();
+    await event.getByText("Provided", { exact: true }).nth(10).click();
+    await expect(
+      event.getByText("Commands: conflux-admin events list", { exact: false }),
+    ).toBeVisible();
     // A feature without a state machine says how its records change.
     const track = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Track \(track\)/ }),

@@ -76,6 +76,10 @@ register_feature(
                 "no_bulk@a team is formed and led by its captain; an organizer does not change "
                 "teams in a batch",
             ),
+            "cli": provided(
+                "no_cli@teams are formed and led by their members; the CLI is an organizer tool "
+                "for events only",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

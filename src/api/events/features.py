@@ -72,6 +72,15 @@ register_feature(
                 "no_bulk@the planner works inside one event, and an event is configured one at "
                 "a time on its own screens",
             ),
+            "cli": provided(
+                "command:events list",
+                "command:events get",
+                "command:events create",
+                "command:events update",
+                "command:events status",
+                "test:tests/integration/test_feature_cli.py::test_each_claimed_command_sends_the_request_its_operation_describes",
+                "test:tests/test_admin_cli.py::test_cli_create_manage_export_preview_and_import_use_canonical_api",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",
@@ -146,6 +155,10 @@ register_feature(
                 "no_bulk@tracks are few and ordered in place on the event dashboard; a batch "
                 "over them adds nothing",
             ),
+            "cli": provided(
+                "no_cli@tracks are part of the event configuration and travel with events "
+                "export and import; nothing is done per track",
+            ),
         },
         lifecycle=Lifecycle(
             "none", note="Edited in place and deleted (track.deleted); position orders it."
@@ -214,6 +227,10 @@ register_feature(
                 "PD-S012-B03-T08",
                 "Registration decisions are made one at a time today; the planner has no action "
                 "for a batch.",
+            ),
+            "cli": provided(
+                "no_cli@registrations are reviewed by organizers on their own screens; the CLI "
+                "administers events only",
             ),
         },
         lifecycle=Lifecycle(
@@ -293,6 +310,10 @@ register_feature(
             "bulk": provided(
                 "no_bulk@announcements are posted one at a time to the event site; a batch "
                 "makes no sense for them",
+            ),
+            "cli": provided(
+                "no_cli@announcements are posted to the event site by organizers; the CLI "
+                "administers events only",
             ),
         },
         lifecycle=Lifecycle(

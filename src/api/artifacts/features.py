@@ -71,6 +71,10 @@ register_feature(
                 "no_bulk@an artifact is uploaded and inspected one at a time with its own "
                 "preview and scan",
             ),
+            "cli": provided(
+                "no_cli@artifacts are uploaded and inspected in the browser with their preview; "
+                "the CLI administers events only",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",

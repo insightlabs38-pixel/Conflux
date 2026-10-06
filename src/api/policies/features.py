@@ -64,6 +64,10 @@ register_feature(
                 "action:extend=temporal_gate.updated",
                 "test:tests/integration/test_bulk_operations.py::test_full_preview_apply_and_retry_are_atomic_and_audited",
             ),
+            "cli": provided(
+                "no_cli@policies and gates are set on the event's own screens with their "
+                "explanations; the CLI administers events only",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

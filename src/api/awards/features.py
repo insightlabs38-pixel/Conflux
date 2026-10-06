@@ -62,6 +62,10 @@ register_feature(
                 "no_bulk@an award is chosen and published one at a time through its own "
                 "deterministic rules",
             ),
+            "cli": provided(
+                "no_cli@awards are chosen and published through their own deterministic "
+                "screens; the CLI administers events only",
+            ),
         },
         lifecycle=Lifecycle(
             "timestamp",

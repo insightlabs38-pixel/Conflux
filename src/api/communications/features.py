@@ -59,6 +59,10 @@ register_feature(
                 "action:send=message.sent",
                 "test:tests/integration/test_bulk_operations.py::test_full_preview_apply_and_retry_are_atomic_and_audited",
             ),
+            "cli": provided(
+                "no_cli@messages are composed to an audience with a preview on the messaging "
+                "screen; the CLI administers events only",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

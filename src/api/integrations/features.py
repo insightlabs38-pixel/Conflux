@@ -65,6 +65,10 @@ register_feature(
                 "no_bulk@a subscription is an integration an admin sets up one at a time with "
                 "its own secret",
             ),
+            "cli": provided(
+                "no_cli@a subscription's secret is shown once and is set up in the web or API, "
+                "not typed in a shell",
+            ),
         },
         lifecycle=Lifecycle(
             "flag",

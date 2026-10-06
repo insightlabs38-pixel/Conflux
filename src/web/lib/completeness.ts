@@ -118,6 +118,8 @@ const FACT_LABEL: Record<string, string> = {
   advanced: "Advanced",
   bulk_actions: "Bulk actions",
   bulk: "Bulk",
+  commands: "Commands",
+  cli: "CLI",
 };
 
 /** One derived fact as a sentence fragment: lists joined, booleans as yes or no. */

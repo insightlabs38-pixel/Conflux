@@ -28,6 +28,7 @@ LANDED = [
     "ui_base",
     "ui_advanced",
     "bulk",
+    "cli",
 ]
 
 

@@ -1,6 +1,6 @@
 """Features of artifacts (completeness contract, PD-F003-B01)."""
 
-from core.features import Feature, Lifecycle, provided, register_feature
+from core.features import Feature, Lifecycle, planned, provided, register_feature
 
 register_feature(
     Feature(
@@ -112,6 +112,11 @@ register_feature(
             ),
             "versioning": provided(
                 "in_place@an artifact is replaced by adding another and each change is audited",
+            ),
+            "fixtures": planned(
+                "PD-S061-B02-T01",
+                "The demo scenario creates no artifacts yet; its generator takes them in with "
+                "the feature combinations.",
             ),
         },
         lifecycle=Lifecycle(

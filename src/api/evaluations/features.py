@@ -116,6 +116,10 @@ register_feature(
                 "diff:rubric",
                 "test:tests/integration/test_feature_versioning.py::test_each_claimed_version_model_refuses_an_edit_and_a_delete",
             ),
+            "fixtures": provided(
+                "seeded:hackathon",
+                "test:tests/integration/test_feature_fixtures.py::test_the_demo_scenario_creates_exactly_the_features_the_claims_say",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

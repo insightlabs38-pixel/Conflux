@@ -1,6 +1,6 @@
 """Features of policies (completeness contract, PD-F003-B01)."""
 
-from core.features import Feature, Lifecycle, provided, register_feature
+from core.features import Feature, Lifecycle, planned, provided, register_feature
 
 register_feature(
     Feature(
@@ -103,6 +103,11 @@ register_feature(
             "versioning": provided(
                 "in_place@a policy is edited in place and each change is audited with what it "
                 "changed",
+            ),
+            "fixtures": planned(
+                "PD-S061-B02-T01",
+                "The demo scenario creates no policies yet; its generator takes them in with "
+                "the feature combinations.",
             ),
         },
         lifecycle=Lifecycle(

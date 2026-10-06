@@ -45,6 +45,10 @@ def isolated(monkeypatch):
     """The real registry copied, so a test can add and break features."""
     monkeypatch.setattr(ft, "FEATURES", dict(ft.FEATURES))
     monkeypatch.setattr(ft, "VERIFIERS", dict(ft.VERIFIERS))
+    # every real property is landed now: add one that has no verifier, as a future batch would
+    monkeypatch.setattr(
+        ft, "PROPERTIES", {**ft.PROPERTIES, "future": ft.Property("future", "Future", "PD-F004")}
+    )
     return ft
 
 
@@ -118,6 +122,8 @@ PRIV = ft.provided(
 EVENT_PRIV = ft.provided(
     "no_personal_data@the event record names no person; people's rows hang off it",
 )
+
+FIXT = ft.not_applicable("A saved view is personal and a demo event has none.")
 
 VERS = ft.provided(
     "counter:version",
@@ -195,6 +201,7 @@ def only(feature_key="x", **over):
             "privacy": PRIV,
             "extension": EXT,
             "versioning": VERS,
+            "fixtures": FIXT,
         },
         "lifecycle": ft.Lifecycle("none", note="Edited in place."),
     }
@@ -219,6 +226,7 @@ def only(feature_key="x", **over):
         "privacy": PRIV,
         "extension": EXT,
         "versioning": VERS,
+        "fixtures": FIXT,
         **values["claims"],
     }
     ft.FEATURES.clear()
@@ -254,6 +262,7 @@ def test_the_fifteen_features_agree_with_the_live_system():
         "privacy",
         "extension",
         "versioning",
+        "fixtures",
     ]
 
 
@@ -325,7 +334,12 @@ def test_the_report_is_deterministic_read_only_and_complete():
         "planned": 0,
         "unclaimed": 0,
     }
-    assert first["totals"]["fixtures"]["unclaimed"] == 15  # not landed yet, so only unclaimed
+    assert first["totals"]["fixtures"] == {  # the last property to land: claimed by all fifteen
+        "provided": 9,
+        "not_applicable": 1,
+        "planned": 5,
+        "unclaimed": 0,
+    }
     assert {p["key"]: p["landed"] for p in first["properties"]}["identity"] is True
 
 
@@ -383,6 +397,7 @@ def test_a_well_formed_independent_feature_passes(isolated):
             "privacy": PRIV,
             "extension": EXT,
             "versioning": VERS,
+            "fixtures": FIXT,
         },
         ft.Lifecycle("none", note="Edited in place and deleted."),
     )
@@ -435,6 +450,7 @@ def event(isolated, **life):
             "event_as_code": EVENT_EAC,
             "archive": EVENT_ARCH,
             "versioning": EVENT_VERS,
+            "fixtures": FIXT,
             "privacy": EVENT_PRIV,
         },
         lifecycle=event_life(**life),
@@ -482,6 +498,7 @@ def test_a_timestamp_or_flag_lifecycle_names_its_two_states(isolated):
                 "identity": identity("field:public_id", "route:webhook-detail"),
                 "privacy": EVENT_PRIV,
                 "versioning": WEBHOOK_VERS,
+                "fixtures": FIXT,
             },
         )
         == []
@@ -517,22 +534,20 @@ def test_a_timestamp_or_flag_lifecycle_names_its_two_states(isolated):
 
 def test_claims_must_be_well_formed_and_honest(isolated):
     base = {"identity": identity("field:public_id", "route:saved-view-detail")}
-    assert "bad_state" in codes(only(claims={**base, "fixtures": ft.Claim("maybe")}))
-    assert "no_refs" in codes(only(claims={**base, "fixtures": ft.Claim("provided")}))
-    assert "no_reason" in codes(only(claims={**base, "fixtures": ft.Claim("not_applicable")}))
-    assert "no_owner" in codes(only(claims={**base, "fixtures": ft.Claim("planned")}))
-    assert "reason_too_long" in codes(
-        only(claims={**base, "fixtures": ft.not_applicable("x" * 301)})
-    )
+    assert "bad_state" in codes(only(claims={**base, "future": ft.Claim("maybe")}))
+    assert "no_refs" in codes(only(claims={**base, "future": ft.Claim("provided")}))
+    assert "no_reason" in codes(only(claims={**base, "future": ft.Claim("not_applicable")}))
+    assert "no_owner" in codes(only(claims={**base, "future": ft.Claim("planned")}))
+    assert "reason_too_long" in codes(only(claims={**base, "future": ft.not_applicable("x" * 301)}))
     assert "no_verifier" in codes(
-        only(claims={**base, "fixtures": ft.provided("op:get_x")})
+        only(claims={**base, "future": ft.provided("op:get_x")})
     )  # not landed
     assert "unknown_property" in codes(only(claims={**base, "colour": ft.not_applicable("n/a")}))
     assert "unclaimed" in codes(only(claims={}))  # identity is landed, so it must be claimed
     good = only(
         claims={
             **base,
-            "fixtures": ft.planned("PD-F003-B03-T01", "Not yet."),
+            "future": ft.planned("PD-F003-B03-T01", "Not yet."),
             "ui_base": ft.not_applicable("Internal."),
         }
     )
@@ -625,6 +640,7 @@ def test_the_endpoint_reports_a_broken_claim_instead_of_hiding_it(world, isolate
             "privacy": ft.FEATURES["event"].claims["privacy"],
             "extension": ft.FEATURES["event"].claims["extension"],
             "versioning": ft.FEATURES["event"].claims["versioning"],
+            "fixtures": ft.FEATURES["event"].claims["fixtures"],
         },
         ft.FEATURES["event"].lifecycle,
     )

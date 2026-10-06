@@ -122,6 +122,10 @@ register_feature(
             "versioning": provided(
                 "in_place@a team is edited by its members in place and each change is audited",
             ),
+            "fixtures": provided(
+                "seeded:hackathon",
+                "test:tests/integration/test_feature_fixtures.py::test_the_demo_scenario_creates_exactly_the_features_the_claims_say",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

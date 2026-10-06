@@ -1,0 +1,97 @@
+version: 3
+task: PD-F003-B03-T05
+batch: PD-F003-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: f84132b
+  head_commit: f84132b
+changed_paths:
+- src/api/core/features_fixtures.py (new), core/apps.py
+- src/api/<app>/features.py for the fifteen features (fixtures claims)
+- src/web/lib/completeness.ts, features/operations/CompletenessPanel.test.tsx, tests/e2e/completeness.spec.ts
+- tests/integration/ (test_feature_fixtures.py new, test_feature_contract.py, test_completeness_regression.py)
+- docs/operations/COMPLETENESS.md, spec 003 (Fixtures as built)
+deliverables:
+- item: Test-fixture and scenario support added to the completeness contract and applied to domain work
+  result: pass
+  evidence: "features_fixtures verifies seeded:<scenario> and test: claims against the demo generator; nine features are seeded (application, award, evaluation plan, event, project, stage, submission, team, track), five are planned for PD-S061-B02-T01 (announcement, artifact, form, message, policy), one is not applicable (webhook subscriptions hold a secret); the proof generates the event and counts rows in both directions; all 21 properties are now landed"
+- item: Observable state and diagnostics
+  result: pass
+  evidence: "the Operations completeness page gains a Test fixtures and scenarios column showing the scenario that creates each feature or the owner of the gap, and no longer lists a pending property"
+- item: Focused tests for the real workflow
+  result: pass
+  evidence: "test_feature_fixtures.py builds the demo event and counts every feature's model (seeded rows exist, planned and not-applicable rows do not), same seed same ids, failure codes, the scenario check reads the generator; the planned-claim ratchet in the regression suite"
+invariants:
+- item: One source of truth, no business rule in a surface
+  result: pass
+  evidence: "the claim names what the registry holds and the verifier reads it; nothing is registered or executed by the contract"
+- item: Server-side authorization, validation and audit remain authoritative
+  result: pass
+  evidence: "no route, authorization or audit change"
+verification:
+- command: "uv run --frozen pytest tests/integration/test_feature_fixtures.py test_feature_contract.py test_completeness_regression.py -n auto"
+  result: pass
+  note: "208 passed"
+- command: "features.check() and check_static on the real tree; manage.py check"
+  result: pass
+  note: "no problems, no issues"
+- command: "pnpm web vitest features/operations; tsc --noEmit; make format-check lint sdk-check block-schema-check"
+  result: pass
+  note: "31 passed, clean"
+- command: "npx playwright test completeness --project=desktop (seed 7, app rebuilt)"
+  result: pass
+  note: "2 passed (390 and 1440) with the fixtures column and no pending property"
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: "column on Operations > Completeness"
+- surface: api
+  result: pass
+  evidence: "report facts carry the property"
+- surface: sdk
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: cli
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: mcp
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: event_as_code
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: audit
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: webhook
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: archive
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: analytics
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: search
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: docs
+  result: pass
+  evidence: "COMPLETENESS.md and the B03 contract in spec 003"
+migrations:
+- none
+findings:
+- "the generic claim tests used the last unlanded property as their victim; they now add a temporary property in the isolated registry"
+- "the planned-claim ratchet became a per-property ceiling (PLANNED_CEILING) so the five owed scenario features are explicit"
+limitations:
+- "five features are not created by the demo scenario yet (owner PD-S061-B02-T01)"
+- "the platform has one scenario, hackathon; the isolated browser fixture profiles are parameters of it and are not claimed per feature"
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

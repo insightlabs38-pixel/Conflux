@@ -1,6 +1,6 @@
 """Features of communications (completeness contract, PD-F003-B01)."""
 
-from core.features import Feature, Lifecycle, provided, register_feature
+from core.features import Feature, Lifecycle, planned, provided, register_feature
 
 register_feature(
     Feature(
@@ -98,6 +98,11 @@ register_feature(
             ),
             "versioning": provided(
                 "in_place@a sent message never changes; the audit trail records that it was sent",
+            ),
+            "fixtures": planned(
+                "PD-S061-B02-T01",
+                "The demo scenario creates no messages yet; its generator takes them in with "
+                "the feature combinations.",
             ),
         },
         lifecycle=Lifecycle(

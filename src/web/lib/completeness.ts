@@ -143,6 +143,8 @@ const FACT_LABEL: Record<string, string> = {
   counters: "Version counters",
   compare: "Compared with",
   versioning: "Versioning",
+  scenarios: "Created by the demo scenario",
+  fixtures: "Fixtures",
 };
 
 /** One derived fact as a sentence fragment: lists joined, booleans as yes or no. */

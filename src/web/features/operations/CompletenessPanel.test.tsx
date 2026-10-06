@@ -413,6 +413,9 @@ describe("completeness helpers", () => {
       "Version counters: draft_revision",
     );
     expect(factText("compare", ["form"])).toBe("Compared with: form");
+    expect(factText("scenarios", ["hackathon"])).toBe(
+      "Created by the demo scenario: hackathon",
+    );
     expect(factText("versioning", "edited in place")).toBe(
       "Versioning: edited in place",
     );

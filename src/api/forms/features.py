@@ -1,6 +1,6 @@
 """Features of forms (completeness contract, PD-F003-B01)."""
 
-from core.features import Feature, Lifecycle, provided, register_feature
+from core.features import Feature, Lifecycle, planned, provided, register_feature
 
 register_feature(
     Feature(
@@ -104,6 +104,11 @@ register_feature(
                 "immutable:forms.FormVersion",
                 "diff:form",
                 "test:tests/integration/test_feature_versioning.py::test_each_claimed_version_model_refuses_an_edit_and_a_delete",
+            ),
+            "fixtures": planned(
+                "PD-S061-B02-T01",
+                "The demo scenario creates no forms yet; its generator takes them in with the "
+                "feature combinations.",
             ),
         },
         lifecycle=Lifecycle(

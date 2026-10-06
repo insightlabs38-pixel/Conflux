@@ -275,3 +275,15 @@ Records change, and what must survive the change differs: some keep numbered imm
 Codes: `bad_ref`, `both`, `no_reason`, `versions_exist`, `counter_exists`, `in_place_unaudited`, `no_answer`, `no_test`, `test_ref`, `version_twice`, `model_unknown`, `not_numbered`, `not_immutable`, `not_a_child`, `version_shared`, `version_unclaimed`, `counter_unknown`, `counter_unlocked`, `counter_twice`, `counter_unclaimed`, `diff_unknown`, `diff_foreign`, `diff_unclaimed`; CI: `test_file`, `test_name`. `tests/integration/test_feature_versioning.py` proves the claims by writing: every numbered immutable model is claimed once or named outside, each claimed model refuses an edit and a delete once written, no source file bypasses that guard with a bulk write, a stale writer is refused by the submission counter, and the comparison sources match the registry. Seven models keep immutable versions (forms, rubrics, assignments, normalization and pairwise runs, submissions, event rules), two features keep a counter, two compare versions and ten are edited in place.
 
 Accepted residual: immutability is a rule of the model, not a database trigger. A queryset `update` or `delete` on a version model would slip past it (verified), so a test fails if any source file does that; a database-level guard would be a migration and is a decision for the owner of the migration plan.
+
+## Fixtures and scenarios (B03-T05)
+
+Tests, demos and training start from deterministic synthetic events (`integrations.demo_scenarios`, which the isolated browser fixtures also use): one real event built through the domain's own rules, with the same ids for the same seed. `features_fixtures` holds a `fixtures` claim to the generator:
+
+- `seeded:<scenario>` + `test:<path>::<name>`: the scenario exists (`scenario_archive` accepts it) and the proof generates the event and finds rows of the feature's own model;
+- `planned` (owner task): the scenario does not create the feature yet; the same proof shows the model has no rows today, so a planned claim that has since come true, or a seeded claim that stopped being true, fails until the claim says so;
+- `not_applicable` with a reason: a demo must not invent this data.
+
+Codes: `bad_ref`, `no_scenario`, `scenario_twice`, `no_test`, `test_ref`, `scenario_unknown`; CI: `test_file`, `test_name`. `tests/integration/test_feature_fixtures.py` builds the demo event and counts the rows of all fifteen models in both directions. Nine features are seeded (application, award, evaluation plan, event, project, stage, submission, team, track), five are owed to the scenario generator by PD-S061-B02-T01 (announcement, artifact, form, message, policy) and one is not applicable (webhook subscriptions hold a secret).
+
+With this property all 21 properties of the contract are verified and the Operations page lists no pending one. The count of `planned` claims is a ratchet in `tests/integration/test_completeness_regression.py` (`PLANNED_CEILING`): one owed screen, one owed bulk action, and the five features above.

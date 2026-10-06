@@ -118,6 +118,10 @@ register_feature(
                 "immutable:governance.RulesVersion",
                 "test:tests/integration/test_feature_versioning.py::test_each_claimed_version_model_refuses_an_edit_and_a_delete",
             ),
+            "fixtures": provided(
+                "seeded:hackathon",
+                "test:tests/integration/test_feature_fixtures.py::test_the_demo_scenario_creates_exactly_the_features_the_claims_say",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",
@@ -228,6 +232,10 @@ register_feature(
             "versioning": provided(
                 "in_place@a track is edited in place and each change is audited; nothing refers "
                 "to an earlier state of it",
+            ),
+            "fixtures": provided(
+                "seeded:hackathon",
+                "test:tests/integration/test_feature_fixtures.py::test_the_demo_scenario_creates_exactly_the_features_the_claims_say",
             ),
         },
         lifecycle=Lifecycle(
@@ -344,6 +352,10 @@ register_feature(
             "versioning": provided(
                 "in_place@an application moves forward through its decision and each change is "
                 "audited",
+            ),
+            "fixtures": provided(
+                "seeded:hackathon",
+                "test:tests/integration/test_feature_fixtures.py::test_the_demo_scenario_creates_exactly_the_features_the_claims_say",
             ),
         },
         lifecycle=Lifecycle(
@@ -465,6 +477,11 @@ register_feature(
             "versioning": provided(
                 "counter:version",
                 "test:tests/integration/test_feature_versioning.py::test_each_claimed_version_model_refuses_an_edit_and_a_delete",
+            ),
+            "fixtures": planned(
+                "PD-S061-B02-T01",
+                "The demo scenario creates no announcements yet; its generator takes them in "
+                "with the feature combinations.",
             ),
         },
         lifecycle=Lifecycle(

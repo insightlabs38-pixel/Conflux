@@ -301,8 +301,24 @@ for (const width of [390, 1440]) {
     });
     await track.getByText("No states").click();
     await expect(track).toContainText("Edited in place and deleted");
-    await panel.getByText(/properties are not checked yet/).click();
-    await expect(panel.getByText("Test fixtures and scenarios")).toBeVisible();
+    // Fixtures: whether the demo scenario creates the feature, and who owes it when it does not.
+    await expect(
+      table.getByRole("columnheader", { name: "Test fixtures and scenarios" }),
+    ).toBeVisible();
+    await trackRow.getByText("Provided", { exact: true }).nth(19).click();
+    await expect(
+      trackRow.getByText("Created by the demo scenario: hackathon", {
+        exact: false,
+      }),
+    ).toBeVisible();
+    const message = table.locator("tbody tr").filter({
+      has: page.getByRole("rowheader", { name: /^Message \(message\)/ }),
+    });
+    await expect(message).toContainText("PD-S061-B02-T01");
+    // Every property of the contract is checked: nothing is left pending.
+    await expect(panel.getByText(/properties are not checked yet/)).toHaveCount(
+      0,
+    );
     await expect(panel.getByRole("button")).toHaveCount(0);
     await noHorizontalOverflow(page);
     await accessible(page);

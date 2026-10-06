@@ -1,6 +1,6 @@
 """Features of integrations (completeness contract, PD-F003-B01)."""
 
-from core.features import Feature, Lifecycle, provided, register_feature
+from core.features import Feature, Lifecycle, not_applicable, provided, register_feature
 
 register_feature(
     Feature(
@@ -104,6 +104,9 @@ register_feature(
             ),
             "versioning": provided(
                 "in_place@a subscription is edited in place and each change is audited",
+            ),
+            "fixtures": not_applicable(
+                "A demo must not invent a subscription: it holds a signing secret and a target URL."
             ),
         },
         lifecycle=Lifecycle(

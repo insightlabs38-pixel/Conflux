@@ -16,6 +16,9 @@ from core import features_search
 pytestmark = pytest.mark.django_db
 
 ROOT = Path(__file__).resolve().parents[2]
+# Planned claims allowed per landed property: one owed screen or action, and the five features the
+# demo scenario does not create yet (owner PD-S061-B02-T01). Lower these as the items land.
+PLANNED_CEILING = {"fixtures": 5}
 LANDED = [
     "identity",
     "validation",
@@ -37,6 +40,7 @@ LANDED = [
     "privacy",
     "extension",
     "versioning",
+    "fixtures",
 ]
 
 
@@ -52,7 +56,8 @@ def test_every_landed_property_is_claimed_and_verified_for_all_fifteen_features(
     assert report["ok"] is True and report["problems"] == []
     for prop in LANDED:
         assert report["totals"][prop]["unclaimed"] == 0, prop
-        assert report["totals"][prop]["planned"] <= 1, prop  # an owed screen, with its owner
+        # a ratchet: a planned claim is an owed item with its owner, and the count never grows
+        assert report["totals"][prop]["planned"] <= PLANNED_CEILING.get(prop, 1), prop
     # the properties of the other batches are not claimed yet, and the report says so
     pending = [p["key"] for p in report["properties"] if not p["landed"]]
     assert len(pending) == 21 - len(LANDED) and not set(pending) & set(LANDED)

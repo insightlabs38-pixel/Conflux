@@ -39,13 +39,13 @@ def create_project(event, creator, name, *, team=None, track=None, description="
 def update_project(project, actor, *, name=None, description=None, track=None, track_set=False):
     if not project.memberships.filter(user=actor).exists():
         raise ValidationError("Only a project member can edit this project.")
+    stored = Project.objects.select_for_update().get(pk=project.pk)  # one editor at a time
     if name is not None:
         project.name = name
     if description is not None:
         project.description = description
     if track_set:
         project.track = track
-    stored = Project.objects.get(pk=project.pk)
     changed = [
         field
         for field in ("name", "description", "track_id")
@@ -53,16 +53,17 @@ def update_project(project, actor, *, name=None, description=None, track=None, t
     ]
     project.full_clean()
     project.save()
-    record_mutation(
-        actor=actor,
-        workspace=project.event.workspace,
-        action="project.updated",
-        target=project,
-        metadata={
-            "event_id": str(project.event.public_id),
-            "changed_fields": [f.removesuffix("_id") for f in changed],
-        },
-    )
+    if changed:  # a repeated or empty PATCH changes nothing and so leaves no second row
+        record_mutation(
+            actor=actor,
+            workspace=project.event.workspace,
+            action="project.updated",
+            target=project,
+            metadata={
+                "event_id": str(project.event.public_id),
+                "changed_fields": [f.removesuffix("_id") for f in changed],
+            },
+        )
     return project
 
 

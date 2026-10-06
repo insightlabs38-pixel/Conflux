@@ -112,6 +112,11 @@ def leave_team(team, user):
     membership.delete()
 
     remaining = team.memberships.order_by("joined_at")
+    new_captain = None
+    if was_captain and remaining.exists():
+        new_captain = remaining.select_related("user").first()
+        new_captain.role = TeamMembershipRole.CAPTAIN
+        new_captain.save(update_fields=["role"])
     _audit(
         user,
         team,
@@ -119,16 +124,11 @@ def leave_team(team, user):
         user_id=str(user.public_id),
         was_captain=was_captain,
         team_disbanded=not remaining.exists(),
+        new_captain_id=str(new_captain.user.public_id) if new_captain else None,
     )
     if not remaining.exists():
         team.delete()
-        return None
-    if was_captain:
-        new_captain = remaining.first()
-        new_captain.role = TeamMembershipRole.CAPTAIN
-        new_captain.save(update_fields=["role"])
-        return new_captain
-    return None
+    return new_captain
 
 
 @transaction.atomic

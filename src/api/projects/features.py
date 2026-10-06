@@ -84,6 +84,7 @@ register_feature(
                 "scope:event",
                 "readers:members",
                 "writers:members",
+                "narrow:submission-reopen:POST=admin,organizer",
                 "own:project_member",
                 "test:tests/integration/test_submission_reopen_diff.py::test_reopen_service_rejects_non_organizers_without_changing_history",
                 "test:tests/integration/test_feature_authorization.py::test_every_matrix_gate_holds_for_a_wrong_role_a_stranger_and_a_signed_out_caller",

@@ -968,11 +968,14 @@ paths:
       description: |-
         Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
 
-        Put before the DRF view class in the MRO. Requests without the header are
-        passed through untouched. A key is private to the caller and to one
-        method+path; reusing it for a different request is rejected (422), a
-        duplicate while the first is still running is refused (409) instead of
-        running twice, and server errors are never cached so they can be retried.
+        Put before the DRF view class in the MRO. Requests without the header, and requests by a
+        caller who is not signed in, are passed through untouched. The key is considered only after
+        DRF has authenticated the caller and checked the view's permissions, so a replay is never
+        served to someone the view would refuse. A key is private to the signed-in user and to one
+        method+path; reusing it for a different request is rejected (422), a duplicate while the
+        first is still running is refused (409) instead of running twice, and server errors are never
+        cached so they can be retried. A refusal (4xx) is remembered like any answer: fix the request
+        and send a new key. Keys are forgotten after a day (`purge`).
       tags:
       - workspaces
       requestBody:
@@ -1817,11 +1820,14 @@ paths:
       description: |-
         Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
 
-        Put before the DRF view class in the MRO. Requests without the header are
-        passed through untouched. A key is private to the caller and to one
-        method+path; reusing it for a different request is rejected (422), a
-        duplicate while the first is still running is refused (409) instead of
-        running twice, and server errors are never cached so they can be retried.
+        Put before the DRF view class in the MRO. Requests without the header, and requests by a
+        caller who is not signed in, are passed through untouched. The key is considered only after
+        DRF has authenticated the caller and checked the view's permissions, so a replay is never
+        served to someone the view would refuse. A key is private to the signed-in user and to one
+        method+path; reusing it for a different request is rejected (422), a duplicate while the
+        first is still running is refused (409) instead of running twice, and server errors are never
+        cached so they can be retried. A refusal (4xx) is remembered like any answer: fix the request
+        and send a new key. Keys are forgotten after a day (`purge`).
       parameters:
       - in: path
         name: event_public_id
@@ -1854,11 +1860,14 @@ paths:
       description: |-
         Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
 
-        Put before the DRF view class in the MRO. Requests without the header are
-        passed through untouched. A key is private to the caller and to one
-        method+path; reusing it for a different request is rejected (422), a
-        duplicate while the first is still running is refused (409) instead of
-        running twice, and server errors are never cached so they can be retried.
+        Put before the DRF view class in the MRO. Requests without the header, and requests by a
+        caller who is not signed in, are passed through untouched. The key is considered only after
+        DRF has authenticated the caller and checked the view's permissions, so a replay is never
+        served to someone the view would refuse. A key is private to the signed-in user and to one
+        method+path; reusing it for a different request is rejected (422), a duplicate while the
+        first is still running is refused (409) instead of running twice, and server errors are never
+        cached so they can be retried. A refusal (4xx) is remembered like any answer: fix the request
+        and send a new key. Keys are forgotten after a day (`purge`).
       parameters:
       - in: path
         name: event_public_id
@@ -4125,11 +4134,14 @@ paths:
       description: |-
         Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
 
-        Put before the DRF view class in the MRO. Requests without the header are
-        passed through untouched. A key is private to the caller and to one
-        method+path; reusing it for a different request is rejected (422), a
-        duplicate while the first is still running is refused (409) instead of
-        running twice, and server errors are never cached so they can be retried.
+        Put before the DRF view class in the MRO. Requests without the header, and requests by a
+        caller who is not signed in, are passed through untouched. The key is considered only after
+        DRF has authenticated the caller and checked the view's permissions, so a replay is never
+        served to someone the view would refuse. A key is private to the signed-in user and to one
+        method+path; reusing it for a different request is rejected (422), a duplicate while the
+        first is still running is refused (409) instead of running twice, and server errors are never
+        cached so they can be retried. A refusal (4xx) is remembered like any answer: fix the request
+        and send a new key. Keys are forgotten after a day (`purge`).
       parameters:
       - in: path
         name: event_public_id
@@ -4167,11 +4179,14 @@ paths:
       description: |-
         Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
 
-        Put before the DRF view class in the MRO. Requests without the header are
-        passed through untouched. A key is private to the caller and to one
-        method+path; reusing it for a different request is rejected (422), a
-        duplicate while the first is still running is refused (409) instead of
-        running twice, and server errors are never cached so they can be retried.
+        Put before the DRF view class in the MRO. Requests without the header, and requests by a
+        caller who is not signed in, are passed through untouched. The key is considered only after
+        DRF has authenticated the caller and checked the view's permissions, so a replay is never
+        served to someone the view would refuse. A key is private to the signed-in user and to one
+        method+path; reusing it for a different request is rejected (422), a duplicate while the
+        first is still running is refused (409) instead of running twice, and server errors are never
+        cached so they can be retried. A refusal (4xx) is remembered like any answer: fix the request
+        and send a new key. Keys are forgotten after a day (`purge`).
       parameters:
       - in: path
         name: event_public_id
@@ -8525,11 +8540,14 @@ paths:
       description: |-
         Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
 
-        Put before the DRF view class in the MRO. Requests without the header are
-        passed through untouched. A key is private to the caller and to one
-        method+path; reusing it for a different request is rejected (422), a
-        duplicate while the first is still running is refused (409) instead of
-        running twice, and server errors are never cached so they can be retried.
+        Put before the DRF view class in the MRO. Requests without the header, and requests by a
+        caller who is not signed in, are passed through untouched. The key is considered only after
+        DRF has authenticated the caller and checked the view's permissions, so a replay is never
+        served to someone the view would refuse. A key is private to the signed-in user and to one
+        method+path; reusing it for a different request is rejected (422), a duplicate while the
+        first is still running is refused (409) instead of running twice, and server errors are never
+        cached so they can be retried. A refusal (4xx) is remembered like any answer: fix the request
+        and send a new key. Keys are forgotten after a day (`purge`).
       parameters:
       - in: path
         name: event_public_id
@@ -8562,11 +8580,14 @@ paths:
       description: |-
         Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
 
-        Put before the DRF view class in the MRO. Requests without the header are
-        passed through untouched. A key is private to the caller and to one
-        method+path; reusing it for a different request is rejected (422), a
-        duplicate while the first is still running is refused (409) instead of
-        running twice, and server errors are never cached so they can be retried.
+        Put before the DRF view class in the MRO. Requests without the header, and requests by a
+        caller who is not signed in, are passed through untouched. The key is considered only after
+        DRF has authenticated the caller and checked the view's permissions, so a replay is never
+        served to someone the view would refuse. A key is private to the signed-in user and to one
+        method+path; reusing it for a different request is rejected (422), a duplicate while the
+        first is still running is refused (409) instead of running twice, and server errors are never
+        cached so they can be retried. A refusal (4xx) is remembered like any answer: fix the request
+        and send a new key. Keys are forgotten after a day (`purge`).
       parameters:
       - in: path
         name: event_public_id
@@ -8688,11 +8709,14 @@ paths:
       description: |-
         Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
 
-        Put before the DRF view class in the MRO. Requests without the header are
-        passed through untouched. A key is private to the caller and to one
-        method+path; reusing it for a different request is rejected (422), a
-        duplicate while the first is still running is refused (409) instead of
-        running twice, and server errors are never cached so they can be retried.
+        Put before the DRF view class in the MRO. Requests without the header, and requests by a
+        caller who is not signed in, are passed through untouched. The key is considered only after
+        DRF has authenticated the caller and checked the view's permissions, so a replay is never
+        served to someone the view would refuse. A key is private to the signed-in user and to one
+        method+path; reusing it for a different request is rejected (422), a duplicate while the
+        first is still running is refused (409) instead of running twice, and server errors are never
+        cached so they can be retried. A refusal (4xx) is remembered like any answer: fix the request
+        and send a new key. Keys are forgotten after a day (`purge`).
       parameters:
       - in: path
         name: event_public_id
@@ -8731,11 +8755,14 @@ paths:
       description: |-
         Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
 
-        Put before the DRF view class in the MRO. Requests without the header are
-        passed through untouched. A key is private to the caller and to one
-        method+path; reusing it for a different request is rejected (422), a
-        duplicate while the first is still running is refused (409) instead of
-        running twice, and server errors are never cached so they can be retried.
+        Put before the DRF view class in the MRO. Requests without the header, and requests by a
+        caller who is not signed in, are passed through untouched. The key is considered only after
+        DRF has authenticated the caller and checked the view's permissions, so a replay is never
+        served to someone the view would refuse. A key is private to the signed-in user and to one
+        method+path; reusing it for a different request is rejected (422), a duplicate while the
+        first is still running is refused (409) instead of running twice, and server errors are never
+        cached so they can be retried. A refusal (4xx) is remembered like any answer: fix the request
+        and send a new key. Keys are forgotten after a day (`purge`).
       parameters:
       - in: path
         name: event_public_id
@@ -15567,11 +15594,14 @@ paths:
       description: |-
         Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
 
-        Put before the DRF view class in the MRO. Requests without the header are
-        passed through untouched. A key is private to the caller and to one
-        method+path; reusing it for a different request is rejected (422), a
-        duplicate while the first is still running is refused (409) instead of
-        running twice, and server errors are never cached so they can be retried.
+        Put before the DRF view class in the MRO. Requests without the header, and requests by a
+        caller who is not signed in, are passed through untouched. The key is considered only after
+        DRF has authenticated the caller and checked the view's permissions, so a replay is never
+        served to someone the view would refuse. A key is private to the signed-in user and to one
+        method+path; reusing it for a different request is rejected (422), a duplicate while the
+        first is still running is refused (409) instead of running twice, and server errors are never
+        cached so they can be retried. A refusal (4xx) is remembered like any answer: fix the request
+        and send a new key. Keys are forgotten after a day (`purge`).
       parameters:
       - in: path
         name: comment_public_id
@@ -15619,11 +15649,14 @@ paths:
       description: |-
         Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
 
-        Put before the DRF view class in the MRO. Requests without the header are
-        passed through untouched. A key is private to the caller and to one
-        method+path; reusing it for a different request is rejected (422), a
-        duplicate while the first is still running is refused (409) instead of
-        running twice, and server errors are never cached so they can be retried.
+        Put before the DRF view class in the MRO. Requests without the header, and requests by a
+        caller who is not signed in, are passed through untouched. The key is considered only after
+        DRF has authenticated the caller and checked the view's permissions, so a replay is never
+        served to someone the view would refuse. A key is private to the signed-in user and to one
+        method+path; reusing it for a different request is rejected (422), a duplicate while the
+        first is still running is refused (409) instead of running twice, and server errors are never
+        cached so they can be retried. A refusal (4xx) is remembered like any answer: fix the request
+        and send a new key. Keys are forgotten after a day (`purge`).
       parameters:
       - in: path
         name: comment_public_id
@@ -15657,11 +15690,14 @@ paths:
       description: |-
         Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
 
-        Put before the DRF view class in the MRO. Requests without the header are
-        passed through untouched. A key is private to the caller and to one
-        method+path; reusing it for a different request is rejected (422), a
-        duplicate while the first is still running is refused (409) instead of
-        running twice, and server errors are never cached so they can be retried.
+        Put before the DRF view class in the MRO. Requests without the header, and requests by a
+        caller who is not signed in, are passed through untouched. The key is considered only after
+        DRF has authenticated the caller and checked the view's permissions, so a replay is never
+        served to someone the view would refuse. A key is private to the signed-in user and to one
+        method+path; reusing it for a different request is rejected (422), a duplicate while the
+        first is still running is refused (409) instead of running twice, and server errors are never
+        cached so they can be retried. A refusal (4xx) is remembered like any answer: fix the request
+        and send a new key. Keys are forgotten after a day (`purge`).
       parameters:
       - in: path
         name: audience
@@ -15715,11 +15751,14 @@ paths:
       description: |-
         Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
 
-        Put before the DRF view class in the MRO. Requests without the header are
-        passed through untouched. A key is private to the caller and to one
-        method+path; reusing it for a different request is rejected (422), a
-        duplicate while the first is still running is refused (409) instead of
-        running twice, and server errors are never cached so they can be retried.
+        Put before the DRF view class in the MRO. Requests without the header, and requests by a
+        caller who is not signed in, are passed through untouched. The key is considered only after
+        DRF has authenticated the caller and checked the view's permissions, so a replay is never
+        served to someone the view would refuse. A key is private to the signed-in user and to one
+        method+path; reusing it for a different request is rejected (422), a duplicate while the
+        first is still running is refused (409) instead of running twice, and server errors are never
+        cached so they can be retried. A refusal (4xx) is remembered like any answer: fix the request
+        and send a new key. Keys are forgotten after a day (`purge`).
       parameters:
       - in: path
         name: audience

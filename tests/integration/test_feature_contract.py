@@ -634,6 +634,7 @@ def test_a_real_authorization_claim_is_derived_from_the_permission_matrix():
         (tuple(r for r in AUTHZ.refs if not r.startswith("route:")), "no_routes"),
         (tuple(r for r in AUTHZ.refs if not r.startswith("test:")), "no_test"),
         (swap("scope:event", "color:red"), "bad_ref"),
+        (AUTHZ.refs + ("narrow:saved-view-detail:GET=none",), "narrow_unused"),
     ],
 )
 def test_each_authorization_failure_has_a_code(refs, code):
@@ -1222,3 +1223,72 @@ def test_a_no_query_claim_needs_a_reason_and_the_search_ci_check_finds_a_missing
         ft.Feature("x", "X", "events.EventApplication", {"search": ft.provided(*ENTITY)})
     )
     assert codes(ft.check_static(tmp_path)) == ["test_file"]
+
+
+def test_the_audit_action_scan_follows_helpers_and_ignores_other_action_keywords():
+    import ast
+    import textwrap
+
+    tree = ast.parse(
+        textwrap.dedent(
+            """
+            def _audit(actor, thing, *, action, **extra):
+                record_mutation(actor=actor, action=action, target=thing)
+
+            def _not_audit(actor, *, action):
+                log(action)
+
+            def _renames(actor, *, kind):
+                record_mutation(actor=actor, action="fixed.verb")
+            """
+        )
+    )
+    from core.features import _helper_names
+
+    assert _helper_names([tree]) == {"_audit"}  # only a function that hands `action` on
+    actions = ft.System().audit_actions()
+    assert "track.created" in actions and "team.invite_redeemed" in actions
+    assert "x.y" not in actions and all(ft.AUDIT_ACTION.fullmatch(a) for a in actions)
+
+
+def only_mentions_a_lock():
+    """Does not call select_for_update, only says it."""
+    return "select_for_update"  # select_for_update
+
+
+def really_takes_a_lock():
+    return ft.System().model("core.SavedView").objects.select_for_update()
+
+
+def test_a_lock_must_be_a_call_and_a_version_must_be_a_version_and_a_key_must_cover_the_method():
+    here = "tests.integration.test_feature_contract"
+    detail = "mode:saved-view-detail:PATCH=locked@"
+    assert verify_idempotency(mode_swap(IDEM.refs[1], f"{detail}{here}.really_takes_a_lock")) == []
+    for wrong in (f"{here}.only_mentions_a_lock", "core.SavedView.name"):
+        found = verify_idempotency(mode_swap(IDEM.refs[1], f"{detail}{wrong}"))
+        assert "lock_missing" in codes(found), wrong
+    from core import features_idempotency as fi
+
+    system = ft.System()
+    assert fi._keyed(system, "project-list", "POST")
+    assert not fi._keyed(system, "project-list", "DELETE")  # the mixin only keys POST, PUT, PATCH
+
+
+def test_a_route_narrower_than_the_claim_is_pinned_so_widening_it_alone_fails():
+    refs = (
+        "route:submission-detail",
+        "route:submission-reopen",
+        "scope:event",
+        "readers:members",
+        "writers:members",
+        "own:project_member",
+        "test:tests/x.py::test_y",
+    )
+    found = codes(verify_authorization(refs, "projects.Submission"))
+    assert "narrow_missing" in found  # reopen is organizers only, the claim says members
+    pinned = (*refs, "narrow:submission-reopen:POST=admin,organizer")
+    assert verify_authorization(pinned, "projects.Submission") == []
+    wrong = (*refs, "narrow:submission-reopen:POST=members")
+    assert "narrow_mismatch" in codes(verify_authorization(wrong, "projects.Submission"))
+    real = ft.FEATURES["submission"].claims["authorization"].refs
+    assert "narrow:submission-reopen:POST=admin,organizer" in real

@@ -88,3 +88,74 @@ def test_server_errors_are_not_cached_and_oversized_keys_are_rejected(monkeypatc
     assert create(alice, "Retry", key="flaky").status_code == 201
     assert create(alice, "X", key="k" * 191).status_code == 400
     assert create(alice, "Y", key="k" * 190).status_code == 201
+
+
+# --- the key is only considered after authentication and permissions (PD-F003-B01 review) ------
+
+
+def organizer_in_event():
+    from events.models import Event
+    from workspaces.models import Membership, Role
+
+    organizer = User.objects.create_user(username="boss", password="x")
+    workspace = Workspace.objects.create(name="Keyed", slug="keyed")
+    membership = Membership.objects.create(user=organizer, workspace=workspace, role=Role.ORGANIZER)
+    event = Event.objects.create(workspace=workspace, name="E", slug="e")
+    client = Client(raise_request_exception=False)
+    client.cookies["session"] = Session.issue(organizer).token
+    url = f"/api/v1/workspaces/{workspace.public_id}/events/{event.public_id}/announcements/"
+    return client, membership, url
+
+
+def announce(client, url, key="a1"):
+    return client.post(
+        url, {"title": "Hello", "body": "World"}, content_type=JSON, HTTP_IDEMPOTENCY_KEY=key
+    )
+
+
+def test_a_replay_is_never_served_to_someone_the_view_no_longer_admits():
+    client, membership, url = organizer_in_event()
+    assert announce(client, url).status_code == 201
+    membership.delete()  # removed from the workspace after the first answer was stored
+    again = announce(client, url)
+    assert again.status_code in (403, 404) and "title" not in again.json()
+    assert IdempotencyKey.objects.count() == 1  # the stale answer was not served, nor extended
+
+
+def test_a_signed_out_caller_leaves_no_key_and_cannot_block_anyone():
+    client, _, url = organizer_in_event()
+    anonymous = Client(raise_request_exception=False)
+    first = announce(anonymous, url, key="shared")
+    second = announce(anonymous, url, key="shared")
+    assert first.status_code == second.status_code in (401, 403)
+    assert not IdempotencyKey.objects.exists()
+    assert announce(client, url, key="shared").status_code == 201
+
+
+def test_a_key_is_forgotten_after_a_day_and_the_sweep_purges_the_stored_answer():
+    from core import idempotency
+    from events.models import Announcement
+
+    client, _, url = organizer_in_event()
+    assert announce(client, url).status_code == 201
+    record = IdempotencyKey.objects.get()
+    assert record.response_body["title"] == "Hello"  # a copy of what the caller was sent
+    IdempotencyKey.objects.filter(pk=record.pk).update(
+        created_at=timezone.now() - idempotency.KEY_TTL - timedelta(minutes=1)
+    )
+    assert idempotency.purge() == 1 and not IdempotencyKey.objects.exists()
+    assert announce(client, url).status_code == 201  # a new request now
+    IdempotencyKey.objects.update(
+        created_at=timezone.now() - idempotency.KEY_TTL - timedelta(hours=1)
+    )
+    assert announce(client, url).status_code == 201  # expired but not yet swept: still a new one
+    assert Announcement.objects.count() == 3
+
+
+def test_a_refusal_is_remembered_under_its_key_so_the_fixed_request_needs_a_new_one():
+    client, _, url = organizer_in_event()
+    bad = client.post(url, {"title": "", "body": ""}, content_type=JSON, HTTP_IDEMPOTENCY_KEY="r1")
+    assert bad.status_code == 400
+    same_key_fixed = announce(client, url, key="r1")
+    assert same_key_fixed.status_code == 422  # reused for a different request, never silently run
+    assert announce(client, url, key="r2").status_code == 201

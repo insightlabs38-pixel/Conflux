@@ -13,6 +13,10 @@ holds the claim to the system:
 - `readers:<roles>` and `writers:<roles>`: who the matrix says may reach the GET routes and the
   writing routes (`members` for every role, `none` for no route). The claim must equal the matrix,
   so widening access without updating the claim fails.
+- `narrow:<route>:<METHOD>=<roles>`: required for every route and method whose roles differ from
+  the `readers:` or `writers:` the claim states (the claim is the widest group; a route that is
+  narrower, such as a reopen only organizers may do, is pinned on its own), so widening any single
+  route fails even while another route already grants that role.
 - `own:<rule>`: required exactly when roles other than organizers and admins may write; it names
   the object-level rule the view enforces (`project_member`, `team_member`, `self`).
 - `test:<path>::<name>`: adversarial tests that a wrong role, another workspace and another
@@ -37,6 +41,10 @@ def _roles_text(roles: set[str]) -> str:
     if roles == ALL_ROLES:
         return "members"
     return ",".join(sorted(roles)) if roles else "none"
+
+
+def _normalize(text: str) -> str:
+    return text if text in ("members", "none") else ",".join(sorted(text.split(",")))
 
 
 def _matrix_rows(system, route_name):
@@ -116,7 +124,9 @@ def verify(feature, claim, system) -> list[dict]:
     model = system.model(feature.model)
     if model is None:
         return found
-    refs = {k: [] for k in ("route", "scope", "readers", "writers", "own", "open", "test")}
+    refs = {
+        k: [] for k in ("route", "scope", "readers", "writers", "own", "open", "test", "narrow")
+    }
     for ref in claim.refs:
         kind, _, value = ref.partition(":")
         if kind in refs:
@@ -124,7 +134,8 @@ def verify(feature, claim, system) -> list[dict]:
         else:
             bad(
                 "bad_ref",
-                f"'{ref}' is not route:, scope:, readers:, writers:, own:, open: or test:.",
+                f"'{ref}' is not route:, scope:, readers:, writers:, narrow:, own:, open: or "
+                "test:.",
             )
     if not refs["route"]:
         bad("no_routes", "Name the routes this feature is reached through (route:<url name>).")
@@ -179,6 +190,38 @@ def verify(feature, claim, system) -> list[dict]:
                     f"The claim says {kind} are '{refs[kind][0]}' "
                     f"but the permission matrix says '{derived_text}'.",
                 )
+    pins = {}
+    for value in refs["narrow"]:
+        target, _, roles = value.partition("=")
+        route, _, method = target.rpartition(":")
+        pins[(route, method)] = roles
+    seen = set()
+    for name, method, access, roles in got["routes"]:
+        if access != "roles" or len(refs["readers"] if method == "GET" else refs["writers"]) != 1:
+            continue
+        declared = (refs["readers"] if method == "GET" else refs["writers"])[0]
+        wanted = _roles_text(roles)
+        if wanted == _normalize(declared):
+            continue
+        seen.add((name, method))
+        if (name, method) not in pins:
+            bad(
+                "narrow_missing",
+                f"{method} {name} allows '{wanted}', not the claim's '{declared}'; "
+                f"pin it with narrow:{name}:{method}={wanted}.",
+            )
+        elif _normalize(pins[(name, method)]) != wanted:
+            bad(
+                "narrow_mismatch",
+                f"narrow:{name}:{method} says '{pins[(name, method)]}' "
+                f"but the matrix says '{wanted}'.",
+            )
+    for key in pins:
+        if key not in seen:
+            bad(
+                "narrow_unused",
+                f"narrow:{key[0]}:{key[1]} narrows nothing the claim does not state.",
+            )
     extra = got["writers"] - ORGANIZER_ROLES
     if extra and not refs["own"]:
         bad(

@@ -1,6 +1,6 @@
 from celery import shared_task
 
-from . import approvals, jobs
+from . import approvals, idempotency, jobs
 
 
 @shared_task(name="core.tasks.run_job")
@@ -18,3 +18,8 @@ def sweep_jobs():
 @shared_task(name="core.tasks.sweep_approvals")
 def sweep_approvals():
     return approvals.sweep()
+
+
+@shared_task(name="core.tasks.sweep_idempotency")
+def sweep_idempotency():
+    return idempotency.purge()

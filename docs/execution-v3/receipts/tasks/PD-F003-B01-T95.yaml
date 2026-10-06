@@ -1,0 +1,68 @@
+version: 3
+task: PD-F003-B01-T95
+batch: PD-F003-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: independent-frontier-review
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: c3afab9
+  head_commit: c3afab9
+changed_paths:
+- "src/api/core/idempotency.py, tasks.py, config/settings.py (key handling after authentication, user scope, 24 hour expiry and purge, hourly beat entry)"
+- src/api/core/features.py, features_authorization.py, features_idempotency.py (verifier hardening)
+- src/api/projects/features.py, projects/services.py, participation/services.py (narrow pin, no-op PATCH audit, captain handover audit)
+- tests/security/test_idempotency_scope.py, tests/integration/test_feature_audit.py, test_feature_contract.py
+- docs/operations/COMPLETENESS.md, UPGRADES.md, spec 003, docs/api/openapi.yaml
+deliverables:
+- item: Independently review the batch against its invariants, threat and privacy boundaries, concurrency behavior and unnecessary complexity
+  result: pass
+  evidence: "the code-review skill ran at high effort over the whole batch diff of src/api in a separate forked pass (not the implementing context) and returned ten findings, each checked against the code"
+- item: Attempt to falsify the implementation with realistic edge cases
+  result: pass
+  evidence: "nine findings were reproduced and fixed with a regression test each: a stored answer replayed to a removed member and rows created for signed-out callers, keys never expiring with stored message and artifact bodies, a repeated PATCH writing a second audit row, an unlocked change set, a captain handover absent from the audit trail, a lock claim satisfied by any field or a comment, a keyed claim on an unkeyed method, an audit scan reading tests and unrelated action keywords, and a role widened on one route masked by another"
+- item: Record blocking findings with reproduction; do not downgrade a gate
+  result: pass
+  evidence: "no gate was weakened; the tenth finding (a refusal stored under its key is replayed under that key) is the established, documented behavior of the mixin and is left, with the instruction to send a new key written in the guide and the upgrade note"
+invariants:
+- item: Server-side authorization and audit stay authoritative
+  result: pass
+  evidence: "the Idempotency-Key is now considered only after DRF authentication and permissions, so replay can no longer bypass them"
+- item: No P0 or P1 issue left open
+  result: pass
+  evidence: "none was found; the highest was P2 (replay before authorization for a caller who already held the answer, and unbounded retention of stored answers)"
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 2467 passed, 31 skipped (10 new regression tests for the findings)
+- command: make format-check lint sdk-check block-schema-check; pnpm web vitest
+  result: pass
+  note: OpenAPI regenerated (operation descriptions only), SDKs unchanged, 658 web tests
+- command: make e2e-affected
+  result: pass
+  note: read-only, isolated-mutation and canary tiers ok after the key handling and verifier hardening, app rebuilt with worker and beat
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unchanged
+- surface: api
+  result: pass
+  evidence: key handling and verifier hardening
+- surface: audit
+  result: pass
+  evidence: project and team audit rows corrected
+- surface: docs
+  result: pass
+  evidence: guide, upgrade note, spec
+migrations: []
+findings:
+- "the review was run by the code-review skill in a separate pass under the same account and model family, not by a human or another model; recorded in QUESTIONS.md (default A) so the owner can still commission an outside review before release"
+limitations:
+- "a stored refusal is replayed under its key by design; clients send a new key after fixing the request"
+- "the worker and beat must be restarted on the new image for the hourly purge (expired keys are treated as new requests until then)"
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

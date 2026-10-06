@@ -151,6 +151,7 @@ CELERY_BEAT_SCHEDULE = {
     },
     "sweep-jobs": {"task": "core.tasks.sweep_jobs", "schedule": 60.0},
     "sweep-approvals": {"task": "core.tasks.sweep_approvals", "schedule": 300.0},
+    "sweep-idempotency": {"task": "core.tasks.sweep_idempotency", "schedule": 3600.0},
 }
 
 # Generic S3 adapter settings; RustFS is the default local object store.

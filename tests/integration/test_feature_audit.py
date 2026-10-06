@@ -513,3 +513,37 @@ def test_the_invite_token_is_never_written_to_the_audit_log(world):
     assert token not in logged
     actions = set(AuditEvent.objects.values_list("action", flat=True))
     assert {"team.invite_created", "team.invite_redeemed", "team.member_joined"} <= actions
+
+
+def test_a_repeated_or_empty_project_patch_leaves_no_second_audit_row(world):
+    kwargs = where(world, project_public_id=world["project"].public_id)
+    first = call_as(world, "alice", "project-detail", "PATCH", kwargs, {"description": "Better"})
+    again = call_as(world, "alice", "project-detail", "PATCH", kwargs, {"description": "Better"})
+    empty = call_as(world, "alice", "project-detail", "PATCH", kwargs, {})
+    assert (first.status_code, again.status_code, empty.status_code) == (200, 200, 200)
+    rows = AuditEvent.objects.filter(action="project.updated")
+    assert rows.count() == 1 and rows[0].metadata["changed_fields"] == ["description"]
+    assert "Better" not in json.dumps(rows[0].metadata)  # names fields, never content
+
+
+def test_a_captain_who_leaves_names_the_new_captain_in_the_audit_row(world):
+    team_of(world, "alice", "bob")
+    response = call_as(world, "alice", "my-team-leave", "POST", where(world), None)
+    assert response.status_code == 204
+    row = AuditEvent.objects.get(action="team.member_left")
+    assert row.metadata["was_captain"] is True and row.metadata["team_disbanded"] is False
+    assert row.metadata["new_captain_id"] == str(world["people"]["bob"].public_id)
+    # the last member leaving disbands the team and names nobody
+    call_as(world, "bob", "my-team-leave", "POST", where(world), None)
+    last = AuditEvent.objects.filter(action="team.member_left").order_by("-id").first()
+    assert last.metadata["team_disbanded"] is True and last.metadata["new_captain_id"] is None
+
+
+def call_as(world, who, route, method, kwargs, body):
+    clients = world.setdefault("clients", {})
+    clients.setdefault(who, client_for(world["people"][who]))
+    wanted = {part for _, part in ft.System().converters(route)}
+    url = reverse(route, kwargs={k: v for k, v in kwargs.items() if k in wanted})
+    return clients[who].generic(
+        method, url, json.dumps(body) if body is not None else "", content_type="application/json"
+    )

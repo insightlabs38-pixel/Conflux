@@ -12,10 +12,12 @@ system:
 - `=token@<app.Model>.<field>`: a single-use token (a unique field) is what authorizes the change,
   so the second use is refused.
 - `=locked@<app.Model>.<field>` or `=locked@<dotted function>`: callers are serialized, either by
-  a version or revision field the model carries (a stale write is refused) or by a function whose
-  code takes a row lock (`select_for_update`).
-- `=keyed`: the view takes an `Idempotency-Key` (`core.idempotency.IdempotentMixin` is in its
-  bases), so a retry with the same key returns the first response and runs once.
+  a version or revision field the model carries (its name ends in `version` or `revision`; a
+  stale write is refused) or by a function that calls `select_for_update` (found in its syntax
+  tree, so a comment does not count).
+- `=keyed`: the view takes an `Idempotency-Key` for that method (`core.idempotency.IdempotentMixin`
+  is in its bases and lists the method), so a retry with the same key returns the first response
+  and runs once.
 - `=none@<reason>`: nothing protects the change and a repeat repeats it; the reason says why that
   is accepted.
 - completeness is derived: every writing method of every route the feature claims under
@@ -76,22 +78,41 @@ def _constraint(system, dotted) -> bool:
 
 
 def _takes_a_lock(system, dotted) -> bool:
+    """Whether the named function calls `select_for_update` (a call, not a mention)."""
+    import ast
     import inspect
+    import textwrap
 
     target = system.resolve(dotted) or system.resolve_method(dotted)
     if target is None:
         return False
     try:
-        return "select_for_update" in inspect.getsource(target)
-    except (OSError, TypeError):
+        tree = ast.parse(textwrap.dedent(inspect.getsource(target)))
+    except (OSError, TypeError, SyntaxError):
         return False
+    return any(
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "select_for_update"
+        for node in ast.walk(tree)
+    )
 
 
-def _keyed(system, route) -> bool:
+def _version_field(system, dotted) -> bool:
+    field = _field(system, dotted)
+    return field is not None and field.name.endswith(("version", "revision"))
+
+
+def _keyed(system, route, method) -> bool:
+    """Whether the view takes an Idempotency-Key for this very method."""
     from .idempotency import IdempotentMixin
 
     view = system.view_class(route)
-    return view is not None and issubclass(view, IdempotentMixin)
+    return (
+        view is not None
+        and issubclass(view, IdempotentMixin)
+        and method in getattr(view, "idempotent_methods", ())
+    )
 
 
 def facts(feature, system) -> dict:
@@ -150,15 +171,19 @@ def verify(feature, claim, system) -> list[dict]:
                 bad("token_missing", f"'{detail}' is not a unique field.")
         elif (
             mode == "locked"
-            and _field(system, detail) is None
+            and not _version_field(system, detail)
             and not _takes_a_lock(system, detail)
         ):
             bad(
                 "lock_missing",
-                f"'{detail}' is neither a version field nor code that takes a row lock.",
+                f"'{detail}' is neither a version or revision field nor code that calls "
+                "select_for_update.",
             )
-        elif mode == "keyed" and route in system.routes() and not _keyed(system, route):
-            bad("not_keyed", f"The view behind {route} does not take an Idempotency-Key.")
+        elif mode == "keyed" and route in system.routes() and not _keyed(system, route, method):
+            bad(
+                "not_keyed",
+                f"The view behind {route} does not take an Idempotency-Key on {method}.",
+            )
         elif mode == "none" and len(detail.strip()) < MIN_REASON:
             bad("no_reason", "Say why a repeated change may repeat (at least a short sentence).")
     auth = feature.claims.get("authorization")

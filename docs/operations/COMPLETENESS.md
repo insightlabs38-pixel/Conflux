@@ -51,6 +51,7 @@ Authorization is decided once, on the server, and the platform already records i
 - `route:<url name>` (one or more): each route must exist, carry the workspace in its URL (and the event, for event scope) and appear in the matrix; a route open to anyone signed in or to the public needs an explicit `open:<url name>` acknowledgement;
 - `scope:event` or `scope:workspace`: where records live, confirmed by the model's own foreign keys (`System.fk_path` finds the chain to `events.Event` or `workspaces.Workspace`);
 - `readers:<roles>` and `writers:<roles>`: who the matrix lets reach the GET routes and the writing routes (`members` for every role, `none`, or a comma list); the claim must equal the matrix, so widening a gate without updating the claim fails;
+- `narrow:<route>:<METHOD>=<roles>`: required for every route and method whose roles differ from the stated `readers:` or `writers:` (the claim is the widest group, a narrower route such as a reopen only organizers may do is pinned on its own), so widening one route fails even while another already grants that role; codes `narrow_missing`, `narrow_mismatch`, `narrow_unused`;
 - `own:<rule>` (`project_member`, `team_member`, `self`): required exactly when roles other than organizers and admins may write, and refused when only they do;
 - `test:<path>::<name>`: adversarial tests (checked in CI by `check_static`).
 
@@ -62,7 +63,7 @@ The page shows the derived readers, writers, the scope chain and an Explanation 
 
 The platform records a change by writing an `AuditEvent` in the same transaction as the change (`audit.services.record_mutation`); the action is a literal `subject.verb` in the code. `features_audit.verify` holds an `audit` claim to that code:
 
-- `write:<route>:<METHOD>=<action>`: the route exists and accepts that writing method (the permission matrix lists it); the action follows `subject.verb` and is one the code records (`System.audit_actions` reads the source: an `action=` literal, a conditional's branches or a name assigned one, in a module that calls `record_mutation`); and it is recorded by the app that owns the feature's model or the route's view, so a claim cannot borrow another feature's action;
+- `write:<route>:<METHOD>=<action>`: the route exists and accepts that writing method (the permission matrix lists it); the action follows `subject.verb` and is one the code records (`System.audit_actions` reads the source, never tests or migrations: an `action=` literal, a conditional's branches or a name assigned one, given to `record_mutation` or to a function that passes its `action` argument on to it); and it is recorded by the app that owns the feature's model or the route's view, so a claim cannot borrow another feature's action;
 - completeness is derived: when the feature claims its routes under `authorization`, every writing method of those routes needs a `write:` ref, so a new writing route fails until it is audited;
 - `test:<path>::<name>`: the proof, checked in CI to exist.
 
@@ -77,8 +78,8 @@ Every change a feature accepts declares what sending it twice does (a retry afte
 - `natural`: it sets a state or moves a state machine forward, so repeating it leaves the same state (a second delete finds nothing, a second finalize returns the version it made);
 - `unique@<app.Model>.<constraint>`: a duplicate is refused by a uniqueness constraint the model really has;
 - `token@<app.Model>.<field>`: a single-use token (a unique field) authorizes the change;
-- `locked@<app.Model>.<field>` or `locked@<dotted function>`: a version or revision field refuses a stale write, or the function's code takes a row lock (`select_for_update`);
-- `keyed`: the view takes an `Idempotency-Key` (`core.idempotency.IdempotentMixin` is among its bases): the same key returns the first response and runs once, a key reused with a different body is refused (422), keys belong to their caller, and a failed change does not keep its key;
+- `locked@<app.Model>.<field>` or `locked@<dotted function>`: a field whose name ends in `version` or `revision` refuses a stale write, or the function calls `select_for_update` (found in its syntax tree, so a comment does not count);
+- `keyed`: the view takes an `Idempotency-Key` for that method (`core.idempotency.IdempotentMixin` is among its bases and lists the method): the same key returns the first response and runs once, a key reused with a different body is refused (422), keys belong to the signed-in user, and a server error does not keep its key. The key is considered only after authentication and permissions, so a replay is never served to someone the view would now refuse and a signed-out caller leaves nothing behind; a refusal (4xx) is remembered like any answer, so fix the request and send a new key; keys and their stored answers are forgotten after a day (`core.tasks.sweep_idempotency`, hourly on beat);
 - `none@<reason>`: nothing protects it and a repeat repeats it; the reason (a sentence) says why that is accepted.
 
 Completeness is derived like audit: every writing method of every route claimed under `authorization` needs a mode. Codes: `bad_ref`, `no_test`, `no_modes`, `mode_twice`, `route_missing`, `method_unknown`, `mode_unknown`, `mode_detail`, `unique_missing`, `token_missing`, `lock_missing`, `not_keyed`, `no_reason`, `mode_missing`; CI: `test_file`, `test_name`.

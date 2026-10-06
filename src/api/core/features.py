@@ -182,45 +182,70 @@ def _assigned_literals(tree) -> dict[str, list]:
     return names
 
 
+def _call_name(node) -> str:
+    return getattr(node.func, "id", getattr(node.func, "attr", ""))
+
+
+def _helper_names(trees) -> set[str]:
+    """Functions that hand their own `action` argument on to `record_mutation`: calling one with
+    `action="a.b"` records that action."""
+    helpers = set()
+    for tree in trees:
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
+                continue
+            arguments = {a.arg for a in (*node.args.args, *node.args.kwonlyargs)}
+            for call in ast.walk(node):
+                if isinstance(call, ast.Call) and _call_name(call) == "record_mutation":
+                    for kw in call.keywords:
+                        if kw.arg == "action" and getattr(kw.value, "id", None) in arguments:
+                            helpers.add(node.name)
+    return helpers
+
+
 @lru_cache(maxsize=1)
 def scan_audit_actions() -> dict[str, tuple[str, ...]]:
-    """Every audit action the code records, mapped to the apps that record it: an `action=` literal
-    (either branch of a conditional, or a name assigned one) in a module that calls
-    `record_mutation`, whether passed to it or to a helper that does. The source is part of the
-    deployed image and does not change while it runs, so the scan is made once."""
-    found: dict[str, set[str]] = {}
+    """Every audit action the code records, mapped to the apps that record it: an `action=`
+    literal (either branch of a conditional, or a name assigned one) given to `record_mutation`
+    or to a function that passes its `action` on to it. Tests and migrations are not code that
+    records anything. The source is part of the deployed image and does not change while it
+    runs, so the scan is made once."""
+    parsed = []
     for config in apps.get_app_configs():
         root = Path(config.path)
         if "site-packages" in root.parts:
             continue
         for file in root.rglob("*.py"):
-            if "migrations" in file.parts:
+            if {"migrations", "tests"} & set(file.parts) or file.name.startswith("test_"):
                 continue
             try:
                 source = file.read_text()
                 tree = ast.parse(source)
             except (OSError, SyntaxError, UnicodeDecodeError):
                 continue
-            if "record_mutation" not in source:
+            if "record_mutation" in source:
+                parsed.append((config.label, tree))
+    callers = {"record_mutation"} | _helper_names(tree for _, tree in parsed)
+    found: dict[str, set[str]] = {}
+    for label, tree in parsed:
+        names = _assigned_literals(tree)
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call) or _call_name(node) not in callers:
                 continue
-            names = _assigned_literals(tree)
-            for node in ast.walk(tree):
-                if not isinstance(node, ast.Call):
+            for kw in node.keywords:
+                if kw.arg != "action":
                     continue
-                for kw in node.keywords:
-                    if kw.arg != "action":
-                        continue
-                    values = [kw.value]
-                    if isinstance(kw.value, ast.Name):  # `action = "a.b"` earlier in the file
-                        values = names.get(kw.value.id, [])
-                    for value in values:
-                        for part in ast.walk(value):
-                            if (
-                                isinstance(part, ast.Constant)
-                                and isinstance(part.value, str)
-                                and AUDIT_ACTION.fullmatch(part.value)
-                            ):
-                                found.setdefault(part.value, set()).add(config.label)
+                values = [kw.value]
+                if isinstance(kw.value, ast.Name):  # `action = "a.b"` earlier in the file
+                    values = names.get(kw.value.id, [])
+                for value in values:
+                    for part in ast.walk(value):
+                        if (
+                            isinstance(part, ast.Constant)
+                            and isinstance(part.value, str)
+                            and AUDIT_ACTION.fullmatch(part.value)
+                        ):
+                            found.setdefault(part.value, set()).add(label)
     return {action: tuple(sorted(labels)) for action, labels in sorted(found.items())}
 
 

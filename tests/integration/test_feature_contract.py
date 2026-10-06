@@ -101,6 +101,14 @@ BULK = ft.provided("no_bulk@a saved view belongs to one person and is never chan
 
 CLIC = ft.provided("no_cli@a saved view is made from the grid toolbar, not from a terminal")
 
+HOOK = ft.provided(
+    "silent:saved_view.created@a saved view is a personal setting that subscribers never need",
+    "silent:saved_view.updated@a saved view is a personal setting that subscribers never need",
+    "silent:saved_view.deleted@a saved view is a personal setting that subscribers never need",
+    "test:tests/integration/test_feature_webhook.py"
+    "::test_each_audited_change_writes_the_outbox_event_its_claim_names",
+)
+
 EVENT_EAC = ft.provided(
     "section:event",
     "test:tests/integration/test_event_as_code.py"
@@ -141,6 +149,7 @@ def only(feature_key="x", **over):
             "cli": CLIC,
             "mcp": MCPC,
             "event_as_code": EACC,
+            "webhook": HOOK,
         },
         "lifecycle": ft.Lifecycle("none", note="Edited in place."),
     }
@@ -159,6 +168,7 @@ def only(feature_key="x", **over):
         "cli": CLIC,
         "mcp": MCPC,
         "event_as_code": EACC,
+        "webhook": HOOK,
         **values["claims"],
     }
     ft.FEATURES.clear()
@@ -188,6 +198,7 @@ def test_the_fifteen_features_agree_with_the_live_system():
         "cli",
         "mcp",
         "event_as_code",
+        "webhook",
     ]
 
 
@@ -311,6 +322,7 @@ def test_a_well_formed_independent_feature_passes(isolated):
             "cli": CLIC,
             "mcp": MCPC,
             "event_as_code": EACC,
+            "webhook": HOOK,
         },
         ft.Lifecycle("none", note="Edited in place and deleted."),
     )
@@ -540,6 +552,7 @@ def test_the_endpoint_reports_a_broken_claim_instead_of_hiding_it(world, isolate
             "cli": ft.FEATURES["event"].claims["cli"],
             "mcp": ft.FEATURES["event"].claims["mcp"],
             "event_as_code": ft.FEATURES["event"].claims["event_as_code"],
+            "webhook": ft.FEATURES["event"].claims["webhook"],
         },
         ft.FEATURES["event"].lifecycle,
     )

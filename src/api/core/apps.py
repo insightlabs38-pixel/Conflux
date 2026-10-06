@@ -21,5 +21,6 @@ class CoreConfig(AppConfig):
             features_search,
             features_ui,
             features_validation,
+            features_webhook,
             manifest_core,
         )

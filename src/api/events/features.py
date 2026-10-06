@@ -90,6 +90,13 @@ register_feature(
                 "test:tests/integration/test_event_as_code.py::test_document_applies_to_an_empty_event_and_reproduces_the_source",
                 "test:tests/integration/test_feature_eac.py::test_every_section_writes_exactly_the_rows_it_declares",
             ),
+            "webhook": provided(
+                "emit:event.created=event.created",
+                "emit:event.deleted=event.deleted",
+                "emit:event.status_changed=event.status_changed",
+                "emit:event.updated=event.updated",
+                "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",
@@ -177,6 +184,12 @@ register_feature(
                 "test:tests/integration/test_event_as_code.py::test_document_applies_to_an_empty_event_and_reproduces_the_source",
                 "test:tests/integration/test_feature_eac.py::test_every_section_writes_exactly_the_rows_it_declares",
             ),
+            "webhook": provided(
+                "emit:track.created=track.created",
+                "emit:track.deleted=track.deleted",
+                "emit:track.updated=track.updated",
+                "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
+            ),
         },
         lifecycle=Lifecycle(
             "none", note="Edited in place and deleted (track.deleted); position orders it."
@@ -257,6 +270,11 @@ register_feature(
             "event_as_code": provided(
                 "no_eac@registrations are runtime participant data and never part of the "
                 "configuration document",
+            ),
+            "webhook": provided(
+                "silent:application.decided@a decision concerns one person and no event type "
+                "shows it to subscribers today",
+                "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
             ),
         },
         lifecycle=Lifecycle(
@@ -349,6 +367,13 @@ register_feature(
             ),
             "event_as_code": provided(
                 "no_eac@announcements are content posted during the event, not configuration of it",
+            ),
+            "webhook": provided(
+                "emit:announcement.deleted=announcement.deleted",
+                "emit:announcement.posted=announcement.posted",
+                "silent:announcement.reviewed@a review decision on an announcement is internal "
+                "to organizers; no event type exists for it",
+                "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
             ),
         },
         lifecycle=Lifecycle(

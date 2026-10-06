@@ -87,6 +87,19 @@ register_feature(
             "event_as_code": provided(
                 "no_eac@teams are runtime participant data formed by the participants themselves",
             ),
+            "webhook": provided(
+                "silent:team.captain_transferred@no event type exists for team membership yet; "
+                "teams are not announced to subscribers",
+                "silent:team.created@no event type exists for teams yet; they are formed by "
+                "participants and are not announced to subscribers",
+                "silent:team.invite_created@an invitation carries a secret token and is private "
+                "to the team that sent it",
+                "silent:team.invite_redeemed@no event type exists for team membership yet; "
+                "teams are not announced to subscribers",
+                "silent:team.member_left@no event type exists for team membership yet; teams "
+                "are not announced to subscribers",
+                "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

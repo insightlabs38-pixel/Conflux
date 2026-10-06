@@ -377,6 +377,10 @@ describe("completeness helpers", () => {
     expect(factText("sections", ["stages: stages.Stage"])).toBe(
       "Document sections: stages: stages.Stage",
     );
+    expect(factText("emits", ["track.created → track.created"])).toBe(
+      "Sent to subscribers: track.created → track.created",
+    );
+    expect(factText("silent", [])).toBe("Not sent: none");
     expect(factText("eac", "not in the document")).toBe(
       "Event-as-Code: not in the document",
     );

@@ -234,6 +234,16 @@ for (const width of [390, 1440]) {
         exact: false,
       }),
     ).toBeVisible();
+    // Webhooks and the outbox: which audited changes subscribers receive and which stay silent.
+    await expect(
+      table.getByRole("columnheader", { name: "Webhooks and outbox" }),
+    ).toBeVisible();
+    await trackRow.getByText("Provided", { exact: true }).nth(13).click();
+    await expect(
+      trackRow.getByText("Sent to subscribers: track.created → track.created", {
+        exact: false,
+      }),
+    ).toBeVisible();
     // A feature without a state machine says how its records change.
     const track = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Track \(track\)/ }),

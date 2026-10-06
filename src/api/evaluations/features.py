@@ -78,6 +78,15 @@ register_feature(
                 "test:tests/integration/test_event_as_code.py::test_document_applies_to_an_empty_event_and_reproduces_the_source",
                 "test:tests/integration/test_feature_eac.py::test_every_section_writes_exactly_the_rows_it_declares",
             ),
+            "webhook": provided(
+                "silent:evaluation_plan.created@judging plans are internal configuration; "
+                "subscribers learn of results when published",
+                "silent:evaluation_plan.deleted@judging plans are internal configuration; "
+                "subscribers learn of results when published",
+                "silent:evaluation_plan.updated@judging plans are internal configuration; "
+                "subscribers learn of results when published",
+                "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

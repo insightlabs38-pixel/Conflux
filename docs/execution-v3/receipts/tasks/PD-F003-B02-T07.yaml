@@ -1,0 +1,96 @@
+version: 3
+task: PD-F003-B02-T07
+batch: PD-F003-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 9dccec3
+  head_commit: 9dccec3
+changed_paths:
+- src/api/core/features_webhook.py (new), core/apps.py
+- src/api/<app>/features.py for the fifteen features (webhook claims)
+- src/web/lib/completeness.ts, features/operations/CompletenessPanel.test.tsx, tests/e2e/completeness.spec.ts
+- tests/integration/ (test_feature_webhook.py new, test_feature_contract.py, test_completeness_regression.py)
+- docs/operations/COMPLETENESS.md, spec 003 (Webhook as built)
+deliverables:
+- item: Webhook/outbox events added to the completeness contract and applied to domain work
+  result: pass
+  evidence: "features_webhook verifies emit:<action>=<type>, silent:<action>@<reason> and test: claims against the source scan of record_mutation calls; every audited change of a feature is exactly one of the two; of 40 audited changes 19 are sent to subscribers and 21 are silent with a stated reason"
+- item: Observable state and diagnostics
+  result: pass
+  evidence: "the Operations completeness page gains a Webhooks and outbox column listing the events each feature sends and the changes it does not"
+- item: Focused tests for the real workflow
+  result: pass
+  evidence: "test_feature_webhook.py sends all 40 audited changes through the API and reads the outbox (a claimed event type is written, a silent change writes nothing), refused changes leave nothing, failure codes, scan checks"
+invariants:
+- item: One source of truth, no business rule in a surface
+  result: pass
+  evidence: "the record_mutation calls stay the only place an event type is decided; the claim names what the code does and the live request proves it; no event type added or removed"
+- item: Server-side authorization, validation and audit remain authoritative
+  result: pass
+  evidence: "no product code changed; the refused-change test shows the outbox is untouched when the API refuses"
+verification:
+- command: "uv run --frozen pytest tests/integration/test_feature_webhook.py test_feature_contract.py test_completeness_regression.py -n auto"
+  result: pass
+  note: "95 and 187 passed"
+- command: "features.check() and check_static on the real tree; manage.py check"
+  result: pass
+  note: "no problems, no issues"
+- command: "pnpm web vitest features/operations; tsc --noEmit; make format-check lint sdk-check block-schema-check"
+  result: pass
+  note: "31 passed, clean"
+- command: "npx playwright test completeness --project=desktop (seed 7, app rebuilt)"
+  result: pass
+  note: "2 passed (390 and 1440) with the Webhooks and outbox column"
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: "Webhooks and outbox column on Operations > Completeness"
+- surface: api
+  result: pass
+  evidence: "report facts carry webhook"
+- surface: sdk
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: cli
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: mcp
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: event_as_code
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: audit
+  result: pass
+  evidence: "every audited change is classified"
+- surface: webhook
+  result: pass
+  evidence: "emit and silent claims proved against the outbox"
+- surface: archive
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: analytics
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: search
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: docs
+  result: pass
+  evidence: "COMPLETENESS.md and the B02 contract in spec 003"
+migrations:
+- none
+findings:
+- "the first scan resolved audit helpers by name across files and marked team and artifact changes as emitting; the real requests failed seven cases and helpers are now resolved per file"
+limitations:
+- "21 audited changes send nothing to subscribers; the silent reasons list what is true today and are the gaps for a later batch"
+- "the scan reads keyword arguments only, as the audit scan does"
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

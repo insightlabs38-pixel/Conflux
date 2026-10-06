@@ -82,6 +82,13 @@ register_feature(
             "event_as_code": provided(
                 "no_eac@projects are runtime participant data written by their teams",
             ),
+            "webhook": provided(
+                "silent:project.created@no event type exists for projects yet; a submission's "
+                "finalization is the event subscribers get",
+                "silent:project.updated@no event type exists for project edits; a submission's "
+                "finalization is the event subscribers get",
+                "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
+            ),
         },
         lifecycle=Lifecycle(
             "none",
@@ -169,6 +176,14 @@ register_feature(
             ),
             "event_as_code": provided(
                 "no_eac@submissions are runtime participant data and are never touched by an apply",
+            ),
+            "webhook": provided(
+                "silent:submission.draft_saved@a draft is private to its team until it is "
+                "finalized, which subscribers do receive",
+                "emit:submission.finalized=submission.finalized",
+                "silent:submission.reopened@no event type exists for reopening yet; subscribers "
+                "see the next finalization",
+                "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
             ),
         },
         lifecycle=Lifecycle(

@@ -205,3 +205,13 @@ Event-as-Code (`integrations.eventascode`, see EVENT_AS_CODE.md) describes an ev
 - `no_eac@<reason>`: the feature is not configuration, and why; a feature whose section is owed is `planned` with the owning task.
 
 Codes: `bad_ref`, `both`, `no_reason`, `no_section`, `no_test`, `test_ref`, `module_missing`, `section_twice`, `section_shared`, `section_unknown`, `section_foreign`, `section_unclaimed`, `eac_exists`; CI: `test_file`, `test_name`. `tests/integration/test_feature_eac.py` proves the table against the code: every section is claimed by exactly one feature or named in `OUTSIDE` (`base_prizes` and `page`, owned by models no feature covers yet), and applying a full document to an empty event changes exactly the tables the sections declare. Seven features own the ten sections they cover (event, track, stage with its transitions, form, policy with its gates and bindings, evaluation plan, award); eight say why they are runtime data.
+
+## Webhooks and the outbox (T07)
+
+A change is audited with `record_mutation(action=...)`; passing `event_type=...` to the same call also writes a pending `DomainEvent` in the same transaction (the outbox), and subscribers receive those events as signed webhooks. A feature's audited changes are the `write:` refs of its `audit` claim, and `features_webhook` requires each of them to be exactly one of:
+
+- `emit:<action>=<event type>`: the code records the action with that event type in the same `record_mutation` call (a helper that hands its `action` and `event_type` on counts, resolved per file), and the type is one a subscription may ask for;
+- `silent:<action>@<reason>`: no call of the code records the action with an event type, and why subscribers do not need it;
+- `test:<path>::<name>`: the proof (CI checks it exists).
+
+Codes: `bad_ref`, `no_test`, `test_ref`, `action_not_audited`, `type_shape`, `emit_not_recorded`, `no_reason`, `silent_but_emits`, `unclassified`, `classified_twice`; CI: `test_file`, `test_name`. `tests/integration/test_feature_webhook.py` proves every claim through the API: each audited change is sent as the role that may make it and the outbox is read (a claimed event type is written to the workspace, a silent change writes nothing) and a refused change leaves nothing behind. The first version of the source scan resolved helpers by name across files and wrongly marked team and artifact changes as emitting; the real requests caught it and helpers are now resolved per file. Of 40 audited changes, 19 are sent to subscribers and 21 are silent; the silent reasons state what is true today (no event type exists, or the change is private) and are the list of gaps for a later batch to close.

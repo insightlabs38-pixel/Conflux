@@ -83,6 +83,15 @@ register_feature(
                 "no_eac@artifacts are participant uploads and are never part of the "
                 "configuration document",
             ),
+            "webhook": provided(
+                "silent:artifact.added@no event type exists for uploads yet; the project's "
+                "submission finalization is what subscribers get",
+                "silent:artifact.upload_started@an upload that has only started is private to "
+                "its project and no event type exists for it",
+                "silent:artifact.validated@validation is a scan result that follows "
+                "artifact.added, which subscribers already receive",
+                "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",

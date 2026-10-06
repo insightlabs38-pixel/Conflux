@@ -124,6 +124,8 @@ const FACT_LABEL: Record<string, string> = {
   mcp: "MCP",
   sections: "Document sections",
   eac: "Event-as-Code",
+  emits: "Sent to subscribers",
+  silent: "Not sent",
 };
 
 /** One derived fact as a sentence fragment: lists joined, booleans as yes or no. */

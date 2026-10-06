@@ -76,6 +76,13 @@ register_feature(
             "event_as_code": provided(
                 "no_eac@a subscription holds a secret that must never be exported in a document",
             ),
+            "webhook": provided(
+                "silent:webhook.created@a subscription must not announce its own setup or "
+                "secret to other subscribers",
+                "silent:webhook.updated@a subscription must not announce its own setup or "
+                "secret to other subscribers",
+                "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
+            ),
         },
         lifecycle=Lifecycle(
             "flag",

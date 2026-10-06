@@ -1,0 +1,78 @@
+version: 3
+task: PD-F003-B03-T91
+batch: PD-F003-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 184ef8e
+  head_commit: 184ef8e
+changed_paths:
+- docs/verification/PD-F003-B03/ (SURFACES.md, T91-verify-fast.log)
+- docs/operations/UPGRADES.md
+deliverables:
+- item: Close the batch's explicit surface matrix
+  result: pass
+  evidence: "SURFACES.md states all twelve surfaces as done with evidence; this batch's surfaces are the web page, the API report and CI for the five properties, and the others are unchanged or read-only so none is skipped without an owner"
+- item: Every required surface delegates to the same canonical operation and generated contracts stay synchronized
+  result: pass
+  evidence: "each property reads its own registry (analytics module, privacy service, manifests and SDK exports, model constraints and the comparison registry, demo generator) through core.features report and check; OpenAPI and both SDKs unchanged, sdk-check and check_openapi_artifact clean in make verify-fast"
+- item: User, operator and developer documentation and migration notes
+  result: pass
+  evidence: "COMPLETENESS.md (one section per property), spec 003 as built, UPGRADES.md note (no migration, five more property keys, what a new person column, version model, hook, bucket or demo change must now claim, known gaps)"
+invariants:
+- item: One source of truth, server authority
+  result: pass
+  evidence: documentation only in this task; no product behavior changed
+verification:
+- command: make verify-fast
+  result: pass
+  note: "format-check, lint, pytest (-n auto), web tests, build, sdk-check and block-schema-check exit 0; log in docs/verification/PD-F003-B03/T91-verify-fast.log"
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: "SURFACES.md"
+- surface: api
+  result: pass
+  evidence: "SURFACES.md"
+- surface: sdk
+  result: pass
+  evidence: "SURFACES.md"
+- surface: cli
+  result: pass
+  evidence: "SURFACES.md"
+- surface: mcp
+  result: pass
+  evidence: "SURFACES.md"
+- surface: event_as_code
+  result: pass
+  evidence: "SURFACES.md"
+- surface: audit
+  result: pass
+  evidence: "SURFACES.md"
+- surface: webhook
+  result: pass
+  evidence: "SURFACES.md"
+- surface: archive
+  result: pass
+  evidence: "SURFACES.md"
+- surface: analytics
+  result: pass
+  evidence: "SURFACES.md"
+- surface: search
+  result: pass
+  evidence: "SURFACES.md"
+- surface: docs
+  result: pass
+  evidence: "SURFACES.md"
+migrations: []
+findings:
+- "No new defect in this task; the T90 findings stand"
+limitations:
+- Listed in the matrix; none are new
+escalations: []
+next: review

@@ -66,6 +66,10 @@ register_feature(
                 "no_cli@awards are chosen and published through their own deterministic "
                 "screens; the CLI administers events only",
             ),
+            "mcp": provided(
+                "no_mcp@awards are chosen and published through their own deterministic rules, "
+                "not by an agent",
+            ),
         },
         lifecycle=Lifecycle(
             "timestamp",

@@ -63,6 +63,10 @@ register_feature(
                 "no_cli@messages are composed to an audience with a preview on the messaging "
                 "screen; the CLI administers events only",
             ),
+            "mcp": provided(
+                "no_mcp@messages reach people and are sent only by organizers with a preview; "
+                "an agent does not send them",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

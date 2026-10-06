@@ -370,6 +370,10 @@ describe("completeness helpers", () => {
       "Commands: conflux-admin events list",
     );
     expect(factText("cli", "no command")).toBe("CLI: no command");
+    expect(factText("tools", ["list_stages (read): GET stage-list"])).toBe(
+      "Tools: list_stages (read): GET stage-list",
+    );
+    expect(factText("mcp", "no tool")).toBe("MCP: no tool");
     expect(factText("advanced", "none beyond the base screen")).toBe(
       "Advanced: none beyond the base screen",
     );

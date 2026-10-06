@@ -69,6 +69,10 @@ register_feature(
                 "no_cli@a subscription's secret is shown once and is set up in the web or API, "
                 "not typed in a shell",
             ),
+            "mcp": provided(
+                "no_mcp@a subscription holds a secret shown once and is set up by an admin, "
+                "never through an agent",
+            ),
         },
         lifecycle=Lifecycle(
             "flag",

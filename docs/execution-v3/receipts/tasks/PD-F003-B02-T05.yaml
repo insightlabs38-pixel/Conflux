@@ -1,0 +1,96 @@
+version: 3
+task: PD-F003-B02-T05
+batch: PD-F003-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: e2cbd6d
+  head_commit: e2cbd6d
+changed_paths:
+- src/api/core/features_mcp.py (new), core/apps.py
+- src/api/<app>/features.py for the fifteen features (mcp claims)
+- src/web/lib/completeness.ts, features/operations/CompletenessPanel.test.tsx, tests/e2e/completeness.spec.ts
+- tests/integration/ (test_feature_mcp.py new, test_feature_contract.py, test_completeness_regression.py)
+- docs/operations/COMPLETENESS.md, spec 003 (MCP as built)
+deliverables:
+- item: MCP inspect/action support added to the completeness contract and applied to domain work
+  result: pass
+  evidence: "features_mcp verifies tool:<name>, test: and no_mcp@ claims against the adapter catalogue at runtime; each tool's route is one the feature claims under authorization, the method is in the permission matrix, path arguments match the route, claimed tools equal the derived set and a write tool reaches an audited role-gated route; stages, projects and announcements own five tools, twelve features say why no tool reaches them"
+- item: Observable state and diagnostics
+  result: pass
+  evidence: "the Operations completeness page gains an MCP column listing each tool as read or write with its route, or why none"
+- item: Contract tests proving parity with the canonical service and authorization path
+  result: pass
+  evidence: "test_feature_mcp.py: every tool claimed by exactly one feature or named OUTSIDE, each claimed tool succeeds through the real endpoint with a credential limited to its route and is refused with one limited to another, failure codes, write-audit check; test_mcp_adapter.py still passes"
+invariants:
+- item: One source of truth, no business rule in a surface
+  result: pass
+  evidence: "the catalogue stays the only list of tools and each tool is a route; the claim names catalogue entries and reads them, nothing is registered by the verifier"
+- item: Server-side authorization, validation and audit remain authoritative
+  result: pass
+  evidence: "no adapter or API change; write tools are held to the feature's audit claim and role-gated matrix rows"
+verification:
+- command: "uv run --frozen pytest tests/integration/test_feature_mcp.py test_feature_cli.py test_feature_bulk.py test_feature_contract.py test_completeness_regression.py test_mcp_adapter.py -n auto"
+  result: pass
+  note: "261 passed"
+- command: "features.check() and check_static on the real tree; manage.py check"
+  result: pass
+  note: "no problems, no issues"
+- command: "pnpm web vitest features/operations; tsc --noEmit; make format-check lint sdk-check block-schema-check"
+  result: pass
+  note: "31 passed, clean"
+- command: "npx playwright test completeness --project=desktop (seed 7, app rebuilt)"
+  result: pass
+  note: "2 passed (390 and 1440) with the MCP column"
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: "MCP column on Operations > Completeness"
+- surface: api
+  result: pass
+  evidence: "report facts carry mcp"
+- surface: sdk
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: cli
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: mcp
+  result: pass
+  evidence: "tool catalogue read by the contract at runtime"
+- surface: event_as_code
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: audit
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: webhook
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: archive
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: analytics
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: search
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: docs
+  result: pass
+  evidence: "COMPLETENESS.md and the B02 contract in spec 003"
+migrations:
+- none
+findings:
+- "the catalogue has no plan tool, so the bulk planner has no MCP claim; recorded as a limitation, no tool added"
+limitations:
+- "nine tools call routes no feature claims yet and are named OUTSIDE (judging, results, voting, analytics, deadlines, mentoring)"
+- "the bulk planner's preview and apply are not offered to agents"
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

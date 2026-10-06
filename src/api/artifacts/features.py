@@ -75,6 +75,10 @@ register_feature(
                 "no_cli@artifacts are uploaded and inspected in the browser with their preview; "
                 "the CLI administers events only",
             ),
+            "mcp": provided(
+                "no_mcp@artifacts hold participant uploads that an agent should not fetch; they "
+                "are inspected in the browser",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",

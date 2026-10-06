@@ -69,6 +69,10 @@ register_feature(
                 "no_cli@evaluation plans are built and activated on the judging screens; the "
                 "CLI administers events only",
             ),
+            "mcp": provided(
+                "no_mcp@plan progress and results are offered as read tools over routes not yet "
+                "claimed by this feature",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

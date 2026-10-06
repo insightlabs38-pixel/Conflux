@@ -211,6 +211,19 @@ for (const width of [390, 1440]) {
     await expect(
       event.getByText("Commands: conflux-admin events list", { exact: false }),
     ).toBeVisible();
+    // MCP: the tools an agent can call for a feature, each one an existing route.
+    await expect(
+      table.getByRole("columnheader", { name: "MCP" }),
+    ).toBeVisible();
+    const stage = table.locator("tbody tr").filter({
+      has: page.getByRole("rowheader", { name: /^Stage \(stage\)/ }),
+    });
+    await stage.getByText("Provided", { exact: true }).nth(11).click();
+    await expect(
+      stage.getByText("Tools: list_stages (read): GET stage-list", {
+        exact: false,
+      }),
+    ).toBeVisible();
     // A feature without a state machine says how its records change.
     const track = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Track \(track\)/ }),

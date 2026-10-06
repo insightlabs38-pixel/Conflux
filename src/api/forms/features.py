@@ -67,6 +67,10 @@ register_feature(
                 "no_cli@forms are built and versioned on the builder screen with a preview; the "
                 "CLI administers events only",
             ),
+            "mcp": provided(
+                "no_mcp@forms are built and versioned by organizers on the builder screen; an "
+                "agent does not edit them",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

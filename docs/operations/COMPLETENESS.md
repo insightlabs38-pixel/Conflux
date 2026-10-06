@@ -185,3 +185,13 @@ The CLI (`conflux-admin`, `sdks/python/conflux_sdk/cli.py`) is a thin client of 
 - `no_cli@<reason>`: the CLI has nothing for the feature, and why; a feature whose commands are owed is `planned` with the owning task.
 
 The SDK is not part of the running API, so the report shows the claim and the table checks run in CI (`check_static`). Codes: `bad_ref`, `both`, `no_reason`, `no_command`, `no_test`, `test_ref`, `command_shape`, `command_twice`, `command_shared`; CI: `table_unreadable`, `command_missing`, `op_not_generated`, `command_foreign`, `command_unclaimed`, `cli_exists`, `test_file`, `test_name`. `tests/integration/test_feature_cli.py` proves the table against the API: each command is claimed by exactly one feature or named in `OUTSIDE` (`whoami`, and `events export`/`import`, which run through the archive routes that PD-F003-B02-T08 claims), and each claimed command sends the request its operation describes. The event feature owns five commands; fourteen features say why the CLI has nothing for them.
+
+## MCP tools (T05)
+
+The MCP adapter (`mcp_adapter.tools.TOOLS`) is a catalogue of tools, each one an existing API route called with the credential's own authority, so authorization, scoping, validation and audit are what the route already enforces. `features_mcp` holds an `mcp` claim to the catalogue, at runtime:
+
+- `tool:<name>` (one or more): the tool is registered, its route is one of the routes the feature claims under `authorization`, the method is in the permission matrix and the path arguments are the route's own; the claimed tools equal the derived set (every tool whose route is the feature's). A write tool must reach a route the feature audits (`write:<route>:<METHOD>=` under `audit`) that is gated by roles;
+- `test:<path>::<name>`: the proof (CI checks it exists);
+- `no_mcp@<reason>`: no tool reaches the feature, and why; a feature whose tools are owed is `planned` with the owning task.
+
+Codes: `bad_ref`, `both`, `no_reason`, `no_tool`, `no_test`, `test_ref`, `catalogue_missing`, `tool_twice`, `tool_shared`, `tool_unknown`, `tool_foreign`, `method_unknown`, `path_arg`, `write_unaudited`, `write_ungated`, `tool_unclaimed`, `mcp_exists`; CI: `test_file`, `test_name`. `tests/integration/test_feature_mcp.py` proves it through the real endpoint: every tool is claimed by exactly one feature or named in `OUTSIDE` (nine tools over routes no feature claims yet: judging, results, voting, analytics, deadlines, mentoring), and each claimed tool succeeds with a credential limited to its own route and is refused with one limited to another. Stages, projects and announcements own five tools; twelve features say why no tool reaches them.

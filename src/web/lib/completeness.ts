@@ -120,6 +120,8 @@ const FACT_LABEL: Record<string, string> = {
   bulk: "Bulk",
   commands: "Commands",
   cli: "CLI",
+  tools: "Tools",
+  mcp: "MCP",
 };
 
 /** One derived fact as a sentence fragment: lists joined, booleans as yes or no. */

@@ -68,6 +68,10 @@ register_feature(
                 "no_cli@stages are configured with the event and advanced through the bulk "
                 "planner; the CLI administers events only",
             ),
+            "mcp": provided(
+                "tool:list_stages",
+                "test:tests/integration/test_feature_mcp.py::test_each_claimed_tool_reaches_its_own_route_with_a_credential_limited_to_it",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

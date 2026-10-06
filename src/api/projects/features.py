@@ -73,6 +73,12 @@ register_feature(
                 "no_cli@projects are written by their teams and read on organizer grids; the "
                 "CLI administers events only",
             ),
+            "mcp": provided(
+                "tool:list_my_projects",
+                "tool:get_project",
+                "test:tests/integration/test_mcp_adapter.py::test_a_read_tool_returns_real_data_and_is_audited_without_content",
+                "test:tests/integration/test_feature_mcp.py::test_each_claimed_tool_reaches_its_own_route_with_a_credential_limited_to_it",
+            ),
         },
         lifecycle=Lifecycle(
             "none",
@@ -153,6 +159,10 @@ register_feature(
             "cli": provided(
                 "no_cli@submissions are written and finalized by their team; the CLI is an "
                 "organizer tool for events only",
+            ),
+            "mcp": provided(
+                "no_mcp@a submission is written and finalized by its team; agents read the "
+                "project, not the submission",
             ),
         },
         lifecycle=Lifecycle(

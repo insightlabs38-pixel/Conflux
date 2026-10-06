@@ -14,6 +14,7 @@ class CoreConfig(AppConfig):
             features_cli,
             features_idempotency,
             features_identity,
+            features_mcp,
             features_rest,
             features_sdk,
             features_search,

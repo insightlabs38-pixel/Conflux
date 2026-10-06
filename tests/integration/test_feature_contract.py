@@ -101,6 +101,10 @@ BULK = ft.provided("no_bulk@a saved view belongs to one person and is never chan
 
 CLIC = ft.provided("no_cli@a saved view is made from the grid toolbar, not from a terminal")
 
+MCPC = ft.provided(
+    "no_mcp@a saved view is a personal setting of the grid that an agent never needs"
+)
+
 
 def identity(*refs):
     return ft.provided(*(refs or ("field:public_id",)))
@@ -125,6 +129,7 @@ def only(feature_key="x", **over):
             "ui_advanced": ADV,
             "bulk": BULK,
             "cli": CLIC,
+            "mcp": MCPC,
         },
         "lifecycle": ft.Lifecycle("none", note="Edited in place."),
     }
@@ -141,6 +146,7 @@ def only(feature_key="x", **over):
         "ui_advanced": ADV,
         "bulk": BULK,
         "cli": CLIC,
+        "mcp": MCPC,
         **values["claims"],
     }
     ft.FEATURES.clear()
@@ -168,6 +174,7 @@ def test_the_fifteen_features_agree_with_the_live_system():
         "ui_advanced",
         "bulk",
         "cli",
+        "mcp",
     ]
 
 
@@ -289,6 +296,7 @@ def test_a_well_formed_independent_feature_passes(isolated):
             "ui_advanced": ADV,
             "bulk": BULK,
             "cli": CLIC,
+            "mcp": MCPC,
         },
         ft.Lifecycle("none", note="Edited in place and deleted."),
     )
@@ -513,6 +521,7 @@ def test_the_endpoint_reports_a_broken_claim_instead_of_hiding_it(world, isolate
             "ui_advanced": ft.FEATURES["event"].claims["ui_advanced"],
             "bulk": ft.FEATURES["event"].claims["bulk"],
             "cli": ft.FEATURES["event"].claims["cli"],
+            "mcp": ft.FEATURES["event"].claims["mcp"],
         },
         ft.FEATURES["event"].lifecycle,
     )

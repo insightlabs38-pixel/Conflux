@@ -80,6 +80,10 @@ register_feature(
                 "no_cli@teams are formed and led by their members; the CLI is an organizer tool "
                 "for events only",
             ),
+            "mcp": provided(
+                "no_mcp@teams are formed and led by their members; no agent task needs to read "
+                "or change them",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

@@ -68,6 +68,10 @@ register_feature(
                 "no_cli@policies and gates are set on the event's own screens with their "
                 "explanations; the CLI administers events only",
             ),
+            "mcp": provided(
+                "no_mcp@policies and gates are set by organizers with their explanations; an "
+                "agent reads none of them yet",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

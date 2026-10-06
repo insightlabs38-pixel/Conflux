@@ -92,6 +92,9 @@ register_feature(
                 "no_analytics@stages are configuration; submissions and judging are counted by "
                 "record, not by stage",
             ),
+            "privacy": provided(
+                "no_personal_data@a stage is configuration of the event and names no person",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

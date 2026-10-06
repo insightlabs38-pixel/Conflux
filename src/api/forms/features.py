@@ -91,6 +91,10 @@ register_feature(
                 "no_analytics@forms are configuration and their answers are counted through "
                 "submissions",
             ),
+            "privacy": provided(
+                "no_personal_data@a form definition is configuration; the answers under a "
+                "project are in no export or erasure bucket yet (PD-S013-B02-T05)",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

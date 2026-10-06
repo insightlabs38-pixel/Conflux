@@ -34,6 +34,7 @@ LANDED = [
     "webhook",
     "archive",
     "analytics",
+    "privacy",
 ]
 
 

@@ -268,6 +268,14 @@ for (const width of [390, 1440]) {
     await expect(
       team.getByText("Measures: teams.total", { exact: false }),
     ).toBeVisible();
+    // Privacy: what happens to a person's rows, kept as evidence or erased, per feature.
+    await expect(
+      table.getByRole("columnheader", { name: "Retention and privacy" }),
+    ).toBeVisible();
+    await team.getByText("Provided", { exact: true }).nth(16).click();
+    await expect(
+      team.getByText("Kept as evidence: team_memberships", { exact: false }),
+    ).toBeVisible();
     // A feature without a state machine says how its records change.
     const track = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Track \(track\)/ }),

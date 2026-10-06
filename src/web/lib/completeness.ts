@@ -132,6 +132,11 @@ const FACT_LABEL: Record<string, string> = {
   dimensions: "Broken down by",
   archive: "Archive",
   analytics: "Analytics",
+  erased: "Erased with the person",
+  retained: "Kept as evidence",
+  purged: "Files purged",
+  people: "People named",
+  privacy: "Privacy",
 };
 
 /** One derived fact as a sentence fragment: lists joined, booleans as yes or no. */

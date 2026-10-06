@@ -88,6 +88,10 @@ register_feature(
                 "no_analytics@awards are decided after judging and the summary stops at judging "
                 "and voting",
             ),
+            "privacy": provided(
+                "no_personal_data@an award names no person; its winners are projects, which are "
+                "claimed under the project feature",
+            ),
         },
         lifecycle=Lifecycle(
             "timestamp",

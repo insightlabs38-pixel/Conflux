@@ -267,10 +267,12 @@ The five platform properties follow the recipe of the eight surfaces: a feature 
 | Key | Claim | What is derived or held to the system | Where it runs |
 |---|---|---|---|
 | `analytics` (T01) | `section:` + `measure:` (+ `dimension:`) or `no_analytics@reason` | the section is in the summary's schema, the feature's model is one the analytics module works on, a breakdown's keys are the field's choices | runtime, proved against a real event |
-| `privacy` (T02) | to be set by its task | retention and erasure behaviour read from the retention policy and the subject-erasure service | runtime |
+| `privacy` (T02) | `erased:`, `retained:`, `purged:` buckets and `person:<field>=<fate>` per user column, or `no_personal_data@reason` | buckets are read from the privacy service; every user column of the model must be claimed; fates are backed by buckets or a reason | runtime, proved by exporting and erasing real subjects |
 | `extension` (T03) | to be set by its task | hooks read from the extension manifests | runtime |
 | `versioning` (T04) | to be set by its task | version and migration behaviour read from the models and the compatibility suites | runtime |
 | `fixtures` (T05) | to be set by its task | scenarios read from the fixture and demo generators | runtime |
 
 **Analytics as built (T01).** `core/features_analytics.py` reads the response schema and the module's imported models through `System.resolve` and `importlib`; `test_feature_analytics.py` computes the summary for a real event and checks every claimed measure and breakdown against the rows. Deviation from the contract: there is no general dimension system in the platform today (the summary has fixed sections and one breakdown, registrations by status), so the claim names what exists and nothing is invented; voting and the member, ballot and vote rows are named as outside because no feature of the registry covers them.
+
+**Privacy as built (T02).** `core/features_privacy.py` builds the service's own querysets with stub ids (no query) to learn each bucket's kind and model, derives each model's user columns and requires a fate for every one; `test_feature_privacy.py` exports and erases real subjects and judges, appellants and message recipients. Deviation from the contract table: retention windows (`EventRetentionPolicy`) are an event setting applied to the same erased buckets, so they are proved by the existing retention suite and not claimed per feature. Accepted residual: form answers are in no bucket yet (PD-S013-B02-T05), and five buckets have no owning feature (named outside).
 

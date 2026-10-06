@@ -106,6 +106,10 @@ register_feature(
                 "no_analytics@the summary is about one event, so the event itself has nothing "
                 "to count in it",
             ),
+            "privacy": provided(
+                "no_personal_data@the event record names no person; people's rows hang off it "
+                "and are claimed by their own features",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",
@@ -207,6 +211,9 @@ register_feature(
                 "no_analytics@tracks are configuration and the summary does not break anything "
                 "down by track yet",
             ),
+            "privacy": provided(
+                "no_personal_data@a track is configuration of the event and names no person",
+            ),
         },
         lifecycle=Lifecycle(
             "none", note="Edited in place and deleted (track.deleted); position orders it."
@@ -306,6 +313,13 @@ register_feature(
                 "measure:registration.approved_teamed",
                 "dimension:status=registration.by_status",
                 "test:tests/integration/test_feature_analytics.py::test_every_claimed_measure_and_breakdown_is_in_the_summary_of_a_real_event",
+            ),
+            "privacy": provided(
+                "erased:event_applications",
+                "person:user=erased",
+                "person:decided_by=staff@the organizer who decided acts in their role and the "
+                "decision stays with the audit trail",
+                "test:tests/integration/test_feature_privacy.py::test_a_real_subject_is_exported_and_erased_as_every_claim_says",
             ),
         },
         lifecycle=Lifecycle(
@@ -414,6 +428,11 @@ register_feature(
             "analytics": provided(
                 "no_analytics@announcements are content posted to the event, not activity the "
                 "summary measures",
+            ),
+            "privacy": provided(
+                "person:posted_by=staff@the organizer who posted acts in their role and the "
+                "announcement stays on the event site",
+                "test:tests/integration/test_feature_privacy.py::test_a_real_subject_is_exported_and_erased_as_every_claim_says",
             ),
         },
         lifecycle=Lifecycle(

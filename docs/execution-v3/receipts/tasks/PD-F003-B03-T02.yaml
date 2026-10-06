@@ -1,0 +1,97 @@
+version: 3
+task: PD-F003-B03-T02
+batch: PD-F003-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: security-review
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 8b368db
+  head_commit: 8b368db
+changed_paths:
+- src/api/core/features_privacy.py (new), core/apps.py
+- src/api/<app>/features.py for the fifteen features (privacy claims)
+- src/web/lib/completeness.ts, features/operations/CompletenessPanel.test.tsx, tests/e2e/completeness.spec.ts
+- tests/integration/ (test_feature_privacy.py new, test_feature_contract.py, test_completeness_regression.py)
+- docs/operations/COMPLETENESS.md, spec 003 (Privacy as built)
+deliverables:
+- item: Retention and privacy semantics added to the completeness contract and applied to domain work
+  result: pass
+  evidence: "features_privacy verifies erased:, retained:, purged:, person:<field>=<fate>, no_personal_data@ and test: claims against the privacy service's own buckets and each model's user columns; eight features say what becomes of their person data (application, message, team, project, submission, evaluation plan, artifact, announcement), seven say they hold none; every user column of a model must be claimed, so a new one cannot be missed"
+- item: Observable state and diagnostics
+  result: pass
+  evidence: "the Operations completeness page gains a Retention and privacy column listing what is erased, kept as evidence or purged, and the fate of each person column, or why none; the report names buckets and never a person"
+- item: Focused tests for the real workflow
+  result: pass
+  evidence: "test_feature_privacy.py exports and erases real subjects, judges, appellants and message recipients (erased rows gone and only theirs, retained evidence kept and reported, files purged, role-only actors leave their decisions, another event untouched, replay removes nothing), every bucket claimed or outside, the report holds no subject and no query, failure codes"
+invariants:
+- item: One source of truth, no business rule in a surface
+  result: pass
+  evidence: "the claim names what the registry holds and the verifier reads it; nothing is registered or executed by the contract"
+- item: Server-side authorization, validation and audit remain authoritative
+  result: pass
+  evidence: "no route, authorization or audit change"
+verification:
+- command: "uv run --frozen pytest tests/integration/test_feature_privacy.py test_retention_privacy.py test_feature_contract.py test_completeness_regression.py -n auto"
+  result: pass
+  note: "231 passed in the focused runs"
+- command: "features.check() and check_static on the real tree; manage.py check"
+  result: pass
+  note: "no problems, no issues"
+- command: "pnpm web vitest features/operations; tsc --noEmit; make format-check lint sdk-check block-schema-check"
+  result: pass
+  note: "31 passed, clean"
+- command: "npx playwright test completeness --project=desktop (seed 7, app rebuilt)"
+  result: pass
+  note: "2 passed (390 and 1440) with the Retention and privacy column"
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: "column on Operations > Completeness"
+- surface: api
+  result: pass
+  evidence: "report facts carry the property"
+- surface: sdk
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: cli
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: mcp
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: event_as_code
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: audit
+  result: pass
+  evidence: "erasure and export audit rows unchanged"
+- surface: webhook
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: archive
+  result: pass
+  evidence: "unchanged"
+- surface: analytics
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: search
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: docs
+  result: pass
+  evidence: "COMPLETENESS.md and the B03 contract in spec 003"
+migrations:
+- none
+findings:
+- "form answers (forms.FormAnswer) can hold personal data and are in no export or erasure bucket; recorded in the form claim with PD-S013-B02-T05 as the owner, not fixed here"
+- "five buckets (marketplace profiles, saved searches, check-ins, attendance, person labels) have no owning feature and are named outside"
+limitations:
+- "retention windows are an event setting over the same erased buckets and are proved by the existing retention suite, not claimed per feature"
+- "a replayed erasure is a no-op but writes its own audit row (accepted: the row records who asked)"
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

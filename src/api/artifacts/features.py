@@ -100,6 +100,11 @@ register_feature(
                 "no_analytics@uploads are evidence under a project and are counted only through "
                 "its submission",
             ),
+            "privacy": provided(
+                "purged:private_artifacts",
+                "person:created_by=purged",
+                "test:tests/integration/test_feature_privacy.py::test_a_real_subject_is_exported_and_erased_as_every_claim_says",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",

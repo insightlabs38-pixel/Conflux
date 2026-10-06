@@ -109,6 +109,16 @@ HOOK = ft.provided(
     "::test_each_audited_change_writes_the_outbox_event_its_claim_names",
 )
 
+PRIV = ft.provided(
+    "person:owner=retained@a saved view is a setting of its owner and is not part of an event",
+    "test:tests/integration/test_feature_privacy.py"
+    "::test_a_real_subject_is_exported_and_erased_as_every_claim_says",
+)
+
+EVENT_PRIV = ft.provided(
+    "no_personal_data@the event record names no person; people's rows hang off it",
+)
+
 ANAL = ft.provided("no_analytics@a saved view is a personal setting and not activity in an event")
 
 ARCH = ft.provided(
@@ -166,6 +176,7 @@ def only(feature_key="x", **over):
             "webhook": HOOK,
             "archive": ARCH,
             "analytics": ANAL,
+            "privacy": PRIV,
         },
         "lifecycle": ft.Lifecycle("none", note="Edited in place."),
     }
@@ -187,6 +198,7 @@ def only(feature_key="x", **over):
         "webhook": HOOK,
         "archive": ARCH,
         "analytics": ANAL,
+        "privacy": PRIV,
         **values["claims"],
     }
     ft.FEATURES.clear()
@@ -219,6 +231,7 @@ def test_the_fifteen_features_agree_with_the_live_system():
         "webhook",
         "archive",
         "analytics",
+        "privacy",
     ]
 
 
@@ -345,6 +358,7 @@ def test_a_well_formed_independent_feature_passes(isolated):
             "webhook": HOOK,
             "archive": ARCH,
             "analytics": ANAL,
+            "privacy": PRIV,
         },
         ft.Lifecycle("none", note="Edited in place and deleted."),
     )
@@ -396,6 +410,7 @@ def event(isolated, **life):
             "identity": identity("field:public_id", "route:event-detail"),
             "event_as_code": EVENT_EAC,
             "archive": EVENT_ARCH,
+            "privacy": EVENT_PRIV,
         },
         lifecycle=event_life(**life),
     )
@@ -438,7 +453,10 @@ def test_a_timestamp_or_flag_lifecycle_names_its_two_states(isolated):
         only(
             model="integrations.WebhookSubscription",
             lifecycle=flag,
-            claims={"identity": identity("field:public_id", "route:webhook-detail")},
+            claims={
+                "identity": identity("field:public_id", "route:webhook-detail"),
+                "privacy": EVENT_PRIV,
+            },
         )
         == []
     )
@@ -578,6 +596,7 @@ def test_the_endpoint_reports_a_broken_claim_instead_of_hiding_it(world, isolate
             "webhook": ft.FEATURES["event"].claims["webhook"],
             "archive": ft.FEATURES["event"].claims["archive"],
             "analytics": ft.FEATURES["event"].claims["analytics"],
+            "privacy": ft.FEATURES["event"].claims["privacy"],
         },
         ft.FEATURES["event"].lifecycle,
     )

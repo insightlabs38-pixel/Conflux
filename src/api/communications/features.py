@@ -84,6 +84,12 @@ register_feature(
                 "no_analytics@messages are outbound communication and the summary does not "
                 "count delivery",
             ),
+            "privacy": provided(
+                "erased:message_receipts",
+                "person:sent_by=staff@the organizer who sent a message acts in their role and "
+                "the message stays in the event history",
+                "test:tests/integration/test_feature_privacy.py::test_a_real_subject_is_exported_and_erased_as_every_claim_says",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

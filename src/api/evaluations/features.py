@@ -97,6 +97,12 @@ register_feature(
                 "measure:judging.plans",
                 "test:tests/integration/test_feature_analytics.py::test_every_claimed_measure_and_breakdown_is_in_the_summary_of_a_real_event",
             ),
+            "privacy": provided(
+                "retained:ballots",
+                "retained:assignments",
+                "retained:pairwise_comparisons",
+                "test:tests/integration/test_feature_privacy.py::test_a_real_subject_is_exported_and_erased_as_every_claim_says",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

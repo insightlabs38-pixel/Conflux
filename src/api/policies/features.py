@@ -93,6 +93,9 @@ register_feature(
                 "no_analytics@policies are configuration and the summary does not count rule "
                 "evaluations",
             ),
+            "privacy": provided(
+                "no_personal_data@a policy is a rule of the event and names no person",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

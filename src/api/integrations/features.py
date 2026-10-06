@@ -91,6 +91,10 @@ register_feature(
             "analytics": provided(
                 "no_analytics@a subscription is an integration setting, not activity in the event",
             ),
+            "privacy": provided(
+                "no_personal_data@a subscription holds a target URL and a signing secret of an "
+                "integration, not data about a participant",
+            ),
         },
         lifecycle=Lifecycle(
             "flag",

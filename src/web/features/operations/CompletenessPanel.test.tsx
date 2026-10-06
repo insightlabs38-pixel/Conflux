@@ -393,6 +393,18 @@ describe("completeness helpers", () => {
       "Broken down by: status → registration.by_status",
     );
     expect(factText("analytics", "not counted")).toBe("Analytics: not counted");
+    expect(factText("erased", ["event_applications"])).toBe(
+      "Erased with the person: event_applications",
+    );
+    expect(factText("retained", ["team_memberships"])).toBe(
+      "Kept as evidence: team_memberships",
+    );
+    expect(factText("people", ["user: erased", "decided_by: staff"])).toBe(
+      "People named: user: erased, decided_by: staff",
+    );
+    expect(factText("privacy", "no personal data")).toBe(
+      "Privacy: no personal data",
+    );
     expect(factText("eac", "not in the document")).toBe(
       "Event-as-Code: not in the document",
     );

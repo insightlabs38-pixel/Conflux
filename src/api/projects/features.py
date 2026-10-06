@@ -100,6 +100,15 @@ register_feature(
                 "measure:submissions.finalized_projects",
                 "test:tests/integration/test_feature_analytics.py::test_every_claimed_measure_and_breakdown_is_in_the_summary_of_a_real_event",
             ),
+            "privacy": provided(
+                "retained:project_memberships",
+                "retained:appeals",
+                "retained:eligibility_responses",
+                "erased:comments",
+                "person:created_by=retained@a project is kept as evidence of the event and its "
+                "creator is not rewritten",
+                "test:tests/integration/test_feature_privacy.py::test_a_real_subject_is_exported_and_erased_as_every_claim_says",
+            ),
         },
         lifecycle=Lifecycle(
             "none",
@@ -206,6 +215,13 @@ register_feature(
                 "measure:submissions.finalized_records",
                 "measure:submissions.immutable_versions",
                 "test:tests/integration/test_feature_analytics.py::test_every_claimed_measure_and_breakdown_is_in_the_summary_of_a_real_event",
+            ),
+            "privacy": provided(
+                "retained:submissions",
+                "retained:submission_versions",
+                "person:updated_by=retained@a finalized submission is evidence and its author "
+                "is kept so it stays verifiable",
+                "test:tests/integration/test_feature_privacy.py::test_a_real_subject_is_exported_and_erased_as_every_claim_says",
             ),
         },
         lifecycle=Lifecycle(

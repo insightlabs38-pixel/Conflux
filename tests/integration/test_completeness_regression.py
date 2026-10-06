@@ -198,3 +198,143 @@ def test_a_system_that_changes_makes_a_claim_fail(monkeypatch):
     # an audit action that the code no longer records
     monkeypatch.setattr(ft, "scan_audit_actions", lambda: {})
     assert any(p["code"] == "action_missing" for p in ft.check(ft.System()))
+
+
+# --- the eight surface properties (PD-F003-B02-T90) ----------------------------------------------
+
+
+def surface_items():
+    """Every item the eight surface claims name, with the features that claim it."""
+    from core import (
+        features_archive,
+        features_bulk,
+        features_cli,
+        features_eac,
+        features_mcp,
+        features_ui,
+        features_webhook,
+    )
+
+    found = {k: {} for k in ("action", "command", "tool", "section", "emit", "table", "use")}
+    for feature in ft.FEATURES.values():
+        c = feature.claims
+        for key, _ in features_bulk.parse(c["bulk"])[0]:
+            found["action"].setdefault(key, set()).add(feature.key)
+        for key in features_cli.parse(c["cli"])[0]:
+            found["command"].setdefault(key, set()).add(feature.key)
+        for key in features_mcp.parse(c["mcp"])[0]:
+            found["tool"].setdefault(key, set()).add(feature.key)
+        for key in features_eac.parse(c["event_as_code"])[0]:
+            found["section"].setdefault(key, set()).add(feature.key)
+        for action, _ in features_webhook.parse(c["webhook"])[0]:
+            found["emit"].setdefault(action, set()).add(feature.key)
+        for key in features_archive.parse(c["archive"])[0]:
+            found["table"].setdefault(key, set()).add(feature.key)
+        for component, path in features_ui.parse_advanced(c["ui_advanced"])[0]:
+            found["use"].setdefault((component, path), set()).add(feature.key)
+    return found
+
+
+def test_no_action_command_tool_section_event_or_table_is_claimed_by_two_features():
+    shared = {
+        kind: {item: who for item, who in found.items() if len(who) > 1}
+        for kind, found in surface_items().items()
+    }
+    assert not any(shared.values()), shared
+
+
+def test_the_surfaces_count_what_the_documents_say():
+    """The matrix and the guide state these numbers; a change must update them on purpose."""
+    found = surface_items()
+    assert {k: len(v) for k, v in found.items()} == {
+        "action": 5,
+        "command": 5,
+        "tool": 5,
+        "section": 10,
+        "emit": 19,
+        "table": 10,
+        "use": 12,
+    }
+
+
+def test_the_webhook_and_audit_claims_describe_the_same_changes():
+    from core import features_audit, features_webhook
+
+    audited = {
+        (f.key, action)
+        for f in ft.FEATURES.values()
+        for _, _, action, _ in features_audit.parse(f.claims["audit"])[0]
+    }
+    classified = {
+        (f.key, action)
+        for f in ft.FEATURES.values()
+        for action, _ in (
+            *features_webhook.parse(f.claims["webhook"])[0],
+            *features_webhook.parse(f.claims["webhook"])[1],
+        )
+    }
+    assert audited == classified and len(audited) == 40
+
+
+def test_every_mcp_write_tool_reaches_an_audited_change_and_every_cli_command_an_sdk_operation():
+    from core import features_audit, features_cli, features_mcp
+    from mcp_adapter.tools import BY_NAME
+
+    for feature in ft.FEATURES.values():
+        writes = {
+            (route, method)
+            for route, method, _, _ in features_audit.parse(feature.claims["audit"])[0]
+        }
+        for name in features_mcp.parse(feature.claims["mcp"])[0]:
+            tool = BY_NAME[name]
+            assert tool.read_only or (tool.url_name, tool.method) in writes, name
+    table, generated = features_cli.load(ROOT)
+    assert set(table) == set(features_cli.OUTSIDE) | {
+        c for f in ft.FEATURES.values() for c in features_cli.parse(f.claims["cli"])[0]
+    }
+    assert all(set(ops) <= set(generated) for ops in table.values())
+
+
+def test_a_system_that_changes_makes_a_surface_claim_fail(monkeypatch):
+    """Each surface claim is held to its registry: change the registry and the claim fails."""
+    from communications import bulk
+    from core import features_webhook
+    from integrations import eventascode
+    from integrations.final_archive_schema import TABLES
+    from mcp_adapter import tools
+
+    def codes():
+        return {p["code"] for p in ft.check(ft.System())}
+
+    assert ft.check() == []
+    # a tool added for a feature's route without a claim
+    extra = tools.Tool("list_stage_notes", "List notes.", "GET", "stage-list")
+    monkeypatch.setattr(tools, "TOOLS", [*tools.TOOLS, extra])
+    assert "tool_unclaimed" in codes()
+    monkeypatch.undo()
+    # ... and the same for a feature that said no tool reaches it
+    extra = tools.Tool("list_tracks", "List tracks.", "GET", "track-list")
+    monkeypatch.setattr(tools, "TOOLS", [*tools.TOOLS, extra])
+    assert "mcp_exists" in codes()
+    monkeypatch.undo()
+    # a bulk action that is no longer registered
+    monkeypatch.delitem(bulk.ACTIONS, "move")
+    assert "action_unknown" in codes()
+    monkeypatch.undo()
+    # a document section the track model owns, added without a claim
+    monkeypatch.setitem(
+        eventascode.SECTION_MODELS, "track_notes", ("events.Track", ("events.Track",))
+    )
+    assert "section_unclaimed" in codes()
+    monkeypatch.undo()
+    # a change that starts emitting an event while its claim says silent
+    real = features_webhook.scan_outbox()
+    patched = {**real, "project.created": {"emits": {"project.created"}, "silent": False}}
+    monkeypatch.setattr(features_webhook, "scan_outbox", lambda: patched)
+    assert "silent_but_emits" in codes()
+    monkeypatch.undo()
+    # a table that leaves the archive contract
+    monkeypatch.delitem(TABLES, "events.track")
+    assert "table_unknown" in codes()
+    monkeypatch.undo()
+    assert ft.check() == []

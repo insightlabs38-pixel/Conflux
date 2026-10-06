@@ -1,0 +1,66 @@
+version: 3
+task: PD-F003-B02-T90
+batch: PD-F003-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 23bde27
+  head_commit: 23bde27
+changed_paths:
+- docs/verification/PD-F003-B02/ (MATRIX.md, T90-e2e-fast.log)
+- tests/integration/test_completeness_regression.py
+- tests/e2e/timeline.spec.ts
+deliverables:
+- item: Verification matrix for the eight capability tasks with an executable proof for each dimension
+  result: pass
+  evidence: "MATRIX.md covers positive, negative and boundary, authorization, lifecycle and compatibility, concurrency, whole-registry regression and UI states for T01-T08; every cited test name was checked to exist by script (34 names)"
+- item: Positive, negative, authorization, lifecycle, migration and concurrency coverage
+  result: pass
+  evidence: "per-surface suites carry the depth (real apply, real requests through the CLI and MCP endpoint, a full document applied to an empty event, 40 audited changes read against the outbox, a real archive restored); the new cross-cutting tests prove no action, command, tool, section, event or table has two owners, the counts the documents state, webhook and audit claims describe the same 40 changes, MCP write tools reach audited changes and CLI commands reach SDK operations, and a changed registry makes each surface claim fail"
+- item: UI-facing states verified beyond screenshots
+  result: pass
+  evidence: "component tests for derived facts of every property and the browser spec at 390 and 1440 with axe and an overflow check open the seven new columns of a real event"
+- item: Exact commands and unresolved limitations recorded
+  result: pass
+  evidence: matrix Commands and Unresolved limitations sections
+invariants:
+- item: Canonical source of truth, server authority
+  result: pass
+  evidence: the new tests run against the live registry, planner, outbox and archive; no product code changed in this task
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 2696 passed, 31 skipped (new cross-cutting tests included)
+- command: pnpm --filter @conflux/web test; make format-check lint sdk-check block-schema-check; makemigrations --check
+  result: pass
+  note: 658 web tests; static checks and drift clean; no migration changes
+- command: make e2e-fast
+  result: pass
+  note: "224 passed, 0 failed after the timeline spec fix; read-only, isolated-mutation and canary ok; docs/verification/PD-F003-B02/T90-e2e-fast.log"
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: states and viewports in the matrix
+- surface: api
+  result: pass
+  evidence: request proofs for every surface
+- surface: audit
+  result: pass
+  evidence: webhook and audit claims describe the same 40 changes
+- surface: docs
+  result: pass
+  evidence: matrix
+migrations: []
+findings:
+- "The first full e2e-fast run failed twice. tests/e2e/timeline.spec.ts shifted a wall-clock hour with a modulo and wrapped to the same day after about 20:00 event time (latent, time-of-day dependent, unrelated to this batch); it now does calendar arithmetic and passes at any hour"
+- "The same run timed out workspace-shell role navigation organizer at 390 at 30.4s of its 30s budget; it passes alone at 19-21s and the full run at 150s total matches earlier runs, so it is a load-near-threshold flake of an existing long test; no timeout was changed and the clean rerun is the evidence (P3, recorded for the owner)"
+- "The first webhook scan false positive found in T07 is the only defect the surface proofs found in the batch's own code"
+limitations:
+- Listed in the matrix; none are new
+escalations: []
+next: review

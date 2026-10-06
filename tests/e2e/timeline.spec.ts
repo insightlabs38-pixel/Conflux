@@ -78,10 +78,11 @@ for (const width of [390, 1440]) {
     const form = panel.getByRole("form", { name: `Times of Panel ${width}` });
     const [starts, ends] = await form.locator("input").all();
     const startValue = await starts.inputValue();
-    const [day, time] = startValue.split("T");
-    const hour = Number(time.slice(0, 2));
+    // The input is a wall-clock time in the event's zone; shift it as plain calendar arithmetic
+    // so a time late in the evening rolls over to the next day instead of wrapping to the same one.
+    const wall = new Date(`${startValue}:00Z`).getTime();
     const shift = (h: number) =>
-      `${day}T${String((hour + h) % 24).padStart(2, "0")}:${time.slice(3)}`;
+      new Date(wall + h * 3_600_000).toISOString().slice(0, 16);
     await starts.fill(shift(2));
     await ends.fill(shift(4));
     await form.getByRole("button", { name: "Save" }).click();

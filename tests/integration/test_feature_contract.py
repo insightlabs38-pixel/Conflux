@@ -109,6 +109,18 @@ HOOK = ft.provided(
     "::test_each_audited_change_writes_the_outbox_event_its_claim_names",
 )
 
+ARCH = ft.provided(
+    "excluded@a saved view is a personal setting of one person and is not part of an event",
+    "test:tests/integration/test_feature_archive.py"
+    "::test_each_excluded_model_is_in_the_archives_exclusion_list_and_not_in_its_contract",
+)
+
+EVENT_ARCH = ft.provided(
+    "root@the archive is one event and restores as a new draft event, so the event is the root",
+    "test:tests/integration/test_feature_archive.py"
+    "::test_the_event_is_the_root_and_restores_as_a_new_draft_event",
+)
+
 EVENT_EAC = ft.provided(
     "section:event",
     "test:tests/integration/test_event_as_code.py"
@@ -150,6 +162,7 @@ def only(feature_key="x", **over):
             "mcp": MCPC,
             "event_as_code": EACC,
             "webhook": HOOK,
+            "archive": ARCH,
         },
         "lifecycle": ft.Lifecycle("none", note="Edited in place."),
     }
@@ -169,6 +182,7 @@ def only(feature_key="x", **over):
         "mcp": MCPC,
         "event_as_code": EACC,
         "webhook": HOOK,
+        "archive": ARCH,
         **values["claims"],
     }
     ft.FEATURES.clear()
@@ -199,6 +213,7 @@ def test_the_fifteen_features_agree_with_the_live_system():
         "mcp",
         "event_as_code",
         "webhook",
+        "archive",
     ]
 
 
@@ -323,6 +338,7 @@ def test_a_well_formed_independent_feature_passes(isolated):
             "mcp": MCPC,
             "event_as_code": EACC,
             "webhook": HOOK,
+            "archive": ARCH,
         },
         ft.Lifecycle("none", note="Edited in place and deleted."),
     )
@@ -373,6 +389,7 @@ def event(isolated, **life):
         claims={
             "identity": identity("field:public_id", "route:event-detail"),
             "event_as_code": EVENT_EAC,
+            "archive": EVENT_ARCH,
         },
         lifecycle=event_life(**life),
     )
@@ -553,6 +570,7 @@ def test_the_endpoint_reports_a_broken_claim_instead_of_hiding_it(world, isolate
             "mcp": ft.FEATURES["event"].claims["mcp"],
             "event_as_code": ft.FEATURES["event"].claims["event_as_code"],
             "webhook": ft.FEATURES["event"].claims["webhook"],
+            "archive": ft.FEATURES["event"].claims["archive"],
         },
         ft.FEATURES["event"].lifecycle,
     )

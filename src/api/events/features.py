@@ -97,6 +97,11 @@ register_feature(
                 "emit:event.updated=event.updated",
                 "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
             ),
+            "archive": provided(
+                "root@the archive is one event and restores as a new draft event, so the event "
+                "is the root of every table",
+                "test:tests/integration/test_feature_archive.py::test_the_event_is_the_root_and_restores_as_a_new_draft_event",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",
@@ -190,6 +195,10 @@ register_feature(
                 "emit:track.updated=track.updated",
                 "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
             ),
+            "archive": provided(
+                "table:events.track",
+                "test:tests/integration/test_feature_archive.py::test_each_claimed_table_is_restored_with_its_rows",
+            ),
         },
         lifecycle=Lifecycle(
             "none", note="Edited in place and deleted (track.deleted); position orders it."
@@ -275,6 +284,11 @@ register_feature(
                 "silent:application.decided@a decision concerns one person and no event type "
                 "shows it to subscribers today",
                 "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
+            ),
+            "archive": provided(
+                "excluded@registrations are personal data of applicants and are not part of the "
+                "archive contract",
+                "test:tests/integration/test_feature_archive.py::test_each_excluded_model_is_in_the_archives_exclusion_list_and_not_in_its_contract",
             ),
         },
         lifecycle=Lifecycle(
@@ -374,6 +388,11 @@ register_feature(
                 "silent:announcement.reviewed@a review decision on an announcement is internal "
                 "to organizers; no event type exists for it",
                 "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
+            ),
+            "archive": provided(
+                "excluded@announcements are content posted during the event and are not part of "
+                "the archive contract",
+                "test:tests/integration/test_feature_archive.py::test_each_excluded_model_is_in_the_archives_exclusion_list_and_not_in_its_contract",
             ),
         },
         lifecycle=Lifecycle(

@@ -1,0 +1,96 @@
+version: 3
+task: PD-F003-B02-T08
+batch: PD-F003-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: d588d1e
+  head_commit: d588d1e
+changed_paths:
+- src/api/core/features_archive.py (new), core/apps.py
+- src/api/<app>/features.py for the fifteen features (archive claims)
+- src/web/lib/completeness.ts, features/operations/CompletenessPanel.test.tsx, tests/e2e/completeness.spec.ts
+- tests/integration/ (test_feature_archive.py new, test_feature_contract.py, test_completeness_regression.py)
+- docs/operations/COMPLETENESS.md, spec 003 (Archive as built)
+deliverables:
+- item: Archive/import/export representation added to the completeness contract and applied to domain work
+  result: pass
+  evidence: "features_archive verifies table:<model>, root@, excluded@ and test: claims against the frozen archive contract at runtime; ten features are archive tables, the event is the root, four are excluded with a reason (registrations, announcements, webhook subscriptions, messages)"
+- item: Observable state and diagnostics
+  result: pass
+  evidence: "the Operations completeness page gains an Archive and import column showing each table, how it is reached, how many fields travel and any left out, or why not archived"
+- item: Focused tests for the real workflow
+  result: pass
+  evidence: "test_feature_archive.py restores a real archive and compares rows per claimed table, checks excluded models against the archive's exclusion list and the contract, the root restores as a new draft event, failure codes; test_final_archive.py passes unchanged"
+invariants:
+- item: One source of truth, no business rule in a surface
+  result: pass
+  evidence: "TABLES stays the only contract; only a feature's own model is claimed so child tables are not listed a second time"
+- item: Existing behavior compatible
+  result: pass
+  evidence: "no archive format, field or contract change; all prior archive tests pass"
+verification:
+- command: "uv run --frozen pytest tests/integration/test_feature_archive.py test_final_archive.py test_feature_contract.py test_completeness_regression.py -n auto"
+  result: pass
+  note: "225 passed"
+- command: "features.check() and check_static on the real tree; manage.py check"
+  result: pass
+  note: "no problems, no issues; all sixteen properties listed so far are landed"
+- command: "pnpm web vitest features/operations; tsc --noEmit; make format-check lint sdk-check block-schema-check"
+  result: pass
+  note: "31 passed, clean"
+- command: "npx playwright test completeness --project=desktop (seed 7, app rebuilt)"
+  result: pass
+  note: "2 passed (390 and 1440) with the Archive and import column"
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: "Archive and import column on Operations > Completeness"
+- surface: api
+  result: pass
+  evidence: "report facts carry archive"
+- surface: sdk
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: cli
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: mcp
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: event_as_code
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: audit
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: webhook
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: archive
+  result: pass
+  evidence: "table, root and excluded claims proved by a real restore"
+- surface: analytics
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: search
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: docs
+  result: pass
+  evidence: "COMPLETENESS.md and the B02 contract in spec 003"
+migrations:
+- none
+findings:
+- "the exclusion list lives in tests/integration/test_final_archive.py, so excluded claims are checked in that suite and not at runtime"
+limitations:
+- "only a feature's own model is claimed; child tables are covered by the archive's classification test"
+- "import preview and the signed archive are unchanged and not part of the claim"
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

@@ -126,6 +126,8 @@ const FACT_LABEL: Record<string, string> = {
   eac: "Event-as-Code",
   emits: "Sent to subscribers",
   silent: "Not sent",
+  tables: "Archived tables",
+  archive: "Archive",
 };
 
 /** One derived fact as a sentence fragment: lists joined, booleans as yes or no. */

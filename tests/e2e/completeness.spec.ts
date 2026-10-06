@@ -244,6 +244,16 @@ for (const width of [390, 1440]) {
         exact: false,
       }),
     ).toBeVisible();
+    // Archive and import: the table a feature travels in, how it is reached and which fields go.
+    await expect(
+      table.getByRole("columnheader", { name: "Archive and import" }),
+    ).toBeVisible();
+    await trackRow.getByText("Provided", { exact: true }).nth(14).click();
+    await expect(
+      trackRow.getByText("Archived tables: events.track: reached by event", {
+        exact: false,
+      }),
+    ).toBeVisible();
     // A feature without a state machine says how its records change.
     const track = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Track \(track\)/ }),

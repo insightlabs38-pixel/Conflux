@@ -83,6 +83,11 @@ register_feature(
                 "secret to other subscribers",
                 "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
             ),
+            "archive": provided(
+                "excluded@a subscription holds a signing secret and a target URL of the old "
+                "event's integration",
+                "test:tests/integration/test_feature_archive.py::test_each_excluded_model_is_in_the_archives_exclusion_list_and_not_in_its_contract",
+            ),
         },
         lifecycle=Lifecycle(
             "flag",

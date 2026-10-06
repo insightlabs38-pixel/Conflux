@@ -215,3 +215,14 @@ A change is audited with `record_mutation(action=...)`; passing `event_type=...`
 - `test:<path>::<name>`: the proof (CI checks it exists).
 
 Codes: `bad_ref`, `no_test`, `test_ref`, `action_not_audited`, `type_shape`, `emit_not_recorded`, `no_reason`, `silent_but_emits`, `unclassified`, `classified_twice`; CI: `test_file`, `test_name`. `tests/integration/test_feature_webhook.py` proves every claim through the API: each audited change is sent as the role that may make it and the outbox is read (a claimed event type is written to the workspace, a silent change writes nothing) and a refused change leaves nothing behind. The first version of the source scan resolved helpers by name across files and wrongly marked team and artifact changes as emitting; the real requests caught it and helpers are now resolved per file. Of 40 audited changes, 19 are sent to subscribers and 21 are silent; the silent reasons state what is true today (no event type exists, or the change is private) and are the list of gaps for a later batch to close.
+
+## Archive and import (T08)
+
+An event is archived and restored through one frozen contract (`integrations.final_archive_schema.TABLES`): the tables written, how each is reached from the event and which fields travel. Every event-owned model is classified there or in the archive's exclusion list (`tests/integration/test_final_archive.py`), so an unclassified model already fails; what `features_archive` adds is each feature's own answer, exactly one of:
+
+- `table:<app.model>`: the feature's own model (lowercase label) is a table of the archive, so it is exported with the event and restored into a new one. The report shows how the table is reached, how many fields travel and any field left out;
+- `root@<reason>`: the feature is the event itself, which is the thing archived and restored as a new draft event (only `events.Event`);
+- `excluded@<reason>`: the model is deliberately not archived, and why; it must not be in `TABLES`;
+- `test:<path>::<name>`: the proof (CI checks it exists).
+
+Codes: `bad_ref`, `one_answer`, `no_test`, `test_ref`, `contract_missing`, `no_reason`, `root_foreign`, `archived_but_excluded`, `table_foreign`, `table_unknown`; CI: `test_file`, `test_name`. `tests/integration/test_feature_archive.py` proves the claims: every feature says one thing, each excluded model is on the archive's exclusion list and not in its contract, and each claimed table is exported with its rows and restored into a new event with the same number of rows. Ten features are tables, the event is the root, four are excluded (registrations, announcements, webhook subscriptions, messages). Child tables (memberships, versions, ballots and so on) are not claimed per feature; the archive's own classification test covers them.

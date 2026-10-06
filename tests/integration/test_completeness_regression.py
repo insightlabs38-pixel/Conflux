@@ -32,6 +32,7 @@ LANDED = [
     "mcp",
     "event_as_code",
     "webhook",
+    "archive",
 ]
 
 

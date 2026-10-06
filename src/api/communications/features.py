@@ -75,6 +75,11 @@ register_feature(
                 "emit:message.sent=message.sent",
                 "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
             ),
+            "archive": provided(
+                "excluded@messages record who was written to and are not part of the archive "
+                "contract",
+                "test:tests/integration/test_feature_archive.py::test_each_excluded_model_is_in_the_archives_exclusion_list_and_not_in_its_contract",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

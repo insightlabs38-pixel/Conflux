@@ -89,6 +89,10 @@ register_feature(
                 "finalization is the event subscribers get",
                 "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
             ),
+            "archive": provided(
+                "table:projects.project",
+                "test:tests/integration/test_feature_archive.py::test_each_claimed_table_is_restored_with_its_rows",
+            ),
         },
         lifecycle=Lifecycle(
             "none",
@@ -184,6 +188,10 @@ register_feature(
                 "silent:submission.reopened@no event type exists for reopening yet; subscribers "
                 "see the next finalization",
                 "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
+            ),
+            "archive": provided(
+                "table:projects.submission",
+                "test:tests/integration/test_feature_archive.py::test_each_claimed_table_is_restored_with_its_rows",
             ),
         },
         lifecycle=Lifecycle(

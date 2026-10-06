@@ -381,6 +381,10 @@ describe("completeness helpers", () => {
       "Sent to subscribers: track.created → track.created",
     );
     expect(factText("silent", [])).toBe("Not sent: none");
+    expect(
+      factText("tables", ["events.track: reached by event, 4 fields"]),
+    ).toBe("Archived tables: events.track: reached by event, 4 fields");
+    expect(factText("archive", "not archived")).toBe("Archive: not archived");
     expect(factText("eac", "not in the document")).toBe(
       "Event-as-Code: not in the document",
     );

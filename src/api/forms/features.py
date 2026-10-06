@@ -83,6 +83,10 @@ register_feature(
                 "type exists for it",
                 "test:tests/integration/test_feature_webhook.py::test_each_audited_change_writes_the_outbox_event_its_claim_names",
             ),
+            "archive": provided(
+                "table:forms.formdefinition",
+                "test:tests/integration/test_feature_archive.py::test_each_claimed_table_is_restored_with_its_rows",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

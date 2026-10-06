@@ -47,6 +47,10 @@ register_feature(
                 "no_query@read through the offset-paged message history; recipients are searched "
                 "in the inbox, not here",
             ),
+            "ui_base": provided(
+                "component:src/web/features/communications/CommunicationsPanel.tsx",
+                "test:src/web/features/communications/CommunicationsPanel.test.tsx",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

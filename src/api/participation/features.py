@@ -64,6 +64,10 @@ register_feature(
                 "no_query@a person reads their own team through my-team; teams are searched "
                 "through the projects entity",
             ),
+            "ui_base": provided(
+                "component:src/web/features/teams/TeamPanel.tsx",
+                "test:src/web/features/teams/TeamPanel.test.tsx",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

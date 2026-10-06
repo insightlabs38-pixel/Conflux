@@ -50,6 +50,10 @@ register_feature(
                 "no_query@read whole through its list: an event has tens of awards, so a query "
                 "over them is not offered",
             ),
+            "ui_base": provided(
+                "component:src/web/features/awards/AwardsPanel.tsx",
+                "test:src/web/features/awards/AwardsPanel.proposals.test.tsx",
+            ),
         },
         lifecycle=Lifecycle(
             "timestamp",

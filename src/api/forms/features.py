@@ -51,6 +51,10 @@ register_feature(
                 "no_query@read whole through its list: an event has a handful of forms, so a "
                 "query over them is not offered",
             ),
+            "ui_base": provided(
+                "component:src/web/features/form-builder/FormBuilder.tsx",
+                "test:src/web/features/form-builder/FormBuilder.test.tsx",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

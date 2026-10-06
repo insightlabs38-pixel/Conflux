@@ -110,6 +110,10 @@ const FACT_LABEL: Record<string, string> = {
   roles: "Who can query",
   fields: "Searchable fields",
   why: "Why not",
+  screens: "Screens",
+  tests: "Tests",
+  reads: "Reads",
+  screen: "Screen",
 };
 
 /** One derived fact as a sentence fragment: lists joined, booleans as yes or no. */

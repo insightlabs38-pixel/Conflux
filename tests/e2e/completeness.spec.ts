@@ -148,6 +148,20 @@ for (const width of [390, 1440]) {
         "status (enum, filter, sort, scan within one event)",
       ),
     ).toBeVisible();
+    // Base UI: the screen that reads the feature, its test, and an owed screen with its owner.
+    await expect(
+      table.getByRole("columnheader", { name: "Base UI" }),
+    ).toBeVisible();
+    await event.getByText("Provided", { exact: true }).nth(7).click();
+    await expect(
+      event.getByText("Screens: EventDashboard.tsx", { exact: false }),
+    ).toBeVisible();
+    const notice = table.locator("tbody tr").filter({
+      has: page.getByRole("rowheader", {
+        name: /^Announcement \(announcement\)/,
+      }),
+    });
+    await expect(notice).toContainText("Planned");
     // A feature without a state machine says how its records change.
     const track = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Track \(track\)/ }),

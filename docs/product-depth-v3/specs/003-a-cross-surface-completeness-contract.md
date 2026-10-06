@@ -227,3 +227,22 @@ Per property: a verifier unit suite on realistic and deliberately broken claims,
 
 **Review hardening (T95).** The independent-style review of the batch found ten defects, nine fixed here. `IdempotentMixin` now runs after authentication and permissions (it replayed a stored answer to someone the view would refuse and created rows for signed-out callers), scopes keys to the user instead of a cookie hash and expires keys after a day with an hourly purge (stored message and artifact answers were kept forever); `project.updated` is not written for a repeated or empty PATCH and the edit holds a row lock; a captain who leaves names the new captain in the audit row; the idempotency verifier requires a version-named field or a real `select_for_update` call and a key that covers the claimed method; the audit scan reads only non-test code and only functions that hand their `action` argument on; and a route narrower than the claim's readers or writers must be pinned with `narrow:`, so widening one route alone fails. Left as designed: a refusal stored under a key is replayed under that key (documented, the client sends a new key after fixing the request).
 
+### PD-F003-B02 contract: the eight surface properties
+
+The eight surfaces are properties like the first eight: a feature claims each as `provided` (with refs the verifier resolves), `not_applicable` or `planned` (an owner task that exists), and what can be derived is derived. A surface is a *view of* a domain operation, never a place for a rule: every verifier checks that the surface reaches the feature through the same routes, operations or registrations the feature already has.
+
+| Key | Claim | What is derived or held to the system | Where it runs |
+|---|---|---|---|
+| `ui_base` (T01) | `component:` + `test:` or `no_ui@reason` | the screen exists, its folder reads the feature's route (a quoted last path segment), a test imports it | report shows the claim; CI (`check_static`) checks the source tree |
+| `ui_advanced` (T02) | `uses:<shared component>` or `no_advanced@reason` | the screen imports the shared advanced primitive it names (grid, filter builder, saved views, preview bar, version diff, rich editor) | CI |
+| `bulk` (T03) | `action:<key>` or `no_bulk@reason` | the action is registered in the bulk planner and its audit actions belong to the feature | runtime |
+| `cli` (T04) | `command:<name>` or `no_cli@reason` | the CLI's command table maps each command to a generated operation of the feature's routes; the commands equal the derived set | runtime (reads the table) |
+| `mcp` (T05) | `tool:<name>` or `no_mcp@reason` | the registered tools whose route is one of the feature's routes equal the claimed set; write tools reach audited, role-gated routes | runtime |
+| `event_as_code` (T06) | `section:<name>` or `no_eac@reason` | the section is in the Event-as-Code document and applies through the feature's own service | runtime |
+| `webhook` (T07) | `emit:<action>=<event type>` or `silent:<action>@reason` per audited change | the pair is read from the same `record_mutation` call in the code; every audited change of the feature is either emitting or silent with a reason | runtime |
+| `archive` (T08) | `table:<model>` or `excluded@reason` | the model is in the archive's table list or says why it is not | runtime |
+
+Rules shared by all eight: a surface that does not fit a feature says so with a reason of at least 20 characters rather than staying unclaimed; a feature whose surface is owed is `planned` with the owning task; a surface verifier never imports a domain app, never writes, and holds the claim to code that exists today; no surface adds a business rule, a second registry or a new endpoint (a gap a task finds is fixed inside its own property with a compatibility test, as in B01). The Operations page gains one column per landed property.
+
+**Base UI as built (T01).** `core/features_ui.py` verifies `component:`, `test:` and `no_ui@` refs at runtime (shape, paths, reasons) and in CI (`check_static`): each screen exists, a quoted last route segment of the feature appears in the non-test sources beside it, and a named test mentions the screen. Fourteen features have a screen (event and track share the event dashboard); announcements have none and are `planned` for PD-S009-B02-T03. The check found that the project test renders the team workspace and not the project screen; the claim now names both. Accepted residual: "reads the feature" is a path-segment match, not proof the screen renders every field.
+

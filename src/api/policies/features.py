@@ -53,6 +53,10 @@ register_feature(
                 "no_query@read whole through its list: an event has tens of policies, so a query "
                 "over them is not offered",
             ),
+            "ui_base": provided(
+                "component:src/web/features/policy-builder/PolicyBuilder.tsx",
+                "test:src/web/features/policy-builder/PolicyBuilder.test.tsx",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

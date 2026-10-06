@@ -1,6 +1,6 @@
 """Features of events (completeness contract, PD-F003-B01)."""
 
-from core.features import Feature, Lifecycle, provided, register_feature
+from core.features import Feature, Lifecycle, planned, provided, register_feature
 
 register_feature(
     Feature(
@@ -57,6 +57,12 @@ register_feature(
             "search": provided(
                 "no_query@read whole through the workspace's event list: a workspace runs a few "
                 "dozen events, so a query over them is not offered",
+            ),
+            "ui_base": provided(
+                "component:src/web/features/event-builder/EventDashboard.tsx",
+                "component:src/web/features/event-builder/CreateEvent.tsx",
+                "test:src/web/features/event-builder/EventDashboard.test.tsx",
+                "test:src/web/features/event-builder/CreateEvent.test.tsx",
             ),
         },
         lifecycle=Lifecycle(
@@ -120,6 +126,10 @@ register_feature(
                 "no_query@read whole through its list: an event has a handful of tracks, so a "
                 "query over them is not offered",
             ),
+            "ui_base": provided(
+                "component:src/web/features/event-builder/EventDashboard.tsx",
+                "test:src/web/features/event-builder/EventDashboard.test.tsx",
+            ),
         },
         lifecycle=Lifecycle(
             "none", note="Edited in place and deleted (track.deleted); position orders it."
@@ -175,6 +185,10 @@ register_feature(
                 "entity:applications",
                 "fields:username,status,note,waitlist_position,decided_by,decided_at,created_at",
                 "test:tests/integration/test_entity_query.py::test_every_registered_field_resolves_against_the_database",
+            ),
+            "ui_base": provided(
+                "component:src/web/features/event-builder/RegistrationPanel.tsx",
+                "test:src/web/features/event-builder/RegistrationPanel.test.tsx",
             ),
         },
         lifecycle=Lifecycle(
@@ -242,6 +256,10 @@ register_feature(
             "search": provided(
                 "no_query@read whole through its list: an event has a handful of announcements, "
                 "so a query over them is not offered",
+            ),
+            "ui_base": planned(
+                "PD-S009-B02-T03",
+                "No organizer screen posts announcements yet; they are read on the event site.",
             ),
         },
         lifecycle=Lifecycle(

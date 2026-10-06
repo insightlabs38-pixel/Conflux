@@ -53,6 +53,10 @@ register_feature(
                 "no_query@read whole through its list: a workspace has a few subscriptions, so a "
                 "query over them is not offered",
             ),
+            "ui_base": provided(
+                "component:src/web/features/integrations/WebhooksPanel.tsx",
+                "test:src/web/features/integrations/WebhooksPanel.test.tsx",
+            ),
         },
         lifecycle=Lifecycle(
             "flag",

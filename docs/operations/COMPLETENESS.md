@@ -130,6 +130,16 @@ The page shows each field with its type, filter and sort flags and how the colum
 
 `tests/integration/test_feature_search.py` asks the engine over HTTP: every entity the platform registers belongs to exactly one claimed feature (a new entity without a claim fails), the catalogue offers exactly the claimed fields to exactly the roles that may read, every claimed field filters and sorts as declared (a field that does not sort is refused), an unclaimed field is refused by name and a query never reaches another event's rows. Two features are entities today (applications, projects); the other thirteen say why a query over them is not offered.
 
+## Base UI (T01)
+
+A feature people work with has a base screen: a component that loads its records from the feature's routes, with a test that renders it. The web source is not part of the running API, so the report shows the claim and the checks that need the source tree run in CI (`check_static`). `features_ui.verify` holds a `ui_base` claim to the code:
+
+- `component:<src/web path>` (one or more): the file exists, and among the non-test sources of its own folder a quoted string holds the last literal segment of a route the feature claims under `authorization` (`tracks/`, `messages/`), so a component cannot be named for a feature it never reads;
+- `test:<src/web path>`: the test file exists and mentions one of the components;
+- `no_ui@<reason>`: there is no screen yet, and why; a feature whose screen is owed is `planned` with the owning task (announcements, PD-S009-B02-T03).
+
+Codes: `bad_ref`, `both`, `no_reason`, `no_component`, `no_test`, `component_path`, `test_path`, `no_routes`; CI: `component_missing`, `screen_reads_nothing`, `test_missing`, `test_unrelated`. The CI check found that the project test renders the team workspace and not the project screen; the claim now names both.
+
 ## The report
 
 `GET /api/v1/workspaces/{id}/completeness/` (organizers and admins; `Cache-Control: private, no-store`; no write method) returns `{properties[], features[], totals, problems[], ok}`. Each feature carries its derived id type and states, its lifecycle graph, its claims and its findings. The page shows findings first (an alert), then a dense features table with identity and a closed lifecycle per row, and the properties not checked yet behind details.

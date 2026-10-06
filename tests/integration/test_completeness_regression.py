@@ -25,6 +25,7 @@ LANDED = [
     "rest",
     "sdk",
     "search",
+    "ui_base",
 ]
 
 
@@ -39,13 +40,11 @@ def test_every_landed_property_is_claimed_and_verified_for_all_fifteen_features(
     report = ft.report()
     assert report["ok"] is True and report["problems"] == []
     for prop in LANDED:
-        assert (
-            report["totals"][prop]["provided"] + report["totals"][prop].get("not_applicable", 0)
-            == 15
-        )
+        assert report["totals"][prop]["unclaimed"] == 0, prop
+        assert report["totals"][prop]["planned"] <= 1, prop  # an owed screen, with its owner
     # the properties of the other batches are not claimed yet, and the report says so
     pending = [p["key"] for p in report["properties"] if not p["landed"]]
-    assert len(pending) == 13 and not set(pending) & set(LANDED)
+    assert len(pending) == 21 - len(LANDED) and not set(pending) & set(LANDED)
 
 
 def test_no_route_change_action_or_entity_is_claimed_by_two_features():
@@ -102,7 +101,7 @@ def test_the_report_is_derived_query_free_and_free_of_secrets(django_assert_num_
     assert not re.search(r"whsec_|secret_key|password|Bearer [A-Za-z0-9]{16,}", text, flags=re.I)
     for row in report["features"]:
         for prop in LANDED:
-            assert row["claims"][prop]["state"] in ("provided", "not_applicable"), (
+            assert row["claims"][prop]["state"] in ("provided", "not_applicable", "planned"), (
                 row["key"],
                 prop,
             )
@@ -172,7 +171,7 @@ def test_a_system_that_changes_makes_a_claim_fail(monkeypatch):
     from core import entities as registry
 
     # a search field added without a claim
-    entity = registry._ENTITIES["applications"]
+    entity = registry.entities()["applications"]  # discovers the registrations first
     extra = registry.Field("extra", registry.TEXT, "note", "Extra")
     monkeypatch.setitem(
         registry._ENTITIES,

@@ -60,6 +60,10 @@ register_feature(
                 "no_query@read per project through its own list; a project holds a few artifacts, "
                 "so a query over them is not offered",
             ),
+            "ui_base": provided(
+                "component:src/web/features/artifacts/ArtifactPanel.tsx",
+                "test:src/web/features/artifacts/ArtifactPanel.test.tsx",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",

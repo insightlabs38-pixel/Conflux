@@ -93,6 +93,8 @@ SDKC = ft.provided(
 
 SEARCH = ft.provided("no_query@read whole through its list: a person saves a few views per event")
 
+UI = ft.provided("no_ui@a saved view is made from the grid toolbar, not on a screen of its own")
+
 
 def identity(*refs):
     return ft.provided(*(refs or ("field:public_id",)))
@@ -113,6 +115,7 @@ def only(feature_key="x", **over):
             "rest": REST,
             "sdk": SDKC,
             "search": SEARCH,
+            "ui_base": UI,
         },
         "lifecycle": ft.Lifecycle("none", note="Edited in place."),
     }
@@ -125,6 +128,7 @@ def only(feature_key="x", **over):
         "rest": REST,
         "sdk": SDKC,
         "search": SEARCH,
+        "ui_base": UI,
         **values["claims"],
     }
     ft.FEATURES.clear()
@@ -148,6 +152,7 @@ def test_the_fifteen_features_agree_with_the_live_system():
         "rest",
         "sdk",
         "search",
+        "ui_base",
     ]
 
 
@@ -265,6 +270,7 @@ def test_a_well_formed_independent_feature_passes(isolated):
             "rest": REST,
             "sdk": SDKC,
             "search": SEARCH,
+            "ui_base": UI,
         },
         ft.Lifecycle("none", note="Edited in place and deleted."),
     )
@@ -485,6 +491,7 @@ def test_the_endpoint_reports_a_broken_claim_instead_of_hiding_it(world, isolate
             "rest": ft.FEATURES["event"].claims["rest"],
             "sdk": ft.FEATURES["event"].claims["sdk"],
             "search": ft.FEATURES["event"].claims["search"],
+            "ui_base": ft.FEATURES["event"].claims["ui_base"],
         },
         ft.FEATURES["event"].lifecycle,
     )
@@ -1292,3 +1299,88 @@ def test_a_route_narrower_than_the_claim_is_pinned_so_widening_it_alone_fails():
     assert "narrow_mismatch" in codes(verify_authorization(wrong, "projects.Submission"))
     real = ft.FEATURES["submission"].claims["authorization"].refs
     assert "narrow:submission-reopen:POST=admin,organizer" in real
+
+
+# --- base UI (T01) --------------------------------------------------------------------------------
+
+SCREEN = (
+    "component:src/web/features/tracks/TrackPanel.tsx",
+    "test:src/web/features/tracks/TrackPanel.test.tsx",
+)
+
+
+def verify_ui_base(refs, authorization=AUTHZ):
+    claims = {"ui_base": ft.provided(*refs)}
+    if authorization is not None:
+        claims["authorization"] = authorization
+    feature = ft.Feature("s", "S", "core.SavedView", claims)
+    return ft.VERIFIERS["ui_base"](feature, feature.claims["ui_base"], ft.System())
+
+
+def test_a_real_ui_base_claim_names_a_screen_a_test_and_what_it_reads():
+    assert verify_ui_base(SCREEN) == []
+    row = {f["key"]: f for f in ft.report()["features"]}
+    facts = row["track"]["facts"]["ui_base"]
+    assert facts["screens"] == ["EventDashboard.tsx"] and facts["tests"] == [
+        "EventDashboard.test.tsx"
+    ]
+    assert facts["reads"] == ["tracks"]
+    assert row["event"]["facts"]["ui_base"]["screens"] == ["EventDashboard.tsx", "CreateEvent.tsx"]
+    assert row["announcement"]["claims"]["ui_base"]["state"] == "planned"
+    assert row["announcement"]["claims"]["ui_base"]["owner"] == "PD-S009-B02-T03"
+
+
+@pytest.mark.parametrize(
+    ("refs", "code"),
+    [
+        (("no_ui@short",), "no_reason"),
+        (SCREEN + ("no_ui@a long enough reason why there is no screen at all",), "both"),
+        (SCREEN[:1], "no_test"),
+        (SCREEN[1:], "no_component"),
+        (("component:src/web/features/x/Y.ts", SCREEN[1]), "component_path"),
+        (("component:src/web/features/x/Y.test.tsx", SCREEN[1]), "component_path"),
+        ((SCREEN[0], "test:src/web/features/x/Y.tsx"), "test_path"),
+        (SCREEN + ("color:red",), "bad_ref"),
+    ],
+)
+def test_each_ui_base_failure_has_a_code(refs, code):
+    assert code in codes(verify_ui_base(refs))
+
+
+def test_a_screen_needs_routes_to_read():
+    assert "no_routes" in codes(verify_ui_base(SCREEN, authorization=None))
+
+
+def web_tree(tmp_path, *, component=True, reads="tracks/", test_mentions="TrackPanel"):
+    folder = tmp_path / "src/web/features/tracks"
+    folder.mkdir(parents=True)
+    if component:
+        (folder / "TrackPanel.tsx").write_text(f'const url = base + "{reads}";\n')
+    (folder / "TrackPanel.test.tsx").write_text(f"import {{ {test_mentions} }} from './x';\n")
+    return tmp_path
+
+
+@pytest.mark.parametrize(
+    ("options", "expected"),
+    [
+        ({}, []),
+        ({"component": False}, ["component_missing"]),
+        ({"reads": "elsewhere/"}, ["screen_reads_nothing"]),
+        ({"test_mentions": "SomethingElse"}, ["test_unrelated"]),
+    ],
+)
+def test_the_ui_ci_check_finds_a_missing_screen_one_that_reads_nothing_and_an_unrelated_test(
+    isolated, tmp_path, options, expected
+):
+    web_tree(tmp_path, **options)
+    claims = {
+        "authorization": ft.provided(
+            "route:track-list", "scope:event", "readers:members", "writers:admin,organizer",
+            "narrow:track-list:POST=admin,organizer", "test:tests/x.py::test_y",
+        ),
+        "ui_base": ft.provided(*SCREEN),
+    }  # fmt: skip
+    ft.FEATURES.clear()
+    ft.register_feature(ft.Feature("x", "X", "events.Track", claims))
+    found = [p for p in ft.check_static(tmp_path) if p["property"] == "ui_base"]
+    assert codes(found) == expected

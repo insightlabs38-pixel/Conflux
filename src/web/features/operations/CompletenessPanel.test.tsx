@@ -355,6 +355,10 @@ describe("completeness helpers", () => {
       "Operations in both SDKs: GET track-list: Track[]",
     );
     expect(factText("count", 4)).toBe("Operations: 4");
+    expect(factText("screens", ["EventDashboard.tsx"])).toBe(
+      "Screens: EventDashboard.tsx",
+    );
+    expect(factText("screen", "none yet")).toBe("Screen: none yet");
     expect(factText("roles", ["admin", "organizer"])).toBe(
       "Who can query: admin, organizer",
     );

@@ -53,6 +53,10 @@ register_feature(
                 "no_query@read whole through its list: a stage has one or two plans, so a query "
                 "over them is not offered",
             ),
+            "ui_base": provided(
+                "component:src/web/features/judging/EvaluationBuilder.tsx",
+                "test:src/web/features/judging/EvaluationBuilder.test.tsx",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

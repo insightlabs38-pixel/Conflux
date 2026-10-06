@@ -53,6 +53,10 @@ register_feature(
                 "no_query@read whole through its list: an event has a handful of stages, so a "
                 "query over them is not offered",
             ),
+            "ui_base": provided(
+                "component:src/web/features/stage-builder/StageBuilder.tsx",
+                "test:src/web/features/stage-builder/StageBuilder.test.tsx",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

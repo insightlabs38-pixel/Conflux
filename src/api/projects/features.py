@@ -55,6 +55,11 @@ register_feature(
                 "fields:name,description,track,team,created_by,gallery_visible,gallery_blocked,created_at",
                 "test:tests/integration/test_entity_query.py::test_every_registered_field_resolves_against_the_database",
             ),
+            "ui_base": provided(
+                "component:src/web/features/artifacts/ProjectWorkspace.tsx",
+                "component:src/web/features/teams/TeamWorkspace.tsx",
+                "test:src/web/features/artifacts/ProjectWorkspace.test.tsx",
+            ),
         },
         lifecycle=Lifecycle(
             "none",
@@ -119,6 +124,10 @@ register_feature(
             "search": provided(
                 "no_query@read per project and stage through its own routes; submissions are "
                 "searched through the projects entity",
+            ),
+            "ui_base": provided(
+                "component:src/web/features/submissions/SubmissionPanel.tsx",
+                "test:src/web/features/submissions/SubmissionPanel.test.tsx",
             ),
         },
         lifecycle=Lifecycle(

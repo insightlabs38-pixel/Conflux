@@ -139,6 +139,10 @@ const FACT_LABEL: Record<string, string> = {
   privacy: "Privacy",
   hooks: "Hooks",
   extension: "Extension",
+  versions: "Immutable versions",
+  counters: "Version counters",
+  compare: "Compared with",
+  versioning: "Versioning",
 };
 
 /** One derived fact as a sentence fragment: lists joined, booleans as yes or no. */

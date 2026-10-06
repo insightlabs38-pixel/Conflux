@@ -114,6 +114,10 @@ register_feature(
                 "no_extension@the event record offers no hook of its own; its timeline and page "
                 "blocks are declared by apps that have no feature",
             ),
+            "versioning": provided(
+                "immutable:governance.RulesVersion",
+                "test:tests/integration/test_feature_versioning.py::test_each_claimed_version_model_refuses_an_edit_and_a_delete",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",
@@ -220,6 +224,10 @@ register_feature(
             ),
             "extension": provided(
                 "no_extension@tracks are configuration of the event and have no extension point",
+            ),
+            "versioning": provided(
+                "in_place@a track is edited in place and each change is audited; nothing refers "
+                "to an earlier state of it",
             ),
         },
         lifecycle=Lifecycle(
@@ -332,6 +340,10 @@ register_feature(
                 "hook:entity=events",
                 "hook:thread_subject=events",
                 "test:tests/integration/test_feature_extension.py::test_every_hook_pair_is_claimed_once_and_the_manifests_agree_with_the_live_registries",
+            ),
+            "versioning": provided(
+                "in_place@an application moves forward through its decision and each change is "
+                "audited",
             ),
         },
         lifecycle=Lifecycle(
@@ -449,6 +461,10 @@ register_feature(
             "extension": provided(
                 "no_extension@announcements are content; their notification category is "
                 "declared with messaging",
+            ),
+            "versioning": provided(
+                "counter:version",
+                "test:tests/integration/test_feature_versioning.py::test_each_claimed_version_model_refuses_an_edit_and_a_delete",
             ),
         },
         lifecycle=Lifecycle(

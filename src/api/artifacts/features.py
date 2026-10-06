@@ -110,6 +110,9 @@ register_feature(
                 "hook:preview_source=artifacts",
                 "test:tests/integration/test_feature_extension.py::test_every_hook_pair_is_claimed_once_and_the_manifests_agree_with_the_live_registries",
             ),
+            "versioning": provided(
+                "in_place@an artifact is replaced by adding another and each change is audited",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",

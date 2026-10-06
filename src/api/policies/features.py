@@ -100,6 +100,10 @@ register_feature(
                 "no_extension@policies run in one deterministic engine that is not extensible "
                 "by design",
             ),
+            "versioning": provided(
+                "in_place@a policy is edited in place and each change is audited with what it "
+                "changed",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

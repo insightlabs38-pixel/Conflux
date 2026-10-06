@@ -36,6 +36,7 @@ LANDED = [
     "analytics",
     "privacy",
     "extension",
+    "versioning",
 ]
 
 

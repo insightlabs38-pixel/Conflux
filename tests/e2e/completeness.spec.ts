@@ -284,6 +284,17 @@ for (const width of [390, 1440]) {
     await expect(
       stage.getByText("Hooks: advancement_strategy", { exact: false }),
     ).toBeVisible();
+    // Versions and migration: immutable versions, counters and what a version can be compared with.
+    await expect(
+      table.getByRole("columnheader", { name: "Version and migration" }),
+    ).toBeVisible();
+    const form = table.locator("tbody tr").filter({
+      has: page.getByRole("rowheader", { name: /^Form \(form\)/ }),
+    });
+    await form.getByText("Provided", { exact: true }).nth(18).click();
+    await expect(
+      form.getByText("Immutable versions: forms.FormVersion", { exact: false }),
+    ).toBeVisible();
     // A feature without a state machine says how its records change.
     const track = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Track \(track\)/ }),

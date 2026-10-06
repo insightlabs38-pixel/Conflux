@@ -406,6 +406,16 @@ describe("completeness helpers", () => {
       factText("hooks", ["bulk_action (send): registered in code only"]),
     ).toBe("Hooks: bulk_action (send): registered in code only");
     expect(factText("extension", "no hook")).toBe("Extension: no hook");
+    expect(factText("versions", ["forms.FormVersion"])).toBe(
+      "Immutable versions: forms.FormVersion",
+    );
+    expect(factText("counters", ["draft_revision"])).toBe(
+      "Version counters: draft_revision",
+    );
+    expect(factText("compare", ["form"])).toBe("Compared with: form");
+    expect(factText("versioning", "edited in place")).toBe(
+      "Versioning: edited in place",
+    );
     expect(factText("privacy", "no personal data")).toBe(
       "Privacy: no personal data",
     );

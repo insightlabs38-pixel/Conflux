@@ -114,6 +114,10 @@ register_feature(
                 "hook:thread_subject=projects",
                 "test:tests/integration/test_feature_extension.py::test_every_hook_pair_is_claimed_once_and_the_manifests_agree_with_the_live_registries",
             ),
+            "versioning": provided(
+                "in_place@a project is edited in place; the finalized submission is its "
+                "versioned record",
+            ),
         },
         lifecycle=Lifecycle(
             "none",
@@ -231,6 +235,11 @@ register_feature(
             "extension": provided(
                 "no_extension@a submission is one fixed lifecycle; the extension points sit on "
                 "the project",
+            ),
+            "versioning": provided(
+                "immutable:projects.SubmissionVersion",
+                "counter:draft_revision",
+                "test:tests/integration/test_feature_versioning.py::test_each_claimed_version_model_refuses_an_edit_and_a_delete",
             ),
         },
         lifecycle=Lifecycle(

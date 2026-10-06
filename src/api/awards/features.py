@@ -96,6 +96,9 @@ register_feature(
                 "no_extension@awards are decided by deterministic rules that are not extensible "
                 "by design",
             ),
+            "versioning": provided(
+                "in_place@an award is edited until it is published and each change is audited",
+            ),
         },
         lifecycle=Lifecycle(
             "timestamp",

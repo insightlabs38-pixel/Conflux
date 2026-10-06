@@ -108,6 +108,14 @@ register_feature(
                 "hook:version_source=evaluations",
                 "test:tests/integration/test_feature_extension.py::test_every_hook_pair_is_claimed_once_and_the_manifests_agree_with_the_live_registries",
             ),
+            "versioning": provided(
+                "immutable:evaluations.RubricVersion",
+                "immutable:evaluations.AssignmentVersion",
+                "immutable:evaluations.NormalizationRun",
+                "immutable:evaluations.PairwiseRun",
+                "diff:rubric",
+                "test:tests/integration/test_feature_versioning.py::test_each_claimed_version_model_refuses_an_edit_and_a_delete",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

@@ -119,6 +119,20 @@ EVENT_PRIV = ft.provided(
     "no_personal_data@the event record names no person; people's rows hang off it",
 )
 
+VERS = ft.provided(
+    "counter:version",
+    "test:tests/integration/test_feature_versioning.py"
+    "::test_each_claimed_version_model_refuses_an_edit_and_a_delete",
+)
+
+EVENT_VERS = ft.provided(
+    "immutable:governance.RulesVersion",
+    "test:tests/integration/test_feature_versioning.py"
+    "::test_each_claimed_version_model_refuses_an_edit_and_a_delete",
+)
+
+WEBHOOK_VERS = ft.provided("in_place@a subscription is edited in place and each change is audited")
+
 EXT = ft.provided("no_extension@a saved view is a personal setting and offers no extension point")
 
 ANAL = ft.provided("no_analytics@a saved view is a personal setting and not activity in an event")
@@ -180,6 +194,7 @@ def only(feature_key="x", **over):
             "analytics": ANAL,
             "privacy": PRIV,
             "extension": EXT,
+            "versioning": VERS,
         },
         "lifecycle": ft.Lifecycle("none", note="Edited in place."),
     }
@@ -203,6 +218,7 @@ def only(feature_key="x", **over):
         "analytics": ANAL,
         "privacy": PRIV,
         "extension": EXT,
+        "versioning": VERS,
         **values["claims"],
     }
     ft.FEATURES.clear()
@@ -237,6 +253,7 @@ def test_the_fifteen_features_agree_with_the_live_system():
         "analytics",
         "privacy",
         "extension",
+        "versioning",
     ]
 
 
@@ -365,6 +382,7 @@ def test_a_well_formed_independent_feature_passes(isolated):
             "analytics": ANAL,
             "privacy": PRIV,
             "extension": EXT,
+            "versioning": VERS,
         },
         ft.Lifecycle("none", note="Edited in place and deleted."),
     )
@@ -416,6 +434,7 @@ def event(isolated, **life):
             "identity": identity("field:public_id", "route:event-detail"),
             "event_as_code": EVENT_EAC,
             "archive": EVENT_ARCH,
+            "versioning": EVENT_VERS,
             "privacy": EVENT_PRIV,
         },
         lifecycle=event_life(**life),
@@ -462,6 +481,7 @@ def test_a_timestamp_or_flag_lifecycle_names_its_two_states(isolated):
             claims={
                 "identity": identity("field:public_id", "route:webhook-detail"),
                 "privacy": EVENT_PRIV,
+                "versioning": WEBHOOK_VERS,
             },
         )
         == []
@@ -604,6 +624,7 @@ def test_the_endpoint_reports_a_broken_claim_instead_of_hiding_it(world, isolate
             "analytics": ft.FEATURES["event"].claims["analytics"],
             "privacy": ft.FEATURES["event"].claims["privacy"],
             "extension": ft.FEATURES["event"].claims["extension"],
+            "versioning": ft.FEATURES["event"].claims["versioning"],
         },
         ft.FEATURES["event"].lifecycle,
     )

@@ -96,6 +96,9 @@ register_feature(
                 "hook:notification_category=communications",
                 "test:tests/integration/test_feature_extension.py::test_every_hook_pair_is_claimed_once_and_the_manifests_agree_with_the_live_registries",
             ),
+            "versioning": provided(
+                "in_place@a sent message never changes; the audit trail records that it was sent",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

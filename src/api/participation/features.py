@@ -119,6 +119,9 @@ register_feature(
                 "no_extension@teams have no extension point; their membership rules are fixed "
                 "in the domain",
             ),
+            "versioning": provided(
+                "in_place@a team is edited by its members in place and each change is audited",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

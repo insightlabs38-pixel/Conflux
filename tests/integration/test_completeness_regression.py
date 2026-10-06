@@ -347,3 +347,127 @@ def test_a_system_that_changes_makes_a_surface_claim_fail(monkeypatch):
     assert "table_unknown" in codes()
     monkeypatch.undo()
     assert ft.check() == []
+
+
+# --- the five platform properties (PD-F003-B03-T90) ----------------------------------------------
+
+
+def platform_items():
+    """Every item the five platform claims name, with the features that claim it."""
+    from core import (
+        features_analytics,
+        features_extension,
+        features_privacy,
+        features_versioning,
+    )
+
+    found = {k: {} for k in ("measure", "bucket", "hook", "version", "counter", "diff")}
+    for feature in ft.FEATURES.values():
+        c = feature.claims
+        measures = features_analytics.parse(c["analytics"])[1]
+        for path in measures:
+            found["measure"].setdefault(path, set()).add(feature.key)
+        buckets = features_privacy.parse(c["privacy"])[0]
+        for kind, names in buckets.items():
+            for name in names:
+                found["bucket"].setdefault(name, set()).add(feature.key)
+        for hook in features_extension.parse(c["extension"])[0]:
+            found["hook"].setdefault(hook, set()).add(feature.key)
+        immutable, counters, diffs = features_versioning.parse(c["versioning"])[:3]
+        for label in immutable:
+            found["version"].setdefault(label, set()).add(feature.key)
+        for name in counters:
+            found["counter"].setdefault((feature.model, name), set()).add(feature.key)
+        for name in diffs:
+            found["diff"].setdefault(name, set()).add(feature.key)
+    return found
+
+
+def test_no_measure_bucket_hook_version_counter_or_source_is_claimed_by_two_features():
+    shared = {
+        kind: {item: who for item, who in found.items() if len(who) > 1}
+        for kind, found in platform_items().items()
+    }
+    assert not any(shared.values()), shared
+
+
+def test_the_platform_properties_count_what_the_documents_say():
+    """The matrix and the guide state these numbers; a change must update them on purpose."""
+    found = platform_items()
+    assert {k: len(v) for k, v in found.items()} == {
+        "measure": 15,
+        "bucket": 13,
+        "hook": 18,
+        "version": 7,
+        "counter": 2,
+        "diff": 2,
+    }
+    states = {
+        prop: {f.claims[prop].state for f in ft.FEATURES.values()}
+        for prop in ("analytics", "privacy", "extension", "versioning")
+    }
+    assert all(s == {"provided"} for s in states.values())  # each says something real or why not
+    fixtures = [f.claims["fixtures"].state for f in ft.FEATURES.values()]
+    assert (fixtures.count("provided"), fixtures.count("planned")) == (9, 5)
+    assert fixtures.count("not_applicable") == 1
+
+
+def test_every_one_of_the_21_properties_is_landed_and_nothing_is_pending():
+    report = ft.report()
+    assert len(report["properties"]) == 21 and all(p["landed"] for p in report["properties"])
+    assert report["ok"] is True and report["problems"] == []
+    assert ft.landed() == LANDED and len(LANDED) == 21
+
+
+def test_the_bucket_hook_and_person_claims_cover_what_the_services_hold():
+    """A person-data bucket, a manifest kind or a user column nobody claims fails a suite."""
+    from core import features_extension, features_privacy
+
+    table = features_privacy.service_buckets(ft.System())
+    claimed = set(platform_items()["bucket"]) | set(features_privacy.OUTSIDE)
+    assert set(table) == claimed
+    assert {(m, k) for (k, m) in platform_items()["hook"]} | set(
+        features_extension.OUTSIDE
+    ) == features_extension.pairs()
+
+
+def test_a_system_that_changes_makes_a_platform_claim_fail(monkeypatch):
+    """Each platform claim is held to its registry: change the registry and the claim fails."""
+    from core import (
+        features_analytics,
+        features_fixtures,
+        features_privacy,
+        features_versioning,
+    )
+
+    def codes():
+        return {p["code"] for p in ft.check(ft.System())}
+
+    assert ft.check() == []
+    # the analytics module starts to count a model a feature said it does not
+    counted = features_analytics.counted_models()
+    monkeypatch.setattr(features_analytics, "counted_models", lambda: {*counted, "events.Track"})
+    assert "analytics_exists" in codes()
+    monkeypatch.undo()
+    # the privacy service starts to handle a model's rows that no claim mentions
+    real = features_privacy.service_buckets
+    monkeypatch.setattr(
+        features_privacy,
+        "service_buckets",
+        lambda system: {**real(system), "track_notes": ("erased", "events.Track")},
+    )
+    assert "personal_exists" in codes()
+    monkeypatch.undo()
+    # a version model appears under a feature that said it is edited in place
+    monkeypatch.setattr(
+        features_versioning,
+        "version_models",
+        lambda feature: ["events.Track"] if feature.key == "track" else [],
+    )
+    assert "versions_exist" in codes()
+    monkeypatch.undo()
+    # the generator no longer builds the scenario a feature says creates it
+    monkeypatch.setattr(features_fixtures, "scenario_exists", lambda system, key: False)
+    assert "scenario_unknown" in codes()
+    monkeypatch.undo()
+    assert ft.check() == []

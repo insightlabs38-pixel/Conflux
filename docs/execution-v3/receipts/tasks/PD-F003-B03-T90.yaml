@@ -1,0 +1,90 @@
+version: 3
+task: PD-F003-B03-T90
+batch: PD-F003-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: abe64ab
+  head_commit: abe64ab
+changed_paths:
+- docs/verification/PD-F003-B03/ (MATRIX.md, T90-e2e-fast.log)
+- tests/integration/test_completeness_regression.py
+- tests/e2e/workspace-shell.spec.ts
+deliverables:
+- item: Verification matrix for the five capability tasks with an executable proof for each dimension
+  result: pass
+  evidence: "MATRIX.md covers positive, negative and boundary, authorization, lifecycle and compatibility, concurrency, whole-registry regression and UI states for T01-T05; every cited test name was checked to exist by script (31 names)"
+- item: Observable state and diagnostics
+  result: pass
+  evidence: "the new cross-cutting tests prove all 21 properties are landed with nothing pending, no measure, bucket, hook, version model, counter or source has two owners, the counts the documents state (15 measures, 13 buckets, 18 hook pairs, 7 version models, 9 seeded and 5 planned features), every service bucket and manifest pair is claimed or named outside, and a changed registry makes each platform claim fail"
+- item: Focused tests for the real workflow
+  result: pass
+  evidence: "component tests for derived facts of every property and the browser spec at 390 and 1440 with axe and an overflow check open the five new columns of a real event and assert that no property is left pending"
+invariants:
+- item: One source of truth, no business rule in a surface
+  result: pass
+  evidence: "the claim names what the registry holds and the verifier reads it; nothing is registered or executed by the contract"
+- item: Server-side authorization, validation and audit remain authoritative
+  result: pass
+  evidence: "no route, authorization or audit change"
+verification:
+- command: "uv run --frozen pytest -n auto --dist worksteal -q"
+  result: pass
+  note: "2814 passed, 31 skipped"
+- command: "pnpm --filter @conflux/web test; makemigrations --check --dry-run"
+  result: pass
+  note: "658 web tests; no migration changes"
+- command: "make e2e-fast"
+  result: pass
+  note: "224 passed, 0 failed; read-only, isolated-mutation and canary ok; docs/verification/PD-F003-B03/T90-e2e-fast.log"
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: "column on Operations > Completeness"
+- surface: api
+  result: pass
+  evidence: "request proofs for every property"
+- surface: sdk
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: cli
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: mcp
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: event_as_code
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: audit
+  result: pass
+  evidence: "every claimed change classified and proved"
+- surface: webhook
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: archive
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: analytics
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: search
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: docs
+  result: pass
+  evidence: "matrix"
+migrations:
+- none
+findings:
+- "the first full e2e-fast run after rebuilding every service timed out workspace-shell role navigation (organizer, 390) at 30.7s of its fixed 30s budget, the second time in this campaign; it passes alone at 20-22s. The work is linear in the nine organizer destinations (each opened, settled, checked for overflow and accessibility), so the test now sets its budget from the destination count (20s + 5s per destination) instead of the fixed 30s; no assertion changed and the clean rerun is the evidence (P3, test only)"
+limitations:
+- "Listed in the matrix; none are new"
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

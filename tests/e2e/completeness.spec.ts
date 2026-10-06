@@ -121,6 +121,33 @@ for (const width of [390, 1440]) {
         exact: false,
       }),
     ).toBeVisible();
+    // Search: a registered query entity with its fields, or why there is none.
+    await expect(
+      table.getByRole("columnheader", { name: "Search and filter fields" }),
+    ).toBeVisible();
+    await event.getByText("Provided", { exact: true }).nth(6).click();
+    await expect(
+      event.getByText(
+        "Why not: read whole through the workspace's event list",
+        {
+          exact: false,
+        },
+      ),
+    ).toBeVisible();
+    const application = table.locator("tbody tr").filter({
+      has: page.getByRole("rowheader", {
+        name: /^Registration application \(application\)/,
+      }),
+    });
+    await application.getByText("Provided", { exact: true }).nth(6).click();
+    await expect(
+      application.getByText("Query: entity applications"),
+    ).toBeVisible();
+    await expect(
+      application.getByText(
+        "status (enum, filter, sort, scan within one event)",
+      ),
+    ).toBeVisible();
     // A feature without a state machine says how its records change.
     const track = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Track \(track\)/ }),

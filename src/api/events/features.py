@@ -54,6 +54,10 @@ register_feature(
                 "generated:typescript",
                 "test:tests/integration/test_feature_sdk.py::test_every_claimed_operation_works_through_the_generated_python_sdk",
             ),
+            "search": provided(
+                "no_query@read whole through the workspace's event list: a workspace runs a few "
+                "dozen events, so a query over them is not offered",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",
@@ -112,6 +116,10 @@ register_feature(
                 "generated:typescript",
                 "test:tests/integration/test_feature_sdk.py::test_every_claimed_operation_works_through_the_generated_python_sdk",
             ),
+            "search": provided(
+                "no_query@read whole through its list: an event has a handful of tracks, so a "
+                "query over them is not offered",
+            ),
         },
         lifecycle=Lifecycle(
             "none", note="Edited in place and deleted (track.deleted); position orders it."
@@ -162,6 +170,11 @@ register_feature(
                 "generated:python",
                 "generated:typescript",
                 "test:tests/integration/test_feature_sdk.py::test_every_claimed_operation_works_through_the_generated_python_sdk",
+            ),
+            "search": provided(
+                "entity:applications",
+                "fields:username,status,note,waitlist_position,decided_by,decided_at,created_at",
+                "test:tests/integration/test_entity_query.py::test_every_registered_field_resolves_against_the_database",
             ),
         },
         lifecycle=Lifecycle(
@@ -225,6 +238,10 @@ register_feature(
                 "generated:python",
                 "generated:typescript",
                 "test:tests/integration/test_feature_sdk.py::test_every_claimed_operation_works_through_the_generated_python_sdk",
+            ),
+            "search": provided(
+                "no_query@read whole through its list: an event has a handful of announcements, "
+                "so a query over them is not offered",
             ),
         },
         lifecycle=Lifecycle(

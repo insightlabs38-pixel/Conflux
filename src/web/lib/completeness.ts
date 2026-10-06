@@ -106,6 +106,10 @@ const FACT_LABEL: Record<string, string> = {
   no_detail: "No page of its own",
   operations: "Operations in both SDKs",
   count: "Operations",
+  query: "Query",
+  roles: "Who can query",
+  fields: "Searchable fields",
+  why: "Why not",
 };
 
 /** One derived fact as a sentence fragment: lists joined, booleans as yes or no. */

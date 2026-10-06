@@ -50,6 +50,11 @@ register_feature(
                 "generated:typescript",
                 "test:tests/integration/test_feature_sdk.py::test_every_claimed_operation_works_through_the_generated_python_sdk",
             ),
+            "search": provided(
+                "entity:projects",
+                "fields:name,description,track,team,created_by,gallery_visible,gallery_blocked,created_at",
+                "test:tests/integration/test_entity_query.py::test_every_registered_field_resolves_against_the_database",
+            ),
         },
         lifecycle=Lifecycle(
             "none",
@@ -109,6 +114,10 @@ register_feature(
                 "generated:python",
                 "generated:typescript",
                 "test:tests/integration/test_feature_sdk.py::test_every_claimed_operation_works_through_the_generated_python_sdk",
+            ),
+            "search": provided(
+                "no_query@read per project and stage through its own routes; submissions are "
+                "searched through the projects entity",
             ),
         },
         lifecycle=Lifecycle(

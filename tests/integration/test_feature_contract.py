@@ -91,6 +91,8 @@ SDKC = ft.provided(
     "test:tests/integration/test_feature_sdk.py::test_every_claimed_operation_works_through_the_generated_python_sdk",
 )
 
+SEARCH = ft.provided("no_query@read whole through its list: a person saves a few views per event")
+
 
 def identity(*refs):
     return ft.provided(*(refs or ("field:public_id",)))
@@ -110,6 +112,7 @@ def only(feature_key="x", **over):
             "idempotency": IDEM,
             "rest": REST,
             "sdk": SDKC,
+            "search": SEARCH,
         },
         "lifecycle": ft.Lifecycle("none", note="Edited in place."),
     }
@@ -121,6 +124,7 @@ def only(feature_key="x", **over):
         "idempotency": IDEM,
         "rest": REST,
         "sdk": SDKC,
+        "search": SEARCH,
         **values["claims"],
     }
     ft.FEATURES.clear()
@@ -143,6 +147,7 @@ def test_the_fifteen_features_agree_with_the_live_system():
         "idempotency",
         "rest",
         "sdk",
+        "search",
     ]
 
 
@@ -259,6 +264,7 @@ def test_a_well_formed_independent_feature_passes(isolated):
             "idempotency": IDEM,
             "rest": REST,
             "sdk": SDKC,
+            "search": SEARCH,
         },
         ft.Lifecycle("none", note="Edited in place and deleted."),
     )
@@ -478,6 +484,7 @@ def test_the_endpoint_reports_a_broken_claim_instead_of_hiding_it(world, isolate
             "idempotency": ft.FEATURES["event"].claims["idempotency"],
             "rest": ft.FEATURES["event"].claims["rest"],
             "sdk": ft.FEATURES["event"].claims["sdk"],
+            "search": ft.FEATURES["event"].claims["search"],
         },
         ft.FEATURES["event"].lifecycle,
     )
@@ -1114,3 +1121,104 @@ def test_the_sdk_ci_check_reports_a_tree_without_the_generated_files(isolated, t
     ft.FEATURES.clear()
     ft.register_feature(ft.Feature("x", "X", "core.SavedView", {"sdk": SDKC}))
     assert "sdk_missing" in codes(ft.check_static(tmp_path))
+
+
+# --- search (T08) ---------------------------------------------------------------------------------
+
+APPLICATION_FIELDS = "username,status,note,waitlist_position,decided_by,decided_at,created_at"
+ENTITY = (
+    "entity:applications",
+    f"fields:{APPLICATION_FIELDS}",
+    "test:tests/integration/test_entity_query.py::test_every_registered_field_resolves_against_the_database",
+)
+
+
+def verify_search(refs, model="events.EventApplication", authorization=None):
+    claims = {"search": ft.provided(*refs)}
+    if authorization is not None:
+        claims["authorization"] = authorization
+    feature = ft.Feature("s", "S", model, claims)
+    return ft.VERIFIERS["search"](feature, feature.claims["search"], ft.System())
+
+
+def test_a_real_search_claim_is_derived_from_the_registry_and_the_model():
+    assert verify_search(ENTITY) == []
+    row = {f["key"]: f for f in ft.report()["features"]}
+    facts = row["application"]["facts"]["search"]
+    assert facts["query"] == "entity applications" and facts["roles"] == ["admin", "organizer"]
+    assert "username (text, filter, sort, indexed)" in facts["fields"]
+    assert "status (enum, filter, sort, scan within one event)" in facts["fields"]
+    assert row["track"]["facts"]["search"]["query"] == "not offered"
+    entities = {
+        f["key"] for f in ft.report()["features"] if f["facts"]["search"]["query"] != "not offered"
+    }
+    assert entities == {"application", "project"}
+
+
+@pytest.mark.parametrize(
+    ("refs", "code"),
+    [
+        (("entity:nope", f"fields:{APPLICATION_FIELDS}", ENTITY[2]), "entity_missing"),
+        (("entity:applications", "fields:username,status", ENTITY[2]), "fields_mismatch"),
+        (
+            ("entity:applications", f"fields:{APPLICATION_FIELDS},extra", ENTITY[2]),
+            "fields_mismatch",
+        ),
+        (("entity:applications", ENTITY[2]), "fields_ref"),
+        (ENTITY[:2], "no_test"),
+        (("fields:username", ENTITY[2]), "entity_ref"),
+        (ENTITY + ("no_query@a feature cannot be an entity and say it is not",), "both"),
+        (("no_query@short",), "no_reason"),
+        (ENTITY + ("color:red",), "bad_ref"),
+    ],
+)
+def test_each_search_failure_has_a_code(refs, code):
+    assert code in codes(verify_search(refs))
+
+
+def test_a_column_the_model_does_not_have_and_one_with_no_event_to_narrow_by_are_refused():
+    from core import entities as registry
+
+    broken = registry.Entity(
+        key="people",
+        label="People",
+        roles=("admin",),
+        base=lambda event, user: None,
+        fields=(
+            registry.Field("name", registry.TEXT, "no_such_column", "Name"),
+            registry.Field("joined", registry.DATE, "date_joined", "Joined"),
+        ),
+    )
+    registry._ENTITIES["people"] = broken
+    try:
+        found = codes(verify_search(
+            ("entity:people", "fields:name,joined", ENTITY[2]), model="accounts.User"
+        ))  # fmt: skip
+    finally:
+        del registry._ENTITIES["people"]
+    assert "column_unresolved" in found and "unindexed_filter" in found
+
+
+def test_an_entity_may_not_let_a_role_search_what_the_routes_refuse_it():
+    organizers_only = ft.provided(
+        "route:event-application-list", "scope:event", "readers:organizer", "writers:organizer",
+        "test:tests/x.py::test_y",
+    )  # fmt: skip
+    assert verify_search(ENTITY, authorization=organizers_only) != []
+    assert "roles_wider" in codes(verify_search(ENTITY, authorization=organizers_only))
+    both = ft.provided(
+        "route:event-application-list", "scope:event", "readers:admin,organizer",
+        "writers:admin,organizer", "test:tests/x.py::test_y",
+    )  # fmt: skip
+    assert "roles_wider" not in codes(verify_search(ENTITY, authorization=both))
+
+
+def test_a_no_query_claim_needs_a_reason_and_the_search_ci_check_finds_a_missing_test(
+    isolated, tmp_path
+):
+    assert verify_search(("no_query@read whole through its list: a handful of rows",)) == []
+    ft.FEATURES.clear()
+    ft.register_feature(
+        ft.Feature("x", "X", "events.EventApplication", {"search": ft.provided(*ENTITY)})
+    )
+    assert codes(ft.check_static(tmp_path)) == ["test_file"]

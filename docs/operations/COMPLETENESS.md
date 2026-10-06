@@ -116,6 +116,19 @@ Codes: `bad_ref`, `bad_target`, `target_missing`, `no_test`, `no_operations`, `o
 
 `tests/integration/test_feature_sdk.py` calls every claimed operation through the generated Python client, in process against the real API (the client's `opener` is pointed at the Django test client), as the role that makes it: an array for `T[]`, nothing for `null`, a record whose fields are the schema's, and a refusal as an `ApiError` carrying the shared error shape. It ran with no defect after T06, which had already corrected the list types the generated clients inherited.
 
+## Search, filter and index fields (T08)
+
+The platform has one query engine (`core.entities`, `core.query`): a domain registers what may be listed, filtered and sorted about its rows, and the engine compiles a client's query against that registration and nothing else. A feature either is such an entity or says why not, and `features_search.verify` holds the claim to the registry:
+
+- `entity:<key>` and `fields:<a,b,c>`: the entity is registered and the claim lists exactly its registered field keys, so adding or removing a searchable field without updating the claim fails; each field's column path must resolve from the feature's model through forward relations; the entity's roles must be within the roles that may read the feature under `authorization`, so a search cannot reach what the routes refuse;
+- the engine only ever queries the rows `base` returns for one event, so a filter on a column with no index of its own (derived from `db_index`, unique, foreign key, `Meta.indexes` and constraints) scans one event's rows; a filterable column with neither an index nor an event to narrow by is refused (`unindexed_filter`);
+- `no_query@<reason>`: the feature is read whole through its routes and says why a query over it is not offered;
+- `test:`: the proof for an entity (CI checks it exists).
+
+The page shows each field with its type, filter and sort flags and how the column is looked up. Codes: `bad_ref`, `both`, `no_reason`, `entity_ref`, `entity_missing`, `no_test`, `fields_ref`, `fields_mismatch`, `column_unresolved`, `unindexed_filter`, `roles_wider`; CI: `test_file`, `test_name`.
+
+`tests/integration/test_feature_search.py` asks the engine over HTTP: every entity the platform registers belongs to exactly one claimed feature (a new entity without a claim fails), the catalogue offers exactly the claimed fields to exactly the roles that may read, every claimed field filters and sorts as declared (a field that does not sort is refused), an unclaimed field is refused by name and a query never reaches another event's rows. Two features are entities today (applications, projects); the other thirteen say why a query over them is not offered.
+
 ## The report
 
 `GET /api/v1/workspaces/{id}/completeness/` (organizers and admins; `Cache-Control: private, no-store`; no write method) returns `{properties[], features[], totals, problems[], ok}`. Each feature carries its derived id type and states, its lifecycle graph, its claims and its findings. The page shows findings first (an alert), then a dense features table with identity and a closed lifecycle per row, and the properties not checked yet behind details.

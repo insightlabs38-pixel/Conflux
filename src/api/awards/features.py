@@ -46,6 +46,10 @@ register_feature(
                 "generated:typescript",
                 "test:tests/integration/test_feature_sdk.py::test_every_claimed_operation_works_through_the_generated_python_sdk",
             ),
+            "search": provided(
+                "no_query@read whole through its list: an event has tens of awards, so a query "
+                "over them is not offered",
+            ),
         },
         lifecycle=Lifecycle(
             "timestamp",

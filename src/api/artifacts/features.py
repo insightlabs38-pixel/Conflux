@@ -56,6 +56,10 @@ register_feature(
                 "generated:typescript",
                 "test:tests/integration/test_feature_sdk.py::test_every_claimed_operation_works_through_the_generated_python_sdk",
             ),
+            "search": provided(
+                "no_query@read per project through its own list; a project holds a few artifacts, "
+                "so a query over them is not offered",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",

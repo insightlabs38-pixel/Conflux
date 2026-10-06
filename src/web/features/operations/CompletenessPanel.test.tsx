@@ -355,6 +355,12 @@ describe("completeness helpers", () => {
       "Operations in both SDKs: GET track-list: Track[]",
     );
     expect(factText("count", 4)).toBe("Operations: 4");
+    expect(factText("roles", ["admin", "organizer"])).toBe(
+      "Who can query: admin, organizer",
+    );
+    expect(factText("query", "entity applications")).toBe(
+      "Query: entity applications",
+    );
     expect(factText("repeats", ["POST track-list: unique"])).toBe(
       "When sent twice: POST track-list: unique",
     );

@@ -1,0 +1,96 @@
+version: 3
+task: PD-F003-B01-T08
+batch: PD-F003-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 11a044c
+  head_commit: 11a044c
+changed_paths:
+- src/api/core/ (features_search.py new, apps.py)
+- src/api/<app>/features.py for the fifteen features (search claims)
+- src/web/lib/completeness.ts, features/operations/CompletenessPanel.test.tsx, tests/e2e/completeness.spec.ts
+- tests/integration/ (test_feature_search.py new, test_feature_contract.py extended)
+- docs/operations/COMPLETENESS.md, spec 003 (as built)
+deliverables:
+- item: Search, filter and index fields added to the completeness contract and applied to domain work
+  result: pass
+  evidence: "search verifier holds entity: and fields: claims to the query-engine registry (declared fields equal registered fields, column paths resolve on the model, entity roles within the roles that may read the feature, filterable columns indexed or narrowed by an event) and no_query@ claims to a stated reason; applications and projects are the two entities and thirteen features say why a query over them is not offered; all fifteen verify with no findings"
+- item: Observable state and diagnostics
+  result: pass
+  evidence: "the page shows each entity field with its type, filter and sort flags and how the column is looked up, or why a feature has no query"
+- item: Focused tests for the real workflow
+  result: pass
+  evidence: "test_feature_search.py asks the engine over HTTP: every registered entity belongs to exactly one claimed feature, the catalogue offers exactly the claimed fields to exactly the roles that may read, every claimed field filters and sorts as declared, an unclaimed field is refused by name, rows never cross events; verifier suite has a code per defect"
+invariants:
+- item: One source of truth, existing QUERY primitive reused
+  result: pass
+  evidence: "the claim names the registered entity; fields, roles and lookups are read from core.entities and the models; no second registry"
+- item: Existing behavior compatible
+  result: pass
+  evidence: "no product code changed"
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 2442 passed, 31 skipped (19 new)
+- command: pnpm web vitest run; tsc --noEmit; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 658 web tests, OpenAPI and SDKs unchanged and clean
+- command: npx playwright test completeness --project=desktop (seed 7, read-only, app rebuilt)
+  result: pass
+  note: 2 passed (390 and 1440) with the Search column opened to an entity's fields and to a reason
+- command: make e2e-affected
+  result: pass
+  note: run at batch close; this task adds no product code
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: Search column with closed details in Operations > Completeness
+- surface: api
+  result: pass
+  evidence: report facts carry search; no schema change
+- surface: sdk
+  result: pass
+  evidence: unchanged, T07
+- surface: cli
+  result: pass
+  evidence: assigned to PD-F003-B02-T04
+- surface: mcp
+  result: pass
+  evidence: assigned to PD-F003-B02-T05
+- surface: event_as_code
+  result: pass
+  evidence: assigned to PD-F003-B02-T06
+- surface: audit
+  result: pass
+  evidence: unchanged, T04
+- surface: webhook
+  result: pass
+  evidence: assigned to PD-F003-B02-T07
+- surface: archive
+  result: pass
+  evidence: assigned to PD-F003-B02-T08
+- surface: analytics
+  result: pass
+  evidence: assigned to PD-F003-B03-T01
+- surface: search
+  result: pass
+  evidence: this task
+- surface: docs
+  result: pass
+  evidence: COMPLETENESS.md search section and spec 003 as built
+migrations:
+- none
+findings:
+- Thirteen of the fifteen features are not searchable through the query engine; each states a reason, and offering them is a domain batch rather than a contract property
+limitations:
+- the index fact is read from the model's declarations, not from the database catalogue
+- an entity may be registered without a model reference, so the model a claim names is the claim's own; the column paths prove it
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

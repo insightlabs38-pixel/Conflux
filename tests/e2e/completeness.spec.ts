@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator } from "@playwright/test";
 import {
   accessible,
   chooseWorkspaceEvent,
@@ -10,6 +10,21 @@ import {
   settled,
   signIn,
 } from "./support";
+
+// Open a claim in a feature row by the column it sits under, so adding, reordering or planning a
+// claim moves nothing (a position among the "Provided" chips would). The row's own header is its
+// first cell, so the nth data cell is the nth column header less one.
+async function open(table: Locator, row: Locator, column: string) {
+  const headers = await table.getByRole("columnheader").allTextContents();
+  const index = headers.findIndex((text) => text.trim() === column);
+  expect(index, `a column named ${column}`).toBeGreaterThan(2);
+  await row
+    .getByRole("cell")
+    .nth(index - 1)
+    .locator("summary")
+    .first()
+    .click();
+}
 
 // Completeness (PD-F003-B01-T01): an organizer sees which features provide what, with each
 // feature's identity and lifecycle, checked against the running system; nothing can be changed.
@@ -56,7 +71,7 @@ for (const width of [390, 1440]) {
     await expect(
       table.getByRole("columnheader", { name: "Validation and invariants" }),
     ).toBeVisible();
-    await event.getByText("Provided", { exact: true }).first().click();
+    await open(table, event, "Validation and invariants");
     await expect(
       event.getByText("check:events.models.Event.clean"),
     ).toBeVisible();
@@ -67,7 +82,7 @@ for (const width of [390, 1440]) {
     await expect(
       table.getByRole("columnheader", { name: "Authorization and scope" }),
     ).toBeVisible();
-    await event.getByText("Provided", { exact: true }).nth(1).click();
+    await open(table, event, "Authorization and scope");
     await expect(event.getByText("route:event-status")).toBeVisible();
     await expect(
       event.getByText("Who can change: admin,organizer"),
@@ -79,7 +94,7 @@ for (const width of [390, 1440]) {
     await expect(
       table.getByRole("columnheader", { name: "Audit events" }),
     ).toBeVisible();
-    await event.getByText("Provided", { exact: true }).nth(2).click();
+    await open(table, event, "Audit events");
     await expect(
       event.getByText("write:event-status:POST=event.status_changed"),
     ).toBeVisible();
@@ -92,7 +107,7 @@ for (const width of [390, 1440]) {
     await expect(
       table.getByRole("columnheader", { name: "Idempotency and concurrency" }),
     ).toBeVisible();
-    await event.getByText("Provided", { exact: true }).nth(3).click();
+    await open(table, event, "Idempotency and concurrency");
     await expect(
       event.getByText("mode:event-status:POST=natural"),
     ).toBeVisible();
@@ -105,7 +120,7 @@ for (const width of [390, 1440]) {
     await expect(
       table.getByRole("columnheader", { name: "REST representation" }),
     ).toBeVisible();
-    await event.getByText("Provided", { exact: true }).nth(4).click();
+    await open(table, event, "REST representation");
     await expect(event.getByText("list:event-list")).toBeVisible();
     await expect(
       event.getByText("Lists: GET event-list: array of Event"),
@@ -114,7 +129,7 @@ for (const width of [390, 1440]) {
     await expect(
       table.getByRole("columnheader", { name: "Generated SDK" }),
     ).toBeVisible();
-    await event.getByText("Provided", { exact: true }).nth(5).click();
+    await open(table, event, "Generated SDK");
     await expect(event.getByText("generated:typescript")).toBeVisible();
     await expect(
       event.getByText("Operations in both SDKs: GET event-list: Event[]", {
@@ -125,7 +140,7 @@ for (const width of [390, 1440]) {
     await expect(
       table.getByRole("columnheader", { name: "Search and filter fields" }),
     ).toBeVisible();
-    await event.getByText("Provided", { exact: true }).nth(6).click();
+    await open(table, event, "Search and filter fields");
     await expect(
       event.getByText(
         "Why not: read whole through the workspace's event list",
@@ -139,7 +154,7 @@ for (const width of [390, 1440]) {
         name: /^Registration application \(application\)/,
       }),
     });
-    await application.getByText("Provided", { exact: true }).nth(6).click();
+    await open(table, application, "Search and filter fields");
     await expect(
       application.getByText("Query: entity applications"),
     ).toBeVisible();
@@ -152,7 +167,7 @@ for (const width of [390, 1440]) {
     await expect(
       table.getByRole("columnheader", { name: "Base UI" }),
     ).toBeVisible();
-    await event.getByText("Provided", { exact: true }).nth(7).click();
+    await open(table, event, "Base UI");
     await expect(
       event.getByText("Screens: EventDashboard.tsx", { exact: false }),
     ).toBeVisible();
@@ -166,7 +181,7 @@ for (const width of [390, 1440]) {
     await expect(
       table.getByRole("columnheader", { name: "Advanced UI" }),
     ).toBeVisible();
-    await event.getByText("Provided", { exact: true }).nth(8).click();
+    await open(table, event, "Advanced UI");
     await expect(
       event.getByText(
         "Shared components: ConsequenceDialog in EventDashboard.tsx",
@@ -178,7 +193,7 @@ for (const width of [390, 1440]) {
     const trackRow = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Track \(track\)/ }),
     });
-    await trackRow.getByText("Provided", { exact: true }).nth(8).click();
+    await open(table, trackRow, "Advanced UI");
     await expect(
       trackRow.getByText("Advanced: none beyond the base screen", {
         exact: false,
@@ -191,7 +206,7 @@ for (const width of [390, 1440]) {
     const project = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Project \(project\)/ }),
     });
-    await project.getByText("Provided", { exact: true }).nth(9).click();
+    await open(table, project, "Bulk operations");
     await expect(
       project.getByText("Bulk actions: move (Move projects to a track)", {
         exact: false,
@@ -207,7 +222,7 @@ for (const width of [390, 1440]) {
     await expect(
       table.getByRole("columnheader", { name: "CLI" }),
     ).toBeVisible();
-    await event.getByText("Provided", { exact: true }).nth(10).click();
+    await open(table, event, "CLI");
     await expect(
       event.getByText("Commands: conflux-admin events list", { exact: false }),
     ).toBeVisible();
@@ -218,7 +233,7 @@ for (const width of [390, 1440]) {
     const stage = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Stage \(stage\)/ }),
     });
-    await stage.getByText("Provided", { exact: true }).nth(11).click();
+    await open(table, stage, "MCP");
     await expect(
       stage.getByText("Tools: list_stages (read): GET stage-list", {
         exact: false,
@@ -228,7 +243,7 @@ for (const width of [390, 1440]) {
     await expect(
       table.getByRole("columnheader", { name: "Event-as-Code" }),
     ).toBeVisible();
-    await trackRow.getByText("Provided", { exact: true }).nth(12).click();
+    await open(table, trackRow, "Event-as-Code");
     await expect(
       trackRow.getByText("Document sections: tracks: events.Track", {
         exact: false,
@@ -238,7 +253,7 @@ for (const width of [390, 1440]) {
     await expect(
       table.getByRole("columnheader", { name: "Webhooks and outbox" }),
     ).toBeVisible();
-    await trackRow.getByText("Provided", { exact: true }).nth(13).click();
+    await open(table, trackRow, "Webhooks and outbox");
     await expect(
       trackRow.getByText("Sent to subscribers: track.created → track.created", {
         exact: false,
@@ -248,7 +263,7 @@ for (const width of [390, 1440]) {
     await expect(
       table.getByRole("columnheader", { name: "Archive and import" }),
     ).toBeVisible();
-    await trackRow.getByText("Provided", { exact: true }).nth(14).click();
+    await open(table, trackRow, "Archive and import");
     await expect(
       trackRow.getByText("Archived tables: events.track: reached by event", {
         exact: false,
@@ -261,7 +276,7 @@ for (const width of [390, 1440]) {
     const team = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Team \(team\)/ }),
     });
-    await team.getByText("Provided", { exact: true }).nth(15).click();
+    await open(table, team, "Analytics dimensions");
     await expect(
       team.getByText("Summary section: teams", { exact: false }),
     ).toBeVisible();
@@ -272,7 +287,7 @@ for (const width of [390, 1440]) {
     await expect(
       table.getByRole("columnheader", { name: "Retention and privacy" }),
     ).toBeVisible();
-    await team.getByText("Provided", { exact: true }).nth(16).click();
+    await open(table, team, "Retention and privacy");
     await expect(
       team.getByText("Kept as evidence: team_memberships", { exact: false }),
     ).toBeVisible();
@@ -280,7 +295,7 @@ for (const width of [390, 1440]) {
     await expect(
       table.getByRole("columnheader", { name: "Extension hooks" }),
     ).toBeVisible();
-    await stage.getByText("Provided", { exact: true }).nth(17).click();
+    await open(table, stage, "Extension hooks");
     await expect(
       stage.getByText("Hooks: advancement_strategy", { exact: false }),
     ).toBeVisible();
@@ -291,7 +306,7 @@ for (const width of [390, 1440]) {
     const form = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Form \(form\)/ }),
     });
-    await form.getByText("Provided", { exact: true }).nth(18).click();
+    await open(table, form, "Version and migration");
     await expect(
       form.getByText("Immutable versions: forms.FormVersion", { exact: false }),
     ).toBeVisible();
@@ -305,7 +320,7 @@ for (const width of [390, 1440]) {
     await expect(
       table.getByRole("columnheader", { name: "Test fixtures and scenarios" }),
     ).toBeVisible();
-    await trackRow.getByText("Provided", { exact: true }).nth(19).click();
+    await open(table, trackRow, "Test fixtures and scenarios");
     await expect(
       trackRow.getByText("Created by the demo scenario: hackathon", {
         exact: false,

@@ -132,3 +132,18 @@ def test_the_real_claims_verify_clean():
 )
 def test_each_extension_failure_has_a_code(key, refs, code):
     assert code in codes(verify(key, refs))
+
+
+def test_a_hook_a_shared_manifest_provides_and_no_feature_of_it_claims_is_reported(monkeypatch):
+    """`events` declares four features; a new hook there is reported on the first of them."""
+    own = manifest.MANIFESTS["events"]
+    extra = manifest.Manifest(
+        id=own.id,
+        version=own.version,
+        label=own.label,
+        provides=(*own.provides, ("page_block", "hologram")),
+        requires=own.requires,
+    )
+    monkeypatch.setitem(manifest.MANIFESTS, "events", extra)
+    assert "hook_unclaimed" in codes(verify("announcement", real("announcement")))
+    assert "hook_unclaimed" not in codes(verify("track", real("track")))

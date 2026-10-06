@@ -19,6 +19,8 @@ feature's model, in both directions. The report lists the scenario each feature 
 
 import re
 
+from django.core.exceptions import ValidationError
+
 from . import features
 from .features import problem
 
@@ -45,7 +47,7 @@ def scenario_exists(system, key: str) -> bool:
         return False
     try:
         build(key, at=fixed)
-    except Exception:  # noqa: BLE001 - any refusal means the scenario is not a real one
+    except ValidationError:  # the generator's own refusal of a scenario it does not know
         return False
     return True
 

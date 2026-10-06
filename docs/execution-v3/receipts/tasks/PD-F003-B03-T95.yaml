@@ -1,0 +1,98 @@
+version: 3
+task: PD-F003-B03-T95
+batch: PD-F003-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: independent-frontier-review
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 7ec65f4
+  head_commit: 7ec65f4
+changed_paths:
+- src/api/core/features_privacy.py, features_versioning.py, features_extension.py, features_fixtures.py
+- tests/integration/ (test_feature_privacy.py, test_feature_versioning.py, test_feature_extension.py)
+- tests/e2e/completeness.spec.ts
+- docs/operations/COMPLETENESS.md, spec 003 (Review hardening)
+deliverables:
+- item: Independent frontier review of the batch's high-risk invariants (privacy fates, version immutability, hook and bucket coverage)
+  result: pass
+  evidence: "the code-review skill reviewed the whole batch diff (eaabafc..HEAD) at high effort and returned eleven findings; seven are fixed with tests, one is a documented reversal, three are answered and not changed (below)"
+- item: Observable state and diagnostics
+  result: pass
+  evidence: "the report is unchanged in shape; privacy, versioning and extension facts and codes are stricter (person_contradiction, diff_exists, hook_unclaimed across shared manifests)"
+- item: Focused tests for the real workflow
+  result: pass
+  evidence: "tests added for each fix: person fates backed by the column the service finds rows by (person_unbacked, person_contradiction), an exact locked@ counter lock, an in-place feature that hides a comparison source, an unclaimed hook of a shared manifest, an AST scan that finds a multi-line chain and a related manager, and the browser spec opens a claim by its column header"
+invariants:
+- item: One source of truth, no business rule in a surface
+  result: pass
+  evidence: "the claim names what the registry holds and the verifier reads it; nothing is registered or executed by the contract"
+- item: Server-side authorization, validation and audit remain authoritative
+  result: pass
+  evidence: "no route, authorization or audit change"
+verification:
+- command: "make verify-fast (format, lint, pytest -n auto, web tests, build, sdk-check, block-schema-check)"
+  result: pass
+  note: "exit 0 after the fixes; log in docs/verification/PD-F003-B03/T91-verify-fast.log"
+- command: "make e2e-fast"
+  result: pass
+  note: "224 passed, 0 failed after the fixes, from a freshly rebuilt stack; docs/verification/PD-F003-B03/T90-e2e-fast.log"
+- command: "uv run --frozen pytest tests/integration/test_feature_versioning.py test_feature_privacy.py test_feature_extension.py test_feature_contract.py test_completeness_regression.py -n auto"
+  result: pass
+  note: "286 passed in the focused run"
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: "column on Operations > Completeness"
+- surface: api
+  result: pass
+  evidence: "unchanged"
+- surface: sdk
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: cli
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: mcp
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: event_as_code
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: audit
+  result: pass
+  evidence: "unchanged"
+- surface: webhook
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: archive
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: analytics
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: search
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: docs
+  result: pass
+  evidence: "COMPLETENESS.md and the B03 contract in spec 003"
+migrations:
+- none
+findings:
+- "Fixed: a person:<field>=erased|purged claim was backed by any erased or purged bucket of the model, so a different user column could claim it; it now needs a bucket the service finds rows by that column (read from the query it builds for a stub person)"
+- "Fixed: the counter lock was a substring match on the idempotency refs and ignored the claim state; it is now an exact locked@<model>.<field> mode of a provided claim"
+- "Fixed: an in_place@ claim skipped the check for a comparison source the manifest provides (diff_exists); a hook of a manifest that declares several features was only caught by a test and is now reported on the first of them (hook_unclaimed)"
+- "Fixed: the bulk-write guard was a one-line regex; it is an AST scan of update, delete and bulk_update calls whose receiver is built from a version model or its parent's related manager (a queryset held in a variable is still not followed, stated in the docs)"
+- "Fixed: the fixtures verifier's docstring overstated what the running check proves and its broad except hid generator bugs; it now narrows to ValidationError and says the proof ties the feature to the rows; the browser spec no longer selects cells by position"
+- "Reversed: the organizer role-navigation budget (20 s + 5 s per destination) was reverted to the fixed 30 s because AGENTS.md forbids hiding regressions behind timeouts; the flake is recorded in QUESTIONS.md for the owner and the clean rerun is the evidence"
+- "Answered, not changed: marking the seven batch tasks DONE is authorized by the continuous single-agent prompt (section 12: the agent owns selection and execution and may update runtime state when the evidence supports it); the repeated checks of the five verifiers (test-ref regex, reason length, claimed-elsewhere loop) are a refactor over fifteen modules, recorded as a follow-up; announcement counter stale-writer is proved with the other locked changes by the idempotency suite and the wording now says so"
+limitations:
+- "the review is by the same tooling account and model family, so it is not independent of the author (QUESTIONS.md, default A); an owner can still commission a human or second-model review before release"
+- "immutability of version models is a rule of the model, not the database, and the AST scan does not follow a queryset held in a variable (QUESTIONS.md, default A)"
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

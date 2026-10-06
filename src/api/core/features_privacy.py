@@ -31,6 +31,7 @@ from .features import problem
 
 MIN_REASON = 20
 SERVICE = "integrations.privacy"
+STUB_EVENT, STUB_USER = 1000001, 1000002  # ids no query is ever run with
 KINDS = ("erased", "retained", "purged")
 FATES = ("erased", "retained", "purged", "staff")
 
@@ -72,10 +73,37 @@ def service_buckets(system) -> dict[str, tuple[str, str]]:
     private = system.resolve(f"{SERVICE}:_private_artifacts")
     if not (event_model and user_model and personal and retained and private):
         return {}
-    event, user = event_model(pk=1), user_model(pk=1)
+    event, user = event_model(pk=STUB_EVENT), user_model(pk=STUB_USER)
     found = {n: ("erased", q.model._meta.label) for n, q in personal(event, user).items()}
     found |= {n: ("retained", q.model._meta.label) for n, q in retained(event, user).items()}
     found["private_artifacts"] = ("purged", private(event, user).model._meta.label)
+    return found
+
+
+def subject_columns(system) -> dict[str, str]:
+    """bucket -> the column the service filters on to find a person's rows (`user`, `judge`),
+    read from the query each builder returns for a stub person."""
+    event_model, user_model = system.model("events.Event"), system.model("accounts.User")
+    personal = system.resolve(f"{SERVICE}:_personal")
+    retained = system.resolve(f"{SERVICE}:_retained")
+    private = system.resolve(f"{SERVICE}:_private_artifacts")
+    if not (event_model and user_model and personal and retained and private):
+        return {}
+    event, user = event_model(pk=STUB_EVENT), user_model(pk=STUB_USER)
+    found = {}
+
+    def walk(node, name):
+        for child in getattr(node, "children", []):
+            if hasattr(child, "children"):
+                walk(child, name)
+            elif (
+                getattr(getattr(child, "rhs", None), "pk", getattr(child, "rhs", None)) == STUB_USER
+            ):
+                found[name] = child.lhs.target.name
+
+    for name, rows in {**personal(event, user), **retained(event, user)}.items():
+        walk(rows.query.where, name)
+    walk(private(event, user).query.where, "private_artifacts")
     return found
 
 
@@ -174,6 +202,11 @@ def verify(feature, claim, system) -> list[dict]:
     named = [field for field, _, _ in persons]
     for field in sorted(set(columns) - set(named)):
         bad("person_unclaimed", f"{feature.model}.{field} names a person; claim its fate.")
+    kinds = {  # the person columns the service itself looks rows up by, on this model's buckets
+        column: table[name][0]
+        for name, column in subject_columns(system).items()
+        if name in exact and name in claimed
+    }
     for field, fate, why in persons:
         if field not in columns:
             bad("person_unknown", f"{feature.model} has no user column '{field}'.")
@@ -181,10 +214,15 @@ def verify(feature, claim, system) -> list[dict]:
             bad("person_twice", f"'{field}' is claimed twice.")
         if fate not in FATES:
             bad("person_fate", f"'{fate}' is not one of {', '.join(FATES)}.")
-        elif fate in ("erased", "purged") and fate not in {exact.get(n) for n in claimed}:
+        elif fate in ("erased", "purged") and kinds.get(field) != fate:
             bad(
                 "person_unbacked",
-                f"'{field}' is {fate}, but no {fate} bucket of this model is claimed.",
+                f"'{field}' is {fate}, but no claimed {fate} bucket of this model is found by it.",
+            )
+        elif fate in ("retained", "staff") and field in kinds and kinds[field] != fate:
+            bad(
+                "person_contradiction",
+                f"'{field}' is the column the service {kinds[field]} by, not {fate}.",
             )
         elif fate in ("retained", "staff") and len(why.strip()) < MIN_REASON:
             bad("no_reason", f"Say why {field} is {fate} (a short sentence after @).")

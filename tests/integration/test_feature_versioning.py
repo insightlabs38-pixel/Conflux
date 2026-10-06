@@ -4,10 +4,11 @@ A feature keeps numbered immutable versions, a counter a writer must present, a 
 or is edited in place with the audit trail as its history. The verifier reads the models, the
 manifests and the comparison registry; these tests prove the claims by writing: every numbered
 immutable model is claimed once, each refuses an edit and a delete once written, no code bypasses
-that guard with a bulk write, a stale writer is refused by each counter, and the comparison sources
-compare two real versions."""
+that guard with a bulk write, a stale writer is refused by the submission counter (the announcement
+counter is proved with the other locked changes by the idempotency suite), and the comparison
+sources match the registry."""
 
-import re
+import ast
 from pathlib import Path
 
 import pytest
@@ -96,24 +97,77 @@ def test_each_claimed_version_model_refuses_an_edit_and_a_delete():
         assert type(row).objects.filter(pk=row.pk).exists(), f"{label} was changed or removed"
 
 
-BULK = re.compile(
-    r"\b(FormVersion|RubricVersion|AssignmentVersion|NormalizationRun|PairwiseRun|SubmissionVersion"
-    r"|RulesVersion)\.objects\b[^\n]*\.(update|delete|bulk_update)\("
-)
+WRITES = {"update", "delete", "bulk_update"}
+
+
+def guarded_names():
+    """The class names of the claimed version models and the names their parents reach them by
+    (`submission.versions`), which is how a related manager would write to them."""
+    classes = {label.rpartition(".")[2] for label in CLAIMED["immutable"]}
+    accessors = set()
+    for label in CLAIMED["immutable"]:
+        model = apps.get_model(label)
+        for field in model._meta.get_fields():
+            if field.is_relation and field.many_to_one:
+                accessors.add(field.remote_field.get_accessor_name())
+    return classes, accessors - {None}
+
+
+def chain(node):
+    """The names a call's receiver is built from (`A.objects.filter(...)` gives A, objects, ...)."""
+    names = []
+    while True:
+        if isinstance(node, ast.Call):
+            node = node.func
+        elif isinstance(node, ast.Attribute):
+            names.append(node.attr)
+            node = node.value
+        elif isinstance(node, ast.Subscript):
+            node = node.value
+        else:
+            if isinstance(node, ast.Name):
+                names.append(node.id)
+            return names
 
 
 def test_no_code_bypasses_the_guard_with_a_bulk_write_on_a_version_model():
     """Immutability is a rule of the model, not a database trigger: a queryset `update` or
-    `delete` would slip past it, so no source file may do that (accepted residual: the database
-    itself does not refuse it)."""
+    `delete` would slip past it, so no source file may write to a version model that way, whether
+    through the class, a chain over several lines or the related manager of its parent. Accepted
+    residual: a queryset first held in a variable is not followed, and the database itself does
+    not refuse the write."""
+    classes, accessors = guarded_names()
     offenders = []
     for path in SRC.rglob("*.py"):
         if {"migrations", "tests"} & set(path.parts) or path.name.startswith("test_"):
             continue
-        for number, line in enumerate(path.read_text().splitlines(), 1):
-            if BULK.search(line):
-                offenders.append(f"{path.relative_to(SRC)}:{number}")
+        for node in ast.walk(ast.parse(path.read_text())):
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+                if node.func.attr in WRITES:
+                    names = set(chain(node.func.value))
+                    if names & classes or names & accessors:
+                        offenders.append(f"{path.relative_to(SRC)}:{node.lineno}")
     assert offenders == []
+
+
+def test_the_bulk_write_scan_finds_a_chain_over_several_lines_and_a_related_manager():
+    source = (
+        "def go(submission):\n"
+        "    SubmissionVersion.objects\\\n"
+        "        .filter(number=1)\\\n"
+        "        .update(digest='x')\n"
+        "    submission.versions.all().delete()\n"
+    )
+    classes, accessors = guarded_names()
+    hits = [
+        node.lineno
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr in WRITES
+        and (set(chain(node.func.value)) & classes or set(chain(node.func.value)) & accessors)
+    ]
+    assert len(hits) == 2
 
 
 def test_a_stale_writer_is_refused_by_the_submission_counter():
@@ -212,9 +266,30 @@ def test_the_real_claims_verify_clean_and_the_report_lists_versions_counters_and
             ],
             "counter_twice",
         ),
+        ("form", ["in_place@" + REASON], "diff_exists"),
         ("track", ["in_place@" + REASON], "ok"),
     ],
 )
 def test_each_versioning_failure_has_a_code(key, refs, code):
     found = codes(verify(key, refs))
     assert (not found) if code == "ok" else code in found
+
+
+def test_a_counter_needs_a_locked_mode_that_names_it_exactly(monkeypatch):
+    """A near match in free text, another mode or an unprovided claim is not a lock."""
+    base = ft.FEATURES["announcement"]
+    refs = ["counter:version", TEST]
+    for idempotency in (
+        ft.provided("mode:announcement-review:POST=natural@events.Announcement.version"),
+        ft.provided("mode:announcement-review:POST=locked@events.Announcement.versions"),
+        ft.planned("PD-F003-B03-T04", "Not yet."),
+    ):
+        feature = ft.Feature(
+            base.key,
+            base.label,
+            base.model,
+            base.claims | {"versioning": ft.provided(*refs), "idempotency": idempotency},
+        )
+        found = ft.VERIFIERS["versioning"](feature, feature.claims["versioning"], ft.System())
+        assert "counter_unlocked" in codes(found)
+    assert verify("announcement", real("announcement")) == []

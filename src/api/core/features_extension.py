@@ -94,6 +94,29 @@ def pairs() -> set[tuple[str, str]]:
     return {(m.id, k) for m in manifest.MANIFESTS.values() for k, _ in m.provides if k != "feature"}
 
 
+def unclaimed_hooks(feature, claimed: set[tuple[str, str]]) -> list[str]:
+    """The hooks of the manifests that declare the feature which no feature of them claims. An app
+    with one feature owns every hook it provides; an app with several has them assigned by claim,
+    so the first of its features reports the ones nobody claims."""
+    found = []
+    for owner in declaring(feature):
+        mine = sorted(f.key for f in features.FEATURES.values() if owner in declaring(f))
+        if feature.key != mine[0]:
+            continue
+        others = {
+            (o, k)
+            for f in features.FEATURES.values()
+            if owner in declaring(f)
+            and f.key != feature.key
+            and f.claims["extension"].state == "provided"
+            for k, o in parse(f.claims["extension"])[0]
+        }
+        for kind in sorted({k for k, _ in manifest.MANIFESTS[owner].provides} - {"feature"}):
+            if (owner, kind) not in others | claimed and (owner, kind) not in OUTSIDE:
+                found.append(f"The manifest '{owner}' provides '{kind}'; no feature claims it.")
+    return found
+
+
 def facts(feature, system) -> dict:
     claim = feature.claims.get("extension")
     if claim is None or claim.state != "provided":
@@ -133,6 +156,8 @@ def verify(feature, claim, system) -> list[dict]:
                 ):
                     if (owner, kind) not in OUTSIDE:
                         bad("hook_exists", f"The manifest '{owner}' provides '{kind}'; claim it.")
+        for message in unclaimed_hooks(feature, set()):
+            bad("hook_unclaimed", message)
         return found
     if not hooks:
         bad("no_hook", "Name each hook (hook:<kind>=<manifest>) or say why none (no_extension@).")
@@ -168,12 +193,8 @@ def verify(feature, claim, system) -> list[dict]:
                     "hook_shared",
                     f"'{kind}' of '{owner}' is also claimed by '{other_feature.key}'.",
                 )
-    claimed = {(owner, kind) for kind, owner in hooks}
-    for owner in owners:  # every hook the declaring app provides is claimed by one of its features
-        if alone(owner):  # the app declares only this feature, so nothing is shared
-            for kind in sorted({k for k, _ in manifest.MANIFESTS[owner].provides} - {"feature"}):
-                if (owner, kind) not in claimed and (owner, kind) not in OUTSIDE:
-                    bad("hook_unclaimed", f"The manifest '{owner}' provides '{kind}'; claim it.")
+    for message in unclaimed_hooks(feature, {(owner, kind) for kind, owner in hooks}):
+        bad("hook_unclaimed", message)
     return found
 
 

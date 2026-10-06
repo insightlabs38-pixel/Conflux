@@ -42,10 +42,6 @@ for (const width of [390, 768, 1024, 1440]) {
   for (const role of Object.keys(destinations)) {
     test(`role navigation ${role} at ${width}`, async ({ page }, info) => {
       test.skip(info.project.name !== "desktop", "explicit viewport matrix");
-      // The work is linear in the destinations: each is opened, settled and checked for overflow
-      // and accessibility (about two to three seconds), so the budget grows with the list rather
-      // than being a fixed 30 s that the nine organizer destinations sat just under.
-      test.setTimeout(20_000 + destinations[role].length * 5_000);
       await page.setViewportSize({ width, height: 900 });
       await signIn(page, role);
       const problems = watch(page);

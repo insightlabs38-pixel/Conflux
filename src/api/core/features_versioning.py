@@ -21,7 +21,8 @@ held to the models and the registries:
 
 A numbered immutable model whose parent is no feature of the registry is named in `OUTSIDE`
 (`tests/integration/test_feature_versioning.py`, which also proves each claimed model refuses an
-edit and a delete, each counter rejects a stale writer, and each diff source compares two versions).
+edit and a delete, no source bypasses that guard with a bulk write, a stale writer is refused by
+the submission counter and the other locked changes are proved by the idempotency suite).
 """
 
 import re
@@ -32,6 +33,7 @@ from django.db import models as dj_models
 from . import features, manifest
 from .features import problem
 from .features_extension import declaring
+from .features_idempotency import parse as parse_idempotency
 
 MIN_REASON = 20
 VERSIONISH = re.compile(r"version|revision")
@@ -105,6 +107,16 @@ def counter_fields(feature, system) -> list[str]:
     )
 
 
+def provided_sources(feature) -> set[str]:
+    """The comparison sources the manifests that declare the feature provide."""
+    return {
+        entry
+        for owner in declaring(feature)
+        for kind, entry in manifest.MANIFESTS[owner].provides
+        if kind == "version_source"
+    }
+
+
 def sources(system) -> dict:
     return dict(system.resolve("core.version_diff:SOURCES") or {})
 
@@ -146,6 +158,8 @@ def verify(feature, claim, system) -> list[dict]:
             bad("versions_exist", f"{label} keeps immutable versions of this feature; claim it.")
         for name in derived_counters:
             bad("counter_exists", f"{feature.model}.{name} counts versions; claim it.")
+        for source in sorted(provided_sources(feature)):
+            bad("diff_exists", f"The manifest provides the version source '{source}'; claim it.")
         if audit is None or audit.state != "provided":
             bad("in_place_unaudited", "A feature edited in place must have its changes audited.")
         return found
@@ -183,22 +197,25 @@ def verify(feature, claim, system) -> list[dict]:
     for label in sorted(set(derived_models) - seen):
         bad("version_unclaimed", f"{label} keeps immutable versions of this feature; claim it.")
     idem = feature.claims.get("idempotency")
+    locks = (
+        {detail for _, _, mode, detail, _ in parse_idempotency(idem)[0] if mode == "locked"}
+        if idem is not None and idem.state == "provided"
+        else set()
+    )
     for name in counters:
         if name not in derived_counters:
             bad("counter_unknown", f"{feature.model} has no version counter '{name}'.")
-        elif idem is None or f"{feature.model}.{name}" not in " ".join(idem.refs):
-            bad("counter_unlocked", f"The idempotency claim does not name {feature.model}.{name}.")
+        elif f"{feature.model}.{name}" not in locks:
+            bad(
+                "counter_unlocked",
+                f"No locked@ mode of the idempotency claim names {feature.model}.{name}.",
+            )
     if len(set(counters)) != len(counters):
         bad("counter_twice", "A counter is claimed twice.")
     for name in sorted(set(derived_counters) - set(counters)):
         bad("counter_unclaimed", f"{feature.model}.{name} counts versions; claim it.")
     live = sources(system)
-    provided = {
-        entry
-        for owner in declaring(feature)
-        for kind, entry in manifest.MANIFESTS[owner].provides
-        if kind == "version_source"
-    }
+    provided = provided_sources(feature)
     for source in diffs:
         if source not in live:
             bad("diff_unknown", f"'{source}' is not a version-comparison source.")

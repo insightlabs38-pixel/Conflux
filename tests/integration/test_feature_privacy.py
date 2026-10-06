@@ -198,6 +198,21 @@ def test_the_real_claims_verify_clean_and_the_report_lists_fates():
         ("announcement", ["person:posted_by=gone@" + REASON, TEST], "person_fate"),
         ("announcement", ["person:posted_by=erased", TEST], "person_unbacked"),
         ("announcement", ["person:posted_by=staff@short", TEST], "no_reason"),
+        (
+            "application",
+            ["erased:event_applications", "person:user=erased", "person:decided_by=erased", TEST],
+            "person_unbacked",
+        ),
+        (
+            "application",
+            [
+                "erased:event_applications",
+                "person:user=staff@" + REASON,
+                "person:decided_by=staff@" + REASON,
+                TEST,
+            ],
+            "person_contradiction",
+        ),
     ],
 )
 def test_each_privacy_failure_has_a_code(key, refs, code):

@@ -1,0 +1,35 @@
+version: 1
+checkpoint_id: CP-PD-F003-B01
+created_at: '2026-10-06T04:23:21Z'
+canonical_commit: 9b78e1b68ece372c792c3afe20f478d7dc42067a
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+- PD-B02
+- PD-B03
+- PD-B04
+- PD-F001-B01
+- PD-F001-B02
+- PD-F002-B01
+- PD-F002-B02
+- PD-F002-B03
+- PD-F003-B01
+active_batches:
+- PD-F003-B02
+active_claims: []
+open_escalations: []
+last_completed_task: PD-F003-B01-T95
+ready_summary:
+- PD-F003-B02 (the eight surfaces of the completeness contract; promoted IN_PROGRESS, not started)
+verification_summary:
+- pytest 2467 passed/31 skipped, web 658, lint/format/build/sdk/block-schema/makemigrations clean
+- make e2e-fast all tiers ok (T90 log) and make e2e-affected ok after the T95 hardening
+- validate_queue valid
+recovery_notes:
+- 'The completeness contract is core/features.py (registry, report, check, check_static) plus one verifier per property (features_identity, _validation, _authorization, _audit, _idempotency, _rest, _sdk, _search); each app declares its features in <app>/features.py and core.apps imports the verifiers; guide docs/operations/COMPLETENESS.md, matrices docs/verification/PD-F003-B01/'
+- 'Request proofs share one world: tests/integration/test_feature_audit.py (scenarios per claimed change) is imported by the idempotency, rest and sdk suites; a new feature or change needs a claim for each landed property and a scenario'
+- 'Next batch PD-F003-B02 adds the surfaces (cli, mcp, event_as_code, webhook, archive, ui) as further properties: add a verifier module, import it in core/apps.py, add claims to all fifteen features (landed properties must be claimed or check() fails), and extend the Operations page spec'
+- 'T95 was run with the code-review skill (QUESTIONS.md, default A); worker and beat need a restart on the new image for the hourly sweep-idempotency'
+- main unpushed; untracked design handoff zips and the owner modified supervisor.py and CONTINUOUS_SINGLE_AGENT_PROMPT.md untouched; .claude-supervisor is prettier-ignored

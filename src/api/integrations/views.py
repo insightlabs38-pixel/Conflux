@@ -9,6 +9,7 @@ from django.http import HttpResponse
 from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework.exceptions import NotFound
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -102,13 +103,13 @@ class JudgeScoresView(APIView):
     def get(self, request):
         fixture = _current_fixture()
         if fixture is None:
-            return Response(status=404)
+            raise NotFound()
 
         requested_id = request.GET.get("judge")
         if requested_id:
             judge = fixture.judges.filter(external_id=requested_id).first()
             if judge is None:
-                return Response(status=404)
+                raise NotFound()
             is_self = judge.linked_user_id == request.user.id
             if not is_self and not has_any_role(
                 request.user, _acceptance_workspace(), Role.ORGANIZER, Role.ADMIN

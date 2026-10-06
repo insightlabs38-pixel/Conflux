@@ -322,6 +322,7 @@ class EvaluationPlanListView(StageEventMixin):
             return [IsWorkspaceMember()]
         return super().get_permissions()
 
+    @extend_schema(responses=EvaluationPlanSerializer(many=True))
     def get(self, request, workspace_public_id, event_public_id, stage_public_id):
         plans = self.get_stage().evaluation_plans.all()
         return Response(EvaluationPlanSerializer(plans, many=True).data)
@@ -1457,7 +1458,7 @@ class ResultsView(PlanMixin):
         plan = self.get_plan()
         is_organizer = has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
         if plan.published_normalization_run_id is None:
-            return Response(status=404)
+            raise NotFound()
         if not is_organizer and not plan.results_visible_to_participants:
             raise PermissionDenied("Results are not yet visible to participants.")
         results = ranked_results(plan, plan.published_normalization_run)
@@ -1606,7 +1607,7 @@ class ProjectFeedbackView(PlanMixin):
             ):
                 raise PermissionDenied("Feedback has not been released for this plan.")
             if not project.memberships.filter(user=request.user).exists():
-                return Response(status=404)
+                raise NotFound()
         ballots = (
             Ballot.objects.filter(rubric_version__plan=plan, project=project, is_calibration=False)
             .exclude(comment="")
@@ -1916,7 +1917,7 @@ class PairwiseResultsView(PlanMixin):
         plan = self.get_plan()
         is_organizer = has_any_role(request.user, self.get_workspace(), Role.ORGANIZER, Role.ADMIN)
         if plan.published_pairwise_run_id is None:
-            return Response(status=404)
+            raise NotFound()
         if not is_organizer and not plan.results_visible_to_participants:
             raise PermissionDenied("Results are not yet visible to participants.")
         results = pairwise_ranked_results(plan, plan.published_pairwise_run)

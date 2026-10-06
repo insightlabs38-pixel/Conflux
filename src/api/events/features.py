@@ -41,6 +41,19 @@ register_feature(
                 "mode:event-status:POST=natural",
                 "test:tests/integration/test_feature_idempotency.py::test_a_repeated_change_does_what_its_declared_mode_says",
             ),
+            "rest": provided(
+                "list:event-list",
+                "detail:event-detail",
+                "paging:unpaged@bounded: a workspace runs a few dozen events and the list is the  "
+                "organizer's index",
+                "test:tests/integration/test_feature_rest.py::test_every_refusal_of_a_claimed_route_uses_the_shared_error_shape",
+                "test:tests/integration/test_feature_rest.py::test_every_claimed_list_returns_what_its_schema_says",
+            ),
+            "sdk": provided(
+                "generated:python",
+                "generated:typescript",
+                "test:tests/integration/test_feature_sdk.py::test_every_claimed_operation_works_through_the_generated_python_sdk",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",
@@ -87,6 +100,18 @@ register_feature(
                 "mode:track-detail:DELETE=natural",
                 "test:tests/integration/test_feature_idempotency.py::test_a_repeated_change_does_what_its_declared_mode_says",
             ),
+            "rest": provided(
+                "list:track-list",
+                "no_detail@a track is read in the event's track list and has no page of its own",
+                "paging:unpaged@bounded: an event has a handful of tracks",
+                "test:tests/integration/test_feature_rest.py::test_every_refusal_of_a_claimed_route_uses_the_shared_error_shape",
+                "test:tests/integration/test_feature_rest.py::test_every_claimed_list_returns_what_its_schema_says",
+            ),
+            "sdk": provided(
+                "generated:python",
+                "generated:typescript",
+                "test:tests/integration/test_feature_sdk.py::test_every_claimed_operation_works_through_the_generated_python_sdk",
+            ),
         },
         lifecycle=Lifecycle(
             "none", note="Edited in place and deleted (track.deleted); position orders it."
@@ -124,6 +149,19 @@ register_feature(
             "idempotency": provided(
                 "mode:event-application-decide:POST=locked@events.registration.decide_application",
                 "test:tests/integration/test_feature_idempotency.py::test_a_repeated_change_does_what_its_declared_mode_says",
+            ),
+            "rest": provided(
+                "list:event-application-list",
+                "no_detail@an application is read in the review queue, which filters by status",
+                "paging:unpaged@bounded by the event's applicants and filtered with ?status=;  "
+                "large queues are paged through the applications query entity",
+                "test:tests/integration/test_feature_rest.py::test_every_refusal_of_a_claimed_route_uses_the_shared_error_shape",
+                "test:tests/integration/test_feature_rest.py::test_every_claimed_list_returns_what_its_schema_says",
+            ),
+            "sdk": provided(
+                "generated:python",
+                "generated:typescript",
+                "test:tests/integration/test_feature_sdk.py::test_every_claimed_operation_works_through_the_generated_python_sdk",
             ),
         },
         lifecycle=Lifecycle(
@@ -174,6 +212,19 @@ register_feature(
                 "mode:announcement-review:POST=locked@events.Announcement.version",
                 "test:tests/integration/test_feature_idempotency.py::test_a_repeated_change_does_what_its_declared_mode_says",
                 "test:tests/integration/test_feature_idempotency.py::test_a_keyed_change_runs_once_for_one_key_and_a_different_body_is_refused",
+            ),
+            "rest": provided(
+                "list:announcement-list",
+                "no_detail@an announcement is read in the event's list and has no page of its own",
+                "paging:unpaged@bounded: an event has a handful of announcements, posted by  "
+                "organizers",
+                "test:tests/integration/test_feature_rest.py::test_every_refusal_of_a_claimed_route_uses_the_shared_error_shape",
+                "test:tests/integration/test_feature_rest.py::test_every_claimed_list_returns_what_its_schema_says",
+            ),
+            "sdk": provided(
+                "generated:python",
+                "generated:typescript",
+                "test:tests/integration/test_feature_sdk.py::test_every_claimed_operation_works_through_the_generated_python_sdk",
             ),
         },
         lifecycle=Lifecycle(

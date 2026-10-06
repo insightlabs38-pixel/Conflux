@@ -2,6 +2,7 @@
 
 import json
 import pathlib
+import re
 
 import pytest
 import yaml
@@ -77,6 +78,19 @@ IDEM = ft.provided(
     "test:tests/integration/test_saved_views.py::test_updates_bump_the_version_refuse_stale_writers_and_are_audited_without_filter_values",
 )
 
+REST = ft.provided(
+    "list:saved-view-list",
+    "detail:saved-view-detail",
+    "paging:unpaged@bounded: a person saves a few views per event and entity",
+    "test:tests/integration/test_saved_views.py::test_views_are_scoped_to_their_event_and_workspace_and_deleted_with_it",
+)
+
+SDKC = ft.provided(
+    "generated:python",
+    "generated:typescript",
+    "test:tests/integration/test_feature_sdk.py::test_every_claimed_operation_works_through_the_generated_python_sdk",
+)
+
 
 def identity(*refs):
     return ft.provided(*(refs or ("field:public_id",)))
@@ -94,6 +108,8 @@ def only(feature_key="x", **over):
             "authorization": AUTHZ,
             "audit": AUDIT,
             "idempotency": IDEM,
+            "rest": REST,
+            "sdk": SDKC,
         },
         "lifecycle": ft.Lifecycle("none", note="Edited in place."),
     }
@@ -103,6 +119,8 @@ def only(feature_key="x", **over):
         "authorization": AUTHZ,
         "audit": AUDIT,
         "idempotency": IDEM,
+        "rest": REST,
+        "sdk": SDKC,
         **values["claims"],
     }
     ft.FEATURES.clear()
@@ -117,7 +135,15 @@ def only(feature_key="x", **over):
 def test_the_fifteen_features_agree_with_the_live_system():
     assert sorted(ft.FEATURES) == KEYS
     assert ft.check() == []
-    assert ft.landed() == ["identity", "validation", "authorization", "audit", "idempotency"]
+    assert ft.landed() == [
+        "identity",
+        "validation",
+        "authorization",
+        "audit",
+        "idempotency",
+        "rest",
+        "sdk",
+    ]
 
 
 def test_every_feature_resolves_to_its_model_and_a_uuid_public_id():
@@ -188,7 +214,7 @@ def test_the_report_is_deterministic_read_only_and_complete():
         "planned": 0,
         "unclaimed": 0,
     }
-    assert first["totals"]["rest"]["unclaimed"] == 15  # not landed yet, so only unclaimed
+    assert first["totals"]["ui_advanced"]["unclaimed"] == 15  # not landed yet, so only unclaimed
     assert {p["key"]: p["landed"] for p in first["properties"]}["identity"] is True
 
 
@@ -231,6 +257,8 @@ def test_a_well_formed_independent_feature_passes(isolated):
             "authorization": AUTHZ,
             "audit": AUDIT,
             "idempotency": IDEM,
+            "rest": REST,
+            "sdk": SDKC,
         },
         ft.Lifecycle("none", note="Edited in place and deleted."),
     )
@@ -355,20 +383,22 @@ def test_a_timestamp_or_flag_lifecycle_names_its_two_states(isolated):
 
 def test_claims_must_be_well_formed_and_honest(isolated):
     base = {"identity": identity("field:public_id", "route:saved-view-detail")}
-    assert "bad_state" in codes(only(claims={**base, "rest": ft.Claim("maybe")}))
-    assert "no_refs" in codes(only(claims={**base, "rest": ft.Claim("provided")}))
-    assert "no_reason" in codes(only(claims={**base, "rest": ft.Claim("not_applicable")}))
-    assert "no_owner" in codes(only(claims={**base, "rest": ft.Claim("planned")}))
-    assert "reason_too_long" in codes(only(claims={**base, "rest": ft.not_applicable("x" * 301)}))
+    assert "bad_state" in codes(only(claims={**base, "ui_advanced": ft.Claim("maybe")}))
+    assert "no_refs" in codes(only(claims={**base, "ui_advanced": ft.Claim("provided")}))
+    assert "no_reason" in codes(only(claims={**base, "ui_advanced": ft.Claim("not_applicable")}))
+    assert "no_owner" in codes(only(claims={**base, "ui_advanced": ft.Claim("planned")}))
+    assert "reason_too_long" in codes(
+        only(claims={**base, "ui_advanced": ft.not_applicable("x" * 301)})
+    )
     assert "no_verifier" in codes(
-        only(claims={**base, "rest": ft.provided("op:get_x")})
+        only(claims={**base, "ui_advanced": ft.provided("op:get_x")})
     )  # not landed
     assert "unknown_property" in codes(only(claims={**base, "colour": ft.not_applicable("n/a")}))
     assert "unclaimed" in codes(only(claims={}))  # identity is landed, so it must be claimed
     good = only(
         claims={
             **base,
-            "rest": ft.planned("PD-F003-B01-T06", "Not yet."),
+            "ui_advanced": ft.planned("PD-F003-B02-T01", "Not yet."),
             "ui_base": ft.not_applicable("Internal."),
         }
     )
@@ -446,6 +476,8 @@ def test_the_endpoint_reports_a_broken_claim_instead_of_hiding_it(world, isolate
             "authorization": ft.FEATURES["event"].claims["authorization"],
             "audit": ft.FEATURES["event"].claims["audit"],
             "idempotency": ft.FEATURES["event"].claims["idempotency"],
+            "rest": ft.FEATURES["event"].claims["rest"],
+            "sdk": ft.FEATURES["event"].claims["sdk"],
         },
         ft.FEATURES["event"].lifecycle,
     )
@@ -850,3 +882,235 @@ def test_the_idempotency_ci_check_finds_a_missing_test(isolated, tmp_path):
     ft.FEATURES.clear()
     ft.register_feature(ft.Feature("x", "X", "core.SavedView", {"idempotency": IDEM}))
     assert codes(ft.check_static(tmp_path)) == ["test_file"]
+
+
+# --- REST representation (T06) --------------------------------------------------------------------
+
+
+def verify_rest(refs, model="core.SavedView", authorization=AUTHZ):
+    claims = {"rest": ft.provided(*refs)}
+    if authorization is not None:
+        claims["authorization"] = authorization
+    feature = ft.Feature("s", "S", model, claims)
+    return ft.VERIFIERS["rest"](feature, feature.claims["rest"], ft.System())
+
+
+def rest_swap(old, new):
+    return tuple(new if r == old else r for r in REST.refs)
+
+
+def test_a_real_rest_claim_is_derived_from_the_openapi_document():
+    assert verify_rest(REST.refs) == []
+    row = {f["key"]: f for f in ft.report()["features"]}
+    facts = row["track"]["facts"]["rest"]
+    assert facts["lists"] == ["GET track-list: array of Track"]
+    assert facts["paging"] == "unpaged" and "no_detail" in facts
+    assert row["message"]["facts"]["rest"]["paging"] == "offset"
+    assert row["submission"]["facts"]["rest"]["detail"] == "GET submission-detail: SubmissionSchema"
+    for feature in ft.FEATURES.values():
+        kinds = {r.partition(":")[0].partition("@")[0] for r in feature.claims["rest"].refs}
+        assert {"paging", "test"} <= kinds, feature.key
+        assert ("list" in kinds) != ("no_list" in kinds)
+        assert ("detail" in kinds) != ("no_detail" in kinds)
+
+
+@pytest.mark.parametrize(
+    ("refs", "code"),
+    [
+        (rest_swap("list:saved-view-list", "list:nope"), "route_missing"),
+        (rest_swap("list:saved-view-list", "list:saved-view-detail"), "list_shape"),
+        (rest_swap("detail:saved-view-detail", "detail:saved-view-list"), "detail_shape"),
+        (rest_swap("detail:saved-view-detail", "detail:accounts-login"), "detail_missing"),
+        (rest_swap("list:saved-view-list", "list:accounts-login"), "list_missing"),
+        (
+            rest_swap(
+                "paging:unpaged@bounded: a person saves a few views per event and entity",
+                "paging:offset",
+            ),
+            "paging_mismatch",
+        ),
+        (
+            rest_swap(
+                "paging:unpaged@bounded: a person saves a few views per event and entity",
+                "paging:unpaged@short",
+            ),
+            "no_reason",
+        ),
+        (
+            rest_swap(
+                "paging:unpaged@bounded: a person saves a few views per event and entity",
+                "paging:forever",
+            ),
+            "paging_ref",
+        ),
+        (tuple(r for r in REST.refs if not r.startswith("paging")), "paging_ref"),
+        (rest_swap("detail:saved-view-detail", "no_detail@short"), "no_reason"),
+        (REST.refs + ("no_list@a feature with a list cannot also say it has none",), "list_both"),
+        (tuple(r for r in REST.refs if not r.startswith("detail")), "detail_ref"),
+        (REST.refs + ("detail:saved-view-detail",), "detail_twice"),
+        (REST.refs + ("color:red",), "bad_ref"),
+        (tuple(r for r in REST.refs if not r.startswith("test:")), "no_test"),
+    ],
+)
+def test_each_rest_failure_has_a_code(refs, code):
+    assert code in codes(verify_rest(refs))
+
+
+def test_a_feature_without_a_list_says_so_and_has_nothing_to_page():
+    refs = (
+        "no_list@a person has one of these per event and reads it directly",
+        "detail:saved-view-detail",
+        "test:tests/x.py::test_y",
+    )
+    assert verify_rest(refs) == []
+    assert "paging_unused" in codes(verify_rest((*refs, "paging:offset")))
+
+
+def test_a_writing_route_the_document_does_not_describe_is_reported(monkeypatch):
+    class Gap(ft.System):
+        def operation(self, route, method):
+            return (
+                None
+                if (route, method) == ("saved-view-list", "POST")
+                else super().operation(route, method)
+            )
+
+    feature = ft.Feature("s", "S", "core.SavedView", {"rest": REST, "authorization": AUTHZ})
+    found = ft.VERIFIERS["rest"](feature, REST, Gap())
+    assert "op_missing" in codes(found)
+
+
+def test_the_rest_ci_check_finds_a_missing_test(isolated, tmp_path):
+    ft.FEATURES.clear()
+    ft.register_feature(ft.Feature("x", "X", "core.SavedView", {"rest": REST}))
+    assert codes(ft.check_static(tmp_path)) == ["test_file"]
+
+
+# --- generated SDK (T07) --------------------------------------------------------------------------
+
+
+def verify_sdk(refs, authorization=AUTHZ, model="core.SavedView"):
+    claims = {"sdk": ft.provided(*refs)}
+    if authorization is not None:
+        claims["authorization"] = authorization
+    feature = ft.Feature("s", "S", model, claims)
+    return ft.VERIFIERS["sdk"](feature, feature.claims["sdk"], ft.System())
+
+
+def test_a_real_sdk_claim_derives_each_operation_and_its_typescript_type():
+    assert verify_sdk(SDKC.refs) == []
+    row = {f["key"]: f for f in ft.report()["features"]}
+    facts = row["track"]["facts"]["sdk"]
+    assert "GET track-list: Track[]" in facts["operations"]
+    assert "POST track-list: Track" in facts["operations"]
+    assert "DELETE track-detail: null" in facts["operations"]
+    assert facts["count"] == len(facts["operations"]) == 4
+    assert ft.check_static(ROOT) == []
+
+
+@pytest.mark.parametrize(
+    ("refs", "authorization", "code"),
+    [
+        (("generated:python", "test:tests/x.py::test_y"), AUTHZ, "target_missing"),
+        (SDKC.refs + ("generated:go",), AUTHZ, "bad_target"),
+        (SDKC.refs + ("color:red",), AUTHZ, "bad_ref"),
+        (tuple(r for r in SDKC.refs if r.startswith("generated")), AUTHZ, "no_test"),
+        (SDKC.refs, None, "no_operations"),
+    ],
+)
+def test_each_sdk_failure_has_a_code(refs, authorization, code):
+    assert code in codes(verify_sdk(refs, authorization))
+
+
+def test_an_operation_missing_from_the_document_or_duplicated_is_reported(monkeypatch):
+    class Gap(ft.System):
+        def operation(self, route, method):
+            if (route, method) == ("saved-view-list", "POST"):
+                return None
+            return super().operation(route, method)
+
+    feature = ft.Feature("s", "S", "core.SavedView", {"sdk": SDKC, "authorization": AUTHZ})
+    assert "op_missing" in codes(ft.VERIFIERS["sdk"](feature, SDKC, Gap()))
+
+    class Twice(ft.System):
+        def openapi(self):
+            document = super().openapi()
+            return {
+                "paths": {
+                    **document["paths"],
+                    "/dup/": {"get": {"operationId": "dup"}},
+                    "/dup2/": {"get": {"operationId": "dup"}},
+                }
+            }
+
+        def operation(self, route, method):
+            return (
+                {"operationId": "dup"}
+                if (route, method) == ("saved-view-list", "GET")
+                else super().operation(route, method)
+            )
+
+    found = ft.VERIFIERS["sdk"](feature, SDKC, Twice())
+    assert "op_id_twice" in codes(found)
+
+
+def sdk_tree(tmp_path, *, ts_type="SavedViewSchema[]", python=True, ts=True):
+    """A copy of the two generated files with one operation changed, to prove the CI check."""
+    system = ft.System()
+    op = system.operation("saved-view-list", "GET")["operationId"]
+    (tmp_path / "tests/integration").mkdir(parents=True)
+    (tmp_path / "tests/integration/test_feature_sdk.py").write_text(
+        "def test_every_claimed_operation_works_through_the_generated_python_sdk():\n    pass\n"
+    )
+    (tmp_path / "tests/integration/test_saved_views.py").write_text("")
+    (tmp_path / "sdks/python/conflux_sdk").mkdir(parents=True)
+    (tmp_path / "sdks/typescript").mkdir(parents=True)
+    py = (ROOT / "sdks/python/conflux_sdk/generated.py").read_text()
+    ts_text = (ROOT / "sdks/typescript/generated.ts").read_text()
+    if not python:
+        py = py.replace(f"'{op}': {{'method'", f"'x{op}': {{'method'")
+    if not ts:
+        ts_text = ts_text.replace(f"  {op}: {{\n    method:", f"  x{op}: {{\n    method:")
+    block = re.search(rf"^  {op}:\s*\{{\s*request:(.*?)^  \}};", ts_text, flags=re.S | re.M)
+    ts_text = ts_text.replace(
+        block.group(0),
+        block.group(0).replace("response: SavedViewSchema[];", f"response: {ts_type};"),
+    )
+    (tmp_path / "sdks/python/conflux_sdk/generated.py").write_text(py)
+    (tmp_path / "sdks/typescript/generated.ts").write_text(ts_text)
+
+
+@pytest.mark.parametrize(
+    ("options", "expected"),
+    [
+        ({}, []),
+        ({"python": False}, ["python_missing"]),
+        ({"ts": False}, ["ts_missing"]),
+        ({"ts_type": "SavedViewSchema"}, ["ts_type_mismatch"]),
+    ],
+)
+def test_the_sdk_ci_check_compares_the_generated_files_with_openapi(
+    isolated, tmp_path, options, expected
+):
+    sdk_tree(tmp_path, **options)
+    claims = {
+        "authorization": ft.provided(
+            "route:saved-view-list",
+            "scope:event",
+            "readers:members",
+            "writers:members",
+            "own:self",
+            "test:tests/integration/test_saved_views.py::test_x",
+        ),  # fmt: skip
+        "sdk": SDKC,
+    }
+    ft.FEATURES.clear()
+    ft.register_feature(ft.Feature("x", "X", "core.SavedView", claims))
+    found = [p for p in ft.check_static(tmp_path) if p["property"] == "sdk"]
+    assert sorted(set(codes(found)) - {"test_name"}) == expected
+
+
+def test_the_sdk_ci_check_reports_a_tree_without_the_generated_files(isolated, tmp_path):
+    ft.FEATURES.clear()
+    ft.register_feature(ft.Feature("x", "X", "core.SavedView", {"sdk": SDKC}))
+    assert "sdk_missing" in codes(ft.check_static(tmp_path))

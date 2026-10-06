@@ -170,6 +170,7 @@ class TransferCaptainView(ParticipantView):
 class TeamInviteListView(ParticipantView):
     serializer_class = TeamInviteSerializer
 
+    @extend_schema(responses=TeamInviteSerializer(many=True))
     def get(self, request, workspace_public_id, event_public_id):
         membership = self.my_membership(self.get_event())
         if membership is None or membership.role != TeamMembershipRole.CAPTAIN:

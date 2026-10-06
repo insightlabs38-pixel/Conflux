@@ -715,6 +715,7 @@ class AwardOutput(TypedDict):
     components: list[ComponentOutput]
     winners: list[WinnerOutput]
     sponsor_contacts: list[str]
+    resources: list[ResourceOutput]
 
 class InputOfAwardOutput(TypedDict):
     public_id: str
@@ -731,6 +732,7 @@ class InputOfAwardOutput(TypedDict):
     components: list[InputOfComponentOutput]
     winners: list[InputOfWinnerOutput]
     sponsor_contacts: list[str]
+    resources: list[InputOfResourceOutput]
 
 class AwardProposalItem(TypedDict):
     award: str
@@ -6658,7 +6660,7 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                               'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/messages/',
                                                                                               'path_params': ['event_public_id',
                                                                                                               'workspace_public_id'],
-                                                                                              'query_params': [],
+                                                                                              'query_params': ['offset'],
                                                                                               'request_body': False,
                                                                                               'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_questions': {'method': 'GET',

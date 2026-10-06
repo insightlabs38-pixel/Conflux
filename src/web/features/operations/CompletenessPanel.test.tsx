@@ -347,6 +347,14 @@ describe("completeness helpers", () => {
       "Scoped through: Track → Event",
     );
     expect(factText("scope_path", [])).toBe("Scoped through: no chain");
+    expect(factText("lists", ["GET track-list: array of Track"])).toBe(
+      "Lists: GET track-list: array of Track",
+    );
+    expect(factText("paging", "unpaged")).toBe("Paging: unpaged");
+    expect(factText("operations", ["GET track-list: Track[]"])).toBe(
+      "Operations in both SDKs: GET track-list: Track[]",
+    );
+    expect(factText("count", 4)).toBe("Operations: 4");
     expect(factText("repeats", ["POST track-list: unique"])).toBe(
       "When sent twice: POST track-list: unique",
     );

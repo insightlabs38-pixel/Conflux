@@ -45,6 +45,7 @@ class StageListView(StageEventMixin):
             return [IsWorkspaceMember()]
         return super().get_permissions()
 
+    @extend_schema(responses=StageSerializer(many=True))
     def get(self, request, workspace_public_id, event_public_id):
         event = self.get_event()
         try:

@@ -12,6 +12,8 @@ class CoreConfig(AppConfig):
             features_authorization,
             features_idempotency,
             features_identity,
+            features_rest,
+            features_sdk,
             features_validation,
             manifest_core,
         )

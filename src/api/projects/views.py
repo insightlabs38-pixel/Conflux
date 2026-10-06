@@ -61,6 +61,7 @@ class ProjectView(APIView):
 class ProjectListView(IdempotentMixin, ProjectView):
     serializer_class = ProjectSerializer
 
+    @extend_schema(responses=ProjectSerializer(many=True))
     def get(self, request, workspace_public_id, event_public_id):
         projects = Project.objects.filter(
             event=self.get_event(), memberships__user=request.user
@@ -99,14 +100,14 @@ class ProjectDetailView(ProjectView):
     def get(self, request, workspace_public_id, event_public_id, project_public_id):
         project = self.get_project()
         if not project.memberships.filter(user=request.user).exists():
-            return Response(status=404)
+            raise NotFound()
         return Response(ProjectSerializer(project).data)
 
     @extend_schema(request=ProjectPatchInputSchema, responses=ProjectSerializer)
     def patch(self, request, workspace_public_id, event_public_id, project_public_id):
         project = self.get_project()
         if not project.memberships.filter(user=request.user).exists():
-            return Response(status=404)
+            raise NotFound()
         event = self.get_event()
         track_set = "track" in request.data
         track_id = request.data.get("track")
@@ -141,7 +142,7 @@ class ProjectMemberView(ProjectView):
         if not project.memberships.filter(
             user=request.user, role=ProjectMembershipRole.OWNER
         ).exists():
-            return Response(status=404)
+            raise NotFound()
         target = get_object_or_404(User, public_id=request.data.get("user"))
         try:
             membership = add_project_member(project, request.user, target)

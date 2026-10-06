@@ -224,8 +224,32 @@ def scan_audit_actions() -> dict[str, tuple[str, ...]]:
     return {action: tuple(sorted(labels)) for action, labels in sorted(found.items())}
 
 
+@lru_cache(maxsize=1)
+def scan_openapi() -> dict:
+    """The OpenAPI document the running code produces (what the generated SDKs are built from),
+    made once: the routes and serializers do not change while the process runs."""
+    from drf_spectacular.generators import SchemaGenerator
+
+    return SchemaGenerator().get_schema(request=None, public=True)
+
+
 class System:
     """Facts about the running system, computed on first use and never written."""
+
+    def openapi(self) -> dict:
+        """The OpenAPI document of the running code."""
+        return scan_openapi()
+
+    def operation(self, route_name: str, method: str) -> dict | None:
+        """The OpenAPI operation behind a named route and HTTP method, or None."""
+        pattern = self.routes().get(route_name)
+        if pattern is None:
+            return None
+        path = "/" + _CONVERTER.sub(r"{\2}", pattern)
+        return self.openapi()["paths"].get(path, {}).get(method.lower())
+
+    def schema(self, name: str) -> dict:
+        return self.openapi().get("components", {}).get("schemas", {}).get(name, {})
 
     def audit_actions(self) -> dict[str, tuple[str, ...]]:
         """Audit action -> the apps that record it, read from the source."""

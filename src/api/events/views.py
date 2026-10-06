@@ -90,6 +90,7 @@ class OrganizerView(APIView):
 class EventListView(OrganizerView):
     serializer_class = EventSerializer
 
+    @extend_schema(responses=EventSerializer(many=True))
     def get(self, request, workspace_public_id):
         events = Event.objects.filter(workspace=self.get_workspace())
         return Response(EventSerializer(events, many=True).data)
@@ -222,6 +223,7 @@ class TrackListView(OrganizerView):
             return [IsWorkspaceMember()]
         return super().get_permissions()
 
+    @extend_schema(responses=TrackSerializer(many=True))
     def get(self, request, workspace_public_id, event_public_id):
         return Response(TrackSerializer(self.get_event().tracks.all(), many=True).data)
 
@@ -362,6 +364,7 @@ class BasePrizeDetailView(OrganizerView):
 class AnnouncementListView(IdempotentMixin, OrganizerView):
     serializer_class = AnnouncementSerializer
 
+    @extend_schema(responses=AnnouncementSerializer(many=True))
     def get(self, request, workspace_public_id, event_public_id):
         announcements = Announcement.objects.filter(event=self.get_event()).select_related(
             "posted_by"

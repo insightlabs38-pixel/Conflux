@@ -1481,7 +1481,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Event'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
           description: ''
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events
@@ -1843,7 +1845,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Announcement'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Announcement'
           description: ''
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements
@@ -4133,6 +4137,11 @@ paths:
           type: string
           format: uuid
         required: true
+      - in: query
+        name: offset
+        schema:
+          type: integer
+        description: Messages to skip (page offset).
       - in: path
         name: workspace_public_id
         schema:
@@ -5278,7 +5287,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FormPayloadSchema'
+                type: array
+                items:
+                  $ref: '#/components/schemas/FormPayloadSchema'
           description: ''
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_forms
@@ -7050,7 +7061,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TeamInvite'
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamInvite'
           description: ''
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_my_team_invites
@@ -7998,7 +8011,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Policy'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Policy'
           description: ''
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_policies
@@ -8538,7 +8553,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Project'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
           description: ''
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects
@@ -8705,7 +8722,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ArtifactSchema'
+                type: array
+                items:
+                  $ref: '#/components/schemas/ArtifactSchema'
           description: ''
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_artifacts
@@ -12103,7 +12122,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Stage'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stage'
           description: ''
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages
@@ -12339,7 +12360,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EvaluationPlan'
+                type: array
+                items:
+                  $ref: '#/components/schemas/EvaluationPlan'
           description: ''
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans
@@ -15894,7 +15917,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Track'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Track'
           description: ''
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_tracks
@@ -19578,6 +19603,10 @@ components:
           type: array
           items:
             type: string
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceOutput'
       required:
       - allow_stacking
       - components
@@ -19589,6 +19618,7 @@ components:
       - public_id
       - published_at
       - require_finalized_submission
+      - resources
       - selection_source
       - sponsor_contacts
       - winner_count

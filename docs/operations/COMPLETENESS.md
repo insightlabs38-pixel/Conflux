@@ -87,6 +87,35 @@ Completeness is derived like audit: every writing method of every route claimed 
 
 The retry test found changes that repeated silently: sending a message, posting an announcement, creating a project and adding an external artifact all did their work twice. Those four now take an `Idempotency-Key` (opt-in: a request without the header behaves as before). Three creates stay unprotected on purpose, each with its reason: a webhook subscription (its response carries the signing secret, which a stored response would keep), an upload intent (its signed URL expires) and a team invite (its response carries a bearer token).
 
+## REST representation (T06)
+
+The OpenAPI document the running code produces is what the generated SDKs and the typed web transport are built from, so a feature's REST representation is what that document says. `features_rest.verify` reads it (`System.openapi`, made once) and holds a `rest` claim to it:
+
+- `list:<route>` (one or more): a GET exists and its 200 response is an array or a paged object, never a single record (a list documented as one record gives every generated client the wrong type); `no_list@<reason>` says why a feature has none;
+- `detail:<route>`: a GET returning one record with a uuid public id; `no_detail@<reason>` says why a record is read only through its list;
+- `paging:offset|cursor|unpaged[@reason]`: must equal what the list's query parameters say (`offset`, `limit`, `page`, `cursor`); an unpaged list says why it stays bounded;
+- ids are public ids: every `*_public_id` path parameter of those routes is a uuid;
+- every writing method of every route claimed under `authorization` is a documented operation with a success response;
+- `test:`: the proof (checked in CI to exist).
+
+Codes: `bad_ref`, `no_test`, `list_ref`, `list_both`, `list_missing`, `list_shape`, `detail_ref`, `detail_both`, `detail_twice`, `detail_missing`, `detail_shape`, `route_missing`, `no_reason`, `id_not_public`, `paging_ref`, `paging_mismatch`, `paging_unused`, `op_missing`, `response_missing`; CI: `test_file`, `test_name`.
+
+`tests/integration/test_feature_rest.py` sends the requests: every claimed list returns an array of exactly what its schema describes (required fields present, no undocumented field, public ids), every claimed detail one record, and every refusal of every claimed route (a stranger, a signed-out caller, an unknown id, an invalid body) is JSON in the shared error shape (`detail`, field messages or a list of messages), never an empty or HTML body.
+
+The verifier and the tests found real defects, fixed here: ten list operations were documented as a single record (announcements, artifacts, evaluation plans, events, forms, policies, projects, stages, team invites, tracks), so the generated SDKs typed them wrongly; the message list took an `offset` that the document did not mention; the award output carried `resources` that the schema omitted; and eleven guard clauses answered 404 with an empty body (projects, artifacts, judging results, the scoreboard), now `NotFound` with the shared `{"detail": "Not found."}`.
+
+## Generated SDK representation (T07)
+
+Both SDKs (`sdks/python`, `sdks/typescript`) are generated from the OpenAPI document of the running code, so a feature's operations are those of the routes it claims under `authorization`, every method the permission matrix lists for them. An `sdk` claim says the feature is generated into both clients (`generated:python`, `generated:typescript`) and names its proof (`test:`); `features_sdk.verify` derives the rest:
+
+- every operation of those routes is in the OpenAPI document with an operation id, unique in the document (the id is what both clients and every typed call use);
+- the report lists each operation with the response type the TypeScript client gives it (`Track[]`, `Event`, `null` for no body), derived from the document;
+- in CI (`check_static`, which has the source tree), each operation id is in both generated files with the right method, and the TypeScript response type equals the type derived from the document, so a list documented as one record, a renamed schema or a stale SDK fails.
+
+Codes: `bad_ref`, `bad_target`, `target_missing`, `no_test`, `no_operations`, `op_missing`, `op_id`, `op_id_twice`; CI: `sdk_missing`, `python_missing`, `ts_missing`, `ts_types_missing`, `ts_type_mismatch`, `test_file`, `test_name`.
+
+`tests/integration/test_feature_sdk.py` calls every claimed operation through the generated Python client, in process against the real API (the client's `opener` is pointed at the Django test client), as the role that makes it: an array for `T[]`, nothing for `null`, a record whose fields are the schema's, and a refusal as an `ApiError` carrying the shared error shape. It ran with no defect after T06, which had already corrected the list types the generated clients inherited.
+
 ## The report
 
 `GET /api/v1/workspaces/{id}/completeness/` (organizers and admins; `Cache-Control: private, no-store`; no write method) returns `{properties[], features[], totals, problems[], ok}`. Each feature carries its derived id type and states, its lifecycle graph, its claims and its findings. The page shows findings first (an alert), then a dense features table with identity and a closed lifecycle per row, and the properties not checked yet behind details.

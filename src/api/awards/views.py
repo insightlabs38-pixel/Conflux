@@ -136,6 +136,7 @@ class AwardOutput(serializers.Serializer):
     components = ComponentOutput(many=True)
     winners = WinnerOutput(many=True)
     sponsor_contacts = serializers.ListField(child=serializers.CharField())
+    resources = ResourceOutput(many=True)
 
 
 class PublicWinnerOutput(serializers.Serializer):

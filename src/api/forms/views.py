@@ -98,6 +98,7 @@ class FormOrganizerView(OrganizerView):
 class FormListView(FormOrganizerView):
     serializer_class = FormPayloadSchema
 
+    @extend_schema(responses=FormPayloadSchema(many=True))
     def get(self, request, workspace_public_id, event_public_id):
         return Response(
             [

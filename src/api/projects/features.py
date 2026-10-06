@@ -37,6 +37,19 @@ register_feature(
                 "test:tests/integration/test_feature_idempotency.py::test_a_repeated_change_does_what_its_declared_mode_says",
                 "test:tests/integration/test_feature_idempotency.py::test_a_keyed_change_runs_once_for_one_key_and_a_different_body_is_refused",
             ),
+            "rest": provided(
+                "list:project-list",
+                "detail:project-detail",
+                "paging:unpaged@bounded: the list is the caller's own projects in one event;  "
+                "every project is paged through the projects query entity",
+                "test:tests/integration/test_feature_rest.py::test_every_refusal_of_a_claimed_route_uses_the_shared_error_shape",
+                "test:tests/integration/test_feature_rest.py::test_every_claimed_list_returns_what_its_schema_says",
+            ),
+            "sdk": provided(
+                "generated:python",
+                "generated:typescript",
+                "test:tests/integration/test_feature_sdk.py::test_every_claimed_operation_works_through_the_generated_python_sdk",
+            ),
         },
         lifecycle=Lifecycle(
             "none",
@@ -84,6 +97,18 @@ register_feature(
                 "mode:submission-finalize:POST=natural",
                 "mode:submission-reopen:POST=natural",
                 "test:tests/integration/test_feature_idempotency.py::test_a_repeated_change_does_what_its_declared_mode_says",
+            ),
+            "rest": provided(
+                "list:submission-stage-list",
+                "detail:submission-detail",
+                "paging:unpaged@bounded: a project has one submission per stage",
+                "test:tests/integration/test_feature_rest.py::test_every_refusal_of_a_claimed_route_uses_the_shared_error_shape",
+                "test:tests/integration/test_feature_rest.py::test_every_claimed_list_returns_what_its_schema_says",
+            ),
+            "sdk": provided(
+                "generated:python",
+                "generated:typescript",
+                "test:tests/integration/test_feature_sdk.py::test_every_claimed_operation_works_through_the_generated_python_sdk",
             ),
         },
         lifecycle=Lifecycle(

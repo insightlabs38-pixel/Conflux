@@ -106,6 +106,7 @@ class PresetListView(OrganizerView):
 class PolicyListView(OrganizerView):
     serializer_class = PolicySerializer
 
+    @extend_schema(responses=PolicySerializer(many=True))
     def get(self, request, workspace_public_id, event_public_id):
         return Response(PolicySerializer(self.get_event().policies.all(), many=True).data)
 

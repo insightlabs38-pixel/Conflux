@@ -6,7 +6,7 @@ from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
 from events.models import Event
 from projects.models import Project
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from workspaces.models import Membership, Workspace
@@ -80,6 +80,7 @@ class ProjectArtifactView(APIView):
 class ArtifactListView(IdempotentMixin, ProjectArtifactView):
     serializer_class = ArtifactSchema
 
+    @extend_schema(responses=ArtifactSchema(many=True))
     def get(self, request, workspace_public_id, event_public_id, project_public_id):
         return Response(
             [
@@ -168,7 +169,7 @@ class ArtifactDetailView(ProjectArtifactView):
     ):
         artifact = self.get_artifact()
         if not self.can_view(artifact):
-            return Response(status=404)
+            raise NotFound()
         payload = artifact_payload(artifact)
         if artifact.status == ArtifactStatus.READY and artifact.object_key:
             payload["download_url"] = S3Storage().presign_get(
@@ -184,7 +185,7 @@ class ArtifactValidateView(ProjectArtifactView):
     ):
         artifact = self.get_artifact()
         if not self.can_view(artifact) and artifact.created_by_id != request.user.id:
-            return Response(status=404)
+            raise NotFound()
         evidence = validate_artifact(artifact, actor=request.user)
         artifact.refresh_from_db()
         return Response(
@@ -209,7 +210,7 @@ class ArtifactEvidenceCheckView(ProjectArtifactView):
     ):
         artifact = self.get_artifact()
         if not self.can_view(artifact) and artifact.created_by_id != request.user.id:
-            return Response(status=404)
+            raise NotFound()
         if artifact.kind not in {ArtifactKind.REPOSITORY, ArtifactKind.LIVE_URL}:
             raise ValidationError(
                 {"detail": "Submission CI only applies to repository/live_url artifacts."}

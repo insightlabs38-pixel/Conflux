@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from events.views import OrganizerView
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -141,7 +141,10 @@ class AudiencePreviewView(OrganizerView):
 
 
 class MessageListCreateView(IdempotentMixin, OrganizerView):
-    @extend_schema(responses=MessageSchema(many=True))
+    @extend_schema(
+        parameters=[OpenApiParameter("offset", int, description="Messages to skip (page offset).")],
+        responses=MessageSchema(many=True),
+    )
     def get(self, request, workspace_public_id, event_public_id):
         offset = _offset(request)
         # Mention notices are inbox deliveries, not organizer broadcasts.

@@ -101,6 +101,26 @@ for (const width of [390, 1440]) {
         exact: false,
       }),
     ).toBeVisible();
+    // REST: the lists and records the OpenAPI document describes, and how a list is paged.
+    await expect(
+      table.getByRole("columnheader", { name: "REST representation" }),
+    ).toBeVisible();
+    await event.getByText("Provided", { exact: true }).nth(4).click();
+    await expect(event.getByText("list:event-list")).toBeVisible();
+    await expect(
+      event.getByText("Lists: GET event-list: array of Event"),
+    ).toBeVisible();
+    // Generated SDKs: each operation of the feature and the type the clients give it.
+    await expect(
+      table.getByRole("columnheader", { name: "Generated SDK" }),
+    ).toBeVisible();
+    await event.getByText("Provided", { exact: true }).nth(5).click();
+    await expect(event.getByText("generated:typescript")).toBeVisible();
+    await expect(
+      event.getByText("Operations in both SDKs: GET event-list: Event[]", {
+        exact: false,
+      }),
+    ).toBeVisible();
     // A feature without a state machine says how its records change.
     const track = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Track \(track\)/ }),

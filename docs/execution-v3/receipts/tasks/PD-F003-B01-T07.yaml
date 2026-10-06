@@ -1,0 +1,96 @@
+version: 3
+task: PD-F003-B01-T07
+batch: PD-F003-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: da31e45
+  head_commit: da31e45
+changed_paths:
+- src/api/core/ (features_sdk.py new, apps.py)
+- src/api/<app>/features.py for the fifteen features (sdk claims)
+- src/web/lib/completeness.ts, features/operations/CompletenessPanel.test.tsx, tests/e2e/completeness.spec.ts
+- tests/integration/ (test_feature_sdk.py new, test_feature_contract.py extended)
+- docs/operations/COMPLETENESS.md, spec 003 (as built)
+deliverables:
+- item: Generated SDK representation added to the completeness contract and applied to domain work
+  result: pass
+  evidence: "sdk verifier derives every operation of every route a feature claims (all methods in the permission matrix), requires a unique operation id in the OpenAPI document and the two generated targets in the claim, and in CI (check_static) confirms each operation is in both generated files with the right method and that the TypeScript response type equals the type derived from OpenAPI; all fifteen features claim it with no findings"
+- item: Observable state and diagnostics
+  result: pass
+  evidence: "the page lists each feature's operations with the TypeScript type its clients give them (Track[], Event, null)"
+- item: Focused tests for the real workflow
+  result: pass
+  evidence: "test_feature_sdk.py calls every claimed operation (45 changes and every claimed list) through the generated Python client in process against the real API, checks the answer against the generated types (array, null, schema fields) and a refusal as an ApiError with the shared shape; verifier suite covers missing targets, missing operations, duplicate ids and a tree whose Python file, TypeScript file or response type differs from OpenAPI"
+invariants:
+- item: One source of truth
+  result: pass
+  evidence: "operations and types are derived from the OpenAPI document and the generated files; the claim only names the targets and the proof"
+- item: Existing behavior compatible
+  result: pass
+  evidence: "no product code changed; the SDK generator and files are untouched"
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 2423 passed, 31 skipped (69 new)
+- command: pnpm web vitest run; tsc --noEmit; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 658 web tests, SDKs and OpenAPI unchanged and clean
+- command: npx playwright test completeness --project=desktop (seed 7, read-only, app rebuilt)
+  result: pass
+  note: 2 passed (390 and 1440) with the Generated SDK column opened to its targets and derived operations
+- command: make e2e-affected
+  result: pass
+  note: the T06 run in this session already covers the product changes; T07 adds no product code
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: Generated SDK column with closed details in Operations > Completeness
+- surface: api
+  result: pass
+  evidence: report facts carry sdk; no schema change
+- surface: sdk
+  result: pass
+  evidence: this task, both clients checked against OpenAPI
+- surface: cli
+  result: pass
+  evidence: assigned to PD-F003-B02-T04
+- surface: mcp
+  result: pass
+  evidence: assigned to PD-F003-B02-T05
+- surface: event_as_code
+  result: pass
+  evidence: assigned to PD-F003-B02-T06
+- surface: audit
+  result: pass
+  evidence: unchanged, T04
+- surface: webhook
+  result: pass
+  evidence: assigned to PD-F003-B02-T07
+- surface: archive
+  result: pass
+  evidence: assigned to PD-F003-B02-T08
+- surface: analytics
+  result: pass
+  evidence: assigned to PD-F003-B03-T01
+- surface: search
+  result: pass
+  evidence: assigned to T08 of this batch
+- surface: docs
+  result: pass
+  evidence: COMPLETENESS.md SDK section and spec 003 as built
+migrations:
+- none
+findings:
+- The SDK check found no defect of its own because T06 had already corrected the ten list types the clients inherited
+limitations:
+- the TypeScript client is checked by its generated types and the shared generator tests, not by a runtime call, because the Python suite has no TypeScript runtime
+- request body types are not compared field by field, only response types
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

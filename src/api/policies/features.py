@@ -37,6 +37,18 @@ register_feature(
                 "mode:policy-detail:DELETE=natural",
                 "test:tests/integration/test_feature_idempotency.py::test_a_repeated_change_does_what_its_declared_mode_says",
             ),
+            "rest": provided(
+                "list:policy-list",
+                "no_detail@a policy is read in the event's policy list",
+                "paging:unpaged@bounded: an event has tens of policies",
+                "test:tests/integration/test_feature_rest.py::test_every_refusal_of_a_claimed_route_uses_the_shared_error_shape",
+                "test:tests/integration/test_feature_rest.py::test_every_claimed_list_returns_what_its_schema_says",
+            ),
+            "sdk": provided(
+                "generated:python",
+                "generated:typescript",
+                "test:tests/integration/test_feature_sdk.py::test_every_claimed_operation_works_through_the_generated_python_sdk",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

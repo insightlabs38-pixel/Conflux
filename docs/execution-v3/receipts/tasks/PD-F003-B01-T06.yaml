@@ -1,0 +1,99 @@
+version: 3
+task: PD-F003-B01-T06
+batch: PD-F003-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: da31e45
+  head_commit: da31e45
+changed_paths:
+- src/api/core/ (features_rest.py new, features.py System.openapi, operation and schema, apps.py)
+- src/api/<app>/features.py for the fifteen features (rest claims)
+- "OpenAPI fixes in src/api/{events,artifacts,evaluations,forms,policies,projects,stages,participation}/views.py (ten list operations documented as arrays), communications/views.py (offset parameter), awards/views.py (resources on the award output)"
+- "empty-bodied 404 guard clauses now raise NotFound in projects, artifacts, evaluations and integrations views"
+- src/web/lib/completeness.ts, features/operations/CompletenessPanel.test.tsx, tests/e2e/completeness.spec.ts
+- tests/integration/ (test_feature_rest.py new, test_feature_contract.py extended)
+- docs/operations/COMPLETENESS.md, spec 003 (as built), docs/api/openapi.yaml, sdks/ (regenerated)
+deliverables:
+- item: REST representation added to the completeness contract and applied to domain work
+  result: pass
+  evidence: "rest verifier reads the OpenAPI document of the running code and holds list:, detail:, no_list@, no_detail@ and paging: claims to it (array or paged list, one-record detail, uuid path ids, paging derived from query parameters, every writing operation documented with a success response); all fifteen features claim it with no findings"
+- item: Observable state and diagnostics, defects found fixed at the source
+  result: pass
+  evidence: "the page shows each feature's lists, detail and paging; the verifier found ten list operations documented as one record (wrong generated SDK types), an undocumented offset on the message list, and the tests found an undocumented resources field on awards and eleven empty-bodied 404s; all fixed and the OpenAPI document and SDKs regenerated"
+- item: Focused tests for the real workflow
+  result: pass
+  evidence: "test_feature_rest.py lists and details against their schemas with real data, refusals by a stranger, a signed-out caller, an unknown id and an invalid body are JSON in the shared shape for all 45 changes, keyed messages for invalid bodies, a JSON 404 for a non-member of a project; verifier suite has a code per defect"
+invariants:
+- item: One source of truth
+  result: pass
+  evidence: "the claim names routes and reasons, everything else is read from the OpenAPI document the SDKs are generated from"
+- item: Existing behavior compatible
+  result: pass
+  evidence: "status codes unchanged; empty 404 bodies gained a detail message; the awards output gained a field already in the response; typed web code compiles and 658 web tests pass"
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 2354 passed, 31 skipped (83 new)
+- command: pnpm web vitest run; tsc --noEmit; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 658 web tests; OpenAPI validated with fail-on-warn and both SDKs regenerated and clean
+- command: npx playwright test completeness --project=desktop (seed 7, read-only, app rebuilt)
+  result: pass
+  note: 2 passed (390 and 1440) with the REST column opened to its refs and derived lists
+- command: make e2e-affected
+  result: pass
+  note: read-only, isolated-mutation and canary tiers ok (run with the corrected list documentation, the NotFound bodies and the awards field in place)
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: REST column with closed details in Operations > Completeness
+- surface: api
+  result: pass
+  evidence: list operations documented as arrays, offset parameter documented, empty 404s now carry the shared error shape
+- surface: sdk
+  result: pass
+  evidence: both SDKs regenerated from the corrected document; checked by T07
+- surface: cli
+  result: pass
+  evidence: assigned to PD-F003-B02-T04
+- surface: mcp
+  result: pass
+  evidence: assigned to PD-F003-B02-T05
+- surface: event_as_code
+  result: pass
+  evidence: assigned to PD-F003-B02-T06
+- surface: audit
+  result: pass
+  evidence: unchanged, T04
+- surface: webhook
+  result: pass
+  evidence: assigned to PD-F003-B02-T07
+- surface: archive
+  result: pass
+  evidence: assigned to PD-F003-B02-T08
+- surface: analytics
+  result: pass
+  evidence: assigned to PD-F003-B03-T01
+- surface: search
+  result: pass
+  evidence: assigned to T08 of this batch
+- surface: docs
+  result: pass
+  evidence: COMPLETENESS.md REST section and spec 003 as built
+migrations:
+- none
+findings:
+- Eight features have no record page of their own (track, stage, policy, announcement, webhook, award, application, message); each says why, and adding GET detail operations is feature work for a later batch
+- Lists are unpaged except messages; each says why it stays bounded. Paging every list is a cross-domain rewrite outside this batch
+limitations:
+- error responses are not enumerated in the OpenAPI document, so SDK users do not see the shared error shape described; the shape is proved by the tests
+- other lists outside the fifteen features may still be documented as a single record; the verifier only covers claimed routes
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

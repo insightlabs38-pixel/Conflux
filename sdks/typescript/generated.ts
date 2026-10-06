@@ -786,6 +786,7 @@ export type AwardOutput = {
   components: ComponentOutput[];
   winners: WinnerOutput[];
   sponsor_contacts: string[];
+  resources: ResourceOutput[];
 };
 
 export type InputOfAwardOutput = {
@@ -803,6 +804,7 @@ export type InputOfAwardOutput = {
   components: InputOfComponentOutput[];
   winners: InputOfWinnerOutput[];
   sponsor_contacts: string[];
+  resources: InputOfResourceOutput[];
 };
 
 export type AwardProposalItem = {
@@ -6724,7 +6726,7 @@ export interface Operations {
   };
   get_api_v1_workspaces_workspace_public_id_events: {
     request: { path: { workspace_public_id: string } };
-    response: Event;
+    response: Event[];
   };
   post_api_v1_workspaces_workspace_public_id_events: {
     request: {
@@ -6796,7 +6798,7 @@ export interface Operations {
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
-    response: Announcement;
+    response: Announcement[];
   };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements: {
     request: {
@@ -7269,7 +7271,10 @@ export interface Operations {
     response: AudiencePreviewSchema;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_messages: {
-    request: { path: { event_public_id: string; workspace_public_id: string } };
+    request: {
+      path: { event_public_id: string; workspace_public_id: string };
+      query?: { offset?: number };
+    };
     response: MessageSchema[];
   };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_messages: {
@@ -7512,7 +7517,7 @@ export interface Operations {
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_forms: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
-    response: FormPayloadSchema;
+    response: FormPayloadSchema[];
   };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_forms: {
     request: {
@@ -7853,7 +7858,7 @@ export interface Operations {
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_my_team_invites: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
-    response: TeamInvite;
+    response: TeamInvite[];
   };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_my_team_invites: {
     request: {
@@ -8041,7 +8046,7 @@ export interface Operations {
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_policies: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
-    response: Policy;
+    response: Policy[];
   };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_policies: {
     request: {
@@ -8148,7 +8153,7 @@ export interface Operations {
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
-    response: Project;
+    response: Project[];
   };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects: {
     request: {
@@ -8186,7 +8191,7 @@ export interface Operations {
         workspace_public_id: string;
       };
     };
-    response: ArtifactSchema;
+    response: ArtifactSchema[];
   };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_artifacts: {
     request: {
@@ -9002,7 +9007,7 @@ export interface Operations {
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_stages: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
-    response: Stage;
+    response: Stage[];
   };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages: {
     request: {
@@ -9061,7 +9066,7 @@ export interface Operations {
         workspace_public_id: string;
       };
     };
-    response: EvaluationPlan;
+    response: EvaluationPlan[];
   };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_stages_stage_public_id_evaluation_plans: {
     request: {
@@ -9885,7 +9890,7 @@ export interface Operations {
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_tracks: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
-    response: Track;
+    response: Track[];
   };
   post_api_v1_workspaces_workspace_public_id_events_event_public_id_tracks: {
     request: {
@@ -11467,7 +11472,7 @@ export const operations = {
       method: "GET",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/messages/",
       path_params: ["event_public_id", "workspace_public_id"],
-      query_params: [],
+      query_params: ["offset"],
       request_body: false,
       response_kind: "json",
     },

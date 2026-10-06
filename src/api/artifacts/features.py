@@ -44,6 +44,18 @@ register_feature(
                 "test:tests/integration/test_feature_idempotency.py::test_a_repeated_change_does_what_its_declared_mode_says",
                 "test:tests/integration/test_feature_idempotency.py::test_a_keyed_change_runs_once_for_one_key_and_a_different_body_is_refused",
             ),
+            "rest": provided(
+                "list:artifact-list",
+                "detail:artifact-detail",
+                "paging:unpaged@bounded: a project holds a few artifacts",
+                "test:tests/integration/test_feature_rest.py::test_every_refusal_of_a_claimed_route_uses_the_shared_error_shape",
+                "test:tests/integration/test_feature_rest.py::test_every_claimed_list_returns_what_its_schema_says",
+            ),
+            "sdk": provided(
+                "generated:python",
+                "generated:typescript",
+                "test:tests/integration/test_feature_sdk.py::test_every_claimed_operation_works_through_the_generated_python_sdk",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",

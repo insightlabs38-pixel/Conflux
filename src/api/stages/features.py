@@ -60,6 +60,10 @@ register_feature(
             "ui_advanced": provided(
                 "uses:ConsequenceDialog@src/web/features/stage-builder/StageBuilder.tsx",
             ),
+            "bulk": provided(
+                "action:advance=stage.advanced",
+                "test:tests/integration/test_bulk_operations.py::test_full_preview_apply_and_retry_are_atomic_and_audited",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

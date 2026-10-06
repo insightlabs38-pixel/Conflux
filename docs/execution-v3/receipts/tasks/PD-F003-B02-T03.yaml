@@ -1,0 +1,96 @@
+version: 3
+task: PD-F003-B02-T03
+batch: PD-F003-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: b2b4891
+  head_commit: b2b4891
+changed_paths:
+- src/api/core/features_bulk.py (new), core/apps.py
+- src/api/<app>/features.py for the fifteen features (bulk claims)
+- src/web/lib/completeness.ts, features/operations/CompletenessPanel.test.tsx, tests/e2e/completeness.spec.ts
+- tests/integration/ (test_feature_bulk.py new, test_feature_contract.py, test_completeness_regression.py)
+- docs/operations/COMPLETENESS.md, spec 003 (Bulk as built)
+deliverables:
+- item: Bulk-operation support added to the completeness contract and applied to domain work
+  result: pass
+  evidence: "features_bulk verifies action:<key>=<audit action>, test: and no_bulk@ claims against the planner registry and the handlers; five features own the five registered actions (message, project, stage, policy, evaluation plan), registration decisions are planned for PD-S012-B03-T08, nine features say why a batch does not fit"
+- item: Observable state and diagnostics
+  result: pass
+  evidence: "the Operations completeness page gains a Bulk operations column showing each action with the fields it takes and the audit action it records, or why none"
+- item: Focused tests for the real workflow
+  result: pass
+  evidence: "test_feature_bulk.py: every registered action claimed by exactly one feature, claimed audit actions equal what a real preview and apply records, a failure code per defect, CI proof check; browser spec at 390 and 1440"
+invariants:
+- item: One source of truth, no business rule in a surface
+  result: pass
+  evidence: "the planner registry stays the only list of actions; the claim names registry keys and reads them, nothing is registered or executed by the verifier"
+- item: Existing behavior compatible
+  result: pass
+  evidence: "no product code changed; bulk planner tests pass unchanged"
+verification:
+- command: "uv run --frozen pytest tests/integration/test_feature_bulk.py test_feature_contract.py test_completeness_regression.py test_feature_search.py test_bulk_operations.py test_bulk_planner_registry.py -n auto"
+  result: pass
+  note: "248 passed, 1 skipped (pre-existing skip); the full suite runs at batch close"
+- command: "features.check() and check_static on the real tree"
+  result: pass
+  note: "no problems"
+- command: "pnpm web vitest features/operations; tsc --noEmit; make format-check lint sdk-check block-schema-check"
+  result: pass
+  note: "31 passed, clean"
+- command: "npx playwright test completeness --project=desktop (seed 7, app rebuilt)"
+  result: pass
+  note: "2 passed (390 and 1440) with the Bulk operations column"
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: "Bulk operations column on Operations > Completeness"
+- surface: api
+  result: pass
+  evidence: "report facts carry bulk"
+- surface: sdk
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: cli
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: mcp
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: event_as_code
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: audit
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: webhook
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: archive
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: analytics
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: search
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: docs
+  result: pass
+  evidence: "COMPLETENESS.md and the B02 contract in spec 003"
+migrations:
+- none
+findings:
+- "The audit action is named in the claim and proved against a real apply, because handlers delegate audit to domain services"
+limitations:
+- "a new registered action without an owning feature fails test_feature_bulk, not the report"
+- "registration decisions in bulk are planned (PD-S012-B03-T08), not built here"
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

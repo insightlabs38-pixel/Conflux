@@ -97,6 +97,8 @@ UI = ft.provided("no_ui@a saved view is made from the grid toolbar, not on a scr
 
 ADV = ft.provided("no_advanced@nothing sits beyond the base screen of a saved view in this test")
 
+BULK = ft.provided("no_bulk@a saved view belongs to one person and is never changed in a batch")
+
 
 def identity(*refs):
     return ft.provided(*(refs or ("field:public_id",)))
@@ -119,6 +121,7 @@ def only(feature_key="x", **over):
             "search": SEARCH,
             "ui_base": UI,
             "ui_advanced": ADV,
+            "bulk": BULK,
         },
         "lifecycle": ft.Lifecycle("none", note="Edited in place."),
     }
@@ -133,6 +136,7 @@ def only(feature_key="x", **over):
         "search": SEARCH,
         "ui_base": UI,
         "ui_advanced": ADV,
+        "bulk": BULK,
         **values["claims"],
     }
     ft.FEATURES.clear()
@@ -158,6 +162,7 @@ def test_the_fifteen_features_agree_with_the_live_system():
         "search",
         "ui_base",
         "ui_advanced",
+        "bulk",
     ]
 
 
@@ -277,6 +282,7 @@ def test_a_well_formed_independent_feature_passes(isolated):
             "search": SEARCH,
             "ui_base": UI,
             "ui_advanced": ADV,
+            "bulk": BULK,
         },
         ft.Lifecycle("none", note="Edited in place and deleted."),
     )
@@ -499,6 +505,7 @@ def test_the_endpoint_reports_a_broken_claim_instead_of_hiding_it(world, isolate
             "search": ft.FEATURES["event"].claims["search"],
             "ui_base": ft.FEATURES["event"].claims["ui_base"],
             "ui_advanced": ft.FEATURES["event"].claims["ui_advanced"],
+            "bulk": ft.FEATURES["event"].claims["bulk"],
         },
         ft.FEATURES["event"].lifecycle,
     )

@@ -116,6 +116,8 @@ const FACT_LABEL: Record<string, string> = {
   screen: "Screen",
   uses: "Shared components",
   advanced: "Advanced",
+  bulk_actions: "Bulk actions",
+  bulk: "Bulk",
 };
 
 /** One derived fact as a sentence fragment: lists joined, booleans as yes or no. */

@@ -61,6 +61,10 @@ register_feature(
                 "no_advanced@the rubric is edited in the base screen; its advanced views "
                 "(progress, results) belong to the judging feature",
             ),
+            "bulk": provided(
+                "action:assign=assignment.activated",
+                "test:tests/integration/test_bulk_operations.py::test_full_preview_apply_and_retry_are_atomic_and_audited",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

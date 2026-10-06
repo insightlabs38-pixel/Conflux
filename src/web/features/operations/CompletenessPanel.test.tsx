@@ -362,6 +362,10 @@ describe("completeness helpers", () => {
     expect(factText("uses", ["EntityGrid in RegistrationPanel.tsx"])).toBe(
       "Shared components: EntityGrid in RegistrationPanel.tsx",
     );
+    expect(factText("bulk_actions", ["move (Move projects)"])).toBe(
+      "Bulk actions: move (Move projects)",
+    );
+    expect(factText("bulk", "not offered")).toBe("Bulk: not offered");
     expect(factText("advanced", "none beyond the base screen")).toBe(
       "Advanced: none beyond the base screen",
     );

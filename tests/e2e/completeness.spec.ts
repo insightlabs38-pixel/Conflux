@@ -184,6 +184,25 @@ for (const width of [390, 1440]) {
         exact: false,
       }),
     ).toBeVisible();
+    // Bulk operations: the planner actions a feature takes part in, or why a batch does not fit.
+    await expect(
+      table.getByRole("columnheader", { name: "Bulk operations" }),
+    ).toBeVisible();
+    const project = table.locator("tbody tr").filter({
+      has: page.getByRole("rowheader", { name: /^Project \(project\)/ }),
+    });
+    await project.getByText("Provided", { exact: true }).nth(9).click();
+    await expect(
+      project.getByText("Bulk actions: move (Move projects to a track)", {
+        exact: false,
+      }),
+    ).toBeVisible();
+    await expect(project).toContainText("records project.track_moved");
+    await expect(
+      table.locator("tbody tr").filter({
+        has: page.getByRole("rowheader", { name: /^Registration application/ }),
+      }),
+    ).toContainText("Planned");
     // A feature without a state machine says how its records change.
     const track = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Track \(track\)/ }),

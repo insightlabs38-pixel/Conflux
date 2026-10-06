@@ -27,6 +27,7 @@ LANDED = [
     "search",
     "ui_base",
     "ui_advanced",
+    "bulk",
 ]
 
 

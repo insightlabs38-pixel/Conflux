@@ -55,6 +55,10 @@ register_feature(
                 "no_advanced@a message is composed and sent in the base screen; delivery detail "
                 "is in the inbox",
             ),
+            "bulk": provided(
+                "action:send=message.sent",
+                "test:tests/integration/test_bulk_operations.py::test_full_preview_apply_and_retry_are_atomic_and_audited",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

@@ -165,3 +165,13 @@ Advanced and expert functionality stays behind progressive disclosure and is bui
 - `no_advanced@<reason>`: nothing goes beyond the base screen, and why; a feature whose advanced screen is owed is `planned` with the owning task.
 
 Codes: `bad_ref`, `both`, `no_reason`, `no_uses`, `component_unknown`, `screen_path`, `use_twice`; CI: `component_missing`, `screen_missing`, `not_imported`, `screen_reads_nothing`. Seven features name shared components, seven say they have nothing beyond the base screen and announcements are planned for PD-S009-B02-T03.
+
+## Bulk operations (T03)
+
+The platform has one bulk planner (`communications.bulk`): an action is registered once, previewed without writing, applied only with the preview's token, audited and receipted. `features_bulk.verify` holds a `bulk` claim to that registry:
+
+- `action:<key>=<audit action>` (one or more): the key is a registered planner action and no other feature claims it; the audit action is one the code records, written by the feature's app or named for the feature (`project.track_moved` for a project), and, when the handler writes it itself, one of the `action=` literals in the handler's source;
+- `test:<path>::<name>`: the proof, a test that previews and applies the action (CI checks it exists);
+- `no_bulk@<reason>`: a batch does not fit the feature, and why; a feature whose actions are owed is `planned` with the owning task (registration decisions, PD-S012-B03-T08).
+
+Codes: `bad_ref`, `both`, `no_reason`, `no_action`, `no_test`, `test_ref`, `planner_missing`, `action_unknown`, `action_twice`, `audit_shape`, `audit_unknown`, `audit_foreign`, `audit_not_written`, `action_shared`; CI: `test_file`, `test_name`. `tests/integration/test_feature_bulk.py` proves the registry side: every registered action belongs to exactly one claimed feature (a new action without a claim fails), and the audit actions the claims name are exactly the ones a real preview and apply leaves behind. Five features own the five actions (message, project, stage, policy, evaluation plan), registrations are planned, nine say why a batch does not fit.

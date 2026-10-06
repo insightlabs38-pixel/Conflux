@@ -60,6 +60,10 @@ register_feature(
             "ui_advanced": provided(
                 "uses:ExplanationView@src/web/features/policy-builder/PolicyBuilder.tsx",
             ),
+            "bulk": provided(
+                "action:extend=temporal_gate.updated",
+                "test:tests/integration/test_bulk_operations.py::test_full_preview_apply_and_retry_are_atomic_and_audited",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

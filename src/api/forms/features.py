@@ -59,6 +59,10 @@ register_feature(
                 "uses:VersionCompare@src/web/features/form-builder/FormBuilder.tsx",
                 "uses:PreviewBar@src/web/features/form-builder/FormPreviewAs.tsx",
             ),
+            "bulk": provided(
+                "no_bulk@a form is built and versioned one at a time, and its versions are "
+                "compared, not batched",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

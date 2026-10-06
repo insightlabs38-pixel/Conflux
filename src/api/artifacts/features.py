@@ -67,6 +67,10 @@ register_feature(
             "ui_advanced": provided(
                 "uses:OperationStatus@src/web/features/artifacts/ArtifactPanel.tsx",
             ),
+            "bulk": provided(
+                "no_bulk@an artifact is uploaded and inspected one at a time with its own "
+                "preview and scan",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",

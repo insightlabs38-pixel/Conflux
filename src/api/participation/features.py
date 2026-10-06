@@ -72,6 +72,10 @@ register_feature(
                 "no_advanced@a team is made, joined and led from one screen; there is no query, "
                 "comparison or preview beyond it",
             ),
+            "bulk": provided(
+                "no_bulk@a team is formed and led by its captain; an organizer does not change "
+                "teams in a batch",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

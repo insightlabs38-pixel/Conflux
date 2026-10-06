@@ -65,6 +65,10 @@ register_feature(
                 "uses:BulkPlanner@src/web/features/event-builder/ProjectsGrid.tsx",
                 "uses:RichEditor@src/web/features/artifacts/ProjectStoryEditor.tsx",
             ),
+            "bulk": provided(
+                "action:move=project.track_moved",
+                "test:tests/integration/test_bulk_operations.py::test_full_preview_apply_and_retry_are_atomic_and_audited",
+            ),
         },
         lifecycle=Lifecycle(
             "none",
@@ -137,6 +141,10 @@ register_feature(
             "ui_advanced": provided(
                 "no_advanced@a submission is one draft and one final per stage, edited in the "
                 "base screen; nothing sits beyond it yet",
+            ),
+            "bulk": provided(
+                "no_bulk@a submission is one draft and one final per stage, written by its team "
+                "and never in a batch",
             ),
         },
         lifecycle=Lifecycle(

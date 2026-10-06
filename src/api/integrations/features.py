@@ -61,6 +61,10 @@ register_feature(
                 "no_advanced@a subscription is a URL, a set of event types and a switch, all in "
                 "the base screen",
             ),
+            "bulk": provided(
+                "no_bulk@a subscription is an integration an admin sets up one at a time with "
+                "its own secret",
+            ),
         },
         lifecycle=Lifecycle(
             "flag",

@@ -58,6 +58,10 @@ register_feature(
                 "no_advanced@awards are edited and published in the base screen; nothing sits "
                 "beyond it",
             ),
+            "bulk": provided(
+                "no_bulk@an award is chosen and published one at a time through its own "
+                "deterministic rules",
+            ),
         },
         lifecycle=Lifecycle(
             "timestamp",

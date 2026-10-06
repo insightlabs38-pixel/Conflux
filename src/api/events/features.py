@@ -68,6 +68,10 @@ register_feature(
                 "uses:ConsequenceDialog@src/web/features/event-builder/EventDashboard.tsx",
                 "uses:SchemaForm@src/web/features/event-builder/ConfigurationPanel.tsx",
             ),
+            "bulk": provided(
+                "no_bulk@the planner works inside one event, and an event is configured one at "
+                "a time on its own screens",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",
@@ -138,6 +142,10 @@ register_feature(
                 "no_advanced@tracks are named and ordered inline in the event dashboard; there is "
                 "nothing beyond the base screen",
             ),
+            "bulk": provided(
+                "no_bulk@tracks are few and ordered in place on the event dashboard; a batch "
+                "over them adds nothing",
+            ),
         },
         lifecycle=Lifecycle(
             "none", note="Edited in place and deleted (track.deleted); position orders it."
@@ -201,6 +209,11 @@ register_feature(
             "ui_advanced": provided(
                 "uses:EntityGrid@src/web/features/event-builder/RegistrationPanel.tsx",
                 "uses:NotesDialog@src/web/features/event-builder/RegistrationPanel.tsx",
+            ),
+            "bulk": planned(
+                "PD-S012-B03-T08",
+                "Registration decisions are made one at a time today; the planner has no action "
+                "for a batch.",
             ),
         },
         lifecycle=Lifecycle(
@@ -276,6 +289,10 @@ register_feature(
             "ui_advanced": planned(
                 "PD-S009-B02-T03",
                 "No screen posts announcements yet, so nothing sits beyond one.",
+            ),
+            "bulk": provided(
+                "no_bulk@announcements are posted one at a time to the event site; a batch "
+                "makes no sense for them",
             ),
         },
         lifecycle=Lifecycle(

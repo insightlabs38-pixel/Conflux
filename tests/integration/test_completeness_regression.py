@@ -35,6 +35,7 @@ LANDED = [
     "archive",
     "analytics",
     "privacy",
+    "extension",
 ]
 
 

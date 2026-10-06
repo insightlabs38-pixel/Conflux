@@ -115,6 +115,10 @@ register_feature(
                 "retained:team_memberships",
                 "test:tests/integration/test_feature_privacy.py::test_a_real_subject_is_exported_and_erased_as_every_claim_says",
             ),
+            "extension": provided(
+                "no_extension@teams have no extension point; their membership rules are fixed "
+                "in the domain",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

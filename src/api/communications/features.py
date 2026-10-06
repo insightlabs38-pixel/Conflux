@@ -90,6 +90,12 @@ register_feature(
                 "the message stays in the event history",
                 "test:tests/integration/test_feature_privacy.py::test_a_real_subject_is_exported_and_erased_as_every_claim_says",
             ),
+            "extension": provided(
+                "hook:bulk_action=communications",
+                "hook:approval_policy=communications",
+                "hook:notification_category=communications",
+                "test:tests/integration/test_feature_extension.py::test_every_hook_pair_is_claimed_once_and_the_manifests_agree_with_the_live_registries",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

@@ -110,6 +110,10 @@ register_feature(
                 "no_personal_data@the event record names no person; people's rows hang off it "
                 "and are claimed by their own features",
             ),
+            "extension": provided(
+                "no_extension@the event record offers no hook of its own; its timeline and page "
+                "blocks are declared by apps that have no feature",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",
@@ -213,6 +217,9 @@ register_feature(
             ),
             "privacy": provided(
                 "no_personal_data@a track is configuration of the event and names no person",
+            ),
+            "extension": provided(
+                "no_extension@tracks are configuration of the event and have no extension point",
             ),
         },
         lifecycle=Lifecycle(
@@ -320,6 +327,11 @@ register_feature(
                 "person:decided_by=staff@the organizer who decided acts in their role and the "
                 "decision stays with the audit trail",
                 "test:tests/integration/test_feature_privacy.py::test_a_real_subject_is_exported_and_erased_as_every_claim_says",
+            ),
+            "extension": provided(
+                "hook:entity=events",
+                "hook:thread_subject=events",
+                "test:tests/integration/test_feature_extension.py::test_every_hook_pair_is_claimed_once_and_the_manifests_agree_with_the_live_registries",
             ),
         },
         lifecycle=Lifecycle(
@@ -433,6 +445,10 @@ register_feature(
                 "person:posted_by=staff@the organizer who posted acts in their role and the "
                 "announcement stays on the event site",
                 "test:tests/integration/test_feature_privacy.py::test_a_real_subject_is_exported_and_erased_as_every_claim_says",
+            ),
+            "extension": provided(
+                "no_extension@announcements are content; their notification category is "
+                "declared with messaging",
             ),
         },
         lifecycle=Lifecycle(

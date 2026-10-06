@@ -402,6 +402,10 @@ describe("completeness helpers", () => {
     expect(factText("people", ["user: erased", "decided_by: staff"])).toBe(
       "People named: user: erased, decided_by: staff",
     );
+    expect(
+      factText("hooks", ["bulk_action (send): registered in code only"]),
+    ).toBe("Hooks: bulk_action (send): registered in code only");
+    expect(factText("extension", "no hook")).toBe("Extension: no hook");
     expect(factText("privacy", "no personal data")).toBe(
       "Privacy: no personal data",
     );

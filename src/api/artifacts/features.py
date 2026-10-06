@@ -105,6 +105,11 @@ register_feature(
                 "person:created_by=purged",
                 "test:tests/integration/test_feature_privacy.py::test_a_real_subject_is_exported_and_erased_as_every_claim_says",
             ),
+            "extension": provided(
+                "hook:artifact_validator=artifacts",
+                "hook:preview_source=artifacts",
+                "test:tests/integration/test_feature_extension.py::test_every_hook_pair_is_claimed_once_and_the_manifests_agree_with_the_live_registries",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",

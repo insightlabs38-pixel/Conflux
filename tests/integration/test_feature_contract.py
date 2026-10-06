@@ -119,6 +119,8 @@ EVENT_PRIV = ft.provided(
     "no_personal_data@the event record names no person; people's rows hang off it",
 )
 
+EXT = ft.provided("no_extension@a saved view is a personal setting and offers no extension point")
+
 ANAL = ft.provided("no_analytics@a saved view is a personal setting and not activity in an event")
 
 ARCH = ft.provided(
@@ -177,6 +179,7 @@ def only(feature_key="x", **over):
             "archive": ARCH,
             "analytics": ANAL,
             "privacy": PRIV,
+            "extension": EXT,
         },
         "lifecycle": ft.Lifecycle("none", note="Edited in place."),
     }
@@ -199,6 +202,7 @@ def only(feature_key="x", **over):
         "archive": ARCH,
         "analytics": ANAL,
         "privacy": PRIV,
+        "extension": EXT,
         **values["claims"],
     }
     ft.FEATURES.clear()
@@ -232,6 +236,7 @@ def test_the_fifteen_features_agree_with_the_live_system():
         "archive",
         "analytics",
         "privacy",
+        "extension",
     ]
 
 
@@ -359,6 +364,7 @@ def test_a_well_formed_independent_feature_passes(isolated):
             "archive": ARCH,
             "analytics": ANAL,
             "privacy": PRIV,
+            "extension": EXT,
         },
         ft.Lifecycle("none", note="Edited in place and deleted."),
     )
@@ -597,6 +603,7 @@ def test_the_endpoint_reports_a_broken_claim_instead_of_hiding_it(world, isolate
             "archive": ft.FEATURES["event"].claims["archive"],
             "analytics": ft.FEATURES["event"].claims["analytics"],
             "privacy": ft.FEATURES["event"].claims["privacy"],
+            "extension": ft.FEATURES["event"].claims["extension"],
         },
         ft.FEATURES["event"].lifecycle,
     )

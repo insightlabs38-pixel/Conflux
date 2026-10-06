@@ -137,6 +137,8 @@ const FACT_LABEL: Record<string, string> = {
   purged: "Files purged",
   people: "People named",
   privacy: "Privacy",
+  hooks: "Hooks",
+  extension: "Extension",
 };
 
 /** One derived fact as a sentence fragment: lists joined, booleans as yes or no. */

@@ -276,6 +276,14 @@ for (const width of [390, 1440]) {
     await expect(
       team.getByText("Kept as evidence: team_memberships", { exact: false }),
     ).toBeVisible();
+    // Extension hooks: the registrations an app offers, typed in the SDK or in code only.
+    await expect(
+      table.getByRole("columnheader", { name: "Extension hooks" }),
+    ).toBeVisible();
+    await stage.getByText("Provided", { exact: true }).nth(17).click();
+    await expect(
+      stage.getByText("Hooks: advancement_strategy", { exact: false }),
+    ).toBeVisible();
     // A feature without a state machine says how its records change.
     const track = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Track \(track\)/ }),

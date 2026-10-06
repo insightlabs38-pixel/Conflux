@@ -95,6 +95,13 @@ register_feature(
                 "no_personal_data@a subscription holds a target URL and a signing secret of an "
                 "integration, not data about a participant",
             ),
+            "extension": provided(
+                "hook:archive_converter=integrations",
+                "hook:archive_exporter=integrations",
+                "hook:archive_importer=integrations",
+                "hook:job_kind=integrations",
+                "test:tests/integration/test_feature_extension.py::test_every_hook_pair_is_claimed_once_and_the_manifests_agree_with_the_live_registries",
+            ),
         },
         lifecycle=Lifecycle(
             "flag",

@@ -103,6 +103,11 @@ register_feature(
                 "retained:pairwise_comparisons",
                 "test:tests/integration/test_feature_privacy.py::test_a_real_subject_is_exported_and_erased_as_every_claim_says",
             ),
+            "extension": provided(
+                "hook:assignment_strategy=evaluations",
+                "hook:version_source=evaluations",
+                "test:tests/integration/test_feature_extension.py::test_every_hook_pair_is_claimed_once_and_the_manifests_agree_with_the_live_registries",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

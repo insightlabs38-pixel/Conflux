@@ -95,6 +95,11 @@ register_feature(
                 "no_personal_data@a form definition is configuration; the answers under a "
                 "project are in no export or erasure bucket yet (PD-S013-B02-T05)",
             ),
+            "extension": provided(
+                "hook:version_source=forms",
+                "hook:preview_surface=forms",
+                "test:tests/integration/test_feature_extension.py::test_every_hook_pair_is_claimed_once_and_the_manifests_agree_with_the_live_registries",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

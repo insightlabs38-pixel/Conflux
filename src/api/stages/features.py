@@ -95,6 +95,10 @@ register_feature(
             "privacy": provided(
                 "no_personal_data@a stage is configuration of the event and names no person",
             ),
+            "extension": provided(
+                "hook:advancement_strategy=stages",
+                "test:tests/integration/test_feature_extension.py::test_every_hook_pair_is_claimed_once_and_the_manifests_agree_with_the_live_registries",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

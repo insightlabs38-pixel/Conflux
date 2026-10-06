@@ -96,6 +96,10 @@ register_feature(
             "privacy": provided(
                 "no_personal_data@a policy is a rule of the event and names no person",
             ),
+            "extension": provided(
+                "no_extension@policies run in one deterministic engine that is not extensible "
+                "by design",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

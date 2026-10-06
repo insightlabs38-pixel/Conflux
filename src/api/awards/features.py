@@ -92,6 +92,10 @@ register_feature(
                 "no_personal_data@an award names no person; its winners are projects, which are "
                 "claimed under the project feature",
             ),
+            "extension": provided(
+                "no_extension@awards are decided by deterministic rules that are not extensible "
+                "by design",
+            ),
         },
         lifecycle=Lifecycle(
             "timestamp",

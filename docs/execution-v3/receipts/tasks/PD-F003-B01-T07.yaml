@@ -25,7 +25,7 @@ deliverables:
   evidence: "the page lists each feature's operations with the TypeScript type its clients give them (Track[], Event, null)"
 - item: Focused tests for the real workflow
   result: pass
-  evidence: "test_feature_sdk.py calls every claimed operation (45 changes and every claimed list) through the generated Python client in process against the real API, checks the answer against the generated types (array, null, schema fields) and a refusal as an ApiError with the shared shape; verifier suite covers missing targets, missing operations, duplicate ids and a tree whose Python file, TypeScript file or response type differs from OpenAPI"
+  evidence: "test_feature_sdk.py calls every claimed operation (the 40 changes and every claimed list, 63 operations in all) through the generated Python client in process against the real API, checks the answer against the generated types (array, null, schema fields) and a refusal as an ApiError with the shared shape; verifier suite covers missing targets, missing operations, duplicate ids and a tree whose Python file, TypeScript file or response type differs from OpenAPI"
 invariants:
 - item: One source of truth
   result: pass

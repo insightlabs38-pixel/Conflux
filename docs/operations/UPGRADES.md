@@ -97,3 +97,12 @@ and a `pg_restore` that can read the dump is available (local, else Docker `post
 `CONFLUX_PG_RESTORE_IMAGE`); otherwise it skips with the reason. A companion test pins the dump's
 SHA-256 so the fixture cannot drift silently. When a newer release ships, add its dump next to this one
 and extend the test rather than replacing the record of the older release.
+
+## Moving to a build with the completeness contract (PD-F003-B01)
+
+No migration, no new Celery task and no new endpoint beyond one read-only report, `GET /api/v1/workspaces/{id}/completeness/` (organizers and admins), which lists which of fifteen features provides which properties and checks every claim against the running system. See [completeness](COMPLETENESS.md). Four changes are visible outside that page:
+
+- **More changes are audited.** Project, form, evaluation-plan, artifact, submission-draft, application-decision and team writes now write an audit row in their own transaction (`project.created`, `project.updated`, `form.created`, `form.draft_saved`, `evaluation_plan.updated`, `evaluation_plan.deleted`, `artifact.added`, `artifact.upload_started`, `artifact.uploaded`, `artifact.validated`, `submission.draft_saved`, `application.decided`, `team.created`, `team.member_joined`, `team.member_left`, `team.captain_transferred`, `team.invite_created`, `team.invite_revoked`, `team.invite_redeemed`). Rows hold ids and field names, never content, object keys, signed URLs or invite tokens. A submission autosave now adds one row per save.
+- **Four creates accept an `Idempotency-Key`**: sending a message, posting an announcement, creating a project and adding an external artifact. It is opt-in: a request without the header behaves as before.
+- **The OpenAPI document and both SDKs were corrected.** Ten list operations (announcements, artifacts, evaluation plans, events, forms, policies, projects, stages, team invites, tracks) were documented as one record and are now arrays, so a TypeScript or Python client that worked around the wrong type should drop the workaround; the message list documents its `offset`; the award output documents `resources`.
+- **An empty-bodied 404 now carries `{"detail": "Not found."}`** (projects, artifacts, judging results and the scoreboard), with the same status.

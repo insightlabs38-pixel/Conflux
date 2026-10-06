@@ -1,0 +1,65 @@
+version: 3
+task: PD-F003-B01-T91
+batch: PD-F003-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: c277f85
+  head_commit: c277f85
+changed_paths:
+- docs/verification/PD-F003-B01/ (SURFACES.md, T91-verify-fast.log)
+- docs/operations/UPGRADES.md
+deliverables:
+- item: Close the batch's explicit surface matrix
+  result: pass
+  evidence: "SURFACES.md states all twelve surfaces: web, api, sdk, audit, search and docs are done in this batch with evidence; cli, mcp, event_as_code, webhook, archive and analytics are each assigned to an existing task of PD-F003-B02 or B03 (ids checked), so no surface is skipped without an owner"
+- item: Every required surface delegates to the same canonical operation and generated contracts stay synchronized
+  result: pass
+  evidence: "the page, the API and the CI check all call core.features report and check over one registry and the live system; OpenAPI was regenerated with fail-on-warn, both SDKs regenerated, and sdk-check and check_openapi_artifact are clean"
+- item: User, operator and developer documentation and migration notes
+  result: pass
+  evidence: "COMPLETENESS.md (one section per property), spec 003 as built, UPGRADES.md note (no migration, one read-only endpoint, audit rows, opt-in Idempotency-Key, corrected OpenAPI types, JSON 404 bodies)"
+invariants:
+- item: One source of truth, server authority
+  result: pass
+  evidence: documentation only in this task; no product behavior changed
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 2457 passed, 31 skipped
+- command: pnpm --filter @conflux/web test
+  result: pass
+  note: 658 passed
+- command: make format-check lint sdk-check block-schema-check
+  result: pass
+  note: clean, log in docs/verification/PD-F003-B01/T91-verify-fast.log
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: browser spec and component tests
+- surface: api
+  result: pass
+  evidence: OpenAPI and SDKs synchronized
+- surface: sdk
+  result: pass
+  evidence: both clients checked by T07
+- surface: audit
+  result: pass
+  evidence: T04 proofs
+- surface: search
+  result: pass
+  evidence: T08 proofs
+- surface: docs
+  result: pass
+  evidence: guide, spec, upgrade note
+migrations: []
+findings: []
+limitations:
+- Carried from the matrix; the cli, mcp, event_as_code, webhook, archive and analytics surfaces are owned by later batches
+escalations: []
+next: review

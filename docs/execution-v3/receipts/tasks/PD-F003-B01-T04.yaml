@@ -12,7 +12,7 @@ git:
   head_commit: 2ecc2d1
 changed_paths:
 - src/api/core/ (features_audit.py new, features.py audit-action source scan, apps.py)
-- src/api/<app>/features.py for the fifteen features (audit claims, 45 changes)
+- src/api/<app>/features.py for the fifteen features (audit claims, 40 changes)
 - "audit rows added in src/api/{projects,forms,evaluations,artifacts,participation,events/registration.py}: project, form, evaluation plan, artifact, submission draft, application decision and team writes"
 - src/web/lib/completeness.ts, features/operations/CompletenessPanel.test.tsx, tests/e2e/completeness.spec.ts
 - tests/integration/ (test_feature_audit.py new, test_feature_contract.py extended)
@@ -23,10 +23,10 @@ deliverables:
   evidence: "audit verifier holds each write:<route>:<METHOD>=<action> claim to the permission matrix and to the actions the code records (derived by a source scan), requires the action to come from the feature's own app, and derives completeness from the authorization routes so an unaudited writing route fails; all fifteen features claim it with no findings"
 - item: Observable state and diagnostics, gaps fixed through the canonical audit primitive
   result: pass
-  evidence: "the page shows each feature's audited changes and actions; the harness found 22 unaudited changes (project, form, evaluation plan, artifact, submission draft, application decision, team) and each now records record_mutation in its own transaction with metadata of ids and field names only"
+  evidence: "the page shows each feature's audited changes and actions; the harness found 19 unaudited changes (project, form, evaluation plan, artifact, submission draft, application decision, team) and each now records record_mutation in its own transaction with metadata of ids and field names only"
 - item: Focused tests for the real workflow
   result: pass
-  evidence: "test_feature_audit.py sends all 45 claimed changes as the permitted role and reads the audit row (action, workspace, actor, target, no secret), 45 refusals by a stranger leave no row, plus invalid body, double decision, rollback and invite-token cases; verifier suite has a code per defect"
+  evidence: "test_feature_audit.py sends all 40 claimed changes as the permitted role and reads the audit row (action, workspace, actor, target, no secret), 40 refusals by a stranger leave no row, plus invalid body, double decision, rollback and invite-token cases; verifier suite has a code per defect"
 invariants:
 - item: One source of truth, audit written with the change
   result: pass
@@ -69,7 +69,7 @@ surface_matrix:
   evidence: assigned to PD-F003-B02-T06
 - surface: audit
   result: pass
-  evidence: this task, 45 changes audited and proved
+  evidence: this task, 40 changes audited and proved
 - surface: webhook
   result: pass
   evidence: assigned to PD-F003-B02-T07

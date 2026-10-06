@@ -1,0 +1,20 @@
+# PD-F003-B01 surface matrix (T91)
+
+The batch declares all twelve surfaces `required`. B01 builds the contract and its first eight properties; the eight surfaces beyond the web page, the API and the SDKs are each assigned to a task of the next batches, recorded in the T00 contract and ESC-20260930-006. No surface is skipped without an owner.
+
+| Surface       | State in B01 | Evidence or owner                                                                                                                                                                                           |
+| ------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| web           | done         | Operations > Completeness shows the eight landed properties, each claim opening to its refs and the facts the system derived (`CompletenessPanel.tsx`, `lib/completeness.ts`, browser spec at 390 and 1440) |
+| api           | done         | `GET /workspaces/{id}/completeness/`; the same registry backs every property; changes to existing endpoints are the additive ones listed in [UPGRADES](../../operations/UPGRADES.md)                        |
+| sdk           | done         | both generated clients carry the report operation; T07 proves every claimed operation is in both and typed as OpenAPI says (`make sdk-check` clean)                                                         |
+| audit         | done         | T04: every claimed change records a named `subject.verb` action, proved through the API; the report itself writes nothing                                                                                   |
+| search        | done         | T08: applications and projects are claimed query entities, the other thirteen features say why not                                                                                                          |
+| docs          | done         | [COMPLETENESS](../../operations/COMPLETENESS.md), spec 003 as built, [UPGRADES](../../operations/UPGRADES.md)                                                                                               |
+| cli           | owned        | PD-F003-B02-T04                                                                                                                                                                                             |
+| mcp           | owned        | PD-F003-B02-T05                                                                                                                                                                                             |
+| event_as_code | owned        | PD-F003-B02-T06                                                                                                                                                                                             |
+| webhook       | owned        | PD-F003-B02-T07                                                                                                                                                                                             |
+| archive       | owned        | PD-F003-B02-T08                                                                                                                                                                                             |
+| analytics     | owned        | PD-F003-B03-T01                                                                                                                                                                                             |
+
+One canonical operation: every surface reads the same registry (`core.features`) and the same live system (permission matrix, OpenAPI document, audit actions, query registry); the web page, the API and a CI check all call `report()` and `check()`, and the generated contracts are checked by `make sdk-check` and the `check_openapi_artifact` script.

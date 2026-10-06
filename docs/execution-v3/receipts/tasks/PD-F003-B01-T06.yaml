@@ -27,7 +27,7 @@ deliverables:
   evidence: "the page shows each feature's lists, detail and paging; the verifier found ten list operations documented as one record (wrong generated SDK types), an undocumented offset on the message list, and the tests found an undocumented resources field on awards and eleven empty-bodied 404s; all fixed and the OpenAPI document and SDKs regenerated"
 - item: Focused tests for the real workflow
   result: pass
-  evidence: "test_feature_rest.py lists and details against their schemas with real data, refusals by a stranger, a signed-out caller, an unknown id and an invalid body are JSON in the shared shape for all 45 changes, keyed messages for invalid bodies, a JSON 404 for a non-member of a project; verifier suite has a code per defect"
+  evidence: "test_feature_rest.py lists and details against their schemas with real data, refusals by a stranger, a signed-out caller, an unknown id and an invalid body are JSON in the shared shape for all 40 changes, keyed messages for invalid bodies, a JSON 404 for a non-member of a project; verifier suite has a code per defect"
 invariants:
 - item: One source of truth
   result: pass

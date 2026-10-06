@@ -12,7 +12,7 @@ git:
   head_commit: 2ecc2d1
 changed_paths:
 - src/api/core/ (features_idempotency.py new, features.py System.view_class, apps.py)
-- src/api/<app>/features.py for the fifteen features (idempotency claims, 45 changes)
+- src/api/<app>/features.py for the fifteen features (idempotency claims, 40 changes)
 - "IdempotentMixin added to AnnouncementListView, MessageListCreateView, ProjectListView, ArtifactListView (opt-in by header)"
 - src/web/lib/completeness.ts, features/operations/CompletenessPanel.test.tsx, tests/e2e/completeness.spec.ts
 - tests/integration/ (test_feature_idempotency.py new, test_feature_contract.py extended)
@@ -23,7 +23,7 @@ deliverables:
   evidence: "idempotency verifier holds each mode:<route>:<METHOD>=<mode> claim to the system (uniqueness constraints and token fields on the models, a version field or code that really takes select_for_update, the view's IdempotentMixin) and derives completeness from the authorization routes; all fifteen features claim it with no findings"
 - item: Observable state and diagnostics, retry behavior proved
   result: pass
-  evidence: "the page shows each change and what it does when sent twice; test_feature_idempotency.py sends each of the 45 changes twice and compares the second send with the declared mode (none and keyed repeat, every other mode returns the same state or a refusal, never a 5xx), proves keyed replay, caller-private keys, 422 for a reused key with another body and that a failed change keeps no key"
+  evidence: "the page shows each change and what it does when sent twice; test_feature_idempotency.py sends each of the 40 changes twice and compares the second send with the declared mode (none and keyed repeat, every other mode returns the same state or a refusal, never a 5xx), proves keyed replay, caller-private keys, 422 for a reused key with another body and that a failed change keeps no key"
 - item: Gaps found fixed through the canonical idempotency primitive
   result: pass
   evidence: "sending a message, posting an announcement, creating a project and adding an external artifact repeated their effect on a retry; each now takes an Idempotency-Key through core.idempotency.IdempotentMixin, opt-in so unkeyed behavior is unchanged"

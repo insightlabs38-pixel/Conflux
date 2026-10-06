@@ -224,6 +224,16 @@ for (const width of [390, 1440]) {
         exact: false,
       }),
     ).toBeVisible();
+    // Event-as-Code: the document sections a feature owns, or why it is runtime data.
+    await expect(
+      table.getByRole("columnheader", { name: "Event-as-Code" }),
+    ).toBeVisible();
+    await trackRow.getByText("Provided", { exact: true }).nth(12).click();
+    await expect(
+      trackRow.getByText("Document sections: tracks: events.Track", {
+        exact: false,
+      }),
+    ).toBeVisible();
     // A feature without a state machine says how its records change.
     const track = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Track \(track\)/ }),
@@ -231,7 +241,7 @@ for (const width of [390, 1440]) {
     await track.getByText("No states").click();
     await expect(track).toContainText("Edited in place and deleted");
     await panel.getByText(/properties are not checked yet/).click();
-    await expect(panel.getByText("Event-as-Code")).toBeVisible();
+    await expect(panel.getByText("Test fixtures and scenarios")).toBeVisible();
     await expect(panel.getByRole("button")).toHaveCount(0);
     await noHorizontalOverflow(page);
     await accessible(page);

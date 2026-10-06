@@ -85,6 +85,11 @@ register_feature(
                 "no_mcp@an agent reads an event through its stages, projects and results; an "
                 "event itself is configured by people",
             ),
+            "event_as_code": provided(
+                "section:event",
+                "test:tests/integration/test_event_as_code.py::test_document_applies_to_an_empty_event_and_reproduces_the_source",
+                "test:tests/integration/test_feature_eac.py::test_every_section_writes_exactly_the_rows_it_declares",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",
@@ -167,6 +172,11 @@ register_feature(
                 "no_mcp@tracks are part of the event configuration, which people set and agents "
                 "do not change",
             ),
+            "event_as_code": provided(
+                "section:tracks",
+                "test:tests/integration/test_event_as_code.py::test_document_applies_to_an_empty_event_and_reproduces_the_source",
+                "test:tests/integration/test_feature_eac.py::test_every_section_writes_exactly_the_rows_it_declares",
+            ),
         },
         lifecycle=Lifecycle(
             "none", note="Edited in place and deleted (track.deleted); position orders it."
@@ -243,6 +253,10 @@ register_feature(
             "mcp": provided(
                 "no_mcp@registration review is a decision about a person that stays with "
                 "organizers, not with an agent",
+            ),
+            "event_as_code": provided(
+                "no_eac@registrations are runtime participant data and never part of the "
+                "configuration document",
             ),
         },
         lifecycle=Lifecycle(
@@ -332,6 +346,9 @@ register_feature(
                 "tool:create_announcement",
                 "test:tests/integration/test_mcp_adapter.py::test_a_write_tool_goes_through_the_normal_route_and_is_double_audited",
                 "test:tests/integration/test_feature_mcp.py::test_each_claimed_tool_reaches_its_own_route_with_a_credential_limited_to_it",
+            ),
+            "event_as_code": provided(
+                "no_eac@announcements are content posted during the event, not configuration of it",
             ),
         },
         lifecycle=Lifecycle(

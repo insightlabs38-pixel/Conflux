@@ -42,6 +42,28 @@ SECTIONS = (
     "page",
 )
 EVENT_FIELDS = ("description", "timezone", "starts_at", "ends_at")
+# What each part of a document stands for: the model that owns it (the completeness contract ties
+# a section to the feature of that model) and the rows an apply writes, which a test proves.
+SECTION_MODELS = {
+    "event": ("events.Event", ("events.Event",)),
+    "tracks": ("events.Track", ("events.Track",)),
+    "base_prizes": ("events.BasePrize", ("events.BasePrize",)),
+    "stages": ("stages.Stage", ("stages.Stage",)),
+    "stage_transitions": ("stages.Stage", ("stages.StageTransition",)),
+    "forms": ("forms.FormDefinition", ("forms.FormDefinition",)),
+    "policies": ("policies.Policy", ("policies.Policy",)),
+    "temporal_gates": ("policies.Policy", ("policies.TemporalGate",)),
+    "policy_bindings": ("policies.Policy", ("policies.PolicyBinding",)),
+    "evaluation_plans": (
+        "evaluations.EvaluationPlan",
+        ("evaluations.EvaluationPlan", "evaluations.RubricVersion"),
+    ),
+    "awards": (
+        "awards.Award",
+        ("awards.Award", "awards.PrizePackage", "awards.PrizeComponent"),
+    ),
+    "page": ("presentation.Page", ("presentation.Page", "presentation.PageBlock")),
+}
 
 
 class ConfigError(Exception):

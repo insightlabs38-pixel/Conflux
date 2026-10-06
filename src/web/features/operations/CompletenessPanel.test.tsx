@@ -374,6 +374,12 @@ describe("completeness helpers", () => {
       "Tools: list_stages (read): GET stage-list",
     );
     expect(factText("mcp", "no tool")).toBe("MCP: no tool");
+    expect(factText("sections", ["stages: stages.Stage"])).toBe(
+      "Document sections: stages: stages.Stage",
+    );
+    expect(factText("eac", "not in the document")).toBe(
+      "Event-as-Code: not in the document",
+    );
     expect(factText("advanced", "none beyond the base screen")).toBe(
       "Advanced: none beyond the base screen",
     );

@@ -72,6 +72,12 @@ register_feature(
                 "tool:list_stages",
                 "test:tests/integration/test_feature_mcp.py::test_each_claimed_tool_reaches_its_own_route_with_a_credential_limited_to_it",
             ),
+            "event_as_code": provided(
+                "section:stages",
+                "section:stage_transitions",
+                "test:tests/integration/test_event_as_code.py::test_document_applies_to_an_empty_event_and_reproduces_the_source",
+                "test:tests/integration/test_feature_eac.py::test_every_section_writes_exactly_the_rows_it_declares",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

@@ -101,6 +101,16 @@ BULK = ft.provided("no_bulk@a saved view belongs to one person and is never chan
 
 CLIC = ft.provided("no_cli@a saved view is made from the grid toolbar, not from a terminal")
 
+EVENT_EAC = ft.provided(
+    "section:event",
+    "test:tests/integration/test_event_as_code.py"
+    "::test_document_applies_to_an_empty_event_and_reproduces_the_source",
+)
+
+EACC = ft.provided(
+    "no_eac@a saved view is a personal setting and never part of the event configuration"
+)
+
 MCPC = ft.provided(
     "no_mcp@a saved view is a personal setting of the grid that an agent never needs"
 )
@@ -130,6 +140,7 @@ def only(feature_key="x", **over):
             "bulk": BULK,
             "cli": CLIC,
             "mcp": MCPC,
+            "event_as_code": EACC,
         },
         "lifecycle": ft.Lifecycle("none", note="Edited in place."),
     }
@@ -147,6 +158,7 @@ def only(feature_key="x", **over):
         "bulk": BULK,
         "cli": CLIC,
         "mcp": MCPC,
+        "event_as_code": EACC,
         **values["claims"],
     }
     ft.FEATURES.clear()
@@ -175,6 +187,7 @@ def test_the_fifteen_features_agree_with_the_live_system():
         "bulk",
         "cli",
         "mcp",
+        "event_as_code",
     ]
 
 
@@ -297,6 +310,7 @@ def test_a_well_formed_independent_feature_passes(isolated):
             "bulk": BULK,
             "cli": CLIC,
             "mcp": MCPC,
+            "event_as_code": EACC,
         },
         ft.Lifecycle("none", note="Edited in place and deleted."),
     )
@@ -344,7 +358,10 @@ def event_life(**over):
 def event(isolated, **life):
     return only(
         model="events.Event",
-        claims={"identity": identity("field:public_id", "route:event-detail")},
+        claims={
+            "identity": identity("field:public_id", "route:event-detail"),
+            "event_as_code": EVENT_EAC,
+        },
         lifecycle=event_life(**life),
     )
 
@@ -354,7 +371,7 @@ def test_a_correct_lifecycle_is_quiet_and_every_wrong_one_is_named(isolated):
     assert "lifecycle_hidden" in codes(
         only(
             model="events.Event",
-            claims={"identity": identity("field:public_id")},
+            claims={"identity": identity("field:public_id"), "event_as_code": EVENT_EAC},
             lifecycle=ft.Lifecycle("none", note="x"),
         )
     )
@@ -522,6 +539,7 @@ def test_the_endpoint_reports_a_broken_claim_instead_of_hiding_it(world, isolate
             "bulk": ft.FEATURES["event"].claims["bulk"],
             "cli": ft.FEATURES["event"].claims["cli"],
             "mcp": ft.FEATURES["event"].claims["mcp"],
+            "event_as_code": ft.FEATURES["event"].claims["event_as_code"],
         },
         ft.FEATURES["event"].lifecycle,
     )

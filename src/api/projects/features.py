@@ -79,6 +79,9 @@ register_feature(
                 "test:tests/integration/test_mcp_adapter.py::test_a_read_tool_returns_real_data_and_is_audited_without_content",
                 "test:tests/integration/test_feature_mcp.py::test_each_claimed_tool_reaches_its_own_route_with_a_credential_limited_to_it",
             ),
+            "event_as_code": provided(
+                "no_eac@projects are runtime participant data written by their teams",
+            ),
         },
         lifecycle=Lifecycle(
             "none",
@@ -163,6 +166,9 @@ register_feature(
             "mcp": provided(
                 "no_mcp@a submission is written and finalized by its team; agents read the "
                 "project, not the submission",
+            ),
+            "event_as_code": provided(
+                "no_eac@submissions are runtime participant data and are never touched by an apply",
             ),
         },
         lifecycle=Lifecycle(

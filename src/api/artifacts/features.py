@@ -79,6 +79,10 @@ register_feature(
                 "no_mcp@artifacts hold participant uploads that an agent should not fetch; they "
                 "are inspected in the browser",
             ),
+            "event_as_code": provided(
+                "no_eac@artifacts are participant uploads and are never part of the "
+                "configuration document",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",

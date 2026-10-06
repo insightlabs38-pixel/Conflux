@@ -84,6 +84,9 @@ register_feature(
                 "no_mcp@teams are formed and led by their members; no agent task needs to read "
                 "or change them",
             ),
+            "event_as_code": provided(
+                "no_eac@teams are runtime participant data formed by the participants themselves",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

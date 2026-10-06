@@ -30,6 +30,7 @@ LANDED = [
     "bulk",
     "cli",
     "mcp",
+    "event_as_code",
 ]
 
 

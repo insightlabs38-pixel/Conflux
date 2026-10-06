@@ -67,6 +67,10 @@ register_feature(
                 "no_mcp@messages reach people and are sent only by organizers with a preview; "
                 "an agent does not send them",
             ),
+            "event_as_code": provided(
+                "no_eac@messages are sent during the event to real people and are not "
+                "configuration",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

@@ -71,6 +71,11 @@ register_feature(
                 "no_mcp@forms are built and versioned by organizers on the builder screen; an "
                 "agent does not edit them",
             ),
+            "event_as_code": provided(
+                "section:forms",
+                "test:tests/integration/test_event_as_code.py::test_document_applies_to_an_empty_event_and_reproduces_the_source",
+                "test:tests/integration/test_feature_eac.py::test_every_section_writes_exactly_the_rows_it_declares",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

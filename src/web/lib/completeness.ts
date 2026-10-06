@@ -122,6 +122,8 @@ const FACT_LABEL: Record<string, string> = {
   cli: "CLI",
   tools: "Tools",
   mcp: "MCP",
+  sections: "Document sections",
+  eac: "Event-as-Code",
 };
 
 /** One derived fact as a sentence fragment: lists joined, booleans as yes or no. */

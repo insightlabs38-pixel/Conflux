@@ -195,3 +195,13 @@ The MCP adapter (`mcp_adapter.tools.TOOLS`) is a catalogue of tools, each one an
 - `no_mcp@<reason>`: no tool reaches the feature, and why; a feature whose tools are owed is `planned` with the owning task.
 
 Codes: `bad_ref`, `both`, `no_reason`, `no_tool`, `no_test`, `test_ref`, `catalogue_missing`, `tool_twice`, `tool_shared`, `tool_unknown`, `tool_foreign`, `method_unknown`, `path_arg`, `write_unaudited`, `write_ungated`, `tool_unclaimed`, `mcp_exists`; CI: `test_file`, `test_name`. `tests/integration/test_feature_mcp.py` proves it through the real endpoint: every tool is claimed by exactly one feature or named in `OUTSIDE` (nine tools over routes no feature claims yet: judging, results, voting, analytics, deadlines, mentoring), and each claimed tool succeeds with a credential limited to its own route and is refused with one limited to another. Stages, projects and announcements own five tools; twelve features say why no tool reaches them.
+
+## Event-as-Code (T06)
+
+Event-as-Code (`integrations.eventascode`, see EVENT_AS_CODE.md) describes an event's configuration as a document. Configuration belongs in it; runtime participant data never does. The module declares `SECTION_MODELS`: each part of the document, the model that owns it and the rows an apply writes. `features_eac` holds an `event_as_code` claim to that table, at runtime:
+
+- `section:<name>` (one or more): the section is declared and its owning model is the feature's own model; the claimed sections equal the derived set (every section the feature's model owns), so a section added for a feature without a claim fails;
+- `test:<path>::<name>`: the proof (CI checks it exists);
+- `no_eac@<reason>`: the feature is not configuration, and why; a feature whose section is owed is `planned` with the owning task.
+
+Codes: `bad_ref`, `both`, `no_reason`, `no_section`, `no_test`, `test_ref`, `module_missing`, `section_twice`, `section_shared`, `section_unknown`, `section_foreign`, `section_unclaimed`, `eac_exists`; CI: `test_file`, `test_name`. `tests/integration/test_feature_eac.py` proves the table against the code: every section is claimed by exactly one feature or named in `OUTSIDE` (`base_prizes` and `page`, owned by models no feature covers yet), and applying a full document to an empty event changes exactly the tables the sections declare. Seven features own the ten sections they cover (event, track, stage with its transitions, form, policy with its gates and bindings, evaluation plan, award); eight say why they are runtime data.

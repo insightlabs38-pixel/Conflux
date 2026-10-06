@@ -1,0 +1,97 @@
+version: 3
+task: PD-F003-B02-T06
+batch: PD-F003-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 1d43bee
+  head_commit: 1d43bee
+changed_paths:
+- src/api/core/features_eac.py (new), core/apps.py
+- src/api/integrations/eventascode.py (SECTION_MODELS table only; document format unchanged)
+- src/api/<app>/features.py for the fifteen features (event_as_code claims)
+- src/web/lib/completeness.ts, features/operations/CompletenessPanel.test.tsx, tests/e2e/completeness.spec.ts
+- tests/integration/ (test_feature_eac.py new, test_feature_contract.py, test_completeness_regression.py)
+- docs/operations/COMPLETENESS.md, spec 003 (Event-as-Code as built)
+deliverables:
+- item: Event-as-Code representation added to the completeness contract and applied to domain work
+  result: pass
+  evidence: "features_eac verifies section:<name>, test: and no_eac@ claims against the module's SECTION_MODELS at runtime; the claimed sections equal the sections the feature's model owns; seven features own ten sections (event, tracks, stages and transitions, forms, policies with gates and bindings, evaluation plans, awards), eight say why they are runtime participant data"
+- item: Observable state and diagnostics
+  result: pass
+  evidence: "the Operations completeness page gains an Event-as-Code column listing each feature's document sections with the records they write, or why none"
+- item: Contract tests proving parity with the canonical service
+  result: pass
+  evidence: "test_feature_eac.py: every section claimed by exactly one feature or named OUTSIDE, an apply of a full document to an empty event changes exactly the tables the sections declare, failure codes; test_event_as_code.py still passes unchanged"
+invariants:
+- item: One source of truth, no business rule in a surface
+  result: pass
+  evidence: "the EaC module stays the only list of sections; SECTION_MODELS is declared beside the code that applies them and proved by a real apply; no document field added or changed"
+- item: Server-side authorization, validation and audit remain authoritative
+  result: pass
+  evidence: "apply, plan and the organizer-only routes are untouched"
+verification:
+- command: "uv run --frozen pytest tests/integration/test_feature_eac.py test_event_as_code.py test_final_archive.py test_feature_contract.py test_completeness_regression.py -n auto"
+  result: pass
+  note: "203 passed in the final focused run (test_event_as_code and test_final_archive passed in the earlier run)"
+- command: "features.check() and check_static on the real tree; manage.py check"
+  result: pass
+  note: "no problems, no issues"
+- command: "pnpm web vitest features/operations; tsc --noEmit; make format-check lint sdk-check block-schema-check"
+  result: pass
+  note: "31 passed, clean"
+- command: "npx playwright test completeness --project=desktop (seed 7, app rebuilt)"
+  result: pass
+  note: "2 passed (390 and 1440) with the Event-as-Code column"
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: "Event-as-Code column on Operations > Completeness"
+- surface: api
+  result: pass
+  evidence: "report facts carry event_as_code"
+- surface: sdk
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: cli
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: mcp
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: event_as_code
+  result: pass
+  evidence: "SECTION_MODELS table read by the contract"
+- surface: audit
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: webhook
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: archive
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: analytics
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: search
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: docs
+  result: pass
+  evidence: "COMPLETENESS.md and the B02 contract in spec 003"
+migrations:
+- none
+findings:
+- "stage_transitions, temporal_gates and policy_bindings are owned by the stage and policy models because the registry has no feature of their own"
+limitations:
+- "base_prizes and page are named OUTSIDE until a feature covers their models"
+- "a section is tied to its feature by owning model, not by a service, because apply writes through the module itself"
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

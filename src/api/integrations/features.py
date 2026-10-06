@@ -73,6 +73,9 @@ register_feature(
                 "no_mcp@a subscription holds a secret shown once and is set up by an admin, "
                 "never through an agent",
             ),
+            "event_as_code": provided(
+                "no_eac@a subscription holds a secret that must never be exported in a document",
+            ),
         },
         lifecycle=Lifecycle(
             "flag",

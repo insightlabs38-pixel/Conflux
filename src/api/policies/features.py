@@ -72,6 +72,13 @@ register_feature(
                 "no_mcp@policies and gates are set by organizers with their explanations; an "
                 "agent reads none of them yet",
             ),
+            "event_as_code": provided(
+                "section:policies",
+                "section:temporal_gates",
+                "section:policy_bindings",
+                "test:tests/integration/test_event_as_code.py::test_document_applies_to_an_empty_event_and_reproduces_the_source",
+                "test:tests/integration/test_feature_eac.py::test_every_section_writes_exactly_the_rows_it_declares",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

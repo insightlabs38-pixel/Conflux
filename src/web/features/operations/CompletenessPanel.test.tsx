@@ -385,6 +385,14 @@ describe("completeness helpers", () => {
       factText("tables", ["events.track: reached by event, 4 fields"]),
     ).toBe("Archived tables: events.track: reached by event, 4 fields");
     expect(factText("archive", "not archived")).toBe("Archive: not archived");
+    expect(factText("summary", ["teams"])).toBe("Summary section: teams");
+    expect(factText("measures", ["teams.total", "teams.with_members"])).toBe(
+      "Measures: teams.total, teams.with_members",
+    );
+    expect(factText("dimensions", ["status → registration.by_status"])).toBe(
+      "Broken down by: status → registration.by_status",
+    );
+    expect(factText("analytics", "not counted")).toBe("Analytics: not counted");
     expect(factText("eac", "not in the document")).toBe(
       "Event-as-Code: not in the document",
     );

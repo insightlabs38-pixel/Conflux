@@ -33,6 +33,7 @@ LANDED = [
     "event_as_code",
     "webhook",
     "archive",
+    "analytics",
 ]
 
 

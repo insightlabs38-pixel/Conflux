@@ -89,6 +89,10 @@ register_feature(
                 "table:policies.policy",
                 "test:tests/integration/test_feature_archive.py::test_each_claimed_table_is_restored_with_its_rows",
             ),
+            "analytics": provided(
+                "no_analytics@policies are configuration and the summary does not count rule "
+                "evaluations",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

@@ -88,6 +88,10 @@ register_feature(
                 "table:stages.stage",
                 "test:tests/integration/test_feature_archive.py::test_each_claimed_table_is_restored_with_its_rows",
             ),
+            "analytics": provided(
+                "no_analytics@stages are configuration; submissions and judging are counted by "
+                "record, not by stage",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

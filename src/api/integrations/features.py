@@ -88,6 +88,9 @@ register_feature(
                 "event's integration",
                 "test:tests/integration/test_feature_archive.py::test_each_excluded_model_is_in_the_archives_exclusion_list_and_not_in_its_contract",
             ),
+            "analytics": provided(
+                "no_analytics@a subscription is an integration setting, not activity in the event",
+            ),
         },
         lifecycle=Lifecycle(
             "flag",

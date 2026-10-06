@@ -80,6 +80,10 @@ register_feature(
                 "contract",
                 "test:tests/integration/test_feature_archive.py::test_each_excluded_model_is_in_the_archives_exclusion_list_and_not_in_its_contract",
             ),
+            "analytics": provided(
+                "no_analytics@messages are outbound communication and the summary does not "
+                "count delivery",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

@@ -1,0 +1,96 @@
+version: 3
+task: PD-F003-B03-T01
+batch: PD-F003-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: eaabafc
+  head_commit: eaabafc
+changed_paths:
+- src/api/core/features_analytics.py (new), core/apps.py
+- src/api/<app>/features.py for the fifteen features (analytics claims)
+- src/web/lib/completeness.ts, features/operations/CompletenessPanel.test.tsx, tests/e2e/completeness.spec.ts
+- tests/integration/ (test_feature_analytics.py new, test_feature_contract.py, test_completeness_regression.py)
+- docs/operations/COMPLETENESS.md, spec 003 (B03 contract and Analytics as built)
+deliverables:
+- item: Analytics dimensions added to the completeness contract and applied to domain work
+  result: pass
+  evidence: "features_analytics verifies section:, measure:, dimension:<field>=<path>, test: and no_analytics@ claims against the response schema and the models the analytics module works on; five features are counted (registrations, teams, projects, submissions, evaluation plans) and ten say why not; voting and the member, ballot and vote rows are named as outside"
+- item: Observable state and diagnostics
+  result: pass
+  evidence: "the Operations completeness page gains an Analytics dimensions column listing each feature's summary section, measures and breakdowns, or why it is not counted"
+- item: Focused tests for the real workflow
+  result: pass
+  evidence: "test_feature_analytics.py computes the summary for a real event and checks every claimed measure, the breakdown keys against the field's choices, that every section and counted model is claimed or outside, and the row counts; failure codes; browser spec at 390 and 1440"
+invariants:
+- item: One source of truth, no business rule in a surface
+  result: pass
+  evidence: "the claim names what the registry holds and the verifier reads it; nothing is registered or executed by the contract"
+- item: Server-side authorization, validation and audit remain authoritative
+  result: pass
+  evidence: "no route, authorization or audit change"
+verification:
+- command: "uv run --frozen pytest tests/integration/test_feature_analytics.py test_event_analytics.py test_feature_contract.py test_completeness_regression.py -n auto"
+  result: pass
+  note: "228 passed"
+- command: "features.check() and check_static on the real tree; manage.py check"
+  result: pass
+  note: "no problems, no issues"
+- command: "pnpm web vitest features/operations; tsc --noEmit; make format-check lint sdk-check block-schema-check"
+  result: pass
+  note: "31 passed, clean"
+- command: "npx playwright test completeness --project=desktop (seed 7, app rebuilt)"
+  result: pass
+  note: "2 passed (390 and 1440) with the Analytics dimensions column"
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: "column on Operations > Completeness"
+- surface: api
+  result: pass
+  evidence: "report facts carry the property"
+- surface: sdk
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: cli
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: mcp
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: event_as_code
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: audit
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: webhook
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: archive
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: analytics
+  result: pass
+  evidence: "summary sections, measures and breakdowns proved against a real event"
+- surface: search
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B03, or unchanged"
+- surface: docs
+  result: pass
+  evidence: "COMPLETENESS.md and the B03 contract in spec 003"
+migrations:
+- none
+findings:
+- "the platform has no general dimension system: the summary has fixed sections and one breakdown (registrations by status), so the claim names what exists and nothing was invented"
+limitations:
+- "voting is not a feature of the registry yet and is named in OUTSIDE_SECTIONS"
+- "a new section or counted model fails test_feature_analytics until it is claimed or named outside"
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

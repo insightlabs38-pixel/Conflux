@@ -84,6 +84,10 @@ register_feature(
                 "table:awards.award",
                 "test:tests/integration/test_feature_archive.py::test_each_claimed_table_is_restored_with_its_rows",
             ),
+            "analytics": provided(
+                "no_analytics@awards are decided after judging and the summary stops at judging "
+                "and voting",
+            ),
         },
         lifecycle=Lifecycle(
             "timestamp",

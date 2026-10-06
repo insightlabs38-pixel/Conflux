@@ -87,6 +87,10 @@ register_feature(
                 "table:forms.formdefinition",
                 "test:tests/integration/test_feature_archive.py::test_each_claimed_table_is_restored_with_its_rows",
             ),
+            "analytics": provided(
+                "no_analytics@forms are configuration and their answers are counted through "
+                "submissions",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

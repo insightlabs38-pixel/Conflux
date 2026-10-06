@@ -96,6 +96,10 @@ register_feature(
                 "table:artifacts.artifact",
                 "test:tests/integration/test_feature_archive.py::test_each_claimed_table_is_restored_with_its_rows",
             ),
+            "analytics": provided(
+                "no_analytics@uploads are evidence under a project and are counted only through "
+                "its submission",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",

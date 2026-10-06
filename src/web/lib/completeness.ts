@@ -127,7 +127,11 @@ const FACT_LABEL: Record<string, string> = {
   emits: "Sent to subscribers",
   silent: "Not sent",
   tables: "Archived tables",
+  summary: "Summary section",
+  measures: "Measures",
+  dimensions: "Broken down by",
   archive: "Archive",
+  analytics: "Analytics",
 };
 
 /** One derived fact as a sentence fragment: lists joined, booleans as yes or no. */

@@ -109,6 +109,8 @@ HOOK = ft.provided(
     "::test_each_audited_change_writes_the_outbox_event_its_claim_names",
 )
 
+ANAL = ft.provided("no_analytics@a saved view is a personal setting and not activity in an event")
+
 ARCH = ft.provided(
     "excluded@a saved view is a personal setting of one person and is not part of an event",
     "test:tests/integration/test_feature_archive.py"
@@ -163,6 +165,7 @@ def only(feature_key="x", **over):
             "event_as_code": EACC,
             "webhook": HOOK,
             "archive": ARCH,
+            "analytics": ANAL,
         },
         "lifecycle": ft.Lifecycle("none", note="Edited in place."),
     }
@@ -183,6 +186,7 @@ def only(feature_key="x", **over):
         "event_as_code": EACC,
         "webhook": HOOK,
         "archive": ARCH,
+        "analytics": ANAL,
         **values["claims"],
     }
     ft.FEATURES.clear()
@@ -214,6 +218,7 @@ def test_the_fifteen_features_agree_with_the_live_system():
         "event_as_code",
         "webhook",
         "archive",
+        "analytics",
     ]
 
 
@@ -339,6 +344,7 @@ def test_a_well_formed_independent_feature_passes(isolated):
             "event_as_code": EACC,
             "webhook": HOOK,
             "archive": ARCH,
+            "analytics": ANAL,
         },
         ft.Lifecycle("none", note="Edited in place and deleted."),
     )
@@ -571,6 +577,7 @@ def test_the_endpoint_reports_a_broken_claim_instead_of_hiding_it(world, isolate
             "event_as_code": ft.FEATURES["event"].claims["event_as_code"],
             "webhook": ft.FEATURES["event"].claims["webhook"],
             "archive": ft.FEATURES["event"].claims["archive"],
+            "analytics": ft.FEATURES["event"].claims["analytics"],
         },
         ft.FEATURES["event"].lifecycle,
     )

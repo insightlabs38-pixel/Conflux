@@ -104,6 +104,13 @@ register_feature(
                 "table:participation.team",
                 "test:tests/integration/test_feature_archive.py::test_each_claimed_table_is_restored_with_its_rows",
             ),
+            "analytics": provided(
+                "section:teams",
+                "measure:teams.total",
+                "measure:teams.with_members",
+                "measure:teams.project_creation",
+                "test:tests/integration/test_feature_analytics.py::test_every_claimed_measure_and_breakdown_is_in_the_summary_of_a_real_event",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

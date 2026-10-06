@@ -93,6 +93,13 @@ register_feature(
                 "table:projects.project",
                 "test:tests/integration/test_feature_archive.py::test_each_claimed_table_is_restored_with_its_rows",
             ),
+            "analytics": provided(
+                "section:submissions",
+                "measure:submissions.projects",
+                "measure:submissions.with_submission",
+                "measure:submissions.finalized_projects",
+                "test:tests/integration/test_feature_analytics.py::test_every_claimed_measure_and_breakdown_is_in_the_summary_of_a_real_event",
+            ),
         },
         lifecycle=Lifecycle(
             "none",
@@ -192,6 +199,13 @@ register_feature(
             "archive": provided(
                 "table:projects.submission",
                 "test:tests/integration/test_feature_archive.py::test_each_claimed_table_is_restored_with_its_rows",
+            ),
+            "analytics": provided(
+                "section:submissions",
+                "measure:submissions.draft_records",
+                "measure:submissions.finalized_records",
+                "measure:submissions.immutable_versions",
+                "test:tests/integration/test_feature_analytics.py::test_every_claimed_measure_and_breakdown_is_in_the_summary_of_a_real_event",
             ),
         },
         lifecycle=Lifecycle(

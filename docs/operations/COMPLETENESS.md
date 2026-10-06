@@ -226,3 +226,15 @@ An event is archived and restored through one frozen contract (`integrations.fin
 - `test:<path>::<name>`: the proof (CI checks it exists).
 
 Codes: `bad_ref`, `one_answer`, `no_test`, `test_ref`, `contract_missing`, `no_reason`, `root_foreign`, `archived_but_excluded`, `table_foreign`, `table_unknown`; CI: `test_file`, `test_name`. `tests/integration/test_feature_archive.py` proves the claims: every feature says one thing, each excluded model is on the archive's exclusion list and not in its contract, and each claimed table is exported with its rows and restored into a new event with the same number of rows. Ten features are tables, the event is the root, four are excluded (registrations, announcements, webhook subscriptions, messages). Child tables (memberships, versions, ballots and so on) are not claimed per feature; the archive's own classification test covers them.
+
+## Analytics dimensions (B03-T01)
+
+The platform has one analytics summary (`communications.analytics.compute_analytics`, served at `operations/analytics/`): sections of counts and rates over an event, computed from the domain's own tables and never stored. `features_analytics` holds an `analytics` claim to the module, at runtime:
+
+- `section:<name>`: the section of the summary (a field of `EventAnalyticsResponse`) that counts the feature, and the feature's own model is one the analytics module works on (the model classes it imports), so a feature cannot claim a section it has no part in;
+- `measure:<section.key>` (one or more): a number, rate or list in that section the feature owns; no measure is claimed by two features;
+- `dimension:<field>=<section.key>` (optional): the summary breaks a measure down by a field of the feature's model, and the breakdown's keys are the field's own choices;
+- `test:<path>::<name>`: the proof (CI checks it exists);
+- `no_analytics@<reason>`: the summary does not count the feature, and why; a feature whose measures are owed is `planned` with the owning task.
+
+Codes: `bad_ref`, `both`, `no_reason`, `analytics_exists`, `one_section`, `no_measure`, `no_test`, `test_ref`, `summary_missing`, `model_not_counted`, `section_unknown`, `path_shape`, `path_foreign`, `measure_twice`, `measure_shared`, `dimension_field`, `dimension_choices`; CI: `test_file`, `test_name`. `tests/integration/test_feature_analytics.py` proves the claims against a real event: every section of the answer and every model the module counts belongs to a claimed feature or is named in `OUTSIDE_SECTIONS` and `OUTSIDE_MODELS` (voting, memberships, ballots, votes), each claimed measure is in the answer, the breakdown by status has exactly the keys of the field's choices, and the numbers match the rows. Five features are counted (registrations, teams, projects, submissions, evaluation plans) and ten say why not.

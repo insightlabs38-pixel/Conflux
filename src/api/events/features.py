@@ -102,6 +102,10 @@ register_feature(
                 "is the root of every table",
                 "test:tests/integration/test_feature_archive.py::test_the_event_is_the_root_and_restores_as_a_new_draft_event",
             ),
+            "analytics": provided(
+                "no_analytics@the summary is about one event, so the event itself has nothing "
+                "to count in it",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",
@@ -199,6 +203,10 @@ register_feature(
                 "table:events.track",
                 "test:tests/integration/test_feature_archive.py::test_each_claimed_table_is_restored_with_its_rows",
             ),
+            "analytics": provided(
+                "no_analytics@tracks are configuration and the summary does not break anything "
+                "down by track yet",
+            ),
         },
         lifecycle=Lifecycle(
             "none", note="Edited in place and deleted (track.deleted); position orders it."
@@ -289,6 +297,15 @@ register_feature(
                 "excluded@registrations are personal data of applicants and are not part of the "
                 "archive contract",
                 "test:tests/integration/test_feature_archive.py::test_each_excluded_model_is_in_the_archives_exclusion_list_and_not_in_its_contract",
+            ),
+            "analytics": provided(
+                "section:registration",
+                "measure:registration.applications",
+                "measure:registration.by_status",
+                "measure:registration.approval",
+                "measure:registration.approved_teamed",
+                "dimension:status=registration.by_status",
+                "test:tests/integration/test_feature_analytics.py::test_every_claimed_measure_and_breakdown_is_in_the_summary_of_a_real_event",
             ),
         },
         lifecycle=Lifecycle(
@@ -393,6 +410,10 @@ register_feature(
                 "excluded@announcements are content posted during the event and are not part of "
                 "the archive contract",
                 "test:tests/integration/test_feature_archive.py::test_each_excluded_model_is_in_the_archives_exclusion_list_and_not_in_its_contract",
+            ),
+            "analytics": provided(
+                "no_analytics@announcements are content posted to the event, not activity the "
+                "summary measures",
             ),
         },
         lifecycle=Lifecycle(

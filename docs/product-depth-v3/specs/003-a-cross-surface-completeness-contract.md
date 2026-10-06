@@ -260,3 +260,17 @@ Rules shared by all eight: a surface that does not fit a feature says so with a 
 
 **Base UI as built (T01).** `core/features_ui.py` verifies `component:`, `test:` and `no_ui@` refs at runtime (shape, paths, reasons) and in CI (`check_static`): each screen exists, a quoted last route segment of the feature appears in the non-test sources beside it, and a named test mentions the screen. Fourteen features have a screen (event and track share the event dashboard); announcements have none and are `planned` for PD-S009-B02-T03. The check found that the project test renders the team workspace and not the project screen; the claim now names both. Accepted residual: "reads the feature" is a path-segment match, not proof the screen renders every field.
 
+### PD-F003-B03 contract: the five platform properties
+
+The five platform properties follow the recipe of the eight surfaces: a feature claims each as `provided` (refs the verifier resolves), `not_applicable` or `planned`, and what can be derived is derived. No surface adds a rule, a second registry or a new endpoint.
+
+| Key | Claim | What is derived or held to the system | Where it runs |
+|---|---|---|---|
+| `analytics` (T01) | `section:` + `measure:` (+ `dimension:`) or `no_analytics@reason` | the section is in the summary's schema, the feature's model is one the analytics module works on, a breakdown's keys are the field's choices | runtime, proved against a real event |
+| `privacy` (T02) | to be set by its task | retention and erasure behaviour read from the retention policy and the subject-erasure service | runtime |
+| `extension` (T03) | to be set by its task | hooks read from the extension manifests | runtime |
+| `versioning` (T04) | to be set by its task | version and migration behaviour read from the models and the compatibility suites | runtime |
+| `fixtures` (T05) | to be set by its task | scenarios read from the fixture and demo generators | runtime |
+
+**Analytics as built (T01).** `core/features_analytics.py` reads the response schema and the module's imported models through `System.resolve` and `importlib`; `test_feature_analytics.py` computes the summary for a real event and checks every claimed measure and breakdown against the rows. Deviation from the contract: there is no general dimension system in the platform today (the summary has fixed sections and one breakdown, registrations by status), so the claim names what exists and nothing is invented; voting and the member, ballot and vote rows are named as outside because no feature of the registry covers them.
+

@@ -254,6 +254,20 @@ for (const width of [390, 1440]) {
         exact: false,
       }),
     ).toBeVisible();
+    // Analytics: the summary section that counts a feature and the measures it owns.
+    await expect(
+      table.getByRole("columnheader", { name: "Analytics dimensions" }),
+    ).toBeVisible();
+    const team = table.locator("tbody tr").filter({
+      has: page.getByRole("rowheader", { name: /^Team \(team\)/ }),
+    });
+    await team.getByText("Provided", { exact: true }).nth(15).click();
+    await expect(
+      team.getByText("Summary section: teams", { exact: false }),
+    ).toBeVisible();
+    await expect(
+      team.getByText("Measures: teams.total", { exact: false }),
+    ).toBeVisible();
     // A feature without a state machine says how its records change.
     const track = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Track \(track\)/ }),

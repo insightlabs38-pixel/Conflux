@@ -8,6 +8,7 @@ class CoreConfig(AppConfig):
     def ready(self):
         from . import (  # noqa: F401 - platform capabilities and the startup check
             checks,
+            features_analytics,
             features_archive,
             features_audit,
             features_authorization,

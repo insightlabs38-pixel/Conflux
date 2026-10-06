@@ -1,0 +1,79 @@
+version: 3
+task: PD-F003-B02-T91
+batch: PD-F003-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: bdd88ff
+  head_commit: bdd88ff
+changed_paths:
+- docs/verification/PD-F003-B02/ (SURFACES.md, T91-verify-fast.log)
+- docs/operations/UPGRADES.md
+- src/web/components/ArtifactPreview.test.tsx
+deliverables:
+- item: Close the batch's explicit surface matrix
+  result: pass
+  evidence: "SURFACES.md states all twelve surfaces: web, api, sdk, cli, mcp, event_as_code, audit, webhook, archive, search and docs are done in this batch with evidence; analytics is assigned to PD-F003-B03-T01 (id checked), so no surface is skipped without an owner"
+- item: Every required surface delegates to the same canonical operation and generated contracts stay synchronized
+  result: pass
+  evidence: "each surface reads its own registry (planner, CLI table, MCP catalogue, section table, record_mutation scan, archive contract) through core.features report and check; OpenAPI and both SDKs unchanged, sdk-check and check_openapi_artifact clean in make verify-fast"
+- item: User, operator and developer documentation and migration notes
+  result: pass
+  evidence: "COMPLETENESS.md (one section per surface), spec 003 as built, UPGRADES.md note (no migration, report carries sixteen properties, one CLI table, one section table, what a new action, tool, command, section, change or model must now claim)"
+invariants:
+- item: One source of truth, server authority
+  result: pass
+  evidence: documentation and one test fix in this task; no product behavior changed
+verification:
+- command: make verify-fast
+  result: pass
+  note: "format-check, lint, pytest (-n auto), web tests, build, sdk-check and block-schema-check exit 0; log in docs/verification/PD-F003-B02/T91-verify-fast.log"
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: SURFACES.md
+- surface: api
+  result: pass
+  evidence: SURFACES.md
+- surface: sdk
+  result: pass
+  evidence: SURFACES.md
+- surface: cli
+  result: pass
+  evidence: SURFACES.md
+- surface: mcp
+  result: pass
+  evidence: SURFACES.md
+- surface: event_as_code
+  result: pass
+  evidence: SURFACES.md
+- surface: audit
+  result: pass
+  evidence: SURFACES.md
+- surface: webhook
+  result: pass
+  evidence: SURFACES.md
+- surface: archive
+  result: pass
+  evidence: SURFACES.md
+- surface: analytics
+  result: pass
+  evidence: "assigned to PD-F003-B03-T01"
+- surface: search
+  result: pass
+  evidence: SURFACES.md
+- surface: docs
+  result: pass
+  evidence: SURFACES.md
+migrations: []
+findings:
+- "The first make verify-fast failed once on components/ArtifactPreview.test.tsx PreviewLoader (expected Loading preview): the test relied on timing to observe the loading state. It passed alone in 9 of 9 runs and failed under load, so the answer is now held back by a deferred promise and the state is observed deterministically (P3, test only)"
+limitations:
+- Listed in the matrix; none are new
+escalations: []
+next: review

@@ -204,11 +204,16 @@ describe("PreviewLoader", () => {
   };
 
   it("asks the server for the descriptor and draws it", async () => {
-    const fetchMock = vi.fn(async () =>
-      jsonResponse(200, preview({ text: "hello" })),
-    );
+    // The answer is held back so the loading state is observed deterministically, not by timing.
+    let release = () => {};
+    const held = new Promise<void>((resolve) => (release = resolve));
+    const fetchMock = vi.fn(async () => {
+      await held;
+      return jsonResponse(200, preview({ text: "hello" }));
+    });
     await mount(fetchMock);
     expect(container.textContent).toContain("Loading preview");
+    await act(async () => release());
     await until(() => container.querySelector("pre") !== null);
     expect(String((fetchMock.mock.calls[0] as unknown[])[0])).toBe(
       "/api/v1/workspaces/w/previews/job_output/?job=j&name=a+b.csv",

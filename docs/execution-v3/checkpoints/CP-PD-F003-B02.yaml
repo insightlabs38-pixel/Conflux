@@ -1,0 +1,35 @@
+version: 1
+checkpoint_id: CP-PD-F003-B02
+created_at: '2026-10-06T21:22:00Z'
+canonical_commit: d79d0e2fb0b626d2bbdd29a2c0622a5ce352e153
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+- PD-B02
+- PD-B03
+- PD-B04
+- PD-F001-B01
+- PD-F001-B02
+- PD-F002-B01
+- PD-F002-B02
+- PD-F002-B03
+- PD-F003-B01
+- PD-F003-B02
+active_batches:
+- PD-F003-B03
+active_claims: []
+open_escalations: []
+last_completed_task: PD-F003-B02-T91
+ready_summary:
+- PD-F003-B03 (analytics, privacy, extension hooks, versioning and fixtures of the completeness contract; promoted IN_PROGRESS, not started)
+verification_summary:
+- pytest 2696 passed/31 skipped, web 658, make verify-fast clean, make e2e-fast 224 passed (T90 log)
+- validate_queue valid
+recovery_notes:
+- 'Each surface is a property verifier core/features_<surface>.py (ui_advanced in features_ui.py) imported by core/apps.py, claims in every <app>/features.py, proof suite tests/integration/test_feature_<surface>.py; guide docs/operations/COMPLETENESS.md, matrices docs/verification/PD-F003-B02/'
+- 'Items with no owning feature sit in each verifier OUTSIDE dict (CLI whoami and archive commands, nine MCP tools, base_prizes and page sections); a new bulk action, tool, command, section, audited change or archive model must be claimed or the proof suite fails'
+- 'Next batch PD-F003-B03 adds analytics, privacy, extension hooks, versioning and fixtures as further properties with the same recipe; landed properties force updates in test_feature_contract.py (only() defaults, landed list), test_completeness_regression.py (LANDED, counts) and the Operations spec (Provided nth index)'
+- 'T95 does not exist in this batch; B01 T95 was the same-account code-review (QUESTIONS.md, default A)'
+- main unpushed; untracked design handoff zips untouched; supervisor.py modification is the owner's and left uncommitted (CONTINUOUS_SINGLE_AGENT_PROMPT.md was committed with the T02 docs add)

@@ -365,8 +365,16 @@ class EvaluationPlanDetailView(PlanMixin):
         serializer = EvaluationPlanSerializer(plan, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         try:
-            plan = serializer.save()
-            plan.full_clean()
+            with transaction.atomic():
+                plan = serializer.save()
+                plan.full_clean()
+                record_mutation(
+                    actor=request.user,
+                    workspace=self.get_workspace(),
+                    action="evaluation_plan.updated",
+                    target=plan,
+                    metadata={"changed_fields": sorted(serializer.validated_data)},
+                )
         except ModelValidationError as exc:
             raise _as_drf_validation_error(exc) from exc
         return Response(EvaluationPlanSerializer(plan).data)
@@ -379,7 +387,15 @@ class EvaluationPlanDetailView(PlanMixin):
             raise ValidationError(
                 {"detail": "A plan with published rubric versions can't be deleted."}
             )
-        plan.delete()
+        with transaction.atomic():
+            record_mutation(
+                actor=request.user,
+                workspace=self.get_workspace(),
+                action="evaluation_plan.deleted",
+                target=plan,
+                metadata={"stage_id": str(plan.stage.public_id)},
+            )
+            plan.delete()
         return Response(status=204)
 
 

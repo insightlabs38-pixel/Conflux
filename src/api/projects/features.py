@@ -25,6 +25,18 @@ register_feature(
                 "test:tests/integration/test_feature_authorization.py::test_a_non_member_of_a_project_can_never_change_it_or_what_hangs_off_it",
                 "test:tests/integration/test_feature_authorization.py::test_objects_of_another_workspace_or_event_are_not_found",
             ),
+            "audit": provided(
+                "write:project-list:POST=project.created",
+                "write:project-detail:PATCH=project.updated",
+                "test:tests/integration/test_feature_audit.py::test_each_declared_change_records_its_audit_action",
+                "test:tests/integration/test_feature_audit.py::test_a_refused_change_leaves_no_audit_row",
+            ),
+            "idempotency": provided(
+                "mode:project-list:POST=keyed",
+                "mode:project-detail:PATCH=natural",
+                "test:tests/integration/test_feature_idempotency.py::test_a_repeated_change_does_what_its_declared_mode_says",
+                "test:tests/integration/test_feature_idempotency.py::test_a_keyed_change_runs_once_for_one_key_and_a_different_body_is_refused",
+            ),
         },
         lifecycle=Lifecycle(
             "none",
@@ -59,6 +71,19 @@ register_feature(
                 "test:tests/integration/test_feature_authorization.py::test_every_matrix_gate_holds_for_a_wrong_role_a_stranger_and_a_signed_out_caller",
                 "test:tests/integration/test_feature_authorization.py::test_a_non_member_of_a_project_can_never_change_it_or_what_hangs_off_it",
                 "test:tests/integration/test_feature_authorization.py::test_objects_of_another_workspace_or_event_are_not_found",
+            ),
+            "audit": provided(
+                "write:submission-detail:PUT=submission.draft_saved",
+                "write:submission-finalize:POST=submission.finalized",
+                "write:submission-reopen:POST=submission.reopened",
+                "test:tests/integration/test_feature_audit.py::test_each_declared_change_records_its_audit_action",
+                "test:tests/integration/test_feature_audit.py::test_a_refused_change_leaves_no_audit_row",
+            ),
+            "idempotency": provided(
+                "mode:submission-detail:PUT=locked@projects.Submission.draft_revision",
+                "mode:submission-finalize:POST=natural",
+                "mode:submission-reopen:POST=natural",
+                "test:tests/integration/test_feature_idempotency.py::test_a_repeated_change_does_what_its_declared_mode_says",
             ),
         },
         lifecycle=Lifecycle(

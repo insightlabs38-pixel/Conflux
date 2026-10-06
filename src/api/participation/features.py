@@ -29,6 +29,25 @@ register_feature(
                 "test:tests/integration/test_feature_authorization.py::test_a_non_member_of_a_project_can_never_change_it_or_what_hangs_off_it",
                 "test:tests/integration/test_feature_authorization.py::test_objects_of_another_workspace_or_event_are_not_found",
             ),
+            "audit": provided(
+                "write:my-team:POST=team.created",
+                "write:my-team-leave:POST=team.member_left",
+                "write:my-team-transfer-captain:POST=team.captain_transferred",
+                "write:my-team-invite-list:POST=team.invite_created",
+                "write:team-invite-redeem:POST=team.invite_redeemed",
+                "test:tests/integration/test_feature_audit.py::test_each_declared_change_records_its_audit_action",
+                "test:tests/integration/test_feature_audit.py::test_a_refused_change_leaves_no_audit_row",
+            ),
+            "idempotency": provided(
+                "mode:my-team:POST=natural",
+                "mode:my-team-leave:POST=natural",
+                "mode:my-team-transfer-captain:POST=natural",
+                "mode:my-team-invite-list:POST=none@each call issues a new bearer link and a "
+                "stored response would keep the invite token; the captain can revoke the "
+                "extra link",
+                "mode:team-invite-redeem:POST=token@participation.TeamInvite.token",
+                "test:tests/integration/test_feature_idempotency.py::test_a_repeated_change_does_what_its_declared_mode_says",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

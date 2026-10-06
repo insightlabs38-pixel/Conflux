@@ -67,13 +67,39 @@ for (const width of [390, 1440]) {
     await expect(
       table.getByRole("columnheader", { name: "Authorization and scope" }),
     ).toBeVisible();
-    await event.getByText("Provided", { exact: true }).last().click();
+    await event.getByText("Provided", { exact: true }).nth(1).click();
     await expect(event.getByText("route:event-status")).toBeVisible();
     await expect(
       event.getByText("Who can change: admin,organizer"),
     ).toBeVisible();
     await expect(
       event.getByText("Scoped through: Event → Workspace"),
+    ).toBeVisible();
+    // Audit is derived from the code: each change a feature accepts and the action it records.
+    await expect(
+      table.getByRole("columnheader", { name: "Audit events" }),
+    ).toBeVisible();
+    await event.getByText("Provided", { exact: true }).nth(2).click();
+    await expect(
+      event.getByText("write:event-status:POST=event.status_changed"),
+    ).toBeVisible();
+    await expect(
+      event.getByText("Audited changes: POST event-list: event.created", {
+        exact: false,
+      }),
+    ).toBeVisible();
+    // Idempotency: what sending a change twice does, per change, derived and proved.
+    await expect(
+      table.getByRole("columnheader", { name: "Idempotency and concurrency" }),
+    ).toBeVisible();
+    await event.getByText("Provided", { exact: true }).nth(3).click();
+    await expect(
+      event.getByText("mode:event-status:POST=natural"),
+    ).toBeVisible();
+    await expect(
+      event.getByText("When sent twice: POST event-list: unique", {
+        exact: false,
+      }),
     ).toBeVisible();
     // A feature without a state machine says how its records change.
     const track = table.locator("tbody tr").filter({

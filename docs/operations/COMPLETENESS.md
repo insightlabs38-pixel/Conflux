@@ -58,6 +58,35 @@ The page shows the derived readers, writers, the scope chain and an Explanation 
 
 `tests/integration/test_feature_authorization.py` sends the requests: every claimed route and method is refused for each role the matrix excludes, for a signed-in stranger and for a signed-out caller; a workspace member who is not on a project cannot change it, its submissions or its artifacts; and records of another workspace or event are not found. It found one ordering gap, fixed here: the upload-intent endpoint validated the body before resolving the project, so a non-member got a 400 instead of the project's 404.
 
+## Audit events (T04)
+
+The platform records a change by writing an `AuditEvent` in the same transaction as the change (`audit.services.record_mutation`); the action is a literal `subject.verb` in the code. `features_audit.verify` holds an `audit` claim to that code:
+
+- `write:<route>:<METHOD>=<action>`: the route exists and accepts that writing method (the permission matrix lists it); the action follows `subject.verb` and is one the code records (`System.audit_actions` reads the source: an `action=` literal, a conditional's branches or a name assigned one, in a module that calls `record_mutation`); and it is recorded by the app that owns the feature's model or the route's view, so a claim cannot borrow another feature's action;
+- completeness is derived: when the feature claims its routes under `authorization`, every writing method of those routes needs a `write:` ref, so a new writing route fails until it is audited;
+- `test:<path>::<name>`: the proof, checked in CI to exist.
+
+The proof is `tests/integration/test_feature_audit.py`. It reads the claims, sends each claimed change through the API as the role that may make it and checks the audit row: the declared action, the workspace, the actor, a target, and no secret or token in the metadata. A scenario must exist for every claim and for nothing else. It also proves that a refused change (a stranger, an invalid body) leaves no audit row, that deciding an application twice audits once, that the row and the change roll back together, and that an invite token never reaches the log. Codes: `bad_ref`, `no_test`, `no_writes`, `write_twice`, `route_missing`, `method_unknown`, `action_format`, `action_missing`, `action_elsewhere`, `write_unaudited`; CI: `test_file`, `test_name`.
+
+The harness found real gaps, fixed here with an audit row inside the change's own transaction (metadata names fields and ids, never content, object keys, signed URLs or tokens): `project.created` and `project.updated`; `form.created` and `form.draft_saved`; `evaluation_plan.updated` and `evaluation_plan.deleted`; `artifact.added`, `artifact.upload_started`, `artifact.uploaded` and `artifact.validated`; `submission.draft_saved`; `application.decided` (an approval grants workspace membership and was not recorded); and `team.created`, `team.member_joined`, `team.member_left`, `team.captain_transferred`, `team.invite_created`, `team.invite_revoked` and `team.invite_redeemed`.
+
+## Idempotency and concurrency (T05)
+
+Every change a feature accepts declares what sending it twice does (a retry after a timeout, a double click, two callers at once). `features_idempotency.verify` holds each `mode:<route>:<METHOD>=<mode>` ref to the system:
+
+- `natural`: it sets a state or moves a state machine forward, so repeating it leaves the same state (a second delete finds nothing, a second finalize returns the version it made);
+- `unique@<app.Model>.<constraint>`: a duplicate is refused by a uniqueness constraint the model really has;
+- `token@<app.Model>.<field>`: a single-use token (a unique field) authorizes the change;
+- `locked@<app.Model>.<field>` or `locked@<dotted function>`: a version or revision field refuses a stale write, or the function's code takes a row lock (`select_for_update`);
+- `keyed`: the view takes an `Idempotency-Key` (`core.idempotency.IdempotentMixin` is among its bases): the same key returns the first response and runs once, a key reused with a different body is refused (422), keys belong to their caller, and a failed change does not keep its key;
+- `none@<reason>`: nothing protects it and a repeat repeats it; the reason (a sentence) says why that is accepted.
+
+Completeness is derived like audit: every writing method of every route claimed under `authorization` needs a mode. Codes: `bad_ref`, `no_test`, `no_modes`, `mode_twice`, `route_missing`, `method_unknown`, `mode_unknown`, `mode_detail`, `unique_missing`, `token_missing`, `lock_missing`, `not_keyed`, `no_reason`, `mode_missing`; CI: `test_file`, `test_name`.
+
+`tests/integration/test_feature_idempotency.py` sends each of the 45 claimed changes twice as the role that makes it and compares what the second send did with the mode: `none` and `keyed` (without a key) repeat the change, every other mode does not (it returns the same state or a refusal, never a server error). It also proves the keyed behavior and that an unkeyed retry of an unprotected change is the documented repeat. Scenarios are the audit proof's, so one request set backs both properties.
+
+The retry test found changes that repeated silently: sending a message, posting an announcement, creating a project and adding an external artifact all did their work twice. Those four now take an `Idempotency-Key` (opt-in: a request without the header behaves as before). Three creates stay unprotected on purpose, each with its reason: a webhook subscription (its response carries the signing secret, which a stored response would keep), an upload intent (its signed URL expires) and a team invite (its response carries a bearer token).
+
 ## The report
 
 `GET /api/v1/workspaces/{id}/completeness/` (organizers and admins; `Cache-Control: private, no-store`; no write method) returns `{properties[], features[], totals, problems[], ok}`. Each feature carries its derived id type and states, its lifecycle graph, its claims and its findings. The page shows findings first (an alert), then a dense features table with identity and a closed lifecycle per row, and the properties not checked yet behind details.

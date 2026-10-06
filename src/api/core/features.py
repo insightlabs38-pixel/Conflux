@@ -24,11 +24,14 @@ Rules
 - Read-only: verifiers never write, and `core` imports no domain app; models are reached by label.
 """
 
+import ast
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from dataclasses import field as dc_field
+from functools import lru_cache
 from importlib import import_module
+from pathlib import Path
 
 from django.apps import apps
 from django.urls import get_resolver
@@ -163,11 +166,74 @@ def problem(code, message, *, feature=None, prop=None) -> dict:
 _CONVERTER = re.compile(r"<(\w+):(\w+)>")
 
 
+AUDIT_ACTION = re.compile(r"[a-z][a-z_]*\.[a-z][a-z_]*")  # `subject.verb`
+
+
+def _assigned_literals(tree) -> dict[str, list]:
+    """Name -> the expressions assigned to it anywhere in the file."""
+    names: dict[str, list] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    names.setdefault(target.id, []).append(node.value)
+        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name) and node.value:
+            names.setdefault(node.target.id, []).append(node.value)
+    return names
+
+
+@lru_cache(maxsize=1)
+def scan_audit_actions() -> dict[str, tuple[str, ...]]:
+    """Every audit action the code records, mapped to the apps that record it: an `action=` literal
+    (either branch of a conditional, or a name assigned one) in a module that calls
+    `record_mutation`, whether passed to it or to a helper that does. The source is part of the
+    deployed image and does not change while it runs, so the scan is made once."""
+    found: dict[str, set[str]] = {}
+    for config in apps.get_app_configs():
+        root = Path(config.path)
+        if "site-packages" in root.parts:
+            continue
+        for file in root.rglob("*.py"):
+            if "migrations" in file.parts:
+                continue
+            try:
+                source = file.read_text()
+                tree = ast.parse(source)
+            except (OSError, SyntaxError, UnicodeDecodeError):
+                continue
+            if "record_mutation" not in source:
+                continue
+            names = _assigned_literals(tree)
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.Call):
+                    continue
+                for kw in node.keywords:
+                    if kw.arg != "action":
+                        continue
+                    values = [kw.value]
+                    if isinstance(kw.value, ast.Name):  # `action = "a.b"` earlier in the file
+                        values = names.get(kw.value.id, [])
+                    for value in values:
+                        for part in ast.walk(value):
+                            if (
+                                isinstance(part, ast.Constant)
+                                and isinstance(part.value, str)
+                                and AUDIT_ACTION.fullmatch(part.value)
+                            ):
+                                found.setdefault(part.value, set()).add(config.label)
+    return {action: tuple(sorted(labels)) for action, labels in sorted(found.items())}
+
+
 class System:
     """Facts about the running system, computed on first use and never written."""
 
+    def audit_actions(self) -> dict[str, tuple[str, ...]]:
+        """Audit action -> the apps that record it, read from the source."""
+        return scan_audit_actions()
+
     def __init__(self):
         self._routes = None
+        self._views = {}
         self._matrix = None
 
     def model(self, label: str):
@@ -179,7 +245,7 @@ class System:
     def routes(self) -> dict[str, str]:
         """URL name -> pattern, for every named route."""
         if self._routes is None:
-            found = {}
+            found, views = {}, {}
 
             def walk(resolver, prefix=""):
                 for pattern in resolver.url_patterns:
@@ -187,10 +253,16 @@ class System:
                         walk(pattern, prefix + str(pattern.pattern))
                     elif pattern.name:
                         found[pattern.name] = prefix + str(pattern.pattern)
+                        views[pattern.name] = getattr(pattern.callback, "view_class", None)
 
             walk(get_resolver())
-            self._routes = found
+            self._routes, self._views = found, views
         return self._routes
+
+    def view_class(self, route_name: str):
+        """The class-based view behind a named route, or None."""
+        self.routes()
+        return self._views.get(route_name)
 
     def converters(self, route_name: str) -> list[tuple[str, str]]:
         return _CONVERTER.findall(self.routes().get(route_name, ""))

@@ -1,3 +1,4 @@
+from audit.services import record_mutation
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
@@ -6,6 +7,17 @@ from policies.services import base_facts, check_action
 from stages.models import ParticipationMode, StageEntry
 
 from .models import MAX_TEAM_SIZE, Team, TeamInvite, TeamMembership, TeamMembershipRole
+
+
+def _audit(actor, team, *, action, **metadata):
+    """The audit row for a team change, in the caller's transaction. Never an invite token."""
+    record_mutation(
+        actor=actor,
+        workspace=team.event.workspace,
+        action=action,
+        target=team,
+        metadata={"event_id": str(team.event.public_id), **metadata},
+    )
 
 
 def _team_subject_id(team):
@@ -57,6 +69,7 @@ def create_team(event, name, creator):
     membership = TeamMembership(team=team, user=creator, role=TeamMembershipRole.CAPTAIN)
     membership.full_clean()
     membership.save()
+    _audit(creator, team, action="team.created")
     return team
 
 
@@ -74,6 +87,7 @@ def join_team(team, user):
     membership = TeamMembership(team=team, user=user, role=TeamMembershipRole.MEMBER)
     membership.full_clean()
     membership.save()
+    _audit(user, team, action="team.member_joined", user_id=str(user.public_id))
     return membership
 
 
@@ -98,6 +112,14 @@ def leave_team(team, user):
     membership.delete()
 
     remaining = team.memberships.order_by("joined_at")
+    _audit(
+        user,
+        team,
+        action="team.member_left",
+        user_id=str(user.public_id),
+        was_captain=was_captain,
+        team_disbanded=not remaining.exists(),
+    )
     if not remaining.exists():
         team.delete()
         return None
@@ -127,6 +149,13 @@ def transfer_captaincy(team, current_captain, new_captain_user):
     current_membership.save(update_fields=["role"])
     new_membership.role = TeamMembershipRole.CAPTAIN
     new_membership.save(update_fields=["role"])
+    _audit(
+        current_captain,
+        team,
+        action="team.captain_transferred",
+        from_user_id=str(current_captain.public_id),
+        to_user_id=str(new_captain_user.public_id),
+    )
     return new_membership
 
 
@@ -146,6 +175,13 @@ def create_invite(team, creator, *, max_uses=1, ttl=None):
     )
     invite.full_clean()
     invite.save()
+    _audit(
+        creator,
+        team,
+        action="team.invite_created",
+        invite_id=str(invite.public_id),
+        max_uses=invite.max_uses,
+    )
     return invite
 
 
@@ -154,6 +190,7 @@ def revoke_invite(invite, actor):
     _require_captain(invite.team, actor, "revoke invite links")
     invite.revoked_at = timezone.now()
     invite.save(update_fields=["revoked_at"])
+    _audit(actor, invite.team, action="team.invite_revoked", invite_id=str(invite.public_id))
     return invite
 
 
@@ -176,4 +213,5 @@ def redeem_invite(token, user, *, event=None):
     membership = join_team(invite.team, user)
     invite.use_count += 1
     invite.save(update_fields=["use_count"])
+    _audit(user, invite.team, action="team.invite_redeemed", invite_id=str(invite.public_id))
     return membership

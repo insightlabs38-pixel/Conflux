@@ -6,6 +6,7 @@ module is just the self-serve front door plus organizer review queue for
 that same primitive, not a new identity concept.
 """
 
+from audit.services import record_mutation
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
@@ -123,6 +124,18 @@ def decide_application(application, decision, *, actor):
     application.decided_at = timezone.now()
     application.save(
         update_fields=["status", "waitlist_position", "decided_by", "decided_at", "updated_at"]
+    )
+    record_mutation(
+        actor=actor,
+        workspace=application.event.workspace,
+        action="application.decided",
+        target=application,
+        metadata={
+            "event_id": str(application.event.public_id),
+            "applicant_id": str(application.user.public_id),
+            "decision": decision,
+            "waitlist_position": application.waitlist_position,
+        },
     )
     return application
 

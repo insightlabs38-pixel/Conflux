@@ -1,4 +1,5 @@
 from accounts.authentication import CookieSessionAuthentication
+from core.idempotency import IdempotentMixin
 from core.permissions import IsWorkspaceMember
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.shortcuts import get_object_or_404
@@ -76,7 +77,7 @@ class ProjectArtifactView(APIView):
         return any(can_view_artifact(artifact, user=self.request.user, role=role) for role in roles)
 
 
-class ArtifactListView(ProjectArtifactView):
+class ArtifactListView(IdempotentMixin, ProjectArtifactView):
     serializer_class = ArtifactSchema
 
     def get(self, request, workspace_public_id, event_public_id, project_public_id):
@@ -184,7 +185,7 @@ class ArtifactValidateView(ProjectArtifactView):
         artifact = self.get_artifact()
         if not self.can_view(artifact) and artifact.created_by_id != request.user.id:
             return Response(status=404)
-        evidence = validate_artifact(artifact)
+        evidence = validate_artifact(artifact, actor=request.user)
         artifact.refresh_from_db()
         return Response(
             {

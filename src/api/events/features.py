@@ -26,6 +26,21 @@ register_feature(
                 "test:tests/integration/test_feature_authorization.py::test_every_matrix_gate_holds_for_a_wrong_role_a_stranger_and_a_signed_out_caller",
                 "test:tests/integration/test_feature_authorization.py::test_objects_of_another_workspace_or_event_are_not_found",
             ),
+            "audit": provided(
+                "write:event-list:POST=event.created",
+                "write:event-detail:PATCH=event.updated",
+                "write:event-detail:DELETE=event.deleted",
+                "write:event-status:POST=event.status_changed",
+                "test:tests/integration/test_feature_audit.py::test_each_declared_change_records_its_audit_action",
+                "test:tests/integration/test_feature_audit.py::test_a_refused_change_leaves_no_audit_row",
+            ),
+            "idempotency": provided(
+                "mode:event-list:POST=unique@events.Event.unique_event_slug_workspace",
+                "mode:event-detail:PATCH=natural",
+                "mode:event-detail:DELETE=natural",
+                "mode:event-status:POST=natural",
+                "test:tests/integration/test_feature_idempotency.py::test_a_repeated_change_does_what_its_declared_mode_says",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",
@@ -59,6 +74,19 @@ register_feature(
                 "test:tests/integration/test_feature_authorization.py::test_every_matrix_gate_holds_for_a_wrong_role_a_stranger_and_a_signed_out_caller",
                 "test:tests/integration/test_feature_authorization.py::test_objects_of_another_workspace_or_event_are_not_found",
             ),
+            "audit": provided(
+                "write:track-list:POST=track.created",
+                "write:track-detail:PATCH=track.updated",
+                "write:track-detail:DELETE=track.deleted",
+                "test:tests/integration/test_feature_audit.py::test_each_declared_change_records_its_audit_action",
+                "test:tests/integration/test_feature_audit.py::test_a_refused_change_leaves_no_audit_row",
+            ),
+            "idempotency": provided(
+                "mode:track-list:POST=unique@events.Track.unique_track_name_event",
+                "mode:track-detail:PATCH=natural",
+                "mode:track-detail:DELETE=natural",
+                "test:tests/integration/test_feature_idempotency.py::test_a_repeated_change_does_what_its_declared_mode_says",
+            ),
         },
         lifecycle=Lifecycle(
             "none", note="Edited in place and deleted (track.deleted); position orders it."
@@ -87,6 +115,15 @@ register_feature(
                 "test:tests/integration/test_event_registration.py::test_application_mode_requires_organizer_decision",
                 "test:tests/integration/test_feature_authorization.py::test_every_matrix_gate_holds_for_a_wrong_role_a_stranger_and_a_signed_out_caller",
                 "test:tests/integration/test_feature_authorization.py::test_objects_of_another_workspace_or_event_are_not_found",
+            ),
+            "audit": provided(
+                "write:event-application-decide:POST=application.decided",
+                "test:tests/integration/test_feature_audit.py::test_each_declared_change_records_its_audit_action",
+                "test:tests/integration/test_feature_audit.py::test_a_refused_change_leaves_no_audit_row",
+            ),
+            "idempotency": provided(
+                "mode:event-application-decide:POST=locked@events.registration.decide_application",
+                "test:tests/integration/test_feature_idempotency.py::test_a_repeated_change_does_what_its_declared_mode_says",
             ),
         },
         lifecycle=Lifecycle(
@@ -123,6 +160,20 @@ register_feature(
                 "test:tests/integration/test_announcements.py::test_organizer_manages_announcements_and_others_cannot",
                 "test:tests/integration/test_feature_authorization.py::test_every_matrix_gate_holds_for_a_wrong_role_a_stranger_and_a_signed_out_caller",
                 "test:tests/integration/test_feature_authorization.py::test_objects_of_another_workspace_or_event_are_not_found",
+            ),
+            "audit": provided(
+                "write:announcement-list:POST=announcement.posted",
+                "write:announcement-detail:DELETE=announcement.deleted",
+                "write:announcement-review:POST=announcement.reviewed",
+                "test:tests/integration/test_feature_audit.py::test_each_declared_change_records_its_audit_action",
+                "test:tests/integration/test_feature_audit.py::test_a_refused_change_leaves_no_audit_row",
+            ),
+            "idempotency": provided(
+                "mode:announcement-list:POST=keyed",
+                "mode:announcement-detail:DELETE=natural",
+                "mode:announcement-review:POST=locked@events.Announcement.version",
+                "test:tests/integration/test_feature_idempotency.py::test_a_repeated_change_does_what_its_declared_mode_says",
+                "test:tests/integration/test_feature_idempotency.py::test_a_keyed_change_runs_once_for_one_key_and_a_different_body_is_refused",
             ),
         },
         lifecycle=Lifecycle(

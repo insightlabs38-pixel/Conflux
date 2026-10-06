@@ -1,5 +1,6 @@
 from accounts.authentication import CookieSessionAuthentication
 from audit.services import diff_snapshots, record_mutation, snapshot_fields
+from core.idempotency import IdempotentMixin
 from core.permissions import IsWorkspaceMember, require_roles
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError, transaction
@@ -358,7 +359,7 @@ class BasePrizeDetailView(OrganizerView):
         return Response(status=204)
 
 
-class AnnouncementListView(OrganizerView):
+class AnnouncementListView(IdempotentMixin, OrganizerView):
     serializer_class = AnnouncementSerializer
 
     def get(self, request, workspace_public_id, event_public_id):

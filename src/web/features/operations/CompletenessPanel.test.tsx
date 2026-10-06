@@ -347,6 +347,12 @@ describe("completeness helpers", () => {
       "Scoped through: Track → Event",
     );
     expect(factText("scope_path", [])).toBe("Scoped through: no chain");
+    expect(factText("repeats", ["POST track-list: unique"])).toBe(
+      "When sent twice: POST track-list: unique",
+    );
+    expect(factText("actions", ["track.created", "track.deleted"])).toBe(
+      "Audit actions: track.created, track.deleted",
+    );
     expect(
       factText("explanation", {
         outcome: "allowed",

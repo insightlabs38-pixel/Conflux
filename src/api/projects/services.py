@@ -1,3 +1,4 @@
+from audit.services import record_mutation
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from participation.models import TeamMembership
@@ -24,6 +25,13 @@ def create_project(event, creator, name, *, team=None, track=None, description="
     membership = ProjectMembership(project=project, user=creator, role=ProjectMembershipRole.OWNER)
     membership.full_clean()
     membership.save()
+    record_mutation(
+        actor=creator,
+        workspace=event.workspace,
+        action="project.created",
+        target=project,
+        metadata={"event_id": str(event.public_id)},
+    )
     return project
 
 
@@ -37,8 +45,24 @@ def update_project(project, actor, *, name=None, description=None, track=None, t
         project.description = description
     if track_set:
         project.track = track
+    stored = Project.objects.get(pk=project.pk)
+    changed = [
+        field
+        for field in ("name", "description", "track_id")
+        if getattr(stored, field) != getattr(project, field)
+    ]
     project.full_clean()
     project.save()
+    record_mutation(
+        actor=actor,
+        workspace=project.event.workspace,
+        action="project.updated",
+        target=project,
+        metadata={
+            "event_id": str(project.event.public_id),
+            "changed_fields": [f.removesuffix("_id") for f in changed],
+        },
+    )
     return project
 
 

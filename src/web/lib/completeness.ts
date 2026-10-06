@@ -95,6 +95,10 @@ const FACT_LABEL: Record<string, string> = {
   readers: "Who can read",
   writers: "Who can change",
   scope_path: "Scoped through",
+  changes: "Audited changes",
+  actions: "Audit actions",
+  repeats: "When sent twice",
+  modes: "Repeat modes",
 };
 
 /** One derived fact as a sentence fragment: lists joined, booleans as yes or no. */

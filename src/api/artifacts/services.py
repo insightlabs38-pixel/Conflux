@@ -1,6 +1,7 @@
 import secrets
 from datetime import timedelta
 
+from audit.services import record_mutation
 from botocore.exceptions import ClientError
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -35,6 +36,18 @@ def inspection_data(record):
     }
 
 
+def _audit(actor, artifact, *, action, **metadata):
+    """The audit row for an artifact change, in the caller's transaction. The object key and the
+    signed upload URLs are never recorded."""
+    record_mutation(
+        actor=actor,
+        workspace=artifact.project.event.workspace,
+        action=action,
+        target=artifact,
+        metadata={"project_id": str(artifact.project.public_id), **metadata},
+    )
+
+
 def _require_project_member(project, user):
     if not project.memberships.filter(user=user).exists():
         raise ValidationError("Only project members can manage its artifacts.")
@@ -64,6 +77,7 @@ def create_external_artifact(project, actor, *, kind, visibility, title, url):
     )
     artifact.full_clean()
     artifact.save()
+    _audit(actor, artifact, action="artifact.added", kind=kind, visibility=visibility)
     return artifact
 
 
@@ -94,6 +108,15 @@ def begin_upload(project, actor, *, kind, visibility, title, byte_size, content_
     storage = storage or S3Storage()
     storage.ensure_bucket()
     artifact.save()
+    _audit(
+        actor,
+        artifact,
+        action="artifact.upload_started",
+        kind=kind,
+        visibility=visibility,
+        byte_size=byte_size,
+        content_type=content_type,
+    )
     key = (
         f"events/{project.event.public_id}/projects/{project.public_id}/"
         f"artifacts/{artifact.public_id}/{secrets.token_hex(12)}"
@@ -187,6 +210,7 @@ def complete_upload(intent, actor, *, parts=None, storage=None):
     artifact.save(update_fields=["object_key", "byte_size", "status", "updated_at"])
     intent.completed_at = timezone.now()
     intent.save(update_fields=["completed_at"])
+    _audit(actor, artifact, action="artifact.uploaded", byte_size=artifact.byte_size)
     return artifact
 
 
@@ -199,7 +223,6 @@ def run_inspection(artifact, actor, *, storage=None, fetcher=None, validator=Non
     """Inspect one artifact and persist the report. A fresh report inside the
     cooldown is returned instead of inspecting again.
     """
-    from audit.services import record_mutation
 
     artifact = Artifact.objects.select_for_update(of=("self",)).get(pk=artifact.pk)
     if artifact.status == ArtifactStatus.PURGED:

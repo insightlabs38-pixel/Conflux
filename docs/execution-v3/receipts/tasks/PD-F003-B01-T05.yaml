@@ -1,0 +1,101 @@
+version: 3
+task: PD-F003-B01-T05
+batch: PD-F003-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 2ecc2d1
+  head_commit: 2ecc2d1
+changed_paths:
+- src/api/core/ (features_idempotency.py new, features.py System.view_class, apps.py)
+- src/api/<app>/features.py for the fifteen features (idempotency claims, 45 changes)
+- "IdempotentMixin added to AnnouncementListView, MessageListCreateView, ProjectListView, ArtifactListView (opt-in by header)"
+- src/web/lib/completeness.ts, features/operations/CompletenessPanel.test.tsx, tests/e2e/completeness.spec.ts
+- tests/integration/ (test_feature_idempotency.py new, test_feature_contract.py extended)
+- docs/operations/COMPLETENESS.md, spec 003 (as built), docs/api/openapi.yaml (operation descriptions)
+deliverables:
+- item: Idempotency and concurrency semantics added to the completeness contract and applied to domain work
+  result: pass
+  evidence: "idempotency verifier holds each mode:<route>:<METHOD>=<mode> claim to the system (uniqueness constraints and token fields on the models, a version field or code that really takes select_for_update, the view's IdempotentMixin) and derives completeness from the authorization routes; all fifteen features claim it with no findings"
+- item: Observable state and diagnostics, retry behavior proved
+  result: pass
+  evidence: "the page shows each change and what it does when sent twice; test_feature_idempotency.py sends each of the 45 changes twice and compares the second send with the declared mode (none and keyed repeat, every other mode returns the same state or a refusal, never a 5xx), proves keyed replay, caller-private keys, 422 for a reused key with another body and that a failed change keeps no key"
+- item: Gaps found fixed through the canonical idempotency primitive
+  result: pass
+  evidence: "sending a message, posting an announcement, creating a project and adding an external artifact repeated their effect on a retry; each now takes an Idempotency-Key through core.idempotency.IdempotentMixin, opt-in so unkeyed behavior is unchanged"
+invariants:
+- item: One source of truth, existing primitive reused
+  result: pass
+  evidence: "no new idempotency mechanism; claims name existing constraints, version fields, locks and the existing mixin"
+- item: Secrets never stored by the idempotency record
+  result: pass
+  evidence: "webhook subscription (signing secret), team invite (bearer token) and upload intent (expiring signed URL) are deliberately not keyed and declare none with a reason"
+- item: Existing behavior compatible
+  result: pass
+  evidence: "a request without the header behaves as before; full suite passes"
+verification:
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 2271 passed, 31 skipped (67 new)
+- command: pnpm web vitest run; make format-check lint sdk-check block-schema-check
+  result: pass
+  note: 658 web tests; OpenAPI regenerated with fail-on-warn (descriptions only), SDKs unchanged and clean
+- command: npx playwright test completeness --project=desktop (seed 7, read-only, app rebuilt)
+  result: pass
+  note: 2 passed (390 and 1440) with the Idempotency column opened to its mode refs and derived repeats
+- command: make e2e-affected
+  result: pass
+  note: read-only, isolated-mutation and canary tiers ok (run after the audit rows and the Idempotency-Key views were in place)
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: Idempotency column with closed details in Operations > Completeness
+- surface: api
+  result: pass
+  evidence: report facts carry idempotency; four creates accept Idempotency-Key
+- surface: sdk
+  result: pass
+  evidence: no schema change, sdk-check clean
+- surface: cli
+  result: pass
+  evidence: assigned to PD-F003-B02-T04
+- surface: mcp
+  result: pass
+  evidence: assigned to PD-F003-B02-T05
+- surface: event_as_code
+  result: pass
+  evidence: assigned to PD-F003-B02-T06
+- surface: audit
+  result: pass
+  evidence: a replayed keyed change writes no second audit row, proved in the retry test
+- surface: webhook
+  result: pass
+  evidence: assigned to PD-F003-B02-T07
+- surface: archive
+  result: pass
+  evidence: assigned to PD-F003-B02-T08
+- surface: analytics
+  result: pass
+  evidence: assigned to PD-F003-B03-T01
+- surface: search
+  result: pass
+  evidence: assigned to T08 of this batch
+- surface: docs
+  result: pass
+  evidence: COMPLETENESS.md idempotency section and spec 003 as built
+migrations:
+- none
+findings:
+- my-team creation is checked (already on a team) but not row-locked, so two simultaneous creates by one person could both succeed; recorded, not fixed here
+- a webhook subscription can be created twice for the same URL; no uniqueness rule exists and adding one is a product decision, recorded with its reason as mode none
+limitations:
+- modes are declared per change and proved by a sequential replay, not by a concurrency harness; the existing race suites under tests/integration/concurrency cover the locked services
+- unique is a sixth mode beyond the contract table's five
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

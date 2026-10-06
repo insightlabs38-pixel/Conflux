@@ -1,6 +1,7 @@
 from accounts.authentication import CookieSessionAuthentication
 from audit.services import record_mutation
 from core.approvals import ApprovalRequired
+from core.idempotency import IdempotentMixin
 from core.permissions import IsWorkspaceMember
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import transaction
@@ -139,7 +140,7 @@ class AudiencePreviewView(OrganizerView):
         )
 
 
-class MessageListCreateView(OrganizerView):
+class MessageListCreateView(IdempotentMixin, OrganizerView):
     @extend_schema(responses=MessageSchema(many=True))
     def get(self, request, workspace_public_id, event_public_id):
         offset = _offset(request)

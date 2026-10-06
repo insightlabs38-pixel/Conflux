@@ -114,7 +114,15 @@ class FormListView(FormOrganizerView):
         if not name:
             raise ValidationError({"name": "Form name is required."})
         try:
-            form = create_form(event, name)
+            with transaction.atomic():
+                form = create_form(event, name)
+                record_mutation(
+                    actor=request.user,
+                    workspace=self.get_workspace(),
+                    action="form.created",
+                    target=form,
+                    metadata={"event_id": str(event.public_id)},
+                )
         except ModelValidationError as exc:
             raise ValidationError(
                 exc.message_dict if hasattr(exc, "message_dict") else exc.messages
@@ -133,7 +141,15 @@ class FormDetailView(FormOrganizerView):
         form = self.get_form()
         self.ensure_mutable(form.event)
         try:
-            save_draft(form, request.data.get("schema"))
+            with transaction.atomic():
+                save_draft(form, request.data.get("schema"))
+                record_mutation(
+                    actor=request.user,
+                    workspace=self.get_workspace(),
+                    action="form.draft_saved",
+                    target=form,
+                    metadata={"event_id": str(form.event.public_id)},
+                )
         except ModelValidationError as exc:
             raise ValidationError(
                 exc.message_dict if hasattr(exc, "message_dict") else exc.messages

@@ -1,6 +1,7 @@
 import http.client
 from dataclasses import dataclass
 
+from audit.services import record_mutation
 from botocore.exceptions import ClientError
 from django.db import transaction
 
@@ -104,7 +105,7 @@ def inspect_artifact(artifact, *, storage=None):
     return validator(artifact, storage_client)
 
 
-def validate_artifact(artifact, *, storage=None):
+def validate_artifact(artifact, *, storage=None, actor=None):
     result = inspect_artifact(artifact, storage=storage)
     with transaction.atomic():
         current = Artifact.objects.select_for_update().get(pk=artifact.pk)
@@ -132,6 +133,18 @@ def validate_artifact(artifact, *, storage=None):
             current.status = ArtifactStatus.REJECTED
         if result.outcome != "retry":
             current.save(update_fields=["status", "updated_at"])
+        record_mutation(
+            actor=actor,
+            workspace=current.project.event.workspace,
+            action="artifact.validated",
+            target=current,
+            metadata={
+                "project_id": str(current.project.public_id),
+                "validator": result.validator,
+                "outcome": result.outcome,
+                "status": current.status,
+            },
+        )
     return evidence
 
 

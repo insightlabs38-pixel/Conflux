@@ -28,6 +28,22 @@ register_feature(
                 "test:tests/integration/test_feature_authorization.py::test_a_non_member_of_a_project_can_never_change_it_or_what_hangs_off_it",
                 "test:tests/integration/test_feature_authorization.py::test_objects_of_another_workspace_or_event_are_not_found",
             ),
+            "audit": provided(
+                "write:artifact-list:POST=artifact.added",
+                "write:artifact-upload-intent:POST=artifact.upload_started",
+                "write:artifact-validate:POST=artifact.validated",
+                "test:tests/integration/test_feature_audit.py::test_each_declared_change_records_its_audit_action",
+                "test:tests/integration/test_feature_audit.py::test_a_refused_change_leaves_no_audit_row",
+            ),
+            "idempotency": provided(
+                "mode:artifact-list:POST=keyed",
+                "mode:artifact-upload-intent:POST=none@each call starts a new pending upload "
+                "whose signed URL expires with its intent, so a stored response would hand "
+                "back a dead URL",
+                "mode:artifact-validate:POST=natural",
+                "test:tests/integration/test_feature_idempotency.py::test_a_repeated_change_does_what_its_declared_mode_says",
+                "test:tests/integration/test_feature_idempotency.py::test_a_keyed_change_runs_once_for_one_key_and_a_different_body_is_refused",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",

@@ -23,6 +23,19 @@ register_feature(
                 "test:tests/integration/test_feature_authorization.py::test_every_matrix_gate_holds_for_a_wrong_role_a_stranger_and_a_signed_out_caller",
                 "test:tests/integration/test_feature_authorization.py::test_objects_of_another_workspace_or_event_are_not_found",
             ),
+            "audit": provided(
+                "write:webhook-list:POST=webhook.created",
+                "write:webhook-detail:PATCH=webhook.updated",
+                "test:tests/integration/test_feature_audit.py::test_each_declared_change_records_its_audit_action",
+                "test:tests/integration/test_feature_audit.py::test_a_refused_change_leaves_no_audit_row",
+            ),
+            "idempotency": provided(
+                "mode:webhook-list:POST=none@a new subscription is made each time and its "
+                "response carries the signing secret, which a replayed response would have to "
+                "store",
+                "mode:webhook-detail:PATCH=natural",
+                "test:tests/integration/test_feature_idempotency.py::test_a_repeated_change_does_what_its_declared_mode_says",
+            ),
         },
         lifecycle=Lifecycle(
             "flag",

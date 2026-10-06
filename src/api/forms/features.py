@@ -24,6 +24,17 @@ register_feature(
                 "test:tests/integration/test_feature_authorization.py::test_every_matrix_gate_holds_for_a_wrong_role_a_stranger_and_a_signed_out_caller",
                 "test:tests/integration/test_feature_authorization.py::test_objects_of_another_workspace_or_event_are_not_found",
             ),
+            "audit": provided(
+                "write:form-list:POST=form.created",
+                "write:form-detail:PUT=form.draft_saved",
+                "test:tests/integration/test_feature_audit.py::test_each_declared_change_records_its_audit_action",
+                "test:tests/integration/test_feature_audit.py::test_a_refused_change_leaves_no_audit_row",
+            ),
+            "idempotency": provided(
+                "mode:form-list:POST=unique@forms.FormDefinition.unique_form_name_event",
+                "mode:form-detail:PUT=natural",
+                "test:tests/integration/test_feature_idempotency.py::test_a_repeated_change_does_what_its_declared_mode_says",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

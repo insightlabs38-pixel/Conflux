@@ -87,6 +87,17 @@ def save_draft(project, stage, actor, *, payload, revision):
     submission.draft_revision += 1
     submission.updated_by = actor
     submission.save(update_fields=["draft_payload", "draft_revision", "updated_by", "updated_at"])
+    record_mutation(
+        actor=actor,
+        workspace=project.event.workspace,
+        action="submission.draft_saved",
+        target=submission,
+        metadata={
+            "project_id": str(project.public_id),
+            "stage_id": str(stage.public_id),
+            "revision": submission.draft_revision,
+        },
+    )
     return submission
 
 

@@ -63,6 +63,20 @@ AUTHZ = ft.provided(
     "test:tests/integration/test_saved_views.py::test_private_views_belong_to_the_owner_and_organizers_views_are_shared_for_reading",
 )
 
+AUDIT = ft.provided(
+    "write:saved-view-list:POST=saved_view.created",
+    "write:saved-view-detail:PATCH=saved_view.updated",
+    "write:saved-view-detail:DELETE=saved_view.deleted",
+    "test:tests/integration/test_saved_views.py::test_deleting_a_view_is_audited_and_leaves_the_data",
+)
+
+IDEM = ft.provided(
+    "mode:saved-view-list:POST=unique@core.SavedView.unique_saved_view_name",
+    "mode:saved-view-detail:PATCH=locked@core.SavedView.version",
+    "mode:saved-view-detail:DELETE=natural",
+    "test:tests/integration/test_saved_views.py::test_updates_bump_the_version_refuse_stale_writers_and_are_audited_without_filter_values",
+)
+
 
 def identity(*refs):
     return ft.provided(*(refs or ("field:public_id",)))
@@ -78,11 +92,19 @@ def only(feature_key="x", **over):
             "identity": identity("field:public_id", "route:saved-view-detail"),
             "validation": VALID,
             "authorization": AUTHZ,
+            "audit": AUDIT,
+            "idempotency": IDEM,
         },
         "lifecycle": ft.Lifecycle("none", note="Edited in place."),
     }
     values.update(over)
-    values["claims"] = {"validation": VALID, "authorization": AUTHZ, **values["claims"]}
+    values["claims"] = {
+        "validation": VALID,
+        "authorization": AUTHZ,
+        "audit": AUDIT,
+        "idempotency": IDEM,
+        **values["claims"],
+    }
     ft.FEATURES.clear()
     ft.register_feature(ft.Feature(**values))
     # every other landed property must be claimed for the registry to be quiet about it
@@ -95,7 +117,7 @@ def only(feature_key="x", **over):
 def test_the_fifteen_features_agree_with_the_live_system():
     assert sorted(ft.FEATURES) == KEYS
     assert ft.check() == []
-    assert ft.landed() == ["identity", "validation", "authorization"]
+    assert ft.landed() == ["identity", "validation", "authorization", "audit", "idempotency"]
 
 
 def test_every_feature_resolves_to_its_model_and_a_uuid_public_id():
@@ -207,6 +229,8 @@ def test_a_well_formed_independent_feature_passes(isolated):
             "identity": identity("field:public_id", "route:saved-view-detail"),
             "validation": VALID,
             "authorization": AUTHZ,
+            "audit": AUDIT,
+            "idempotency": IDEM,
         },
         ft.Lifecycle("none", note="Edited in place and deleted."),
     )
@@ -420,6 +444,8 @@ def test_the_endpoint_reports_a_broken_claim_instead_of_hiding_it(world, isolate
             "identity": identity("field:public_id", "route:nope"),
             "validation": ft.FEATURES["event"].claims["validation"],
             "authorization": ft.FEATURES["event"].claims["authorization"],
+            "audit": ft.FEATURES["event"].claims["audit"],
+            "idempotency": ft.FEATURES["event"].claims["idempotency"],
         },
         ft.FEATURES["event"].lifecycle,
     )
@@ -601,4 +627,226 @@ def test_a_model_with_no_chain_to_its_scope_is_refused():
 def test_the_authorization_ci_check_finds_a_missing_test(isolated, tmp_path):
     ft.FEATURES.clear()
     ft.register_feature(ft.Feature("x", "X", "core.SavedView", {"authorization": AUTHZ}))
+    assert codes(ft.check_static(tmp_path)) == ["test_file"]
+
+
+# --- audit (T04) ----------------------------------------------------------------------------------
+
+
+def verify_audit(refs, model="core.SavedView", authorization=AUTHZ):
+    claims = {"audit": ft.provided(*refs)}
+    if authorization is not None:
+        claims["authorization"] = authorization
+    feature = ft.Feature("s", "S", model, claims)
+    return ft.VERIFIERS["audit"](feature, feature.claims["audit"], ft.System())
+
+
+def without(*drop):
+    return tuple(r for r in AUDIT.refs if r not in drop)
+
+
+def test_a_real_audit_claim_is_derived_from_the_code():
+    assert verify_audit(AUDIT.refs) == []
+    actions = ft.System().audit_actions()
+    assert actions["saved_view.created"] == ("core",)
+    assert actions["track.created"] == ("events",)  # recorded through a helper's action=
+    assert actions["announcement.reviewed"] == ("communications",)  # assigned to a name first
+    row = {f["key"]: f for f in ft.report()["features"]}
+    facts = row["track"]["facts"]["audit"]
+    assert facts["changes"] == [
+        "POST track-list: track.created",
+        "PATCH track-detail: track.updated",
+        "DELETE track-detail: track.deleted",
+    ]
+    assert facts["actions"] == ["track.created", "track.deleted", "track.updated"]
+    for feature in ft.FEATURES.values():
+        kinds = {r.partition(":")[0] for r in feature.claims["audit"].refs}
+        assert kinds == {"write", "test"}, feature.key
+        # every action follows subject.verb and is recorded by the code
+        for ref in feature.claims["audit"].refs:
+            if ref.startswith("write:"):
+                assert ft.AUDIT_ACTION.fullmatch(ref.rpartition("=")[2])
+
+
+@pytest.mark.parametrize(
+    ("refs", "code"),
+    [
+        (without("write:saved-view-detail:DELETE=saved_view.deleted"), "write_unaudited"),
+        (
+            without("write:saved-view-list:POST=saved_view.created")
+            + ("write:saved-view-list:POST=saved_view.nope",),
+            "action_missing",
+        ),
+        (
+            without("write:saved-view-list:POST=saved_view.created")
+            + ("write:saved-view-list:POST=Saved.View",),
+            "action_format",
+        ),
+        (
+            without("write:saved-view-list:POST=saved_view.created")
+            + ("write:saved-view-list:POST=track.created",),
+            "action_elsewhere",
+        ),
+        (AUDIT.refs + ("write:saved-view-list:POST=saved_view.created",), "write_twice"),
+        (AUDIT.refs + ("write:nope:POST=saved_view.created",), "route_missing"),
+        (AUDIT.refs + ("write:saved-view-list:PUT=saved_view.created",), "method_unknown"),
+        (AUDIT.refs + ("write:saved-view-list=saved_view.created",), "bad_ref"),
+        (AUDIT.refs + ("color:red",), "bad_ref"),
+        (tuple(r for r in AUDIT.refs if not r.startswith("test:")), "no_test"),
+        (tuple(r for r in AUDIT.refs if not r.startswith("write:")), "no_writes"),
+    ],
+)
+def test_each_audit_failure_has_a_code(refs, code):
+    assert code in codes(verify_audit(refs))
+
+
+def test_a_route_that_only_reads_cannot_be_claimed_as_a_change():
+    refs = AUDIT.refs + ("write:accounts-me:GET=saved_view.created",)
+    assert "bad_ref" in codes(verify_audit(refs))
+
+
+def test_completeness_is_derived_from_the_authorization_claim_only_when_there_is_one():
+    # no authorization claim: nothing to derive the changes from, so only the refs are checked
+    assert (
+        verify_audit(
+            without("write:saved-view-detail:DELETE=saved_view.deleted"), authorization=None
+        )
+        == []
+    )
+
+
+def test_the_audit_ci_check_finds_a_missing_test(isolated, tmp_path):
+    ft.FEATURES.clear()
+    ft.register_feature(ft.Feature("x", "X", "core.SavedView", {"audit": AUDIT}))
+    assert codes(ft.check_static(tmp_path)) == ["test_file"]
+
+
+# --- idempotency (T05) ----------------------------------------------------------------------------
+
+
+def verify_idempotency(refs, model="core.SavedView", authorization=AUTHZ):
+    claims = {"idempotency": ft.provided(*refs)}
+    if authorization is not None:
+        claims["authorization"] = authorization
+    feature = ft.Feature("s", "S", model, claims)
+    return ft.VERIFIERS["idempotency"](feature, feature.claims["idempotency"], ft.System())
+
+
+def mode_swap(old, new):
+    return tuple(new if r == old else r for r in IDEM.refs)
+
+
+def test_a_real_idempotency_claim_is_derived_from_the_system():
+    assert verify_idempotency(IDEM.refs) == []
+    row = {f["key"]: f for f in ft.report()["features"]}
+    facts = row["track"]["facts"]["idempotency"]
+    assert facts["repeats"] == [
+        "POST track-list: unique (events.Track.unique_track_name_event)",
+        "PATCH track-detail: natural",
+        "DELETE track-detail: natural",
+    ]
+    assert facts["modes"] == ["natural", "unique"]
+    assert "keyed" in row["message"]["facts"]["idempotency"]["modes"]
+    assert ft.System().view_class("message-list-create") is not None
+    for feature in ft.FEATURES.values():
+        kinds = {r.partition(":")[0] for r in feature.claims["idempotency"].refs}
+        assert kinds == {"mode", "test"}, feature.key
+
+
+@pytest.mark.parametrize(
+    ("refs", "code"),
+    [
+        (
+            mode_swap(
+                "mode:saved-view-list:POST=unique@core.SavedView.unique_saved_view_name",
+                "mode:saved-view-list:POST=unique@core.SavedView.nope",
+            ),
+            "unique_missing",
+        ),
+        (
+            mode_swap(
+                "mode:saved-view-detail:DELETE=natural", "mode:saved-view-detail:DELETE=magic"
+            ),
+            "mode_unknown",
+        ),
+        (
+            mode_swap(
+                "mode:saved-view-detail:DELETE=natural", "mode:saved-view-detail:DELETE=natural@why"
+            ),
+            "mode_detail",
+        ),
+        (
+            mode_swap(
+                "mode:saved-view-detail:DELETE=natural",
+                "mode:saved-view-detail:DELETE=token@core.SavedView.name",
+            ),
+            "token_missing",
+        ),
+        (
+            mode_swap(
+                "mode:saved-view-detail:DELETE=natural",
+                "mode:saved-view-detail:DELETE=token@core.SavedView.public_id",
+            ),
+            None,
+        ),
+        (
+            mode_swap(
+                "mode:saved-view-detail:PATCH=locked@core.SavedView.version",
+                "mode:saved-view-detail:PATCH=locked@core.SavedView.nope",
+            ),
+            "lock_missing",
+        ),
+        (
+            mode_swap(
+                "mode:saved-view-detail:PATCH=locked@core.SavedView.version",
+                "mode:saved-view-detail:PATCH=locked@core.saved_views.validate_name",
+            ),
+            "lock_missing",
+        ),
+        (
+            mode_swap(
+                "mode:saved-view-detail:DELETE=natural", "mode:saved-view-detail:DELETE=keyed"
+            ),
+            "not_keyed",
+        ),
+        (
+            mode_swap(
+                "mode:saved-view-detail:DELETE=natural", "mode:saved-view-detail:DELETE=none@short"
+            ),
+            "no_reason",
+        ),
+        (tuple(r for r in IDEM.refs if "DELETE" not in r), "mode_missing"),
+        (IDEM.refs + ("mode:saved-view-detail:DELETE=natural",), "mode_twice"),
+        (IDEM.refs + ("mode:nope:POST=natural",), "route_missing"),
+        (IDEM.refs + ("mode:saved-view-list:PUT=natural",), "method_unknown"),
+        (IDEM.refs + ("mode:saved-view-list=natural",), "bad_ref"),
+        (IDEM.refs + ("color:red",), "bad_ref"),
+        (tuple(r for r in IDEM.refs if not r.startswith("test:")), "no_test"),
+        (tuple(r for r in IDEM.refs if not r.startswith("mode:")), "no_modes"),
+    ],
+)
+def test_each_idempotency_failure_has_a_code(refs, code):
+    found = codes(verify_idempotency(refs))
+    assert (code in found) if code else found == []
+
+
+def test_a_lock_is_found_in_code_that_really_takes_one_and_a_key_in_a_view_that_takes_it():
+    system = ft.System()
+    ok = "mode:saved-view-detail:PATCH=locked@events.registration.decide_application"
+    refs = mode_swap("mode:saved-view-detail:PATCH=locked@core.SavedView.version", ok)
+    assert verify_idempotency(refs) == []
+    keyed = mode_swap(
+        "mode:saved-view-list:POST=unique@core.SavedView.unique_saved_view_name",
+        "mode:saved-view-list:POST=keyed",
+    )
+    assert "not_keyed" in codes(verify_idempotency(keyed))
+    assert issubclass(
+        system.view_class("project-list"),
+        __import__("core.idempotency", fromlist=["x"]).IdempotentMixin,
+    )
+
+
+def test_the_idempotency_ci_check_finds_a_missing_test(isolated, tmp_path):
+    ft.FEATURES.clear()
+    ft.register_feature(ft.Feature("x", "X", "core.SavedView", {"idempotency": IDEM}))
     assert codes(ft.check_static(tmp_path)) == ["test_file"]

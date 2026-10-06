@@ -1,6 +1,7 @@
 from accounts.authentication import CookieSessionAuthentication
 from accounts.models import User
 from core.authz import has_any_role
+from core.idempotency import IdempotentMixin
 from core.permissions import IsWorkspaceMember
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.shortcuts import get_object_or_404
@@ -57,7 +58,7 @@ class ProjectView(APIView):
         )
 
 
-class ProjectListView(ProjectView):
+class ProjectListView(IdempotentMixin, ProjectView):
     serializer_class = ProjectSerializer
 
     def get(self, request, workspace_public_id, event_public_id):

@@ -1812,6 +1812,14 @@ paths:
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/announcements/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements
+      description: |-
+        Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
+
+        Put before the DRF view class in the MRO. Requests without the header are
+        passed through untouched. A key is private to the caller and to one
+        method+path; reusing it for a different request is rejected (422), a
+        duplicate while the first is still running is refused (409) instead of
+        running twice, and server errors are never cached so they can be retried.
       parameters:
       - in: path
         name: event_public_id
@@ -1839,6 +1847,14 @@ paths:
           description: ''
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_announcements
+      description: |-
+        Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
+
+        Put before the DRF view class in the MRO. Requests without the header are
+        passed through untouched. A key is private to the caller and to one
+        method+path; reusing it for a different request is rejected (422), a
+        duplicate while the first is still running is refused (409) instead of
+        running twice, and server errors are never cached so they can be retried.
       parameters:
       - in: path
         name: event_public_id
@@ -4102,6 +4118,14 @@ paths:
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/communications/messages/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_messages
+      description: |-
+        Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
+
+        Put before the DRF view class in the MRO. Requests without the header are
+        passed through untouched. A key is private to the caller and to one
+        method+path; reusing it for a different request is rejected (422), a
+        duplicate while the first is still running is refused (409) instead of
+        running twice, and server errors are never cached so they can be retried.
       parameters:
       - in: path
         name: event_public_id
@@ -4131,6 +4155,14 @@ paths:
           description: ''
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_communications_messages
+      description: |-
+        Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
+
+        Put before the DRF view class in the MRO. Requests without the header are
+        passed through untouched. A key is private to the caller and to one
+        method+path; reusing it for a different request is rejected (422), a
+        duplicate while the first is still running is refused (409) instead of
+        running twice, and server errors are never cached so they can be retried.
       parameters:
       - in: path
         name: event_public_id
@@ -8475,6 +8507,14 @@ paths:
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects
+      description: |-
+        Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
+
+        Put before the DRF view class in the MRO. Requests without the header are
+        passed through untouched. A key is private to the caller and to one
+        method+path; reusing it for a different request is rejected (422), a
+        duplicate while the first is still running is refused (409) instead of
+        running twice, and server errors are never cached so they can be retried.
       parameters:
       - in: path
         name: event_public_id
@@ -8502,6 +8542,14 @@ paths:
           description: ''
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects
+      description: |-
+        Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
+
+        Put before the DRF view class in the MRO. Requests without the header are
+        passed through untouched. A key is private to the caller and to one
+        method+path; reusing it for a different request is rejected (422), a
+        duplicate while the first is still running is refused (409) instead of
+        running twice, and server errors are never cached so they can be retried.
       parameters:
       - in: path
         name: event_public_id
@@ -8620,6 +8668,14 @@ paths:
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/projects/{project_public_id}/artifacts/:
     get:
       operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_artifacts
+      description: |-
+        Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
+
+        Put before the DRF view class in the MRO. Requests without the header are
+        passed through untouched. A key is private to the caller and to one
+        method+path; reusing it for a different request is rejected (422), a
+        duplicate while the first is still running is refused (409) instead of
+        running twice, and server errors are never cached so they can be retried.
       parameters:
       - in: path
         name: event_public_id
@@ -8653,6 +8709,14 @@ paths:
           description: ''
     post:
       operationId: post_api_v1_workspaces_workspace_public_id_events_event_public_id_projects_project_public_id_artifacts
+      description: |-
+        Dedupe unsafe requests by a client-supplied `Idempotency-Key` header.
+
+        Put before the DRF view class in the MRO. Requests without the header are
+        passed through untouched. A key is private to the caller and to one
+        method+path; reusing it for a different request is rejected (422), a
+        duplicate while the first is still running is refused (409) instead of
+        running twice, and server errors are never cached so they can be retried.
       parameters:
       - in: path
         name: event_public_id

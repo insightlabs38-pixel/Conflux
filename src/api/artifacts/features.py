@@ -64,6 +64,9 @@ register_feature(
                 "component:src/web/features/artifacts/ArtifactPanel.tsx",
                 "test:src/web/features/artifacts/ArtifactPanel.test.tsx",
             ),
+            "ui_advanced": provided(
+                "uses:OperationStatus@src/web/features/artifacts/ArtifactPanel.tsx",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",

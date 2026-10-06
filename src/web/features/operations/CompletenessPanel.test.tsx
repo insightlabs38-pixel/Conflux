@@ -359,6 +359,12 @@ describe("completeness helpers", () => {
       "Screens: EventDashboard.tsx",
     );
     expect(factText("screen", "none yet")).toBe("Screen: none yet");
+    expect(factText("uses", ["EntityGrid in RegistrationPanel.tsx"])).toBe(
+      "Shared components: EntityGrid in RegistrationPanel.tsx",
+    );
+    expect(factText("advanced", "none beyond the base screen")).toBe(
+      "Advanced: none beyond the base screen",
+    );
     expect(factText("roles", ["admin", "organizer"])).toBe(
       "Who can query: admin, organizer",
     );

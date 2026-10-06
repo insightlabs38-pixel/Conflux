@@ -26,6 +26,7 @@ LANDED = [
     "sdk",
     "search",
     "ui_base",
+    "ui_advanced",
 ]
 
 

@@ -57,6 +57,10 @@ register_feature(
                 "component:src/web/features/judging/EvaluationBuilder.tsx",
                 "test:src/web/features/judging/EvaluationBuilder.test.tsx",
             ),
+            "ui_advanced": provided(
+                "no_advanced@the rubric is edited in the base screen; its advanced views "
+                "(progress, results) belong to the judging feature",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

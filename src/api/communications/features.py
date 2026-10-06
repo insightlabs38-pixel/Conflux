@@ -51,6 +51,10 @@ register_feature(
                 "component:src/web/features/communications/CommunicationsPanel.tsx",
                 "test:src/web/features/communications/CommunicationsPanel.test.tsx",
             ),
+            "ui_advanced": provided(
+                "no_advanced@a message is composed and sent in the base screen; delivery detail "
+                "is in the inbox",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

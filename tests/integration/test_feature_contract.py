@@ -95,6 +95,8 @@ SEARCH = ft.provided("no_query@read whole through its list: a person saves a few
 
 UI = ft.provided("no_ui@a saved view is made from the grid toolbar, not on a screen of its own")
 
+ADV = ft.provided("no_advanced@nothing sits beyond the base screen of a saved view in this test")
+
 
 def identity(*refs):
     return ft.provided(*(refs or ("field:public_id",)))
@@ -116,6 +118,7 @@ def only(feature_key="x", **over):
             "sdk": SDKC,
             "search": SEARCH,
             "ui_base": UI,
+            "ui_advanced": ADV,
         },
         "lifecycle": ft.Lifecycle("none", note="Edited in place."),
     }
@@ -129,6 +132,7 @@ def only(feature_key="x", **over):
         "sdk": SDKC,
         "search": SEARCH,
         "ui_base": UI,
+        "ui_advanced": ADV,
         **values["claims"],
     }
     ft.FEATURES.clear()
@@ -153,6 +157,7 @@ def test_the_fifteen_features_agree_with_the_live_system():
         "sdk",
         "search",
         "ui_base",
+        "ui_advanced",
     ]
 
 
@@ -224,7 +229,7 @@ def test_the_report_is_deterministic_read_only_and_complete():
         "planned": 0,
         "unclaimed": 0,
     }
-    assert first["totals"]["ui_advanced"]["unclaimed"] == 15  # not landed yet, so only unclaimed
+    assert first["totals"]["fixtures"]["unclaimed"] == 15  # not landed yet, so only unclaimed
     assert {p["key"]: p["landed"] for p in first["properties"]}["identity"] is True
 
 
@@ -271,6 +276,7 @@ def test_a_well_formed_independent_feature_passes(isolated):
             "sdk": SDKC,
             "search": SEARCH,
             "ui_base": UI,
+            "ui_advanced": ADV,
         },
         ft.Lifecycle("none", note="Edited in place and deleted."),
     )
@@ -395,22 +401,22 @@ def test_a_timestamp_or_flag_lifecycle_names_its_two_states(isolated):
 
 def test_claims_must_be_well_formed_and_honest(isolated):
     base = {"identity": identity("field:public_id", "route:saved-view-detail")}
-    assert "bad_state" in codes(only(claims={**base, "ui_advanced": ft.Claim("maybe")}))
-    assert "no_refs" in codes(only(claims={**base, "ui_advanced": ft.Claim("provided")}))
-    assert "no_reason" in codes(only(claims={**base, "ui_advanced": ft.Claim("not_applicable")}))
-    assert "no_owner" in codes(only(claims={**base, "ui_advanced": ft.Claim("planned")}))
+    assert "bad_state" in codes(only(claims={**base, "fixtures": ft.Claim("maybe")}))
+    assert "no_refs" in codes(only(claims={**base, "fixtures": ft.Claim("provided")}))
+    assert "no_reason" in codes(only(claims={**base, "fixtures": ft.Claim("not_applicable")}))
+    assert "no_owner" in codes(only(claims={**base, "fixtures": ft.Claim("planned")}))
     assert "reason_too_long" in codes(
-        only(claims={**base, "ui_advanced": ft.not_applicable("x" * 301)})
+        only(claims={**base, "fixtures": ft.not_applicable("x" * 301)})
     )
     assert "no_verifier" in codes(
-        only(claims={**base, "ui_advanced": ft.provided("op:get_x")})
+        only(claims={**base, "fixtures": ft.provided("op:get_x")})
     )  # not landed
     assert "unknown_property" in codes(only(claims={**base, "colour": ft.not_applicable("n/a")}))
     assert "unclaimed" in codes(only(claims={}))  # identity is landed, so it must be claimed
     good = only(
         claims={
             **base,
-            "ui_advanced": ft.planned("PD-F003-B02-T01", "Not yet."),
+            "fixtures": ft.planned("PD-F003-B03-T01", "Not yet."),
             "ui_base": ft.not_applicable("Internal."),
         }
     )
@@ -492,6 +498,7 @@ def test_the_endpoint_reports_a_broken_claim_instead_of_hiding_it(world, isolate
             "sdk": ft.FEATURES["event"].claims["sdk"],
             "search": ft.FEATURES["event"].claims["search"],
             "ui_base": ft.FEATURES["event"].claims["ui_base"],
+            "ui_advanced": ft.FEATURES["event"].claims["ui_advanced"],
         },
         ft.FEATURES["event"].lifecycle,
     )
@@ -1383,4 +1390,86 @@ def test_the_ui_ci_check_finds_a_missing_screen_one_that_reads_nothing_and_an_un
     ft.FEATURES.clear()
     ft.register_feature(ft.Feature("x", "X", "events.Track", claims))
     found = [p for p in ft.check_static(tmp_path) if p["property"] == "ui_base"]
+    assert codes(found) == expected
+
+
+# --- advanced UI (T02) ----------------------------------------------------------------------------
+
+USES = (
+    "uses:EntityGrid@src/web/features/event-builder/RegistrationPanel.tsx",
+    "uses:NotesDialog@src/web/features/event-builder/RegistrationPanel.tsx",
+)
+
+
+def verify_advanced(refs):
+    feature = ft.Feature("s", "S", "events.EventApplication", {"ui_advanced": ft.provided(*refs)})
+    return ft.VERIFIERS["ui_advanced"](feature, feature.claims["ui_advanced"], ft.System())
+
+
+def test_a_real_advanced_ui_claim_names_the_shared_component_and_the_screen_that_uses_it():
+    assert verify_advanced(USES) == []
+    row = {f["key"]: f for f in ft.report()["features"]}
+    assert row["form"]["facts"]["ui_advanced"]["uses"] == [
+        "VersionCompare in FormBuilder.tsx",
+        "PreviewBar in FormPreviewAs.tsx",
+    ]
+    assert row["track"]["facts"]["ui_advanced"]["advanced"] == "none beyond the base screen"
+    assert row["announcement"]["claims"]["ui_advanced"]["state"] == "planned"
+
+
+@pytest.mark.parametrize(
+    ("refs", "code"),
+    [
+        (("no_advanced@short",), "no_reason"),
+        (
+            USES + ("no_advanced@a long enough reason why nothing sits beyond the base screen",),
+            "both",
+        ),
+        ((), "no_uses"),
+        (("uses:Wizard@src/web/features/a/B.tsx",), "component_unknown"),
+        (("uses:EntityGrid@src/web/lib/x.ts",), "screen_path"),
+        (("uses:EntityGrid@src/web/features/a/B.test.tsx",), "screen_path"),
+        (USES + (USES[0],), "use_twice"),
+        (USES + ("color:red",), "bad_ref"),
+    ],
+)
+def test_each_advanced_ui_failure_has_a_code(refs, code):
+    assert code in codes(verify_advanced(refs))
+
+
+def advanced_tree(tmp_path, *, imports=True, reads=True, shared=True):
+    (tmp_path / "src/web/components").mkdir(parents=True)
+    (tmp_path / "src/web/features/regs").mkdir(parents=True)
+    if shared:
+        (tmp_path / "src/web/components/EntityGrid.tsx").write_text(
+            "export const EntityGrid = 1;\n"
+        )
+    line = 'import { EntityGrid } from "../../components/EntityGrid";\n' if imports else ""
+    body = 'const url = "applications/";\n' if reads else "const url = 1;\n"
+    (tmp_path / "src/web/features/regs/Panel.tsx").write_text(line + body)
+
+
+@pytest.mark.parametrize(
+    ("options", "expected"),
+    [
+        ({}, []),
+        ({"imports": False}, ["not_imported"]),
+        ({"reads": False}, ["screen_reads_nothing"]),
+        ({"shared": False}, ["component_missing"]),
+    ],
+)
+def test_the_advanced_ui_ci_check_finds_an_unimported_component_and_a_screen_that_reads_nothing(
+    isolated, tmp_path, options, expected
+):
+    advanced_tree(tmp_path, **options)
+    claims = {
+        "authorization": ft.provided(
+            "route:event-application-list", "scope:event", "readers:admin,organizer",
+            "writers:admin,organizer", "test:tests/x.py::test_y",
+        ),
+        "ui_advanced": ft.provided("uses:EntityGrid@src/web/features/regs/Panel.tsx"),
+    }  # fmt: skip
+    ft.FEATURES.clear()
+    ft.register_feature(ft.Feature("x", "X", "events.EventApplication", claims))
+    found = [p for p in ft.check_static(tmp_path) if p["property"] == "ui_advanced"]
     assert codes(found) == expected

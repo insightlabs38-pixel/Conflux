@@ -149,3 +149,140 @@ def static(feature, claim, root) -> list[dict]:
 
 
 features.register_verifier("ui_base", verify, facts=facts, static=static)
+
+
+# --- ui_advanced (PD-F003-B02-T02) --------------------------------------------------------------
+#
+# Advanced and expert functionality stays behind progressive disclosure and is built from the
+# shared advanced components (`src/web/components`: grids, filters, saved views, bulk planner,
+# preview bar, version compare, rich editor, schema form, explanations, provenance) rather than
+# written again per screen. A `ui_advanced` claim names each use:
+#
+# - `uses:<Component>@<src/web path>` (one or more): the shared component exists and the named
+#   screen file imports it, and that file reads the feature (a quoted last route segment of a
+#   claimed route, the key of the feature's query entity, or the feature's own key) so a use
+#   cannot be borrowed from another feature's screen;
+# - `no_advanced@<reason>`: nothing beyond the base screen, and why. A feature whose advanced screen
+#   is owed is `planned` with the owning task.
+
+ADVANCED_COMPONENTS = (
+    "ArtifactPreview",
+    "BulkPlanner",
+    "ConsequenceDialog",
+    "DataGrid",
+    "DiffView",
+    "EntityGrid",
+    "ExplanationView",
+    "FilterBuilder",
+    "NotesDialog",
+    "OperationStatus",
+    "PreviewBar",
+    "ProvenanceView",
+    "RichDoc",
+    "RichEditor",
+    "SchemaForm",
+    "ThreadPanel",
+    "VersionCompare",
+    "ViewBar",
+)
+
+
+def parse_advanced(claim):
+    uses, reasons, other = [], {}, []
+    for ref in claim.refs:
+        kind, _, rest = ref.partition(":")
+        head, _, reason = ref.partition("@")
+        if kind == "uses":
+            component, _, path = rest.partition("@")
+            uses.append((component, path))
+        elif head == "no_advanced":
+            reasons["no_advanced"] = reason
+        else:
+            other.append(ref)
+    return uses, reasons, other
+
+
+def advanced_facts(feature, system) -> dict:
+    claim = feature.claims.get("ui_advanced")
+    if claim is None or claim.state != "provided":
+        return {}
+    uses, reasons, _ = parse_advanced(claim)
+    if "no_advanced" in reasons:
+        return {"advanced": "none beyond the base screen", "why": reasons["no_advanced"]}
+    return {"uses": [f"{c} in {p.rsplit('/', 1)[-1]}" for c, p in uses]}
+
+
+def advanced_verify(feature, claim, system) -> list[dict]:
+    found = []
+
+    def bad(code, message):
+        found.append(problem(code, message, feature=feature.key, prop="ui_advanced"))
+
+    uses, reasons, other = parse_advanced(claim)
+    for ref in other:
+        bad("bad_ref", f"'{ref}' is not uses:<Component>@<path> or no_advanced@.")
+    if "no_advanced" in reasons:
+        if uses:
+            bad("both", "A feature cannot use advanced components and say it has none.")
+        if len(reasons["no_advanced"].strip()) < MIN_REASON:
+            bad("no_reason", "Say why nothing goes beyond the base screen (a short sentence).")
+        return found
+    if not uses:
+        bad("no_uses", "Name each shared component the screens use or say why none (no_advanced@).")
+    seen = set()
+    for component, path in uses:
+        if component not in ADVANCED_COMPONENTS:
+            bad("component_unknown", f"'{component}' is not a shared advanced component.")
+        if not re.fullmatch(r"src/web/features/[\w./-]+\.tsx", path) or ".test." in path:
+            bad("screen_path", f"'{path}' is not a screen under src/web/features.")
+        if (component, path) in seen:
+            bad("use_twice", f"{component} in {path} is claimed twice.")
+        seen.add((component, path))
+    return found
+
+
+def feature_words(feature, system) -> list[str]:
+    words = [*route_words(feature, system), feature.key]
+    search = feature.claims.get("search")
+    if search is not None and search.state == "provided":
+        words += [r.partition(":")[2] for r in search.refs if r.startswith("entity:")]
+    return sorted(set(words))
+
+
+def advanced_static(feature, claim, root) -> list[dict]:
+    """CI: each named screen imports the shared component and reads the feature."""
+    from .features import System
+
+    found = []
+
+    def bad(code, message):
+        found.append(problem(code, message, feature=feature.key, prop="ui_advanced"))
+
+    uses, _, _ = parse_advanced(claim)
+    root = Path(root)
+    words = feature_words(feature, System())
+    for component, path in uses:
+        if component not in ADVANCED_COMPONENTS:
+            continue
+        shared = root / "src/web/components" / f"{component}.tsx"
+        if not shared.is_file():
+            bad("component_missing", f"The shared component {component} does not exist.")
+        screen = root / path
+        if not screen.is_file():
+            bad("screen_missing", f"'{path}' does not exist.")
+            continue
+        text = screen.read_text()
+        if not re.search(rf"from \"[./]*(?:\.\./)*components/{component}\"", text):
+            bad("not_imported", f"{Path(path).name} does not import {component}.")
+        if words and not any(f"{word}/" in text or f'"{word}"' in text for word in words):
+            bad(
+                "screen_reads_nothing",
+                f"{Path(path).name} mentions none of {', '.join(words)}; it does not read this "
+                "feature.",
+            )
+    return found
+
+
+features.register_verifier(
+    "ui_advanced", advanced_verify, facts=advanced_facts, static=advanced_static
+)

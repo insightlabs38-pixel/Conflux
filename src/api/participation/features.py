@@ -68,6 +68,10 @@ register_feature(
                 "component:src/web/features/teams/TeamPanel.tsx",
                 "test:src/web/features/teams/TeamPanel.test.tsx",
             ),
+            "ui_advanced": provided(
+                "no_advanced@a team is made, joined and led from one screen; there is no query, "
+                "comparison or preview beyond it",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

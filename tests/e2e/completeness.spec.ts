@@ -162,6 +162,28 @@ for (const width of [390, 1440]) {
       }),
     });
     await expect(notice).toContainText("Planned");
+    // Advanced UI: the shared components a screen uses, or why a feature has nothing beyond its base.
+    await expect(
+      table.getByRole("columnheader", { name: "Advanced UI" }),
+    ).toBeVisible();
+    await event.getByText("Provided", { exact: true }).nth(8).click();
+    await expect(
+      event.getByText(
+        "Shared components: ConsequenceDialog in EventDashboard.tsx",
+        {
+          exact: false,
+        },
+      ),
+    ).toBeVisible();
+    const trackRow = table.locator("tbody tr").filter({
+      has: page.getByRole("rowheader", { name: /^Track \(track\)/ }),
+    });
+    await trackRow.getByText("Provided", { exact: true }).nth(8).click();
+    await expect(
+      trackRow.getByText("Advanced: none beyond the base screen", {
+        exact: false,
+      }),
+    ).toBeVisible();
     // A feature without a state machine says how its records change.
     const track = table.locator("tbody tr").filter({
       has: page.getByRole("rowheader", { name: /^Track \(track\)/ }),

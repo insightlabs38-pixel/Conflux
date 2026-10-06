@@ -54,6 +54,10 @@ register_feature(
                 "component:src/web/features/awards/AwardsPanel.tsx",
                 "test:src/web/features/awards/AwardsPanel.proposals.test.tsx",
             ),
+            "ui_advanced": provided(
+                "no_advanced@awards are edited and published in the base screen; nothing sits "
+                "beyond it",
+            ),
         },
         lifecycle=Lifecycle(
             "timestamp",

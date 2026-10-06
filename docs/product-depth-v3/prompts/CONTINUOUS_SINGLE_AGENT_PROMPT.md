@@ -205,6 +205,12 @@ Make coherent commits where repository policy permits.
 
 Execute every required task verification plus the smallest appropriate adjacent regression set.
 
+For each task, prefer its focused checks and the smallest relevant adjacent regression. Do not
+rerun the full repository suite after every task unless that task explicitly requires it. Run the
+full relevant suite once when closing a batch and record the exact command and result. Repeat a
+long, flaky, or race-focused check only when investigating a specific failure or reliability
+question; record what the repeat establishes.
+
 Examples:
 - backend/domain → focused + integration tests;
 - UI → browser/state/reference checks;

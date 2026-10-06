@@ -1,0 +1,96 @@
+version: 3
+task: PD-F003-B02-T02
+batch: PD-F003-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: fe195a5
+  head_commit: fe195a5
+changed_paths:
+- src/api/core/features_ui.py (ui_advanced verifier, facts and CI check)
+- src/api/<app>/features.py for the fifteen features (ui_advanced claims)
+- src/web/lib/completeness.ts, features/operations/CompletenessPanel.test.tsx, tests/e2e/completeness.spec.ts
+- tests/integration/ (test_feature_contract.py, test_completeness_regression.py)
+- docs/operations/COMPLETENESS.md, spec 003 (Advanced UI as built)
+deliverables:
+- item: Advanced UI added to the completeness contract and applied to domain work
+  result: pass
+  evidence: "features_ui.advanced_verify holds uses:Component@screen and no_advanced@reason claims to the shared component list and screen paths; in CI the shared component exists, the screen imports it and reads the feature; seven features name shared components, seven say why nothing goes beyond the base screen, announcements are planned for PD-S009-B02-T03"
+- item: Observable state and diagnostics
+  result: pass
+  evidence: "the Operations completeness page gains an Advanced UI column showing the shared components per screen or why there are none"
+- item: Focused tests for the real workflow
+  result: pass
+  evidence: "a failure code per defect, a temporary source tree for the CI check (unimported component, screen that reads nothing, missing shared component), fact label test and browser spec at 390 and 1440"
+invariants:
+- item: One source of truth, no business rule in a surface
+  result: pass
+  evidence: "the claim names files; the component list is fixed and the registry is the only record; no screen logic written"
+- item: Existing behavior compatible
+  result: pass
+  evidence: "no product code changed; the generic claim tests moved to the unlanded fixtures property"
+verification:
+- command: "uv run --frozen pytest tests/integration/test_feature_contract.py test_completeness_regression.py test_feature_search.py test_feature_audit.py -n auto"
+  result: pass
+  note: "275 passed (focused; the full suite runs at batch close)"
+- command: "manage.py shell check_static on the real tree and features.check(); manage.py check"
+  result: pass
+  note: "no ui_advanced problems, no issues"
+- command: "pnpm web vitest features/operations; tsc --noEmit; make format-check lint sdk-check block-schema-check"
+  result: pass
+  note: "31 passed, clean"
+- command: "npx playwright test completeness --project=desktop (seed 7, app rebuilt)"
+  result: pass
+  note: "2 passed (390 and 1440) with the Advanced UI column"
+design_refs: []
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: "Advanced UI column on Operations > Completeness"
+- surface: api
+  result: pass
+  evidence: "report facts carry ui_advanced"
+- surface: sdk
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: cli
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: mcp
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: event_as_code
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: audit
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: webhook
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: archive
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: analytics
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: search
+  result: pass
+  evidence: "assigned to a later task of PD-F003-B02 or B03, or unchanged"
+- surface: docs
+  result: pass
+  evidence: "COMPLETENESS.md and the B02 contract in spec 003"
+migrations:
+- none
+findings:
+- "The interrupted working tree held the verifier and claims; this session verified them against the real tree, added the web labels, browser assertions and docs"
+limitations:
+- "the check proves a screen imports a shared component and reads the feature, not that the component sits behind a disclosure; that stays in each screen's tests"
+- "the screen check runs in CI only because the web source is not in the running API"
+escalations:
+- ESC-20260930-006 (resolved, default A)
+next: review

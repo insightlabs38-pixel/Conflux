@@ -57,6 +57,9 @@ register_feature(
                 "component:src/web/features/policy-builder/PolicyBuilder.tsx",
                 "test:src/web/features/policy-builder/PolicyBuilder.test.tsx",
             ),
+            "ui_advanced": provided(
+                "uses:ExplanationView@src/web/features/policy-builder/PolicyBuilder.tsx",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

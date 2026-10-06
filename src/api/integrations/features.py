@@ -57,6 +57,10 @@ register_feature(
                 "component:src/web/features/integrations/WebhooksPanel.tsx",
                 "test:src/web/features/integrations/WebhooksPanel.test.tsx",
             ),
+            "ui_advanced": provided(
+                "no_advanced@a subscription is a URL, a set of event types and a switch, all in "
+                "the base screen",
+            ),
         },
         lifecycle=Lifecycle(
             "flag",

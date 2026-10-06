@@ -156,3 +156,12 @@ Codes: `bad_ref`, `both`, `no_reason`, `no_component`, `no_test`, `component_pat
 ## Boundaries and compatibility
 
 Read-only and stateless: no table, no migration, no audit row, no request depends on it. Not every one of the 122 domain models is a feature, and a model that is not registered is never failed. No endpoint, stored value or route changed for the registry's sake. Escalation: `docs/execution-v3/escalations/ESC-20260930-006.yaml`; contract: spec 003.
+
+## Advanced UI (T02)
+
+Advanced and expert functionality stays behind progressive disclosure and is built from the shared advanced components in `src/web/components` (grids, filter builder, saved views, bulk planner, preview bar, version compare, rich editor, schema form, explanations, provenance), not written again per screen. `features_ui.advanced_verify` holds a `ui_advanced` claim to the code:
+
+- `uses:<Component>@<src/web/features path>` (one or more): the component is one of the shared advanced components and the path is a non-test screen under `src/web/features`; in CI the shared component file exists, the screen imports it, and the screen reads the feature (a quoted last route segment, the key of the feature's query entity, or the feature's own key), so a use cannot be borrowed from another feature's screen;
+- `no_advanced@<reason>`: nothing goes beyond the base screen, and why; a feature whose advanced screen is owed is `planned` with the owning task.
+
+Codes: `bad_ref`, `both`, `no_reason`, `no_uses`, `component_unknown`, `screen_path`, `use_twice`; CI: `component_missing`, `screen_missing`, `not_imported`, `screen_reads_nothing`. Seven features name shared components, seven say they have nothing beyond the base screen and announcements are planned for PD-S009-B02-T03.

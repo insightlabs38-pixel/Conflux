@@ -64,6 +64,10 @@ register_feature(
                 "test:src/web/features/event-builder/EventDashboard.test.tsx",
                 "test:src/web/features/event-builder/CreateEvent.test.tsx",
             ),
+            "ui_advanced": provided(
+                "uses:ConsequenceDialog@src/web/features/event-builder/EventDashboard.tsx",
+                "uses:SchemaForm@src/web/features/event-builder/ConfigurationPanel.tsx",
+            ),
         },
         lifecycle=Lifecycle(
             "choice",
@@ -130,6 +134,10 @@ register_feature(
                 "component:src/web/features/event-builder/EventDashboard.tsx",
                 "test:src/web/features/event-builder/EventDashboard.test.tsx",
             ),
+            "ui_advanced": provided(
+                "no_advanced@tracks are named and ordered inline in the event dashboard; there is "
+                "nothing beyond the base screen",
+            ),
         },
         lifecycle=Lifecycle(
             "none", note="Edited in place and deleted (track.deleted); position orders it."
@@ -189,6 +197,10 @@ register_feature(
             "ui_base": provided(
                 "component:src/web/features/event-builder/RegistrationPanel.tsx",
                 "test:src/web/features/event-builder/RegistrationPanel.test.tsx",
+            ),
+            "ui_advanced": provided(
+                "uses:EntityGrid@src/web/features/event-builder/RegistrationPanel.tsx",
+                "uses:NotesDialog@src/web/features/event-builder/RegistrationPanel.tsx",
             ),
         },
         lifecycle=Lifecycle(
@@ -260,6 +272,10 @@ register_feature(
             "ui_base": planned(
                 "PD-S009-B02-T03",
                 "No organizer screen posts announcements yet; they are read on the event site.",
+            ),
+            "ui_advanced": planned(
+                "PD-S009-B02-T03",
+                "No screen posts announcements yet, so nothing sits beyond one.",
             ),
         },
         lifecycle=Lifecycle(

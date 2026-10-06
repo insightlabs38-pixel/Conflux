@@ -55,6 +55,10 @@ register_feature(
                 "component:src/web/features/form-builder/FormBuilder.tsx",
                 "test:src/web/features/form-builder/FormBuilder.test.tsx",
             ),
+            "ui_advanced": provided(
+                "uses:VersionCompare@src/web/features/form-builder/FormBuilder.tsx",
+                "uses:PreviewBar@src/web/features/form-builder/FormPreviewAs.tsx",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

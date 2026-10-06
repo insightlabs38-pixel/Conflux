@@ -57,6 +57,9 @@ register_feature(
                 "component:src/web/features/stage-builder/StageBuilder.tsx",
                 "test:src/web/features/stage-builder/StageBuilder.test.tsx",
             ),
+            "ui_advanced": provided(
+                "uses:ConsequenceDialog@src/web/features/stage-builder/StageBuilder.tsx",
+            ),
         },
         lifecycle=Lifecycle(
             "none",

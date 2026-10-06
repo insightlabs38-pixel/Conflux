@@ -114,6 +114,8 @@ const FACT_LABEL: Record<string, string> = {
   tests: "Tests",
   reads: "Reads",
   screen: "Screen",
+  uses: "Shared components",
+  advanced: "Advanced",
 };
 
 /** One derived fact as a sentence fragment: lists joined, booleans as yes or no. */

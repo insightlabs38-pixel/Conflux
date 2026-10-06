@@ -60,6 +60,11 @@ register_feature(
                 "component:src/web/features/teams/TeamWorkspace.tsx",
                 "test:src/web/features/artifacts/ProjectWorkspace.test.tsx",
             ),
+            "ui_advanced": provided(
+                "uses:EntityGrid@src/web/features/event-builder/ProjectsGrid.tsx",
+                "uses:BulkPlanner@src/web/features/event-builder/ProjectsGrid.tsx",
+                "uses:RichEditor@src/web/features/artifacts/ProjectStoryEditor.tsx",
+            ),
         },
         lifecycle=Lifecycle(
             "none",
@@ -128,6 +133,10 @@ register_feature(
             "ui_base": provided(
                 "component:src/web/features/submissions/SubmissionPanel.tsx",
                 "test:src/web/features/submissions/SubmissionPanel.test.tsx",
+            ),
+            "ui_advanced": provided(
+                "no_advanced@a submission is one draft and one final per stage, edited in the "
+                "base screen; nothing sits beyond it yet",
             ),
         },
         lifecycle=Lifecycle(

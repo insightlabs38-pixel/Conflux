@@ -1,5 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { ExplanationView } from "../../components/ExplanationView";
+import { RecordPicker } from "../../components/RecordPicker";
+import { entityBase } from "../../lib/entityQuery";
 import { apiJson } from "../../lib/api";
 import type { Explanation } from "../../lib/explain";
 
@@ -396,14 +398,16 @@ export function PolicyBuilder({
           </select>
         </label>
         {(debugAction === "submit" || debugAction === "join") && (
-          <label>
-            {debugAction === "submit" ? "Project ID" : "Team ID"} for grant
-            check{" "}
-            <input
-              value={debugSubjectId}
-              onChange={(e) => setDebugSubjectId(e.target.value)}
-            />
-          </label>
+          <RecordPicker
+            key={debugAction}
+            base={entityBase(workspaceId, eventId)}
+            entity={debugAction === "submit" ? "projects" : "teams"}
+            field="name"
+            label={`${debugAction === "submit" ? "Project" : "Team"} for grant check`}
+            noun={debugAction === "submit" ? "project" : "team"}
+            value={debugSubjectId}
+            onChange={setDebugSubjectId}
+          />
         )}
         <button disabled={busy}>Check policy</button>
       </form>

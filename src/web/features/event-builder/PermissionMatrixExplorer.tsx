@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { apiRequest } from "../../lib/api";
 import { useLoad } from "../../hooks/useLoad";
+import { RecordPicker } from "../../components/RecordPicker";
+import { entityBase } from "../../lib/entityQuery";
 
 type Access = "roles" | "any_authenticated" | "public" | "unknown";
 type MatrixEntry = {
@@ -187,7 +189,7 @@ export function PermissionMatrixExplorer({
           onChange={(e) => setSubjectKind(e.target.value as "role" | "user")}
         >
           <option value="role">Hypothetical role</option>
-          <option value="user">Real user (by ID)</option>
+          <option value="user">Real person</option>
         </select>
       </label>
       {subjectKind === "role" ? (
@@ -203,10 +205,14 @@ export function PermissionMatrixExplorer({
           ))}
         </select>
       ) : (
-        <input
+        <RecordPicker
+          base={entityBase(workspaceId, eventId)}
+          entity="people"
+          field="username"
+          label="Person"
+          noun="person"
           value={subjectUserId}
-          onChange={(e) => setSubjectUserId(e.target.value)}
-          placeholder="User public ID"
+          onChange={setSubjectUserId}
         />
       )}
       <button type="button" disabled={dryRunBusy} onClick={runDryRun}>

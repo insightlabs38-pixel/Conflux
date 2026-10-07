@@ -26,6 +26,7 @@ const RULES: SlopRule[] = [
   "alarmColors",
   "fakeAi",
   "precision",
+  "opaqueIds",
 ];
 
 const SETUP_TASKS = [
@@ -406,4 +407,30 @@ test("the audit sees a figure with false precision", async ({ page }, info) => {
   const found = await slopProblems(page, ["precision"]);
   expect(found.precision).toHaveLength(1);
   expect(found.precision?.[0]).toContain("0.8333333");
+});
+
+test("the audit sees a box that asks for an opaque id", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, "organizer");
+  await goToDestination(page, "results");
+  await settled(page);
+  await page.evaluate(() => {
+    const row = document.createElement("div");
+    row.innerHTML = `
+      <input placeholder="User public ID" />
+      <label>Team ID <input /></label>
+      <input aria-label="Reference" value="3f2b8c1e-5a4d-4e0a-9b7c-1d2e3f405162" />
+      <label>Field id <input data-authored-key /></label>
+      <label>Find person <input type="search" /></label>
+      <label>Valid ID check <input readonly /></label>
+      <select aria-label="Project id"><option>Alpha</option></select>`;
+    document.querySelector("main")!.prepend(row);
+  });
+  const found = await slopProblems(page, ["opaqueIds"]);
+  // the placeholder, the labelled box and the box holding a uuid; the authored key, a name search,
+  // a read-only box and a select (a choice by name) are not reported
+  expect(found.opaqueIds).toHaveLength(3);
 });

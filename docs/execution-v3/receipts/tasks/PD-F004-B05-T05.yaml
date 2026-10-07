@@ -1,0 +1,98 @@
+version: 3
+task: PD-F004-B05-T05
+batch: PD-F004-B05
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: d63b4d4
+  head_commit: null
+changed_paths:
+- tests/e2e/slop.ts
+- tests/e2e/slop-audit.spec.ts
+- tests/e2e/record-picker.spec.ts
+- src/web/components/RecordPicker.tsx
+- src/web/components/RecordPicker.test.tsx
+- src/web/features/policy-builder/PolicyBuilder.tsx
+- src/web/features/policy-builder/PolicyDebugger.interaction.test.tsx
+- src/web/features/policy-builder/PolicyBuilder.test.tsx
+- src/web/features/policy-builder/PolicyBuilder.timezone.test.tsx
+- src/web/features/event-builder/PermissionMatrixExplorer.tsx
+- src/web/features/form-builder/FormBuilder.tsx
+- src/api/accounts/entities.py
+- src/api/participation/entities.py
+- tests/integration/test_entity_pickers.py
+- tests/integration/test_entity_query.py
+deliverables:
+- item: Rule encoded in the visual audit contract
+  result: pass
+  evidence: 'live rule opaqueIds (V-SLOP-12) in tests/e2e/slop.ts, enabled in RULES: an editable text box whose
+    label, aria-label or placeholder asks for a uuid, a public/record/object id or an "X ID", or that already
+    holds a uuid, is reported. Selects, read-only boxes and name searches are not. data-authored-key marks a key
+    the author invents (FormBuilder field id), which is not a reference to an existing record.'
+- item: Rule applied to the approved reference surfaces, exceptions recorded
+  result: pass
+  evidence: 'the first live run found a real failure: Setup > Policies asked for "Project ID / Team ID for grant check".
+    Source search found one more, the Permissions dry run ("User public ID"). Both now use RecordPicker, a
+    by-name list over the existing entity query (projects; new teams and people entities, organizer/admin only,
+    username only). Exception: FormBuilder "Field id" is authored, marked data-authored-key.'
+- item: No product behavior added for the guardrail
+  result: pass
+  evidence: 'product change is limited to replacing typed ids with pickers over the canonical entity query
+    (QUERY primitive); the policy-debug and authz-dry-run APIs and their payloads are unchanged (still receive
+    the record id).'
+invariants:
+- item: One canonical source of truth, server authorization authoritative
+  result: pass
+  evidence: pickers read core.entities (roles organizer/admin, event-scoped base querysets); test_only_organizers_may_list_people_and_teams
+    shows a judge gets 403; policy-debug still 404s a subject outside the event.
+- item: The gate can fail
+  result: pass
+  evidence: self-test 'the audit sees a box that asks for an opaque id' expects exactly 3 findings (placeholder,
+    labelled box, uuid value) and none for authored key, name search, read-only box or select; the live audit
+    failed on Policies against the old bundle.
+- item: No test weakened
+  result: pass
+  evidence: PolicyBuilder tests gained a QueryClient wrapper; the debugger test now also asserts subject_id is the
+    chosen project's id; the catalogue test lists the two new entities.
+verification:
+- command: npx playwright test -c tests/e2e/playwright.config.ts slop-audit --project=desktop --workers=3
+  result: pass
+  note: 76 passed, after docker compose up -d --build app (first run, old bundle, failed 2 Policies pages with the opaqueIds finding)
+- command: npx playwright test -c tests/e2e/playwright.config.ts record-picker --project=desktop
+  result: pass
+  note: 2 passed (1440 and 390), project chosen by name on live Policies page and policy check returns a result
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 130 files, 703 tests
+- command: pytest tests/integration/test_entity_pickers.py tests/integration/test_entity_query.py tests/integration/test_shared_primitives_b01_regression.py -n 4
+  result: pass
+  note: 48 passed (env DJANGO_SECRET_KEY and RECORD_SIGNING_KEY_SEED as in Makefile)
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-SLOP-12
+- ref: design/state-matrix
+  result: pass
+  note: picker has loading, error and no-match text and a 'showing N of M; type to narrow' state
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: live audit at 390 and 1440 plus record-picker spec
+- surface: docs
+  result: pass
+  evidence: spec 004 contract at T91
+migrations: []
+findings:
+- P3 the Permissions dry run sits behind a dashboard tab the audit does not walk; its picker is covered by unit
+  tests and the shared component, not by the live audit.
+- P3 first live pass uses the same running stack as other specs; the app image was rebuilt once (make up equivalent).
+escalations: []
+limitations:
+- A picker lists at most 100 records and narrows by typed name; events with more people than that rely on search.
+- people lists everyone holding a role in the workspace, not only the event.
+- Static audit text rules do not see ids typed into a free-text field that is not labelled as one.
+next: review

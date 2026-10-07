@@ -313,6 +313,7 @@ export function FormBuilder({
             <label>
               Field id{" "}
               <input
+                data-authored-key
                 value={fieldId}
                 onChange={(event) => setFieldId(event.target.value)}
                 required

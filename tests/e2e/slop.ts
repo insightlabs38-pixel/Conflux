@@ -37,7 +37,8 @@ export type SlopRule =
   | "recordGrids"
   | "alarmColors"
   | "fakeAi"
-  | "precision";
+  | "precision"
+  | "opaqueIds";
 
 export async function slopProblems(page: Page, rules: SlopRule[]) {
   return page.evaluate((wanted) => {
@@ -406,6 +407,43 @@ export async function slopProblems(page: Page, rules: SlopRule[]) {
             "precision",
             `"${m[0]}" shown with ${m[0].split(".")[1].length} decimals in ${name(parent)}`,
           );
+      }
+    }
+
+    if (wanted.includes("opaqueIds")) {
+      // an advanced capability must not depend on someone memorizing or pasting an opaque id
+      // (V-SLOP-12): a record is chosen by name from a list. A text box that asks for a UUID or an
+      // "X ID", or one already holding a UUID, is the failure. A key the author is inventing (a
+      // field's own id) is not a reference to an existing record and says so with data-authored-key.
+      const asksForId =
+        /\b(?:uuid|guid)\b|\b(?:public|record|object|internal)\s+id\b|\b[a-z]+\s+ids?\b|^\s*ids?\b/i;
+      const uuid =
+        /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i;
+      for (const el of document.querySelectorAll(
+        "input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=submit]):not([type=button]), textarea",
+      )) {
+        const box = el as HTMLInputElement;
+        if (!shown(el) || box.readOnly || box.disabled) continue;
+        if (el.closest("[data-authored-key], [data-user-content]")) continue;
+        const labels = [...(box.labels ?? [])].map((l) =>
+          [...l.childNodes]
+            .filter((n) => n.nodeType === 3)
+            .map((n) => n.textContent)
+            .join(" "),
+        );
+        const said = [
+          el.getAttribute("aria-label"),
+          el.getAttribute("placeholder"),
+          ...labels,
+        ].filter(Boolean) as string[];
+        const hit = said.find((text) => asksForId.test(text));
+        if (hit)
+          add(
+            "opaqueIds",
+            `input asks for an id ("${hit.trim().slice(0, 40)}") in ${name(el)}`,
+          );
+        else if (uuid.test(box.value))
+          add("opaqueIds", `input holds an opaque id in ${name(el)}`);
       }
     }
 

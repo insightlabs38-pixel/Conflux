@@ -2,6 +2,7 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, expect, it, vi } from "vitest";
+import { withQuery } from "../../lib/test-router";
 import { PolicyBuilder } from "./PolicyBuilder";
 
 (
@@ -48,17 +49,39 @@ describe("policy debugger", () => {
                   truncated: false,
                 },
               }
-            : path.endsWith("policy-presets/")
-              ? {}
-              : [],
+            : path.includes("/entities/projects/")
+              ? {
+                  entity: "projects",
+                  total: 1,
+                  limit: 100,
+                  offset: 0,
+                  rows: [{ id: "project-uuid", name: "Alpha" }],
+                }
+              : path.endsWith("policy-presets/")
+                ? {}
+                : [],
       }));
     vi.stubGlobal("fetch", fetcher);
     const container = document.createElement("div");
     document.body.appendChild(container);
     const root = createRoot(container);
     await act(async () =>
-      root.render(<PolicyBuilder workspaceId="w" eventId="e" />),
+      root.render(withQuery(<PolicyBuilder workspaceId="w" eventId="e" />)),
     );
+    // the project is chosen by name; its id is never typed or shown
+    expect(container.querySelector('input[placeholder*="ID" i]')).toBeNull();
+    const picker = (await vi.waitFor(() => {
+      const found = container.querySelector(
+        'select[aria-label="Project for grant check"]',
+      ) as HTMLSelectElement;
+      if (!found || found.options.length < 2) throw new Error("not loaded");
+      return found;
+    })) as HTMLSelectElement;
+    expect(picker.options[1].textContent).toBe("Alpha");
+    await act(async () => {
+      picker.value = "project-uuid";
+      picker.dispatchEvent(new Event("change", { bubbles: true }));
+    });
     const form = [...container.querySelectorAll("form")].find((item) =>
       item.textContent?.includes("Check policy"),
     ) as HTMLFormElement;
@@ -71,7 +94,8 @@ describe("policy debugger", () => {
       fetcher.mock.calls.some(
         ([path, options]) =>
           String(path).endsWith("policy-debug/") &&
-          JSON.parse(options.body).action === "submit",
+          JSON.parse(options.body).action === "submit" &&
+          JSON.parse(options.body).subject_id === "project-uuid",
       ),
     ).toBe(true);
     expect(container.textContent).toContain("Denied by policy");

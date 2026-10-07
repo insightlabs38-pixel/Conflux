@@ -11,34 +11,51 @@ import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { routes } from "../lib/routes";
 import { carriedSearch } from "../lib/urlState";
 
-export const roleDestinations: Record<
-  string,
-  { id: string; label: string; group?: string }[]
-> = {
+export type Destination = {
+  id: string;
+  label: string;
+  group?: string;
+  /** The word under the icon in the phone's bottom bar. */
+  short?: string;
+  /** Kept in the bottom bar when the role has more than five places (the rest go to "More"). */
+  bar?: boolean;
+};
+
+export const roleDestinations: Record<string, Destination[]> = {
   participant: [
-    { id: "overview", label: "Overview" },
-    { id: "team", label: "Team" },
-    { id: "project", label: "Project & submission" },
-    { id: "resources", label: "Event resources" },
-    { id: "messages", label: "Messages" },
+    { id: "overview", label: "Overview", bar: true },
+    { id: "team", label: "Team", bar: true },
+    {
+      id: "project",
+      label: "Project & submission",
+      short: "Project",
+      bar: true,
+    },
+    { id: "resources", label: "Event resources", short: "Resources" },
+    { id: "messages", label: "Messages", bar: true },
     { id: "profile", label: "Profile & history" },
   ],
   judge: [
     { id: "overview", label: "Overview" },
-    { id: "queue", label: "Review queue" },
-    { id: "schedule", label: "Schedule & route" },
-    { id: "profile", label: "Judge profile" },
+    { id: "queue", label: "Review queue", short: "Queue" },
+    { id: "schedule", label: "Schedule & route", short: "Schedule" },
+    { id: "profile", label: "Judge profile", short: "Profile" },
     { id: "messages", label: "Messages" },
   ],
   organizer: [
-    { id: "overview", label: "Overview" },
+    { id: "overview", label: "Overview", bar: true },
     { id: "setup", label: "Event setup", group: "Manage event" },
-    { id: "participants", label: "Participants & teams" },
-    { id: "eligibility", label: "Projects & eligibility" },
-    { id: "judging", label: "Judging" },
+    {
+      id: "participants",
+      label: "Participants & teams",
+      short: "People",
+      bar: true,
+    },
+    { id: "eligibility", label: "Projects & eligibility", short: "Projects" },
+    { id: "judging", label: "Judging", bar: true },
     { id: "results", label: "Results & publication" },
     { id: "communications", label: "Communications" },
-    { id: "onsite", label: "On-site" },
+    { id: "onsite", label: "On-site", bar: true },
     { id: "integrations", label: "Integrations", group: "Advanced" },
     { id: "operations", label: "Operations & audit" },
     { id: "profile", label: "Profile", group: "Account" },
@@ -61,23 +78,38 @@ roleDestinations.admin = roleDestinations.organizer;
  * so when its first item is hidden the heading moves to the next shown item of that group.
  */
 function visibleDestinations(
-  destinations: { id: string; label: string; group?: string }[],
+  destinations: Destination[],
   hidden: Set<string | null>,
 ) {
   let current: string | undefined;
   let shown: string | undefined;
-  const out: { id: string; label: string; group?: string }[] = [];
+  const out: Destination[] = [];
   for (const item of destinations) {
     if (item.group) current = item.group;
     if (hidden.has(item.id)) continue;
     out.push({
-      id: item.id,
-      label: item.label,
+      ...item,
+      group: undefined,
       ...(current !== shown ? { group: current } : {}),
     });
     shown = current;
   }
   return out;
+}
+
+/**
+ * What the phone's bottom bar shows: every place when there are at most five, otherwise the places
+ * the role keeps in the bar plus a "More" control for the rest (at most four, so five controls).
+ */
+export function barDestinations(destinations: Destination[]): {
+  bar: Destination[];
+  more: boolean;
+} {
+  if (destinations.length <= 5) return { bar: destinations, more: false };
+  return {
+    bar: destinations.filter((item) => item.bar).slice(0, 4),
+    more: true,
+  };
 }
 
 type Navigation = {
@@ -86,7 +118,7 @@ type Navigation = {
   /** Link to a destination; `section` opens one of its tabs (see WorkflowSections `linkable`). */
   href: (id: string, section?: string) => string;
   /** The role's destinations minus optional modules that are neither enabled nor in use. */
-  destinations: { id: string; label: string; group?: string }[];
+  destinations: Destination[];
   /** Optional modules for the selected event (organizer/admin only; null until known). */
   modules: Modules;
 };
@@ -215,8 +247,11 @@ export function DestinationLink({
   section,
   children,
   className = "cx-task-link",
+  title,
 }: {
   id: string;
+  /** A tooltip for a link whose words are hidden (the icon rail). */
+  title?: string;
   /** Open this tab of the destination (a `linkable` WorkflowSections id). */
   section?: string;
   children: ReactNode;
@@ -238,6 +273,7 @@ export function DestinationLink({
           );
       }}
       className={className}
+      title={title}
       aria-current={navigation?.view === id ? "page" : undefined}
     >
       {children}

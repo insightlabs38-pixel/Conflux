@@ -1,5 +1,6 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
+  barDestinations,
   DestinationLink,
   roleDestinations,
   useWorkspaceNavigation,
@@ -55,12 +56,29 @@ export function AppShell({
   brandAs?: "h1" | "p";
 }) {
   const [navOpen, setNavOpen] = useState(false);
+  // The control that opened the navigation (the header toggle on a tablet, "More" on a phone) gets
+  // focus back when it closes.
+  const opener = useRef<HTMLButtonElement | null>(null);
   const toggle = useRef<HTMLButtonElement>(null);
   // Optional modules that are off are not offered (see WorkspaceNavigationProvider).
   const navigation = useWorkspaceNavigation();
   const destinations = role
     ? (navigation?.destinations ?? roleDestinations[role])
     : undefined;
+  const { bar, more } = barDestinations(destinations ?? []);
+  const inBar = new Set(more ? bar.map((item) => item.id) : []);
+  const sheet = useRef<HTMLElement>(null);
+  useEffect(() => {
+    // On a phone the opened list is a sheet: put the reader inside it.
+    if (navOpen && opener.current?.dataset.phone === "true")
+      [...(sheet.current?.querySelectorAll<HTMLElement>("nav a") ?? [])]
+        .find((link) => link.checkVisibility())
+        ?.focus({ preventScroll: true });
+  }, [navOpen]);
+  const closeNavigation = () => {
+    setNavOpen(false);
+    opener.current?.focus();
+  };
   return (
     <div className={`cx-shell ${destinations ? "cx-shell--workspace" : ""}`}>
       <SkipLink targetId={MAIN_ID} />
@@ -84,7 +102,10 @@ export function AppShell({
               className="cx-nav-toggle cx-button cx-button--secondary"
               aria-expanded={navOpen}
               aria-controls="workspace-navigation"
-              onClick={() => setNavOpen((open) => !open)}
+              onClick={() => {
+                opener.current = toggle.current;
+                setNavOpen((open) => !open);
+              }}
             >
               Navigation
             </button>
@@ -140,14 +161,23 @@ export function AppShell({
       {destinations && (
         <aside
           id="workspace-navigation"
+          ref={sheet}
           className={`cx-sidebar ${navOpen ? "cx-sidebar--open" : ""}`}
           onKeyDown={(event) => {
-            if (event.key === "Escape") {
-              setNavOpen(false);
-              toggle.current?.focus();
-            }
+            if (event.key === "Escape") closeNavigation();
           }}
         >
+          <div className="cx-sidebar__sheet-head">
+            <p className="cx-sidebar__sheet-title">All sections</p>
+            <button
+              type="button"
+              className="cx-sidebar__sheet-close"
+              onClick={closeNavigation}
+              aria-label="Close navigation"
+            >
+              <Icon name="x" />
+            </button>
+          </div>
           <nav
             aria-label="Primary"
             onClick={(event) => {
@@ -155,20 +185,70 @@ export function AppShell({
             }}
           >
             {destinations.map((item) => (
-              <div key={item.id}>
+              <div
+                key={item.id}
+                className={
+                  inBar.has(item.id) ? "cx-sidebar__in-bar" : undefined
+                }
+              >
                 {item.group && (
                   <p className="cx-sidebar__group">{item.group}</p>
                 )}
-                <DestinationLink id={item.id} className="cx-sidebar__link">
+                <DestinationLink
+                  id={item.id}
+                  className="cx-sidebar__link"
+                  title={item.label}
+                >
                   {DESTINATION_ICON[item.id] && (
                     <Icon name={DESTINATION_ICON[item.id]} />
                   )}
-                  {item.label}
+                  <span className="cx-sidebar__label">{item.label}</span>
                 </DestinationLink>
               </div>
             ))}
           </nav>
         </aside>
+      )}
+      {destinations && navOpen && (
+        <button
+          type="button"
+          className="cx-sheet-scrim"
+          tabIndex={-1}
+          aria-label="Close navigation"
+          onClick={closeNavigation}
+        />
+      )}
+      {destinations && (
+        <nav className="cx-bottom-nav" aria-label="Quick navigation">
+          {bar.map((item) => (
+            <DestinationLink
+              key={item.id}
+              id={item.id}
+              className="cx-bottom-nav__item"
+            >
+              {DESTINATION_ICON[item.id] && (
+                <Icon name={DESTINATION_ICON[item.id]} size={20} />
+              )}
+              <span>{item.short ?? item.label}</span>
+            </DestinationLink>
+          ))}
+          {more && (
+            <button
+              type="button"
+              className="cx-bottom-nav__item"
+              data-phone="true"
+              aria-expanded={navOpen}
+              aria-controls="workspace-navigation"
+              onClick={(event) => {
+                opener.current = event.currentTarget;
+                setNavOpen((open) => !open);
+              }}
+            >
+              <Icon name="menu" size={20} />
+              <span>More</span>
+            </button>
+          )}
+        </nav>
       )}
 
       <main id={MAIN_ID} className="cx-shell__main" tabIndex={-1}>

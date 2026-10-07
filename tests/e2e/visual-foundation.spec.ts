@@ -291,7 +291,7 @@ for (const width of [390, 1440]) {
       expect((await motion(page)).button).toBeLessThanOrEqual(0.00001);
       const shell = await shellGeometry(page);
       expect(shell.marketing).toBe(false);
-      // below 1024px the header still wraps its navigation onto rows until the mobile navigation (PD-F005)
+      // below 1024px the shell has no rail (drawer, then the phone bottom bar; tests/e2e/shell-responsive.spec.ts)
       if (width >= 1024) expect(shell.header).toMatchObject({ h: 44 }); // --h-top, hairline included
       expect(shell.markBackground).toBe("rgb(22, 26, 33)"); // --ink: neutral mark, not the accent
       if (width >= 1024) {

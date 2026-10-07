@@ -142,12 +142,31 @@ export function destinationLink(page: Page, id: string) {
   );
 }
 
-/** Navigate the visible role shell, disclosing mobile navigation when necessary. */
+/** The same place in the phone's bottom bar (visible only below 768). */
+export function barLink(page: Page, id: string) {
+  return page.locator(
+    `.cx-bottom-nav a:is([href$="/${id}"], [href*="/${id}?"])`,
+  );
+}
+
+/**
+ * Navigate the visible role shell: a place in the phone's bottom bar is tapped there, any other is
+ * reached through the control that discloses the list ("Navigation" drawer on a tablet, "More" sheet
+ * on a phone).
+ */
 export async function goToDestination(page: Page, id: string) {
   const link = destinationLink(page, id);
-  if (!(await link.isVisible()))
-    await page.getByRole("button", { name: "Navigation", exact: true }).click();
-  await link.click();
+  const bar = barLink(page, id);
+  if (await bar.isVisible()) await bar.click();
+  else {
+    if (!(await link.isVisible()))
+      await page
+        .getByRole("button", { name: /^(Navigation|More)$/ })
+        .filter({ visible: true })
+        .click();
+    await link.click();
+  }
+  // the list holds every place (hidden or not), so the current one is marked whichever way it was reached
   await expect(link).toHaveAttribute("aria-current", "page");
 }
 

@@ -240,3 +240,45 @@ it("loads optional profile content only when visited and retains its draft after
   await act(async () => root.unmount());
   host.remove();
 });
+
+describe("the phone's bottom bar", () => {
+  it("shows every place when there are at most five", async () => {
+    const { barDestinations, roleDestinations } =
+      await import("./WorkspaceNavigation");
+    for (const role of ["judge", "mentor", "volunteer"]) {
+      const { bar, more } = barDestinations(roleDestinations[role]);
+      expect(more).toBe(false);
+      expect(bar.map((item) => item.id)).toEqual(
+        roleDestinations[role].map((item) => item.id),
+      );
+    }
+  });
+
+  it("keeps four places and More when there are more than five", async () => {
+    const { barDestinations, roleDestinations } =
+      await import("./WorkspaceNavigation");
+    const organizer = barDestinations(roleDestinations.organizer);
+    expect(organizer.more).toBe(true);
+    expect(organizer.bar.map((item) => item.short ?? item.label)).toEqual([
+      "Overview",
+      "People",
+      "Judging",
+      "On-site",
+    ]);
+    const participant = barDestinations(roleDestinations.participant);
+    expect(participant.bar).toHaveLength(4);
+    expect(participant.more).toBe(true);
+  });
+
+  it("never offers more than four places plus More, and only places the role has", async () => {
+    const { barDestinations, roleDestinations } =
+      await import("./WorkspaceNavigation");
+    for (const [role, places] of Object.entries(roleDestinations)) {
+      const { bar, more } = barDestinations(places);
+      expect(bar.length + (more ? 1 : 0)).toBeLessThanOrEqual(5);
+      for (const item of bar)
+        expect(places.some((p) => p.id === item.id)).toBe(true);
+      expect(role).toBeTruthy();
+    }
+  });
+});

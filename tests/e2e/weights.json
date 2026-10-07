@@ -40,6 +40,7 @@
   "read-only:roles": 4.7,
   "read-only:routing": 3.4,
   "read-only:server-state": 2.3,
+  "read-only:shell-responsive": 45,
   "read-only:showcase": 5.5,
   "read-only:signin": 2.2,
   "read-only:uiv2-gate": 11.3,

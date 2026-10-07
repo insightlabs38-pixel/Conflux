@@ -197,14 +197,15 @@ test("mobile disclosure, account escape and sign-out retain keyboard and session
   await page.setViewportSize({ width: 390, height: 844 });
   await signIn(page, "participant-01");
   await openWorkspace(page);
-  const toggle = page.getByRole("button", { name: "Navigation", exact: true });
+  // a phone opens the places that are not in the bottom bar from "More" (D-009)
+  const toggle = page.getByRole("button", { name: "More", exact: true });
   await toggle.click();
-  const team = destinationLink(page, "team");
-  await team.focus();
+  const resources = destinationLink(page, "resources");
+  await resources.focus();
   await page.keyboard.press("Escape");
   await expect(toggle).toBeFocused();
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
-  await expect(team).toBeHidden();
+  await expect(resources).toBeHidden();
   const account = page.locator(".cx-account summary");
   await account.click();
   await page.keyboard.press("Escape");

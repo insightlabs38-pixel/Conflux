@@ -1,0 +1,79 @@
+version: 3
+task: PD-F005-B01-T03
+batch: PD-F005-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 39cef28
+  head_commit: null
+changed_paths:
+- src/web/components/AppShell.tsx
+- src/web/components/WorkspaceNavigation.tsx
+- src/web/components/WorkspaceNavigation.test.tsx
+- src/web/components/Icon.tsx
+- src/web/styles/components.css
+- src/web/styles/tokens.css
+- tests/e2e/shell-responsive.spec.ts
+- tests/e2e/support.ts
+- tests/e2e/workspace-shell.spec.ts
+- tests/e2e/visual-foundation.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Responsive persistent navigation that collapses to task-focused mobile navigation, as a complete workflow
+  result: pass
+  evidence: the four tiers of design D-009 - 1440 and up the 216px rail with words; 1024-1439 a 52px icon rail (words are the tooltip and the accessible name, group headings become hairlines); 768-1023 the top bar with the Navigation drawer; below 768 a bottom bar of at most five controls (the role's four bar places and More, or all places when there are five or fewer) with the rest of the places in an All sections sheet (grouped, scrim, close button, Escape returns focus to More). One nav list (#workspace-navigation, derived from roleDestinations and the hidden-module filter) serves rail, drawer and sheet; the bar is a view of the same destinations (barDestinations), not a second list.
+- item: Wired to canonical state, no mock
+  result: pass
+  evidence: destinations, hidden modules, aria-current and deep links come from WorkspaceNavigationProvider; browser tests run on the live seeded stack
+- item: States, keyboard and accessibility
+  result: pass
+  evidence: bar controls are 44px and sit on the bottom edge (tested); More has aria-expanded and aria-controls; opening the sheet moves focus to its first visible place, Escape and the scrim close it and focus returns to the opener; a place chosen from the sheet closes it; the bar is a navigation landmark named Quick navigation, unique beside Primary; axe and landmark gates (uiv2-gate, roles, visual-foundation, slop-audit at 390 and 1440) stay green
+invariants:
+- item: One source of truth for places, hidden modules still respected
+  result: pass
+  evidence: bar and sheet derive from the provider's visible destinations; WorkspaceNavigation.modules.test.tsx unchanged and green
+- item: No test weakened
+  result: pass
+  evidence: the 390 mobile-disclosure test keeps every assertion (focus return, aria-expanded, hidden after Escape) against the new control (More, a sheet place); goToDestination taps a bar place or discloses the list; the visual-foundation comment about the missing mobile navigation was updated
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run components
+  result: pass
+  note: 214 in components; barDestinations rules unit-tested (at most five controls, only the role's places, judge and mentor show all)
+- command: npx playwright test -c tests/e2e/playwright.config.ts shell-responsive --project=desktop --workers=3
+  result: pass
+  note: 8 passed at 1920, 1440, 1280, 1024, 800 and 390 for organizer, judge-01 and participant-01
+- command: npx playwright test -c tests/e2e/playwright.config.ts workspace-shell --project=desktop --workers=4
+  result: pass
+  note: 50 passed (all destinations of every role at 390 and 1440, modules, new-tab links, mobile disclosure and sign-out)
+- command: npx playwright test -c tests/e2e/playwright.config.ts visual-foundation roles uiv2-gate slop-audit --project=desktop --workers=4
+  result: pass
+  note: 116 passed
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: rail 216, bottom nav of at most five plus a More sheet, rail collapse per responsive-wide D-009; the inspector, switcher, notifications and account items of the boards belong to other tasks
+- ref: design/state-matrix
+  result: pass
+  note: no new data state in this task
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: component, browser and geometry tests
+- surface: docs
+  result: pass
+  evidence: contract in spec 005; release note at T91
+migrations: []
+findings:
+- P3 the sheet lists the role's remaining places only (bar places are hidden in it); the board's Switch role and Switch event rows arrive with B02-T04 and T02.
+- P3 first browser run of the Escape test passed for the wrong reason (focus never entered the sheet because the first link was a hidden bar item); fixed by focusing the first visible link and asserting the sheet closes.
+escalations:
+- ESC-20260930-007
+limitations:
+- 1024-1439 icon rail has no group labels (hairlines only), per the board; touch pointers at those widths keep 32px rail items.
+- Landscape phones above 768 get the tablet drawer.
+next: review

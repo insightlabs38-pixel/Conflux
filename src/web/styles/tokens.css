@@ -112,8 +112,10 @@
   --z-toast: 80;
   --z-skip-link: 100;
 
-  /* shell (v3): the rail is 216px, top bar is --h-top; collapse and inspector belong to PD-F005 */
+  /* shell (v3): the rail is 216px (52px icons from 1024 to 1439), top bar is --h-top; the inspector belongs to PD-F005-B02 */
   --w-rail: 13.5rem;
+  --w-rail-icon: 3.25rem; /* 1024-1439: icons only, labels in the tooltip (D-009) */
+  --h-bar: 3.5rem; /* phone bottom navigation */
 }
 
 /* Touch layouts (below 768px, or a coarse pointer) keep every control at the 44px hit area (D-012). */

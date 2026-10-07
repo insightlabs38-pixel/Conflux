@@ -124,6 +124,35 @@ export async function slopProblems(page: Page, rules: SlopRule[]) {
       }
     }
 
+    if (wanted.includes("pills")) {
+      // pills carry a state or a count, never ordinary text (V-SLOP-5, V-RAD-1): nothing drawn
+      // pill-shaped around words, and at most one tag in a row of a table or list (a project's own
+      // tag list is the content and may hold several)
+      for (const el of all) {
+        if (!shown(el) || el.closest("svg")) continue;
+        const style = getComputedStyle(el);
+        const box = el.getBoundingClientRect();
+        const radius = parseFloat(style.borderTopLeftRadius);
+        const text = (el.textContent ?? "").trim();
+        const outlined =
+          parseFloat(style.borderTopWidth) > 0 || filled(style.backgroundColor);
+        if (
+          outlined &&
+          radius >= Math.min(box.width, box.height) / 2 &&
+          box.height < 64 &&
+          /[A-Za-z]{3}/.test(text) &&
+          !el.matches(".cx-avatar, .cx-avatar *")
+        )
+          add("pills", `pill around "${text.slice(0, 24)}" in ${name(el)}`);
+      }
+      for (const row of document.querySelectorAll("tr, li")) {
+        if (!shown(row) || row.closest(".cx-tags")) continue;
+        const tags = [...row.querySelectorAll(".cx-tag")].filter(shown);
+        if (tags.length > 1)
+          add("pills", `${tags.length} tags in one ${name(row)}`);
+      }
+    }
+
     if (wanted.includes("kpiCards")) {
       // a row of three or more boxes with their own border or fill is a card dashboard (V-SLOP-3,
       // V-SLOP-14); a summary is one strip of figures, and a list of records is a table. Only the

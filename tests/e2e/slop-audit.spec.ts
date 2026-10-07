@@ -154,3 +154,26 @@ test("the audit sees oversized and tagline copy in an operator page", async ({
   const found = await slopProblems(page, ["operatorCopy"]);
   expect(found.operatorCopy).toHaveLength(2);
 });
+
+test("the audit sees a pill around words and two tags in one row", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, "organizer");
+  await goToDestination(page, "overview");
+  await settled(page);
+  await page.evaluate(() => {
+    const pill = document.createElement("span");
+    pill.style.cssText =
+      "display:inline-block;padding:2px 12px;border:1px solid #888;border-radius:999px";
+    pill.textContent = "Design review";
+    const row = document.createElement("ul");
+    row.innerHTML =
+      '<li><span class="cx-tag">AI</span> <span class="cx-tag">Open data</span></li>';
+    document.querySelector("main")!.prepend(pill, row);
+  });
+  const found = await slopProblems(page, ["pills"]);
+  expect(found.pills?.some((p) => p.startsWith("pill around"))).toBe(true);
+  expect(found.pills?.some((p) => p.includes("2 tags in one li"))).toBe(true);
+});

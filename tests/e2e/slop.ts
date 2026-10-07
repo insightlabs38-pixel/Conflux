@@ -34,7 +34,8 @@ export type SlopRule =
   | "nestedCards"
   | "repeatedLabels"
   | "hiddenActions"
-  | "recordGrids";
+  | "recordGrids"
+  | "alarmColors";
 
 export async function slopProblems(page: Page, rules: SlopRule[]) {
   return page.evaluate((wanted) => {
@@ -291,6 +292,50 @@ export async function slopProblems(page: Page, rules: SlopRule[]) {
             `${across.length} boxed items across in ${name(parent)}`,
           );
       }
+    }
+
+    if (wanted.includes("alarmColors")) {
+      // red is for the thing that failed and for the final destructive button, nowhere else
+      // (V-SLOP-9). Anything painted in the error hue (text, fill or border) must sit in an alert,
+      // an invalid field, a failing status, a refusal or a confirmation dialog, and a page may not
+      // carry more than a handful of red marks.
+      const red = (color: string) => {
+        const m = color.match(/rgba?\((\d+), (\d+), (\d+)(?:, ([\d.]+))?\)/);
+        if (!m || (m[4] !== undefined && parseFloat(m[4]) < 0.2)) return false;
+        const [r, g, b] = [+m[1] / 255, +m[2] / 255, +m[3] / 255];
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        const l = (max + min) / 2;
+        const sat = max === min ? 0 : (max - min) / (1 - Math.abs(2 * l - 1));
+        if (sat < 0.35 || max !== r) return false;
+        const hue = (((g - b) / (max - min)) * 60 + 360) % 360;
+        return hue <= 15 || hue >= 345;
+      };
+      const allowed =
+        '[role="alert"], [role="alertdialog"], [role="dialog"], dialog, [aria-invalid="true"], ' +
+        ".cx-alert, .cx-status--danger, .cx-consequence, [role='group'][aria-label^='Confirm'], .cx-error, [data-state='error'], " +
+        "[data-severity='error'], [data-severity='blocker'], [data-denied], .cx-denied";
+      const marks: string[] = [];
+      for (const el of all) {
+        if (!shown(el) || el.closest(allowed)) continue;
+        const style = getComputedStyle(el);
+        const ownText = [...el.childNodes].some(
+          (n) => n.nodeType === 3 && (n.textContent ?? "").trim(),
+        );
+        const painted =
+          (ownText && red(style.color)) ||
+          (filled(style.backgroundColor) && red(style.backgroundColor)) ||
+          (parseFloat(style.borderTopWidth) > 0 && red(style.borderTopColor)) ||
+          (parseFloat(style.borderLeftWidth) > 0 && red(style.borderLeftColor));
+        if (painted) marks.push(name(el));
+      }
+      for (const mark of marks.slice(0, 6))
+        add(
+          "alarmColors",
+          `red outside a failure or a final destructive action: ${mark}`,
+        );
+      if (marks.length > 6)
+        add("alarmColors", `${marks.length} red marks on one page`);
     }
 
     if (wanted.includes("kpiCards")) {

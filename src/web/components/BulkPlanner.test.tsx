@@ -88,6 +88,10 @@ describe("BulkPlanner", () => {
     expect(container.textContent).toContain("All or nothing");
     expect(container.textContent).toContain("valid for 10 minutes");
     expect(container.textContent).not.toMatch(/are you sure/i);
+    // a move is not destructive: the final button is the primary action, red is for what cannot be undone
+    expect(button(container, "Move to Hardware").className).not.toContain(
+      "cx-button--danger",
+    );
 
     await act(async () => button(container, "Move to Hardware").click());
     await settle();

@@ -23,6 +23,7 @@ const RULES: SlopRule[] = [
   "repeatedLabels",
   "hiddenActions",
   "recordGrids",
+  "alarmColors",
 ];
 
 const SETUP_TASKS = [
@@ -335,3 +336,36 @@ for (const width of [390, 1440])
       await expect(table.locator("th[aria-sort]").first()).toBeAttached();
       expect(await slopProblems(page, ["recordGrids", "kpiCards"])).toEqual({});
     });
+
+test("the audit sees red outside a failure and a page of alarms", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, "organizer");
+  await goToDestination(page, "overview");
+  await settled(page);
+  const one = await page.evaluate(() => {
+    const row = document.createElement("div");
+    row.innerHTML =
+      '<p style="color:var(--err)">Delete later</p><div role="alert"><p style="color:var(--err)">It failed</p></div><div class="cx-consequence"><button class="cx-button cx-button--danger" type="button">Remove</button></div><button class="cx-button cx-button--danger" type="button">Delete everything</button>';
+    document.querySelector("main")!.prepend(row);
+    return true;
+  });
+  expect(one).toBe(true);
+  const found = await slopProblems(page, ["alarmColors"]);
+  // the paragraph and the red button outside a confirmation are reported; the alert and the confirm are not
+  expect(found.alarmColors).toHaveLength(2);
+  await page.evaluate(() => {
+    const row = document.createElement("div");
+    row.innerHTML = Array.from(
+      { length: 7 },
+      (_, n) => `<p style="color:var(--err)">Warning ${n}</p>`,
+    ).join("");
+    document.querySelector("main")!.prepend(row);
+  });
+  const many = await slopProblems(page, ["alarmColors"]);
+  expect(
+    many.alarmColors?.some((p) => p.includes("red marks on one page")),
+  ).toBe(true);
+});

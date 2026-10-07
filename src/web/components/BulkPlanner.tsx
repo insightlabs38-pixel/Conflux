@@ -40,6 +40,7 @@ export function BulkPlanner({
   operations,
   names,
   applyLabel = "Apply",
+  destructive = false,
   onApplied,
   onClose,
 }: {
@@ -49,6 +50,8 @@ export function BulkPlanner({
   operations: BulkOperation[];
   names?: Names;
   applyLabel?: string;
+  /** The plan removes or overwrites something that cannot be restored: only then the final button is red. */
+  destructive?: boolean;
   /** The changes were applied (the list behind the dialog can reload). */
   onApplied?: (result: BulkApplied) => void;
   onClose: () => void;
@@ -202,7 +205,7 @@ export function BulkPlanner({
         )}
         {(phase.kind === "ready" || phase.kind === "applying") && (
           <Button
-            variant="danger"
+            variant={destructive ? "danger" : "primary"}
             disabled={busy}
             onClick={() => void apply(phase.preview)}
           >

@@ -502,7 +502,7 @@ export function OrganizerJudgingLogisticsPanel({
                 I understand this freezes a new assignment version
               </label>{" "}
               <Button
-                variant="danger"
+                variant="primary"
                 disabled={!confirmed}
                 onClick={() => void rebalance()}
               >

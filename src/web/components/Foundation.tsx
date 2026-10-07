@@ -1,3 +1,4 @@
+import { initials } from "../lib/initials";
 import {
   useId,
   type AnchorHTMLAttributes,
@@ -142,17 +143,10 @@ export function Avatar({
   src?: string;
   size?: "normal" | "large";
 }) {
-  const initials =
-    name
-      .trim()
-      .split(/\s+/)
-      .slice(0, 2)
-      .map((part) => Array.from(part)[0] ?? "")
-      .join("")
-      .toLocaleUpperCase() || "?";
+  const letters = initials(name);
   return (
     <span className={`cx-avatar cx-avatar--${size}`} aria-hidden="true">
-      {initials}
+      {letters}
       {src && (
         <img
           key={src}

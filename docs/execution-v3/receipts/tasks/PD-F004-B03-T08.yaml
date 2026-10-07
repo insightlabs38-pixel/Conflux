@@ -1,0 +1,82 @@
+version: 3
+task: PD-F004-B03-T08
+batch: PD-F004-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: b310420
+  head_commit: null
+changed_paths:
+- src/api/presentation/showcase.py
+- src/api/presentation/templatetags/presentation_tags.py
+- src/api/presentation/templates/presentation/event_landing.html
+- src/web/lib/initials.ts
+- src/web/lib/initials.test.ts
+- src/web/components/Foundation.tsx
+- src/web/public/event-site/EventSite.tsx
+- src/web/styles/presentation.css
+- tests/fixtures/initials_cases.json
+- tests/integration/test_public_site.py
+- tests/test_visual_ratchets.py
+- tests/e2e/visual-foundation.spec.ts
+deliverables:
+- item: Fallback identity looks intentional when no artwork exists
+  result: pass
+  evidence: 'the hero lockup (T07) and the project covers (gallery cards, project page tile) now share one
+    treatment: initials in the accent on the surface, type-scale size (32px, 24px in compact cards),
+    hairline frame, nothing decorative. The last two literal glyph size exemptions (project cover) were deleted
+    from the ratchet and from the e2e off-scale scan instead of extended, so the scale is now enforced
+    on every public page'
+- item: One rule for the letters
+  result: pass
+  evidence: 'initials() was `part[0]` of the first two words: "(Open) Data" gave "(D", an emoji name gave
+    half a character, the hero used only the first character and the React site another rule. One rule now
+    (first letter or digit of each of the first two words, first visible character if there is none,
+    "?" only for an empty name) in presentation/showcase.py and web/lib/initials.ts, proved by a shared
+    fixture of 15 cases run by pytest and vitest, used by the lockup, project covers, people avatars and the
+    React event site'
+invariants:
+- item: No user content reaches markup unescaped
+  result: pass
+  evidence: the letters are template-escaped text; the rule only selects characters
+- item: Accessibility
+  result: pass
+  evidence: lockups stay aria-hidden decoration beside the real name; axe and overflow pass on public pages at 390 and 1440
+- item: Progressive disclosure and defaults
+  result: pass
+  evidence: no setting added; art, when set, replaces the lockup exactly as before
+verification:
+- command: uv run --frozen pytest -n auto -q
+  result: pass
+  note: 2939 passed, 34 skipped (shared initials table, an event named "(Open) Data Regionals" draws OD)
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 699 passed (initials fixtures, avatar test unchanged)
+- command: npx playwright test public showcase foundations visual-foundation --project=desktop
+  result: pass
+  note: 45 passed; the off-scale type scan now includes the covers and lockup
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-HERO-1 (fallback identity looks intentional), V-TYPE-2 (scale only), V-SLOP-2 (no coloured tile)
+- ref: design/state-matrix
+  result: pass
+  note: no state component changed
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: lockup, covers, avatars, React site
+- surface: docs
+  result: pass
+  evidence: VISUAL_FOUNDATION.md and the spec 004 contract at T91
+migrations: []
+findings: []
+escalations: []
+limitations:
+- A name whose first letter is a combining sequence or an emoji ZWJ sequence is drawn by its first code point
+  only; there is no grapheme segmentation on the server.
+next: review

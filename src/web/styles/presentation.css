@@ -709,10 +709,15 @@
   background: var(--color-surface);
   color: var(--color-text-secondary);
   overflow: hidden;
-  font-size: clamp(3rem, 6vw, 5rem);
-  font-weight: var(--font-weight-bold);
-  letter-spacing: -0.06em;
+  font-size: var(--fs-32);
+  font-weight: var(--font-weight-semibold);
   border-bottom: 1px solid var(--color-border);
+}
+/* Without a picture the cover is the same lettered lockup as the event hero: initials in the
+   accent on the surface, nothing decorative. */
+.cx-project-card__cover:not(:has(img)),
+.cx-project-cover:not(:has(img)) {
+  color: var(--color-accent);
 }
 .cx-project-card__cover img,
 .cx-project-cover img {

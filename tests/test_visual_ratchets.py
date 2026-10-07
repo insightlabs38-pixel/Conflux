@@ -61,14 +61,6 @@ def test_ratchet_names_a_new_decorative_fill():
     assert [sel for sel, body in rules(sample) if SOLID.search(body)] == [".cx-card--promo"]
 
 
-# Decorative glyphs of the project cover (a letter or monogram, not text). The cover redesign
-# (PD-F004-B03) replaces them; until then they are the only literal sizes.
-GLYPH_SIZES = {
-    "styles/presentation.css": {
-        ".cx-project-cover",
-        ".cx-project-card__cover, .cx-project-cover",
-    },
-}
 FONT_SIZE = re.compile(r"font-size:\s*([^;]+);")
 SCALE = re.compile(r"var\(--fs-(11|12|13|14|16|20|24|32|display)\)")
 
@@ -88,8 +80,6 @@ def test_every_font_size_comes_from_the_type_scale():
             continue
         rel = str(sheet.relative_to(WEB))
         for selector, value in declarations(sheet.read_text(), "font-size"):
-            if selector in GLYPH_SIZES.get(rel, set()):
-                continue
             assert SCALE.fullmatch(value) or value in ("inherit", "100%", "1em"), (
                 rel,
                 selector,

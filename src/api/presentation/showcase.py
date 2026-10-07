@@ -15,7 +15,20 @@ VIDEO_TYPES = {"video/mp4", "video/webm"}
 
 
 def initials(name):
-    return "".join(part[0] for part in name.split()[:2]).upper() or "?"
+    """The letters a name is drawn as when there is no artwork: the first letter or digit of each of
+    its first two words, so "(Open) Data" is OD and not "(D", a name with no letters at all (an
+    emoji, punctuation) falls back to its first visible character, and nothing is "?" unless the
+    name is empty. One rule for event lockups, project covers and people."""
+    found = []
+    for word in str(name or "").split():
+        letter = next((ch for ch in word if ch.isalnum()), "")
+        if letter:
+            found.append(letter)
+        if len(found) == 2:
+            break
+    if not found:
+        found = [next((ch for ch in str(name or "") if not ch.isspace()), "?")]
+    return "".join(found).upper()
 
 
 def prepare_showcase(projects, event):

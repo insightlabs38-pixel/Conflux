@@ -1,0 +1,51 @@
+{
+  "cases": [
+    { "name": "two words", "name_text": "Conflux Builders", "initials": "CB" },
+    { "name": "one word", "name_text": "Regionals", "initials": "R" },
+    {
+      "name": "only the first two words",
+      "name_text": "Open Data Hack Day",
+      "initials": "OD"
+    },
+    {
+      "name": "punctuation is not a letter",
+      "name_text": "(Open) Data",
+      "initials": "OD"
+    },
+    {
+      "name": "hyphen and apostrophe",
+      "name_text": "a-b c'd",
+      "initials": "AC"
+    },
+    { "name": "digits count", "name_text": "2026 Hack", "initials": "2H" },
+    {
+      "name": "extra spaces",
+      "name_text": "   sam    rivera  ",
+      "initials": "SR"
+    },
+    { "name": "non-Latin", "name_text": "李 明", "initials": "李明" },
+    {
+      "name": "kana and kanji",
+      "name_text": "データ 大会",
+      "initials": "デ大"
+    },
+    {
+      "name": "an emoji word is skipped when a letter follows",
+      "name_text": "🚀 Launch",
+      "initials": "L"
+    },
+    {
+      "name": "no letters at all falls back to the first visible character",
+      "name_text": "!!! ???",
+      "initials": "!"
+    },
+    { "name": "an emoji alone", "name_text": "🚀", "initials": "🚀" },
+    { "name": "empty", "name_text": "", "initials": "?" },
+    { "name": "blank", "name_text": "   ", "initials": "?" },
+    {
+      "name": "accented letters upper-case",
+      "name_text": "élan vital",
+      "initials": "ÉV"
+    }
+  ]
+}

@@ -10,7 +10,7 @@
           <h1>{{ event.name }}</h1>
           <p class="cx-hero__facts">{% event_facts event %}</p>
         </div>
-        {% if event_brand.banner_url %}<picture class="cx-hero__art">{% if event_brand.banner_mobile_url %}<source media="(max-width: 48rem)" srcset="{{ event_brand.banner_mobile_url }}">{% endif %}<img class="cx-hero__image" src="{{ event_brand.banner_url }}" alt="" width="960" height="640"></picture>{% else %}<div class="cx-hero__identity" aria-hidden="true"><span>{{ event.name|slice:":1" }}</span><small>{{ event.starts_at|date:"Y" }}</small></div>{% endif %}
+        {% if event_brand.banner_url %}<picture class="cx-hero__art">{% if event_brand.banner_mobile_url %}<source media="(max-width: 48rem)" srcset="{{ event_brand.banner_mobile_url }}">{% endif %}<img class="cx-hero__image" src="{{ event_brand.banner_url }}" alt="" width="960" height="640"></picture>{% else %}<div class="cx-hero__identity" aria-hidden="true"><span>{{ event.name|initials }}</span><small>{{ event.starts_at|date:"Y" }}</small></div>{% endif %}
       </div>
       <div class="cx-hero__after">
         {% if event.description %}<p>{{ event.description }}</p>{% endif %}
@@ -26,7 +26,7 @@
             <h1>{{ block.config.title }}</h1>
             <p class="cx-hero__facts">{% event_facts event %}</p>
           </div>
-          {% if event_brand.banner_url %}<picture class="cx-hero__art">{% if event_brand.banner_mobile_url %}<source media="(max-width: 48rem)" srcset="{{ event_brand.banner_mobile_url }}">{% endif %}<img class="cx-hero__image" src="{{ event_brand.banner_url }}" alt="" width="960" height="640"></picture>{% else %}<div class="cx-hero__identity" aria-hidden="true"><span>{{ event.name|slice:":1" }}</span><small>{{ event.starts_at|date:"Y" }}</small></div>{% endif %}
+          {% if event_brand.banner_url %}<picture class="cx-hero__art">{% if event_brand.banner_mobile_url %}<source media="(max-width: 48rem)" srcset="{{ event_brand.banner_mobile_url }}">{% endif %}<img class="cx-hero__image" src="{{ event_brand.banner_url }}" alt="" width="960" height="640"></picture>{% else %}<div class="cx-hero__identity" aria-hidden="true"><span>{{ event.name|initials }}</span><small>{{ event.starts_at|date:"Y" }}</small></div>{% endif %}
         </div>
         <div class="cx-hero__after">
           {% if block.config.subtitle %}<p>{{ block.config.subtitle }}</p>{% endif %}

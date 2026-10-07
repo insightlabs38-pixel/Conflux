@@ -6,6 +6,7 @@ from django.utils.safestring import mark_safe
 
 from ..blocks import safe_href as _safe_href
 from ..sanitize import sanitize_html as _sanitize_html
+from ..showcase import initials as _initials
 
 register = template.Library()
 
@@ -15,6 +16,12 @@ def sanitize_html(value):
     """Re-sanitize at render time (defense in depth on top of save-time
     cleaning in blocks.clean_config) before marking safe for `{{ }}`."""
     return mark_safe(_sanitize_html(value or ""))
+
+
+@register.filter(name="initials")
+def initials(value):
+    """What a name is drawn as without artwork (showcase.initials, the one rule)."""
+    return _initials(value)
 
 
 @register.filter(name="safe_href")

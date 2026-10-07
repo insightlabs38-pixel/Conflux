@@ -195,3 +195,26 @@ def test_the_hero_facts_say_only_what_is_set():
     event.save()
     body = Client().get(f"/e/{event.public_id}/").content.decode()
     assert '<p class="cx-hero__facts">Open · Jan. 1, 2026 · Not/AZone</p>' in body
+
+
+def test_initials_follow_the_one_rule_shared_with_the_web():
+    import json
+    import pathlib
+
+    from presentation.showcase import initials
+
+    cases = json.loads(
+        (
+            pathlib.Path(__file__).resolve().parents[1] / "fixtures" / "initials_cases.json"
+        ).read_text()
+    )["cases"]
+    for case in cases:
+        assert initials(case["name_text"]) == case["initials"], case["name"]
+
+
+def test_an_event_without_artwork_is_drawn_as_its_initials():
+    event, _, _ = make_public_event_with_finalized_project()
+    event.name = "(Open) Data Regionals"
+    event.save()
+    body = Client().get(f"/e/{event.public_id}/").content.decode()
+    assert '<div class="cx-hero__identity" aria-hidden="true"><span>OD</span>' in body

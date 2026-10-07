@@ -14,13 +14,11 @@ import {
 // PD-F004-B01: the Conflux v3 visual foundation as it renders. Read-only; every check is computed
 // style on the live pages, so an inline style or a stylesheet outside the token layer is caught.
 const SCALE = [11, 12, 13, 14, 16, 20, 24, 32];
-// Decorative monogram glyphs of the project cover (replaced by PD-F004-B03).
-const GLYPH = ".cx-project-cover, .cx-project-card__cover";
 
 /** Every visible text-bearing element whose computed size is off the scale, as `size selector text`. */
 async function offScale(page: Page) {
   return page.evaluate(
-    ({ scale, glyph }) => {
+    ({ scale }) => {
       const bad: string[] = [];
       const walker = document.createTreeWalker(
         document.body,
@@ -31,8 +29,7 @@ async function offScale(page: Page) {
         const el = node.parentElement;
         if (!el || seen.has(el) || !node.textContent?.trim()) continue;
         seen.add(el);
-        if (el.closest(glyph) || el.closest("script,style,noscript,svg"))
-          continue;
+        if (el.closest("script,style,noscript,svg")) continue;
         const box = el.getBoundingClientRect();
         if (!box.width || !box.height) continue;
         const size = parseFloat(getComputedStyle(el).fontSize);
@@ -44,7 +41,7 @@ async function offScale(page: Page) {
       }
       return bad;
     },
-    { scale: SCALE, glyph: GLYPH },
+    { scale: SCALE },
   );
 }
 

@@ -1,3 +1,4 @@
+import { initials } from "../../lib/initials";
 import type { CSSProperties } from "react";
 import "../../styles/presentation.css";
 import { ButtonLink } from "../../components/Foundation";
@@ -141,7 +142,7 @@ export function EventSite({ eventId }: { eventId: string }) {
                   </picture>
                 ) : (
                   <div className="cx-hero__identity" aria-hidden="true">
-                    <span>{Array.from(event.name)[0]}</span>
+                    <span>{initials(event.name)}</span>
                   </div>
                 )}
               </div>

@@ -128,7 +128,9 @@ describe("EntityGrid", () => {
     const { container, pages, root } = await mount(() =>
       jsonResponse(200, page(ROWS)),
     );
-    await until(() => container.querySelector("tbody tr") !== null);
+    await until(
+      () => container.querySelector("tbody tr:not([aria-hidden])") !== null,
+    );
     expect(
       [...container.querySelectorAll("thead th")].map((h) =>
         h.textContent?.replace(/,.*$/, "").trim(),

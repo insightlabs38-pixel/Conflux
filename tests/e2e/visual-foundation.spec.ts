@@ -1,8 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
 import {
+  accessible,
   chooseWorkspaceEvent,
   eventIds,
   goToDestination,
+  goToTask,
+  noHorizontalOverflow,
   openWorkspace,
   settled,
   signIn,
@@ -320,5 +323,45 @@ for (const width of [390, 1440]) {
       .evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
     expect(h1).toBeGreaterThanOrEqual(24);
     expect(h1).toBeLessThanOrEqual(32);
+  });
+}
+
+// S-LOAD: a grid's columns are known, so while its rows load it keeps its header and shows the shape
+// of the rows; past eight seconds it says so; nothing is invented about the data. Read-only: the
+// list request is held and then released, never altered.
+for (const width of [390, 1440]) {
+  test(`a loading grid keeps its header, shows placeholders and admits a slow wait at ${width}`, async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+    await page.setViewportSize({ width, height: 900 });
+    await signIn(page, "organizer");
+    await openWorkspace(page);
+    const { workspace, event } = await eventIds(page);
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => (release = resolve));
+    await page.route("**/entities/applications/**", async (route) => {
+      await gate;
+      await route.continue();
+    });
+    await page.clock.install();
+    await page.goto(`/app/w/${workspace}/participants?event=${event}`);
+    await goToTask(page, "Registration");
+    const panel = page.locator('[data-entity="applications"]');
+    const busy = panel.locator("[aria-busy='true']");
+    await expect(busy).toBeVisible();
+    await expect(panel.getByRole("status")).toContainText(
+      "Loading Applications",
+    );
+    await expect(panel.locator(".cx-skeleton").first()).toBeVisible();
+    await expect(panel.locator("tbody tr")).toHaveCount(0);
+    await expect(panel.getByText("longer than usual")).toHaveCount(0);
+    await noHorizontalOverflow(page);
+    await accessible(page);
+    await page.clock.fastForward(8000);
+    await expect(panel.getByText("longer than usual")).toBeVisible();
+    release();
+    await expect(busy).toHaveCount(0);
+    await expect(panel.locator("tbody tr").first()).toBeVisible();
   });
 }

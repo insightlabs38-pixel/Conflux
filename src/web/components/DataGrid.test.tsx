@@ -210,9 +210,33 @@ describe("DataGrid", () => {
         <DataGrid label="People" columns={COLUMNS} rows={[]} status={status} />,
       );
       expect(container.textContent).toContain(text);
-      expect(container.querySelector("table")).toBeNull();
+      // only loading keeps a table: the known columns with placeholder rows, hidden from assistive tech
+      expect(container.querySelector("table") !== null).toBe(
+        status.kind === "loading",
+      );
       act(() => root.unmount());
     }
+    const loading = mount(
+      <DataGrid
+        label="People"
+        columns={COLUMNS}
+        rows={[]}
+        status={{ kind: "loading" }}
+      />,
+    );
+    expect(
+      loading.container.querySelector("[aria-busy='true']"),
+    ).not.toBeNull();
+    expect(loading.container.querySelectorAll("th")).toHaveLength(
+      COLUMNS.length,
+    );
+    expect(loading.container.querySelectorAll("tbody tr")).toHaveLength(0);
+    expect(
+      loading.container.querySelectorAll(
+        ".cx-skeleton-rows[aria-hidden='true'] .cx-skeleton",
+      ),
+    ).toHaveLength(5 * COLUMNS.length);
+    act(() => loading.root.unmount());
     const empty = mount(
       <DataGrid
         label="People"

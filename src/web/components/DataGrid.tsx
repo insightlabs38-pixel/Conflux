@@ -4,7 +4,7 @@ import { Icon } from "./Icon";
 import { EmptyState } from "./EmptyState";
 import { ErrorState } from "./ErrorState";
 import { DeniedState } from "./DeniedState";
-import { LoadingState } from "./LoadingState";
+import { LoadingState, SkeletonRows } from "./LoadingState";
 
 /**
  * The dense data grid (PD-F002-B01-T03). A controlled, server-driven table: sort, paging, the
@@ -75,8 +75,28 @@ export function DataGrid<Row extends { id: string }>({
 }) {
   const body = useRef<HTMLTableSectionElement>(null);
 
+  // The columns are known, so the grid keeps its header and shows the shape of the rows to come.
   if (status.kind === "loading")
-    return <LoadingState label={`Loading ${label}…`} />;
+    return (
+      <div className={`cx-grid-wrap cx-grid-wrap--${density}`} aria-busy="true">
+        <LoadingState label={`Loading ${label}…`} />
+        <div className="cx-table-region cx-datagrid" aria-hidden="true">
+          <table className="cx-table cx-datagrid__table">
+            <thead>
+              <tr>
+                {onSelect && <th scope="col" className="cx-datagrid__select" />}
+                {columns.map((column) => (
+                  <th key={column.key} scope="col">
+                    {column.label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+          </table>
+          <SkeletonRows columns={columns.length + (onSelect ? 1 : 0)} />
+        </div>
+      </div>
+    );
   if (status.kind === "denied") return <DeniedState message={status.message} />;
   if (status.kind === "error")
     return <ErrorState message={status.message} onRetry={status.onRetry} />;

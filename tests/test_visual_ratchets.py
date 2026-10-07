@@ -271,7 +271,7 @@ def test_status_is_an_icon_and_a_word_and_never_a_fill():
 
 TRANSITION_PROPERTIES = {"background-color", "border-color", "color"}
 # State indicators that animate while work is pending; each needs a reduced-motion fallback.
-ANIMATIONS_ALLOWED: set[str] = set()
+ANIMATIONS_ALLOWED: set[str] = {"cx-spin"}
 
 
 def test_motion_is_a_short_state_transition_and_nothing_is_ambient():

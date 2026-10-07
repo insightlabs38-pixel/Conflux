@@ -1,0 +1,89 @@
+version: 3
+task: PD-F004-B02-T03
+batch: PD-F004-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: ad7de91
+  head_commit: null
+changed_paths:
+- src/web/components/LoadingState.tsx
+- src/web/components/LoadingState.test.tsx
+- src/web/components/DataGrid.tsx
+- src/web/components/DataGrid.test.tsx
+- src/web/components/EntityGrid.test.tsx
+- src/web/components/Icon.tsx
+- src/web/styles/components.css
+- tests/test_visual_ratchets.py
+- tests/e2e/visual-foundation.spec.ts
+deliverables:
+- item: Skeletons only where layout is predictable; otherwise a clear progress indicator
+  result: pass
+  evidence: 'DataGrid loading now keeps its header (the columns are known) over static placeholder blocks
+    and a status line, instead of replacing the whole grid with text; every other wait (55 call sites)
+    gets LoadingState: spinner icon plus words in a role=status region; the one allowed animation is cx-spin,
+    covered by the global reduced-motion rule'
+- item: A wait past eight seconds says so and offers a way out
+  result: pass
+  evidence: 'LoadingState shows ''This is taking longer than usual. Your data is safe; you can keep waiting.''
+    after SLOW_AFTER_MS = 8000 and a Cancel button only when the caller passes onCancel (the real operation
+    stays the caller''s: hooks/useOperation / ASYNC_JOB); proved with fake timers (7999 ms quiet, 8000
+    ms note, timer cleared on unmount) and in the browser with a held request and a page clock'
+- item: DATA_GRID reuse
+  result: pass
+  evidence: the loading branch lives inside the shared DataGrid, so EntityGrid and every grid get it;
+    no per-feature skeleton
+invariants:
+- item: Placeholders never read as data
+  result: pass
+  evidence: skeleton blocks are aria-hidden divs, not table rows, so tbody row counts in unit and e2e
+    tests cannot mistake them for rows; aria-busy marks the region
+- item: Accessibility preserved
+  result: pass
+  evidence: axe passes while the grid is loading at 390 and 1440; the status text equals the old label
+    exactly (tests that wait on it still pass)
+- item: No test weakened
+  result: pass
+  evidence: the DataGrid state test changed from 'no table while loading' to the new contract (header
+    kept, five placeholder rows of columns, no tbody rows) with stronger assertions; EntityGrid waits
+    on real rows only
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 668 passed (3 new LoadingState tests, extended DataGrid test)
+- command: uv run --frozen pytest tests/test_visual_ratchets.py -q
+  result: pass
+  note: 20 passed (cx-spin is the single allowed animation)
+- command: docker compose up -d --build app; npx playwright test -c tests/e2e/playwright.config.ts visual-foundation
+    --project=desktop
+  result: pass
+  note: 10 passed including the loading-grid test at 390 and 1440 (held list request, header and placeholders
+    visible, no data rows, axe, 8s page clock, release then rows)
+design_refs:
+- ref: design/state-matrix
+  result: pass
+  note: S-LOAD (skeleton only when layout is predictable, headers stay live, past 8s say what is slow
+    and offer cancel)
+- ref: design/system-v3
+  result: pass
+  note: V-MOTION-1 (the spinner is a state indicator with a reduced-motion fallback)
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: LoadingState, DataGrid, styles
+- surface: docs
+  result: pass
+  evidence: contract in spec 004; guide extended at B02 T91
+migrations: []
+findings:
+- P3 the inspector 'Loading Dev Patel…' state of the design (no skeleton, a spinner) is the same LoadingState;
+  the inspector itself is PD-F005
+escalations: []
+limitations:
+- Cancel is offered only where a caller passes onCancel; wiring each long operation to its cancel is the
+  job of the screens that own them (OperationStatus already offers Cancel for operations).
+next: review

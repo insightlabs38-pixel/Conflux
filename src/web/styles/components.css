@@ -2878,3 +2878,39 @@ html {
     scroll-behavior: auto !important;
   }
 }
+
+/* Loading (S-LOAD): a spinner for an unknown shape, static placeholder rows for a known one. */
+.cx-state--loading {
+  border-style: solid;
+}
+.cx-state--loading .cx-state__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.cx-spin {
+  animation: cx-spin 900ms linear infinite;
+}
+@keyframes cx-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.cx-skeleton {
+  display: block;
+  height: var(--sp-3);
+  width: 70%;
+  border-radius: var(--r-1);
+  background: var(--surface-3);
+}
+.cx-skeleton-rows {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  align-items: center;
+  gap: 0 var(--sp-3);
+  padding: 0 var(--sp-3);
+}
+.cx-skeleton-rows .cx-skeleton {
+  height: var(--sp-3);
+  margin-block: calc((var(--h-row) - var(--sp-3)) / 2);
+}

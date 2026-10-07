@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
  */
 const SHAPES = {
   circle: [],
+  loader: ["M21 12a9 9 0 1 1-6.219-8.56"],
   check: ["M20 6 9 17l-5-5"],
   x: ["M18 6 6 18", "m6 6 12 12"],
   plus: ["M5 12h14", "M12 5v14"],
@@ -113,15 +114,18 @@ export function Icon({
   name,
   label,
   size = 16,
+  className,
 }: {
   name: IconName;
   /** Only for an icon that stands alone; beside its word, leave it out. */
   label?: string;
   size?: 12 | 16 | 20;
+  /** Only to animate a pending indicator (cx-spin); colour and size come from the context. */
+  className?: string;
 }) {
   return (
     <svg
-      className="cx-icon"
+      className={className ? `cx-icon ${className}` : "cx-icon"}
       width={size}
       height={size}
       viewBox="0 0 24 24"

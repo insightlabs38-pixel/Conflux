@@ -154,7 +154,7 @@
 }
 .cx-button--danger:hover:not(:disabled) {
   background: var(--color-danger);
-  color: #fff;
+  color: var(--surface);
 }
 
 .cx-badge {

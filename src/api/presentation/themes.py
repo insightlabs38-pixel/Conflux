@@ -84,7 +84,7 @@ def clean_theme_config(value, theme="default"):
         if not isinstance(accent, str) or not re.fullmatch(r"#[0-9a-fA-F]{6}", accent):
             raise ValidationError({"theme_config": "Accent must be a six-digit hex color."})
         colors = THEME_COLORS.get(theme, THEME_COLORS["default"])
-        surfaces = [colors["bg"], "#1b2028" if theme == "dark" else "#ffffff"]
+        surfaces = [colors["bg"], colors["surface"]]
         if min(contrast_ratio(accent, surface) for surface in surfaces) < 4.5:
             raise ValidationError(
                 {"theme_config": "Accent needs at least 4.5:1 contrast on event surfaces."}
@@ -104,7 +104,16 @@ def resolved_theme(page):
     # A fixed validated accent is used for all interaction states; state is also
     # conveyed by underline/border, never by an unvalidated color transformation.
     settings["accent"] = accent
+    colors = THEME_COLORS.get(theme, THEME_COLORS["default"])
+    tint = _accent_tint(accent, colors["surface"])
     settings["variables"] = {
+        # v3 names: what new CSS reads. The legacy --color-* names resolve from these in the
+        # stylesheet; they are listed too so clients that already apply them keep working.
+        "--accent": accent,
+        "--accent-hover": accent,
+        "--accent-ink": ink,
+        "--accent-tint": tint,
+        "--accent-line": accent,
         "--color-accent": accent,
         "--color-accent-strong": accent,
         "--color-accent-active": accent,
@@ -112,3 +121,20 @@ def resolved_theme(page):
         "--color-accent-contrast": ink,
     }
     return settings
+
+
+def _mix(foreground, background, share):
+    """sRGB mix of two #rrggbb colors; `share` is the foreground fraction."""
+    fg = [int(foreground[i : i + 2], 16) for i in (1, 3, 5)]
+    bg = [int(background[i : i + 2], 16) for i in (1, 3, 5)]
+    return "#" + "".join(f"{round(f * share + b * (1 - share)):02x}" for f, b in zip(fg, bg))
+
+
+def _accent_tint(accent, surface):
+    """Selected-row background for an organizer accent: the strongest tint on which the accent
+    still reads at 4.5:1, so accent text on it stays accessible; the plain surface otherwise."""
+    for share in (0.12, 0.08, 0.04):
+        tint = _mix(accent, surface, share)
+        if contrast_ratio(accent, tint) >= 4.5:
+            return tint
+    return surface

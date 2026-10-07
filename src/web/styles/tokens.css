@@ -1,10 +1,40 @@
-/* Shared semantic foundation; React and server-rendered public templates. */
+/* Shared semantic foundation; React and server-rendered public templates.
+   Colour values are the Conflux v3 tokens (docs/product-depth-v3/design/system/tokens.css);
+   tests/integration/test_visual_tokens.py fails when they drift. New CSS uses the v3 names. The
+   --color-* names below are one-release aliases to them (PD-F004-B01-T00), never second values. */
 :root {
-  --color-surface-subtle: #f7f9f8;
-  --color-text-tertiary: #65736d;
-  --color-accent-active: #083e35;
-  --color-accent-subtle: #e1efe9;
-  --color-divider: var(--color-border);
+  /* colour (v3, light) */
+  --bg: #f5f6f8; /* app canvas */
+  --surface: #ffffff; /* panels, tables */
+  --surface-2: #f0f2f5; /* table header, toolbars, wells */
+  --surface-3: #e6e9ee; /* pressed / strong wells */
+  --line: #dcdfe5; /* default hairline */
+  --line-2: #c3c8d1; /* control borders */
+  --line-3: #8a929e; /* focus-adjacent / strong control border (3:1 on white) */
+  --ink: #161a21; /* primary text 17.4:1 on white */
+  --ink-2: #454e5b; /* secondary text 8.4:1 on white */
+  --ink-3: #5e6772; /* tertiary text 5.7:1 on white, 5.3:1 on --bg */
+  --accent: #1d55c2; /* 6.7:1 on white */
+  --accent-hover: #174aa8;
+  --accent-ink: #ffffff;
+  --accent-tint: #e8effc; /* selected row, active nav */
+  --accent-line: #a9c1ef;
+  --ok: #17693c;
+  --ok-tint: #e5f4ea;
+  --ok-line: #9ccfae;
+  --warn: #7d4e00;
+  --warn-tint: #fff2d1;
+  --warn-line: #e6c36c;
+  --err: #b3261e;
+  --err-tint: #fcebe9;
+  --err-line: #eba9a4;
+  --info: #1d55c2;
+  --info-tint: #e8effc;
+  --info-line: #a9c1ef;
+  --mute: #5e6772;
+  --mute-tint: #eef0f3;
+  --mute-line: #cfd4db;
+
   --font-mono:
     ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
   --font-size-xs: 0.75rem;
@@ -39,28 +69,6 @@
   --z-toast: 80;
   --z-skip-link: 100;
 
-  --color-bg: #f4f6f5;
-  --color-surface: #edf1ef;
-  --color-surface-raised: #ffffff;
-  --color-border: #d7dce2;
-  --color-border-strong: #7c8982;
-  --color-text: #16202b;
-  --color-text-muted: #56626d;
-  --color-accent: #126454;
-  --color-accent-strong: #0b4c40;
-  --color-accent-contrast: #ffffff;
-
-  --color-success: #146c43;
-  --color-success-bg: #e7f6ec;
-  --color-warning: #8a5a00;
-  --color-warning-bg: #fff3e0;
-  --color-danger: #b3261e;
-  --color-danger-bg: #fdecea;
-  --color-info: #2952cc;
-  --color-info-bg: #eaf0ff;
-
-  --color-focus-ring: #126454;
-
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -79,41 +87,80 @@
   --font-size-lg: 1.25rem;
   --font-size-xl: 1.75rem;
 
+  --header-height: 3.5rem;
   --shadow-sm: 0 1px 2px rgba(22, 32, 43, 0.08);
   --shadow-md: 0 4px 12px rgba(22, 32, 43, 0.1);
-
-  --header-height: 3.5rem;
 }
 
-/* Organizer-selectable presets (PAGE-001), applied to the public event site
-   via `data-theme="dark"` / `.theme-minimal` on <html>/<body>. The React
-   public React root uses the same palette without changing the authenticated app. */
+/* Legacy colour names resolve from the v3 names on every element that may redeclare them
+   (organizer accent on .cx-event-site, dark scope), because var() resolves where it is declared. */
+:root,
+.cx-event-site,
+[data-theme] {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface-2);
+  --color-surface-raised: var(--surface);
+  --color-surface-subtle: var(--surface-2);
+  --color-border: var(--line);
+  --color-divider: var(--line);
+  --color-border-strong: var(--line-3);
+  --color-text: var(--ink);
+  --color-text-secondary: var(--ink-2);
+  --color-text-muted: var(--ink-2);
+  --color-text-tertiary: var(--ink-3);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-hover);
+  --color-accent-active: var(--accent-hover);
+  --color-accent-subtle: var(--accent-tint);
+  --color-accent-contrast: var(--accent-ink);
+  --color-success: var(--ok);
+  --color-success-bg: var(--ok-tint);
+  --color-warning: var(--warn);
+  --color-warning-bg: var(--warn-tint);
+  --color-danger: var(--err);
+  --color-danger-bg: var(--err-tint);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-tint);
+  --color-focus-ring: var(--accent);
+}
+
+/* Organizer-selectable preset (PAGE-001) and the v3 dark theme, applied via `data-theme="dark"`
+   on <html> or the public event site. The theme root re-declares colour and background (D-008). */
 :root[data-theme="dark"],
 .cx-event-site[data-theme="dark"] {
-  --color-surface-subtle: #171e23;
-  --color-text-tertiary: #a7b0bb;
-  --color-accent-subtle: #25344b;
-  --color-accent-active: #afc1ff;
-  --color-success: #81d7a7;
-  --color-success-bg: #193a2a;
-  --color-warning: #f4ca7c;
-  --color-warning-bg: #3d3019;
-  --color-danger: #ffa9a3;
-  --color-danger-bg: #442420;
-  --color-info: #adc1ff;
-  --color-info-bg: #25344b;
-  --color-focus-ring: #adc1ff;
-
-  --color-bg: #12161c;
-  --color-surface: #1b2028;
-  --color-surface-raised: #1b2028;
-  --color-border: #2c333d;
-  --color-border-strong: #7e8996;
-  --color-text: #e8ecf1;
-  --color-text-muted: #a7b0bb;
-  --color-accent: #6d8fff;
-  --color-accent-strong: #92abff;
-  --color-accent-contrast: #0c1220;
+  color-scheme: dark;
+  --bg: #0f1216;
+  --surface: #171b21;
+  --surface-2: #1e232b;
+  --surface-3: #2a313b;
+  --line: #2b323c;
+  --line-2: #3c4552;
+  --line-3: #7a8594;
+  --ink: #eceff3;
+  --ink-2: #b4bcc8;
+  --ink-3: #98a2b0;
+  --accent: #7ba6f4;
+  --accent-hover: #93b7f7;
+  --accent-ink: #0f1216;
+  --accent-tint: #1c2a45;
+  --accent-line: #35528a;
+  --ok: #6fd193;
+  --ok-tint: #12291c;
+  --ok-line: #26593a;
+  --warn: #f0bd5a;
+  --warn-tint: #2e2410;
+  --warn-line: #6b5219;
+  --err: #f59a92;
+  --err-tint: #33191a;
+  --err-line: #7a3733;
+  --info: #7ba6f4;
+  --info-tint: #1c2a45;
+  --info-line: #35528a;
+  --mute: #98a2b0;
+  --mute-tint: #232932;
+  --mute-line: #3a424e;
+  color: var(--ink);
+  background-color: var(--bg);
 }
 
 .theme-minimal .cx-card {

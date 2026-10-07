@@ -7,30 +7,32 @@ not a hypothetical redesign.
 
 import re
 
-# Mirrors src/web/styles/tokens.css exactly. Kept here rather than parsed
-# from the CSS at runtime -- there is no shared build step between the
-# Django backend and the Vite frontend for design tokens, and inventing
-# one is out of this batch's scope. THEME_COLORS must be updated by hand
-# if tokens.css's palette changes.
+# Mirrors the v3 colour tokens of src/web/styles/tokens.css (bg, surface, ink, ink-2, accent).
+# Kept here rather than parsed at runtime -- there is no shared build step between the Django
+# backend and the Vite frontend -- but tests/integration/test_visual_tokens.py parses the CSS and
+# fails when this table differs, so a palette change cannot leave the contrast gate behind.
 THEME_COLORS = {
     "default": {
-        "bg": "#f4f6f5",
-        "text": "#16202b",
-        "text_muted": "#56626d",
-        "accent": "#126454",
+        "bg": "#f5f6f8",
+        "surface": "#ffffff",
+        "text": "#161a21",
+        "text_muted": "#454e5b",
+        "accent": "#1d55c2",
     },
     "minimal": {
         # .theme-minimal only changes shadows/radius, not the palette.
-        "bg": "#f4f6f5",
-        "text": "#16202b",
-        "text_muted": "#56626d",
-        "accent": "#126454",
+        "bg": "#f5f6f8",
+        "surface": "#ffffff",
+        "text": "#161a21",
+        "text_muted": "#454e5b",
+        "accent": "#1d55c2",
     },
     "dark": {
-        "bg": "#12161c",
-        "text": "#e8ecf1",
-        "text_muted": "#a7b0bb",
-        "accent": "#6d8fff",
+        "bg": "#0f1216",
+        "surface": "#171b21",
+        "text": "#eceff3",
+        "text_muted": "#b4bcc8",
+        "accent": "#7ba6f4",
     },
 }
 

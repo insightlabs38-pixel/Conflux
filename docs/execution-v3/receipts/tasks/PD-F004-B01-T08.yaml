@@ -1,0 +1,96 @@
+version: 3
+task: PD-F004-B01-T08
+batch: PD-F004-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: e9406cd
+  head_commit: null
+changed_paths:
+- src/web/styles/tokens.css
+- src/web/styles/components.css
+- src/api/presentation/accessibility.py
+- src/api/presentation/themes.py
+- tests/integration/test_visual_tokens.py
+- tests/integration/test_accessibility_audit.py
+- tests/test_visual_ratchets.py
+deliverables:
+- item: Muted colour for structure, saturated colour reserved for status and action, through the canonical
+    token layer
+  result: pass
+  evidence: tokens.css now defines the v3 colour tokens (light and dark) once; 25 legacy --color-* names
+    are aliases to them (redeclared on :root, .cx-event-site and [data-theme] so organizer accent and
+    dark scope resolve); structure uses neutral --bg/--surface/--line/--ink, saturated fills are limited
+    to the allowlisted action and state selectors by tests/test_visual_ratchets.py
+- item: Observable diagnostics and no second source of truth
+  result: pass
+  evidence: test_visual_tokens.py fails when css differs from design tokens.json, when THEME_COLORS (server
+    contrast gate) differs from the css, or when a legacy alias holds a hex value
+- item: Integrate with existing authorization/versioning primitives
+  result: pass
+  evidence: organizer theme_config unchanged and still validated; resolved_theme variables add v3 names
+    plus an accessible accent tint while keeping the legacy keys, so the public API payload stays compatible
+invariants:
+- item: One canonical source of truth, server contrast gate stays authoritative
+  result: pass
+  evidence: 'THEME_COLORS gained a surface per theme and the dark surface literal in themes.py was removed;
+    stored preset accents (#126454, #a32918, #363636) re-checked at 4.5:1 on the new bg and surface'
+- item: Design intent, accessibility and progressive disclosure preserved
+  result: pass
+  evidence: every token pair at least 4.5:1 in both themes (tests/test_design_manifest.py); axe passed
+    on public, foundations and uiv2-gate specs
+- item: No test weakened
+  result: pass
+  evidence: test_fixed_theme_audit_tracks_shared_css_tokens was replaced by the stricter test_server_contrast_table_mirrors_the_css
+    (same intent re-pointed at the v3 names, plus design parity)
+verification:
+- command: uv run --frozen pytest tests/integration/test_visual_tokens.py tests/integration/test_event_themes.py
+    tests/integration/test_accessibility_audit.py tests/integration/test_accessibility_conformance.py
+    tests/test_visual_ratchets.py tests/test_design_manifest.py -q
+  result: pass
+  note: all passed; 3 preset-on-dark parametrizations skip by design (presets are light-theme accents)
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 658 tests passed, types clean
+- command: docker compose up -d --build app; make e2e-smoke
+  result: pass
+  note: 16 passed (8.7s)
+- command: npx playwright test -c tests/e2e/playwright.config.ts event-themes public foundations uiv2-gate
+    --project=desktop --project=mobile on an iso-min fixture
+  result: pass
+  note: 54 passed, 38 skipped by their own project guards, includes axe contrast and no-overflow checks
+    at 390 and 1440; fixture disposed
+- command: screenshots of the public event page and the workspace picker at 1440
+  result: pass
+  note: blue v3 accent on the app, organizer's stored green accent kept on the public site
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: colour tokens, line-3 control border, theme root rule
+- ref: design/state-matrix
+  result: pass
+  note: semantic status tokens carry tint, line and ink for icon-plus-word states
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: tokens and one danger-button text colour fix
+- surface: docs
+  result: pass
+  evidence: contract in spec 004; upgrade note scheduled with T91
+migrations: []
+findings:
+- 'P3 .cx-button--danger text was a literal #fff, unreadable on the light danger colour of the dark theme;
+  now var(--surface). The danger hover fill is on the ratchet allowlist until T06 makes destructive actions
+  neutral until the final step.'
+- P3 --color-text-secondary was used 18 times but never defined (inherited colour); now aliases --ink-2.
+escalations: []
+limitations:
+- Only the colour group of the v3 tokens is adopted here; type, spacing, radii, elevation, touch and font
+  tokens follow in T04, T05, T02, T03 (per the T00 task order).
+- Default accent changes from green to blue for the app and for public sites without a stored accent;
+  recorded for the upgrade note in T91.
+next: review

@@ -301,6 +301,21 @@
   --hero-lockup: 9rem;
   --hero-pad: var(--sp-8);
 }
+/* none: no band. The page keeps one h1 and the primary action; art, lockup and kicker are dropped. */
+.cx-event-site[data-hero-size="none"] {
+  --hero-pad: var(--sp-2);
+}
+.cx-event-site[data-hero-size="none"] .cx-hero__image,
+.cx-event-site[data-hero-size="none"] .cx-hero__identity,
+.cx-event-site[data-hero-size="none"] .cx-event-kicker {
+  display: none;
+}
+.cx-event-site[data-hero-size="none"] .cx-hero__band {
+  grid-template-columns: minmax(0, 1fr);
+}
+.cx-event-site[data-hero-size="none"] .cx-hero {
+  border-bottom: 0;
+}
 .cx-event-site .cx-hero {
   margin-block: var(--sp-4) var(--sp-8);
   border-bottom: 1px solid var(--line);

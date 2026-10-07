@@ -13,6 +13,9 @@ ENUMS = {
     "density": ("comfortable", "compact"),
     "width": ("standard", "wide"),
     "hero": ("split", "poster", "editorial"),
+    # How much room the public hero takes (PD-F004-B02-T08): compact is the default and what a theme
+    # without the key means, so no stored theme needs a migration.
+    "hero_size": ("compact", "none", "standard"),
     "background": ("canvas", "paper"),
     "project_card": ("visual", "compact"),
 }

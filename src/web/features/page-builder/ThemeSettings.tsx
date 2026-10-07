@@ -16,6 +16,7 @@ export type ThemeConfig = {
   density?: string;
   width?: string;
   hero?: string;
+  hero_size?: string;
   background?: string;
   project_card?: string;
 };
@@ -25,15 +26,19 @@ const choices: Record<string, string[]> = {
   density: ["comfortable", "compact"],
   width: ["standard", "wide"],
   hero: ["split", "poster", "editorial"],
+  hero_size: ["compact", "none", "standard"],
   background: ["canvas", "paper"],
   project_card: ["visual", "compact"],
 };
+const heroSizeHint =
+  "Compact is a short band with the title, status and one action. None keeps only the title and the action. Standard allows larger art.";
 const labels: Record<string, string> = {
   typography: "Typography",
   personality: "Corner style",
   density: "Section spacing",
   width: "Content width",
   hero: "Hero layout",
+  hero_size: "Hero size",
   background: "Background",
   project_card: "Project cards",
 };
@@ -173,6 +178,7 @@ export function ThemeSettings({
           <div className="cx-grid">
             {(
               [
+                "hero_size",
                 "hero",
                 "width",
                 "density",
@@ -180,7 +186,11 @@ export function ThemeSettings({
                 "project_card",
               ] as const
             ).map((key) => (
-              <Field key={key} label={labels[key]}>
+              <Field
+                key={key}
+                label={labels[key]}
+                hint={key === "hero_size" ? heroSizeHint : undefined}
+              >
                 {(props) => (
                   <Select
                     {...props}

@@ -141,7 +141,13 @@
         "src/api/presentation/*",
         "src/api/events/*"
       ],
-      "specs": ["event-themes", "foundations", "public", "showcase"]
+      "specs": [
+        "event-themes",
+        "foundations",
+        "hero-size",
+        "public",
+        "showcase"
+      ]
     },
     {
       "paths": [

@@ -1,0 +1,94 @@
+version: 3
+task: PD-F004-B02-T08
+batch: PD-F004-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: e3bc3bd
+  head_commit: null
+changed_paths:
+- src/api/presentation/themes.py
+- src/web/features/page-builder/ThemeSettings.tsx
+- src/web/features/page-builder/ThemeSettings.test.tsx
+- src/web/styles/presentation.css
+- tests/integration/test_event_themes.py
+- tests/e2e/hero-size.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+- tests/e2e/affected.json
+- docs/operations/VISUAL_FOUNDATION.md
+deliverables:
+- item: Organizer can choose none, compact or standard
+  result: pass
+  evidence: 'hero_size joins the presentation enums in themes.py (compact first, so it is the default),
+    so the existing page API validates it and a refusal changes nothing; Event setup, Public page, Appearance
+    has a Hero size select with a hint; both public renderers expose it as data-hero-size and the stylesheet
+    draws none (title and action only, one h1 kept), compact and standard (band at most 360px)'
+- item: Canonical source of truth
+  result: pass
+  evidence: one key in the page's theme_config, the same JSON the page API, Event-as-Code and the archive
+    already carry; no second setting, no new table
+- item: Migration and compatibility
+  result: pass
+  evidence: a theme without the key resolves to compact (tested); no stored value is rewritten and no migration
+    is needed. Visible consequence recorded in limitations
+- item: Diagnostics
+  result: pass
+  evidence: the server answers 400 with 'Unsupported hero_size preset.'; the form shows it in its alert and keeps
+    the draft (existing ThemeSettings behaviour, tested)
+invariants:
+- item: Server authority and audit
+  result: pass
+  evidence: save goes through the existing page PATCH (organizer role check, validation, existing audit);
+    the select is only a convenience over it
+- item: Progressive disclosure
+  result: pass
+  evidence: one select among the Layout settings with compact preselected; immersive is not offered
+- item: Accessibility
+  result: pass
+  evidence: axe and horizontal-overflow checks run on the builder after each save and on the public page for
+    each size at 390 and 1440
+verification:
+- command: uv run --frozen pytest -n auto -q
+  result: pass
+  note: 2892 passed, 34 skipped (18 theme tests, 7 of them new)
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 677 passed
+- command: uv run --frozen ruff check . && uv run --frozen ruff format --check .
+  result: pass
+  note: clean
+- command: e2e fixture iso-min; npx playwright test tests/e2e/hero-size.spec.ts --project=desktop
+  result: pass
+  note: 3 passed, 12 s per width; fixture disposed. A first run failed because the spec did not open the
+    Appearance tab (spec fault, fixed, no timeout changed)
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-HERO-1 none/compact/standard
+- ref: design/state-matrix
+  result: pass
+  note: the save form's loading, error and saved states are the shared ones
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: builder control, public renderers, stylesheet
+- surface: docs
+  result: pass
+  evidence: docs/operations/VISUAL_FOUNDATION.md, Public hero
+- surface: api
+  result: pass
+  evidence: not_required; theme_config is free JSON in OpenAPI, validation lives in themes.py, no schema change
+migrations: []
+findings:
+- P3 events that already had a stored theme now render the compact hero instead of the old large one
+  (the default changed by design in T07); an organizer who wants more room chooses standard.
+escalations: []
+limitations:
+- The organizer preview at desktop, tablet and mobile and image focal point are ADV items of the spec and are
+  not part of this task; the immersive size is not offered until it is designed.
+next: review

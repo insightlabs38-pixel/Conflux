@@ -119,7 +119,7 @@ export function EventSite({ eventId }: { eventId: string }) {
                 {schedule && <p>{schedule}</p>}
                 {event.description && <p>{event.description}</p>}
                 <p>
-                  <ButtonLink href={`/e/${eventId}/gallery/`}>
+                  <ButtonLink variant="primary" href={`/e/${eventId}/gallery/`}>
                     Browse project gallery
                   </ButtonLink>
                 </p>

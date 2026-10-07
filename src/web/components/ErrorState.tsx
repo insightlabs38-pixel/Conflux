@@ -1,4 +1,5 @@
 import { Button } from "./Button";
+import { Icon } from "./Icon";
 
 export function ErrorState({
   message,
@@ -9,7 +10,9 @@ export function ErrorState({
 }) {
   return (
     <div className="cx-state cx-state--error" role="alert">
-      <p className="cx-state__title">Something went wrong</p>
+      <p className="cx-state__title">
+        <Icon name="circle-x" /> Something went wrong
+      </p>
       <p>{message}</p>
       {onRetry && (
         <Button variant="secondary" onClick={onRetry}>

@@ -1,5 +1,6 @@
 import { useRef, type KeyboardEvent, type ReactNode } from "react";
 import { Button } from "./Button";
+import { Icon } from "./Icon";
 import { EmptyState } from "./EmptyState";
 import { ErrorState } from "./ErrorState";
 import { DeniedState } from "./DeniedState";
@@ -203,9 +204,13 @@ export function DataGrid<Row extends { id: string }>({
                         }
                       >
                         {column.label}
-                        <span aria-hidden="true">
-                          {active ? (sort!.descending ? " ▼" : " ▲") : ""}
-                        </span>
+                        {active && (
+                          <Icon
+                            name={
+                              sort!.descending ? "chevron-down" : "chevron-up"
+                            }
+                          />
+                        )}
                         <span className="cx-visually-hidden">
                           {active
                             ? sort!.descending

@@ -948,9 +948,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.cx-account summary::after {
-  content: "⌄";
-}
 .cx-account__panel {
   position: absolute;
   z-index: var(--z-menu);
@@ -2561,6 +2558,9 @@ html {
   position: static;
 }
 .cx-workflow__advanced {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
   text-align: left;
   min-height: var(--h-ctl);
   padding: var(--sp-2) var(--sp-3);
@@ -2827,4 +2827,35 @@ html {
   margin: var(--sp-2) 0 0;
   padding-left: var(--sp-4);
   color: var(--color-text-muted);
+}
+
+/* Icons (V-ICON-1): 16px, currentColor, never on a coloured tile; beside their word. */
+.cx-icon {
+  flex: none;
+  vertical-align: -0.125em;
+}
+.cx-sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.cx-sidebar__link .cx-icon {
+  color: var(--ink-3);
+}
+.cx-sidebar__link[aria-current] .cx-icon {
+  color: currentColor;
+}
+.cx-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+}
+.cx-alert > .cx-icon {
+  margin-top: 2px;
+}
+.cx-alert > div {
+  min-width: 0;
+}
+.cx-state__title .cx-icon {
+  margin-right: var(--sp-1);
 }

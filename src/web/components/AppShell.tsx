@@ -5,8 +5,30 @@ import {
   useWorkspaceNavigation,
 } from "./WorkspaceNavigation";
 import { SkipLink } from "./SkipLink";
+import { Icon, type IconName } from "./Icon";
 
 const MAIN_ID = "main-content";
+
+/** A rail icon helps find a place, so only the stable destinations have one. */
+const DESTINATION_ICON: Record<string, IconName> = {
+  overview: "home",
+  setup: "sliders",
+  participants: "users",
+  eligibility: "file-text",
+  judging: "list-checks",
+  results: "trophy",
+  communications: "message-square",
+  onsite: "map-pin",
+  integrations: "plug",
+  operations: "shield",
+  profile: "user",
+  team: "users",
+  project: "file-text",
+  resources: "file-text",
+  messages: "message-square",
+  queue: "list-checks",
+  schedule: "calendar",
+};
 
 /** Shared page chrome: skip link, header/nav landmark, main landmark. */
 export function AppShell({
@@ -92,6 +114,7 @@ export function AppShell({
           >
             <summary aria-label={`Account for ${username || "current user"}`}>
               <span>{username || "My account"}</span>
+              <Icon name="chevron-down" />
             </summary>
             <div className="cx-account__panel">
               {destinations.some((item) => item.id === "profile") && (
@@ -138,6 +161,9 @@ export function AppShell({
                   <p className="cx-sidebar__group">{item.group}</p>
                 )}
                 <DestinationLink id={item.id} className="cx-sidebar__link">
+                  {DESTINATION_ICON[item.id] && (
+                    <Icon name={DESTINATION_ICON[item.id]} />
+                  )}
                   {item.label}
                 </DestinationLink>
               </div>

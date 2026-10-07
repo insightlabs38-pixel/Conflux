@@ -126,6 +126,32 @@ async function actionHierarchy(page: Page) {
   });
 }
 
+/** Icons that break the contract: wrong size, unnamed and not hidden, or alone on a coloured tile. */
+async function iconProblems(page: Page) {
+  return page.evaluate(() => {
+    const bad: string[] = [];
+    for (const icon of document.querySelectorAll<SVGElement>("svg.cx-icon")) {
+      if (!icon.checkVisibility()) continue;
+      const box = icon.getBoundingClientRect();
+      const where = `${icon.parentElement?.tagName.toLowerCase()}.${icon.parentElement?.className}`;
+      if (![12, 16, 20].includes(Math.round(box.width)))
+        bad.push(`size ${box.width} in ${where}`);
+      const hidden = icon.getAttribute("aria-hidden") === "true";
+      const named =
+        icon.getAttribute("role") === "img" &&
+        !!icon.getAttribute("aria-label");
+      if (!hidden && !named) bad.push(`unnamed icon in ${where}`);
+      const parent = icon.parentElement!;
+      const tile =
+        parent.childElementCount === 1 &&
+        !parent.textContent?.trim() &&
+        getComputedStyle(parent).backgroundColor !== "rgba(0, 0, 0, 0)";
+      if (tile) bad.push(`coloured tile ${where}`);
+    }
+    return bad;
+  });
+}
+
 const ROLES = ["organizer", "participant-01", "judge-01"];
 for (const width of [390, 1440]) {
   for (const role of ROLES) {
@@ -149,6 +175,13 @@ for (const width of [390, 1440]) {
       // standard density keeps controls at 28px or more; touch layouts at the 44px hit area
       expect(await shortControls(page, width < 768 ? 44 : 28)).toEqual([]);
       expect(await offScaleRadii(page)).toEqual([]);
+      expect(await iconProblems(page)).toEqual([]);
+      if (width >= 1024)
+        expect(
+          await page
+            .locator(".cx-sidebar__link:not(:has(svg.cx-icon))")
+            .count(),
+        ).toBe(0);
       expect(await shadowed(page)).toEqual([]);
       if (role === "organizer" && width >= 768) {
         await page.locator(".cx-account summary").click();

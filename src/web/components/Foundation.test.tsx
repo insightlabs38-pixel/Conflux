@@ -48,12 +48,14 @@ describe("foundation accessibility contracts", () => {
   it("keeps actions as links and choices native and disabled", () => {
     const html = renderToStaticMarkup(
       <>
-        <ButtonLink href="/event">Join event</ButtonLink>
+        <ButtonLink variant="primary" href="/event">
+          Join event
+        </ButtonLink>
         <Checkbox disabled />
         <Radio name="role" value="judge" />
       </>,
     );
-    expect(html).toContain('<a class="cx-button cx-button--primary ');
+    expect(html).toContain('<a class="cx-button cx-button--primary"');
     expect(html).toContain('href="/event"');
     expect(html).toContain('type="checkbox"');
     expect(html).toContain('disabled=""');

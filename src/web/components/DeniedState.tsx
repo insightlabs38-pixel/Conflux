@@ -1,3 +1,5 @@
+import { Icon } from "./Icon";
+
 export function DeniedState({
   message = "You do not have access to this page.",
 }: {
@@ -5,7 +7,9 @@ export function DeniedState({
 }) {
   return (
     <div className="cx-state cx-state--denied" role="alert">
-      <p className="cx-state__title">Access denied</p>
+      <p className="cx-state__title">
+        <Icon name="lock" /> Access denied
+      </p>
       <p>{message}</p>
     </div>
   );

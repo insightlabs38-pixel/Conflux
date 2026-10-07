@@ -1,5 +1,6 @@
 import { useMe, useSessionChanged, useSignOut } from "../hooks/useMe";
 import { Button } from "../components/Button";
+import { Icon } from "../components/Icon";
 import { Avatar, PageHeader } from "../components/Foundation";
 import { LoadingState } from "../components/LoadingState";
 import { ErrorState } from "../components/ErrorState";
@@ -94,8 +95,8 @@ export function WorkspaceSelector({
                     {membership.role}
                   </span>
                 </span>
-                <span className="cx-workspace-choice__arrow" aria-hidden="true">
-                  →
+                <span className="cx-workspace-choice__arrow">
+                  <Icon name="arrow-right" />
                 </span>
               </button>
             </li>

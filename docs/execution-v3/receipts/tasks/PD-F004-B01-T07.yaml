@@ -1,0 +1,92 @@
+version: 3
+task: PD-F004-B01-T07
+batch: PD-F004-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: f7660b1
+  head_commit: null
+changed_paths:
+- src/web/components/Icon.tsx
+- src/web/components/Icon.test.tsx
+- src/web/components/AppShell.tsx
+- src/web/components/Foundation.tsx
+- src/web/components/Foundation.test.tsx
+- src/web/components/ErrorState.tsx
+- src/web/components/DeniedState.tsx
+- src/web/components/DataGrid.tsx
+- src/web/components/WorkflowSections.tsx
+- src/web/app/WorkspaceSelector.tsx
+- src/web/public/event-site/EventSite.tsx
+- src/web/styles/components.css
+- tests/test_visual_ratchets.py
+- tests/e2e/visual-foundation.spec.ts
+deliverables:
+- item: Iconography used where it improves recognition, not as decoration
+  result: pass
+  evidence: one Icon component (24 grid, 2px round stroke, currentColor, 16px, Lucide shapes, 28 names);
+    used for rail destinations (recognition), alert and error/denied states (status = icon plus word),
+    sort direction, disclosure and arrow affordances; the CSS content glyph on the account menu and the
+    text glyphs for sort, disclosure and workspace arrow were replaced; ButtonLink now shares Button's
+    variants and default (secondary)
+- item: Never colour or meaning alone
+  result: pass
+  evidence: an icon is aria-hidden beside its word or an img with a label; Alert pairs each tone with
+    an icon and its text; tests assert it for all four tones, ErrorState and DeniedState
+invariants:
+- item: One canonical component, no inline svg, no coloured tiles
+  result: pass
+  evidence: ratchets fail on an inline <svg> outside Icon, on a coloured background for an icon selector,
+    and on glyph characters in CSS content (diff +/- marks excepted); e2e audits size, naming and tiles
+    on live pages
+- item: Accessibility preserved
+  result: pass
+  evidence: axe passed in uiv2-gate, public, workspace-shell and foundations; icons are focusable=false
+- item: No test weakened
+  result: pass
+  evidence: 'Foundation.test.tsx now passes variant=primary explicitly because ButtonLink''s default became
+    secondary (same intent: a link-styled action); no assertion removed'
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 664 passed (3 new Icon tests)
+- command: uv run --frozen pytest tests/test_visual_ratchets.py tests/integration/test_visual_tokens.py
+    -q
+  result: pass
+  note: all passed
+- command: docker compose up -d --build app; npx playwright test -c tests/e2e/playwright.config.ts visual-foundation
+    --project=desktop
+  result: pass
+  note: 8 passed including icon audit and rail icons at 1440; screenshot of the organizer rail opened
+    and checked
+- command: npx playwright test -c tests/e2e/playwright.config.ts uiv2-gate public workspace-shell foundations
+    --project=desktop
+  result: pass
+  note: 44 passed
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-ICON-1, V-SLOP-2 (no coloured icon tiles)
+- ref: design/state-matrix
+  result: pass
+  note: S-ERR and S-DENY states carry icon plus word
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: Icon, shell rail, states, alerts
+- surface: docs
+  result: pass
+  evidence: contract in spec 004
+migrations: []
+findings:
+- P3 shapes are authored from the Lucide set (ISC licence) by hand; there is no automated diff against
+  the upstream package, which is not a dependency
+escalations: []
+limitations:
+- 'Not every status in the app is an icon-plus-word yet: Badge/Status/Tag are split in PD-F004-B02-T01..;
+  Loading and Empty states have no icon by design.'
+next: review

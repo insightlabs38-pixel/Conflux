@@ -1,6 +1,7 @@
 import { useId, useRef, useState, type ReactNode } from "react";
 import { useInRouterContext } from "react-router";
 import { useUrlParam } from "../lib/urlState";
+import { Icon } from "./Icon";
 
 type Section = {
   id: string;
@@ -149,7 +150,7 @@ function Tabs({
             disabled={selectedIsAdvanced}
             onClick={() => setExpanded((value) => !value)}
           >
-            <span aria-hidden="true">{open ? "\u2212" : "+"} </span>
+            <Icon name={open ? "minus" : "plus"} />
             Advanced ({advanced.length})
           </button>
         </div>

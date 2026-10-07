@@ -7,17 +7,19 @@ import {
   type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
 } from "react";
+import { buttonClass, type ButtonSize, type ButtonVariant } from "./Button";
+import { Icon } from "./Icon";
 
 export function ButtonLink({
-  variant = "primary",
+  variant = "secondary",
+  size = "md",
   className = "",
   ...props
 }: AnchorHTMLAttributes<HTMLAnchorElement> & {
-  variant?: "primary" | "secondary";
+  variant?: ButtonVariant;
+  size?: ButtonSize;
 }) {
-  return (
-    <a className={`cx-button cx-button--${variant} ${className}`} {...props} />
-  );
+  return <a className={buttonClass(variant, size, className)} {...props} />;
 }
 
 export function PageHeader({
@@ -233,6 +235,13 @@ export function ProjectCard({
   );
 }
 
+const ALERT_ICON = {
+  info: "info",
+  danger: "circle-x",
+  warning: "triangle-alert",
+  success: "circle-check",
+} as const;
+
 export function Alert({
   tone = "info",
   children,
@@ -245,7 +254,8 @@ export function Alert({
       className={`cx-alert cx-alert--${tone}`}
       role={tone === "danger" ? "alert" : "status"}
     >
-      {children}
+      <Icon name={ALERT_ICON[tone]} />
+      <div>{children}</div>
     </div>
   );
 }

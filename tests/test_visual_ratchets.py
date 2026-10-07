@@ -82,7 +82,7 @@ def declarations(text, prop):
     text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
     for match in re.finditer(r"([^{}]+)\{([^{}]*)\}", text):
         selector = " ".join(match.group(1).split()).split("}")[-1].strip()
-        for value in re.findall(prop + r":\s*([^;]+);", match.group(2)):
+        for value in re.findall(r"(?<![\w-])" + prop + r":\s*([^;]+);", match.group(2)):
             yield selector, value.strip()
 
 
@@ -211,3 +211,41 @@ def test_overlays_use_the_scrim_and_floating_background_tokens():
     assert dict(declarations(text, "background"))[".cx-consequence__backdrop"] == "var(--scrim)"
     assert dict(declarations(text, "background"))[".cx-consequence"] == "var(--float-bg)"
     assert dict(declarations(text, "background"))[".cx-account__panel"] == "var(--float-bg)"
+
+
+def web_sources():
+    for path in sorted(WEB.rglob("*.tsx")):
+        parts = path.relative_to(WEB).parts
+        if parts[0] in ("node_modules", "dist"):
+            continue
+        yield path
+
+
+def test_icons_come_from_the_one_component_not_inline_svg():
+    for path in web_sources():
+        if path.name in ("Icon.tsx", "Icon.test.tsx") or ".test." in path.name:
+            continue
+        assert "<svg" not in path.read_text(), str(path.relative_to(WEB))
+
+
+def test_icons_never_sit_on_coloured_tiles():
+    for sheet in SHEETS:
+        for selector, body in rules(sheet.read_text()):
+            if "icon" in selector.lower() and "mark" not in selector.lower():
+                assert not re.search(
+                    r"background(-color)?:\s*var\(--(?:color-)?(?!surface|bg)", body
+                ), (
+                    sheet.name,
+                    selector,
+                )
+
+
+def test_decorative_glyph_characters_are_not_used_as_icons_in_css_content():
+    for sheet in SHEETS:
+        for _, value in declarations(sheet.read_text(), "content"):
+            assert (
+                value in ('"/"', '"− "', '"+ "', '"Account"', '""', "none") or "attr(" in value
+            ), (
+                sheet.name,
+                value,
+            )

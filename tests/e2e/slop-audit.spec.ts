@@ -21,6 +21,7 @@ const RULES: SlopRule[] = [
   "pills",
   "nestedCards",
   "repeatedLabels",
+  "hiddenActions",
 ];
 
 const SETUP_TASKS = [
@@ -269,4 +270,22 @@ test("the audit sees a label said twice and a crumb that repeats the title", asy
   expect(found.repeatedLabels?.some((p) => p.startsWith("breadcrumb"))).toBe(
     true,
   );
+});
+
+test("the audit sees actions hidden behind three dots", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, "organizer");
+  await goToDestination(page, "overview");
+  await settled(page);
+  await page.evaluate(() => {
+    const row = document.createElement("div");
+    row.innerHTML =
+      '<button type="button">\u22ef</button><button type="button" aria-haspopup="menu">Row</button><button type="button" aria-label="More actions"><svg width="12" height="12"></svg></button>';
+    document.querySelector("main")!.prepend(row);
+  });
+  const found = await slopProblems(page, ["hiddenActions"]);
+  expect(found.hiddenActions).toHaveLength(3);
 });

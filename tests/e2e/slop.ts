@@ -227,6 +227,35 @@ export async function slopProblems(page: Page, rules: SlopRule[]) {
           add("repeatedLabels", `breadcrumb "${h1}" repeats the page title`);
     }
 
+    if (wanted.includes("hiddenActions")) {
+      // an action people use every day is a labelled button on the row or the page, not a menu
+      // behind a three-dot glyph (V-SLOP-8). Flags a menu popup, a trigger whose only text is a
+      // dots glyph, and an icon-only "more/actions/options" control. A labelled disclosure
+      // ("Advanced", "Show filters") is progressive disclosure and stays allowed.
+      const dots = /^[\s.\u2026\u22ef\u22ee\u2807\u00b7\u2022]+$/;
+      const vague = /^(more|more actions|actions|options|menu|overflow)$/i;
+      for (const el of document.querySelectorAll(
+        'main button, main summary, main [role="button"], main [aria-haspopup]',
+      )) {
+        if (!shown(el)) continue;
+        const text = (el.textContent ?? "").trim();
+        const label = (el.getAttribute("aria-label") ?? text).trim();
+        if (
+          el.matches(
+            '[aria-haspopup]:not([aria-haspopup="false"]):not([aria-haspopup="dialog"])',
+          )
+        )
+          add("hiddenActions", `menu trigger "${label}" in ${name(el)}`);
+        else if (dots.test(text) || (!text && vague.test(label)))
+          add(
+            "hiddenActions",
+            `three-dot control "${label || "dots"}" in ${name(el)}`,
+          );
+      }
+      for (const menu of document.querySelectorAll('main [role="menu"]'))
+        if (shown(menu)) add("hiddenActions", `a menu popup in ${name(menu)}`);
+    }
+
     if (wanted.includes("kpiCards")) {
       // a row of three or more boxes with their own border or fill is a card dashboard (V-SLOP-3,
       // V-SLOP-14); a summary is one strip of figures, and a list of records is a table. Only the

@@ -1,0 +1,60 @@
+version: 3
+task: PD-F004-B04-T08
+batch: PD-F004-B04
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: d33fd27
+  head_commit: null
+changed_paths:
+- tests/e2e/slop.ts
+- tests/e2e/slop-audit.spec.ts
+deliverables:
+- item: Rule encoded in the visual audit contract
+  result: pass
+  evidence: 'live rule hiddenActions (V-SLOP-8) in tests/e2e/slop.ts, enabled in RULES of slop-audit.spec.ts. Inside main it flags a menu popup (role=menu), a trigger with aria-haspopup other than dialog, a control whose only text is a dots glyph, and an icon-only control named more, actions, options, menu or overflow. Labelled disclosures such as Advanced or Show filters stay allowed because they are progressive disclosure, not hidden actions. Runs on every destination and task tab of every role at 390 and 1440 and on the six setup tasks.'
+- item: Rule applied to the approved reference surfaces
+  result: pass
+  evidence: no surface hid an action behind a menu, so no product change was needed; grep of src/web finds no aria-haspopup, role=menu or dots-glyph trigger, and the audit passes on all 65 pages. Every primary action (Send, Publish, Create, Save, Remove) is a labelled button on its row or panel.
+- item: No product behavior added for the guardrail
+  result: pass
+  evidence: test-only change
+invariants:
+- item: The gate can fail
+  result: pass
+  evidence: self-test "the audit sees actions hidden behind three dots" injects a glyph button, a menu trigger and an icon-only More actions button and expects exactly three findings
+- item: No test weakened
+  result: pass
+  evidence: a rule and a self-test were added; nothing removed or loosened
+verification:
+- command: cd src/web && npx tsc --noEmit
+  result: pass
+  note: clean
+- command: npx playwright test slop-audit --project=desktop --workers=4
+  result: pass
+  note: 67 passed in 58.6 s against the rebuilt stack from T07 (web bundle unchanged in this task)
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-SLOP-8
+- ref: design/state-matrix
+  result: pass
+  note: states untouched
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: live audit over all roles and the public site
+- surface: docs
+  result: pass
+  evidence: spec 004 contract at T91
+migrations: []
+findings:
+- P3 the rule looks inside main only; the application shell outside main has no menus today (grep), so a future shell menu would need the scope widened.
+escalations: []
+limitations:
+- Dialogs and open disclosures are not walked by the audit (same as T06).
+next: review

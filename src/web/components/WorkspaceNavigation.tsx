@@ -19,56 +19,65 @@ export type Destination = {
   short?: string;
   /** Kept in the bottom bar when the role has more than five places (the rest go to "More"). */
   bar?: boolean;
+  /** The letter after G that goes here ("G then J"); unique within the role. */
+  key?: string;
 };
 
 export const roleDestinations: Record<string, Destination[]> = {
   participant: [
-    { id: "overview", label: "Overview", bar: true },
-    { id: "team", label: "Team", bar: true },
+    { id: "overview", label: "Overview", key: "o", bar: true },
+    { id: "team", label: "Team", key: "t", bar: true },
     {
       id: "project",
       label: "Project & submission",
+      key: "p",
       short: "Project",
       bar: true,
     },
-    { id: "resources", label: "Event resources", short: "Resources" },
-    { id: "messages", label: "Messages", bar: true },
-    { id: "profile", label: "Profile & history" },
+    { id: "resources", label: "Event resources", key: "r", short: "Resources" },
+    { id: "messages", label: "Messages", key: "m", bar: true },
+    { id: "profile", label: "Profile & history", key: "f" },
   ],
   judge: [
-    { id: "overview", label: "Overview" },
-    { id: "queue", label: "Review queue", short: "Queue" },
-    { id: "schedule", label: "Schedule & route", short: "Schedule" },
-    { id: "profile", label: "Judge profile", short: "Profile" },
-    { id: "messages", label: "Messages" },
+    { id: "overview", label: "Overview", key: "o" },
+    { id: "queue", label: "Review queue", key: "q", short: "Queue" },
+    { id: "schedule", label: "Schedule & route", key: "s", short: "Schedule" },
+    { id: "profile", label: "Judge profile", key: "f", short: "Profile" },
+    { id: "messages", label: "Messages", key: "m" },
   ],
   organizer: [
-    { id: "overview", label: "Overview", bar: true },
-    { id: "setup", label: "Event setup", group: "Manage event" },
+    { id: "overview", label: "Overview", key: "o", bar: true },
+    { id: "setup", label: "Event setup", key: "s", group: "Manage event" },
     {
       id: "participants",
       label: "Participants & teams",
+      key: "p",
       short: "People",
       bar: true,
     },
-    { id: "eligibility", label: "Projects & eligibility", short: "Projects" },
-    { id: "judging", label: "Judging", bar: true },
-    { id: "results", label: "Results & publication" },
-    { id: "communications", label: "Communications" },
-    { id: "onsite", label: "On-site", bar: true },
-    { id: "integrations", label: "Integrations", group: "Advanced" },
-    { id: "operations", label: "Operations & audit" },
-    { id: "profile", label: "Profile", group: "Account" },
+    {
+      id: "eligibility",
+      label: "Projects & eligibility",
+      key: "e",
+      short: "Projects",
+    },
+    { id: "judging", label: "Judging", key: "j", bar: true },
+    { id: "results", label: "Results & publication", key: "r" },
+    { id: "communications", label: "Communications", key: "c" },
+    { id: "onsite", label: "On-site", key: "n", bar: true },
+    { id: "integrations", label: "Integrations", key: "i", group: "Advanced" },
+    { id: "operations", label: "Operations & audit", key: "a" },
+    { id: "profile", label: "Profile", key: "f", group: "Account" },
   ],
   mentor: [
-    { id: "overview", label: "Mentor desk" },
-    { id: "profile", label: "Profile" },
-    { id: "messages", label: "Messages" },
+    { id: "overview", label: "Mentor desk", key: "o" },
+    { id: "profile", label: "Profile", key: "f" },
+    { id: "messages", label: "Messages", key: "m" },
   ],
   volunteer: [
-    { id: "overview", label: "Check-in desk" },
-    { id: "profile", label: "Profile" },
-    { id: "messages", label: "Messages" },
+    { id: "overview", label: "Check-in desk", key: "o" },
+    { id: "profile", label: "Profile", key: "f" },
+    { id: "messages", label: "Messages", key: "m" },
   ],
 };
 roleDestinations.admin = roleDestinations.organizer;

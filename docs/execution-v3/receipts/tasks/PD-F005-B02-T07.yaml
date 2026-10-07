@@ -1,0 +1,80 @@
+version: 3
+task: PD-F005-B02-T07
+batch: PD-F005-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: f08554e
+  head_commit: null
+changed_paths:
+- src/web/lib/shortcuts.ts
+- src/web/lib/shortcuts.test.ts
+- src/web/lib/shellEvents.ts
+- src/web/lib/shellPreferences.ts
+- src/web/lib/commands.ts
+- src/web/lib/shellCommands.ts
+- src/web/components/ShortcutsHelp.tsx
+- src/web/components/ShortcutsHelp.test.tsx
+- src/web/components/CommandPalette.tsx
+- src/web/components/CommandPalette.test.tsx
+- src/web/components/AppShell.tsx
+- src/web/components/WorkspaceNavigation.tsx
+- src/web/styles/components.css
+- tests/e2e/shortcuts.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Keyboard shortcut help overlay as a complete workflow
+  result: pass
+  evidence: The question-mark key opens a dialog titled Keyboard shortcuts with what works anywhere (Ctrl or Cmd K, "/", Esc) and, per group, the commands that declare a shortcut - read from the command registry (COMMANDS, lib/commands.ts), so a command that declares one appears without editing the overlay; the go-to keys are G then a letter for each of the role's places (a key field on roleDestinations, unique per role). The same help opens from the palette (Show keyboard shortcuts) and from the account menu, which is how it is found with no keyboard.
+- item: The shortcuts themselves
+  result: pass
+  evidence: lib/shortcuts.ts interprets keys apart from React - question mark for help, slash for the palette, g starts a chord that lasts 1.5 s and the next letter goes to that place; any other key drops it; nothing fires while typing (input, textarea, select, contenteditable), with Ctrl, Cmd or Alt held, or while a modal dialog is open
+- item: Accessibility - single-key shortcuts can be turned off
+  result: pass
+  evidence: the help has a switch (checkbox) for single-key shortcuts (WCAG 2.1.4); off, "?", "/" and G-then-letter do nothing and the keys using Ctrl or Cmd remain; the choice is device-local (shellPreferences), survives a reload and is forgotten at sign-out; the overlay is a modal dialog with focus return and passes axe at 1440 and 390
+invariants:
+- item: One registry, no second list of shortcuts
+  result: pass
+  evidence: the overlay and the palette read commandsFor(context); the go-to keys come from the same destinations as the rail; nothing else lists keys
+- item: No test weakened
+  result: pass
+  evidence: palette expectations were updated for the new Help group and the shortcut shown beside a command (labels are asserted without it, and the shortcut is asserted separately)
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 141 files, 771 tests (shortcuts 3, ShortcutsHelp 5 - help listing from the registry, chord with timeout and wrong keys, silence while typing or in a dialog or with a modifier, the off switch, the account menu)
+- command: npx playwright test -c tests/e2e/playwright.config.ts shortcuts --project=desktop --workers=3
+  result: pass
+  note: 4 passed on the rebuilt stack - the help lists the role's keys and G J and G R navigate; / opens the palette and ? or g typed into its box are text; the switch persists across a reload while Ctrl+K still works; the help opens from the account menu at 390 inside the viewport with axe clean
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: the question-mark key opens shortcuts, G-then-letter navigation, palette dialog with listbox
+- ref: design/state-matrix
+  result: pass
+  note: no data state
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit, component, browser and accessibility tests
+- surface: audit
+  result: pass
+  evidence: shortcuts only navigate or open overlays; they write nothing
+- surface: search
+  result: pass
+  evidence: the slash key opens the palette and its record search
+- surface: docs
+  result: pass
+  evidence: developer note and release note at T91
+migrations: []
+findings:
+- P3 two entries of roleDestinations are formatted across lines and the automated key insertion missed them; found by a coverage script and added by hand (every place of every role has a key, unique per role).
+escalations: []
+limitations:
+- Keys are not remappable; the off switch is the WCAG 2.1.4 mechanism. There are no shortcuts inside a screen yet (for example next or previous row); they join the registry as features need them.
+next: review

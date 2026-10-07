@@ -137,6 +137,32 @@ export function useDensityPreference(user: string): Density {
   );
 }
 
+/**
+ * Single-key shortcuts (?, /, G then a letter) can be switched off (WCAG 2.1.4); the keys that use
+ * Ctrl or Cmd stay. On by default, stored only when off.
+ */
+export const singleKeyShortcuts = (user: string) =>
+  !user ||
+  storage()?.getItem(key(user, DEVICE, "single-key-shortcuts")) !== "off";
+
+export function setSingleKeyShortcuts(user: string, on: boolean) {
+  if (!user) return;
+  try {
+    if (on) storage()?.removeItem(key(user, DEVICE, "single-key-shortcuts"));
+    else storage()?.setItem(key(user, DEVICE, "single-key-shortcuts"), "off");
+  } catch {
+    // blocked storage: the choice lasts until the page is closed
+  }
+  changed();
+}
+
+export const useSingleKeyShortcuts = (user: string) =>
+  useSyncExternalStore(
+    subscribe,
+    () => singleKeyShortcuts(user),
+    () => true,
+  );
+
 const MAX_RECENT_COMMANDS = 5;
 const COMMAND_ID = /^[a-z][a-z0-9._-]{0,80}$/i;
 

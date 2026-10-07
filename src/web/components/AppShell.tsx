@@ -19,6 +19,8 @@ import {
 import { EventSwitcher } from "./EventSwitcher";
 import { InboxCenter } from "./InboxCenter";
 import { CommandPaletteButton } from "./CommandPalette";
+import { ShellShortcuts } from "./ShortcutsHelp";
+import { openShellOverlay } from "../lib/shellEvents";
 import { SkipLink } from "./SkipLink";
 import { Icon, type IconName } from "./Icon";
 
@@ -164,6 +166,7 @@ export function AppShell({
   return (
     <div className={`cx-shell ${destinations ? "cx-shell--workspace" : ""}`}>
       {destinations && <ThemeApplier />}
+      {destinations && <ShellShortcuts />}
       <SkipLink targetId={MAIN_ID} />
       <header className="cx-shell__header">
         <Brand className="cx-shell__brand">
@@ -240,6 +243,13 @@ export function AppShell({
               )}
               <ThemeChoice />
               <DensityChoice />
+              <button
+                type="button"
+                className="cx-account__link cx-account__shortcuts"
+                onClick={() => openShellOverlay("shortcuts")}
+              >
+                Keyboard shortcuts
+              </button>
               <p className="cx-metadata">{role} access</p>
               {onSignOut && (
                 <button

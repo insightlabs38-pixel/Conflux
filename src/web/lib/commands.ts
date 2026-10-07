@@ -22,7 +22,7 @@ export type CommandContext = {
   /** The current view of the workspace. */
   view: string;
   /** The places this person has in this workspace (the shell's destinations, hidden modules removed). */
-  places: { id: string; label: string; to: string }[];
+  places: { id: string; label: string; to: string; key?: string }[];
   /** The events this person may choose between, the selected one marked. */
   events: { id: string; name: string; current: boolean }[];
   /** Go to a location (path and search) built with `routes.target`. */
@@ -32,6 +32,7 @@ export type CommandContext = {
     signOut: () => void;
     setTheme: (theme: "system" | "light" | "dark") => void;
     setDensity: (density: "comfortable" | "compact" | "high") => void;
+    openShortcuts: () => void;
   }>;
 };
 

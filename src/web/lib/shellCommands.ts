@@ -15,6 +15,7 @@ registerCommandProvider((context) => {
       label: `Go to ${place.label}`,
       group: "Go to",
       keywords: [place.label],
+      shortcut: place.key ? `G then ${place.key.toUpperCase()}` : undefined,
       run: (ctx) => ctx.go(place.to),
     });
   for (const event of context.events)
@@ -69,6 +70,18 @@ registerCommandProvider(() => {
     density("high", "Use high-density tables"),
   ];
 });
+
+registerCommandProvider(() => [
+  {
+    id: "help.shortcuts",
+    label: "Show keyboard shortcuts",
+    group: "Help",
+    keywords: ["keys", "keyboard", "help", "hotkeys"],
+    shortcut: "?",
+    when: (ctx) => !!ctx.capabilities.openShortcuts,
+    run: (ctx) => ctx.capabilities.openShortcuts?.(),
+  },
+]);
 
 registerCommandProvider(() => [
   {

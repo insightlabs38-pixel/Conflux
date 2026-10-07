@@ -55,5 +55,6 @@
   "isolated-mutation:inbox-center": 30,
   "read-only:global-search": 30,
   "read-only:command-palette": 30,
-  "read-only:density": 25
+  "read-only:density": 25,
+  "read-only:shortcuts": 25
 }

@@ -143,6 +143,11 @@ const key = async (name: string) =>
   });
 const options = () =>
   [...document.querySelectorAll('[role="option"]')].map((o) => o.textContent);
+/** The words of each option, without a shortcut shown beside it. */
+const labels = () =>
+  [...document.querySelectorAll('[role="option"] > span:first-child')].map(
+    (o) => o.textContent,
+  );
 const groups = () =>
   [...document.querySelectorAll(".cx-search__group")].map((g) => g.textContent);
 const where = () =>
@@ -192,12 +197,18 @@ describe("command palette", () => {
       () => {},
     );
     await open();
-    expect(groups()).toEqual(["Go to", "Events", "Appearance", "Account"]);
-    expect(options()).toContain("Go to Team");
-    expect(options()).not.toContain("Go to Event setup"); // an organizer place
-    expect(options()).toContain("Switch to Noether Night");
-    expect(options()).not.toContain("Switch to Gauss Hack"); // already selected
-    expect(options()).toContain("Sign out");
+    expect(groups()).toEqual([
+      "Go to",
+      "Events",
+      "Appearance",
+      "Help",
+      "Account",
+    ]);
+    expect(labels()).toContain("Go to Team");
+    expect(labels()).not.toContain("Go to Event setup"); // an organizer place
+    expect(labels()).toContain("Switch to Noether Night");
+    expect(labels()).not.toContain("Switch to Gauss Hack"); // already selected
+    expect(labels()).toContain("Sign out");
     await act(async () => root.unmount());
   });
 
@@ -207,7 +218,8 @@ describe("command palette", () => {
     });
     await open();
     await type("review q");
-    expect(options()).toEqual(["Go to Review queue"]);
+    expect(labels()).toEqual(["Go to Review queue"]);
+    expect(options()).toEqual(["Go to Review queueG then Q"]); // the shortcut is shown beside it
     await key("Enter");
     expect(where()).toBe("/w/w/queue?event=e1&stage=s1");
     expect(document.querySelector(".cx-search")).toBeNull();

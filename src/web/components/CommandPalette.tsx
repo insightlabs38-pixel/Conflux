@@ -18,6 +18,7 @@ import {
 } from "../lib/commands";
 import "../lib/shellCommands";
 import { routes } from "../lib/routes";
+import { onShellOverlay, openShellOverlay } from "../lib/shellEvents";
 import {
   rememberCommand,
   setDensityPreference,
@@ -53,6 +54,7 @@ export function CommandPaletteButton({
 }) {
   const [open, setOpen] = useState(false);
   const navigation = useWorkspaceNavigation();
+  useEffect(() => onShellOverlay("palette", () => setOpen(true)), []);
   useEffect(() => {
     const toggle = (event: globalThis.KeyboardEvent) => {
       if (
@@ -136,6 +138,7 @@ function CommandPalette({
         id: place.id,
         label: place.label,
         to: navigation.href(place.id),
+        key: place.key,
       })),
       events: events.map((event) => ({
         id: event.public_id,
@@ -147,6 +150,7 @@ function CommandPalette({
         signOut: onSignOut,
         setTheme: (theme) => setThemePreference(user, theme),
         setDensity: (density) => setDensityPreference(user, density),
+        openShortcuts: () => openShellOverlay("shortcuts"),
       },
     }),
     // `go` only closes over `navigate`, which is stable

@@ -1134,6 +1134,42 @@
   gap: var(--sp-2);
   min-height: var(--h-ctl);
 }
+.cx-account__shortcuts {
+  width: 100%;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.cx-shortcuts {
+  margin: 0 0 var(--sp-3);
+}
+.cx-shortcuts > div {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  padding: var(--sp-1) 0;
+  border-bottom: 1px solid var(--line);
+}
+.cx-shortcuts dt {
+  flex: none;
+  min-width: 6rem;
+}
+.cx-shortcuts dd {
+  margin: 0;
+}
+.cx-shortcuts kbd {
+  font: inherit;
+  font-weight: var(--font-weight-semibold);
+}
+.cx-shortcuts__switch {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--h-ctl);
+}
 .cx-account__link {
   display: flex;
   align-items: center;

@@ -38,7 +38,8 @@ export type SlopRule =
   | "alarmColors"
   | "fakeAi"
   | "precision"
-  | "opaqueIds";
+  | "opaqueIds"
+  | "crumbs";
 
 export async function slopProblems(page: Page, rules: SlopRule[]) {
   return page.evaluate((wanted) => {
@@ -445,6 +446,17 @@ export async function slopProblems(page: Page, rules: SlopRule[]) {
         else if (uuid.test(box.value))
           add("opaqueIds", `input holds an opaque id in ${name(el)}`);
       }
+    }
+
+    if (wanted.includes("crumbs")) {
+      // a breadcrumb trail is for a page three levels deep (Breadcrumbs in Foundation.tsx renders
+      // nothing otherwise). Every page the audit walks is a destination or a tab of one, which the
+      // rail and the tabs already locate, so a trail on any of them is noise (V-SLOP-7). A page
+      // that is three deep and is added to the audit later must be excepted here with its reason.
+      for (const nav of document.querySelectorAll(
+        'nav[aria-label="Breadcrumb"], nav[aria-label="Breadcrumbs"]',
+      ))
+        if (shown(nav)) add("crumbs", `breadcrumb trail in ${name(nav)}`);
     }
 
     if (wanted.includes("kpiCards")) {

@@ -1,0 +1,65 @@
+version: 3
+task: PD-F005-B01-T04
+batch: PD-F005-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 649151d
+  head_commit: null
+changed_paths:
+- src/web/components/Foundation.tsx
+- src/web/components/Breadcrumbs.test.tsx
+- tests/e2e/slop.ts
+- tests/e2e/slop-audit.spec.ts
+deliverables:
+- item: Breadcrumbs only where they add orientation
+  result: pass
+  evidence: the one existing Breadcrumbs component (Foundation.tsx, unused in the app until now) now enforces the rule by construction - it lists the ancestors of the current page, never the page itself (its title is the heading, so nothing is said twice, V-SLOP-7), and renders nothing unless there are at least two ancestors, that is a page three levels deep. Ancestors link through routes.target (RouteTarget) inside a workspace, or a plain href outside it.
+- item: Applied where it adds orientation, with the decision recorded
+  result: pass
+  evidence: a census of every in-app page found none three levels deep - destinations are located by the rail and bottom bar, sections by the tabs, and records are inline panels (no record route or Back control exists in src/web/features). So no page carries a trail today; the first consumers are record pages that later tasks add (side inspector B02-T06, record deep links). Stated as a limitation rather than adding a decorative trail.
+- item: The rule is a gate, not a convention
+  result: pass
+  evidence: slop rule crumbs (tests/e2e/slop.ts, enabled in RULES) fails any breadcrumb trail on the 65 audited destination and tab pages at 390 and 1440, with a self-test that injects a two-item trail on Results and expects one finding
+invariants:
+- item: No parallel breadcrumb component or hand-built URL
+  result: pass
+  evidence: one component, extended in place; links built by routes.target
+- item: No test weakened
+  result: pass
+  evidence: a rule and a self-test were added; the server-rendered public breadcrumb (project page) is untouched
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run components
+  result: pass
+  note: 217 passed; Breadcrumbs.test.tsx covers nothing for 1 or 2 levels, ancestors only for 3, router links with event context, plain-href fallback
+- command: npx playwright test -c tests/e2e/playwright.config.ts slop-audit --project=desktop --workers=3
+  result: pass
+  note: 77 passed on the rebuilt stack (crumbs rule on every audited page plus its self-test)
+- command: browser verification at 390 and 1440 with loading, empty and error states
+  result: pass
+  note: the audit runs the rule at 390 and 1440 on all three roles; no page renders a trail, so there is no layout to review
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: the boards show no breadcrumb on any destination, consistent with the rule
+- ref: design/state-matrix
+  result: pass
+  note: no state added
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: component and live audit
+- surface: docs
+  result: pass
+  evidence: contract in spec 005
+migrations: []
+findings:
+- P3 no in-app page is three levels deep yet; the component is ready for the first record page and the audit rule must get an exception (with a reason) for it.
+escalations: []
+limitations:
+- No visible trail ships in this task, by decision.
+next: review

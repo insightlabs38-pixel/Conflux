@@ -27,6 +27,7 @@ const RULES: SlopRule[] = [
   "fakeAi",
   "precision",
   "opaqueIds",
+  "crumbs",
 ];
 
 const SETUP_TASKS = [
@@ -433,4 +434,22 @@ test("the audit sees a box that asks for an opaque id", async ({
   // the placeholder, the labelled box and the box holding a uuid; the authored key, a name search,
   // a read-only box and a select (a choice by name) are not reported
   expect(found.opaqueIds).toHaveLength(3);
+});
+
+test("the audit sees a breadcrumb trail on a destination", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, "organizer");
+  await goToDestination(page, "results");
+  await settled(page);
+  await page.evaluate(() => {
+    const nav = document.createElement("nav");
+    nav.setAttribute("aria-label", "Breadcrumb");
+    nav.innerHTML = "<ol><li>Home</li><li>Results</li></ol>";
+    document.querySelector("main")!.prepend(nav);
+  });
+  const found = await slopProblems(page, ["crumbs"]);
+  expect(found.crumbs).toHaveLength(1);
 });

@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+import { routes, type RouteTarget } from "../lib/routes";
 import { initials } from "../lib/initials";
 import {
   useId,
@@ -265,20 +267,44 @@ export function Grid({
 }: HTMLAttributes<HTMLDivElement>) {
   return <div className={`cx-grid ${className}`} {...props} />;
 }
+export type Crumb = {
+  label: string;
+  /** A place in a workspace, linked through the router (lib/routes.ts). */
+  target?: RouteTarget;
+  /** A plain link for anything outside the workspace routes. */
+  href?: string;
+};
+
+/**
+ * Where the current page sits, shown only when that adds orientation: the trail lists the *ancestors*
+ * of the page (never the page itself, whose title is the heading, so nothing is said twice) and only
+ * when there are at least two of them, that is when the page is three levels deep or more. A
+ * destination, or a section under one, is already shown by the rail and the tabs, so it gets none.
+ * `items` ends with the current page; its label is dropped.
+ */
 export function Breadcrumbs({
   items,
+  workspaceId,
 }: {
-  items: { label: string; href?: string }[];
+  items: Crumb[];
+  /** Needed to link a `target`. */
+  workspaceId?: string;
 }) {
+  const ancestors = items.slice(0, -1);
+  if (ancestors.length < 2) return null;
   return (
     <nav aria-label="Breadcrumb">
       <ol className="cx-breadcrumbs">
-        {items.map((item, index) => (
+        {ancestors.map((item, index) => (
           <li key={index}>
-            {item.href ? (
+            {item.target && workspaceId ? (
+              <Link to={routes.target(workspaceId, item.target)}>
+                {item.label}
+              </Link>
+            ) : item.href ? (
               <a href={item.href}>{item.label}</a>
             ) : (
-              <span aria-current="page">{item.label}</span>
+              <span>{item.label}</span>
             )}
           </li>
         ))}

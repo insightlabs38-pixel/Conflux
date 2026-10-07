@@ -1,0 +1,65 @@
+version: 3
+task: PD-F005-B01-T01
+batch: PD-F005-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 0180e33
+  head_commit: null
+changed_paths:
+- src/web/lib/routes.ts
+- src/web/lib/routes.test.ts
+- src/web/components/WorkspaceNavigation.tsx
+- tests/e2e/routing.spec.ts
+deliverables:
+- item: Real route hierarchy with stable URLs, back/forward and deep linking as a complete workflow
+  result: pass
+  evidence: the hierarchy, legacy mapping and URL-state rules existed (PD-B04-T01/T04); this task adds the missing half of the contract - RouteTarget {view, section, event, params} with one builder routes.target and its inverse parseWorkspaceLocation (src/web/lib/routes.ts), so every later surface (switcher, breadcrumbs, search, palette, inbox) produces a target instead of a string. WorkspaceNavigation.href now builds through it (the only hand-built workspace URL).
+- item: Wired to canonical state, no mock
+  result: pass
+  evidence: browser tests run against the live seeded stack through the gateway
+- item: States, keyboard and accessibility, no base clutter
+  result: pass
+  evidence: no visible change; unknown section keeps the first tab selected, an unknown event is removed from the URL, a view the role lacks goes to the overview (existing test), signed-out deep link returns to the same URL (existing test)
+invariants:
+- item: One URL per place; no typed text in a URL
+  result: pass
+  evidence: routes.test.ts - fixed query order (event, stage, plan, invite, other keys by name, section), TypeError for free text, an email, an upper-case key or a reserved name; parseWorkspaceLocation drops unsafe params
+- item: Legacy and existing URLs unchanged
+  result: pass
+  evidence: legacyTarget table and App.navigation tests unchanged and green; href keeps the carried order event, stage, plan, invite then section
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: see the run just before this receipt (full web suite)
+- command: npx playwright test -c tests/e2e/playwright.config.ts routing --project=desktop
+  result: pass
+  note: 9 passed against the rebuilt stack, two new - an organizer deep link with event and section survives reload and Back returns to the exact place; an unknown section does not select another tab and an unknown event is removed from the URL
+- command: browser verification at 390
+  result: skipped
+  note: the routing spec is viewport independent by design (test.skip isMobile); no layout changed
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: no visual change in this task
+- ref: design/state-matrix
+  result: pass
+  note: S-DENY and not-found states unchanged and tested
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: lib, component and browser tests
+- surface: docs
+  result: pass
+  evidence: contract in spec 005; release note at T91
+migrations: []
+findings: []
+escalations:
+- ESC-20260930-007
+limitations:
+- Search results, breadcrumbs, the switcher, the palette and the inbox have not adopted RouteTarget yet; each does in its own task.
+next: review

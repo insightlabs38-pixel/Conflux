@@ -129,11 +129,16 @@ export function WorkspaceNavigationProvider({
     : "overview";
   const href = useCallback(
     (id: string, section?: string) => {
-      const carried = carriedSearch(search);
-      const tab = section
-        ? `${carried ? "&" : "?"}section=${encodeURIComponent(section)}`
-        : "";
-      return routes.workspace(workspaceId, id) + carried + tab;
+      // Context follows the person between views; panel state and typed text do not (urlState.ts).
+      const kept = new URLSearchParams(carriedSearch(search));
+      const event = kept.get("event") ?? undefined;
+      kept.delete("event");
+      return routes.target(workspaceId, {
+        view: id,
+        section,
+        event,
+        params: Object.fromEntries(kept),
+      });
     },
     [workspaceId, search],
   );

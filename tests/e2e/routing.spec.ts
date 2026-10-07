@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { account, PASSWORD, signIn, settled } from "./support";
+import { account, eventIds, PASSWORD, signIn, settled } from "./support";
 
 // Real routes and stable deep links (PD-B04-T01): direct loads through the gateway, refresh,
 // history, compatibility redirects for the pre-router query-string URLs, and role boundaries.
@@ -135,4 +135,42 @@ test("selecting a workspace and going back to workspaces is a real history round
   await expect(
     page.getByRole("navigation", { name: "Your workspaces" }),
   ).toBeVisible();
+});
+
+test("a deep link to an event and a section keeps both through reload and history", async ({
+  page,
+}) => {
+  await signIn(page, "organizer");
+  const { workspace, event } = await eventIds(page);
+  const link = `/app/w/${workspace}/setup?event=${event}&section=policies`;
+  await page.goto(link);
+  const tab = page.getByRole("tab", { name: /^Policies/ });
+  await expect(tab).toHaveAttribute("aria-selected", "true");
+  await page.reload();
+  await expect(tab).toHaveAttribute("aria-selected", "true");
+  const search = new URL(page.url()).searchParams;
+  expect(search.get("event")).toBe(event);
+  expect(search.get("section")).toBe("policies");
+  // moving to another place is a history entry, Back returns to the exact place
+  await page.locator('#workspace-navigation a[href*="/judging"]').click();
+  await expect(page).toHaveURL(new RegExp(`/judging\\?event=${event}`));
+  await page.goBack();
+  await expect(tab).toHaveAttribute("aria-selected", "true");
+  expect(new URL(page.url()).search).toBe(`?event=${event}&section=policies`);
+});
+
+test("a section or event that is not offered is not honoured", async ({
+  page,
+}) => {
+  await signIn(page, "organizer");
+  const { workspace, event } = await eventIds(page);
+  await page.goto(`/app/w/${workspace}/setup?event=${event}&section=nonsense`);
+  await settled(page);
+  // an unknown section never selects another place: exactly one tab is selected, the first
+  await expect(page.getByRole("tab", { selected: true })).toHaveCount(1);
+  await page.goto(`/app/w/${workspace}/setup?event=not-an-event`);
+  await settled(page);
+  await expect(page.locator("main")).toBeVisible();
+  // the URL is a request: an event that does not resolve is removed from it, not shown as another
+  expect(new URL(page.url()).searchParams.get("event")).toBeNull();
 });

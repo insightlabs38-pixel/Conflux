@@ -70,6 +70,18 @@ export async function slopProblems(page: Page, rules: SlopRule[]) {
         }
       }
     }
+    if (wanted.includes("iconTile")) {
+      // an icon is for recognition where it helps, not a decoration in front of every heading
+      const headings = [
+        ...document.body.querySelectorAll("h1, h2, h3, h4"),
+      ].filter(shown);
+      const iconed = headings.filter((h) => h.querySelector(":scope > svg"));
+      if (headings.length >= 3 && iconed.length * 2 > headings.length)
+        add(
+          "iconTile",
+          `${iconed.length} of ${headings.length} headings lead with an icon`,
+        );
+    }
     return found;
   }, rules);
 }

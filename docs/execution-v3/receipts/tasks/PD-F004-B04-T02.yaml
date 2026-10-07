@@ -1,0 +1,58 @@
+version: 3
+task: PD-F004-B04-T02
+batch: PD-F004-B04
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: bd518be
+  head_commit: null
+changed_paths:
+- tests/e2e/slop.ts
+- tests/e2e/slop-audit.spec.ts
+deliverables:
+- item: No icons in coloured squares next to headings
+  result: pass
+  evidence: 'the static ratchet from PD-F004-B01 (no icon selector with a filled background) is joined by a live
+    rule: an svg whose parent or grandparent holds no text, is at most 64px square and has a painted
+    background is reported, and so is a page where more than half of at least three visible headings lead with an
+    icon (decoration rather than recognition). 49 audit tests over the three roles and the public pages are clean
+    at 390 and 1440; the self-test shows the rule a coloured square and expects it to fire'
+invariants:
+- item: The gate can fail
+  result: pass
+  evidence: "the self-test (\"the audit sees a gradient and an icon in a coloured square\") injects both and expects both rules"
+- item: Icons stay where they help
+  result: pass
+  evidence: rail items, status words and state titles keep their icons (they are not headings with tiles)
+verification:
+- command: npx playwright test slop-audit --project=desktop --workers=4
+  result: pass
+  note: 49 passed
+- command: uv run --frozen pytest tests/test_visual_ratchets.py -q
+  result: pass
+  note: 27 passed
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-SLOP-2, V-ICON-1
+- ref: design/state-matrix
+  result: pass
+  note: not applicable
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: live audit and ratchet
+- surface: docs
+  result: pass
+  evidence: spec 004 contract at T91
+migrations: []
+findings:
+- no violation existed; the proof is new.
+escalations: []
+limitations:
+- Same coverage limit as T01 (reference destinations and main public pages).
+next: review

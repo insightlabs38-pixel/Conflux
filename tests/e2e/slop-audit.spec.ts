@@ -12,7 +12,7 @@ import { slopProblems, type SlopRule } from "./slop";
 // The anti-slop gate of spec 004 (V-SLOP-1..) measured on the live pages of every role and on the
 // public site, at 390 and 1440. Read-only. One test per page and width: pages are large and each
 // is measured on its own. A rule is added to RULES by the task that implements it.
-const RULES: SlopRule[] = ["gradient"];
+const RULES: SlopRule[] = ["gradient", "iconTile"];
 
 const PAGES: Record<string, string[]> = {
   organizer: [
@@ -87,7 +87,9 @@ for (const width of [390, 1440]) {
 }
 
 // The gate must be able to fail: each rule is shown a page that breaks it.
-test("the audit sees a gradient", async ({ page }, info) => {
+test("the audit sees a gradient and an icon in a coloured square", async ({
+  page,
+}, info) => {
   test.skip(info.project.name !== "desktop", "explicit viewport matrix");
   await signIn(page, "organizer");
   const { event } = await eventIds(page);
@@ -96,6 +98,14 @@ test("the audit sees a gradient", async ({ page }, info) => {
     content:
       ".cx-hero h1::after{content:'';display:block;height:4px;background:linear-gradient(red,blue)}",
   });
-  const found = await slopProblems(page, ["gradient"]);
-  expect(Object.keys(found)).toEqual(["gradient"]);
+  await page.evaluate(() => {
+    const tile = document.createElement("span");
+    tile.style.cssText =
+      "display:inline-block;width:32px;height:32px;background:rgb(30,80,200)";
+    tile.innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 24 24"><path d="M5 12h14"/></svg>';
+    document.querySelector("main")!.prepend(tile);
+  });
+  const found = await slopProblems(page, ["gradient", "iconTile"]);
+  expect(Object.keys(found).sort()).toEqual(["gradient", "iconTile"]);
 });

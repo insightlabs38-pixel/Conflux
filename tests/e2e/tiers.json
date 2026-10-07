@@ -1,5 +1,6 @@
 {
   "read-only": [
+    "account-menu",
     "async-operations",
     "event-switcher",
     "extended-embed",

@@ -50,5 +50,6 @@
   "read-only:uiv2-surfaces": 165,
   "read-only:url-state": 3.1,
   "read-only:visual-foundation": 5.6,
-  "read-only:workspace-shell": 40.7
+  "read-only:workspace-shell": 40.7,
+  "read-only:account-menu": 30
 }

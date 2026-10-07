@@ -5,11 +5,56 @@ import {
   roleDestinations,
   useWorkspaceNavigation,
 } from "./WorkspaceNavigation";
+import { useAppTheme } from "../hooks/useAppTheme";
+import { useMe } from "../hooks/useMe";
+import {
+  setThemePreference,
+  useThemePreference,
+  type Theme,
+} from "../lib/shellPreferences";
 import { EventSwitcher } from "./EventSwitcher";
 import { SkipLink } from "./SkipLink";
 import { Icon, type IconName } from "./Icon";
 
 const MAIN_ID = "main-content";
+
+/**
+ * The signed-in person's theme on the app's own screens. It exists only in the workspace shell: the
+ * public event site and the server-rendered public pages follow the organizer's theme and are never
+ * overridden by the viewer's choice (design: dark-mode, Authority).
+ */
+function ThemeApplier() {
+  useAppTheme(useMe().data?.public_id ?? "");
+  return null;
+}
+
+function ThemeChoice() {
+  const user = useMe().data?.public_id ?? "";
+  const preference = useThemePreference(user);
+  return (
+    <fieldset className="cx-account__theme">
+      <legend>Theme</legend>
+      {(
+        [
+          ["system", "System"],
+          ["light", "Light"],
+          ["dark", "Dark"],
+        ] as [Theme, string][]
+      ).map(([value, label]) => (
+        <label key={value}>
+          <input
+            type="radio"
+            name="theme"
+            value={value}
+            checked={preference === value}
+            onChange={() => setThemePreference(user, value)}
+          />{" "}
+          {label}
+        </label>
+      ))}
+    </fieldset>
+  );
+}
 
 /** A rail icon helps find a place, so only the stable destinations have one. */
 const DESTINATION_ICON: Record<string, IconName> = {
@@ -82,6 +127,7 @@ export function AppShell({
   };
   return (
     <div className={`cx-shell ${destinations ? "cx-shell--workspace" : ""}`}>
+      {destinations && <ThemeApplier />}
       <SkipLink targetId={MAIN_ID} />
       <header className="cx-shell__header">
         <Brand className="cx-shell__brand">
@@ -141,10 +187,20 @@ export function AppShell({
             </summary>
             <div className="cx-account__panel">
               {destinations.some((item) => item.id === "profile") && (
-                <DestinationLink id="profile" className="cx-account__link">
-                  View profile
-                </DestinationLink>
+                <>
+                  <DestinationLink id="profile" className="cx-account__link">
+                    View profile
+                  </DestinationLink>
+                  <DestinationLink
+                    id="profile"
+                    hash="notification-preferences"
+                    className="cx-account__link"
+                  >
+                    Notification preferences
+                  </DestinationLink>
+                </>
               )}
+              <ThemeChoice />
               <p className="cx-metadata">{role} access</p>
               {onSignOut && (
                 <button

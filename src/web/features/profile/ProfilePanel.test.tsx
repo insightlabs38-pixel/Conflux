@@ -2,6 +2,7 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
+import { MemoryRouter } from "react-router";
 import { ProfilePanel } from "./ProfilePanel";
 import { jsonResponse } from "../../lib/test-http";
 
@@ -52,7 +53,13 @@ it("retains an editable identity after a rejected save, then shows the confirmed
   const host = document.createElement("div");
   document.body.appendChild(host);
   const root = createRoot(host);
-  await act(async () => root.render(<ProfilePanel />));
+  await act(async () =>
+    root.render(
+      <MemoryRouter>
+        <ProfilePanel />
+      </MemoryRouter>,
+    ),
+  );
   await waitFor(() => Boolean(host.querySelector("form")));
   expect(host.textContent).toContain("Python");
   expect(host.textContent).toContain("Looking for a team");
@@ -94,7 +101,13 @@ it("contains malformed profile responses in a retryable error instead of throwin
   const host = document.createElement("div");
   document.body.appendChild(host);
   const root = createRoot(host);
-  await act(async () => root.render(<ProfilePanel />));
+  await act(async () =>
+    root.render(
+      <MemoryRouter>
+        <ProfilePanel />
+      </MemoryRouter>,
+    ),
+  );
   await waitFor(() => Boolean(host.querySelector('[role="alert"]')));
   expect(host.textContent).toContain("Invalid profile response.");
   expect(host.querySelector("button")?.textContent).toBe("Try again");

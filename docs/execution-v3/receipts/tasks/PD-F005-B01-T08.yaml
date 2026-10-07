@@ -1,0 +1,77 @@
+version: 3
+task: PD-F005-B01-T08
+batch: PD-F005-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 4813fa4
+  head_commit: null
+changed_paths:
+- src/web/lib/shellPreferences.ts
+- src/web/lib/shellPreferences.test.ts
+- src/web/hooks/useAppTheme.ts
+- src/web/hooks/useAppTheme.test.tsx
+- src/web/components/AppShell.tsx
+- src/web/components/WorkspaceNavigation.tsx
+- src/web/components/WorkspaceNavigation.test.tsx
+- src/web/features/profile/ProfilePanel.tsx
+- src/web/features/profile/ProfilePanel.test.tsx
+- src/web/styles/components.css
+- tests/e2e/account-menu.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Account, profile and preferences control as a complete workflow
+  result: pass
+  evidence: the account menu of every role shell now holds View profile, Notification preferences (opens the profile with that disclosure open and focused, via a hash link and a ProfilePanel effect that follows hash changes), a Theme choice (System, Light, Dark; radios) and the role line and Sign out it already had. Theme applies to the app's own screens through data-theme on the document in a layout effect (no wrong-theme flash), follows the operating system while System is chosen (and changes with it), and an explicit choice ignores the system. The account menu is the one place B02 adds role switch, preview-as, density and shortcuts.
+- item: Wired to canonical state, no mock
+  result: pass
+  evidence: notification preferences are the existing server-backed NOTIFICATIONS primitive screen; the theme is the one shell preference that is device-local by decision (shellPreferences, QUESTIONS.md 2026-10-07T21:40Z); browser tests run on the live stack for organizer, participant and judge
+- item: States, keyboard, accessibility, base clutter
+  result: pass
+  evidence: native radios in a fieldset with a legend, labelled links, Escape closes the menu and returns focus (existing test unchanged and green), 44px controls on touch, no new chrome in the header; axe passes in dark on the organizer overview at 1440 and 390 and in the existing dark and minimal pass of uiv2-gate for all three roles; dark was reviewed on the shell, switcher, account menu and phone sheet (screenshots)
+invariants:
+- item: The app theme never reaches the public pages
+  result: pass
+  evidence: ThemeApplier and ThemeChoice render only in the workspace shell (the public event site and the server-rendered site do not mount them); the browser test chooses Dark and then loads /e/<event>/ (not dark) and /app/event/<event> (no data-theme); the attribute found before is restored when the shell leaves
+- item: Stored value is a request; forgotten at sign-out; no personal data
+  result: pass
+  evidence: themePreference reads only system, light or dark (anything else is system), the default is stored as nothing, setThemePreference refuses other values, and clearShellPreferences at sign-out removes it (the browser test finds no theme key and no data-theme after sign-out)
+- item: No test weakened
+  result: pass
+  evidence: WorkspaceNavigation tests that looked for the draft input now exclude the theme radios (input:not([name=theme])); ProfilePanel tests gained a router, which it now needs for the hash; no assertion removed
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 134 files, 733 tests (shellPreferences theme 2, useAppTheme 3 with a controllable matchMedia)
+- command: npx playwright test -c tests/e2e/playwright.config.ts account-menu event-switcher shell-responsive workspace-shell visual-foundation uiv2-gate slop-audit roles routing --project=desktop --workers=4
+  result: pass
+  note: 196 passed on the rebuilt stack; account-menu spec 6 (menu contents, notification preferences landing, dark at 1440 and 390 with reload and axe, System following the OS, public pages untouched and sign-out forgetting)
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: account menu with theme; role switch, preview-as, density and shortcuts follow in B02 in the same menu
+- ref: design/dark-mode
+  result: pass
+  note: system, light, dark per user on authenticated app surfaces (default System), public pages never overridden
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit, component, browser and accessibility tests
+- surface: docs
+  result: pass
+  evidence: contract in spec 005; release note at T91
+migrations: []
+findings:
+- P3 the profile section is a collapsed disclosure by design (progressive disclosure), so the menu link opens it rather than scrolling to a visible region.
+- P3 an earlier immediate read of data-theme after load raced the passive effect; fixed by applying in a layout effect and by polling in the browser tests.
+escalations:
+- ESC-20260930-007
+limitations:
+- The theme is per device, not per person across devices (QUESTIONS.md); the workspace selector and API explorer, which do not use the workspace shell, stay in the default light theme.
+- Only the screens the dark reference covers were reviewed visually; the rest inherit through tokens and are checked by axe where the existing gates walk them.
+next: review

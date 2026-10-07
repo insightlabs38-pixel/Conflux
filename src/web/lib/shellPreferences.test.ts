@@ -7,6 +7,8 @@ import {
   favoriteEvents,
   recentEvents,
   rememberEvent,
+  setThemePreference,
+  themePreference,
   toggleFavoriteEvent,
 } from "./shellPreferences";
 
@@ -68,5 +70,28 @@ describe("shell preferences", () => {
     expect(favoriteEvents("u", "w")).toEqual([]);
     expect(recentEvents("u2", "w2")).toEqual([]);
     expect(window.localStorage.getItem("something-else")).toBe("kept");
+  });
+
+  it("keeps the theme per person, defaulting to the system, and forgets it at sign-out", () => {
+    expect(themePreference("u")).toBe("system");
+    setThemePreference("u", "dark");
+    expect(themePreference("u")).toBe("dark");
+    expect(themePreference("other")).toBe("system");
+    setThemePreference("u", "system"); // the default is stored as nothing at all
+    expect(window.localStorage.length).toBe(0);
+    setThemePreference("u", "light");
+    clearShellPreferences();
+    expect(themePreference("u")).toBe("system");
+  });
+
+  it("reads an unknown stored theme as the system and refuses to store one", () => {
+    window.localStorage.setItem("conflux:v1:u:device:theme", "purple");
+    expect(themePreference("u")).toBe("system");
+    setThemePreference("u", "purple" as never);
+    setThemePreference("", "dark");
+    expect(window.localStorage.getItem("conflux:v1:u:device:theme")).toBe(
+      "purple",
+    );
+    expect(themePreference("")).toBe("system");
   });
 });

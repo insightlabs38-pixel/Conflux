@@ -260,10 +260,13 @@ export function DestinationLink({
   children,
   className = "cx-task-link",
   title,
+  hash,
 }: {
   id: string;
   /** A tooltip for a link whose words are hidden (the icon rail). */
   title?: string;
+  /** An element id on the destination to scroll to (for a part of a page that is not a tab). */
+  hash?: string;
   /** Open this tab of the destination (a `linkable` WorkflowSections id). */
   section?: string;
   children: ReactNode;
@@ -274,7 +277,10 @@ export function DestinationLink({
   // to the browser, and the href is the canonical deep link.
   return (
     <Link
-      to={navigation?.href(id, section) || routes.home}
+      to={
+        (navigation?.href(id, section) || routes.home) +
+        (hash ? `#${hash}` : "")
+      }
       onClick={(event) => {
         if (
           event.button === 0 &&

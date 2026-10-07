@@ -1,4 +1,5 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useLocation } from "react-router";
 import { Button } from "../../components/Button";
 import {
   Field,
@@ -74,6 +75,19 @@ export function ProfilePanel({ workspaceId }: { workspaceId?: string }) {
   const [saved, setSaved] = useState(false);
   const [retry, setRetry] = useState(0);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  // The account menu links here by hash: open that disclosure, bring it into view and focus it.
+  const { hash } = useLocation();
+  const notifications = useRef<HTMLDetailsElement>(null);
+  const loaded = profile !== null;
+  useEffect(() => {
+    if (hash !== "#notification-preferences" || !loaded) return;
+    const details = notifications.current;
+    if (!details) return;
+    details.open = true;
+    setNotificationsOpen(true);
+    details.scrollIntoView({ block: "start" });
+    details.querySelector("summary")?.focus({ preventScroll: true });
+  }, [hash, loaded]);
   const [skillText, setSkillText] = useState("");
   const [interestText, setInterestText] = useState("");
   const [roleText, setRoleText] = useState("");
@@ -349,6 +363,8 @@ export function ProfilePanel({ workspaceId }: { workspaceId?: string }) {
       </details>
       {workspaceId && (
         <details
+          ref={notifications}
+          id="notification-preferences"
           className="cx-profile-editor"
           onToggle={(event) => setNotificationsOpen(event.currentTarget.open)}
         >

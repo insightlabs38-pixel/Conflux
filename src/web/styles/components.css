@@ -1032,6 +1032,25 @@
 .cx-switcher__star[aria-pressed="true"] .cx-icon {
   fill: currentColor;
 }
+.cx-account__theme {
+  margin: var(--sp-3) 0 0;
+  padding: var(--sp-2) 0 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+.cx-account__theme legend {
+  padding: 0;
+  color: var(--ink-3);
+  font-size: var(--fs-12);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.cx-account__theme label {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--h-ctl);
+}
 .cx-account__link {
   display: flex;
   align-items: center;

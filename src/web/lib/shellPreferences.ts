@@ -140,3 +140,33 @@ export const useFavoriteEvents = (user: string, workspace: string) =>
   useList(() => favoriteEvents(user, workspace));
 export const useRecentEvents = (user: string, workspace: string) =>
   useList(() => recentEvents(user, workspace));
+
+/** The colour theme of the app's own screens; "system" follows the operating system (design D-008). */
+export type Theme = "system" | "light" | "dark";
+const THEMES: readonly Theme[] = ["system", "light", "dark"];
+const DEVICE = "device"; // a value that is the person's, not one workspace's
+
+export function themePreference(user: string): Theme {
+  if (!user) return "system";
+  const raw = storage()?.getItem(key(user, DEVICE, "theme"));
+  return THEMES.find((theme) => theme === raw) ?? "system";
+}
+
+export function setThemePreference(user: string, theme: Theme) {
+  if (!user || !THEMES.includes(theme)) return;
+  try {
+    if (theme === "system") storage()?.removeItem(key(user, DEVICE, "theme"));
+    else storage()?.setItem(key(user, DEVICE, "theme"), theme);
+  } catch {
+    // blocked storage: the choice lasts until the page is closed, nothing breaks
+  }
+  changed();
+}
+
+export function useThemePreference(user: string): Theme {
+  return useSyncExternalStore(
+    subscribe,
+    () => themePreference(user),
+    () => "system" as Theme,
+  );
+}

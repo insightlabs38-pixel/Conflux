@@ -1,0 +1,38 @@
+version: 1
+checkpoint_id: CP-PD-F004-B02
+created_at: '2026-10-07T07:20:00Z'
+canonical_commit: 180e00b
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+- PD-B02
+- PD-B03
+- PD-B04
+- PD-F001-B01
+- PD-F001-B02
+- PD-F002-B01
+- PD-F002-B02
+- PD-F002-B03
+- PD-F003-B01
+- PD-F003-B02
+- PD-F003-B03
+- PD-DESIGN-B00
+- PD-F004-B01
+- PD-F004-B02
+active_batches:
+- PD-F004-B03
+active_claims: []
+open_escalations: []
+last_completed_task: PD-F004-B02-T91
+ready_summary:
+- PD-F004-B03 (immersive hero opt-in and artwork-heavy variants, focal point, fallback identity; promoted IN_PROGRESS, not started). hero_size already has compact, none and standard; immersive is a new value of the same enum, not a second setting.
+verification_summary:
+- make verify-fast clean (pytest 2892, vitest 677); make e2e-fast green on rerun (docs/verification/PD-F004-B02/T90-e2e-fast.log); tests/test_visual_ratchets.py, tests/integration/test_event_themes.py, tests/e2e/visual-foundation.spec.ts, tests/e2e/hero-size.spec.ts
+recovery_notes:
+- 'Contract: spec 004 section PD-F004-B02 canonical contract; guide docs/operations/VISUAL_FOUNDATION.md (Advanced never means chaotic, Public hero). Hero vocabulary decision: layout stays hero (split, poster, editorial); size is hero_size in theme_config, absent means compact, no migration.'
+- 'Removed Badge class cx-badge must not appear in any e2e spec (ratchet); a visually-hidden absolute cell needs a positioned scroll region (ratchet).'
+- 'Open decisions in .claude-supervisor/QUESTIONS.md (untracked): font binaries (default A), organizer navigation split (default C), hero size vocabulary note (2026-10-07), plus earlier ones at their defaults'
+- 'Tooling traps: after docker compose up -d --build app wait for health plus ~20 s; isolated-mutation specs (hero-size, event-themes) need a fixture, never seed 7; make e2e-report BREACH lingers until clean runs accumulate'
+- main unpushed; untracked design handoff zips untouched; supervisor.py modification is the owner's and left uncommitted

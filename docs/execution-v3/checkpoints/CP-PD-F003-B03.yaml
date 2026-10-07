@@ -1,0 +1,36 @@
+version: 1
+checkpoint_id: CP-PD-F003-B03
+created_at: '2026-10-06T22:50:00Z'
+canonical_commit: f2091b4
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+- PD-B02
+- PD-B03
+- PD-B04
+- PD-F001-B01
+- PD-F001-B02
+- PD-F002-B01
+- PD-F002-B02
+- PD-F002-B03
+- PD-F003-B01
+- PD-F003-B02
+- PD-F003-B03
+active_batches:
+- PD-DESIGN-B00
+active_claims: []
+open_escalations: []
+last_completed_task: PD-F003-B03-T95
+ready_summary:
+- PD-DESIGN-B00 (design handoff gate; promoted IN_PROGRESS, not started; read its tasks and the protocol before acting)
+verification_summary:
+- make verify-fast clean (pytest 2820 passed/31 skipped, web 658), make e2e-fast 224 passed from a rebuilt stack (T90 log)
+- validate_queue valid
+recovery_notes:
+- 'All 21 properties of the completeness contract are verified: core/features_<property>.py per property, claims in every <app>/features.py, proof suites tests/integration/test_feature_<property>.py, cross-cutting tests/integration/test_completeness_regression.py (LANDED, counts, PLANNED_CEILING); guide docs/operations/COMPLETENESS.md, matrices docs/verification/PD-F003-B01..B03/'
+- 'A new feature must claim all 21 properties (check() fails otherwise); a new bulk action, tool, command, section, audited change, archive model, privacy bucket or user column, manifest provide, version model or counter, analytics measure or demo-scenario change must be claimed or named in the verifier OUTSIDE dict'
+- 'Open decisions logged in .claude-supervisor/QUESTIONS.md (not tracked): T95 same-account review (default A), immutable version models in the model not the database (default A), workspace-shell organizer navigation budget (default A, flake recorded)'
+- 'Planned owners: PD-S061-B02-T01 (five features missing from the demo scenario), PD-S013-B02-T05 (form answers in no privacy bucket), PD-S009-B02-T03 (announcements screen)'
+- main unpushed; untracked design handoff zips untouched; supervisor.py modification is the owner's and left uncommitted

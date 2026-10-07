@@ -41,6 +41,12 @@ Under the brand settings, a disclosure ("Hero image crop and phone image") holds
 
 An event with something better to open with than a banner adds a **Lead** block (Public page, Content, Add block). It is an h1, a short body, up to four label/value facts and one action; it has no art, it is placed first when added, and its presence replaces the default hero (`has_hero` in `site_views.py`), so a page keeps exactly one h1 (the accessibility audit warns when hero and lead are both present). Links typed into blocks (hero, lead and call-to-action links, sponsor and resource URLs) must be a path or anchor on this site, an `http(s)` or `mailto` link: the server refuses anything else (`presentation/blocks.py safe_href`) and the template drops an unsafe value again at render time, because the public site shares an origin with the application.
 
+## The anti-slop audit
+
+The visual guardrails of spec 004 (V-SLOP-1..8) are measured on the rendered pages, not on a screenshot: `tests/e2e/slop.ts` exports `slopProblems(page, rules)`, which runs each rule in the page and returns what breaks it as short strings, and `tests/e2e/slop-audit.spec.ts` runs it (read-only tier, seed 7) on every destination and task tab of the organizer, participant and judge roles and on the three public pages, at 390 and 1440. The rules: `gradient`, `iconTile`, `kpiCards` (three boxed siblings in a row), `operatorCopy` (nothing over 20px in the app, no tagline over ten words), `pills`, `nestedCards`, `repeatedLabels` (no heading, selected tab or crumb says the same thing twice) and `hiddenActions` (no menu popup, dots-glyph or icon-only "More" control in the page).
+
+To add a rule: add its name to `SlopRule`, a block to `slopProblems`, the name to `RULES` in the spec, and a self-test that injects a violation and expects the finding (a gate that cannot fail proves nothing). To except something, narrow the rule's selector with a reason in a comment; never loosen a threshold to make a page pass. Not walked: dialogs, open disclosures and per-record detail views.
+
 ## Touch and density
 
 Controls are `--h-ctl` (32px) on desktop and `--h-touch` (44px) below 768px or with a coarse pointer. Per-user density and theme preferences are PD-F005; nothing here changes by viewport width except that touch sizing.

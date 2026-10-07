@@ -251,3 +251,16 @@ Recorded at the close of PD-F004-B03 from what was built (T01-T08), against desi
 - **Project pages and mobile.** The project cover is a small tile beside the title (a capped strip with art, absent when it is only initials on a phone), so the story and the evidence begin above the fold. The public header is two rows on a phone and each public page puts its title in the top 30% of the screen.
 - **Fallback identity.** With no artwork the hero and every project cover draw the same lettered lockup (initials in the accent, hairline frame, type-scale size). One rule produces the letters (`presentation/showcase.py initials`, `web/lib/initials.ts`, shared fixture `tests/fixtures/initials_cases.json`).
 - **Migration and compatibility.** `presentation 0006` changes only the allowed values of `PageBlock.kind`. Every new theme key is optional and absent means the old behaviour; no stored value is rewritten. Surfaces: web and docs; the block kind enum gained `lead` in OpenAPI and both SDKs (regenerated, checked); the page preview reuses the existing preview-as endpoint.
+
+## PD-F004-B04 canonical contract
+
+Recorded at the close of PD-F004-B04 from what was built (T01-T08), against design `V-SLOP-1..8`.
+
+- **The guardrails are a measured gate.** `slopProblems` (`tests/e2e/slop.ts`) implements eight rules on the rendered page: `gradient`, `iconTile`, `kpiCards`, `operatorCopy`, `pills`, `nestedCards`, `repeatedLabels`, `hiddenActions`. `slop-audit.spec.ts` runs them on every destination and task tab of the three reference roles and the three public pages at 390 and 1440, and each rule has a self-test that injects a violation. Static ratchets from B01 (stylesheet) and T01 (web sources and templates) remain for gradients.
+- **Summary, not KPI cards.** The overview is one strip of at most six figures, each the link to its records; the on-site and deliberation facts share the strip style and the operations sections are hairline-separated rows; each overview figure loads and fails on its own (Loading, or "could not load" with Retry).
+- **Operator copy.** Application text is at most 20px; a page header is a title plus context of at most ten words.
+- **Labels.** A heading, selected task tab and breadcrumb never say the same thing twice inside the page; the rail may match the page title because it names where you are.
+- **Cards.** A box with its own border or a filled padded surface never sits inside another; inside a card the empty and loading states and tables are unframed, error and denied states keep their border because it carries meaning.
+- **Actions.** Every frequent action is a labelled button where it is used; a menu popup or dots-glyph trigger fails the audit. Labelled disclosures (Advanced) are allowed.
+- **Surfaces.** web and docs only; no endpoint, model, SDK, audit, webhook, archive or Event-as-Code change. Limitation: dialogs, open disclosures and per-record detail views are not walked.
+

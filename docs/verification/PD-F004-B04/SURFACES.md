@@ -1,0 +1,11 @@
+# PD-F004-B04 surface matrix (spec 004)
+
+| Surface                                                   | Requirement  | Result                                                                                                                                                                                                                          |
+| --------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| web                                                       | required     | Done: eight live audit rules (`tests/e2e/slop.ts`, `slop-audit.spec.ts`) over all reference roles and public pages at 390 and 1440; summary strips, no taglines, no nested frames, no repeated headings. Proofs in `MATRIX.md`. |
+| docs                                                      | required     | `docs/operations/VISUAL_FOUNDATION.md` (the anti-slop audit and how to add a rule), `docs/operations/UPGRADES.md` (organizer notes, renamed card headings), spec 004 "PD-F004-B04 canonical contract".                          |
+| api, sdk                                                  | not_required | No endpoint, model or schema changed; `make verify-fast` runs the OpenAPI and SDK checks clean.                                                                                                                                 |
+| cli, mcp                                                  | not_required | No operation or tool; presentation only.                                                                                                                                                                                        |
+| event_as_code, audit, webhook, archive, analytics, search | not_required | No stored value, mutation, event, model, measure or index changed.                                                                                                                                                              |
+
+Every web change is presentation of server state that is unchanged: headings, frames and copy only, with the overview figures still linking to the same record lists.

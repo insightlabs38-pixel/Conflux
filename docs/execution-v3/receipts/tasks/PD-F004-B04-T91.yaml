@@ -1,0 +1,55 @@
+version: 3
+task: PD-F004-B04-T91
+batch: PD-F004-B04
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: null
+  head_commit: null
+changed_paths:
+- docs/verification/PD-F004-B04/SURFACES.md
+- docs/operations/VISUAL_FOUNDATION.md
+- docs/operations/UPGRADES.md
+- docs/product-depth-v3/specs/004-visual-direction-professional-clean-compact-deliberate.md
+deliverables:
+- item: Explicit surface matrix closed
+  result: pass
+  evidence: docs/verification/PD-F004-B04/SURFACES.md lists web and docs as required and every other surface as not_required with the reason
+- item: Every required surface delegates to the same state and contracts stay synchronized
+  result: pass
+  evidence: no endpoint, model or schema changed; make verify-fast (openapi-check, sdk-check, block-schema-check) was clean in T90
+- item: Documentation and migration notes
+  result: pass
+  evidence: VISUAL_FOUNDATION.md section on the anti-slop audit, UPGRADES.md note (no migration; renamed card headings affect scripts that find cards by heading), spec 004 canonical contract
+invariants:
+- item: One source of truth
+  result: pass
+  evidence: the rules live in one function, slopProblems, used by one spec
+verification:
+- command: npx prettier --check on the touched docs; python3 scripts/pdv3/validate_queue.py
+  result: pass
+  note: formatted and valid
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-SLOP-1..8
+- ref: design/state-matrix
+  result: pass
+  note: unchanged
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: SURFACES.md
+- surface: docs
+  result: pass
+  evidence: SURFACES.md
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Dialogs, open disclosures and per-record detail views are not walked by the audit.
+next: review

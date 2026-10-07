@@ -156,3 +156,12 @@ One choices-only migration (`presentation 0006`, the allowed block kinds) and on
 - **Public page changes for every event**: the hero shows the status and dates (in the event's timezone); on a phone the header is two rows; project pages put their story and evidence above the fold with a small cover tile; project covers, tags and statuses use the same lettered identity, tags and status words as the app.
 - **Security hardening (links in page blocks).** Links typed into blocks must be a path or anchor on the site, or an `http(s)` or `mailto` link. Saving anything else is refused with that sentence, and a link already stored that does not meet the rule is no longer rendered as a link (it used to be written into the page as typed, including `javascript:`). Check pages that use unusual schemes (`tel:`, `ftp:`) before upgrading; they now render without a link until changed to an allowed form.
 - **Initials**: a name starting with punctuation or an emoji now draws its first letters ("(Open) Data" is OD, not "(D"); only an empty name draws "?".
+
+## Moving to a build with the anti-slop cleanups (PD-F004-B04)
+
+No migration, no endpoint, no SDK change; web only. What an operator or organizer will notice:
+
+- **Page headers carry a title and a short context line**, not a sentence of marketing; the overview and the on-site facts are a strip of figures instead of rows of boxed cards, and the operations sections are separated by hairlines.
+- **Fewer repeated headings**: panels under a task tab (Settings, Features, Forms, Policies, Stages) no longer say the tab's name again; the Communications panel is titled "Send a message" and the judging card "Evaluation setup". Browser tests or scripts that find these cards by heading must use the new names.
+- **No frame inside a frame**: the public page editor stands on the page, and empty and loading states and tables inside a card lose their own border (error and denied states keep theirs).
+- The browser suite has a new read-only gate, `slop-audit`, that fails when a page regains a gradient, a coloured icon tile, a card row, a pill around ordinary text, a nested card, a repeated label or a three-dot menu (docs/operations/VISUAL_FOUNDATION.md).

@@ -25,6 +25,7 @@ const RULES: SlopRule[] = [
   "recordGrids",
   "alarmColors",
   "fakeAi",
+  "precision",
 ];
 
 const SETUP_TASKS = [
@@ -388,4 +389,21 @@ test("the audit sees an assistant look on a deterministic workflow", async ({
   const found = await slopProblems(page, ["fakeAi"]);
   // the sparkle button and the AI-named control; a real magic-link sign-in and a project link are not
   expect(found.fakeAi).toHaveLength(2);
+});
+
+test("the audit sees a figure with false precision", async ({ page }, info) => {
+  test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, "organizer");
+  await goToDestination(page, "results");
+  await settled(page);
+  await page.evaluate(() => {
+    const row = document.createElement("div");
+    row.innerHTML =
+      "<p>Score 0.8333333 of 5</p><p>Mean 4.25 and version 1.2.3 at 10:04:05.123</p><code>0.123456</code>";
+    document.querySelector("main")!.prepend(row);
+  });
+  const found = await slopProblems(page, ["precision"]);
+  expect(found.precision).toHaveLength(1);
+  expect(found.precision?.[0]).toContain("0.8333333");
 });

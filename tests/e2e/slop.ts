@@ -36,7 +36,8 @@ export type SlopRule =
   | "hiddenActions"
   | "recordGrids"
   | "alarmColors"
-  | "fakeAi";
+  | "fakeAi"
+  | "precision";
 
 export async function slopProblems(page: Page, rules: SlopRule[]) {
   return page.evaluate((wanted) => {
@@ -377,6 +378,35 @@ export async function slopProblems(page: Page, rules: SlopRule[]) {
         "main [class*='sparkle'], main [class*='magic'], main [class*='-ai-']",
       );
       if (decor) add("fakeAi", `sparkle styling in ${name(decor)}`);
+    }
+
+    if (wanted.includes("precision")) {
+      // a figure is shown to the precision people can act on: two decimals at most (V-SLOP-11).
+      // Whatever the server stores, a score of 0.8333333 reads 0.83. Code, preformatted text, inputs
+      // and version-like strings (1.2.3) are not figures; fractions of a second after a clock time
+      // are not either.
+      const long = /(?<![\d.:])\d+\.\d{3,}(?![\d.])/g;
+      const walker = document.createTreeWalker(
+        document.querySelector("main") ?? document.body,
+        NodeFilter.SHOW_TEXT,
+      );
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        const text = node.textContent ?? "";
+        const parent = node.parentElement;
+        if (
+          !parent ||
+          !shown(parent) ||
+          parent.closest(
+            "code, pre, kbd, samp, script, style, textarea, [data-raw]",
+          )
+        )
+          continue;
+        for (const m of text.matchAll(long))
+          add(
+            "precision",
+            `"${m[0]}" shown with ${m[0].split(".")[1].length} decimals in ${name(parent)}`,
+          );
+      }
     }
 
     if (wanted.includes("kpiCards")) {

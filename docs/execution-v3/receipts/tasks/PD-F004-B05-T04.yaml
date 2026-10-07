@@ -1,0 +1,63 @@
+version: 3
+task: PD-F004-B05-T04
+batch: PD-F004-B05
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: b930f48
+  head_commit: null
+changed_paths:
+- tests/e2e/slop.ts
+- tests/e2e/slop-audit.spec.ts
+deliverables:
+- item: Rule encoded in the visual audit contract
+  result: pass
+  evidence: 'live rule precision (V-SLOP-11) in tests/e2e/slop.ts, enabled in RULES of slop-audit.spec.ts: any
+    visible figure in main with three or more decimals (0.8333333) is reported. Code, pre, kbd, samp, textarea,
+    [data-raw], version-like strings (1.2.3) and fractions of a second after a clock time are not figures.'
+- item: Rule applied to the approved reference surfaces, exceptions recorded
+  result: pass
+  evidence: all 65 audited pages pass with the rule on, so no surface showed backend precision; no product change.
+    Exemption for deliberate raw values is the data-raw attribute.
+- item: No product behavior added for the guardrail
+  result: pass
+  evidence: test-only change
+invariants:
+- item: The gate can fail
+  result: pass
+  evidence: self-test 'the audit sees a figure with false precision' injects 0.8333333 beside 4.25, 1.2.3, a
+    timestamp with milliseconds and a code element, and expects exactly one finding naming 0.8333333
+- item: No test weakened
+  result: pass
+  evidence: a rule and a self-test were added; nothing removed or loosened
+verification:
+- command: npx playwright test -c tests/e2e/playwright.config.ts slop-audit --project=desktop --workers=4
+  result: pass
+  note: 74 passed, 1 failed on the first run (organizer participants at 390, settled() saw a Loading line while
+    4 workers contended); the same test passed on rerun with 2 workers (2 passed). Unrelated to the rule.
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-SLOP-11 (the date/timezone half of V-SLOP-11 is not audited by this task)
+- ref: design/state-matrix
+  result: pass
+  note: states untouched
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: live audit
+- surface: docs
+  result: pass
+  evidence: spec 004 contract at T91
+migrations: []
+findings:
+- P3 settled() in tests/e2e/support.ts is sensitive to load at 4 workers; pre-existing, passes alone.
+escalations: []
+limitations:
+- Precision is checked on rendered text only, not on chart axes drawn in canvas or SVG attributes.
+- Dates in event timezone with a relative hint are not audited.
+next: review

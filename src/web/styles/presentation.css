@@ -9,17 +9,6 @@
   margin: 0 0 var(--sp-4);
 }
 
-.cx-hero {
-  padding: var(--sp-8) var(--sp-4);
-  text-align: center;
-  background: var(--color-surface);
-  border-radius: var(--r-3);
-}
-.cx-hero h1 {
-  margin: 0 0 var(--sp-2);
-  font-size: var(--fs-24);
-}
-
 .cx-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(16rem, 100%), 1fr));
@@ -295,54 +284,93 @@
   padding-bottom: var(--sp-4);
   border-bottom: 1px solid var(--color-border);
 }
+/* Public hero (V-HERO-1, D-005, D-012). The band is art or lockup, title and status; the one primary
+   action and any description sit under it and never grow it. Compact (160-240px) is the default (no
+   attribute);
+   `standard` is the organizer's larger choice and `none` drops the band (PD-F004-B02-T08). Text never
+   sits over art: the art is its own column on the page surface. */
+.cx-event-site {
+  --hero-art-w: 14rem;
+  --hero-art-h: 7.5rem;
+  --hero-lockup: 5.5rem;
+  --hero-pad: var(--sp-5);
+}
+.cx-event-site[data-hero-size="standard"] {
+  --hero-art-w: 24rem;
+  --hero-art-h: 13rem;
+  --hero-lockup: 9rem;
+  --hero-pad: var(--sp-8);
+}
 .cx-event-site .cx-hero {
+  margin-block: var(--sp-4) var(--sp-8);
+  border-bottom: 1px solid var(--line);
+}
+.cx-hero__band {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-  gap: var(--sp-8);
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--sp-6);
   align-items: center;
-  padding: clamp(var(--sp-6), 4vw, var(--sp-12));
-  text-align: left;
-  background: var(--color-surface-raised);
-  border: 1px solid var(--color-border);
+  padding-block: var(--hero-pad);
 }
 .cx-event-site .cx-hero h1 {
   font-size: var(--fs-display);
-  line-height: 1.08;
-  letter-spacing: -0.035em;
+  line-height: var(--lh-tight);
   overflow-wrap: anywhere;
+  text-wrap: balance;
 }
-.cx-hero__story > p {
+.cx-hero__story {
+  display: grid;
+  justify-items: start;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+.cx-hero__story > * {
+  margin: 0;
+}
+.cx-hero__after {
+  display: grid;
+  justify-items: start;
+  gap: var(--sp-3);
+  padding-bottom: var(--sp-5);
+}
+.cx-hero__after > * {
+  margin: 0;
   max-width: 42rem;
 }
 .cx-event-kicker {
   font-size: var(--fs-14);
   color: var(--color-text-muted);
-  margin-bottom: var(--sp-5);
+  margin-bottom: var(--sp-2);
 }
 .cx-hero__image {
-  width: 100%;
-  height: auto;
-  max-height: 30rem;
+  display: block;
+  width: var(--hero-art-w);
+  height: var(--hero-art-h);
   object-fit: cover;
   border-radius: var(--r-2);
 }
+/* The fallback identity is a typographic lockup: the event initial and year in a hairline frame. */
 .cx-hero__identity {
-  min-height: 18rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  color: var(--color-accent-contrast);
-  background: var(--color-accent);
+  width: var(--hero-lockup);
+  height: var(--hero-lockup);
+  color: var(--color-accent);
+  border: 1px solid var(--line-3);
   border-radius: var(--r-2);
 }
 .cx-hero__identity span {
-  font-size: clamp(6rem, 15vw, 12rem);
+  font-size: var(--fs-32);
+  font-weight: var(--font-weight-semibold);
   line-height: 1;
 }
 .cx-hero__identity small {
   font-family: var(--font-mono);
-  margin-block: var(--sp-4);
+  font-size: var(--fs-12);
+  color: var(--color-text-muted);
+  margin-top: var(--sp-1);
 }
 .cx-event-footer {
   display: flex;
@@ -384,30 +412,27 @@
   background: var(--color-surface-raised);
 }
 .cx-event-site[data-hero="poster"] .cx-hero {
-  grid-template-columns: minmax(0, 1fr);
-  border: 2px solid var(--color-accent);
   text-align: center;
+  border: 2px solid var(--color-accent);
+  border-radius: var(--r-2);
+  padding-inline: var(--sp-4);
 }
-.cx-event-site[data-hero="poster"] .cx-hero__story > p {
+.cx-event-site[data-hero="poster"] .cx-hero__band {
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+}
+.cx-event-site[data-hero="poster"] .cx-hero__story,
+.cx-event-site[data-hero="poster"] .cx-hero__after {
+  justify-items: center;
+}
+.cx-event-site[data-hero="poster"] .cx-hero__after > * {
   margin-inline: auto;
 }
-.cx-event-site[data-hero="poster"] .cx-hero__identity {
-  min-height: 8rem;
-  flex-direction: row;
-  gap: var(--sp-6);
-}
-.cx-event-site[data-hero="poster"] .cx-hero__identity span {
-  font-size: 6rem;
-}
-.cx-event-site[data-hero="editorial"] .cx-hero {
+.cx-event-site[data-hero="editorial"] .cx-hero__band {
   grid-template-columns: minmax(0, 1fr);
-  padding-inline: 0;
-  border: 0;
-  border-bottom: 1px solid var(--color-border-strong);
-  border-radius: 0;
-  background: transparent;
 }
-.cx-event-site[data-hero="editorial"] .cx-hero__identity {
+.cx-event-site[data-hero="editorial"] .cx-hero__identity,
+.cx-event-site[data-hero="editorial"] .cx-hero__image {
   display: none;
 }
 .cx-theme-editor fieldset {
@@ -436,11 +461,22 @@
   .cx-event-site .cx-shell__language {
     margin-left: 0;
   }
-  .cx-event-site .cx-hero {
+  /* the band collapses to title and status, about 100px (V-HERO-1 allows 120); art and lockup step
+     aside, and a name too long for that budget wraps rather than being cut */
+  .cx-event-site,
+  .cx-event-site[data-hero-size="standard"] {
+    --hero-pad: var(--sp-3);
+  }
+  .cx-event-site .cx-hero__band {
     grid-template-columns: minmax(0, 1fr);
   }
-  .cx-hero__identity {
-    min-height: 10rem;
+  .cx-event-site .cx-hero h1 {
+    font-size: var(--fs-24);
+  }
+  .cx-hero__image,
+  .cx-hero__identity,
+  .cx-event-site .cx-event-kicker {
+    display: none;
   }
   .cx-event-site .cx-block > h2 {
     font-size: var(--fs-24);

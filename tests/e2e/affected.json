@@ -137,6 +137,7 @@
     {
       "paths": [
         "src/web/features/page-builder/*",
+        "src/web/public/event-site/*",
         "src/api/presentation/*",
         "src/api/events/*"
       ],

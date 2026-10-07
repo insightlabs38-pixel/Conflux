@@ -13,7 +13,7 @@
   <meta name="theme-color" content="{{ event_brand.accent }}">
   {% block extra_head %}{% endblock %}
 </head>
-<body class="cx-shell cx-event-site{% if event_brand.mode == "minimal" %} theme-minimal{% endif %}" style="{{ event_brand.style }}" data-typography="{{ event_brand.typography }}" data-personality="{{ event_brand.personality }}" data-density="{{ event_brand.density }}" data-width="{{ event_brand.width }}" data-hero="{{ event_brand.hero }}" data-background="{{ event_brand.background }}" data-project-card="{{ event_brand.project_card }}">
+<body class="cx-shell cx-event-site{% if event_brand.mode == "minimal" %} theme-minimal{% endif %}" style="{{ event_brand.style }}" data-typography="{{ event_brand.typography }}" data-personality="{{ event_brand.personality }}" data-density="{{ event_brand.density }}" data-width="{{ event_brand.width }}" data-hero="{{ event_brand.hero }}" data-hero-size="{{ event_brand.hero_size }}" data-background="{{ event_brand.background }}" data-project-card="{{ event_brand.project_card }}">
   <a class="cx-skip-link" href="#main-content">{% trans "Skip to main content" %}</a>
   {% if event %}
   <header class="cx-shell__header">

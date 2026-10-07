@@ -36,6 +36,7 @@ type PublicEvent = {
     density: string;
     width: string;
     hero: string;
+    hero_size?: string;
     background: string;
     project_card: string;
     logo_url?: string;
@@ -90,6 +91,7 @@ export function EventSite({ eventId }: { eventId: string }) {
       data-density={event?.presentation?.density}
       data-width={event?.presentation?.width}
       data-hero={event?.presentation?.hero}
+      data-hero-size={event?.presentation?.hero_size}
       data-background={event?.presentation?.background}
       style={event?.presentation?.variables as CSSProperties}
     >
@@ -114,31 +116,33 @@ export function EventSite({ eventId }: { eventId: string }) {
               className="cx-block cx-hero"
               aria-label="Event introduction"
             >
-              <div className="cx-hero__story">
-                <p className="cx-event-kicker">{event.timezone} · Conflux</p>
-                <h1>{event.name}</h1>
-                <Status tone="info">{event.status}</Status>
-                {schedule && <p>{schedule}</p>}
-                {event.description && <p>{event.description}</p>}
-                <p>
-                  <ButtonLink variant="primary" href={`/e/${eventId}/gallery/`}>
-                    Browse project gallery
-                  </ButtonLink>
-                </p>
-              </div>
-              {event.presentation?.banner_url ? (
-                <img
-                  className="cx-hero__image"
-                  src={event.presentation.banner_url}
-                  alt=""
-                  width={960}
-                  height={640}
-                />
-              ) : (
-                <div className="cx-hero__identity" aria-hidden="true">
-                  <span>{Array.from(event.name)[0]}</span>
+              <div className="cx-hero__band">
+                <div className="cx-hero__story">
+                  <p className="cx-event-kicker">{event.timezone} · Conflux</p>
+                  <h1>{event.name}</h1>
+                  <Status tone="info">{event.status}</Status>
+                  {schedule && <p>{schedule}</p>}
                 </div>
-              )}
+                {event.presentation?.banner_url ? (
+                  <img
+                    className="cx-hero__image"
+                    src={event.presentation.banner_url}
+                    alt=""
+                    width={960}
+                    height={640}
+                  />
+                ) : (
+                  <div className="cx-hero__identity" aria-hidden="true">
+                    <span>{Array.from(event.name)[0]}</span>
+                  </div>
+                )}
+              </div>
+              <div className="cx-hero__after">
+                {event.description && <p>{event.description}</p>}
+                <ButtonLink variant="primary" href={`/e/${eventId}/gallery/`}>
+                  Browse project gallery
+                </ButtonLink>
+              </div>
             </section>
             <PublicAwards eventId={eventId} />
 

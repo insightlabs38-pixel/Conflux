@@ -14,8 +14,8 @@ import {
 // PD-F004-B01: the Conflux v3 visual foundation as it renders. Read-only; every check is computed
 // style on the live pages, so an inline style or a stylesheet outside the token layer is caught.
 const SCALE = [11, 12, 13, 14, 16, 20, 24, 32];
-// Decorative monogram glyphs of the public hero and project cover (replaced by PD-F004-B02/B03).
-const GLYPH = ".cx-hero__identity, .cx-project-cover, .cx-project-card__cover";
+// Decorative monogram glyphs of the project cover (replaced by PD-F004-B03).
+const GLYPH = ".cx-project-cover, .cx-project-card__cover";
 
 /** Every visible text-bearing element whose computed size is off the scale, as `size selector text`. */
 async function offScale(page: Page) {
@@ -354,6 +354,50 @@ for (const width of [390, 1440]) {
       .evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
     expect(h1).toBeGreaterThanOrEqual(24);
     expect(h1).toBeLessThanOrEqual(32);
+  });
+
+  // V-HERO-1 / D-012: the default public hero is compact. The band (lockup or art, title, status)
+  // is 160-240px on desktop (the lower bound is not a floor) and at most 120px on mobile; the
+  // description and the one primary action sit under it; no text sits over art; no sideways scroll.
+  test(`the default public hero is a compact band with its action beneath at ${width}`, async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+    await page.setViewportSize({ width, height: 900 });
+    await signIn(page, "organizer");
+    const { event } = await eventIds(page);
+    await page.goto(`/e/${event}/`);
+    await page.waitForLoadState("networkidle");
+    const hero = await page.evaluate(() => {
+      const box = (selector: string) =>
+        document.querySelector(selector)?.getBoundingClientRect();
+      const band = box(".cx-hero .cx-hero__band");
+      const after = box(".cx-hero .cx-hero__after");
+      const action = box(".cx-hero .cx-button--primary");
+      const art = document.querySelector<HTMLElement>(
+        ".cx-hero__identity, .cx-hero__image",
+      );
+      return {
+        size: document.body.dataset.heroSize ?? "",
+        band: band && { top: band.top, height: band.height },
+        after: after && { top: after.top },
+        action: action && { top: action.top, bottom: action.bottom },
+        art: art && getComputedStyle(art).display,
+        h1: document.querySelectorAll("h1").length,
+        wide: document.documentElement.scrollWidth - innerWidth,
+      };
+    });
+    expect(hero.size === "" || hero.size === "compact").toBe(true);
+    expect(hero.band).not.toBeNull();
+    expect(hero.band!.height).toBeLessThanOrEqual(width < 768 ? 120 : 240);
+    expect(hero.after!.top).toBeGreaterThanOrEqual(
+      hero.band!.top + hero.band!.height - 1,
+    );
+    expect(hero.action!.bottom).toBeLessThan(900); // the primary action is above the fold
+    expect(hero.h1).toBe(1);
+    expect(hero.wide).toBeLessThanOrEqual(0);
+    // the lockup or art is its own column on desktop and steps aside on mobile
+    expect(hero.art === "none").toBe(width < 768);
   });
 }
 

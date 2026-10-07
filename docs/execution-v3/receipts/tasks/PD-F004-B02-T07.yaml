@@ -1,0 +1,92 @@
+version: 3
+task: PD-F004-B02-T07
+batch: PD-F004-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 2e33ba9
+  head_commit: null
+changed_paths:
+- src/web/styles/presentation.css
+- src/web/public/event-site/EventSite.tsx
+- src/api/presentation/templates/presentation/event_landing.html
+- src/api/presentation/templates/presentation/base.html
+- tests/test_visual_ratchets.py
+- tests/e2e/visual-foundation.spec.ts
+- tests/e2e/affected.json
+deliverables:
+- item: Compact hero is the default, not a viewport-consuming marketing hero
+  result: pass
+  evidence: 'both renderers (the server-rendered public site and the React EventSite) now draw the hero
+    as a band (kicker, title, status, and a lockup or art as its own column) with the description and
+    the one primary action in a separate row beneath it (D-012). The old 18rem lockup, display-size padding
+    and 30rem banner are gone; default sizes come from --hero-* variables, so compact needs no attribute
+    and `data-hero-size="standard"` (set by PD-F004-B02-T08) selects the larger one'
+- item: Mobile collapses aggressively
+  result: pass
+  evidence: below 48rem the band is title and status only; art, lockup and kicker step aside, padding drops
+    to --sp-3 for every size; measured band at 390 is within 120px
+- item: Fallback identity looks intentional
+  result: pass
+  evidence: no artwork gives a typographic lockup (initial and year in a hairline frame, accent letter)
+    instead of the old solid accent tile, so the SOLID_FILL and GLYPH_SIZES allowlist entries for the hero
+    were deleted rather than extended
+- item: Project content near the fold
+  result: pass
+  evidence: e2e asserts the primary action ends above 900px and the next block follows the band; seed 7
+    public page at 1440 shows the tracks section starting about 400px down
+invariants:
+- item: Layout presets keep working
+  result: pass
+  evidence: poster (centred, accent frame) and editorial (no art) re-expressed on the band; event-themes
+    spec 16 passed on a fresh iso-min fixture
+- item: Text never over art, contrast validated accents only
+  result: pass
+  evidence: art is its own column on the page surface; only validated --accent is used
+- item: Untrusted content unchanged
+  result: pass
+  evidence: banner and logo URLs still pass clean_theme_config; templates escape as before
+verification:
+- command: uv run --frozen pytest tests/test_visual_ratchets.py tests/test_e2e_tiers.py -q
+  result: pass
+  note: 24 and 40 passed
+- command: uv run --frozen pytest -n auto -q -k "presentation or site or theme or hero or public"
+  result: pass
+  note: 166 passed, 8 skipped
+- command: cd src/web && npx tsc --noEmit && npx vitest run public
+  result: pass
+  note: 4 passed
+- command: docker compose up -d --build app; npx playwright test -c tests/e2e/playwright.config.ts public showcase foundations visual-foundation --project=desktop
+  result: pass
+  note: 39 passed, including the new hero band test at 390 and 1440
+- command: E2E fixture iso-min; npx playwright test event-themes --project=desktop
+  result: pass
+  note: 16 passed, fixture disposed
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-HERO-1, V-SLOP-2 (no coloured tile), V-TYPE-2 (public h1 24-32)
+- ref: design/state-matrix
+  result: pass
+  note: no state component changed
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: public site template, EventSite, presentation.css
+- surface: docs
+  result: pass
+  evidence: hero policy documented with the setting in PD-F004-B02-T08 (docs/operations/VISUAL_FOUNDATION.md)
+migrations: []
+findings:
+- 'P3-design the band has no hard maximum: a very long event name wraps instead of being truncated, so
+  the budget holds for normal names and grows only with the name itself (D-012: a hero never grows to
+  carry more content, a name is not extra content).'
+escalations: []
+limitations:
+- The immersive hero (artwork-heavy, opt-in) and image focal-point controls are ADV/later work and are not
+  part of this task.
+next: review

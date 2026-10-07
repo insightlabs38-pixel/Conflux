@@ -21,7 +21,6 @@ SOLID_FILL_ALLOWED = {
         ".cx-button--danger",
         ".cx-shell a.cx-skip-link",
     },
-    "styles/presentation.css": {".cx-hero__identity"},
 }
 SOLID = re.compile(
     r"background(?:-color)?:\s*var\(--(?:color-)?(?:accent|success|warning|danger|info|ok|warn|err)\)"
@@ -62,12 +61,10 @@ def test_ratchet_names_a_new_decorative_fill():
     assert [sel for sel, body in rules(sample) if SOLID.search(body)] == [".cx-card--promo"]
 
 
-# Decorative glyphs of the public hero and project cover (a letter or monogram, not text). The hero
-# redesign (PD-F004-B02/B03) replaces them; until then they are the only literal sizes.
+# Decorative glyphs of the project cover (a letter or monogram, not text). The cover redesign
+# (PD-F004-B03) replaces them; until then they are the only literal sizes.
 GLYPH_SIZES = {
     "styles/presentation.css": {
-        ".cx-hero__identity span",
-        '.cx-event-site[data-hero="poster"] .cx-hero__identity span',
         ".cx-project-cover",
         ".cx-project-card__cover, .cx-project-cover",
     },

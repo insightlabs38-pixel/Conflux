@@ -1,4 +1,4 @@
-/* Conflux v3 design tokens — r2. Production source of truth for :root values. */
+/* Conflux v3 design tokens — r2.1. Production source of truth for :root values. */
 :root {
   /* type */
   --font-sans: "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -15,12 +15,12 @@
   --line: #dcdfe5;          /* default hairline */
   --line-2: #c3c8d1;        /* control borders */
   --line-3: #8a929e;        /* focus-adjacent / strong control border (3:1 on white) */
-  --ink: #161a21;           /* primary text 16.9:1 */
-  --ink-2: #454e5b;         /* secondary text 8.2:1 */
-  --ink-3: #5e6772;         /* tertiary text 5.7:1 on white, 5.2:1 on --bg */
+  --ink: #161a21;           /* primary text 17.4:1 on white */
+  --ink-2: #454e5b;         /* secondary text 8.4:1 on white */
+  --ink-3: #5e6772;         /* tertiary text 5.7:1 on white, 5.3:1 on --bg */
 
   /* accent: action + selection + focus only */
-  --accent: #1d55c2;        /* 6.9:1 on white */
+  --accent: #1d55c2;        /* 6.7:1 on white */
   --accent-hover: #174aa8;
   --accent-ink: #ffffff;
   --accent-tint: #e8effc;   /* selected row, active nav */

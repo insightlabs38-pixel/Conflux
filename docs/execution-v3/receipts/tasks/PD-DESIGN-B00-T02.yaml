@@ -1,0 +1,93 @@
+version: 3
+task: PD-DESIGN-B00-T02
+batch: PD-DESIGN-B00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: design-review
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 64137d4
+  head_commit: null
+changed_paths:
+- docs/product-depth-v3/design/system/VISUAL_CONTRACT.md
+- docs/product-depth-v3/design/system/tokens.css
+- docs/product-depth-v3/design/system/tokens.json
+- tests/test_design_manifest.py
+deliverables:
+- item: Versioned typography, spacing, density, color, borders/elevation, radii, icon, motion, compact-hero and anti-slop rules
+  result: pass
+  evidence: "system/VISUAL_CONTRACT.md v1 gives citable ids (V-TYPE, V-SPACE, V-DENS, V-COLOR, V-THEME, V-LINE, V-ELEV, V-RAD, V-ICON, V-MOTION, V-FOCUS, V-HERO, V-RESP, V-SLOP-1..15) consolidated from the approved r2.1 system README, decisions 001-004/008/009 and the Component grammar board"
+- item: Legacy repository styling is not aesthetic authority
+  result: pass
+  evidence: "contract states it; adoption of tokens in src/web is left to PD-F004 (component-mapping.md); no web file changed"
+invariants:
+- item: Domain behavior, tests and gates unchanged
+  result: pass
+  evidence: docs, token comments and one test file only; token values unchanged
+- item: Artifacts consumable without the hosted conversation
+  result: pass
+  evidence: all rules cite committed files; tokens.css equals tokens.json (tested)
+verification:
+- command: uv run --frozen pytest tests/test_design_manifest.py -q
+  result: pass
+  note: "10 passed; recomputes WCAG contrast for 9 ink and 6 tone pairs on surface/bg/tint in light and dark (all at least 4.5), line-3 at least 3, scale/spacing/radius/motion/row sets, css-json drift, rule-id coverage; negative case shows a failing pair is below 4.5"
+- command: node script rendering six boards at 1440x900 and 390x844 with Playwright chromium
+  result: pass
+  note: "Sys-Foundations, Sys-Components, Sys-Dark, Shell-Mobile, States-1, States-2 load, resolve --accent #1d55c2, no page or console errors (font fetches ignored); boards are fixed artboards, so 390 scrolls horizontally by design"
+- command: python3 scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid, 0 errors
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: source of the contract (VISUAL_CONTRACT.md)
+- ref: design/app-shell
+  result: pass
+  note: contract rules apply to this surface; no component built here
+- ref: design/organizer-data-surface
+  result: pass
+  note: contract rules apply to this surface; no component built here
+- ref: design/participant-my-event
+  result: pass
+  note: contract rules apply to this surface; no component built here
+- ref: design/project-story-editor
+  result: pass
+  note: contract rules apply to this surface; no component built here
+- ref: design/judge-review
+  result: pass
+  note: contract rules apply to this surface; no component built here
+- ref: design/deliberation-awards
+  result: pass
+  note: contract rules apply to this surface; no component built here
+- ref: design/public-event
+  result: pass
+  note: contract rules apply to this surface; no component built here
+- ref: design/public-project
+  result: pass
+  note: contract rules apply to this surface; no component built here
+- ref: design/event-builder
+  result: pass
+  note: contract rules apply to this surface; no component built here
+- ref: design/onsite-mobile
+  result: pass
+  note: contract rules apply to this surface; no component built here
+- ref: design/state-matrix
+  result: pass
+  note: contract rules apply to this surface; no component built here
+surface_matrix:
+- surface: web
+  result: deferred-by-contract
+  evidence: contract and token checks only; adopting the tokens in src/web is PD-F004
+- surface: docs
+  result: pass
+  evidence: VISUAL_CONTRACT.md
+migrations: []
+findings:
+- "P3: tokens.css contrast comments were off by up to 0.5 (ink 16.9 vs measured 17.4, accent 6.9 vs 6.7); corrected, values unchanged. tokens.json revision r2 bumped to r2.1."
+escalations: []
+limitations:
+- Hover, focus and axe behaviour are implementation QA (README known limitation); the six boards were loaded, not axe-scanned.
+- Static comps do not demonstrate responsive reflow; the mobile and narrow boards are the evidence.
+next: review

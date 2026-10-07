@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
@@ -289,7 +289,7 @@ export function OnsiteOperationsPanel({
                         <td>{MODE_LABEL[row.mode] ?? row.mode}</td>
                         <td>
                           {row.checked_in ? (
-                            <Badge tone="success">Checked in</Badge>
+                            <Status tone="success">Checked in</Status>
                           ) : (
                             <Button
                               variant="secondary"

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Button } from "../../components/Button";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
@@ -155,7 +155,7 @@ export function CommunityVoting({ eventId }: { eventId: string }) {
             <li key={candidate.project}>
               {candidate.name}{" "}
               {votedFor === candidate.project ? (
-                <Badge tone="success">voted</Badge>
+                <Status tone="success">voted</Status>
               ) : (
                 <Button
                   variant="secondary"

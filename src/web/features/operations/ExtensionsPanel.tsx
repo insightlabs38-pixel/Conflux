@@ -1,4 +1,4 @@
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Card } from "../../components/Card";
 import { DataTable } from "../../components/Foundation";
 import { ErrorState } from "../../components/ErrorState";
@@ -36,26 +36,26 @@ export function ExtensionsPanel({ workspaceId }: { workspaceId: string }) {
         <>
           {data.problems.length === 0 ? (
             <p role="status">
-              <Badge tone="success">Consistent</Badge> Every registered
+              <Status tone="success">Consistent</Status> Every registered
               extension is declared and every declaration is registered.
             </p>
           ) : (
             <div role={data.ok ? "status" : "alert"}>
               <p>
-                <Badge tone={data.ok ? "warning" : "danger"}>
+                <Status tone={data.ok ? "warning" : "danger"}>
                   {data.ok ? "Needs a look" : "Inconsistent"}
-                </Badge>{" "}
+                </Status>{" "}
                 {data.problems.length} finding
                 {data.problems.length === 1 ? "" : "s"}.
               </p>
               <ul aria-label="Extension findings">
                 {data.problems.map((problem, index) => (
                   <li key={index}>
-                    <Badge
+                    <Status
                       tone={problem.severity === "error" ? "danger" : "warning"}
                     >
                       {problem.severity}
-                    </Badge>{" "}
+                    </Status>{" "}
                     {problem.manifest && <strong>{problem.manifest}: </strong>}
                     {problem.message}
                   </li>

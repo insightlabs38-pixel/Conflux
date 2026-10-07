@@ -6,7 +6,7 @@ import {
 } from "../../components/WorkspaceNavigation";
 import { PageHeader, Grid } from "../../components/Foundation";
 import { useEffect, useRef, useState } from "react";
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
@@ -329,9 +329,9 @@ function BallotForm({
       <Card title={candidate.name}>
         <p className="cx-judge-scoring__meta">
           <span>{position}</span>
-          <Badge tone={finalized ? "success" : queued ? "warning" : "info"}>
+          <Status tone={finalized ? "success" : queued ? "warning" : "info"}>
             {candidate.status}
-          </Badge>
+          </Status>
           {!finalized && !queued && (
             <Button type="button" variant="secondary" onClick={onRecuse}>
               Recuse or report a conflict
@@ -626,9 +626,9 @@ function PlanQueue({
                 {candidate.name}
               </button>
               {progress.next?.project === candidate.project && (
-                <Badge tone="info">Next</Badge>
+                <Status tone="info">Next</Status>
               )}
-              <Badge
+              <Status
                 tone={
                   candidate.status === "submitted"
                     ? "success"
@@ -640,7 +640,7 @@ function PlanQueue({
                 }
               >
                 {candidate.status}
-              </Badge>
+              </Status>
             </li>
           ))}
         </ul>

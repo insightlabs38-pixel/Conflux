@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
  * assistive technology. Add a shape here rather than a one-off inline <svg>.
  */
 const SHAPES = {
+  circle: [],
   check: ["M20 6 9 17l-5-5"],
   x: ["M18 6 6 18", "m6 6 12 12"],
   plus: ["M5 12h14", "M12 5v14"],
@@ -92,6 +93,7 @@ const SHAPES = {
 
 /** Shapes that need a filled-outline primitive in addition to their path. */
 const EXTRAS: Partial<Record<IconName, ReactNode>> = {
+  circle: <circle cx="12" cy="12" r="10" />,
   info: <circle cx="12" cy="12" r="10" />,
   "circle-check": <circle cx="12" cy="12" r="10" />,
   "circle-x": <circle cx="12" cy="12" r="10" />,

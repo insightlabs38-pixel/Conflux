@@ -1,4 +1,4 @@
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Card } from "../../components/Card";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
@@ -60,9 +60,9 @@ export function JudgeCalendarPanel({
             <ul aria-label="Event windows">
               {calendar.windows.map((window) => (
                 <li key={window.name}>
-                  <Badge tone={WINDOW_TONE[window.status]}>
+                  <Status tone={WINDOW_TONE[window.status]}>
                     {window.status.replace(/_/g, " ")}
-                  </Badge>{" "}
+                  </Status>{" "}
                   {window.name}
                 </li>
               ))}

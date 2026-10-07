@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Badge } from "../../components/Badge";
+import { Status, Tag } from "../../components/Status";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
@@ -152,12 +152,11 @@ export function TimelinePanel({
                   <li key={item.key}>
                     <p>
                       <time>{rangeText(item)}</time>{" "}
-                      <strong>{item.label}</strong>{" "}
-                      <Badge>{item.kind_label}</Badge>
+                      <strong>{item.label}</strong> <Tag>{item.kind_label}</Tag>
                       {conflicted.has(item.key) && (
                         <>
                           {" "}
-                          <Badge tone="warning">Conflict</Badge>
+                          <Status tone="warning">Conflict</Status>
                         </>
                       )}
                     </p>

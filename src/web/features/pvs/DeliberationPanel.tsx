@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Badge } from "../../components/Badge";
+import { Icon } from "../../components/Icon";
+import { Status, Tag } from "../../components/Status";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
@@ -125,7 +126,7 @@ function DecisionSteps({ status }: { status: Room["status"] | null }) {
           }
         >
           <span className="cx-steps__mark" aria-hidden="true">
-            {index < current ? "✓" : index + 1}
+            {index < current ? <Icon name="check" /> : index + 1}
           </span>
           {label}
         </li>
@@ -189,7 +190,7 @@ function EvidencePanel({
             <dt>Conflicts excluded</dt>
             <dd>
               {progress.data.conflict_count > 0 ? (
-                <Badge tone="warning">{progress.data.conflict_count}</Badge>
+                <Status tone="warning">{progress.data.conflict_count}</Status>
               ) : (
                 0
               )}
@@ -266,18 +267,18 @@ function EvidencePanel({
                     <td>
                       <div className="cx-flags">
                         {row.project && close.has(row.project) && (
-                          <Badge tone="warning">Close call</Badge>
+                          <Status tone="warning">Close call</Status>
                         )}
                         {stance?.recommended && (
-                          <Badge tone="success">Recommended</Badge>
+                          <Status tone="success">Recommended</Status>
                         )}
                         {stance && !stance.recommended && (
-                          <Badge>Not recommended</Badge>
+                          <Tag>Not recommended</Tag>
                         )}
                         {other.map((name) => (
-                          <Badge key={name} tone="warning">
+                          <Status key={name} tone="warning">
                             Also wins {name}
-                          </Badge>
+                          </Status>
                         ))}
                       </div>
                     </td>
@@ -463,7 +464,7 @@ export function DeliberationPanel({
       {data && (
         <Card title="Deliberation room" as="h4">
           <p>
-            <Badge
+            <Status
               tone={
                 data.status === "open"
                   ? "info"
@@ -473,7 +474,7 @@ export function DeliberationPanel({
               }
             >
               {data.status}
-            </Badge>{" "}
+            </Status>{" "}
             Quorum {data.quorum}
           </p>
           {data.tally.length === 0 ? (
@@ -505,9 +506,9 @@ export function DeliberationPanel({
                       <td>{row.abstain}</td>
                       <td>
                         {row.recommended ? (
-                          <Badge tone="success">Recommended</Badge>
+                          <Status tone="success">Recommended</Status>
                         ) : (
-                          <Badge>Not recommended</Badge>
+                          <Tag>Not recommended</Tag>
                         )}
                       </td>
                     </tr>
@@ -523,7 +524,7 @@ export function DeliberationPanel({
                   <strong>
                     {evaluated.get(stance.project) ?? stance.project}
                   </strong>{" "}
-                  · {stance.judge}: <Badge>{stance.stance}</Badge>
+                  · {stance.judge}: <Tag>{stance.stance}</Tag>
                   {stance.rationale && <p>{stance.rationale}</p>}
                 </li>
               ))}

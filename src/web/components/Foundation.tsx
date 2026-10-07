@@ -357,7 +357,7 @@ export function Timeline({
           aria-current={item.status === "current" ? "step" : undefined}
         >
           <span className="cx-timeline__marker" aria-hidden="true">
-            {item.status === "complete" ? "✓" : index + 1}
+            {item.status === "complete" ? <Icon name="check" /> : index + 1}
           </span>
           <div>
             <strong>{item.title}</strong>

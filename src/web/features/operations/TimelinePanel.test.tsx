@@ -136,7 +136,7 @@ describe("TimelinePanel", () => {
     expect(march6.textContent).toContain("10:00–11:30");
     expect(march6.textContent).toContain("Opening");
     expect(march6.textContent).toContain("Not on the public agenda.");
-    expect(march6.querySelectorAll(".cx-badge--warning")).toHaveLength(2);
+    expect(march6.querySelectorAll(".cx-status--warning")).toHaveLength(2);
     expect(
       container.querySelector('[aria-label="Scheduling conflicts"]')!
         .textContent,

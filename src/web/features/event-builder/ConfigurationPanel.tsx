@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Button } from "../../components/Button";
 import { SchemaForm } from "../../components/SchemaForm";
 import { apiJson, describeProblem } from "../../lib/api";
@@ -217,9 +217,9 @@ export function ConfigurationPanel({
           {data.settings.map((entry) => (
             <li key={entry.key}>
               <strong>{entry.label}</strong>: {show(entry.value)}{" "}
-              <Badge tone={SOURCE[entry.source].tone}>
+              <Status tone={SOURCE[entry.source].tone}>
                 {SOURCE[entry.source].label}
-              </Badge>
+              </Status>
               <br />
               <small className="cx-muted">
                 {entry.help}

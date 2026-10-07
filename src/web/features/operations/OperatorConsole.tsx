@@ -1,4 +1,4 @@
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Card } from "../../components/Card";
 import { useLoad } from "../../hooks/useLoad";
 
@@ -67,7 +67,7 @@ export function OperatorConsole({
                 >
                   {event.name}
                 </button>{" "}
-                <Badge
+                <Status
                   tone={
                     event.health === "ready"
                       ? "success"
@@ -77,7 +77,7 @@ export function OperatorConsole({
                   }
                 >
                   {event.health}
-                </Badge>{" "}
+                </Status>{" "}
                 {event.status} · {event.is_public ? "public" : "private"} ·{" "}
                 {event.blocker_count} blockers · {event.warning_count} warnings{" "}
                 <a

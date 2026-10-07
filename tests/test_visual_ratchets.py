@@ -183,7 +183,7 @@ def test_radii_come_from_the_three_step_scale():
 
 def test_no_status_label_is_a_pill():
     text = (WEB / "styles/components.css").read_text()
-    assert dict(declarations(text, "border-radius"))[".cx-badge"] == "var(--r-1)"
+    assert dict(declarations(text, "border-radius"))[".cx-tag"] == "var(--r-1)"
 
 
 # Shadows belong to floating layers only (V-ELEV-1); the rest is hairlines and spacing.
@@ -248,3 +248,22 @@ def test_decorative_glyph_characters_are_not_used_as_icons_in_css_content():
                 sheet.name,
                 value,
             )
+
+
+def test_the_colour_chip_badge_is_gone_for_status_and_tag():
+    for sheet in SHEETS:
+        assert "cx-badge" not in sheet.read_text(), sheet.name
+    for path in web_sources():
+        if path.name == "Status.test.tsx":
+            continue
+        text = path.read_text()
+        assert "cx-badge" not in text, str(path.relative_to(WEB))
+        assert "components/Badge" not in text and './Badge"' not in text, str(path.relative_to(WEB))
+
+
+def test_status_is_an_icon_and_a_word_and_never_a_fill():
+    text = (WEB / "styles/components.css").read_text()
+    for selector, body in rules(text):
+        if selector.startswith(".cx-status"):
+            assert "background" not in body, selector
+    assert (WEB / "components/Status.tsx").read_text().count("<Icon") == 1

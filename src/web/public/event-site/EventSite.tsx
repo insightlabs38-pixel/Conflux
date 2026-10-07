@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import "../../styles/presentation.css";
 import { ButtonLink } from "../../components/Foundation";
 import { AppShell } from "../../components/AppShell";
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorState } from "../../components/ErrorState";
@@ -115,7 +115,7 @@ export function EventSite({ eventId }: { eventId: string }) {
               <div className="cx-hero__story">
                 <p className="cx-event-kicker">{event.timezone} · Conflux</p>
                 <h1>{event.name}</h1>
-                <Badge tone="info">{event.status}</Badge>
+                <Status tone="info">{event.status}</Status>
                 {schedule && <p>{schedule}</p>}
                 {event.description && <p>{event.description}</p>}
                 <p>

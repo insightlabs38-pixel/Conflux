@@ -6,7 +6,7 @@ import {
   type Outcome,
   type Severity,
 } from "../lib/explain";
-import { Badge } from "./Badge";
+import { Status } from "./Status";
 
 const OUTCOME_TONE: Record<
   Outcome,
@@ -41,18 +41,18 @@ export function ExplanationView({
   return (
     <section className="cx-explain" aria-label={label ?? "Explanation"}>
       <p className="cx-explain__summary" role={announce ? "alert" : undefined}>
-        <Badge tone={OUTCOME_TONE[explanation.outcome]}>
+        <Status tone={OUTCOME_TONE[explanation.outcome]}>
           {OUTCOME_LABEL[explanation.outcome]}
-        </Badge>{" "}
+        </Status>{" "}
         {explanation.summary}
       </p>
       {explanation.reasons.length > 0 && (
         <ul className="cx-explain__reasons">
           {explanation.reasons.map((reason, index) => (
             <li key={`${reason.code}-${index}`}>
-              <Badge tone={SEVERITY_TONE[reason.severity]}>
+              <Status tone={SEVERITY_TONE[reason.severity]}>
                 {SEVERITY_LABEL[reason.severity]}
-              </Badge>{" "}
+              </Status>{" "}
               {reason.message}
               {reason.fix && (
                 <span className="cx-muted">

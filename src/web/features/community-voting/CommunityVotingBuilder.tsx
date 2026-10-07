@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { FraudReview } from "./FraudReview";
@@ -186,9 +186,9 @@ export function CommunityVotingBuilder({
 
         <p>
           Results:{" "}
-          <Badge tone={plan.results_published_at ? "success" : "neutral"}>
+          <Status tone={plan.results_published_at ? "success" : "neutral"}>
             {plan.results_published_at ? "published" : "not published"}
-          </Badge>
+          </Status>
         </p>
         <Button variant="primary" onClick={() => void publishResults()}>
           Publish results

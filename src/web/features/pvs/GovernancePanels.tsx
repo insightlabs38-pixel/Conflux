@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { FrozenSubmissionPreview } from "../submissions/FrozenSubmissionPreview";
-import { Badge } from "../../components/Badge";
+import { Icon } from "../../components/Icon";
+import { Status } from "../../components/Status";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
@@ -69,7 +70,7 @@ export function RulesPanel({
           {!canPublish &&
             (rules.data.acknowledged ? (
               <p role="status">
-                <Badge tone="success">Acknowledged</Badge> You have accepted
+                <Status tone="success">Acknowledged</Status> You have accepted
                 this version.
               </p>
             ) : (
@@ -250,7 +251,7 @@ export function PublicationGovernancePanel({
             }
           >
             <span className="cx-steps__mark" aria-hidden="true">
-              {step.done ? "✓" : index + 1}
+              {step.done ? <Icon name="check" /> : index + 1}
             </span>
             {step.label}
           </li>
@@ -381,9 +382,9 @@ export function PublicationGovernancePanel({
             <li key={item.public_id}>
               Run {item.normalization_run_number} requested by{" "}
               {item.requested_by}{" "}
-              <Badge tone={STATUS_TONE[item.status] ?? "neutral"}>
+              <Status tone={STATUS_TONE[item.status] ?? "neutral"}>
                 {item.status}
-              </Badge>
+              </Status>
               {item.reason && <> · {item.reason}</>}
               {item.decision_note && <> · {item.decision_note}</>}
               {item.status === "pending" && (
@@ -523,7 +524,7 @@ export function ExceptionRequestsPanel({
           as="h4"
         >
           <p>
-            <Badge
+            <Status
               tone={
                 item.status === "approved"
                   ? "success"
@@ -533,7 +534,7 @@ export function ExceptionRequestsPanel({
               }
             >
               {item.status}
-            </Badge>{" "}
+            </Status>{" "}
             {item.reason}
             {item.grant_expires_at &&
               ` · grant expires ${formatWhen(item.grant_expires_at)}`}
@@ -627,7 +628,7 @@ export function ProjectExceptionPanel({
         <ul>
           {requests.data.map((item) => (
             <li key={item.public_id}>
-              <Badge
+              <Status
                 tone={
                   item.status === "approved"
                     ? "success"
@@ -637,7 +638,7 @@ export function ProjectExceptionPanel({
                 }
               >
                 {item.status}
-              </Badge>{" "}
+              </Status>{" "}
               {item.reason}
               {item.decision_note && ` — ${item.decision_note}`}
               {item.grant_expires_at &&

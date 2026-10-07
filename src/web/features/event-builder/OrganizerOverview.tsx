@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import {
   DestinationLink,
   useModuleEnabled,
@@ -188,7 +188,9 @@ export function OrganizerOverview({
     >
       <h3>Event operations</h3>
       <p className="cx-ops__timing">
-        <Badge tone={status === "open" ? "success" : "neutral"}>{status}</Badge>{" "}
+        <Status tone={status === "open" ? "success" : "neutral"}>
+          {status}
+        </Status>{" "}
         Starts {when(starts)} · Ends {when(ends)}
       </p>
       <section className="cx-ops-issues" aria-label="Needs action">

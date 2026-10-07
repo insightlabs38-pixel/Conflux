@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Avatar, PersonCard } from "./Foundation";
-import { Badge } from "./Badge";
+import { Tag } from "./Status";
 
 export type PersonIdentity = {
   profile_url?: string;
@@ -20,7 +20,7 @@ export function SkillTags({ values }: { values: string[] }) {
     <ul className="cx-tags" aria-label="Skills and interests">
       {Array.from(new Set(values)).map((value) => (
         <li key={value}>
-          <Badge>{value}</Badge>
+          <Tag>{value}</Tag>
         </li>
       ))}
     </ul>

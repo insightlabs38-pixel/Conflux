@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { AppShell } from "./AppShell";
-import { Badge } from "./Badge";
+import { Status, Tag } from "./Status";
 import { Button } from "./Button";
 import { Card } from "./Card";
 import { DeniedState } from "./DeniedState";
@@ -29,11 +29,17 @@ describe("Button", () => {
   });
 });
 
-describe("Badge", () => {
-  it("renders the requested tone", () => {
-    expect(renderToStaticMarkup(<Badge tone="success">Ready</Badge>)).toContain(
-      "cx-badge--success",
-    );
+describe("Status and Tag", () => {
+  it("renders the requested tone with an icon and the word", () => {
+    const html = renderToStaticMarkup(<Status tone="success">Ready</Status>);
+    expect(html).toContain("cx-status--success");
+    expect(html).toContain("<svg");
+    expect(html).toContain("Ready");
+  });
+  it("renders a neutral attribute as plain text in a tag, with no icon", () => {
+    const html = renderToStaticMarkup(<Tag>Hardware</Tag>);
+    expect(html).toContain("cx-tag");
+    expect(html).not.toContain("<svg");
   });
 });
 

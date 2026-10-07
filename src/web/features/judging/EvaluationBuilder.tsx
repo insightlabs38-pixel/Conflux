@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
@@ -259,9 +259,9 @@ function ProgressPanel({ planUrl }: { planUrl: string }) {
           : ""}{" "}
         ballots submitted{" "}
         {progress.completion_ratio !== null && (
-          <Badge tone={progress.completion_ratio >= 1 ? "success" : "info"}>
+          <Status tone={progress.completion_ratio >= 1 ? "success" : "info"}>
             {Math.round(progress.completion_ratio * 100)}%
-          </Badge>
+          </Status>
         )}
       </p>
       <Button
@@ -472,9 +472,9 @@ function PlanEditor({
       {error && <p role="alert">{error}</p>}
       <p>
         Published rubric version:{" "}
-        <Badge tone={plan.current_rubric_version ? "success" : "neutral"}>
+        <Status tone={plan.current_rubric_version ? "success" : "neutral"}>
           {plan.current_rubric_version ?? "none yet"}
-        </Badge>
+        </Status>
       </p>
       {plan.prize_judging && (
         <p>

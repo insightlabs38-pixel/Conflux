@@ -193,6 +193,25 @@ async function shortSummaries(page: Page) {
   );
 }
 
+/** Statuses that are not an icon plus words, and any leftover colour chip. */
+async function statusProblems(page: Page) {
+  return page.evaluate(() => {
+    const bad: string[] = [];
+    for (const el of document.querySelectorAll<HTMLElement>(".cx-status")) {
+      if (!el.checkVisibility()) continue;
+      const label = (el.textContent ?? "").trim();
+      if (!label) bad.push("status without words");
+      if (!el.querySelector("svg.cx-icon"))
+        bad.push(`status without icon: ${label}`);
+      if (getComputedStyle(el).backgroundColor !== "rgba(0, 0, 0, 0)")
+        bad.push(`status with a fill: ${label}`);
+    }
+    if (document.querySelector(".cx-badge"))
+      bad.push("cx-badge still rendered");
+    return bad;
+  });
+}
+
 const ROLES = ["organizer", "participant-01", "judge-01"];
 for (const width of [390, 1440]) {
   for (const role of ROLES) {
@@ -218,6 +237,7 @@ for (const width of [390, 1440]) {
       expect(await offScaleRadii(page)).toEqual([]);
       expect(await shortSummaries(page)).toEqual([]);
       expect(await iconProblems(page)).toEqual([]);
+      expect(await statusProblems(page)).toEqual([]);
       const shell = await shellGeometry(page);
       expect(shell.marketing).toBe(false);
       // below 1024px the header still wraps its navigation onto rows until the mobile navigation (PD-F005)

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "../../components/Button";
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { SubmissionReceipt } from "../pvs";
 import { apiJson, describeProblem } from "../../lib/api";
 import { useLoad } from "../../hooks/useLoad";
@@ -170,14 +170,15 @@ export function SubmissionPanel({
       </p>
       <ol className="cx-submission-steps" aria-label="Submission progress">
         <li>
-          <Badge tone={stageId ? "success" : "neutral"}>1</Badge> Choose a stage
+          <Status tone={stageId ? "success" : "neutral"}>1</Status> Choose a
+          stage
         </li>
         <li>
-          <Badge tone={stageId ? "info" : "neutral"}>2</Badge> Prepare notes &
+          <Status tone={stageId ? "info" : "neutral"}>2</Status> Prepare notes &
           artifacts
         </li>
         <li>
-          <Badge tone={finalized ? "success" : "neutral"}>3</Badge> Finalize &
+          <Status tone={finalized ? "success" : "neutral"}>3</Status> Finalize &
           keep receipt
         </li>
       </ol>

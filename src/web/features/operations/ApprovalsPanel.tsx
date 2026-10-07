@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
@@ -137,7 +137,9 @@ export function ApprovalsPanel({
           <li key={item.public_id}>
             <p>
               <strong>{item.label}</strong>{" "}
-              <Badge tone={TONE[item.status]}>{statusWords(item.status)}</Badge>
+              <Status tone={TONE[item.status]}>
+                {statusWords(item.status)}
+              </Status>
             </p>
             <ul>
               {item.summary.map((line, index) => (

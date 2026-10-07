@@ -1,4 +1,4 @@
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { VisuallyHidden } from "../../components/VisuallyHidden";
 import { DestinationLink } from "../../components/WorkspaceNavigation";
 import type { Loaded } from "../../hooks/useLoad";
@@ -47,9 +47,9 @@ export function ReadinessPanel({ load }: { load: Loaded<Readiness> }) {
     <section aria-label="Event readiness">
       <h3>
         Launch readiness{" "}
-        <Badge tone={TONE[readiness.status]}>
+        <Status tone={TONE[readiness.status]}>
           {STATUS_TEXT[readiness.status]}
-        </Badge>
+        </Status>
       </h3>
       {open.length === 0 ? (
         <p>Nothing is missing. Every check passes.</p>
@@ -57,7 +57,7 @@ export function ReadinessPanel({ load }: { load: Loaded<Readiness> }) {
         <ul>
           {open.map((item) => (
             <li key={item.id}>
-              <Badge tone={severityTone(item)}>{item.severity}</Badge>{" "}
+              <Status tone={severityTone(item)}>{item.severity}</Status>{" "}
               {item.detail}{" "}
               <DestinationLink
                 id={item.fix.destination}
@@ -82,7 +82,7 @@ export function ReadinessPanel({ load }: { load: Loaded<Readiness> }) {
           <ul>
             {passed.map((item) => (
               <li key={item.id}>
-                <Badge tone="success">OK</Badge> {item.detail}
+                <Status tone="success">OK</Status> {item.detail}
               </li>
             ))}
           </ul>

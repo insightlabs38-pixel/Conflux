@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Button } from "../../components/Button";
 import { PreviewLoader } from "../../components/ArtifactPreview";
 import { ProvenanceView } from "../../components/ProvenanceView";
@@ -217,7 +217,7 @@ export function JobsPanel({
               <tr key={job.public_id}>
                 <th scope="row">{job.label}</th>
                 <td>
-                  <Badge tone={TONE[job.status]}>{job.status}</Badge>
+                  <Status tone={TONE[job.status]}>{job.status}</Status>
                   {job.progress?.message && !isFinished(job) && (
                     <> {job.progress.message}</>
                   )}

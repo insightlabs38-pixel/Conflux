@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { blockTypes } from "./blockSchemas.generated";
 import { configDefaults, configError, type ConfigSchema } from "./configSchema";
 import { ConfigFields } from "./ConfigFields";
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
@@ -393,7 +393,7 @@ export function PageBuilder({
                   <ul>
                     {warnings.map((warning, index) => (
                       <li key={index}>
-                        <Badge tone="warning">{warning.category}</Badge>{" "}
+                        <Status tone="warning">{warning.category}</Status>{" "}
                         {warning.message}
                       </li>
                     ))}

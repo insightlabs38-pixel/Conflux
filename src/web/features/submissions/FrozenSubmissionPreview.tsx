@@ -1,4 +1,4 @@
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
 import { useLoad } from "../pvs/http";
@@ -39,11 +39,11 @@ export function FrozenSubmissionPreview({
       {data && Array.isArray(data.artifacts) && (
         <>
           <p>
-            <Badge tone={data.verified ? "success" : "warning"}>
+            <Status tone={data.verified ? "success" : "warning"}>
               {data.verified
                 ? "Evidence verified"
                 : "Evidence changed since finalization"}
-            </Badge>{" "}
+            </Status>{" "}
             · Version {data.version}
           </p>
           <ul className="cx-evidence-list">
@@ -52,9 +52,9 @@ export function FrozenSubmissionPreview({
                 <strong>{artifact.title}</strong>
                 <span>{artifact.kind}</span>
                 {artifact.drift ? (
-                  <Badge tone="danger">
+                  <Status tone="danger">
                     {artifact.drift.replaceAll("_", " ")}
-                  </Badge>
+                  </Status>
                 ) : (
                   artifact.download_url && (
                     <a

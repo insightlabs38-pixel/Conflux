@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Card } from "../../components/Card";
 import { apiRequest } from "../../lib/api";
 import { queryKeys } from "../../lib/query";
@@ -76,7 +76,7 @@ export function Inbox({ workspaceId }: { workspaceId: string }) {
       <ul>
         {messages.map((message) => (
           <li key={message.public_id}>
-            {!message.read_at && <Badge tone="info">new</Badge>}{" "}
+            {!message.read_at && <Status tone="info">new</Status>}{" "}
             <strong>{message.subject}</strong> ({message.event_name}):{" "}
             {message.body}
             {!message.read_at && (

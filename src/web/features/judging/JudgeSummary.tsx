@@ -1,4 +1,4 @@
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { DestinationLink } from "../../components/WorkspaceNavigation";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
@@ -134,7 +134,9 @@ export function JudgeSummary({ planBase }: { planBase: string }) {
         </div>
         <div>
           <dt>Recused</dt>
-          <dd>{declined > 0 ? <Badge tone="warning">{declined}</Badge> : 0}</dd>
+          <dd>
+            {declined > 0 ? <Status tone="warning">{declined}</Status> : 0}
+          </dd>
         </div>
       </dl>
     </section>

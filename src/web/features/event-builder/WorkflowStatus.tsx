@@ -1,4 +1,4 @@
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { describeProblem } from "../../lib/api";
 import { useLoad } from "../../hooks/useLoad";
 
@@ -31,13 +31,13 @@ export function WorkflowStatus({
       <h3>
         Workflow{" "}
         {data && (
-          <Badge tone={data.source === "preset" ? "success" : "neutral"}>
+          <Status tone={data.source === "preset" ? "success" : "neutral"}>
             {data.source === "preset"
               ? "Follows the format"
               : data.source === "custom"
                 ? "Customized"
                 : "Built by hand"}
-          </Badge>
+          </Status>
         )}
       </h3>
       {load.error && (

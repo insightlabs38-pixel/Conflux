@@ -1,5 +1,5 @@
 import { appHref, routes } from "../../lib/routes";
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Card } from "../../components/Card";
 import { useLoad } from "../../hooks/useLoad";
 import { useReadiness } from "../../hooks/useReadiness";
@@ -111,7 +111,7 @@ export function OperationsCenter({
               <ul>
                 {summary.submissions.blocked_projects.items.map((row) => (
                   <li key={row.project}>
-                    <Badge tone="danger">blocked</Badge> {row.project}:{" "}
+                    <Status tone="danger">blocked</Status> {row.project}:{" "}
                     {row.checks.join("; ")}
                   </li>
                 ))}
@@ -140,7 +140,7 @@ export function OperationsCenter({
                     {!plan.rubric_published && (
                       <>
                         {" "}
-                        · <Badge tone="danger">no rubric</Badge>
+                        · <Status tone="danger">no rubric</Status>
                       </>
                     )}
                   </li>
@@ -163,14 +163,14 @@ export function OperationsCenter({
             <h4>Publication</h4>
             <p>
               Public site:{" "}
-              <Badge
+              <Status
                 tone={summary.publication.event_public ? "success" : "neutral"}
               >
                 {summary.publication.event_public ? "on" : "off"}
-              </Badge>
+              </Status>
               {" · "}
               Page:{" "}
-              <Badge
+              <Status
                 tone={
                   summary.publication.page_configured ? "success" : "warning"
                 }
@@ -178,7 +178,7 @@ export function OperationsCenter({
                 {summary.publication.page_configured
                   ? `${summary.publication.page_block_count} blocks`
                   : "not configured"}
-              </Badge>
+              </Status>
               {" · "}
               Awards published: {summary.publication.awards_published}/
               {summary.publication.award_count}

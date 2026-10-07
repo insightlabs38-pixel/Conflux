@@ -1,0 +1,78 @@
+version: 3
+task: PD-F004-B02-T01
+batch: PD-F004-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 895f1ea
+  head_commit: null
+changed_paths:
+- src/web/components/Status.tsx
+- src/web/components/Badge.tsx (removed)
+- src/web/components/Icon.tsx
+- src/web/components/components.test.tsx
+- 34 files that rendered Badge now render Status or Tag
+- src/web/styles/components.css
+- tests/test_visual_ratchets.py
+- tests/test_design_manifest.py
+- tests/e2e/visual-foundation.spec.ts
+deliverables:
+- item: Semantic status colours have icon/text redundancy and accessible contrast
+  result: pass
+  evidence: 'Badge (a coloured chip with colour-only tone variants) was replaced by Status (icon + words
+    in the tone''s ink, no fill; icon per tone: circle, info, circle-check, triangle-alert, circle-x)
+    and Tag (neutral outlined attribute label); a TypeScript-AST codemod moved 34 files (tone neutral
+    or absent became Tag, every other tone Status); the check marks in timeline and step markers are the
+    Icon component; contrast of every tone ink on bg, surface and surface-2 is at least 4.5:1 in both
+    themes (test_design_manifest)'
+invariants:
+- item: One canonical component, no colour-only meaning
+  result: pass
+  evidence: ratchets fail on any cx-badge, any import of Badge, any background on a .cx-status selector,
+    or a Status without its icon; e2e statusProblems audits live pages for words, icon, no fill
+- item: Behavior and server state unchanged
+  result: pass
+  evidence: presentational swap only; vitest 665 passed
+- item: No test weakened
+  result: pass
+  evidence: the Badge tone tests became Status/Tag tests with stronger assertions (icon present, words
+    kept, no icon on a Tag); the timeline test now selects .cx-status--warning
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 665 passed
+- command: uv run --frozen pytest tests/test_visual_ratchets.py tests/test_design_manifest.py tests/integration/test_visual_tokens.py
+    -q
+  result: pass
+  note: all passed
+- command: docker compose up -d --build app; npx playwright test -c tests/e2e/playwright.config.ts visual-foundation
+    uiv2-surfaces uiv2-gate public --project=desktop
+  result: pass
+  note: 33 passed (axe included)
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-COLOR-2, V-SLOP-5 (no pill soup), D-004 status colour accessibility
+- ref: design/state-matrix
+  result: pass
+  note: status words and icons for S-ERR, S-PART, S-DENY
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: components and styles
+- surface: docs
+  result: pass
+  evidence: contract in spec 004; VISUAL_FOUNDATION.md to be extended at B02 T91
+migrations: []
+findings:
+- P3 'at most one tag per row' is a design rule that is not machine-checked yet; the ratchet covers the
+  component, not the row composition
+escalations: []
+limitations:
+- A neutral Badge with no tone was treated as an attribute and became a Tag; where such a label was really
+  a state (for example 'draft') it now reads as plain text, which still carries the word.
+next: review

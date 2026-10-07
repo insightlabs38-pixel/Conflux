@@ -8,7 +8,7 @@ import {
   previewUrl,
   type Preview,
 } from "../lib/preview";
-import { Badge } from "./Badge";
+import { Status } from "./Status";
 import { ErrorState } from "./ErrorState";
 import { LoadingState } from "./LoadingState";
 
@@ -55,7 +55,7 @@ export function ArtifactPreview({
         >
           {preview.findings.map((finding, index) => (
             <li key={`${finding.code}-${index}`}>
-              <Badge tone={TONE[finding.level]}>{finding.level}</Badge>{" "}
+              <Status tone={TONE[finding.level]}>{finding.level}</Status>{" "}
               {finding.message}
             </li>
           ))}

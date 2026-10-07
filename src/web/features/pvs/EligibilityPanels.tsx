@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
@@ -55,7 +55,7 @@ const STATE_TONE = {
 } as const;
 
 export function StatusBadge({ status }: { status: Review["status"] }) {
-  return <Badge tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Badge>;
+  return <Status tone={STATUS_TONE[status]}>{STATUS_LABEL[status]}</Status>;
 }
 
 function FindingList({
@@ -74,10 +74,10 @@ function FindingList({
             {finding.automated ? "Automated check" : "Organizer finding"} ·{" "}
             {finding.code}
           </p>
-          <Badge tone={finding.severity === "blocking" ? "danger" : "neutral"}>
+          <Status tone={finding.severity === "blocking" ? "danger" : "neutral"}>
             {finding.severity}
-          </Badge>{" "}
-          <Badge tone={STATE_TONE[finding.state]}>{finding.state}</Badge>{" "}
+          </Status>{" "}
+          <Status tone={STATE_TONE[finding.state]}>{finding.state}</Status>{" "}
           <p className="cx-finding__message">{finding.message}</p>
           {finding.participant_response && (
             <blockquote>

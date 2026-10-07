@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Badge } from "../../components/Badge";
+import { Status, Tag } from "../../components/Status";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
@@ -65,7 +65,7 @@ export function PortfolioPanel({ workspaceId }: { workspaceId: string }) {
                   <tr key={item.project}>
                     <th scope="row">{item.name}</th>
                     <td>
-                      {item.event.name} <Badge>{item.event.status}</Badge>
+                      {item.event.name} <Tag>{item.event.status}</Tag>
                     </td>
                     <td>
                       {item.submissions.length === 0
@@ -311,11 +311,11 @@ export function ContinuationsAdminPanel({
           <p>
             {item.summary}{" "}
             {item.hidden ? (
-              <Badge tone="warning">Hidden</Badge>
+              <Status tone="warning">Hidden</Status>
             ) : item.is_public ? (
-              <Badge tone="success">Public</Badge>
+              <Status tone="success">Public</Status>
             ) : (
-              <Badge>Private</Badge>
+              <Tag>Private</Tag>
             )}
           </p>
           {item.seeking.length > 0 && <p>Seeking: {item.seeking.join(", ")}</p>}
@@ -416,7 +416,7 @@ export function ChallengesPanel({
             <ul aria-label={`Resources for ${challenge.name}`}>
               {challenge.resources.map((resource) => (
                 <li key={resource.public_id}>
-                  <Badge>{resource.kind}</Badge>{" "}
+                  <Tag>{resource.kind}</Tag>{" "}
                   {resource.url && isWebUrl(resource.url) ? (
                     <a
                       href={resource.url}

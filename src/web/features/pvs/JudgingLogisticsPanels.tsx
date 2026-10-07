@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Badge } from "../../components/Badge";
+import { Status, Tag } from "../../components/Status";
 import { Button } from "../../components/Button";
 import { PreviewLoader } from "../../components/ArtifactPreview";
 import { Card } from "../../components/Card";
@@ -74,7 +74,7 @@ function StopList({ route }: { route: Route }) {
             {index + 1}
           </span>
           <span className="cx-route__project">
-            {index === 0 && <Badge tone="info">Next stop</Badge>}{" "}
+            {index === 0 && <Status tone="info">Next stop</Status>}{" "}
             <strong>{stop.project_name}</strong>
           </span>
           <span className="cx-route__place">
@@ -131,7 +131,7 @@ export function JudgeAssignmentsPanel({ planBase }: { planBase: string }) {
           {rows.data.map((row) => (
             <li key={row.project} className="cx-assignment">
               <strong className="cx-assignment__name">{row.name}</strong>
-              <Badge
+              <Status
                 tone={
                   row.status === "accepted"
                     ? "success"
@@ -141,7 +141,7 @@ export function JudgeAssignmentsPanel({ planBase }: { planBase: string }) {
                 }
               >
                 {row.status}
-              </Badge>
+              </Status>
               {row.reason && (
                 <span className="cx-assignment__reason">{row.reason}</span>
               )}
@@ -343,7 +343,9 @@ export function OrganizerJudgingLogisticsPanel({
               <dt>Declined or recused</dt>
               <dd>
                 {responses.data.counts.declined > 0 ? (
-                  <Badge tone="warning">{responses.data.counts.declined}</Badge>
+                  <Status tone="warning">
+                    {responses.data.counts.declined}
+                  </Status>
                 ) : (
                   0
                 )}
@@ -414,7 +416,7 @@ export function OrganizerJudgingLogisticsPanel({
                   <td>{judge.already_evaluated}</td>
                   <td>
                     {judge.unplaced.length > 0 ? (
-                      <Badge tone="warning">{judge.unplaced.length}</Badge>
+                      <Status tone="warning">{judge.unplaced.length}</Status>
                     ) : (
                       0
                     )}
@@ -574,13 +576,13 @@ export function ArtifactInspector({
           >
             <header className="cx-artifact__header">
               <h5>{artifact.title}</h5>
-              <Badge>{artifact.kind}</Badge>
+              <Tag>{artifact.kind}</Tag>
               {artifact.inspection && (
-                <Badge
+                <Status
                   tone={VERDICT_TONE[artifact.inspection.verdict] ?? "info"}
                 >
                   {artifact.inspection.verdict}
-                </Badge>
+                </Status>
               )}
             </header>
             <div className="cx-artifact__links">

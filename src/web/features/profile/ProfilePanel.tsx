@@ -13,7 +13,7 @@ import {
   SkillTags,
   type PersonIdentity,
 } from "../../components/Person";
-import { Badge } from "../../components/Badge";
+import { Tag } from "../../components/Status";
 import { apiRequest } from "../../lib/api";
 import { NotificationPreferences } from "./NotificationPreferences";
 
@@ -160,11 +160,11 @@ export function ProfilePanel({ workspaceId }: { workspaceId?: string }) {
   return (
     <section aria-label="Your profile" className="cx-profile">
       <ProfileHeader person={profile}>
-        <Badge>
+        <Tag>
           {profile.visibility === "members"
             ? "Shared workspace members"
             : `${profile.visibility} profile`}
-        </Badge>
+        </Tag>
         <SkillTags values={tags} />
       </ProfileHeader>
       <details className="cx-profile-editor">

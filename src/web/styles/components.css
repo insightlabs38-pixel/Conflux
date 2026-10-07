@@ -192,34 +192,42 @@
   color: var(--surface);
 }
 
-.cx-badge {
+/* A state is an icon and a word in the tone's ink, never a coloured chip (V-COLOR-2). */
+.cx-status {
   display: inline-flex;
   align-items: center;
-  font-size: var(--fs-14);
-  font-weight: 600;
-  padding: var(--sp-1) var(--sp-3);
+  gap: var(--sp-1);
+  font-size: var(--fs-12);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--lh-ui);
+  white-space: nowrap;
+}
+.cx-status--neutral {
+  color: var(--mute);
+}
+.cx-status--info {
+  color: var(--info);
+}
+.cx-status--success {
+  color: var(--ok);
+}
+.cx-status--warning {
+  color: var(--warn);
+}
+.cx-status--danger {
+  color: var(--err);
+}
+/* An attribute label: neutral, outlined, at most one per row. */
+.cx-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--sp-2);
+  border: 1px solid var(--line-2);
   border-radius: var(--r-1);
-  line-height: 1.4;
-}
-.cx-badge--neutral {
-  background: var(--color-surface);
-  color: var(--color-text-muted);
-}
-.cx-badge--info {
-  background: var(--color-info-bg);
-  color: var(--color-info);
-}
-.cx-badge--success {
-  background: var(--color-success-bg);
-  color: var(--color-success);
-}
-.cx-badge--warning {
-  background: var(--color-warning-bg);
-  color: var(--color-warning);
-}
-.cx-badge--danger {
-  background: var(--color-danger-bg);
-  color: var(--color-danger);
+  font-size: var(--fs-12);
+  line-height: var(--sp-5);
+  color: var(--ink-2);
+  white-space: nowrap;
 }
 
 .cx-card {
@@ -404,11 +412,6 @@
 .cx-shell__main {
   max-width: var(--content-app);
   padding: var(--sp-10) var(--sp-8);
-}
-.cx-badge {
-  border-radius: var(--r-1);
-  padding: 2px var(--sp-2);
-  font-size: var(--fs-12);
 }
 .cx-card {
   box-shadow: none;

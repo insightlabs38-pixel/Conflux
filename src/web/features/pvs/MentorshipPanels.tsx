@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Button } from "../../components/Button";
 import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
@@ -164,7 +164,7 @@ export function ProjectMentorshipPanel({
           {requests.data.map((item) => (
             <li key={item.public_id}>
               {item.topic}{" "}
-              <Badge tone={STATUS_TONE[item.status]}>{item.status}</Badge>
+              <Status tone={STATUS_TONE[item.status]}>{item.status}</Status>
               {item.claimed_by && <> · {item.claimed_by}</>}
               {item.resolution_note && <> · {item.resolution_note}</>}
               {(item.status === "pending" || item.status === "claimed") && (
@@ -344,10 +344,10 @@ export function MentorDeskPanel({
         >
           <p>
             {item.topic}{" "}
-            <Badge tone={item.urgency === "urgent" ? "danger" : "neutral"}>
+            <Status tone={item.urgency === "urgent" ? "danger" : "neutral"}>
               {item.urgency}
-            </Badge>{" "}
-            <Badge tone={STATUS_TONE[item.status]}>{item.status}</Badge>
+            </Status>{" "}
+            <Status tone={STATUS_TONE[item.status]}>{item.status}</Status>
             {item.claimed_by && <> · claimed by {item.claimed_by}</>}
           </p>
           {item.status === "pending" && (

@@ -129,7 +129,7 @@ def test_scales_match_the_contract():
 def test_every_text_pair_is_at_least_4_5_to_1_and_controls_3_to_1_in_both_themes():
     for name, t in zip(("light", "dark"), themes(), strict=True):
         for ink in ("ink", "ink-2", "ink-3", "accent", "ok", "warn", "err", "info", "mute"):
-            for ground in ("surface", "bg"):
+            for ground in ("surface", "bg", "surface-2"):
                 ratio = contrast(t["--" + ink], t["--" + ground])
                 assert ratio >= 4.5, f"{name}: {ink} on {ground} is {ratio:.2f}"
         for tone in ("ok", "warn", "err", "info", "mute", "accent"):

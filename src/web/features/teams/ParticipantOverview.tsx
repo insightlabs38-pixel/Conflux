@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Button } from "../../components/Button";
 import { ErrorState } from "../../components/ErrorState";
 import { LoadingState } from "../../components/LoadingState";
@@ -178,7 +178,7 @@ export function ParticipantOverview({
             {summary.projects.map((project) => (
               <li key={project.public_id}>
                 <strong>{project.name}</strong>
-                <Badge
+                <Status
                   tone={
                     project.review.status === "cleared"
                       ? "success"
@@ -188,7 +188,7 @@ export function ParticipantOverview({
                   }
                 >
                   {project.review.status.replaceAll("_", " ")}
-                </Badge>
+                </Status>
                 <span>
                   {project.stages
                     .map(

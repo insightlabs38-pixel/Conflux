@@ -1,4 +1,4 @@
-import { Badge } from "../../components/Badge";
+import { Status } from "../../components/Status";
 import { Card } from "../../components/Card";
 import { DataTable } from "../../components/Foundation";
 import { ErrorState } from "../../components/ErrorState";
@@ -89,14 +89,14 @@ export function CompletenessPanel({ workspaceId }: { workspaceId: string }) {
         <>
           {data.problems.length === 0 ? (
             <p role="status">
-              <Badge tone="success">Consistent</Badge> Every claim matches the
+              <Status tone="success">Consistent</Status> Every claim matches the
               system for {data.features.length} features.
             </p>
           ) : (
             <div role="alert">
               <p>
-                <Badge tone="danger">Inconsistent</Badge> {data.problems.length}{" "}
-                finding
+                <Status tone="danger">Inconsistent</Status>{" "}
+                {data.problems.length} finding
                 {data.problems.length === 1 ? "" : "s"}.
               </p>
               <ul aria-label="Completeness findings">

@@ -174,3 +174,15 @@ No migration, no endpoint, no SDK change. What an organizer will notice:
 - **Registrations and projects are sortable tables**; red now marks only a failure or the final destructive button (bulk apply and rebalance are no longer red).
 - The projects query entity gained a read-only `team_id` field (not a default column, not filterable) so a screen can name a team without exposing its id. Saved views and API clients that list the entity's fields will see one more.
 - The browser suite's `slop-audit` gate now also fails on boxed records, alarm colours, assistant-like controls, figures with more than two decimals and id-typed inputs; the new `record-picker` spec is in the read-only tier.
+
+## Moving to a build with the application shell (PD-F005-B01)
+
+No migration, no endpoint, no SDK change; web only. Every existing URL keeps working. What an operator, organizer or participant will notice:
+
+- **A new top bar**: an event switcher (current, favorites, recent, other events, and your other workspaces), **Search** (also Ctrl+K or Cmd+K, which opens a palette of commands such as "Go to Judging", "Switch to ...", "Use the dark theme", "Sign out" and, for organizers, a search of the event's projects and applications), a notification bell with the unread count, and the account menu.
+- **Navigation changes with the screen**: a 52px icon rail between 1024 and 1439 pixels, the old drawer from 768 to 1023, and on phones a bottom bar of at most five controls with a **More** sheet. Browser tests or scripts that opened the old "Navigation" toggle on a phone must use "More" (the shared helper `goToDestination` already does).
+- **Theme**: Account, Theme chooses System, Light or Dark for the app's own screens. It is kept on the device and forgotten at sign-out; public event pages follow the organizer's theme and are never changed by it.
+- **Favorites and recent events** are kept on the device too, not on your account, so they do not follow you to another browser.
+- **Notification preferences** are one click from the account menu and the bell; they open the profile section directly.
+- The browser suite's read-only tier gained `shell-responsive`, `event-switcher`, `account-menu`, `global-search` and `command-palette`, the isolated tier gained `inbox-center`, and `slop-audit` has a `crumbs` rule. `Modal` now returns focus to the control that opened it (a fix for an autofocused field being mistaken for the opener).
+- Integrators: a new query entity now needs an entry in `src/web/lib/searchTargets.json` (a test fails otherwise), and the inbox read is shared by `useInbox`.

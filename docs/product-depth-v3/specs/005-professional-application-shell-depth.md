@@ -208,3 +208,15 @@ Written by PD-F005-B01-T00 against the approved design (`design/app-shell`, `des
 ### Escalation conditions
 
 - A needed shell behavior that cannot be done without a new endpoint, table or entity registration (each registered entity needs a feature, manifest and search claim); a command that would have to mutate state; a route change that breaks a legacy URL; a theme that fails the contrast gate; any stored value that would need to leave the device.
+
+### As built (recorded at the close of PD-F005-B01)
+
+- **Routes.** `routes.target` and `parseWorkspaceLocation` extend `lib/routes.ts` in place (ROUTER, ESC-20260930-007 option A); `event` stayed a context search param. Unknown sections and events are not honoured; legacy URLs are unchanged.
+- **Navigation.** The four tiers of D-009 are built as specified: rail 216, icon rail 52 (1024-1439), drawer (768-1023), bottom bar of at most five plus a More sheet. `roleDestinations` gained `short` and `bar` fields; one nav list serves rail, drawer and sheet, the bar is a view of it (`barDestinations`).
+- **Switcher, preferences, theme.** `lib/shellPreferences.ts` is the only store (favorites 12, recents 8, recent commands 5, theme); device-local, validated, versioned `v1`, cleared at sign-out. The theme (`useAppTheme`) applies to the workspace shell only.
+- **Breadcrumbs.** The existing `Breadcrumbs` component now lists ancestors only and renders nothing under three levels; no in-app page is that deep yet, so none ships a trail. The audit rule `crumbs` guards destinations and tabs.
+- **Commands and search.** `lib/commands.ts` is the COMMANDS registry (providers, `when`, deterministic ranking with recents as the tie-break); `lib/shellCommands.ts` holds the shell's commands. Search is web-only over the entity catalogue through `useGlobalSearch` and `searchTargets.json`; the palette and the search are one overlay (`CommandPalette`).
+- **Inbox.** `InboxCenter` and the Messages card share `useInbox`; only the notification center subscribes to the realtime topic.
+- **Surfaces as closed.** web required (done), audit required (no new event type; the shell writes no state, verified by delegation), search required (T06), docs required (VISUAL_FOUNDATION.md shell section, UPGRADES.md note); api, sdk, cli, mcp, event_as_code, webhook, archive and analytics not required and unchanged (`make verify-fast` OpenAPI and SDK checks clean).
+- **Open for later batches.** Role switch, preview-as, density, the shortcut overlay and recent actions mount in the account menu and the registry (B02); selection-parameterised commands, a per-user server store for shell preferences, and record-level routes that a search hit can open directly (B02-T06, B03). Limitations: record search is organizer and admin only because the entity catalogue is; a hit opens the list that holds the record; the unread count is of the newest hundred messages.
+

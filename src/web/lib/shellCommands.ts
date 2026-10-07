@@ -51,6 +51,25 @@ registerCommandProvider(() => {
   ];
 });
 
+registerCommandProvider(() => {
+  const density = (
+    value: "comfortable" | "compact" | "high",
+    label: string,
+  ): Command => ({
+    id: `density.${value}`,
+    label,
+    group: "Appearance",
+    keywords: ["density", "table", "rows", "spacing", value],
+    when: (ctx) => !!ctx.capabilities.setDensity,
+    run: (ctx) => ctx.capabilities.setDensity?.(value),
+  });
+  return [
+    density("comfortable", "Use comfortable table density"),
+    density("compact", "Use compact table density"),
+    density("high", "Use high-density tables"),
+  ];
+});
+
 registerCommandProvider(() => [
   {
     id: "account.notification-preferences",

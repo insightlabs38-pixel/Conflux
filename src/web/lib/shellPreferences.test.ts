@@ -7,8 +7,10 @@ import {
   favoriteEvents,
   recentCommands,
   recentEvents,
+  densityPreference,
   rememberCommand,
   rememberEvent,
+  setDensityPreference,
   setThemePreference,
   themePreference,
   toggleFavoriteEvent,
@@ -116,5 +118,23 @@ describe("shell preferences", () => {
       JSON.stringify(["1bad", "go.ok"]),
     );
     expect(recentCommands("u", "w")).toEqual(["go.ok"]);
+  });
+
+  it("keeps the table density per person, comfortable by default, and forgets it at sign-out", () => {
+    expect(densityPreference("u")).toBe("comfortable");
+    setDensityPreference("u", "high");
+    expect(densityPreference("u")).toBe("high");
+    expect(densityPreference("other")).toBe("comfortable");
+    setDensityPreference("u", "comfortable"); // the default is stored as nothing
+    expect(window.localStorage.length).toBe(0);
+    setDensityPreference("u", "compact");
+    clearShellPreferences();
+    expect(densityPreference("u")).toBe("comfortable");
+    window.localStorage.setItem("conflux:v1:u:device:density", "tiny");
+    expect(densityPreference("u")).toBe("comfortable");
+    setDensityPreference("u", "tiny" as never);
+    expect(window.localStorage.getItem("conflux:v1:u:device:density")).toBe(
+      "tiny",
+    );
   });
 });

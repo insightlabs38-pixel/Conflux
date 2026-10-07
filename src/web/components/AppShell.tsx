@@ -5,11 +5,15 @@ import {
   roleDestinations,
   useWorkspaceNavigation,
 } from "./WorkspaceNavigation";
+import { useAppDensity } from "../hooks/useAppDensity";
 import { useAppTheme } from "../hooks/useAppTheme";
 import { useMe } from "../hooks/useMe";
 import {
+  setDensityPreference,
   setThemePreference,
+  useDensityPreference,
   useThemePreference,
+  type Density,
   type Theme,
 } from "../lib/shellPreferences";
 import { EventSwitcher } from "./EventSwitcher";
@@ -26,8 +30,38 @@ const MAIN_ID = "main-content";
  * overridden by the viewer's choice (design: dark-mode, Authority).
  */
 function ThemeApplier() {
-  useAppTheme(useMe().data?.public_id ?? "");
+  const user = useMe().data?.public_id ?? "";
+  useAppTheme(user);
+  useAppDensity(user);
   return null;
+}
+
+const DENSITY_CHOICES: [Density, string][] = [
+  ["comfortable", "Comfortable"],
+  ["compact", "Compact"],
+  ["high", "High density"],
+];
+
+function DensityChoice() {
+  const user = useMe().data?.public_id ?? "";
+  const preference = useDensityPreference(user);
+  return (
+    <fieldset className="cx-account__theme">
+      <legend>Table density</legend>
+      {DENSITY_CHOICES.map(([value, label]) => (
+        <label key={value}>
+          <input
+            type="radio"
+            name="density"
+            value={value}
+            checked={preference === value}
+            onChange={() => setDensityPreference(user, value)}
+          />{" "}
+          {label}
+        </label>
+      ))}
+    </fieldset>
+  );
 }
 
 function ThemeChoice() {
@@ -205,6 +239,7 @@ export function AppShell({
                 </>
               )}
               <ThemeChoice />
+              <DensityChoice />
               <p className="cx-metadata">{role} access</p>
               {onSignOut && (
                 <button

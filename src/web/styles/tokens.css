@@ -127,6 +127,24 @@
   }
 }
 
+/* Table density, the person's choice for the app's own screens (design D-009). The default sets no
+   attribute and is the long-standing look (rows of about 48px, set by the 32px controls in them);
+   compact is about 40px and high density about 32px. The cell padding is the token; in high density
+   the controls inside a table also take their small height, on a fine pointer from 768px up only, so
+   touch targets keep their 44px (D-012). A grid view's own compact setting is more specific and
+   still wins for that grid. */
+:root[data-density="compact"] {
+  --cell-pad-y: var(--sp-1);
+}
+:root[data-density="high"] {
+  --cell-pad-y: 0.125rem;
+}
+@media (min-width: 48rem) and (pointer: fine) {
+  :root[data-density="high"] .cx-table {
+    --h-ctl: var(--h-ctl-sm);
+  }
+}
+
 /* Legacy colour names resolve from the v3 names on every element that may redeclare them
    (organizer accent on .cx-event-site, dark scope), because var() resolves where it is declared. */
 :root,

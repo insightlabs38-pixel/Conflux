@@ -31,6 +31,7 @@ export type CommandContext = {
   capabilities: Partial<{
     signOut: () => void;
     setTheme: (theme: "system" | "light" | "dark") => void;
+    setDensity: (density: "comfortable" | "compact" | "high") => void;
   }>;
 };
 

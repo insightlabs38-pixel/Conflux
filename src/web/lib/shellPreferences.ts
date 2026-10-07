@@ -104,6 +104,39 @@ export function rememberEvent(
   );
 }
 
+/**
+ * How tightly tables are set (design D-009): comfortable is the app's long-standing look (rows about
+ * 44px), compact about 36px and high density about 28px. Never changed because of the viewport.
+ */
+export type Density = "comfortable" | "compact" | "high";
+const DENSITIES: readonly Density[] = ["comfortable", "compact", "high"];
+
+export function densityPreference(user: string): Density {
+  if (!user) return "comfortable";
+  const raw = storage()?.getItem(key(user, DEVICE, "density"));
+  return DENSITIES.find((density) => density === raw) ?? "comfortable";
+}
+
+export function setDensityPreference(user: string, density: Density) {
+  if (!user || !DENSITIES.includes(density)) return;
+  try {
+    if (density === "comfortable")
+      storage()?.removeItem(key(user, DEVICE, "density"));
+    else storage()?.setItem(key(user, DEVICE, "density"), density);
+  } catch {
+    // blocked storage: the choice lasts until the page is closed
+  }
+  changed();
+}
+
+export function useDensityPreference(user: string): Density {
+  return useSyncExternalStore(
+    subscribe,
+    () => densityPreference(user),
+    () => "comfortable" as Density,
+  );
+}
+
 const MAX_RECENT_COMMANDS = 5;
 const COMMAND_ID = /^[a-z][a-z0-9._-]{0,80}$/i;
 

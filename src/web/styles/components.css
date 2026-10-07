@@ -2293,7 +2293,7 @@
 .cx-shell__main td {
   text-align: left;
   vertical-align: top;
-  padding: var(--sp-2) var(--sp-3);
+  padding: var(--cell-pad-y, var(--sp-2)) var(--cell-pad-x, var(--sp-3));
   border-bottom: 1px solid var(--color-border);
 }
 .cx-shell__main thead th {

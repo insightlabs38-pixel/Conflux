@@ -4,6 +4,7 @@
     "async-operations",
     "event-switcher",
     "command-palette",
+    "density",
     "extended-embed",
     "foundations",
     "global-search",

@@ -20,6 +20,7 @@ import "../lib/shellCommands";
 import { routes } from "../lib/routes";
 import {
   rememberCommand,
+  setDensityPreference,
   setThemePreference,
   useRecentCommands,
 } from "../lib/shellPreferences";
@@ -145,6 +146,7 @@ function CommandPalette({
       capabilities: {
         signOut: onSignOut,
         setTheme: (theme) => setThemePreference(user, theme),
+        setDensity: (density) => setDensityPreference(user, density),
       },
     }),
     // `go` only closes over `navigate`, which is stable

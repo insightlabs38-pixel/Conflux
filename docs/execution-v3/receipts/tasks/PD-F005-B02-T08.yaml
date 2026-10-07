@@ -1,0 +1,78 @@
+version: 3
+task: PD-F005-B02-T08
+batch: PD-F005-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 8250f24
+  head_commit: null
+changed_paths:
+- src/web/lib/shellPreferences.ts
+- src/web/lib/shellPreferences.test.ts
+- src/web/hooks/useAppDensity.ts
+- src/web/hooks/useAppDensity.test.tsx
+- src/web/components/AppShell.tsx
+- src/web/components/WorkspaceNavigation.test.tsx
+- src/web/components/CommandPalette.tsx
+- src/web/lib/commands.ts
+- src/web/lib/shellCommands.ts
+- src/web/styles/components.css
+- src/web/styles/tokens.css
+- tests/e2e/density.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Configurable density (comfortable, compact, high density) as a complete workflow
+  result: pass
+  evidence: the account menu has a Table density choice (three radios) and the palette has three commands; the choice is the person's (device-local through shellPreferences, forgotten at sign-out), applied to the app's own screens as data-density on the document by useAppDensity in the workspace shell, and never changed by the viewport. Comfortable is today's look and sets no attribute; compact (about 40px rows) and high density (about 32px) set the cell padding token, and high density also gives controls inside a table their small height on a fine pointer from 768px up only.
+- item: Reuses the data grid and keeps a grid view's own setting
+  result: pass
+  evidence: the tokens drive the shell's table cells (the rule the DataGrid and EntityGrid tables use); a grid view's own compact setting is more specific and still wins for that grid; the saved-view schema (compact or comfortable) is unchanged, so no server contract moved
+- item: States, keyboard, accessibility, touch
+  result: pass
+  evidence: native radios in a fieldset with a legend; controls keep 44px on touch (browser test at 390 asserts the search control and the bottom bar are unchanged and at least 44px with high density chosen); the choice survives a reload and is cleared at sign-out
+invariants:
+- item: Never auto-switch from the viewport; touch targets stay 44px
+  result: pass
+  evidence: no media query selects a density; the only media query narrows the small control height to fine pointers at 768px and up (design D-009 and D-012)
+- item: Default look unchanged
+  result: pass
+  evidence: no attribute and the padding fallbacks equal the old values; the existing geometry and slop gates are unchanged and green in the shell regression run
+- item: No test weakened
+  result: pass
+  evidence: the draft-input finders in WorkspaceNavigation.test now exclude radio inputs (the account menu has more of them), which is what they meant
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 140 files, 766 tests (shellPreferences density 1, useAppDensity 3)
+- command: npx playwright test -c tests/e2e/playwright.config.ts density --project=desktop --workers=3
+  result: pass
+  note: 3 passed on the rebuilt stack - row heights fall at each step on the Registration table at 1440 and a reload keeps the choice, a phone keeps the choice with controls at 44px, the palette sets it and sign-out forgets it
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: density in the account menu
+- ref: design/responsive-wide
+  result: pass
+  note: density is a per-user setting, never automatic; touch targets at least 44px at any density
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: docs
+  result: pass
+  evidence: release note and developer notes at T91
+migrations: []
+findings:
+- P3 cells ease into their padding (an existing transition), so a measurement taken at once reads the old row height; the browser test polls for the settled height.
+- P3 on a phone tables are stacked cards whose spacing the card layout sets, so density changes rows from 768px up.
+escalations: []
+limitations:
+- Heights differ from the board (44, 36, 28) because the app's rows are set by their controls; the labels follow the research and the default is today's look (QUESTIONS.md 2026-10-07T23:35Z).
+- The wide-display suggestion to offer dense once at 1800px and up is not built.
+- Only the shell's tables follow the setting; public pages do not.
+next: review

@@ -74,7 +74,7 @@ describe("workspace destinations", () => {
     )!;
     act(() => click(project));
     const input = container.querySelector<HTMLInputElement>(
-      "input:not([name=theme])",
+      "input:not([type=radio])",
     )!;
     input.value = "Unsaved project";
     expect(input.closest<HTMLElement>(".cx-destination")!.hidden).toBe(false);
@@ -87,7 +87,7 @@ describe("workspace destinations", () => {
     act(() => click(overview));
     expect(input.closest<HTMLElement>(".cx-destination")!.hidden).toBe(true);
     act(() => click(project));
-    expect(container.querySelector("input:not([name=theme])")).toBe(input);
+    expect(container.querySelector("input:not([type=radio])")).toBe(input);
     expect(input.value).toBe("Unsaved project");
     act(() => root.unmount());
     container.remove();
@@ -222,13 +222,13 @@ it("loads optional profile content only when visited and retains its draft after
       </Harness>,
     ),
   );
-  expect(host.querySelector("input:not([name=theme])")).toBeNull();
+  expect(host.querySelector("input:not([type=radio])")).toBeNull();
   const link = host.querySelector<HTMLAnchorElement>(
     'nav[aria-label="Primary"] a[href="/w/w/profile"]',
   )!;
   await act(async () => click(link));
   const input = host.querySelector<HTMLInputElement>(
-    "input:not([name=theme])",
+    "input:not([type=radio])",
   )!;
   input.value = "Unsaved bio";
   await act(async () =>
@@ -239,7 +239,7 @@ it("loads optional profile content only when visited and retains its draft after
     ),
   );
   await act(async () => click(link));
-  expect(host.querySelector("input:not([name=theme])")).toBe(input);
+  expect(host.querySelector("input:not([type=radio])")).toBe(input);
   expect(input.value).toBe("Unsaved bio");
   await act(async () => root.unmount());
   host.remove();

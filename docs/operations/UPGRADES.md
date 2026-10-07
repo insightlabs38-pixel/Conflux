@@ -165,3 +165,12 @@ No migration, no endpoint, no SDK change; web only. What an operator or organize
 - **Fewer repeated headings**: panels under a task tab (Settings, Features, Forms, Policies, Stages) no longer say the tab's name again; the Communications panel is titled "Send a message" and the judging card "Evaluation setup". Browser tests or scripts that find these cards by heading must use the new names.
 - **No frame inside a frame**: the public page editor stands on the page, and empty and loading states and tables inside a card lose their own border (error and denied states keep theirs).
 - The browser suite has a new read-only gate, `slop-audit`, that fails when a page regains a gradient, a coloured icon tile, a card row, a pill around ordinary text, a nested card, a repeated label or a three-dot menu (docs/operations/VISUAL_FOUNDATION.md).
+
+## Moving to a build with the data guardrails (PD-F004-B05)
+
+No migration, no endpoint, no SDK change. What an organizer will notice:
+
+- **Choosing instead of pasting ids.** Setup > Policies "Check policy" chooses the project (or the team, for joining) from a list by name, with a box to narrow it; Permissions "Test" with a real person chooses them by username. The API calls are unchanged and still receive the record's id, so scripts that post ids keep working. The person list is the workspace's project participants; to test a judge or mentor use the hypothetical-role mode.
+- **Registrations and projects are sortable tables**; red now marks only a failure or the final destructive button (bulk apply and rebalance are no longer red).
+- The projects query entity gained a read-only `team_id` field (not a default column, not filterable) so a screen can name a team without exposing its id. Saved views and API clients that list the entity's fields will see one more.
+- The browser suite's `slop-audit` gate now also fails on boxed records, alarm colours, assistant-like controls, figures with more than two decimals and id-typed inputs; the new `record-picker` spec is in the read-only tier.

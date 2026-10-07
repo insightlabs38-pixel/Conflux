@@ -264,3 +264,16 @@ Recorded at the close of PD-F004-B04 from what was built (T01-T08), against desi
 - **Actions.** Every frequent action is a labelled button where it is used; a menu popup or dots-glyph trigger fails the audit. Labelled disclosures (Advanced) are allowed.
 - **Surfaces.** web and docs only; no endpoint, model, SDK, audit, webhook, archive or Event-as-Code change. Limitation: dialogs, open disclosures and per-record detail views are not walked.
 
+## PD-F004-B05 canonical contract
+
+Recorded at the close of PD-F004-B05 from what was built (T01-T05), against design `V-SLOP-9..12` and `V-SLOP-14`.
+
+- **Five more audit rules** in `slopProblems`: `recordGrids`, `alarmColors`, `fakeAi`, `precision`, `opaqueIds`, each with a self-test and run on the same pages and widths as B04.
+- **A list of records is a table.** Registrations and projects are sortable tables (the entity grid); three or more boxed siblings in a row fail the audit.
+- **Red is for failure.** Red appears only on the failing item and on a final destructive button; a page with several red marks fails.
+- **Deterministic flows do not look like an assistant.** No sparkle, "AI", copilot, magic (other than "magic link") or smart-suggest control; scoring, eligibility and publication stay unlabeled as intelligent.
+- **Precision.** A shown figure has at most two decimals; `data-raw` marks an exact value on purpose. Dates in the event timezone with a relative hint are not audited by this rule.
+- **No opaque ids as input.** A record is chosen by name (`RecordPicker`): a project or team from the projects entity (a team through its project, via the read-only `team_id` field), a person from the organizer-only participants list. A key the author invents (a form field's id) is `data-authored-key`.
+- **Surfaces.** web and docs. The only server change is one derived, non-default `team_id` field on the projects entity (the feature search claim lists it); no model, migration, endpoint payload, SDK, audit, webhook, archive or Event-as-Code change. Registering new query entities was tried and rejected: each must be claimed by a feature, manifest and search contract.
+- **Limitations.** Dialogs, open disclosures and per-record detail views are not walked; the person list omits people with no project; a team with no project is not offered.
+

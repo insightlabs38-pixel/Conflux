@@ -1,0 +1,58 @@
+version: 3
+task: PD-F004-B05-T91
+batch: PD-F004-B05
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 298b115
+  head_commit: null
+changed_paths:
+- docs/verification/PD-F004-B05/SURFACES.md
+- docs/operations/VISUAL_FOUNDATION.md
+- docs/operations/UPGRADES.md
+- docs/product-depth-v3/specs/004-visual-direction-professional-clean-compact-deliberate.md
+deliverables:
+- item: Surface matrix closed, no undocumented skip
+  result: pass
+  evidence: docs/verification/PD-F004-B05/SURFACES.md closes every surface of the spec 004 matrix (web and docs required and done; the rest stated not_required with the reason and the check that backs it)
+- item: Every required surface delegates to the same canonical operation, contracts synchronized
+  result: pass
+  evidence: pickers read the projects query entity and the participants list; policy-debug and authz-dry-run payloads unchanged; make verify-fast OpenAPI and SDK checks clean in T90
+- item: User, operator and developer documentation and migration notes
+  result: pass
+  evidence: VISUAL_FOUNDATION.md (five rules, RecordPicker), UPGRADES.md (organizer notes, scripts posting ids keep working, new team_id field), spec 004 canonical contract
+invariants:
+- item: No second source of truth
+  result: pass
+  evidence: new registered entities were rejected in T05; one derived field on an existing entity
+verification:
+- command: npx prettier --check docs/operations docs/verification/PD-F004-B05 docs/product-depth-v3/specs
+  result: pass
+  note: formatting only; behaviour was verified in T90 on the same code
+- command: python3 scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid, 331 batches, 3110 tasks
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-SLOP-9..12, 14
+- ref: design/state-matrix
+  result: pass
+  note: states untouched
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: T90 live audit and record-picker spec
+- surface: docs
+  result: pass
+  evidence: files above
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Dialogs, open disclosures and per-record detail views are not walked by the audit.
+next: review

@@ -1,0 +1,73 @@
+version: 3
+task: PD-F004-B01-T00
+batch: PD-F004-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: architecture
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 1d614a1
+  head_commit: null
+changed_paths:
+- docs/product-depth-v3/specs/004-visual-direction-professional-clean-compact-deliberate.md
+deliverables:
+- item: Update spec 004 with canonical state/data model, lifecycle, authority boundary, migration plan
+    and cross-surface applicability
+  result: pass
+  evidence: spec 004 section 'PD-F004-B01 canonical contract' covers source of truth and naming (v3 names
+    canonical, legacy as aliases, ratchet), lifecycle (no persisted state; owners PD-F005-B01-T08, PD-F005-B02-T08,
+    PD-S010-B01-T08), authority, migration (theme_config values stay valid, no DB/API/SDK change), cross-surface
+    (React app and server-rendered public templates share tokens.css)
+- item: Resolve reuse of shared primitives and forbid duplicate local representations
+  result: pass
+  evidence: one Button/Status/Tag/Icon/state-component set, one token file; ASYNC_JOB is the only source
+    of the slow-operation state
+- item: Record unresolved ambiguity as an escalation instead of guessing
+  result: pass
+  evidence: font self-hosting (design D-007 item 2) logged in .claude-supervisor/QUESTIONS.md with default
+    A; icon source and task order decided inside the contract
+invariants:
+- item: One canonical source of truth, existing domain services, no UI-only business rules
+  result: pass
+  evidence: contract keeps deadlines, roles and eligibility server-side (S-DENY, S-ERR)
+- item: Server authorization, validation and audit unchanged
+  result: pass
+  evidence: no API or model change in B01
+- item: Design intent, accessibility and progressive disclosure preserved
+  result: pass
+  evidence: V-* and S-* rules cited as the acceptance basis; rem-based sizes keep browser font scaling
+verification:
+- command: uv run --frozen pytest tests/integration/test_accessibility_audit.py -k tracks_shared
+  result: pass
+  note: the existing mirror test between THEME_COLORS and tokens.css passes on the baseline the contract
+    builds on
+- command: grep and read of src/web/styles, components, AppShell, presentation base.html and themes.py
+  result: pass
+  note: facts in 'What exists' checked (1 hex literal, 0 gradients, shared static tokens.css, hand-mirrored
+    THEME_COLORS, 29 files using Card)
+- command: browser verification at 1440 and 390 with loading, empty and error states
+  result: skipped
+  note: T00 changes no behavior; browser evidence is owned by the implementation tasks and T90 (visual-foundation.spec.ts)
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: contract cites VISUAL_CONTRACT V-* and tokens as the value authority
+- ref: design/state-matrix
+  result: pass
+  note: contract cites STATE_MATRIX S-* and the extension of the four state components
+surface_matrix:
+- surface: web
+  result: deferred-by-contract
+  evidence: implementation tasks T01-T08
+- surface: docs
+  result: pass
+  evidence: spec 004 section
+migrations: []
+findings:
+- P3 no existing task owns vendoring font binaries; defaulted to the system fallback (QUESTIONS.md)
+escalations: []
+limitations:
+- Counts of Button/Badge/Card uses are line counts of JSX tags, not a component census.
+next: review

@@ -181,3 +181,48 @@ Conflux should explicitly reject several common low-quality SaaS/AI-generated UI
 - Visual guardrail: avoid display unhelpful decimals/precision just because the backend has them
 - Visual guardrail: avoid make advanced capabilities depend on memorizing opaque IDs
 
+
+## PD-F004-B01 canonical contract
+
+Written by PD-F004-B01-T00 against the committed design authority (`design/system-v3`, `design/state-matrix`; rules `V-*` in `design/system/VISUAL_CONTRACT.md`, `S-*` in `design/states/STATE_MATRIX.md`, decisions D-001..D-012, obligations in `design/IMPLEMENTATION_HANDOFF.md`).
+
+### What exists (reuse, do not rebuild)
+
+- One token layer, `src/web/styles/tokens.css`, is loaded by the React app (`main.css`) and by the server-rendered public templates (`presentation/base.html` via `{% static 'tokens.css' %}`), so a value change reaches both. `components.css` (2,801 lines) and `presentation.css` (774) are already token-driven: no hex literal beyond one, no gradient, `font-size` through `var(...)`, radii through `--radius-*`.
+- `Button`, `Badge`, `Card`, `EmptyState`, `ErrorState`, `LoadingState`, `DeniedState`, `AppShell`, `WorkspaceNavigation`, `Foundation`, `DataGrid` exist (152 / 75 / 38 uses of Button / Badge / Card). `presentation/accessibility.py THEME_COLORS` hand-mirrors the palette for the organizer-theme contrast gate. The dark values exist only as the public-site preset `:root[data-theme="dark"]`.
+
+### Canonical source of truth and names
+
+- Values are defined once, in `src/web/styles/tokens.css`, under the **v3 names** (`--bg`, `--surface`, `--line*`, `--ink*`, `--accent*`, `--ok/warn/err/info/mute` with `-tint` and `-line`, `--fs-*`, `--sp-*`, `--r-*`, `--h-*`, `--sh-*`, `--t-*`, `--focus`) and the v3 dark set under `[data-theme="dark"]`. `design/system/tokens.json` is the approved reference; a test fails when the web tokens differ from it (after normalising rem to px).
+- The legacy names (`--color-*`, `--space-*`, `--radius-*`, `--font-size-*`, `--shadow-*`, `--control-height*`) stay for one release as **aliases to the v3 names** (never a second value), so `components.css` keeps working while tasks move it over. A ratchet test counts legacy-name uses and may only fall; the aliases are deleted when the count is zero, no later than the close of PD-F004-B05. New and edited CSS uses v3 names only.
+- Sizes are authored in `rem` equal to the design's px at a 16px root (`--fs-14: 0.875rem`), so a user's browser font-size still scales the UI; density row heights and touch targets stay px. The parity test compares the px equivalents.
+- `THEME_COLORS` stays a mirror, now proved not trusted: the existing `test_fixed_theme_audit_tracks_shared_css_tokens` (parses `tokens.css`, asserts the mirror equals it) is re-pointed at the v3 names in the colour task. Organizer accents stored today (`#126454`, `#a32918`, `#363636` and any custom value) are re-checked against the new light and dark backgrounds by the existing gate; a stored accent that fails is reported by the migration check below, never silently rewritten.
+
+### Lifecycle, state and authority
+
+- B01 persists nothing and adds no API field: it is CSS, tokens and React components. Per-user theme preference (system / light / dark) is owned by PD-F005-B01-T08, density by PD-F005-B02-T08, event theme modes by PD-S010-B01-T08. B01 ships the dark token set and the theme root rule (re-declare `color` and `background-color`, D-008) and honours an existing `data-theme` attribute; it adds no toggle.
+- Official scoring, permissions, deadlines and publication are untouched. A component never decides eligibility, role or deadline state; it renders what the server returned (S-DENY, S-ERR).
+
+### Migration and compatibility
+
+- Stored `theme_config` values (`hero` split / poster / editorial, `density`, `typography`, `personality`, `width`, `background`, `project_card`) stay valid and keep their meaning; the hero vocabulary (none / compact / standard / immersive) is PD-F004-B02/B03 and needs its own mapping decision there.
+- The change is visual and structural in the React shell. Server-rendered public pages receive the new palette through the shared tokens, so the public e2e and accessibility gates (`public.spec`, `event-themes.spec`, `uiv2-*`) must stay green at 390 and 1440 without being weakened; `public.spec` expects `system-ui` in the body font stack, which the stack keeps.
+- No database migration, no OpenAPI or SDK change, no URL change. A release note goes in `docs/operations/UPGRADES.md` when the palette lands (default accent moves from green to blue; stored organizer accents are untouched).
+
+### Reuse and forbidden duplicates
+
+- Status (icon plus word) and Tag replace the colour-only `Badge` variants; there is one `Button` with one primary per context; one icon component; one set of state components extended with the S- fields. No per-feature copy of any of them, no second token file, no inline style literals for colour, size, radius or shadow.
+- `ASYNC_JOB` (the declared reuse) is the only source for the "slow, keep working, cancel" state (S-LOAD, after 8s): a component shows a job's real progress and cancel, it does not invent one.
+
+### Decisions taken here (conservative defaults, reversible)
+
+- Fonts: B01 keeps the font stack (`"IBM Plex Sans"` first, then the system stack) and ships no font binaries. Self-hosting Plex needs the owner's answer on licence packaging and air-gapped installs (design D-007 item 2); until then installs without Plex use the system fallback. Logged in `.claude-supervisor/QUESTIONS.md`.
+- Icons: a small first-party inline-SVG `Icon` component with the subset in use (16px, `currentColor`, Lucide-compatible shapes), not a new npm dependency.
+- Task order inside the batch (all depend only on T00): T08 colour and token layer, T04 typography, T05 spacing, T02 radii, T03 elevation, T06 primary action, T07 icons, T01 shell last, because it consumes the rest.
+
+### Test strategy
+
+- Python: token parity with the design JSON, `THEME_COLORS` mirror, contrast of every token pair (extends `tests/test_design_manifest.py`).
+- Vitest: legacy-name and literal ratchets over `src/web` (hex, px font sizes, radii outside the scale, gradients, shadows outside floating layers), component tests per primitive.
+- Playwright (`tests/e2e/visual-foundation.spec.ts`, isolated fixture): computed geometry at 1440 and 390 (top bar 44px, rail 216px, row heights 28/36/44, 44px touch hit areas), focus ring, no horizontal overflow, axe, on organizer, participant and judge shells and one public page, plus the existing gates unchanged.
+- Escalation conditions: a stored organizer accent that fails the new gate; a component that needs a second source of truth; a server-rendered template that cannot take the shared tokens.

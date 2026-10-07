@@ -1,0 +1,79 @@
+version: 3
+task: PD-F004-B03-T01
+batch: PD-F004-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 65d9e24
+  head_commit: null
+changed_paths:
+- src/api/presentation/themes.py
+- src/web/features/page-builder/ThemeSettings.tsx
+- src/web/features/page-builder/ThemeSettings.test.tsx
+- src/web/styles/presentation.css
+- tests/integration/test_event_themes.py
+- tests/e2e/hero-size.spec.ts
+- docs/operations/VISUAL_FOUNDATION.md
+deliverables:
+- item: Immersive hero is opt-in for events that deliberately want it
+  result: pass
+  evidence: 'hero_size gains `immersive` (same enum and key as compact, none, standard; no second setting).
+    The server refuses it without a hero image (''built around artwork'') and refuses removing the image
+    while it is set; the form keeps the option disabled until a Hero image URL is entered; the default
+    stays compact'
+- item: Rendering
+  result: pass
+  evidence: both public renderers; the art is a full-width strip above the title row (order in CSS), at
+    most 22rem desktop and 7.5rem mobile, title row on the page surface, so no text sits over art; editorial
+    layout still hides art except for immersive
+- item: Diagnostics and states
+  result: pass
+  evidence: refusal text names the next step (add a hero image URL, or choose compact or standard); the
+    form shows it in its alert and keeps the draft; hint on the field explains each size
+invariants:
+- item: Server authority, untrusted URLs
+  result: pass
+  evidence: banner_url still passes the existing safe-URL validation; the immersive rule is server-side
+- item: Accessibility and no overflow
+  result: pass
+  evidence: axe and horizontal-overflow assertions on the public page at 390 and 1440; one h1 kept
+- item: Progressive disclosure and defaults
+  result: pass
+  evidence: no event changes by default; stored themes without the key still mean compact
+verification:
+- command: uv run --frozen pytest tests/integration/test_event_themes.py -q
+  result: pass
+  note: 20 passed (art required, refusal text, removal refused, render)
+- command: cd src/web && npx tsc --noEmit && npx vitest run page-builder
+  result: pass
+  note: 11 passed (disabled until art, enabled with art)
+- command: docker compose up -d --build app; iso-min fixture; npx playwright test hero-size --project=desktop
+  result: pass
+  note: 6 passed (immersive at 390 and 1440, API refusal, unsupported value), fixture disposed
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-HERO-1 (immersive opt-in, Advanced), D-005 (text over art sits on a solid base), V-COLOR-2
+- ref: design/state-matrix
+  result: pass
+  note: error and saved states are the shared ones
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: builder control, public renderers, stylesheet
+- surface: docs
+  result: pass
+  evidence: VISUAL_FOUNDATION.md Public hero
+migrations: []
+findings:
+- P3 design D-007 item 4 leaves the immersive hero undesigned; built from V-HERO-1, D-005 and the existing
+  primitives (QUESTIONS.md 2026-10-07T07:40Z, default A).
+escalations: []
+limitations:
+- No bespoke immersive design exists; the owner can commission one and replace the one CSS block. Focal point
+  and per-viewport art are PD-F004-B03-T06; the organizer preview is T07.
+next: review

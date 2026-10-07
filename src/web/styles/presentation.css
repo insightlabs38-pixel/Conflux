@@ -301,6 +301,20 @@
   --hero-lockup: 9rem;
   --hero-pad: var(--sp-8);
 }
+/* immersive (opt-in, needs a hero image): the art is its own full-width strip above the title row,
+   never behind the text, so contrast never depends on the picture. Capped at 22rem (352px) on a
+   desktop and 7.5rem (120px) on a phone. */
+.cx-event-site[data-hero-size="immersive"] .cx-hero__band {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-4);
+  padding-top: 0;
+}
+.cx-event-site[data-hero-size="immersive"] .cx-hero__image {
+  order: -1;
+  display: block;
+  width: 100%;
+  height: clamp(12rem, 28vw, 22rem);
+}
 /* none: no band. The page keeps one h1 and the primary action; art, lockup and kicker are dropped. */
 .cx-event-site[data-hero-size="none"] {
   --hero-pad: var(--sp-2);
@@ -447,7 +461,8 @@
   grid-template-columns: minmax(0, 1fr);
 }
 .cx-event-site[data-hero="editorial"] .cx-hero__identity,
-.cx-event-site[data-hero="editorial"] .cx-hero__image {
+.cx-event-site[data-hero="editorial"]:not([data-hero-size="immersive"])
+  .cx-hero__image {
   display: none;
 }
 .cx-theme-editor fieldset {
@@ -492,6 +507,9 @@
   .cx-hero__identity,
   .cx-event-site .cx-event-kicker {
     display: none;
+  }
+  .cx-event-site[data-hero-size="immersive"] .cx-hero__image {
+    height: 7.5rem; /* the one strip that stays: opt-in art, 120px */
   }
   .cx-event-site .cx-block > h2 {
     font-size: var(--fs-24);

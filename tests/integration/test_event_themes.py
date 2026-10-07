@@ -15,7 +15,7 @@ pytestmark = pytest.mark.django_db
         {"accent": "red"},
         {"accent": "#ffffff"},
         {"hero": "anything"},
-        {"hero_size": "immersive"},
+        {"hero_size": "huge"},
         {"hero_size": ""},
         {"hero_size": ["none"]},
         {"logo_url": "javascript:alert(1)"},
@@ -119,8 +119,57 @@ def test_hero_size_is_validated_by_the_page_api_and_a_refusal_changes_nothing():
     ok = client.patch(url, {"theme_config": {"hero_size": "none"}}, content_type="application/json")
     assert ok.status_code == 200 and ok.json()["theme_config"]["hero_size"] == "none"
     bad = client.patch(
-        url, {"theme_config": {"hero_size": "immersive"}}, content_type="application/json"
+        url, {"theme_config": {"hero_size": "huge"}}, content_type="application/json"
     )
     assert bad.status_code == 400
     assert "hero_size" in str(bad.json()) and "Unsupported" in str(bad.json())
     assert Page.objects.get(event=event).theme_config == {"hero_size": "none"}
+
+
+ART = "https://art.example.org/hero.jpg"
+
+
+def test_immersive_needs_a_hero_image_and_says_so():
+    with pytest.raises(ValidationError, match="built around artwork"):
+        clean_theme_config({"hero_size": "immersive"})
+    with pytest.raises(ValidationError, match="built around artwork"):
+        clean_theme_config({"hero_size": "immersive", "banner_url": ""})
+    assert clean_theme_config({"hero_size": "immersive", "banner_url": ART})["hero_size"] == (
+        "immersive"
+    )
+    assert clean_theme_config({"hero_size": "standard"})["hero_size"] == "standard"
+
+
+def test_immersive_page_renders_with_its_art_and_removing_the_art_is_refused():
+    from django.test import Client
+    from presentation.models import PageBlock
+    from test_public_site import make_public_event_with_finalized_project
+
+    workspace, event, organizer = make_event_with_organizer()
+    client = cookie_client(Session.issue(organizer).token)
+    url = page_url(workspace, event)
+    client.get(url)
+    ok = client.patch(
+        url,
+        {"theme_config": {"hero_size": "immersive", "banner_url": ART}},
+        content_type="application/json",
+    )
+    assert ok.status_code == 200
+    without_art = client.patch(
+        url,
+        {"theme_config": {"hero_size": "immersive"}},
+        content_type="application/json",
+    )
+    assert without_art.status_code == 400
+    assert "artwork" in str(without_art.json())
+    assert Page.objects.get(event=event).theme_config["banner_url"] == ART
+
+    public_event, _, _ = make_public_event_with_finalized_project()
+    page = Page.objects.create(
+        event=public_event, theme_config={"hero_size": "immersive", "banner_url": ART}
+    )
+    PageBlock.objects.create(page=page, kind="hero", config={"title": public_event.name})
+    body = Client().get(f"/e/{public_event.public_id}/").content.decode()
+    assert 'data-hero-size="immersive"' in body
+    assert f'class="cx-hero__image" src="{ART}"' in body
+    assert body.count("<h1") == 1

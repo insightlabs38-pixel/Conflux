@@ -14,8 +14,9 @@ ENUMS = {
     "width": ("standard", "wide"),
     "hero": ("split", "poster", "editorial"),
     # How much room the public hero takes (PD-F004-B02-T08): compact is the default and what a theme
-    # without the key means, so no stored theme needs a migration.
-    "hero_size": ("compact", "none", "standard"),
+    # without the key means, so no stored theme needs a migration. `immersive` (PD-F004-B03-T01) is
+    # the artwork-led opt-in and needs a hero image (checked in clean_theme_config).
+    "hero_size": ("compact", "none", "standard", "immersive"),
     "background": ("canvas", "paper"),
     "project_card": ("visual", "compact"),
 }
@@ -82,6 +83,13 @@ def clean_theme_config(value, theme="default"):
             raise ValidationError(
                 {"theme_config": f"{key} must be a safe absolute HTTP(S) image URL."}
             )
+    if result.get("hero_size") == "immersive" and not result.get("banner_url"):
+        raise ValidationError(
+            {
+                "theme_config": "The immersive hero is built around artwork: add a hero image URL "
+                "first, or choose compact or standard."
+            }
+        )
     if "accent" in result:
         accent = result["accent"]
         if not isinstance(accent, str) or not re.fullmatch(r"#[0-9a-fA-F]{6}", accent):

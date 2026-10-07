@@ -26,12 +26,12 @@ const choices: Record<string, string[]> = {
   density: ["comfortable", "compact"],
   width: ["standard", "wide"],
   hero: ["split", "poster", "editorial"],
-  hero_size: ["compact", "none", "standard"],
+  hero_size: ["compact", "none", "standard", "immersive"],
   background: ["canvas", "paper"],
   project_card: ["visual", "compact"],
 };
 const heroSizeHint =
-  "Compact is a short band with the title, status and one action. None keeps only the title and the action. Standard allows larger art.";
+  "Compact is a short band with the title, status and one action. None keeps only the title and the action. Standard allows larger art. Immersive is a full-width image above the title and needs a hero image URL.";
 const labels: Record<string, string> = {
   typography: "Typography",
   personality: "Corner style",
@@ -198,7 +198,15 @@ export function ThemeSettings({
                     onChange={(event) => update(key, event.target.value)}
                   >
                     {choices[key].map((value) => (
-                      <option key={value} value={value}>
+                      <option
+                        key={value}
+                        value={value}
+                        disabled={
+                          key === "hero_size" &&
+                          value === "immersive" &&
+                          !draft.banner_url
+                        }
+                      >
                         {value}
                       </option>
                     ))}

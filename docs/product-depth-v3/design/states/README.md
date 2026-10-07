@@ -6,3 +6,4 @@ Known limits: representative surfaces only (grid, My Event, judge, deliberation,
 ## r2.1 changes
 - States-1 “Public project · media failed”: explicit failure placeholder (`.fig-fail`, warning glyph, “Figure 2 failed to load”, file + cause) with the retained caption “Forecast MAE by horizon”, a Retry button and the long-description link. This is the only place the failed-media treatment appears; normal references show the real chart.
 - Board labels: States-1 `r2.1`; States-2 `r2.1 · content inherited from r1`.
+- `STATE_MATRIX.md` (v1) maps every reference surface to every state class (PD-DESIGN-B00-T05).

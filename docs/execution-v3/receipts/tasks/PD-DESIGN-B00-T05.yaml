@@ -1,0 +1,95 @@
+version: 3
+task: PD-DESIGN-B00-T05
+batch: PD-DESIGN-B00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: design-review
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 93c1860
+  head_commit: null
+changed_paths:
+- docs/product-depth-v3/design/states/STATE_MATRIX.md
+- docs/product-depth-v3/design/states/README.md
+- tests/test_design_manifest.py
+deliverables:
+- item: Record normal, loading, empty, error, permission-denied, dense/large-data, destructive, mobile
+    and degraded/offline states required for each reference surface
+  result: pass
+  evidence: STATE_MATRIX.md v1 has eleven citable rules (S-NORMAL..S-OFF) from States-1 and States-2 (both
+    opened at full resolution) and a 9 surface by 11 class coverage table naming the board cell or the
+    inherited rule, with reasoned n/a
+invariants:
+- item: Domain behavior and gates unchanged
+  result: pass
+  evidence: docs and test only
+- item: Error and denied states follow server authority
+  result: pass
+  evidence: 'matrix obligation: text comes from the server problem payload, UI mirrors it (S-DENY)'
+verification:
+- command: uv run --frozen pytest tests/test_design_manifest.py -q
+  result: pass
+  note: 17 passed; every class cited, all 9 surfaces have 11 non-empty cells, the boards still draw the
+    cited cells
+- command: Playwright chromium load of States-1.html and States-2.html at 1440 and 390 (T02 run)
+  result: pass
+  note: load without page errors; loading, empty, error, denied, offline cells are visible in the screenshots
+- command: python3 scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid, 0 errors
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/app-shell
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/organizer-data-surface
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/participant-my-event
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/project-story-editor
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/judge-review
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/deliberation-awards
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/public-event
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/public-project
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/event-builder
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/onsite-mobile
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/state-matrix
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+surface_matrix:
+- surface: web
+  result: deferred-by-contract
+  evidence: design approval only; implementation is PD-F004 onward
+- surface: docs
+  result: pass
+  evidence: states/STATE_MATRIX.md
+migrations: []
+findings:
+- P3 shipped LoadingState/EmptyState/ErrorState/DeniedState lack kept-data, retry-scope, error-ref, reason
+  and cancel fields; implementation obligation for PD-F004 recorded in the matrix
+escalations: []
+limitations:
+- Representative surfaces only, as the boards state; other surfaces inherit the rule. Dark has no separate
+  state boards.
+- Static comps; actual states are implemented and browser-tested per surface in later batches.
+next: review

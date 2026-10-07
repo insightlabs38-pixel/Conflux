@@ -240,3 +240,47 @@ def test_phone_boards_are_declared_and_fit_their_artboard():
     for entry in report:
         declared_w = int(entry["declared"].split("x")[0])
         assert entry["scrollW"] <= declared_w, entry["name"]
+
+
+def test_state_matrix_covers_every_class_for_every_surface():
+    text = (DESIGN / "states/STATE_MATRIX.md").read_text()
+    ids = set(re.findall(r"S-[A-Z]+\b", text))
+    classes = {
+        "NORMAL",
+        "LOAD",
+        "EMPTY",
+        "PART",
+        "ERR",
+        "DENY",
+        "VALID",
+        "LARGE",
+        "DEST",
+        "MOBILE",
+        "OFF",
+    }
+    assert {f"S-{c}" for c in classes} <= ids
+    rows = [r for r in text.splitlines() if r.startswith("| ") and "---" not in r]
+    coverage = rows[rows.index(next(r for r in rows if r.startswith("| Surface"))) + 1 :]
+    assert len(coverage) == 9
+    for row in coverage:
+        cells = [c.strip() for c in row.strip("|").split("|")]
+        assert len(cells) == 12 and all(cells), row
+
+
+def test_state_boards_still_draw_the_cells_the_matrix_cites():
+    states = (DESIGN / "states/html/States-1.html").read_text() + (
+        DESIGN / "states/html/States-2.html"
+    ).read_text()
+    for cell in (
+        "Filters match nothing",
+        "Save failed",
+        "Bulk job",
+        "Masked column",
+        "Route",
+        "Invalid inline edit",
+        "Irreversible",
+        "Realtime degraded",
+        "Judge",
+        "Pass",
+    ):
+        assert cell.lower() in states.lower(), cell

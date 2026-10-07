@@ -17,7 +17,7 @@ import {
   type CommandContext,
 } from "../lib/commands";
 import "../lib/shellCommands";
-import { routes } from "../lib/routes";
+import { roleLabel } from "../lib/roles";
 import { onShellOverlay, openShellOverlay } from "../lib/shellEvents";
 import {
   rememberCommand,
@@ -146,6 +146,12 @@ function CommandPalette({
         current: event.public_id === eventId,
       })),
       go,
+      target: navigation.target,
+      roles: navigation.roles.map((held) => ({
+        role: held,
+        label: roleLabel(held),
+        current: held === role,
+      })),
       capabilities: {
         signOut: onSignOut,
         setTheme: (theme) => setThemePreference(user, theme),
@@ -203,7 +209,7 @@ function CommandPalette({
           run: () => {
             onClose();
             go(
-              routes.target(workspaceId, {
+              navigation.target({
                 view: hit.view,
                 section: hit.section,
                 event: eventId,

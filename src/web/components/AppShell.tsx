@@ -5,6 +5,8 @@ import {
   roleDestinations,
   useWorkspaceNavigation,
 } from "./WorkspaceNavigation";
+import { Link } from "react-router";
+import { roleLabel } from "../lib/roles";
 import { useAppDensity } from "../hooks/useAppDensity";
 import { useAppTheme } from "../hooks/useAppTheme";
 import { useMe } from "../hooks/useMe";
@@ -43,6 +45,31 @@ const DENSITY_CHOICES: [Density, string][] = [
   ["compact", "Compact"],
   ["high", "High density"],
 ];
+
+/**
+ * Which of their own roles the person is viewing the workspace as, shown only when they hold more
+ * than one. Each choice is a link to that role's overview (a history entry); it picks a screen,
+ * the server still authorizes every request against what the person really holds.
+ */
+function RoleChoice() {
+  const navigation = useWorkspaceNavigation();
+  if (!navigation || navigation.roles.length < 2) return null;
+  return (
+    <nav aria-label="Roles" className="cx-account__roles">
+      <p className="cx-account__legend">Viewing as</p>
+      {navigation.roles.map((held) => (
+        <Link
+          key={held}
+          className="cx-account__link"
+          aria-current={held === navigation.role ? "true" : undefined}
+          to={navigation.target({ view: "overview", params: { as: held } })}
+        >
+          {roleLabel(held)}
+        </Link>
+      ))}
+    </nav>
+  );
+}
 
 function DensityChoice() {
   const user = useMe().data?.public_id ?? "";
@@ -179,7 +206,9 @@ export function AppShell({
           <>
             <span className="cx-shell__context">
               {workspaceName
-                ? `${workspaceName} · ${role === "admin" ? "organizer" : role}`
+                ? `${workspaceName} · ${
+                    (navigation?.roles.length ?? 0) > 1 ? "viewing as " : ""
+                  }${role === "admin" ? "organizer" : role}`
                 : `${role === "admin" ? "Organizer" : role} workspace`}
             </span>
             <EventSwitcher />
@@ -241,6 +270,7 @@ export function AppShell({
                   </DestinationLink>
                 </>
               )}
+              <RoleChoice />
               <ThemeChoice />
               <DensityChoice />
               <button

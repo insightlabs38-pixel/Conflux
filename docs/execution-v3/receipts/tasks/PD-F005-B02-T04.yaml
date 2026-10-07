@@ -1,0 +1,81 @@
+version: 3
+task: PD-F005-B02-T04
+batch: PD-F005-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: bdc6944
+  head_commit: null
+changed_paths:
+- src/web/lib/roles.ts
+- src/web/lib/roles.test.ts
+- src/web/lib/routes.ts
+- src/web/lib/urlState.ts
+- src/web/lib/commands.ts
+- src/web/lib/commands.test.ts
+- src/web/lib/shellCommands.ts
+- src/web/app/App.tsx
+- src/web/app/App.roles.test.tsx
+- src/web/components/WorkspaceNavigation.tsx
+- src/web/components/AppShell.tsx
+- src/web/components/EventSwitcher.tsx
+- src/web/components/CommandPalette.tsx
+- src/web/components/ShortcutsHelp.tsx
+- src/web/styles/components.css
+- tests/e2e/role-switcher.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Role switcher for people with several roles, with a clear viewing-as state, as a complete workflow
+  result: pass
+  evidence: the account API already returns one membership per role, but the app showed whichever came first. Now lib/roles.ts lists the roles a person holds in the workspace (most privileged first) and pickRole chooses - the role asked for by the as URL context param when the person holds it, otherwise the most privileged. The header says Workspace, viewing as, role whenever the person holds more than one role; the account menu has a Viewing as section of links (one per role, the current marked, each a history entry that goes to that role's overview and keeps the event); the palette has View as commands; as is carried between views, by the event switcher and by search hits (navigation.target keeps the event and the role).
+- item: A choice of screen, never a permission
+  result: pass
+  evidence: nothing is sent to the server for the choice and no role is granted; the browser test views as participant while the same session still gets 200 from an organizer endpoint, and a role the person does not hold is dropped from the URL by a replace instead of shown (also unit-tested in App.roles.test.tsx); the server authorizes every request against the roles really held
+- item: Robust to hand-edited URLs
+  result: pass
+  evidence: carriedContext keeps only id-like values, so a hostile event or as value in the URL is dropped from links instead of throwing in routes.target (this also closes a regression risk from T01 in the navigation links, now tested)
+invariants:
+- item: One route builder; one carried-context rule
+  result: pass
+  evidence: navigation.target and navigation.href both build through routes.target with carriedContext; the switcher, palette and search no longer call routes.target directly
+- item: No test weakened
+  result: pass
+  evidence: tests were added; the two existing expectations that count context params are unchanged because as is absent unless asked for
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 143 files, 779 tests (roles 3, App.roles 4 - default role, as picks a held role and survives views, an unheld role is dropped, one role shows nothing extra and a hostile value never breaks a link, plus the View as commands)
+- command: scripts/e2e fixture run of role-switcher.spec.ts (create iso-min fixture, run, dispose; the runner's own with_fixture steps)
+  result: pass
+  note: 5 passed on an isolated fixture where the organizer is granted participant through the real members endpoint - viewing as organizer by default, the menu lists both, switching shows the participant screen and keeps the role through reload and Back, still an organizer to the server, an unheld role dropped, the palette switches and the event switcher keeps the role, a one-role judge sees no control; at 1440 and 390
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: account menu with role switch and a clear viewing-as state; preview-as and density follow in the same menu
+- ref: design/state-matrix
+  result: pass
+  note: no data state added
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: audit
+  result: pass
+  evidence: nothing is written; the role was granted through the existing audited members endpoint in the test setup
+- surface: docs
+  result: pass
+  evidence: developer and release notes at T91
+migrations: []
+findings:
+- P3 the default for a person with several roles is now the most privileged one rather than whichever membership came first; for a person with one role nothing changes. Recorded for the upgrade note.
+- P3 a hostile event value in the URL would have thrown while building navigation links after T01; found while adding the role parameter and fixed with carriedContext.
+escalations: []
+limitations:
+- The choice is in the URL, not remembered between visits; a link without as shows the most privileged role.
+- Preview as another role the person does not hold is T05, which is a different thing (a read-only server-evaluated preview).
+next: review

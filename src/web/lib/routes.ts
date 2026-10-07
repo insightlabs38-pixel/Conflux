@@ -36,12 +36,37 @@ export type RouteTarget = {
 /** A param value is a public id or a value from a fixed set: never free text (lib/urlState.ts). */
 const SAFE_VALUE = /^[A-Za-z0-9_.:-]{1,100}$/;
 /** The context params come first, in the order the app has always written them. */
-const CONTEXT_ORDER = ["stage", "plan", "invite"];
+const CONTEXT_ORDER = ["as", "stage", "plan", "invite"];
 const SAFE_KEY = /^[a-z][a-z0-9_]{0,39}$/;
+
+/** An id-like token a URL may carry (see lib/urlState.ts): a hand-edited value that is not one is dropped. */
+export const isSafeParam = (value: string) => SAFE_VALUE.test(value);
+
+/**
+ * The context that follows a person between views (event, stage, plan, invite, role) read from a
+ * search string, keeping only safe values: a hand-edited URL can carry anything, and a link built
+ * from it must never throw or carry typed text.
+ */
+export function carriedContext(search: string): {
+  event?: string;
+  params: Record<string, string>;
+} {
+  const source = new URLSearchParams(search);
+  const params: Record<string, string> = {};
+  for (const key of ["as", "stage", "plan", "invite"]) {
+    const value = source.get(key);
+    if (value && SAFE_VALUE.test(value)) params[key] = value;
+  }
+  const event = source.get("event");
+  return {
+    ...(event && SAFE_VALUE.test(event) ? { event } : {}),
+    params,
+  };
+}
 
 /**
  * The location (path and search) for a target. The query is ordered the same way every time -
- * `event`, the context params (`stage`, `plan`, `invite`), any other params by name, then `section` - so one place has one URL. A value that is not
+ * `event`, the context params (`as`, `stage`, `plan`, `invite`), any other params by name, then `section` - so one place has one URL. A value that is not
  * an id-like token is a programming error (it would put typed text or personal data in a URL) and
  * throws instead of being quietly dropped.
  */

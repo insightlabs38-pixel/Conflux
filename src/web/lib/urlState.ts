@@ -12,7 +12,7 @@ import {
  * | Kind        | Lives in                     | Examples                                    | History |
  * | ----------- | ---------------------------- | ------------------------------------------- | ------- |
  * | Location    | path (lib/routes.ts)         | workspace, view, person, public event       | push    |
- * | Context     | search, carried across views | `event`, `stage`, `plan`                    | push    |
+ * | Context     | search, carried across views | `event`, `stage`, `plan`, `as` (a role)     | push    |
  * | Panel state | search, dropped on view exit | selected row, enumerated filter/sort, tab, page | replace |
  * | Entry token | search, read once            | `invite`                                    | -       |
  * | Local only  | component state / storage    | drafts, form fields, scores, comments, free-text search, open menus | - |
@@ -34,7 +34,7 @@ import {
 export const CONTEXT_PARAMS = ["event", "stage", "plan"] as const;
 
 /** Params that follow the user when they move between the views of one workspace. */
-const CARRIED = new Set<string>([...CONTEXT_PARAMS, "invite"]);
+const CARRIED = new Set<string>([...CONTEXT_PARAMS, "invite", "as"]);
 
 /** The search string for a link to another view of the same workspace: context params only. */
 export function carriedSearch(search: string): string {

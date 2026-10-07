@@ -32,20 +32,13 @@ import { TeamWorkspace } from "../features/teams/TeamWorkspace";
 import { StaffWorkspace } from "../features/pvs/StaffWorkspace";
 import { EventSite } from "../public/event-site/EventSite";
 import { appBasename, legacyTarget, routes } from "../lib/routes";
+import { pickRole, rolesIn } from "../lib/roles";
 import { SignIn } from "./SignIn";
 import { WorkspaceSelector } from "./WorkspaceSelector";
 
 const ApiExplorer = lazy(() => import("../features/api-explorer/ApiExplorer"));
 
 type RoleState = "loading" | "ready" | "denied" | "error" | "signed-out";
-const ROLES = [
-  "participant",
-  "judge",
-  "mentor",
-  "volunteer",
-  "organizer",
-  "admin",
-];
 
 /** The history router for the browser; a static one when there is no `window` (tests, SSR). */
 function AppRouter({ children }: { children: ReactNode }) {
@@ -97,8 +90,11 @@ function WorkspaceRoute() {
   const membership = me.data?.memberships?.find(
     (candidate) => candidate.workspace === workspaceId,
   );
-  const role =
-    membership && ROLES.includes(membership.role) ? membership.role : null;
+  // A person may hold several roles here; `as` (a URL context param) picks which of their own to
+  // view as, otherwise the most privileged. It chooses a screen; the server still authorizes.
+  const roles = rolesIn(me.data?.memberships, workspaceId);
+  const requestedAs = new URLSearchParams(search).get("as") ?? "";
+  const { role, requestedUnheld } = pickRole(roles, requestedAs);
   const roleState: RoleState =
     me.isPending || (me.isError && me.isFetching)
       ? "loading"
@@ -118,6 +114,18 @@ function WorkspaceRoute() {
     navigate(routes.home);
   }, [navigate, signOutMutation]);
 
+  // A role the person does not hold is not a place either: drop it from the URL.
+  if (roleState === "ready" && requestedUnheld) {
+    const params = new URLSearchParams(search);
+    params.delete("as");
+    const text = params.toString();
+    return (
+      <Navigate
+        to={routes.workspace(workspaceId, view) + (text ? `?${text}` : "")}
+        replace
+      />
+    );
+  }
   // A view this role does not have is not a place: send the URL to the overview.
   const destinations = role ? roleDestinations[role] : undefined;
   if (
@@ -129,7 +137,11 @@ function WorkspaceRoute() {
 
   const ready = roleState === "ready" && role;
   return (
-    <WorkspaceNavigationProvider role={role || ""} workspaceId={workspaceId}>
+    <WorkspaceNavigationProvider
+      role={role || ""}
+      roles={roles}
+      workspaceId={workspaceId}
+    >
       <AppShell
         role={ready ? role : undefined}
         username={username}

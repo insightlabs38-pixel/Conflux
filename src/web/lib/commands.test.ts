@@ -17,6 +17,8 @@ const context = (over: Partial<CommandContext> = {}): CommandContext => ({
   places: [],
   events: [],
   go: () => {},
+  target: (t) => `/w/w/${t.view}`,
+  roles: [],
   capabilities: {},
   ...over,
 });
@@ -129,5 +131,32 @@ describe("command registry", () => {
     const bare = commandsFor(context()).map((c) => c.id);
     expect(bare).not.toContain("account.sign-out");
     expect(bare).not.toContain("theme.dark");
+  });
+
+  it("offers View as another role only to a person who holds more than one, and keeps the event", () => {
+    const one = commandsFor(
+      context({ roles: [{ role: "judge", label: "Judge", current: true }] }),
+    );
+    expect(one.some((c) => c.id.startsWith("role."))).toBe(false);
+    const gone: string[] = [];
+    const two = commandsFor(
+      context({
+        roles: [
+          { role: "organizer", label: "Organizer", current: true },
+          { role: "participant", label: "Participant", current: false },
+        ],
+        go: (to) => gone.push(to),
+        target: (t) => `/w/w/${t.view}?as=${t.params?.as}`,
+      }),
+    );
+    const role = two.filter((c) => c.id.startsWith("role."));
+    expect(role.map((c) => c.label)).toEqual(["View as Participant"]);
+    role[0].run(
+      context({
+        go: (to) => gone.push(to),
+        target: (t) => `/w/w/${t.view}?as=${t.params?.as}`,
+      }),
+    );
+    expect(gone).toEqual(["/w/w/overview?as=participant"]);
   });
 });

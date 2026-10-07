@@ -1,5 +1,4 @@
 import { registerCommandProvider, type Command } from "./commands";
-import { routes } from "./routes";
 
 /**
  * The commands of the application shell. They are navigation and presentation only: going to a
@@ -25,10 +24,7 @@ registerCommandProvider((context) => {
         label: `Switch to ${event.name}`,
         group: "Events",
         keywords: ["event", event.name],
-        run: (ctx) =>
-          ctx.go(
-            routes.target(ctx.workspaceId, { view: ctx.view, event: event.id }),
-          ),
+        run: (ctx) => ctx.go(ctx.target({ view: ctx.view, event: event.id })),
       });
   return commands;
 });
@@ -71,6 +67,24 @@ registerCommandProvider(() => {
   ];
 });
 
+registerCommandProvider((context) =>
+  // only when the person holds more than one role here; viewing as another is choosing a screen
+  context.roles.length < 2
+    ? []
+    : context.roles
+        .filter((entry) => !entry.current)
+        .map((entry): Command => ({
+          id: `role.${entry.role}`,
+          label: `View as ${entry.label}`,
+          group: "Role",
+          keywords: ["role", "switch", "view as", entry.role],
+          run: (ctx) =>
+            ctx.go(
+              ctx.target({ view: "overview", params: { as: entry.role } }),
+            ),
+        })),
+);
+
 registerCommandProvider(() => [
   {
     id: "help.shortcuts",
@@ -91,12 +105,7 @@ registerCommandProvider(() => [
     keywords: ["notifications", "email", "settings", "profile"],
     when: (ctx) => ctx.role !== "",
     run: (ctx) =>
-      ctx.go(
-        routes.target(ctx.workspaceId, {
-          view: "profile",
-          event: ctx.eventId || undefined,
-        }) + "#notification-preferences",
-      ),
+      ctx.go(ctx.target({ view: "profile" }) + "#notification-preferences"),
   },
   {
     id: "account.sign-out",

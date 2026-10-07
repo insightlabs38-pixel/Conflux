@@ -14,6 +14,8 @@
  * - Ranking is deterministic: exact, prefix, word prefix, substring, subsequence, then the person's
  *   recent commands, then registration order. No model, no randomness.
  */
+import type { RouteTarget } from "./routes";
+
 export type CommandContext = {
   role: string;
   workspaceId: string;
@@ -25,8 +27,12 @@ export type CommandContext = {
   places: { id: string; label: string; to: string; key?: string }[];
   /** The events this person may choose between, the selected one marked. */
   events: { id: string; name: string; current: boolean }[];
-  /** Go to a location (path and search) built with `routes.target`. */
+  /** Go to a location (path and search) built with `target`. */
   go: (to: string) => void;
+  /** A location in this workspace that keeps the current event and role (`navigation.target`). */
+  target: (target: RouteTarget) => string;
+  /** The roles the person holds here, the one being viewed as marked. */
+  roles: { role: string; label: string; current: boolean }[];
   /** Everything else a command may need is handed in by the shell as named capabilities. */
   capabilities: Partial<{
     signOut: () => void;

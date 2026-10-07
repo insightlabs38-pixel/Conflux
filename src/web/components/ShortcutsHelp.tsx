@@ -118,6 +118,8 @@ function ShortcutsDialog({
       })),
       events: [],
       go: () => {},
+      target: navigation.target,
+      roles: [],
       capabilities: { openShortcuts: () => {} },
     }),
     [navigation, requested],

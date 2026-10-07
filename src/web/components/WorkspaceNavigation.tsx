@@ -8,8 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router";
-import { routes } from "../lib/routes";
-import { carriedSearch } from "../lib/urlState";
+import { carriedContext, routes, type RouteTarget } from "../lib/routes";
 
 export type Destination = {
   id: string;
@@ -124,6 +123,13 @@ export function barDestinations(destinations: Destination[]): {
 type Navigation = {
   workspaceId: string;
   role: string;
+  /** Every role the person holds in this workspace (more than one means they can switch). */
+  roles: string[];
+  /**
+   * A location in this workspace: the current event and the role being viewed as are kept unless the
+   * target names them. The one way for the shell to build a link that must not lose either.
+   */
+  target: (target: RouteTarget) => string;
   view: string;
   navigate: (id: string) => void;
   /** Link to a destination; `section` opens one of its tabs (see WorkflowSections `linkable`). */
@@ -143,10 +149,12 @@ const Context = createContext<Navigation | null>(null);
  */
 export function WorkspaceNavigationProvider({
   role,
+  roles = role ? [role] : [],
   workspaceId = "",
   children,
 }: {
   role: string;
+  roles?: string[];
   workspaceId?: string;
   children: ReactNode;
 }) {
@@ -173,17 +181,27 @@ export function WorkspaceNavigationProvider({
   const href = useCallback(
     (id: string, section?: string) => {
       // Context follows the person between views; panel state and typed text do not (urlState.ts).
-      const kept = new URLSearchParams(carriedSearch(search));
-      const event = kept.get("event") ?? undefined;
-      kept.delete("event");
-      return routes.target(workspaceId, {
-        view: id,
-        section,
-        event,
-        params: Object.fromEntries(kept),
-      });
+      const { event, params } = carriedContext(search);
+      return routes.target(workspaceId, { view: id, section, event, params });
     },
     [workspaceId, search],
+  );
+  const target = useCallback(
+    (to: RouteTarget) => {
+      const carried = carriedContext(search);
+      return routes.target(workspaceId, {
+        ...to,
+        event: "event" in to ? to.event : carried.event,
+        // the role being viewed as stays unless the target says otherwise; the rest of the context is the target's
+        params: {
+          ...(carried.params.as && roles.includes(carried.params.as)
+            ? { as: carried.params.as }
+            : {}),
+          ...to.params,
+        },
+      });
+    },
+    [workspaceId, search, roles],
   );
   const navigate = useCallback(
     (id: string) => {
@@ -200,6 +218,8 @@ export function WorkspaceNavigationProvider({
       value={{
         workspaceId,
         role,
+        roles,
+        target,
         view,
         navigate,
         href,

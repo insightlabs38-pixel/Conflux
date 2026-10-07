@@ -69,7 +69,7 @@ export function EventSwitcher() {
         ? "Choose an event"
         : "No events";
   const to = (eventId: string) =>
-    routes.target(workspaceId, { view: navigation.view, event: eventId });
+    navigation.target({ view: navigation.view, event: eventId });
 
   const row = (event: ShellEvent) => {
     const starred = favorites.includes(event.public_id);

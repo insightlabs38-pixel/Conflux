@@ -1,0 +1,37 @@
+version: 1
+checkpoint_id: CP-PD-F004-B01
+created_at: '2026-10-07T05:00:00Z'
+canonical_commit: 231dbe4
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+- PD-B02
+- PD-B03
+- PD-B04
+- PD-F001-B01
+- PD-F001-B02
+- PD-F002-B01
+- PD-F002-B02
+- PD-F002-B03
+- PD-F003-B01
+- PD-F003-B02
+- PD-F003-B03
+- PD-DESIGN-B00
+- PD-F004-B01
+active_batches:
+- PD-F004-B02
+active_claims: []
+open_escalations: []
+last_completed_task: PD-F004-B01-T91
+ready_summary:
+- PD-F004-B02 (status colour with icon-plus-word, motion, skeletons, empty and error states, advanced disclosure, hero none/compact/standard; promoted IN_PROGRESS, not started). Its T08 changes the stored hero vocabulary (split/poster/editorial today): decide the migration mapping before changing behavior, escalate if ambiguous.
+verification_summary:
+- make verify-fast clean; make e2e-fast green (docs/verification/PD-F004-B01/T90-e2e-fast.log); tests/test_visual_ratchets.py, tests/integration/test_visual_tokens.py, tests/e2e/visual-foundation.spec.ts
+recovery_notes:
+- 'Contract: spec 004 section PD-F004-B01 canonical contract; guide docs/operations/VISUAL_FOUNDATION.md; ratchets list sanctioned exceptions (hero glyph sizes, organizer expressive radii, danger final confirm, brand-free solid fills)'
+- 'Legacy --color-* aliases in tokens.css must be removed by the close of PD-F004-B05 (count their uses first); public presentation variables keep legacy keys plus v3 names'
+- 'Open decisions in .claude-supervisor/QUESTIONS.md (untracked): font binaries (default A), organizer navigation split (default C), plus earlier ones at their defaults'
+- 'Tooling traps: after docker compose up -d --build app wait for health plus ~20 s; never run isolated-mutation specs on seed 7 (scripts/demo-reset recovers); make e2e-report BREACH lingers until clean runs accumulate'
+- main unpushed; untracked design handoff zips untouched; supervisor.py modification is the owner's and left uncommitted

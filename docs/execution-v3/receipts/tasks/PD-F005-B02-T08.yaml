@@ -48,7 +48,7 @@ invariants:
 verification:
 - command: cd src/web && npx tsc --noEmit && npx vitest run
   result: pass
-  note: 140 files, 766 tests (shellPreferences density 1, useAppDensity 3)
+  note: 139 files, 763 tests (shellPreferences density 1, useAppDensity 3)
 - command: npx playwright test -c tests/e2e/playwright.config.ts density --project=desktop --workers=3
   result: pass
   note: 3 passed on the rebuilt stack - row heights fall at each step on the Registration table at 1440 and a reload keeps the choice, a phone keeps the choice with controls at 44px, the palette sets it and sign-out forgets it

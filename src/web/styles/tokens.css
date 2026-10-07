@@ -62,11 +62,25 @@
   --line-height-tight: var(--lh-tight);
   --line-height-body: var(--lh-ui);
   --line-height-code: var(--lh-read);
-  --space-10: 2.5rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
-  --control-height: 2.75rem;
-  --control-height-compact: 2.25rem;
+  /* spacing (v3): 4px base; rem equal to the design's px at a 16px root */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.25rem;
+  --sp-6: 1.5rem;
+  --sp-8: 2rem;
+  --sp-10: 2.5rem;
+  --sp-12: 3rem;
+  /* control, row and bar heights (v3, standard density); touch layouts use --h-touch */
+  --h-ctl: 2rem;
+  --h-ctl-sm: 1.75rem;
+  --h-ctl-lg: 2.5rem;
+  --h-row: 2.25rem;
+  --h-row-dense: 1.75rem;
+  --h-row-comfy: 2.75rem;
+  --h-top: 2.75rem;
+  --h-touch: 2.75rem;
   --content-narrow: 32rem;
   --content-reading: 48rem;
   --content-app: 82rem;
@@ -84,14 +98,6 @@
   --z-toast: 80;
   --z-skip-link: 100;
 
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 10px;
@@ -99,6 +105,15 @@
   --header-height: 3.5rem;
   --shadow-sm: 0 1px 2px rgba(22, 32, 43, 0.08);
   --shadow-md: 0 4px 12px rgba(22, 32, 43, 0.1);
+}
+
+/* Touch layouts (below 768px, or a coarse pointer) keep every control at the 44px hit area (D-012). */
+@media (max-width: 47.9375rem), (pointer: coarse) {
+  :root {
+    --h-ctl: var(--h-touch);
+    --h-ctl-sm: var(--h-touch);
+    --h-ctl-lg: var(--h-touch);
+  }
 }
 
 /* Legacy colour names resolve from the v3 names on every element that may redeclare them

@@ -2,26 +2,26 @@
   min-width: 0;
 }
 .cx-api-header h2 {
-  margin-bottom: var(--space-1);
+  margin-bottom: var(--sp-1);
 }
 .cx-api-layout {
   display: grid;
   grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
-  gap: var(--space-6);
+  gap: var(--sp-6);
   align-items: start;
-  margin-top: var(--space-4);
+  margin-top: var(--sp-4);
 }
 .cx-api-sidebar {
   min-width: 0;
   position: sticky;
-  top: var(--space-4);
+  top: var(--sp-4);
 }
 .cx-api-main {
   min-width: 0;
 }
 .cx-api-explorer label {
   display: block;
-  margin-block: var(--space-3);
+  margin-block: var(--sp-3);
 }
 .cx-api-explorer label > :is(input:not([type="checkbox"]), select, textarea) {
   display: block;
@@ -33,11 +33,11 @@
   border-radius: var(--radius-md);
 }
 .cx-api-explorer fieldset > button {
-  margin: var(--space-1);
+  margin: var(--sp-1);
 }
 .cx-api-operations {
   list-style: none;
-  margin: var(--space-3) 0 0;
+  margin: var(--sp-3) 0 0;
   padding: 0;
   max-height: 28rem;
   overflow-y: auto;
@@ -48,10 +48,10 @@
 .cx-api-operation {
   display: flex;
   align-items: baseline;
-  gap: var(--space-2);
+  gap: var(--sp-2);
   width: 100%;
-  min-height: var(--control-height);
-  padding: var(--space-2) var(--space-3);
+  min-height: var(--h-ctl);
+  padding: var(--sp-2) var(--sp-3);
   text-align: left;
   background: transparent;
   border: 0;
@@ -74,7 +74,7 @@
 .cx-method {
   flex: none;
   min-width: 3.75rem;
-  padding: 0.1rem var(--space-2);
+  padding: 2px var(--sp-2);
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
   font-size: var(--fs-12);
@@ -100,8 +100,8 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3);
+  gap: var(--sp-3);
+  padding: var(--sp-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface-raised);
@@ -115,7 +115,7 @@
   color: var(--color-warning);
 }
 .cx-api-confirm {
-  padding: var(--space-2) var(--space-3);
+  padding: var(--sp-2) var(--sp-3);
   border-left: 3px solid var(--color-warning);
   background: var(--color-warning-bg);
 }
@@ -139,7 +139,7 @@
   overflow: auto;
   max-width: 100%;
   max-height: 30rem;
-  padding: var(--space-3);
+  padding: var(--sp-3);
   background: var(--color-surface-subtle);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);

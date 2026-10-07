@@ -129,3 +129,37 @@ def test_application_headings_stay_at_or_below_20px():
         ".cx-shell :where(h2)": "var(--fs-16)",
         ".cx-shell :where(h3)": "var(--fs-14)",
     }
+
+
+SPACING = re.compile(r"^(padding|margin|gap|row-gap|column-gap)(-[a-z]+)?$")
+# Scroll room under a sticky action bar; a size, not rhythm.
+SPACING_LITERALS = {("styles/components.css", "padding-bottom", "10rem")}
+
+
+def spacing_declarations(text):
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+    for match in re.finditer(r"([^{}]+)\{([^{}]*)\}", text):
+        for prop, value in re.findall(r"([a-z-]+):\s*([^;]+);", match.group(2)):
+            if SPACING.match(prop):
+                yield prop, value.strip()
+
+
+def test_spacing_comes_from_the_4px_scale_or_is_an_optical_nudge_of_two_pixels_or_less():
+    for sheet in SHEETS:
+        if sheet.name == "tokens.css":
+            continue
+        rel = str(sheet.relative_to(WEB))
+        for prop, value in spacing_declarations(sheet.read_text()):
+            if (rel, prop, value) in SPACING_LITERALS:
+                continue
+            stripped = re.sub(r"var\(--sp-\d+\)|calc\([^)]*\)|clamp\([^)]*\)", "", value)
+            for number in re.findall(r"-?\d*\.?\d+(?:px|rem|em)", stripped):
+                assert abs(float(re.match(r"-?[\d.]+", number).group())) <= 2 and number.endswith(
+                    "px"
+                ), (rel, prop, value)
+            assert "--space-" not in value, (rel, prop, value)
+
+
+def test_a_literal_rem_gap_is_named_by_the_spacing_ratchet():
+    bad = list(spacing_declarations(".x { gap: 1rem; padding: 0 var(--sp-2); margin: -1px; }"))
+    assert [v for _, v in bad if "rem" in v] == ["1rem"]

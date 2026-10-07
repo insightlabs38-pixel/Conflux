@@ -3,27 +3,27 @@
    tokens/components as the React app (see base.html). */
 
 .cx-block {
-  margin: 0 0 var(--space-8);
+  margin: 0 0 var(--sp-8);
 }
 .cx-block h2 {
-  margin: 0 0 var(--space-4);
+  margin: 0 0 var(--sp-4);
 }
 
 .cx-hero {
-  padding: var(--space-8) var(--space-4);
+  padding: var(--sp-8) var(--sp-4);
   text-align: center;
   background: var(--color-surface);
   border-radius: var(--radius-lg);
 }
 .cx-hero h1 {
-  margin: 0 0 var(--space-2);
+  margin: 0 0 var(--sp-2);
   font-size: var(--fs-24);
 }
 
 .cx-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(16rem, 100%), 1fr));
-  gap: var(--space-4);
+  gap: var(--sp-4);
   list-style: none;
   margin: 0;
   padding: 0;
@@ -32,13 +32,13 @@
 .cx-search-form {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
-  margin-bottom: var(--space-6);
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-6);
 }
 .cx-search-form input[type="search"],
 .cx-search-form select {
   font: inherit;
-  padding: var(--space-2) var(--space-3);
+  padding: var(--sp-2) var(--sp-3);
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-md);
 }
@@ -48,7 +48,7 @@
   padding: 0;
 }
 .cx-artifact-list li {
-  padding: var(--space-2) 0;
+  padding: var(--sp-2) 0;
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -58,7 +58,7 @@
 
 .cx-technical-description pre {
   overflow-x: auto;
-  padding: var(--space-4);
+  padding: var(--sp-4);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -66,7 +66,7 @@
 }
 
 .cx-technical-description :not(pre) > code {
-  padding: 0.1em 0.3em;
+  padding: 2px var(--sp-1);
   border-radius: var(--radius-md);
   background: var(--color-surface);
 }
@@ -80,7 +80,7 @@
 
 .cx-technical-description th,
 .cx-technical-description td {
-  padding: var(--space-2) var(--space-3);
+  padding: var(--sp-2) var(--sp-3);
   border: 1px solid var(--color-border);
 }
 
@@ -97,18 +97,18 @@
   flex-wrap: wrap;
   align-items: end;
   justify-content: space-between;
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-6);
 }
 .cx-page-head h1 {
   margin: 0;
 }
 .cx-page-head__lead {
-  margin: var(--space-2) 0 0;
+  margin: var(--sp-2) 0 0;
   color: var(--color-text-muted);
 }
 .cx-eyebrow {
-  margin: 0 0 var(--space-2);
+  margin: 0 0 var(--sp-2);
   font-size: var(--fs-12);
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.06em;
@@ -117,7 +117,7 @@
 }
 .cx-chip {
   display: inline-block;
-  padding: 0.1rem var(--space-2);
+  padding: 2px var(--sp-2);
   border-radius: var(--radius-sm);
   background: var(--color-accent-subtle);
   color: var(--color-text);
@@ -125,18 +125,18 @@
   font-weight: var(--font-weight-semibold);
 }
 .cx-empty-note {
-  padding: var(--space-6);
+  padding: var(--sp-6);
   border: 1px dashed var(--color-border-strong);
   border-radius: var(--radius-md);
   color: var(--color-text-muted);
   text-align: center;
 }
 .cx-agenda-day {
-  margin-block: var(--space-8);
+  margin-block: var(--sp-8);
 }
 .cx-agenda-day__title {
-  margin: 0 0 var(--space-3);
-  padding-bottom: var(--space-2);
+  margin: 0 0 var(--sp-3);
+  padding-bottom: var(--sp-2);
   border-bottom: 2px solid var(--color-accent);
   font-size: var(--fs-24);
 }
@@ -148,8 +148,8 @@
 .cx-agenda-session {
   display: grid;
   grid-template-columns: 8.5rem minmax(0, 1fr);
-  gap: var(--space-4);
-  padding: var(--space-4) 0;
+  gap: var(--sp-4);
+  padding: var(--sp-4) 0;
   border-bottom: 1px solid var(--color-border);
 }
 .cx-agenda-session__time {
@@ -160,15 +160,15 @@
   color: var(--color-accent);
 }
 .cx-agenda-session__title {
-  margin: 0 0 var(--space-1);
+  margin: 0 0 var(--sp-1);
   font-size: var(--fs-20);
 }
 .cx-agenda-session__meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2) var(--space-3);
-  margin: 0 0 var(--space-2);
+  gap: var(--sp-2) var(--sp-3);
+  margin: 0 0 var(--sp-2);
   color: var(--color-text-muted);
 }
 .cx-expo {
@@ -177,13 +177,13 @@
   padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
-  gap: var(--space-4);
+  gap: var(--sp-4);
 }
 .cx-expo__place {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--sp-2);
   align-content: start;
-  padding: var(--space-4);
+  padding: var(--sp-4);
   border: 1px solid var(--color-border);
   border-top: 3px solid var(--color-accent);
   border-radius: var(--radius-md);
@@ -193,7 +193,7 @@
 .cx-expo__where {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--sp-2);
   margin: 0;
 }
 .cx-expo__room {
@@ -209,7 +209,7 @@
   margin: 0;
   padding: 0;
   display: grid;
-  gap: var(--space-1);
+  gap: var(--sp-1);
 }
 .cx-expo__projects a {
   font-weight: var(--font-weight-semibold);
@@ -221,7 +221,7 @@
 @media (max-width: 40rem) {
   .cx-agenda-session {
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-2);
+    gap: var(--sp-2);
   }
 }
 .cx-embed {
@@ -243,8 +243,8 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
-  margin: 1.5rem 0;
+  gap: var(--sp-4);
+  margin: var(--sp-6) 0;
 }
 
 /* One public component system, with constrained layout and density presets. */
@@ -261,14 +261,14 @@
   margin-inline: auto;
 }
 .cx-event-site .cx-shell__header {
-  padding-block: var(--space-5);
+  padding-block: var(--sp-5);
   border-bottom: 1px solid var(--color-border-strong);
-  gap: var(--space-5);
+  gap: var(--sp-5);
 }
 .cx-event-site .cx-shell__brand {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--sp-3);
   font-size: var(--fs-20);
   text-decoration: none;
   max-width: 32rem;
@@ -278,7 +278,7 @@
   flex-shrink: 0;
 }
 .cx-event-site .cx-shell__nav a {
-  padding: var(--space-3) var(--space-2);
+  padding: var(--sp-3) var(--sp-2);
   text-decoration: none;
   border-bottom: 2px solid transparent;
 }
@@ -292,15 +292,15 @@
 }
 .cx-event-site .cx-block > h2 {
   font-size: var(--fs-32);
-  padding-bottom: var(--space-4);
+  padding-bottom: var(--sp-4);
   border-bottom: 1px solid var(--color-border);
 }
 .cx-event-site .cx-hero {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-  gap: var(--space-8);
+  gap: var(--sp-8);
   align-items: center;
-  padding: clamp(1.5rem, 4vw, 4rem);
+  padding: clamp(var(--sp-6), 4vw, var(--sp-12));
   text-align: left;
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
@@ -317,7 +317,7 @@
 .cx-event-kicker {
   font-size: var(--fs-14);
   color: var(--color-text-muted);
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--sp-5);
 }
 .cx-hero__image {
   width: 100%;
@@ -342,15 +342,15 @@
 }
 .cx-hero__identity small {
   font-family: var(--font-mono);
-  margin-block: var(--space-4);
+  margin-block: var(--sp-4);
 }
 .cx-event-footer {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-6);
+  gap: var(--sp-4);
+  padding: var(--sp-6);
   border-top: 1px solid var(--color-border-strong);
   color: var(--color-text-muted);
 }
@@ -394,7 +394,7 @@
 .cx-event-site[data-hero="poster"] .cx-hero__identity {
   min-height: 8rem;
   flex-direction: row;
-  gap: var(--space-6);
+  gap: var(--sp-6);
 }
 .cx-event-site[data-hero="poster"] .cx-hero__identity span {
   font-size: 6rem;
@@ -422,8 +422,8 @@
 @media (max-width: 48rem) {
   .cx-event-site .cx-shell__header {
     flex-wrap: wrap;
-    gap: var(--space-3);
-    padding-inline: var(--space-4);
+    gap: var(--sp-3);
+    padding-inline: var(--sp-4);
   }
   .cx-event-site .cx-shell__brand {
     width: 100%;
@@ -431,7 +431,7 @@
   }
   .cx-event-site .cx-shell__nav {
     flex: 1;
-    gap: var(--space-2);
+    gap: var(--sp-2);
   }
   .cx-event-site .cx-shell__language {
     margin-left: 0;
@@ -453,8 +453,8 @@
 }
 .cx-event-schedule li {
   display: flex;
-  gap: var(--space-5);
-  padding: var(--space-5) 0;
+  gap: var(--sp-5);
+  padding: var(--sp-5) 0;
   border-bottom: 1px solid var(--color-border);
 }
 .cx-event-schedule h3 {
@@ -463,22 +463,22 @@
 .cx-event-schedule__number {
   font: var(--fs-20) var(--font-mono);
   color: var(--color-accent);
-  padding-top: var(--space-1);
+  padding-top: var(--sp-1);
 }
 .cx-event-faq {
   border-bottom: 1px solid var(--color-border);
-  padding: var(--space-4) 0;
+  padding: var(--sp-4) 0;
 }
 .cx-event-faq summary {
-  padding-block: var(--space-2);
+  padding-block: var(--sp-2);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
 }
 .cx-event-resources a {
   display: flex;
   justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-5);
+  gap: var(--sp-3);
+  padding: var(--sp-5);
   border: 1px solid var(--color-border-strong);
   text-decoration: none;
 }
@@ -490,7 +490,7 @@
   padding: 0;
 }
 .cx-event-announcements li {
-  padding: var(--space-5) 0;
+  padding: var(--sp-5) 0;
   border-bottom: 1px solid var(--color-border);
 }
 .cx-event-announcements h3 {
@@ -500,30 +500,30 @@
 .cx-event-site .cx-shell__language label {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--sp-2);
   font-size: var(--fs-14);
 }
 .cx-event-site .cx-shell__language select {
-  min-height: var(--control-height-compact);
+  min-height: var(--h-ctl-sm);
   color: var(--color-text);
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
   font: inherit;
-  padding: var(--space-2);
+  padding: var(--sp-2);
 }
 
 /* Showcase hierarchy: browsing, storytelling and technical evidence have
    deliberately different densities, with the same event-derived tokens. */
 .cx-showcase-header {
   max-width: 48rem;
-  margin: var(--space-6) 0 var(--space-8);
+  margin: var(--sp-6) 0 var(--sp-8);
 }
 .cx-showcase-header h1,
 .cx-project-header h1 {
   font-size: var(--fs-display);
   line-height: var(--line-height-tight);
-  margin: var(--space-2) 0 var(--space-4);
+  margin: var(--sp-2) 0 var(--sp-4);
   overflow-wrap: anywhere;
 }
 .cx-showcase-header > p:last-child,
@@ -533,13 +533,13 @@
 }
 .cx-search-form {
   align-items: end;
-  padding: var(--space-4);
+  padding: var(--sp-4);
   border: 1px solid var(--color-border);
   background: var(--color-surface-subtle);
 }
 .cx-search-form label {
   display: grid;
-  gap: var(--space-2);
+  gap: var(--sp-2);
   flex: 1 1 10rem;
   min-width: 0;
   font-weight: var(--font-weight-medium);
@@ -550,14 +550,14 @@
   min-width: 0;
   background: var(--color-surface-raised);
   color: var(--color-text);
-  min-height: var(--control-height);
+  min-height: var(--h-ctl);
 }
 .cx-gallery-state {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-3);
+  gap: var(--sp-3);
   justify-content: space-between;
-  margin: var(--space-4) 0;
+  margin: var(--sp-4) 0;
   color: var(--color-text-secondary);
 }
 .cx-project-card {
@@ -598,8 +598,8 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-5);
+  gap: var(--sp-3);
+  padding: var(--sp-5);
   min-width: 0;
 }
 .cx-project-card h2,
@@ -635,7 +635,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: var(--sp-2);
 }
 .cx-project-card__metadata,
 .cx-project-card__people {
@@ -661,32 +661,32 @@
 .cx-project-header {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  gap: var(--space-8);
+  gap: var(--sp-8);
   align-items: center;
-  padding: var(--space-8) 0;
+  padding: var(--sp-8) 0;
 }
 .cx-project-actions {
-  margin-top: var(--space-5);
+  margin-top: var(--sp-5);
 }
 .cx-project-layout {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
-  gap: var(--space-12);
+  gap: var(--sp-12);
 }
 .cx-project-story > section {
-  padding: var(--space-6) 0;
+  padding: var(--sp-6) 0;
   border-top: 1px solid var(--color-border);
 }
 .cx-project-evidence {
   background: var(--color-surface-subtle);
-  padding: var(--space-5);
+  padding: var(--sp-5);
   align-self: start;
   border: 1px solid var(--color-border);
 }
 .cx-project-evidence section + section {
   border-top: 1px solid var(--color-border);
-  margin-top: var(--space-6);
-  padding-top: var(--space-4);
+  margin-top: var(--sp-6);
+  padding-top: var(--sp-4);
 }
 .cx-project-evidence h2 {
   font-size: var(--fs-20);
@@ -695,10 +695,10 @@
   font-family: var(--font-mono);
   font-size: var(--fs-14);
   overflow-wrap: anywhere;
-  margin: var(--space-2) 0 var(--space-4);
+  margin: var(--sp-2) 0 var(--sp-4);
 }
 .cx-project-media figure {
-  margin: var(--space-6) 0;
+  margin: var(--sp-6) 0;
 }
 .cx-project-media img,
 .cx-project-media video {
@@ -709,15 +709,15 @@
   background: var(--color-surface);
 }
 .cx-project-media figcaption {
-  padding-top: var(--space-2);
+  padding-top: var(--sp-2);
   color: var(--color-text-secondary);
 }
 .cx-project-awards {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--space-4);
-  padding: var(--space-4) 0;
+  gap: var(--sp-4);
+  padding: var(--sp-4) 0;
   border-block: 1px solid var(--color-border);
 }
 .cx-project-awards h2 {
@@ -727,20 +727,20 @@
 .cx-project-awards ul {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-5);
+  gap: var(--sp-5);
   margin: 0;
 }
 .cx-results {
   list-style: none;
   padding: 0;
   display: grid;
-  gap: var(--space-10);
+  gap: var(--sp-10);
 }
 .cx-award-section {
   display: grid;
   grid-template-columns: minmax(12rem, 1fr) minmax(0, 2fr);
-  gap: var(--space-8);
-  padding-top: var(--space-6);
+  gap: var(--sp-8);
+  padding-top: var(--sp-6);
   border-top: 2px solid var(--color-border-strong);
 }
 .cx-award-section h2 {
@@ -751,7 +751,7 @@
   color: var(--color-text-secondary);
 }
 .cx-award-winner {
-  padding: var(--space-6);
+  padding: var(--sp-6);
   background: var(--color-surface-subtle);
   border-left: 3px solid var(--color-accent);
 }
@@ -760,13 +760,13 @@
   .cx-project-layout,
   .cx-award-section {
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-5);
+    gap: var(--sp-5);
   }
   .cx-project-header {
-    padding-top: var(--space-5);
+    padding-top: var(--sp-5);
   }
   .cx-project-evidence {
-    padding: var(--space-4);
+    padding: var(--sp-4);
   }
   .cx-search-form button {
     flex: 1 1 100%;

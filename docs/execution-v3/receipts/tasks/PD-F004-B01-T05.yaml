@@ -1,0 +1,84 @@
+version: 3
+task: PD-F004-B01-T05
+batch: PD-F004-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 5bc1568
+  head_commit: null
+changed_paths:
+- src/web/styles/tokens.css
+- src/web/styles/components.css
+- src/web/styles/presentation.css
+- src/web/features/api-explorer/explorer.css
+- tests/integration/test_visual_tokens.py
+- tests/test_visual_ratchets.py
+- tests/e2e/visual-foundation.spec.ts
+deliverables:
+- item: Consistent spacing tokens and optical alignment through the canonical token layer
+  result: pass
+  evidence: --sp-1..12 (4px base, rem) and the v3 height tokens (--h-ctl 32, --h-ctl-sm 28, --h-ctl-lg
+    40, rows 28/36/44, --h-top, --h-touch 44) live in tokens.css; the legacy --space-* and --control-height*
+    names were renamed in place (same values, no alias left); every padding, margin and gap uses the scale
+    or a 2px optical nudge; controls share one height token and raise to the 44px hit area on touch layouts
+    (below 768px or coarse pointer)
+- item: Diagnostics for drift
+  result: pass
+  evidence: ratchet reports property and value of any off-scale spacing; the e2e spec lists each control
+    shorter than 28px (44px on touch) with tag, class and label
+invariants:
+- item: One canonical source of truth
+  result: pass
+  evidence: spacing and height parity with design tokens.json is tested in px
+- item: Accessibility preserved or improved
+  result: pass
+  evidence: compaction exposed an axe WCAG 2.2 target-size failure on .cx-inline-link (3 nodes); fixed
+    with a 24px minimum, gate not weakened; touch targets at 390 asserted at 44px
+- item: No test weakened
+  result: pass
+  evidence: no existing assertion edited
+verification:
+- command: uv run --frozen pytest tests/test_visual_ratchets.py tests/integration/test_visual_tokens.py
+    tests/test_e2e_tiers.py -q
+  result: pass
+  note: all passed (3 preset-on-dark skips by design)
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 658 passed
+- command: npx playwright test -c tests/e2e/playwright.config.ts visual-foundation --project=desktop
+  result: pass
+  note: 8 passed; control heights at 390 (44px) and 1440 (28px) for three roles; a bare 40px button found
+    and fixed on the first run
+- command: npx playwright test -c tests/e2e/playwright.config.ts public foundations workspace-shell --project=desktop
+    --project=mobile
+  result: pass
+  note: workspace-shell 14 passed after the target-size fix; public and foundations passed on both projects
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-SPACE-1, V-DENS-1 and D-012 touch hit area
+- ref: design/state-matrix
+  result: pass
+  note: not affected
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: stylesheets and tokens
+- surface: docs
+  result: pass
+  evidence: contract in spec 004
+migrations: []
+findings:
+- P3 the first run of the compacted stylesheet failed axe target-size on three inline link-buttons and
+  a bare 40px button; both fixed at the root (token heights, 24px link minimum)
+escalations: []
+limitations:
+- Row-height tokens (--h-row*) are defined and tested but applied by the data-grid density work (PD-F005-B02-T08);
+  the application of per-user density is not in this task.
+- Optical alignment is enforced as one control height, one rhythm and centered flex rows; icon-to-text
+  alignment is covered by T07.
+next: review

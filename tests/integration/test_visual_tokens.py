@@ -112,3 +112,28 @@ def test_type_scale_equals_the_design_in_px():
 
 def test_display_size_stays_inside_the_scale():
     assert LIGHT["--fs-display"] == "clamp(var(--fs-24), 4vw, var(--fs-32))"
+
+
+def test_spacing_and_height_tokens_equal_the_design_in_px():
+    for name in (1, 2, 3, 4, 5, 6, 8, 10, 12):
+        assert px(LIGHT[f"--sp-{name}"]) == px(DESIGN["light"][f"--sp-{name}"]), name
+    for name in ("h-ctl", "h-ctl-sm", "h-ctl-lg", "h-row", "h-row-dense", "h-row-comfy", "h-top"):
+        assert px(LIGHT["--" + name]) == px(DESIGN["light"]["--" + name]), name
+    assert px(LIGHT["--h-touch"]) == 44 == px(DESIGN["light"]["--h-touch"])
+
+
+def test_touch_layouts_raise_every_control_height_to_the_touch_target():
+    match = re.search(
+        r"@media \(max-width: 47.9375rem\), \(pointer: coarse\) \{\s*:root \{(.*?)\}", CSS, re.S
+    )
+    assert match, "touch override missing"
+    raised = dict(re.findall(r"(--[\w-]+):\s*([^;]+);", match.group(1)))
+    assert raised == {
+        "--h-ctl": "var(--h-touch)",
+        "--h-ctl-sm": "var(--h-touch)",
+        "--h-ctl-lg": "var(--h-touch)",
+    }
+
+
+def test_legacy_spacing_and_control_names_are_gone():
+    assert not re.search(r"--space-\d|--control-height", CSS)

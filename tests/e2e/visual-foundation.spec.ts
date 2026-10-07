@@ -45,6 +45,26 @@ async function offScale(page: Page) {
   );
 }
 
+/** Visible form controls and buttons shorter than `min` px, as `height tag.class label`. */
+async function shortControls(page: Page, min: number) {
+  return page.evaluate((limit) => {
+    const bad: string[] = [];
+    const selector =
+      'button, select, textarea, input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]), [role="tab"], [role="button"]';
+    for (const el of document.querySelectorAll<HTMLElement>(selector)) {
+      if (el.closest(".cx-visually-hidden, [hidden]")) continue;
+      const box = el.getBoundingClientRect();
+      if (!box.width || !box.height) continue;
+      if (getComputedStyle(el).visibility === "hidden") continue;
+      if (box.height < limit - 0.5)
+        bad.push(
+          `${Math.round(box.height)} ${el.tagName.toLowerCase()}.${el.className} ${(el.textContent || el.getAttribute("aria-label") || "").trim().slice(0, 24)}`,
+        );
+    }
+    return bad;
+  }, min);
+}
+
 const ROLES = ["organizer", "participant-01", "judge-01"];
 for (const width of [390, 1440]) {
   for (const role of ROLES) {
@@ -65,6 +85,8 @@ for (const width of [390, 1440]) {
       await goToDestination(page, "overview");
       await settled(page);
       expect(await offScale(page)).toEqual([]);
+      // standard density keeps controls at 28px or more; touch layouts at the 44px hit area
+      expect(await shortControls(page, width < 768 ? 44 : 28)).toEqual([]);
       const title = await page
         .locator("main h1")
         .first()

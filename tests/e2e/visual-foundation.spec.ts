@@ -179,6 +179,20 @@ async function shellGeometry(page: Page) {
   });
 }
 
+/** Disclosure summaries under the WCAG 2.2 24px target, with every closed disclosure left as is. */
+async function shortSummaries(page: Page) {
+  return page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>("main summary")]
+      .filter((el) => el.checkVisibility())
+      .map((el) => [
+        Math.round(el.getBoundingClientRect().height),
+        (el.textContent ?? "").trim().slice(0, 24),
+      ])
+      .filter(([h]) => (h as number) < 24)
+      .map(([h, label]) => `${h} ${label}`),
+  );
+}
+
 const ROLES = ["organizer", "participant-01", "judge-01"];
 for (const width of [390, 1440]) {
   for (const role of ROLES) {
@@ -202,6 +216,7 @@ for (const width of [390, 1440]) {
       // standard density keeps controls at 28px or more; touch layouts at the 44px hit area
       expect(await shortControls(page, width < 768 ? 44 : 28)).toEqual([]);
       expect(await offScaleRadii(page)).toEqual([]);
+      expect(await shortSummaries(page)).toEqual([]);
       expect(await iconProblems(page)).toEqual([]);
       const shell = await shellGeometry(page);
       expect(shell.marketing).toBe(false);

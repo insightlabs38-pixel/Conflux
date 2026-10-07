@@ -1,0 +1,44 @@
+./scripts/e2e-fast 
+ok   stack health — http://localhost:8080
+ok   reference scenario seed 7 — organizer signs in; event window open
+ok   source freshness — running API matches src/api
+warn leftover fixtures — 1 kept/leftover (`make e2e-fixture-sweep`)
+ok   playwright chromium
+preflight 2.1s
+[iso-event-advanced] exit 0: 1 skipped; 1 passed (10.8s)
+[iso-event-configuration] exit 0: 2 skipped; 2 passed (16.6s)
+[iso-schema-form] exit 0: 2 skipped; 2 passed (19.1s)
+[canary-lifecycle] exit 0: 6 skipped; 6 passed (29.3s)
+[iso-rich-preview] exit 0: 2 skipped; 2 passed (18.5s)
+[iso-notifications] exit 0: 2 skipped; 2 passed (12.6s)
+[iso-artifact-preview] exit 0: 2 skipped; 2 passed (19.0s)
+[canary-scenes] exit 0: 5 passed (18.1s)
+[iso-explanations] exit 0: 2 skipped; 2 passed (17.5s)
+[iso-version-diff] exit 0: 2 skipped; 2 passed (28.3s)
+[iso-provenance] exit 0: 2 skipped; 2 passed (35.9s)
+[iso-extensions] exit 0: 2 skipped; 2 passed (17.5s)
+[iso-preview-context] exit 0: 2 skipped; 2 passed (16.2s)
+[iso-completeness] exit 0: 2 skipped; 2 passed (21.7s)
+[iso-timeline] exit 0: 2 skipped; 2 passed (19.6s)
+[iso-threads] exit 0: 2 skipped; 2 passed (17.8s)
+[canary-uiv2-organizer] exit 0: 4 skipped; 4 passed (1.2m)
+[iso-approvals] exit 0: 2 skipped; 2 passed (18.6s)
+[iso-jobs] exit 0: 2 skipped; 2 passed (19.1s)
+[iso-bulk-planner] exit 0: 2 skipped; 2 passed (14.5s)
+[iso-event-modules] exit 0: 1 skipped; 1 passed (14.7s)
+[iso-event-consequences] exit 0: 2 skipped; 2 passed (19.7s)
+[iso-entity-grid] exit 0: 2 skipped; 2 passed (29.0s)
+[iso-event-presets] exit 0: ✓  3 [desktop] › tests/e2e/event-presets.spec.ts:98:5 › the create form explains a failed format list and recovers on retry (1.5s); -  6 [mobile] › tests/e2e/event-presets.spec.ts:98:5 › the create form explains a failed format list and recovers on retry; 3 skipped; 3 passed (10.3s)
+[canary-uiv2-final-states] exit 0: 6 skipped; 6 passed (59.2s)
+[canary-release-integrity] exit 0: 4 skipped; 4 passed (3.3s)
+[iso-event-readiness] exit 0: 2 skipped; 2 passed (15.9s)
+[iso-event-workflow] exit 0: 2 skipped; 2 passed (11.2s)
+[iso-profiles] exit 0: 2 skipped; 2 passed (7.0s)
+[iso-event-themes] exit 0: 16 skipped; 16 passed (43.7s)
+[iso-participant-workflow] exit 0: 4 skipped; 4 passed (33.2s)
+[iso-uiv2-judge] exit 0: 4 skipped; 4 passed (13.4s)
+[read-only] exit 0: ✓    6 [desktop] › tests/e2e/async-operations.spec.ts:108:5 › a failed part is an alert with the reason, and Try again starts a fresh attempt (2.0s); -   89 [mobile] › tests/e2e/async-operations.spec.ts:108:5 › a failed part is an alert with the reason, and Try again starts a fresh attempt; 113 skipped; 151 passed (4.4m)
+[iso-route-drafts] exit 0: 6 skipped; 6 passed (19.5s)
+[iso-pvs] exit 0: 5 skipped; 15 passed (41.5s)
+== read-only: ok, isolated-mutation: ok, canary: ok
+exit 0

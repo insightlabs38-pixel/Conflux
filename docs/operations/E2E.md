@@ -59,7 +59,7 @@ Boundaries (all produce a diagnostic, none silently degrade): 3–40 participant
 
 **Tiers** (specs run unmodified on an isolated seed; `pvs` 10/10 and event-themes/profiles/participant-workflow/uiv2-judge 26/26 passed on `iso-min`):
 
-- _read-only on reference:_ `workspace-shell`, `roles`, `signin`, `extended-embed`, `uiv2-surfaces`, `uiv2-gate` (logout only), `public`, `showcase`, `foundations`. They move to isolated seeds only if a run needs the reference stable after a mutator.
+- _read-only on reference:_ `workspace-shell`, `roles`, `signin`, `extended-embed`, `uiv2-surfaces`, `uiv2-gate` (logout only), `public`, `showcase`, `foundations`, `visual-foundation`. They move to isolated seeds only if a run needs the reference stable after a mutator.
 - _isolated-mutation (iso-min, own seed):_ `event-themes` (PATCHes event brand), `profiles`, `participant-workflow`, `pvs`, `uiv2-judge`.
 - _lifecycle canary (serial, `canary` profile, never parallelised or shortened):_ `lifecycle`. Consumes `participant-24`; still the authoritative create→submit→judge→publish→public-results path.
 - _post-lifecycle readers:_ `uiv2-organizer`, `uiv2-final-states`, `scenes` read state the canary creates. `uiv2-organizer` fails on a generator-`published` seed (`404 …/awards/<id>/deliberation/`: the generator decides awards but never opens a deliberation), so these run on the canary's fixture after `lifecycle`, or T02 adds a canonical deliberation-finalize step; they must not be pointed at `iso-published` as-is.

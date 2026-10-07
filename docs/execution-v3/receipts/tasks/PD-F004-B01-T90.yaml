@@ -1,0 +1,92 @@
+version: 3
+task: PD-F004-B01-T90
+batch: PD-F004-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: e8ec110
+  head_commit: null
+changed_paths:
+- docs/verification/PD-F004-B01/MATRIX.md
+- docs/verification/PD-F004-B01/T90-e2e-fast.log
+- tests/integration/test_visual_tokens.py
+- tests/e2e/visual-foundation.spec.ts
+- tests/e2e/workspace-shell.spec.ts
+- tests/e2e/weights.json
+- src/web/styles/components.css
+deliverables:
+- item: Verification matrix for the 8 capability tasks, each linked to at least one executable proof
+  result: pass
+  evidence: docs/verification/PD-F004-B01/MATRIX.md maps T01-T08 to positive proof, negative or boundary
+    proof and compatibility/authority notes, with state and viewport coverage
+- item: Positive, negative, authorization, lifecycle/migration and concurrency coverage
+  result: pass
+  evidence: 'migration: test_every_accent_the_old_gate_accepted_is_still_accepted (4,000+ colours) and
+    the gate-still-refuses test; authorization, lifecycle, concurrency: none changed (no API, model or
+    permission), stated in the matrix; the one behavior change (template delete confirms) is covered by
+    the entity-grid, bulk-planner and approvals specs for neighbouring flows'
+- item: UI states and viewports verified, not only screenshots
+  result: pass
+  evidence: computed-style assertions at 390 and 1440 on three roles and a public page; uiv2-gate states
+    spec passes; screenshots were opened as a check, never as the proof
+- item: Exact commands and results recorded
+  result: pass
+  evidence: below and in the batch receipt
+invariants:
+- item: No test, gate or assertion weakened
+  result: pass
+  evidence: axe, overflow and every workspace-shell assertion kept; the organizer walk was split per destination
+    (same checks, QUESTIONS.md 2026-10-07T04:10Z), not loosened or given a longer timeout
+- item: Failures were root-caused
+  result: pass
+  evidence: 'e2e-fast found two real regressions, both fixed in the product: disclosure summaries under
+    the WCAG 2.2 24px target (uiv2-surfaces, preview-context) and the organizer navigation test over its
+    budget (split)'
+verification:
+- command: make verify-fast
+  result: pass
+  note: pytest 2877 passed, 34 skipped; web vitest 664 passed; ruff, prettier, tsc, build, sdk-check,
+    openapi, block-schema checks clean (run before the last CSS and test edits; the focused suites below
+    were rerun after)
+- command: make e2e-fast (final run, log in docs/verification/PD-F004-B01/T90-e2e-fast.log)
+  result: pass
+  note: 'read-only ok, isolated-mutation ok, canary ok, exit 0. Earlier runs: run 1 failed on summary
+    target size (6 tests), run 2 and 3 failed only on the organizer navigation budget; both fixed as above'
+- command: cd src/web && npx tsc --noEmit && npx vitest run; uv run --frozen ruff check .; npx prettier
+    --check src/web tests/e2e docs
+  result: pass
+  note: 664 passed; clean after the final edits
+- command: uv run --frozen pytest tests/test_visual_ratchets.py tests/integration/test_visual_tokens.py
+    tests/test_design_manifest.py tests/test_e2e_tiers.py -q
+  result: pass
+  note: 98 passed, 3 skipped by design
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: all V-* rules of the batch asserted
+- ref: design/state-matrix
+  result: pass
+  note: S-ERR, S-DENY, S-DEST covered by the matrix
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: MATRIX.md
+- surface: docs
+  result: pass
+  evidence: MATRIX.md and this receipt
+migrations: []
+findings:
+- P3 make e2e-report still reports BREACH (affected median 152s over 120s, full median 277s over 210s,
+  5 of 10 clean runs) because this batch produced red runs; the file is not edited and clears as clean
+  runs accumulate. The suite itself is green.
+- P3 workspace-shell organizer navigation is now 36 small tests instead of 4 long ones (decision logged)
+escalations: []
+limitations:
+- make verify-fast ran before the last CSS summary fix, the workspace-shell split and the docs; the focused
+  unit suites and the full e2e-fast were rerun after, the Python and web suites are unaffected by those
+  edits.
+next: review

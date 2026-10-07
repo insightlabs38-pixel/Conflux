@@ -38,71 +38,102 @@ const destinations: Record<string, string[]> = {
   ],
   "judge-01": ["overview", "queue", "schedule", "profile", "messages"],
 };
+async function openRole(page: Page, role: string, width: number) {
+  await page.setViewportSize({ width, height: 900 });
+  await signIn(page, role);
+  const problems = watch(page);
+  await openWorkspace(page);
+  if (role === "organizer") await chooseWorkspaceEvent(page);
+  else {
+    await page
+      .getByRole("combobox", { name: "Event", exact: true })
+      .selectOption({ index: 1 });
+    if (role === "judge-01")
+      await page
+        .getByRole("combobox", { name: "Stage", exact: true })
+        .selectOption({ index: 1 });
+  }
+  await settled(page);
+  return problems;
+}
+
+async function checkDestination(
+  page: Page,
+  role: string,
+  width: number,
+  id: string,
+) {
+  await goToDestination(page, id);
+  await settled(page);
+  await noHorizontalOverflow(page);
+  await accessible(page);
+  if (id === "overview")
+    await capture(page, {
+      path: `tests/e2e/artifacts/uiv2-b02/${role}-${width}.png`,
+      fullPage: true,
+    });
+}
+
 for (const width of [390, 768, 1024, 1440]) {
   for (const role of Object.keys(destinations)) {
+    // The organizer has nine destinations, each a full-page axe scan, so the walk is one test per
+    // destination: the same assertions as before, none of them dropped or loosened, and each
+    // inside the shared 30s budget on its own (ESC: PD-F004-B01-T90, QUESTIONS.md).
+    if (role === "organizer") {
+      for (const id of destinations[role]) {
+        test(`role navigation ${role} at ${width}: ${id}`, async ({
+          page,
+        }, info) => {
+          test.skip(
+            info.project.name !== "desktop",
+            "explicit viewport matrix",
+          );
+          const problems = await openRole(page, role, width);
+          await checkDestination(page, role, width, id);
+          expect(problems).toEqual([]);
+        });
+      }
+      continue;
+    }
     test(`role navigation ${role} at ${width}`, async ({ page }, info) => {
       test.skip(info.project.name !== "desktop", "explicit viewport matrix");
-      await page.setViewportSize({ width, height: 900 });
-      await signIn(page, role);
-      const problems = watch(page);
-      await openWorkspace(page);
-      if (role === "organizer") await chooseWorkspaceEvent(page);
-      else {
-        await page
-          .getByRole("combobox", { name: "Event", exact: true })
-          .selectOption({ index: 1 });
-        if (role === "judge-01")
-          await page
-            .getByRole("combobox", { name: "Stage", exact: true })
-            .selectOption({ index: 1 });
-      }
-      await settled(page);
-      for (const id of destinations[role]) {
-        await goToDestination(page, id);
-        await settled(page);
-        await noHorizontalOverflow(page);
-        await accessible(page);
-        if (id === "overview")
-          await capture(page, {
-            path: `tests/e2e/artifacts/uiv2-b02/${role}-${width}.png`,
-            fullPage: true,
-          });
-      }
-      if (role === "organizer") {
-        for (const { id, module } of hiddenOrganizer) {
-          await expect(destinationLink(page, id)).toHaveCount(0);
-          await page.goto(
-            page.url().replace(/\/w\/([^/]+)\/[^?]+/, `/w/$1/${id}`),
-          );
-          await expect(
-            page.getByText(`${module} is not turned on for this event.`),
-          ).toBeVisible();
-          await settled(page);
-          await noHorizontalOverflow(page);
-          await accessible(page);
-        }
-        await goToDestination(page, "setup");
-        await page
-          .getByText("Create a new event or start from a template")
-          .click();
-        const form = page.locator("form").filter({
-          has: page.getByRole("heading", {
-            name: "Create event",
-            exact: true,
-          }),
-        });
-        await form
-          .getByLabel("Name", { exact: true })
-          .fill("Draft retained across destinations");
-        await goToDestination(page, "overview");
-        await goToDestination(page, "setup");
-        await expect(form.getByLabel("Name", { exact: true })).toHaveValue(
-          "Draft retained across destinations",
-        );
-      }
+      const problems = await openRole(page, role, width);
+      for (const id of destinations[role])
+        await checkDestination(page, role, width, id);
       expect(problems).toEqual([]);
     });
   }
+
+  test(`organizer hides modules that are off and keeps a draft across destinations at ${width}`, async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+    const problems = await openRole(page, "organizer", width);
+    for (const { id, module } of hiddenOrganizer) {
+      await expect(destinationLink(page, id)).toHaveCount(0);
+      await page.goto(page.url().replace(/\/w\/([^/]+)\/[^?]+/, `/w/$1/${id}`));
+      await expect(
+        page.getByText(`${module} is not turned on for this event.`),
+      ).toBeVisible();
+      await settled(page);
+      await noHorizontalOverflow(page);
+      await accessible(page);
+    }
+    await goToDestination(page, "setup");
+    await page.getByText("Create a new event or start from a template").click();
+    const form = page.locator("form").filter({
+      has: page.getByRole("heading", { name: "Create event", exact: true }),
+    });
+    await form
+      .getByLabel("Name", { exact: true })
+      .fill("Draft retained across destinations");
+    await goToDestination(page, "overview");
+    await goToDestination(page, "setup");
+    await expect(form.getByLabel("Name", { exact: true })).toHaveValue(
+      "Draft retained across destinations",
+    );
+    expect(problems).toEqual([]);
+  });
 }
 
 test("destination links support opening a separate browser tab", async ({

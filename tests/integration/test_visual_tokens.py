@@ -156,3 +156,35 @@ def test_elevation_tokens_equal_the_design_in_both_themes():
     assert LIGHT["--float-bg"] == "var(--surface)"
     assert DARK["--float-bg"] == "var(--surface-2)"
     assert not re.search(r"--shadow-", CSS)
+
+
+# The palette before PD-F004-B01 (bg, raised surface) per theme: a stored organizer accent that the
+# gate accepted then must still be accepted now, so no stored theme_config becomes invalid.
+OLD_SURFACES = {"light": ("#f4f6f5", "#ffffff"), "dark": ("#12161c", "#1b2028")}
+
+
+def accepted(accent, surfaces):
+    return all(contrast_ratio(accent, surface) >= 4.5 for surface in surfaces)
+
+
+def test_every_accent_the_old_gate_accepted_is_still_accepted():
+    steps = range(0, 256, 17)
+    checked = 0
+    for r in steps:
+        for g in steps:
+            for b in steps:
+                accent = f"#{r:02x}{g:02x}{b:02x}"
+                for old, theme in (("light", "default"), ("dark", "dark")):
+                    if accepted(accent, OLD_SURFACES[old]):
+                        checked += 1
+                        new = THEME_COLORS[theme]
+                        assert accepted(accent, (new["bg"], new["surface"])), (accent, theme)
+    assert checked > 1000
+
+
+def test_the_gate_still_refuses_a_low_contrast_accent_with_its_message():
+    from django.core.exceptions import ValidationError
+
+    with pytest.raises(ValidationError) as caught:
+        clean_theme_config({"accent": "#cccccc"}, "default")
+    assert "4.5:1" in str(caught.value)

@@ -2850,3 +2850,10 @@ html {
 .cx-state__title .cx-icon {
   margin-right: var(--sp-1);
 }
+
+/* WCAG 2.2 target size: a disclosure summary keeps a 24px target at the compact scale. */
+.cx-shell__main summary {
+  min-height: var(--sp-6);
+  padding-block: var(--sp-1);
+  cursor: pointer;
+}

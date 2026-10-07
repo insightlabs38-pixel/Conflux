@@ -23,6 +23,10 @@ An exception is an edit to the allowlist in the ratchet test, with a reason; a n
 - `Icon` (28 Lucide-shaped names, 16px, `currentColor`, hidden from assistive technology unless it has a `label`). Add a shape to the table in `Icon.tsx`.
 - State components carry an icon for error and denied; the remaining state fields (kept data, retry scope, error reference, cancel) are PD-F004-B02.
 
+## Advanced never means chaotic
+
+Advanced content opens into the page, not into a different layout. Every `<details>` inside the shell shares one look in `components.css` ("Disclosure"): a hairline above, a medium-weight summary, one chevron that turns when open, no native marker. Borders are solid hairlines everywhere; `dashed` and `dotted` are banned in every stylesheet. A disclosure that needs its own surface (account menu, entity tools bar) opts out of the hairline by class, never by a second chevron. `test_no_dashed_or_dotted_borders_and_every_disclosure_has_the_one_chevron` and the "every organizer disclosure shares one look" spec in `visual-foundation.spec.ts` enforce it.
+
 ## Touch and density
 
 Controls are `--h-ctl` (32px) on desktop and `--h-touch` (44px) below 768px or with a coarse pointer. Per-user density and theme preferences are PD-F005; nothing here changes by viewport width except that touch sizing.

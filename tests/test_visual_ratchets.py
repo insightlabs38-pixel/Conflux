@@ -322,8 +322,8 @@ def test_every_empty_state_says_why_and_none_is_a_bare_headline():
             assert re.search(r"\bwhy=", opening), (str(path.relative_to(WEB)), opening[:80])
 
 
-# Not a plain failed load: the error boundary renders a crash, and the config history panel merges its
-# load and restore errors into one message.
+# Not a plain failed load: the error boundary renders a crash, and the config history panel merges
+# its load and restore errors into one message.
 ERROR_STATE_EXEMPT = {"features/pvs/Guarded.tsx", "features/audit/ConfigHistoryPanel.tsx"}
 
 
@@ -336,3 +336,20 @@ def test_every_error_state_with_a_retry_says_what_failed_and_what_retry_does():
             opening = match.group(1)
             if "onRetry" in opening:
                 assert re.search(r'kind="read"|\bkept=', opening), (rel, opening[:90])
+
+
+def test_no_dashed_or_dotted_borders_and_every_disclosure_has_the_one_chevron():
+    for sheet in SHEETS:
+        text = sheet.read_text()
+        assert "dashed" not in text and "dotted" not in text, sheet.name
+    text = (WEB / "styles/components.css").read_text()
+    block = dict(rules(text))
+    assert block[".cx-shell__main details > summary::before"].count("border-right") == 1
+    assert "list-style: none" in block[".cx-shell__main details > summary"]
+
+
+def test_a_scroll_region_contains_its_absolutely_positioned_cells():
+    # a visually-hidden header (position: absolute) inside a static scroll region escaped its clip
+    # and made the whole page scroll sideways at 390px (organizer eligibility queue)
+    block = dict(rules((WEB / "styles/components.css").read_text()))
+    assert "position: relative" in block[".cx-scroll-region"]

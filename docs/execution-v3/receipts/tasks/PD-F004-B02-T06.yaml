@@ -1,0 +1,75 @@
+version: 3
+task: PD-F004-B02-T06
+batch: PD-F004-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: bb169ad
+  head_commit: null
+changed_paths:
+- src/web/styles/components.css
+- src/web/styles/presentation.css
+- tests/test_visual_ratchets.py
+- tests/e2e/visual-foundation.spec.ts
+- docs/operations/VISUAL_FOUNDATION.md
+deliverables:
+- item: Advanced never means visually chaotic
+  result: pass
+  evidence: 'every details block inside the shell shares one disclosure look (hairline, medium summary, one
+    chevron that turns when open, native marker removed); the two dashed borders (empty-state container,
+    ghost action, empty note) became solid hairlines per V-LINE-1; advanced content opens into the page
+    grid instead of a distinct layout'
+- item: States and viewports
+  result: pass
+  evidence: checked closed and open at 390 and 1440 on the organizer destinations that have disclosures (setup,
+    participants, operations, profile); axe runs on those destinations in workspace-shell
+- item: Server state
+  result: pass
+  evidence: presentation only; no state, validation or API is touched
+invariants:
+- item: Progressive disclosure preserved
+  result: pass
+  evidence: no content moved or revealed by default; only the look of existing disclosures changed
+- item: Accessibility preserved
+  result: pass
+  evidence: summaries keep the 24px target-size rule of the existing summary rule, focus ring untouched
+- item: No second source of truth, no test weakened
+  result: pass
+  evidence: one CSS block, one ratchet, one spec; no allowlist edited
+verification:
+- command: uv run --frozen pytest tests/test_visual_ratchets.py -q
+  result: pass
+  note: 23 passed (new dashed/dotted ban and one-chevron rule)
+- command: docker compose up -d --build app; npx playwright test -c tests/e2e/playwright.config.ts visual-foundation --project=desktop
+  result: pass
+  note: 14 passed, including the new disclosure walk at 390 and 1440 and the per-overview disclosureProblems check
+- command: npx playwright test -c tests/e2e/playwright.config.ts workspace-shell --project=desktop
+  result: pass
+  note: 50 passed; the first run had the organizer eligibility queue at 390 overflowing by 57px (see findings)
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-LINE-1 (hairlines), V-SLOP-4 (no nested cards), V-MOTION-1 (chevron eases at --t-fast)
+- ref: design/state-matrix
+  result: pass
+  note: no state component changed
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: components.css, presentation.css, ratchet, e2e
+- surface: docs
+  result: pass
+  evidence: docs/operations/VISUAL_FOUNDATION.md section Advanced never means chaotic
+migrations: []
+findings:
+- 'P2-fixed regression found by workspace-shell: the eligibility queue at 390 scrolled the whole page sideways by 57px (it failed identically with this task''s CSS stashed). Root cause is a position:absolute visually-hidden Action header inside a static .cx-scroll-region escaping the clip; fixed with position:relative on .cx-scroll-region and a ratchet. Not weakened or retried; 3 reruns failed before the fix, 50/50 pass after.'
+- P3 pre-existing E501 in tests/test_visual_ratchets.py (T05 comment) fixed in passing.
+escalations: []
+limitations:
+- Disclosures outside the authenticated shell (public event pages such as the FAQ) keep their own summary
+  style in presentation.css; the public page look is owned by PD-F004-B03.
+next: review

@@ -126,7 +126,7 @@
 }
 .cx-empty-note {
   padding: var(--sp-6);
-  border: 1px dashed var(--color-border-strong);
+  border: 1px solid var(--line-3);
   border-radius: var(--r-2);
   color: var(--color-text-muted);
   text-align: center;

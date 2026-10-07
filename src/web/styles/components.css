@@ -110,6 +110,7 @@
 }
 
 .cx-scroll-region {
+  position: relative; /* contains the absolutely positioned visually-hidden cells, which would otherwise widen the page */
   max-width: 100%;
   overflow-x: auto;
 }
@@ -244,7 +245,7 @@
   padding: var(--sp-6) var(--sp-4);
   text-align: center;
   color: var(--color-text-muted);
-  border: 1px dashed var(--color-border);
+  border: 1px solid var(--color-border);
   border-radius: var(--r-3);
 }
 .cx-state--error {
@@ -2554,7 +2555,7 @@ html {
   padding: var(--sp-2) var(--sp-3);
   background: transparent;
   color: var(--color-text-secondary);
-  border: 1px dashed var(--color-border);
+  border: 1px solid var(--color-border);
   border-radius: var(--r-1);
   font: inherit;
   cursor: pointer;
@@ -2941,4 +2942,43 @@ html {
 }
 .cx-state__ref code {
   font-family: var(--font-mono);
+}
+
+/* Disclosure (progressive disclosure, never chaos): one look for every details block in the app.
+   A hairline, a medium-weight summary with a chevron that turns when open, and a body on the
+   same grid as the page. Advanced content opens into this, not into a different layout. */
+.cx-shell__main details {
+  border-top: 1px solid var(--line);
+  padding-block: var(--sp-1);
+}
+.cx-shell__main details > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  list-style: none;
+  font-weight: var(--font-weight-medium);
+  color: var(--ink);
+}
+.cx-shell__main details > summary::-webkit-details-marker {
+  display: none;
+}
+.cx-shell__main details > summary::before {
+  content: "";
+  flex: none;
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-right: 2px solid var(--ink-3);
+  border-bottom: 2px solid var(--ink-3);
+  transform: rotate(-45deg);
+}
+.cx-shell__main details[open] > summary::before {
+  transform: rotate(45deg);
+}
+.cx-shell__main details[open] > summary {
+  margin-bottom: var(--sp-2);
+}
+/* the account menu and the entity tools bar are their own surfaces */
+.cx-shell__main .cx-account,
+.cx-shell__main .cx-entity-grid__tools {
+  border-top: 0;
 }

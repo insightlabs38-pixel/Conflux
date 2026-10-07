@@ -244,6 +244,20 @@ async function emptyProblems(page: Page) {
   });
 }
 
+/** Disclosures that do not use the shared look: native marker showing, or no chevron drawn. */
+async function disclosureProblems(page: Page) {
+  return page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>("main details > summary")]
+      .filter((el) => el.checkVisibility())
+      .filter((el) => {
+        const marker = getComputedStyle(el).listStyleType;
+        const chevron = getComputedStyle(el, "::before");
+        return marker !== "none" || parseFloat(chevron.width) < 6;
+      })
+      .map((el) => (el.textContent ?? "").trim().slice(0, 30)),
+  );
+}
+
 const ROLES = ["organizer", "participant-01", "judge-01"];
 for (const width of [390, 1440]) {
   for (const role of ROLES) {
@@ -268,6 +282,7 @@ for (const width of [390, 1440]) {
       expect(await shortControls(page, width < 768 ? 44 : 28)).toEqual([]);
       expect(await offScaleRadii(page)).toEqual([]);
       expect(await shortSummaries(page)).toEqual([]);
+      expect(await disclosureProblems(page)).toEqual([]);
       expect(await iconProblems(page)).toEqual([]);
       expect(await statusProblems(page)).toEqual([]);
       await page.emulateMedia({ reducedMotion: "no-preference" }); // the suite runs with reduce
@@ -339,6 +354,47 @@ for (const width of [390, 1440]) {
       .evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
     expect(h1).toBeGreaterThanOrEqual(24);
     expect(h1).toBeLessThanOrEqual(32);
+  });
+}
+
+// V-SLOP "advanced never means chaotic": every disclosure on the organizer destinations that have one
+// draws the one chevron and hairline, and the chevron turns when it opens.
+for (const width of [390, 1440]) {
+  test(`every organizer disclosure shares one look, closed and open, at ${width}`, async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+    await page.setViewportSize({ width, height: 900 });
+    await signIn(page, "organizer");
+    await openWorkspace(page);
+    await chooseWorkspaceEvent(page);
+    await settled(page);
+    let seen = 0;
+    for (const id of ["setup", "participants", "operations", "profile"]) {
+      await goToDestination(page, id);
+      await settled(page);
+      expect(await disclosureProblems(page)).toEqual([]);
+      const summaries = page.locator("main details > summary:visible");
+      for (let i = 0; i < (await summaries.count()); i++) {
+        const summary = summaries.nth(i);
+        const details = summary.locator("xpath=..");
+        const closed = await summary.evaluate(
+          (el) => getComputedStyle(el, "::before").transform,
+        );
+        await summary.click();
+        await expect(details).toHaveAttribute("open", "");
+        await expect // the chevron turns when open (it eases over --t-fast)
+          .poll(() =>
+            summary.evaluate(
+              (el) => getComputedStyle(el, "::before").transform,
+            ),
+          )
+          .not.toBe(closed);
+        await summary.click();
+        seen += 1;
+      }
+    }
+    expect(seen).toBeGreaterThan(0);
   });
 }
 

@@ -65,6 +65,21 @@ async function shortControls(page: Page, min: number) {
   }, min);
 }
 
+/** Rendered corners off the 3/5/8px scale (pill and circle excepted), as `radius tag.class`. */
+async function offScaleRadii(page: Page) {
+  return page.evaluate(() => {
+    const bad = new Set<string>();
+    for (const el of document.querySelectorAll<HTMLElement>("body *")) {
+      const box = el.getBoundingClientRect();
+      if (!box.width || !box.height) continue;
+      const radius = parseFloat(getComputedStyle(el).borderTopLeftRadius);
+      if (![0, 3, 5, 8].includes(radius) && radius < 100)
+        bad.add(`${radius} ${el.tagName.toLowerCase()}.${el.className}`);
+    }
+    return [...bad];
+  });
+}
+
 const ROLES = ["organizer", "participant-01", "judge-01"];
 for (const width of [390, 1440]) {
   for (const role of ROLES) {
@@ -87,6 +102,7 @@ for (const width of [390, 1440]) {
       expect(await offScale(page)).toEqual([]);
       // standard density keeps controls at 28px or more; touch layouts at the 44px hit area
       expect(await shortControls(page, width < 768 ? 44 : 28)).toEqual([]);
+      expect(await offScaleRadii(page)).toEqual([]);
       const title = await page
         .locator("main h1")
         .first()

@@ -137,3 +137,9 @@ def test_touch_layouts_raise_every_control_height_to_the_touch_target():
 
 def test_legacy_spacing_and_control_names_are_gone():
     assert not re.search(r"--space-\d|--control-height", CSS)
+
+
+def test_radii_equal_the_design_and_legacy_radius_names_are_gone():
+    for name in ("r-1", "r-2", "r-3", "r-pill"):
+        assert LIGHT["--" + name] == DESIGN["light"]["--" + name], name
+    assert not re.search(r"--radius-", CSS)

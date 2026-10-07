@@ -163,3 +163,25 @@ def test_spacing_comes_from_the_4px_scale_or_is_an_optical_nudge_of_two_pixels_o
 def test_a_literal_rem_gap_is_named_by_the_spacing_ratchet():
     bad = list(spacing_declarations(".x { gap: 1rem; padding: 0 var(--sp-2); margin: -1px; }"))
     assert [v for _, v in bad if "rem" in v] == ["1rem"]
+
+
+RADIUS_PART = re.compile(r"var\(--r-(?:1|2|3|pill)\)|0|inherit")
+
+
+def test_radii_come_from_the_three_step_scale():
+    for sheet in SHEETS:
+        if sheet.name == "tokens.css":
+            continue
+        for selector, value in declarations(sheet.read_text(), "border-radius"):
+            parts = re.findall(r"var\([^)]*\)|\S+", value)
+            assert parts and all(RADIUS_PART.fullmatch(p) for p in parts), (
+                sheet.name,
+                selector,
+                value,
+            )
+        assert "--radius-" not in sheet.read_text(), sheet.name
+
+
+def test_no_status_label_is_a_pill():
+    text = (WEB / "styles/components.css").read_text()
+    assert dict(declarations(text, "border-radius"))[".cx-badge"] == "var(--r-1)"

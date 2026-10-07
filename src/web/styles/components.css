@@ -15,7 +15,7 @@
   background: var(--color-accent);
   color: var(--color-accent-contrast);
   padding: var(--sp-2) var(--sp-4);
-  border-radius: 0 0 var(--radius-sm) 0;
+  border-radius: 0 0 var(--r-1) 0;
 }
 .cx-skip-link:focus {
   left: 0;
@@ -120,7 +120,7 @@
   font-weight: 600;
   line-height: 1.2;
   padding: var(--sp-2) var(--sp-4);
-  border-radius: var(--radius-md);
+  border-radius: var(--r-2);
   border: 1px solid transparent;
   cursor: pointer;
   display: inline-flex;
@@ -163,7 +163,7 @@
   font-size: var(--fs-14);
   font-weight: 600;
   padding: var(--sp-1) var(--sp-3);
-  border-radius: 999px;
+  border-radius: var(--r-1);
   line-height: 1.4;
 }
 .cx-badge--neutral {
@@ -190,7 +190,7 @@
 .cx-card {
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--r-3);
   padding: var(--sp-4);
   box-shadow: var(--shadow-sm);
 }
@@ -204,7 +204,7 @@
   text-align: center;
   color: var(--color-text-muted);
   border: 1px dashed var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--r-3);
 }
 .cx-state--error {
   color: var(--color-danger);
@@ -258,7 +258,7 @@
   gap: var(--sp-2) var(--sp-3);
   padding: var(--sp-2) var(--sp-3);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--r-2);
   color: var(--color-text-muted);
 }
 .cx-operation--success {
@@ -292,7 +292,7 @@
 .cx-shell__main
   :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
   border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-md);
+  border-radius: var(--r-2);
   padding: var(--sp-2) var(--sp-3);
   background: var(--color-surface-raised);
   color: inherit;
@@ -313,7 +313,7 @@
   padding: var(--sp-2) var(--sp-4);
   min-height: var(--h-ctl);
   border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-md);
+  border-radius: var(--r-2);
   background: var(--color-surface-raised);
   color: var(--color-text);
   cursor: pointer;
@@ -365,7 +365,7 @@
   padding: var(--sp-10) var(--sp-8);
 }
 .cx-button {
-  border-radius: var(--radius-md);
+  border-radius: var(--r-2);
   min-height: var(--h-ctl);
   font-size: var(--fs-14);
   transition: background var(--motion-fast) var(--motion-ease);
@@ -381,7 +381,7 @@
   background: var(--color-accent-active);
 }
 .cx-badge {
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-1);
   padding: 2px var(--sp-2);
   font-size: var(--fs-12);
 }
@@ -457,7 +457,7 @@
 .cx-shell__main
   :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
   border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-md);
+  border-radius: var(--r-2);
   padding: var(--sp-2) var(--sp-3);
   min-height: var(--h-ctl);
   background: var(--color-surface-raised);
@@ -499,7 +499,7 @@
 .cx-alert {
   padding: var(--sp-4);
   border-left: 3px solid;
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-1);
 }
 .cx-alert--info {
   background: var(--color-info-bg);
@@ -523,7 +523,7 @@
   place-items: center;
   width: 2.75rem;
   height: 2.75rem;
-  border-radius: var(--radius-md);
+  border-radius: var(--r-2);
   background: var(--color-accent-subtle);
   color: var(--color-text);
   font-weight: var(--font-weight-semibold);
@@ -556,7 +556,7 @@
 .cx-project-card {
   overflow: hidden;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--r-3);
   background: var(--color-surface-raised);
 }
 .cx-project-card:focus-within {
@@ -606,7 +606,7 @@
   overflow-x: auto;
   max-width: 100%;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--r-2);
 }
 .cx-table {
   border-collapse: collapse;
@@ -654,7 +654,7 @@
   flex-shrink: 0;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-1);
 }
 .cx-timeline [data-status="current"] .cx-timeline__marker {
   background: var(--color-accent);
@@ -677,7 +677,7 @@
   max-width: 68rem;
   border: 1px solid var(--color-border);
   background: var(--color-surface-raised);
-  border-radius: var(--radius-lg);
+  border-radius: var(--r-3);
   overflow: hidden;
 }
 .cx-entry__intro {
@@ -739,7 +739,7 @@
   padding: var(--sp-6);
   background: var(--color-surface-raised);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--r-2);
   color: var(--color-text);
   font: inherit;
   cursor: pointer;
@@ -832,7 +832,7 @@
   background: var(--color-accent);
   color: var(--color-accent-contrast);
   font-size: var(--fs-14);
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-1);
 }
 .cx-shell__context {
   text-transform: capitalize;
@@ -935,7 +935,7 @@
   min-width: 12rem;
   max-width: min(20rem, 85vw);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--r-2);
   background: var(--color-surface-raised);
   padding: var(--sp-4);
   box-shadow: var(--shadow-md);
@@ -1283,7 +1283,7 @@
   color: var(--color-text);
   border: 1px solid transparent;
   border-left: 3px solid transparent;
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-1);
   font: inherit;
   cursor: pointer;
 }
@@ -1474,7 +1474,7 @@
   margin-bottom: var(--sp-4);
   background: var(--color-surface-subtle);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-1);
 }
 .cx-judge-summary {
   display: grid;
@@ -1579,7 +1579,7 @@
   margin: 0 0 var(--sp-3);
   padding: var(--sp-3);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-1);
 }
 .cx-criterion legend {
   font-weight: var(--font-weight-semibold);
@@ -1666,7 +1666,7 @@
   place-items: center;
   width: 2rem;
   height: 2rem;
-  border-radius: 50%;
+  border-radius: var(--r-pill);
   background: var(--color-accent-subtle);
   font-weight: var(--font-weight-bold);
 }
@@ -1814,7 +1814,7 @@
   min-height: var(--h-ctl);
   padding: 0 var(--sp-3);
   border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-1);
   background: var(--color-surface-raised);
   color: var(--color-text);
   font: inherit;
@@ -1877,7 +1877,7 @@
   place-items: center;
   width: 1.75rem;
   height: 1.75rem;
-  border-radius: 50%;
+  border-radius: var(--r-pill);
   border: 2px solid var(--color-border-strong);
   font-size: var(--fs-12);
   font-weight: var(--font-weight-bold);
@@ -1922,7 +1922,7 @@
   height: 0.25rem;
   margin-top: var(--sp-1);
   background: var(--color-warning);
-  border-radius: 2px;
+  border-radius: var(--r-1);
 }
 .cx-flags {
   display: flex;
@@ -2085,7 +2085,7 @@
   place-items: center;
   width: 1.75rem;
   height: 1.75rem;
-  border-radius: 50%;
+  border-radius: var(--r-pill);
   background: var(--color-surface-subtle);
   border: 1px solid var(--color-border-strong);
   font-size: var(--fs-12);
@@ -2151,7 +2151,7 @@
   margin: 0 0 var(--sp-4);
   padding: var(--sp-3) var(--sp-4);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-1);
 }
 .cx-theme-group legend {
   padding-inline: var(--sp-2);
@@ -2166,7 +2166,7 @@
 .cx-theme-swatch span {
   width: 2rem;
   height: 1.25rem;
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-1);
   border: 1px solid var(--color-border-strong);
 }
 .cx-config-list {
@@ -2177,7 +2177,7 @@
 .cx-config-item {
   padding: var(--sp-3);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-1);
   background: var(--color-surface-subtle);
 }
 .cx-config-item__title {
@@ -2201,7 +2201,7 @@
 .cx-create-event {
   margin-bottom: var(--sp-4);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-1);
   background: var(--color-surface-raised);
   padding: var(--sp-2) var(--sp-4);
 }
@@ -2328,7 +2328,7 @@
   overflow-y: auto;
   padding: var(--sp-4);
   border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-md);
+  border-radius: var(--r-2);
   background: var(--color-surface-raised);
   color: var(--color-text);
 }
@@ -2347,7 +2347,7 @@
   overflow-x: auto;
   padding: var(--sp-3);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-1);
   background: var(--color-surface-subtle);
   font-size: var(--fs-14);
 }
@@ -2367,7 +2367,7 @@
   margin: 0;
   padding: var(--sp-3);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-1);
 }
 .cx-create-form .cx-format-choice {
   display: block;
@@ -2542,7 +2542,7 @@ html {
   background: transparent;
   color: var(--color-text-secondary);
   border: 1px dashed var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--r-1);
   font: inherit;
   cursor: pointer;
 }
@@ -2787,7 +2787,7 @@ html {
   margin: 0 0 var(--sp-3);
   padding: var(--sp-3);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--r-2);
 }
 .cx-preview-bar__pick {
   display: flex;

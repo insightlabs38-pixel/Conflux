@@ -1,0 +1,78 @@
+version: 3
+task: PD-F004-B01-T02
+batch: PD-F004-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 0b3ed32
+  head_commit: null
+changed_paths:
+- src/web/styles/tokens.css
+- src/web/styles/components.css
+- src/web/styles/presentation.css
+- src/web/features/api-explorer/explorer.css
+- tests/integration/test_visual_tokens.py
+- tests/test_visual_ratchets.py
+- tests/e2e/visual-foundation.spec.ts
+deliverables:
+- item: Modest border radii; no region turned into a giant rounded card, through the canonical token layer
+  result: pass
+  evidence: tokens.css defines --r-1/2/3 (3/5/8px) and --r-pill from the design; every border-radius in
+    the app and public stylesheets is one of them or 0; the legacy --radius-* names were renamed in place
+    with no alias left; badges are tags (3px) not pills; circles use --r-pill; the organizer 'square'
+    and 'expressive' personalities now override --r-1..3
+- item: Diagnostics for drift
+  result: pass
+  evidence: ratchet names file, selector and value of any off-scale radius; the e2e spec lists computed
+    radii off 0/3/5/8 on three role overviews at 390 and 1440
+invariants:
+- item: One canonical source of truth; no behavior change
+  result: pass
+  evidence: radii tested equal to design tokens.json; stored organizer personality values keep their meaning
+- item: Accessibility and design intent preserved
+  result: pass
+  evidence: public, foundations, event-themes and workspace axe gates passed; V-RAD-1 and V-SLOP-5 asserted
+verification:
+- command: uv run --frozen pytest tests/test_visual_ratchets.py tests/integration/test_visual_tokens.py
+    -q
+  result: pass
+  note: 29 passed, 3 preset-on-dark skips by design
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 658 passed
+- command: docker compose up -d --build app; npx playwright test -c tests/e2e/playwright.config.ts visual-foundation
+    --project=desktop
+  result: pass
+  note: 8 passed including computed radii
+- command: npx playwright test -c tests/e2e/playwright.config.ts public foundations event-themes --project=desktop;
+    python3 scripts/e2e-tiers smoke
+  result: pass
+  note: 33 passed; smoke 16 passed. event-themes is an isolated-mutation spec and was run on seed 7 by
+    mistake, so scripts/demo-reset restored the reference scenario and smoke passed again
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-RAD-1, V-SLOP-5 (no pill soup)
+- ref: design/state-matrix
+  result: pass
+  note: not affected
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: stylesheets and tokens
+- surface: docs
+  result: pass
+  evidence: contract in spec 004
+migrations: []
+findings:
+- P3 the organizer 'expressive' personality sets 20px and 12px radii, outside the 3/5/8 scale; it is an
+  explicit organizer opt-in (spec 010) so it stays, listed here as the one sanctioned exception to V-RAD-1
+escalations: []
+limitations:
+- Public sites with the expressive personality are not covered by the radii e2e check (the check runs
+  on the authenticated app).
+next: review

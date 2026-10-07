@@ -90,6 +90,40 @@ export async function slopProblems(page: Page, rules: SlopRule[]) {
         }
       }
     }
+    if (wanted.includes("operatorCopy")) {
+      // authenticated pages are tools, not landing pages (V-SLOP-6): nothing larger than 20px, and a
+      // page header carries a title and its context, not a tagline of more than ten words
+      const app = document.querySelector(
+        ".cx-shell--workspace, .cx-shell__main",
+      );
+      if (app && !document.querySelector(".cx-event-site")) {
+        const walker = document.createTreeWalker(app, NodeFilter.SHOW_TEXT);
+        const seen = new Set<Element>();
+        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+          const el = node.parentElement;
+          if (!el || seen.has(el) || !node.textContent?.trim() || !shown(el))
+            continue;
+          seen.add(el);
+          const size = parseFloat(getComputedStyle(el).fontSize);
+          if (size > 20.5)
+            add(
+              "operatorCopy",
+              `${size}px text in ${name(el)}: ${node.textContent.trim().slice(0, 30)}`,
+            );
+        }
+        for (const lede of document.querySelectorAll(
+          ".cx-page-header__description, .cx-lede, .cx-hero-copy",
+        )) {
+          const words = (lede.textContent ?? "")
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean).length;
+          if (shown(lede) && words > 10)
+            add("operatorCopy", `a ${words}-word tagline under a page title`);
+        }
+      }
+    }
+
     if (wanted.includes("kpiCards")) {
       // a row of three or more boxes with their own border or fill is a card dashboard (V-SLOP-3,
       // V-SLOP-14); a summary is one strip of figures, and a list of records is a table. Only the

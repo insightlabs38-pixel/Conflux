@@ -1,0 +1,64 @@
+version: 3
+task: PD-F004-B04-T04
+batch: PD-F004-B04
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: d47152d
+  head_commit: null
+changed_paths:
+- src/web/features/event-builder/EventDashboard.tsx
+- src/web/features/judging/JudgeWorkspace.tsx
+- src/web/features/teams/TeamWorkspace.tsx
+- src/web/app/WorkspaceSelector.tsx
+- tests/e2e/slop.ts
+- tests/e2e/slop-audit.spec.ts
+- docs/execution-v3/receipts/tasks/PD-F004-B04-T03.yaml
+deliverables:
+- item: No oversized marketing copy inside authenticated operator workflows
+  result: pass
+  evidence: 'new live rule operatorCopy: nothing in the application shell is larger than 20px, and a page header
+    carries a title and its context, not a tagline longer than ten words. It found 43 pages (all three roles,
+    both widths) with a 11 to 13 word tagline under the page title ("Manage the event, review what needs
+    attention, and bring the results to publication." and its judge and participant twins); the taglines
+    are removed from the organizer, judge and participant workspace headers and the workspace picker says
+    "Choose an event workspace." No text over 20px existed'
+invariants:
+- item: Nothing needed to operate was removed
+  result: pass
+  evidence: the removed sentences described what the page is for; titles, the event selector, status and every action remain
+- item: The gate can fail
+  result: pass
+  evidence: self-test injects a 40px paragraph and a 15-word tagline and expects both
+verification:
+- command: docker compose up -d --build app; npx playwright test slop-audit --project=desktop --workers=4
+  result: pass
+  note: 51 passed (48 pages at two widths plus three self-tests)
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 701 passed
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-SLOP-6, V-TYPE-2 (application titles at most 20px)
+- ref: design/state-matrix
+  result: pass
+  note: no state component changed
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: page headers and the live audit
+- surface: docs
+  result: pass
+  evidence: spec 004 contract at T91
+migrations: []
+findings:
+- P3 the receipt of T03 named the canary spec twice (uiv2-uiv2-organizer); corrected here.
+escalations: []
+limitations:
+- Copy inside panels (hints, empty states) is governed by the state rules (S-EMPTY, S-ERR), not by this rule.
+next: review

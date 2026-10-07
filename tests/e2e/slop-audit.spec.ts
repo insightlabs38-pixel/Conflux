@@ -12,7 +12,7 @@ import { slopProblems, stable, type SlopRule } from "./slop";
 // The anti-slop gate of spec 004 (V-SLOP-1..) measured on the live pages of every role and on the
 // public site, at 390 and 1440. Read-only. One test per page and width: pages are large and each
 // is measured on its own. A rule is added to RULES by the task that implements it.
-const RULES: SlopRule[] = ["gradient", "iconTile", "kpiCards"];
+const RULES: SlopRule[] = ["gradient", "iconTile", "kpiCards", "operatorCopy"];
 
 const PAGES: Record<string, string[]> = {
   organizer: [
@@ -131,4 +131,26 @@ test("the audit sees a row of cards", async ({ page }, info) => {
   });
   const found = await slopProblems(page, ["kpiCards"]);
   expect(found.kpiCards?.[0]).toContain("3 cards in a row");
+});
+
+test("the audit sees oversized and tagline copy in an operator page", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, "organizer");
+  await goToDestination(page, "overview");
+  await settled(page);
+  await page.evaluate(() => {
+    const big = document.createElement("p");
+    big.style.fontSize = "40px";
+    big.textContent = "Welcome back";
+    const tagline = document.createElement("p");
+    tagline.className = "cx-page-header__description";
+    tagline.textContent =
+      "Manage the event, review what needs attention, and bring every result to publication today.";
+    document.querySelector("main")!.prepend(big, tagline);
+  });
+  const found = await slopProblems(page, ["operatorCopy"]);
+  expect(found.operatorCopy).toHaveLength(2);
 });

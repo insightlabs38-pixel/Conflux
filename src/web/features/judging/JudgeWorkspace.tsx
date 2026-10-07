@@ -795,7 +795,6 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
           events.find((event) => event.public_id === eventId)?.name ||
           "Your judging workspace"
         }
-        description="Review your assigned projects, inspect evidence, and submit your own scores."
       />
       <WorkspaceViewTitle role="judge" />
       <Destination id="messages">

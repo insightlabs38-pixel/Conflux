@@ -67,7 +67,7 @@ export function WorkspaceSelector({
       <PageHeader
         eyebrow="Your Conflux"
         title="Choose your workspace"
-        description="Pick an event workspace to continue with your team, reviews, or event operations."
+        description="Choose an event workspace."
         actions={
           <Button variant="secondary" onClick={signOut}>
             Sign out

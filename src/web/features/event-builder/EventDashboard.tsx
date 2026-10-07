@@ -270,7 +270,6 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
         as="h1"
         title={selected?.name || "Events"}
         eyebrow="Organizer workspace"
-        description="Manage the event, review what needs attention, and bring the results to publication."
       />
       <WorkspaceViewTitle role="organizer" />
       <Destination id="profile" lazy>

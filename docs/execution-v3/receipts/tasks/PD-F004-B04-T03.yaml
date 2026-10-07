@@ -50,7 +50,7 @@ verification:
   note: 701 passed (strip of at most six linked figures, one figure failing alone)
 - command: docker compose up -d --build app; npx playwright test slop-audit uiv2-gate timeline --project=desktop --workers=4
   result: pass
-  note: kpiCards clean on every page at 390 and 1440; uiv2-uiv2-organizer is a canary-chain spec (needs the lifecycle state) and is
+  note: kpiCards clean on every page at 390 and 1440; uiv2-organizer is a canary-chain spec (needs the lifecycle state) and is
     verified by make e2e-fast at the batch close
 design_refs:
 - ref: design/system-v3

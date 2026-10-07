@@ -56,7 +56,6 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
           events.find((event) => event.public_id === selectedId)?.name ||
           "Your events"
         }
-        description="Bring your team together, build your project, and get ready to submit."
       />
       <WorkspaceViewTitle role="participant" />
       <Destination id="messages">

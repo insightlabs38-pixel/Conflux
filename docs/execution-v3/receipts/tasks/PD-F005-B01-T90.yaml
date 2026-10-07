@@ -1,0 +1,78 @@
+version: 3
+task: PD-F005-B01-T90
+batch: PD-F005-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 45e32a1
+  head_commit: null
+changed_paths:
+- docs/verification/PD-F005-B01/MATRIX.md
+- docs/verification/PD-F005-B01/T00-census.log
+- docs/verification/PD-F005-B01/T90-e2e-fast.log
+- docs/verification/PD-F005-B01/T90-verify-fast.log
+- src/web/hooks/useInbox.ts
+- src/web/hooks/useInbox.test.tsx
+- src/web/features/communications/Inbox.tsx
+- src/web/features/communications/Inbox.test.tsx
+- src/web/styles/components.css
+- tests/test_visual_ratchets.py
+- tests/e2e/notifications.spec.ts
+deliverables:
+- item: Verification matrix for the eight capability tasks
+  result: pass
+  evidence: docs/verification/PD-F005-B01/MATRIX.md links each capability T01-T08 to unit, component, browser and negative proofs and to its product change
+- item: Positive, negative, authorization, lifecycle cases
+  result: pass
+  evidence: the matrix and its cross-cutting section - no endpoint changed, so server authorization is unchanged and the shell is shown to ask nothing a role may not see; device-local state is validated, namespaced and cleared at sign-out; legacy URLs still redirect
+- item: UI states
+  result: pass
+  evidence: loading, empty, error with retry, long list, many unread and permission states in component tests; every overlay at 390 inside the viewport in the browser; axe in light and dark
+- item: Exact commands and results recorded
+  result: pass
+  evidence: T90 logs in docs/verification/PD-F005-B01
+invariants:
+- item: No gate weakened
+  result: pass
+  evidence: the visual ratchet allowlist gained the three new floating layers with the same elevation tokens and the overlay-background check covers them; the realtime spec was kept unchanged and the product fixed instead; the notifications spec only scoped one text finder to the page
+verification:
+- command: make verify-fast
+  result: pass
+  note: run alone - format, ruff, 2946 pytest passed (34 skipped), 759 vitest, build, openapi, sdk and block-schema checks
+- command: make e2e-fast
+  result: pass
+  note: run alone after verify-fast - read-only 308 passed, every isolated spec ok (including the new inbox-center) and the canary chain ok
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: rail and bottom bar tiers, switcher, palette, notification center, account menu
+- ref: design/dark-mode
+  result: pass
+  note: system, light, dark on app surfaces, public pages untouched
+- ref: design/state-matrix
+  result: pass
+  note: states covered in the matrix
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: matrix
+- surface: audit
+  result: pass
+  evidence: no state written by the shell; delegation shown in T05 and T07
+- surface: search
+  result: pass
+  evidence: T06 rows
+migrations: []
+findings:
+- P1-in-scope regression caught by realtime.spec - a second inbox subscriber doubled the polling reads; fixed in this task (only the notification center subscribes) and covered by useInbox.test.tsx
+- P3 running verify-fast and e2e-fast at the same time flaked again earlier in the program; they were run one after the other here
+escalations:
+- ESC-20260930-007
+limitations:
+- Dialogs, open disclosures and per-record detail views are still not walked by the slop audit; the new overlays are covered by their own specs and axe checks.
+- The seeded demo has one event per workspace, so multi-event ordering is proven by component tests.
+next: review

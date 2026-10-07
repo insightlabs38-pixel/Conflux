@@ -35,7 +35,11 @@ for (const width of [390, 1440]) {
     expect(await email("mention")).toBe(false);
 
     await goToDestination(page, "profile");
-    await page.getByText("Notification preferences", { exact: true }).click();
+    // the profile's own disclosure (the account menu and the bell link here too)
+    await page
+      .locator("main")
+      .getByText("Notification preferences", { exact: true })
+      .click();
     const panel = page.getByRole("region", {
       name: "Notification preferences",
     });
@@ -74,7 +78,11 @@ for (const width of [390, 1440]) {
     await page.reload();
     await settled(page);
     await goToDestination(page, "profile");
-    await page.getByText("Notification preferences", { exact: true }).click();
+    // the profile's own disclosure (the account menu and the bell link here too)
+    await page
+      .locator("main")
+      .getByText("Notification preferences", { exact: true })
+      .click();
     await expect(
       panel
         .getByRole("group", { name: "Announcements and reminders" })

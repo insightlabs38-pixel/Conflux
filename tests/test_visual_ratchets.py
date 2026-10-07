@@ -177,6 +177,10 @@ def test_no_status_label_is_a_pill():
 SHADOW_ALLOWED = {
     "styles/components.css": {
         ".cx-account__panel": "var(--sh-pop)",
+        # the shell's other floating layers (PD-F005-B01): switcher, notifications, phone sheet
+        ".cx-switcher__panel": "var(--sh-pop)",
+        ".cx-inbox__panel": "var(--sh-pop)",
+        ".cx-sidebar--open": "var(--sh-pop)",
         ".cx-consequence": "var(--sh-dlg)",
     },
 }
@@ -197,6 +201,8 @@ def test_overlays_use_the_scrim_and_floating_background_tokens():
     assert dict(declarations(text, "background"))[".cx-consequence__backdrop"] == "var(--scrim)"
     assert dict(declarations(text, "background"))[".cx-consequence"] == "var(--float-bg)"
     assert dict(declarations(text, "background"))[".cx-account__panel"] == "var(--float-bg)"
+    for layer in (".cx-switcher__panel", ".cx-inbox__panel"):
+        assert dict(declarations(text, "background"))[layer] == "var(--float-bg)", layer
 
 
 def web_sources():

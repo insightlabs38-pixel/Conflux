@@ -951,8 +951,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.cx-account__panel,
-.cx-switcher__panel {
+.cx-account__panel {
   position: absolute;
   z-index: var(--z-menu);
   top: 100%;
@@ -1046,12 +1045,19 @@
   border-top: 1px solid var(--line);
 }
 .cx-switcher__panel {
-  right: auto;
+  position: absolute;
+  z-index: var(--z-menu);
+  top: 100%;
   left: 0;
   width: 20rem;
+  max-width: min(20rem, 85vw);
   max-height: min(28rem, 70vh);
   overflow-y: auto;
   padding: var(--sp-2) var(--sp-3) var(--sp-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--r-3);
+  background: var(--float-bg);
+  box-shadow: var(--sh-pop);
 }
 .cx-switcher__panel ul {
   list-style: none;

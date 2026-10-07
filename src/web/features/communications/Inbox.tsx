@@ -3,7 +3,8 @@ import { Card } from "../../components/Card";
 import { useInbox } from "../../hooks/useInbox";
 
 export function Inbox({ workspaceId }: { workspaceId: string }) {
-  const { messages, error, markRead } = useInbox(workspaceId);
+  // the header notification center keeps this query live; a second subscriber would double the reads
+  const { messages, error, markRead } = useInbox(workspaceId, { live: false });
   if (messages.length === 0 && !error) return null;
 
   return (

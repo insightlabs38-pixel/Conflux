@@ -22,7 +22,7 @@ export const INBOX_PAGE = 100;
  * query, one cache entry and one mark-read path. New mail arrives as a realtime hint to refetch
  * (lib/realtime.ts): what is shown is what the server just returned for this account.
  */
-export function useInbox(workspaceId: string) {
+export function useInbox(workspaceId: string, { live = true } = {}) {
   const base = `/api/v1/workspaces/${workspaceId}/inbox/`;
   const client = useQueryClient();
   const key = queryKeys.inbox(workspaceId);
@@ -36,7 +36,11 @@ export function useInbox(workspaceId: string) {
     staleTime: 0,
     enabled: workspaceId !== "",
   });
-  useRealtimeInvalidate(`workspace:${workspaceId}:inbox`, key);
+  // One subscriber per workspace is enough: every instance shares this query, and two handlers on
+  // the same topic would each invalidate it, doubling the reads on every hint. The header's
+  // notification center is always mounted and keeps the cache fresh, so the Messages card passes
+  // `live: false`.
+  useRealtimeInvalidate(live ? `workspace:${workspaceId}:inbox` : null, key);
   const [actionError, setActionError] = useState("");
   const messages = Array.isArray(inbox.data) ? inbox.data : [];
   const loadError =

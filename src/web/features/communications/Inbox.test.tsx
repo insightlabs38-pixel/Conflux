@@ -73,7 +73,7 @@ describe("Inbox", () => {
     expect(container.textContent).not.toContain("new");
   });
 
-  it("refetches when a realtime hint arrives, showing exactly what the server returns", async () => {
+  it("leaves the realtime topic to the header's notification center (a second subscriber would double the reads)", async () => {
     const make = (id: string, subject: string) => ({
       public_id: id,
       subject,
@@ -97,14 +97,12 @@ describe("Inbox", () => {
       ),
     );
     await until(() => container.textContent?.includes("First") ?? false);
-    expect(feed.openTopics()).toEqual(["workspace:w1:inbox"]);
+    expect(feed.openTopics()).toEqual([]);
     const before = fetchMock.mock.calls.length;
     rows = [make("r2", "Second"), make("r1", "First")];
     await act(async () => feed.emit("workspace:w1:inbox"));
-    await until(() => container.textContent?.includes("Second") ?? false);
-    expect(fetchMock.mock.calls.length).toBe(before + 1);
+    expect(fetchMock.mock.calls.length).toBe(before); // no hint is heard here
     act(() => root.unmount());
-    expect(feed.openTopics()).toEqual([]); // closed with the screen
     root = createRoot(container);
   });
 });

@@ -96,6 +96,21 @@ async function render(
           200,
           handlers.applications ?? { total: 0, rows: [] },
         );
+      if (path.includes("/audit/"))
+        return jsonResponse(200, [
+          {
+            public_id: "a1",
+            action: "event.status_changed",
+            target_type: "event",
+            created_at: new Date().toISOString(),
+          },
+          {
+            public_id: "a2",
+            action: "membership.granted",
+            target_type: "membership",
+            created_at: new Date().toISOString(),
+          },
+        ]);
       if (path.includes("/views/"))
         return jsonResponse(200, [
           {
@@ -404,5 +419,75 @@ describe("pinned views", () => {
     await open();
     expect(groups()).not.toContain("Pinned views");
     await act(async () => root.unmount());
+  });
+});
+
+describe("recent actions and recent views", () => {
+  it("lists the organizer's own latest audit actions, filters them by what is typed and opens the audit place", async () => {
+    const { root, calls } = await render("organizer", "/w/w/overview?event=e1");
+    await open();
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+    expect(groups()).toContain("Recent actions");
+    expect(
+      options().filter((o) => o?.startsWith("Event status changed")),
+    ).toHaveLength(1);
+    expect(
+      calls.some((c) => c.includes("/api/v1/audit/w/?mine=1&limit=8")),
+    ).toBe(true);
+    await type("membership");
+    expect(options().some((o) => o?.startsWith("Membership granted"))).toBe(
+      true,
+    );
+    expect(options().some((o) => o?.startsWith("Event status changed"))).toBe(
+      false,
+    );
+    await key("Enter");
+    expect(where()).toBe("/w/w/operations?event=e1");
+    await act(async () => root.unmount());
+  });
+
+  it("asks the audit log nothing for a role that may not read it", async () => {
+    const { root, calls } = await render("judge", "/w/w/overview?event=e1", {
+      catalogue: [],
+    });
+    await open();
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+    expect(groups()).not.toContain("Recent actions");
+    expect(calls.some((c) => c.includes("/audit/"))).toBe(false);
+    await act(async () => root.unmount());
+  });
+
+  it("offers recently opened views that still exist and are not pinned", async () => {
+    window.localStorage.setItem(
+      "conflux:v1:u1:w:recent-views",
+      JSON.stringify(["e1:projects:v1", "e1:projects:gone"]),
+    );
+    const { root } = await render("organizer", "/w/w/overview?event=e1");
+    await open();
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+    expect(groups()).toContain("Recent views");
+    expect(labels().filter((l) => l?.startsWith("Open view"))).toEqual([
+      "Open view Late projects",
+    ]);
+    window.localStorage.setItem(
+      "conflux:v1:u1:w:pinned-views",
+      JSON.stringify(["e1:projects:v1"]),
+    );
+    await act(async () => root.unmount());
+    document.body.innerHTML = "";
+    const pinned = await render("organizer", "/w/w/overview?event=e1");
+    await open();
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+    expect(groups()).toContain("Pinned views");
+    expect(groups()).not.toContain("Recent views"); // already pinned, shown once
+    await act(async () => pinned.root.unmount());
   });
 });

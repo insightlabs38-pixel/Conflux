@@ -181,6 +181,16 @@ paths:
         app with workspace-scoped endpoints (workspaces, audit, and later
         event/stage/policy views) to keep the lookup identical everywhere.
       parameters:
+      - in: query
+        name: limit
+        schema:
+          type: integer
+        description: At most this many, newest first (1 to 200); all if absent.
+      - in: query
+        name: mine
+        schema:
+          type: boolean
+        description: Only the actions the caller performed (a person's recent activity).
       - in: path
         name: workspace_public_id
         schema:

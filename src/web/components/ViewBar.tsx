@@ -12,7 +12,11 @@ import {
 } from "../lib/savedViews";
 import { Button } from "./Button";
 import { useMe } from "../hooks/useMe";
-import { togglePinnedView, usePinnedViews } from "../lib/shellPreferences";
+import {
+  rememberView,
+  togglePinnedView,
+  usePinnedViews,
+} from "../lib/shellPreferences";
 
 /**
  * Pick, save, rename, share and delete saved views of one entity. The selected view is the `view_<entity>`
@@ -109,6 +113,12 @@ export function ViewBar({
           onChange={(e) => {
             const next = views.find((v) => v.public_id === e.target.value);
             setApplied(next?.public_id ?? "");
+            if (next)
+              rememberView(user, workspaceId, {
+                event: eventId,
+                entity,
+                view: next.public_id,
+              });
             select(e.target.value, { replace: true });
             onApply(next ?? null);
             setNaming(null);

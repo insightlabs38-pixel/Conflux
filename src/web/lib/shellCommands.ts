@@ -7,28 +7,44 @@ import { SEARCH_TARGETS } from "./searchTargets";
  * places and events come from `context.places` / `context.events`, which the palette fills from what
  * the shell already holds, so a place or event the person cannot see is never offered.
  */
-// pinned views come first: they are what the person chose to keep at hand
-registerCommandProvider((context) =>
-  context.pinned.flatMap((pin): Command[] => {
-    const target = SEARCH_TARGETS[pin.entity];
+// pinned views come first: they are what the person chose to keep at hand; recent ones follow
+function viewCommands(
+  views: { id: string; entity: string; name: string }[],
+  group: string,
+  idPrefix: string,
+): Command[] {
+  return views.flatMap((view): Command[] => {
+    const target = SEARCH_TARGETS[view.entity];
     if (!target) return [];
     return [
       {
-        id: `view.${pin.id}`,
-        label: `Open view ${pin.name}`,
-        group: "Pinned views",
-        keywords: ["view", "pinned", pin.name, target.nouns],
+        id: `${idPrefix}.${view.id}`,
+        label: `Open view ${view.name}`,
+        group,
+        keywords: ["view", group.toLowerCase(), view.name, target.nouns],
         run: (ctx) =>
           ctx.go(
             ctx.target({
               view: target.view,
               section: target.section,
-              params: { [`view_${pin.entity}`]: pin.id },
+              params: { [`view_${view.entity}`]: view.id },
             }),
           ),
       },
     ];
-  }),
+  });
+}
+registerCommandProvider((context) =>
+  viewCommands(context.pinned, "Pinned views", "view"),
+);
+registerCommandProvider((context) =>
+  viewCommands(
+    context.recentViews.filter(
+      (view) => !context.pinned.some((pin) => pin.id === view.id),
+    ),
+    "Recent views",
+    "recent-view",
+  ),
 );
 
 registerCommandProvider((context) => {

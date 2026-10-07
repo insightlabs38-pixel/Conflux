@@ -121,6 +121,7 @@ function ShortcutsDialog({
       target: navigation.target,
       roles: [],
       pinned: [],
+      recentViews: [],
       capabilities: { openShortcuts: () => {} },
     }),
     [navigation, requested],

@@ -10,7 +10,9 @@ import {
   densityPreference,
   MAX_PINS,
   pinnedViews,
+  recentViews,
   rememberCommand,
+  rememberView,
   rememberEvent,
   setDensityPreference,
   setThemePreference,
@@ -169,5 +171,18 @@ describe("shell preferences", () => {
     expect(
       togglePinnedView("u", "w", { event: "e 1", entity: "p", view: "v" }),
     ).toBe(false);
+  });
+
+  it("keeps the last eight opened views, newest first, once each, only id-like", () => {
+    for (let i = 0; i < 10; i++)
+      rememberView("u", "w", { event: "e", entity: "projects", view: `v${i}` });
+    rememberView("u", "w", { event: "e", entity: "projects", view: "v5" });
+    const views = recentViews("u", "w").map((v) => v.view);
+    expect(views).toHaveLength(8);
+    expect(views[0]).toBe("v5");
+    expect(new Set(views).size).toBe(8);
+    rememberView("u", "w", { event: "e", entity: "projects", view: "a b" });
+    expect(recentViews("u", "w")).toHaveLength(8);
+    expect(recentViews("u", "w2")).toEqual([]);
   });
 });

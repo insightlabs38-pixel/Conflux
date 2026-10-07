@@ -6292,7 +6292,7 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
  'get_api_v1_audit_workspace_public_id': {'method': 'GET',
                                           'path': '/api/v1/audit/{workspace_public_id}/',
                                           'path_params': ['workspace_public_id'],
-                                          'query_params': [],
+                                          'query_params': ['limit', 'mine'],
                                           'request_body': False,
                                           'response_kind': 'json'},
  'get_api_v1_audit_workspace_public_id_events_event_public_id_config_history': {'method': 'GET',

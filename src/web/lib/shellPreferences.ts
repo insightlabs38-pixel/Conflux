@@ -211,6 +211,51 @@ export function togglePinnedView(
   return true;
 }
 
+/** The saved views the person opened lately: the same three ids as a pin, newest first, eight at most. */
+const MAX_RECENT_VIEWS = 8;
+export function recentViews(user: string, workspace: string): PinnedView[] {
+  const out: PinnedView[] = [];
+  for (const text of readIds(user, workspace, "recent-views")) {
+    const [event, entity, view, extra] = text.split(":");
+    if (event && entity && view && extra === undefined)
+      out.push({ event, entity, view });
+  }
+  return out.slice(0, MAX_RECENT_VIEWS);
+}
+
+export function rememberView(user: string, workspace: string, pin: PinnedView) {
+  if (
+    ![pin.event, pin.entity, pin.view].every(
+      (part) => ID.test(part) && !part.includes(":"),
+    )
+  )
+    return;
+  const text = pinText(pin);
+  const current = recentViews(user, workspace).map(pinText);
+  if (current[0] === text) return;
+  writeIds(
+    user,
+    workspace,
+    "recent-views",
+    [text, ...current.filter((other) => other !== text)].slice(
+      0,
+      MAX_RECENT_VIEWS,
+    ),
+  );
+}
+
+export const useRecentViews = (
+  user: string,
+  workspace: string,
+): PinnedView[] => {
+  const snapshot = useSyncExternalStore(
+    subscribe,
+    () => JSON.stringify(recentViews(user, workspace)),
+    () => "[]",
+  );
+  return useMemo(() => JSON.parse(snapshot) as PinnedView[], [snapshot]);
+};
+
 export const usePinnedViews = (
   user: string,
   workspace: string,

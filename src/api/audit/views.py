@@ -5,7 +5,7 @@ from core.permissions import require_roles
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from events.models import BasePrize, Event, Track
 from events.serializers import BasePrizeSerializer, EventSerializer, TrackSerializer
 from events.views import OrganizerView
@@ -44,13 +44,41 @@ def _serialize(event):
     }
 
 
+_MAX_LIMIT = 200
+
+
 class WorkspaceAuditLogView(WorkspaceLookupMixin, APIView):
     authentication_classes = [CookieSessionAuthentication]
     permission_classes = [require_roles(Role.ORGANIZER, Role.ADMIN)]
 
-    @extend_schema(responses=AuditEventSchema(many=True))
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "mine",
+                bool,
+                description="Only the actions the caller performed (a person's recent activity).",
+            ),
+            OpenApiParameter(
+                "limit",
+                int,
+                description=f"At most this many, newest first (1 to {_MAX_LIMIT}); all if absent.",
+            ),
+        ],
+        responses=AuditEventSchema(many=True),
+    )
     def get(self, request, workspace_public_id):
-        events = AuditEvent.objects.filter(workspace=self.get_workspace())
+        events = AuditEvent.objects.filter(workspace=self.get_workspace()).select_related("actor")
+        if request.query_params.get("mine", "").lower() in ("1", "true"):
+            events = events.filter(actor=request.user)
+        limit = request.query_params.get("limit")
+        if limit is not None:
+            try:
+                count = int(limit)
+            except ValueError as exc:
+                raise ValidationError({"limit": "Must be an integer."}) from exc
+            if not 1 <= count <= _MAX_LIMIT:
+                raise ValidationError({"limit": f"Must be between 1 and {_MAX_LIMIT}."})
+            events = events[:count]
         return Response([_serialize(e) for e in events])
 
 

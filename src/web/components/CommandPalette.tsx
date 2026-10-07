@@ -10,7 +10,11 @@ import { useLocation, useNavigate } from "react-router";
 import { useMe } from "../hooks/useMe";
 import { useGlobalSearch, MIN_QUERY } from "../hooks/useGlobalSearch";
 import { useShellEvents } from "../hooks/useShellEvents";
-import { usePinnedViewList } from "../hooks/usePinnedViewList";
+import {
+  usePinnedViewList,
+  useRecentViewList,
+} from "../hooks/usePinnedViewList";
+import { actionWords, ago, useRecentActions } from "../hooks/useRecentActions";
 import {
   commandsFor,
   rankCommands,
@@ -120,6 +124,11 @@ function CommandPalette({
     : "";
   const recent = useRecentCommands(user, workspaceId);
   const pinned = usePinnedViewList(workspaceId, eventId, user);
+  const recentViews = useRecentViewList(workspaceId, eventId, user);
+  const { actions: recentActions } = useRecentActions(
+    workspaceId,
+    role === "organizer" || role === "admin",
+  );
   const search = useGlobalSearch({ workspaceId, eventId, query });
   const text = query.trim();
   const canSearchRecords = role === "organizer" || role === "admin";
@@ -150,6 +159,7 @@ function CommandPalette({
       go,
       target: navigation.target,
       pinned,
+      recentViews,
       roles: navigation.roles.map((held) => ({
         role: held,
         label: roleLabel(held),
@@ -164,7 +174,17 @@ function CommandPalette({
     }),
     // `go` only closes over `navigate`, which is stable
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [role, workspaceId, eventId, navigation, events, onSignOut, user, pinned],
+    [
+      role,
+      workspaceId,
+      eventId,
+      navigation,
+      events,
+      onSignOut,
+      user,
+      pinned,
+      recentViews,
+    ],
   );
 
   const options = useMemo(() => {
@@ -202,6 +222,21 @@ function CommandPalette({
             detail: command.shortcut,
             run: run(command),
           });
+    // the person's own latest actions, from the audit log; choosing one opens where it is kept
+    for (const action of recentActions) {
+      const label = actionWords(action.action);
+      if (text && !label.toLowerCase().includes(text.toLowerCase())) continue;
+      out.push({
+        id: `action-${action.public_id}`,
+        group: "Recent actions",
+        label,
+        detail: ago(action.created_at),
+        run: () => {
+          onClose();
+          go(navigation.target({ view: "operations" }));
+        },
+      });
+    }
     for (const group of search.groups)
       for (const hit of group.hits)
         out.push({
@@ -222,7 +257,16 @@ function CommandPalette({
         });
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [context, text, recent, search.groups, user, workspaceId, eventId]);
+  }, [
+    context,
+    text,
+    recent,
+    search.groups,
+    recentActions,
+    user,
+    workspaceId,
+    eventId,
+  ]);
 
   const at = Math.min(active, Math.max(0, options.length - 1));
   const keydown = (event: KeyboardEvent) => {

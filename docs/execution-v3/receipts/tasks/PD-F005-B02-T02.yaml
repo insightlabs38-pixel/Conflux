@@ -1,0 +1,93 @@
+version: 3
+task: PD-F005-B02-T02
+batch: PD-F005-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 96126ba
+  head_commit: null
+changed_paths:
+- src/api/audit/views.py
+- docs/api/openapi.yaml
+- sdks/python/conflux_sdk/generated.py
+- sdks/typescript/generated.ts
+- tests/integration/test_audit_recent_actions.py
+- src/web/hooks/useRecentActions.ts
+- src/web/hooks/useRecentActions.test.ts
+- src/web/hooks/usePinnedViewList.ts
+- src/web/lib/shellPreferences.ts
+- src/web/lib/shellPreferences.test.ts
+- src/web/lib/commands.ts
+- src/web/lib/commands.test.ts
+- src/web/lib/shellCommands.ts
+- src/web/components/CommandPalette.tsx
+- src/web/components/CommandPalette.test.tsx
+- src/web/components/ShortcutsHelp.tsx
+- src/web/components/ViewBar.tsx
+- docs/product-depth-v3/specs/005-professional-application-shell-depth.md
+- tests/e2e/recent-activity.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Recent organizer actions and recent objects as a complete workflow
+  result: pass
+  evidence: opening the palette shows the organizer's own latest eight audit actions in a Recent actions group (the action in words and how long ago), filtered by what is typed, and choosing one opens Operations and audit where the log is kept; the saved views the person opened lately (the view bar remembers each selection) are offered in a Recent views group, resolved against the server's lists so a deleted or hidden view is not shown, and a view that is pinned is shown once, under Pinned views. Events were already recents in the switcher. A record route does not exist, so a record cannot be a recent object yet.
+- item: Through the canonical service layer, with the server change stated
+  result: pass
+  evidence: the actions are rows of the existing audit log. The one server change is additive and read-only - GET /audit/{workspace}/ accepts mine (only the caller's actions) and limit (1 to 200, newest first), refuses a bad limit with a field error, keeps organizer and admin only, and answers exactly as before without them (tests/integration/test_audit_recent_actions.py, 4 tests). OpenAPI and both SDKs were regenerated and their checks pass. This reclassifies the api surface for this task, recorded in the spec's PD-F005-B02 canonical contract.
+- item: Authorization, states, keyboard, accessibility
+  result: pass
+  evidence: a role that may not read the log (a judge, a participant) asks nothing of it (unit and browser tests) and sees no group; the items are palette options with the keyboard behaviour of every command; the figure is relative time with the exact action text; nothing is written by the shell
+invariants:
+- item: The server stays authority; nothing personal stored
+  result: pass
+  evidence: recent views are three ids on the device, validated on read and write; the audit rows are read from the server each time and never stored; the endpoint's own rule limits the log to organizers and admins
+- item: No test weakened
+  result: pass
+  evidence: tests were added; the endpoint's existing behaviour is asserted unchanged without parameters
+verification:
+- command: pytest tests/integration/test_audit_recent_actions.py test_identity_authz.py test_feature_audit.py test_feature_rest.py test_feature_sdk.py -n 6
+  result: pass
+  note: 232 passed (env as in the Makefile); make openapi-check and make sdk-check pass after regeneration
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 144 files, 789 tests (useRecentActions 2, shellPreferences recent views 1, the palette 3 - actions listed, filtered and opened, nothing asked for a judge, recent views offered once)
+- command: scripts/e2e fixture run of recent-activity.spec.ts (create iso-min fixture, run, dispose; the runner's own with_fixture steps)
+  result: pass
+  note: 4 passed on an isolated fixture - a real track creation shows as the newest action with its age and opens Operations, typing narrows, a selected view becomes a recent view and is shown once when pinned, a participant sees no group and sends no audit request; at 1440 and 390
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: recent objects and actions reachable from the palette
+- ref: design/state-matrix
+  result: pass
+  note: no data state added; a failed read shows no group
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: reclassified by this task - additive mine and limit on the existing audit read, tested, OpenAPI and SDK regenerated and checked
+- surface: sdk
+  result: pass
+  evidence: generated clients regenerated for the two optional parameters
+- surface: audit
+  result: pass
+  evidence: the audit log is the source; nothing new is recorded
+- surface: docs
+  result: pass
+  evidence: spec contract now and release note at T91
+migrations: []
+findings:
+- P2 the workspace audit log endpoint had no way to bound or scope its answer (it returned every row); the new limit makes a bounded read possible, but other consumers still read all rows when they pass nothing.
+- P3 the grid's Registration and Projects sections are both mounted, so a finder must scope to the grid it means.
+escalations: []
+limitations:
+- A recent action opens Operations and audit, not the object it acted on; the audit rows carry a target type and id but no route exists for most targets.
+- Recent saved views follow the device, like the other shell preferences.
+next: review

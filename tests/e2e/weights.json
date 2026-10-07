@@ -43,6 +43,7 @@
   "read-only:showcase": 5.5,
   "read-only:signin": 2.2,
   "read-only:uiv2-gate": 11.3,
+  "read-only:slop-audit": 150,
   "read-only:uiv2-surfaces": 165,
   "read-only:url-state": 3.1,
   "read-only:visual-foundation": 5.6,

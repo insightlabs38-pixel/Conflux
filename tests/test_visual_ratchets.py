@@ -354,3 +354,13 @@ def test_server_rendered_pages_do_not_use_the_removed_badge_class():
     # the public templates kept `cx-badge` after the React Badge went; statuses were bare text
     for template in sorted((ROOT / "src/api").glob("**/templates/**/*.html")):
         assert "cx-badge" not in template.read_text(), str(template.relative_to(ROOT))
+
+
+def test_no_gradient_in_any_component_or_server_template():
+    # a gradient can also arrive as an inline style or a style string (V-SLOP-1); the live audit
+    # (tests/e2e/slop-audit.spec.ts) measures what is drawn, this keeps the sources clean
+    sources = [*web_sources(), *sorted((ROOT / "src/api").glob("**/templates/**/*.html"))]
+    for path in sources:
+        if path.name.endswith((".test.tsx", ".test.ts")):
+            continue
+        assert "gradient" not in path.read_text().lower(), str(path.relative_to(ROOT))

@@ -1,0 +1,66 @@
+version: 3
+task: PD-F004-B02-T91
+batch: PD-F004-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: cca7d26
+  head_commit: null
+changed_paths:
+- docs/verification/PD-F004-B02/SURFACES.md
+- docs/operations/UPGRADES.md
+- docs/operations/VISUAL_FOUNDATION.md
+- docs/product-depth-v3/specs/004-visual-direction-professional-clean-compact-deliberate.md
+deliverables:
+- item: Close the batch's explicit surface matrix
+  result: pass
+  evidence: SURFACES.md lists all twelve surfaces; web and docs required and done; api, sdk, cli, mcp, event_as_code,
+    audit, webhook, archive, analytics and search not_required, each with the reason (hero_size is a key inside
+    the existing theme_config, additive in the public payload)
+- item: Every required surface delegates to the same canonical operation and generated contracts stay synchronized
+  result: pass
+  evidence: the hero size is decided by server-validated theme_config (presentation/themes.py), read by both
+    public renderers; make openapi-check and make sdk-check clean
+- item: Documentation and migration notes for externally visible behavior
+  result: pass
+  evidence: UPGRADES.md (compact hero is the default for every event, Hero size control, hero_size in the
+    payload, statuses and states), VISUAL_FOUNDATION.md (disclosure, public hero), spec 004 "PD-F004-B02
+    canonical contract" (includes the hero vocabulary decision the B01 contract deferred)
+invariants:
+- item: One source of truth, server authority
+  result: pass
+  evidence: no client-side rule for hero size, role or eligibility
+- item: Progressive disclosure and design intent preserved
+  result: pass
+  evidence: immersive not offered; hero size is one select with compact preselected
+verification:
+- command: make openapi-check && make sdk-check
+  result: pass
+  note: clean
+- command: npx prettier --check docs
+  result: pass
+  note: clean
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-HERO-1, D-005, D-012 written into the contract
+- ref: design/state-matrix
+  result: pass
+  note: S-LOAD, S-EMPTY, S-ERR, S-DENY written into the contract
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: SURFACES.md
+- surface: docs
+  result: pass
+  evidence: SURFACES.md
+migrations: []
+findings: []
+escalations: []
+limitations:
+- The server sends no request reference for errors yet; ErrorState shows one when supplied (spec 004 contract).
+next: review

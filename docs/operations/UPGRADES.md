@@ -135,3 +135,13 @@ No migration, no new endpoint and no change to the OpenAPI document or either SD
 - **A destructive action asks first.** "Delete template" now shows a named confirmation instead of deleting at once; "Delete view" and "Decline" are neutral buttons, and the red filled button appears only as the final confirm.
 - **The public presentation payload keeps every existing key** (`--color-accent`, `--color-accent-strong`, ...) and adds the v3 names (`--accent`, `--accent-hover`, `--accent-ink`, `--accent-tint`, `--accent-line`); a client that applies the variables needs no change. The legacy `--color-*` CSS names are aliases to the v3 colour tokens for one release and are removed by the close of PD-F004-B05; custom CSS or embeds that read `--space-*`, `--radius-*`, `--font-size-*`, `--shadow-*` or `--control-height*` must move to `--sp-*`, `--r-*`, `--fs-*`, `--sh-*` and `--h-ctl*` (the values are the same, apart from the new scale: 3/5/8px radii, 11 to 32px type).
 - **Fonts**: IBM Plex Sans and Mono are named first, but no font files ship yet; hosts without them use the system font (open question logged for the owner).
+
+## Moving to a build with status, state and hero polish (PD-F004-B02)
+
+No database migration, no new endpoint and no change to either SDK; the build is stylesheets, React components and templates. What an operator or organizer will notice:
+
+- **The public hero is compact by default.** It is a short band (title, status, art or a small lettered lockup) with the description and one action beneath, at most 240px on desktop and 120px on a phone, instead of the large split, poster or editorial block. This applies to every event, including events whose theme was saved earlier (their stored theme has no hero size, which means compact). An organizer who wants more room chooses **Standard**, or **None** for a title and one action, under Event setup, Public page, Appearance, Hero size; the layout choice (split, poster, editorial) is separate and unchanged.
+- **Statuses read as icon plus word**, and ordinary labels are plain tags, not coloured chips.
+- **Loading shows the grid's header over placeholders; empty states say why and offer the next step; failed loads say whether anything changed and what Try again does** (a failed read changed nothing; a save that failed without a refusal says the change could not be confirmed, check before repeating it).
+- **Public presentation payload**: `presentation.hero_size` is added (`compact`, `none`, `standard`); clients that ignore it keep working. A saved theme containing any other value is refused with a 400 naming `hero_size`.
+- Advanced sections now share one disclosure look and borders are solid; no behavior or default open state changed.

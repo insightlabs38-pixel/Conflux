@@ -24,7 +24,14 @@ export function OperationStatus<T>({
 }) {
   if (state.status === "idle") return null;
   if (state.status === "failed")
-    return <ErrorState message={state.error} onRetry={onRetry} />;
+    return (
+      <ErrorState
+        message={state.error}
+        kept={state.kept}
+        retry={state.retry}
+        onRetry={onRetry}
+      />
+    );
   if (state.status === "pending") {
     const { progress } = state;
     const determinate =

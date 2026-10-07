@@ -45,7 +45,7 @@ export function PersonProfilePage({ personId }: { personId: string }) {
       />
       {loading && <LoadingState label="Loading profile…" />}
       {!loading && error && (
-        <ErrorState message={error} onRetry={reload} />
+        <ErrorState kind="read" message={error} onRetry={reload} />
       )}{" "}
       {!loading && !error && person && (
         <ProfileHeader person={person} headingAs="h2">

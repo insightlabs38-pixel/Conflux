@@ -2923,3 +2923,22 @@ html {
 .cx-state__next {
   margin-top: var(--sp-3);
 }
+
+/* Error (S-ERR): what happened, whether data was kept, what retry does, and a reference. */
+.cx-state__kept {
+  font-weight: var(--font-weight-medium);
+}
+.cx-state__retry {
+  margin: var(--sp-2) auto 0;
+  max-width: 48ch;
+  font-size: var(--fs-12);
+  color: var(--ink-2);
+}
+.cx-state__ref {
+  margin: var(--sp-2) 0 0;
+  font-size: var(--fs-12);
+  color: var(--ink-3);
+}
+.cx-state__ref code {
+  font-family: var(--font-mono);
+}

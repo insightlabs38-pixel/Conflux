@@ -53,7 +53,13 @@ export function VersionCompare({
   );
 
   if (list.error)
-    return <ErrorState message={list.error.message} onRetry={list.reload} />;
+    return (
+      <ErrorState
+        kind="read"
+        message={list.error.message}
+        onRetry={list.reload}
+      />
+    );
   if (!list.data) return <LoadingState label="Loading versions…" />;
   if (versions.length < 2) return <p>There is nothing to compare yet.</p>;
   return (
@@ -79,6 +85,7 @@ export function VersionCompare({
       </div>
       {comparison.error && (
         <ErrorState
+          kind="read"
           message={comparison.error.message}
           onRetry={comparison.reload}
         />

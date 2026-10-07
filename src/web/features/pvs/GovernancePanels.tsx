@@ -55,7 +55,11 @@ export function RulesPanel({
       <h3>Event rules</h3>
       {rules.loading && <LoadingState label="Loading rules…" />}
       {rules.error && (
-        <ErrorState message={rules.error.message} onRetry={rules.reload} />
+        <ErrorState
+          kind="read"
+          message={rules.error.message}
+          onRetry={rules.reload}
+        />
       )}
       {problem && <p role="alert">{problem}</p>}
       {rules.data && !rules.data.current && (
@@ -512,6 +516,7 @@ export function ExceptionRequestsPanel({
       {requests.loading && <LoadingState label="Loading requests…" />}
       {requests.error && (
         <ErrorState
+          kind="read"
           message={requests.error.message}
           onRetry={requests.reload}
         />
@@ -622,6 +627,7 @@ export function ProjectExceptionPanel({
       <h3>Deadline exception</h3>
       {requests.error && (
         <ErrorState
+          kind="read"
           message={requests.error.message}
           onRetry={requests.reload}
         />
@@ -695,7 +701,11 @@ export function SubmissionReceipt({
   if (receipt.loading) return <LoadingState label="Loading receipt…" />;
   if (receipt.error)
     return (
-      <ErrorState message={receipt.error.message} onRetry={receipt.reload} />
+      <ErrorState
+        kind="read"
+        message={receipt.error.message}
+        onRetry={receipt.reload}
+      />
     );
   if (!receipt.data) return null;
   const { token, claims, issued_at } = receipt.data;

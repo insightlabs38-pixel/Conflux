@@ -145,3 +145,33 @@ describe("accessibility baseline", () => {
     ).not.toContain("<h1");
   });
 });
+
+describe("DeniedState", () => {
+  it("states the denial and draws the server's explanation as sent, never one of its own", () => {
+    const plain = renderToStaticMarkup(<DeniedState />);
+    expect(plain).toContain("Access denied");
+    expect(plain).not.toContain("cx-explain");
+    const explained = renderToStaticMarkup(
+      <DeniedState
+        message="You cannot publish."
+        explanation={{
+          outcome: "blocked",
+          summary: "Two approvals are missing.",
+          reasons: [
+            {
+              code: "approvals",
+              severity: "blocker",
+              message: "Needs 2 of 3 approvers.",
+              fix: { destination: "results", section: null },
+            },
+          ],
+          total: 1,
+          truncated: false,
+        }}
+      />,
+    );
+    expect(explained).toContain("Two approvals are missing.");
+    expect(explained).toContain("Needs 2 of 3 approvers.");
+    expect(explained).toContain("Resolve in");
+  });
+});

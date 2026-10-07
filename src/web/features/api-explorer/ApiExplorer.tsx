@@ -141,6 +141,7 @@ export default function ApiExplorer() {
         </header>
         {loadError ? (
           <ErrorState
+            kind="read"
             message={loadError}
             onRetry={() => setRetry((count) => count + 1)}
           />

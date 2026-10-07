@@ -144,6 +144,7 @@ export function ProfilePanel({ workspaceId }: { workspaceId?: string }) {
   if (!profile || !draft)
     return (
       <ErrorState
+        kind="read"
         message={error || "Could not load profile."}
         onRetry={() => setRetry((value) => value + 1)}
       />

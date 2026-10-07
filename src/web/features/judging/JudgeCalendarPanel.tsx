@@ -50,7 +50,7 @@ export function JudgeCalendarPanel({
 
   return (
     <Card title="My judging calendar" as="h3">
-      {error && <ErrorState message={error} onRetry={load} />}
+      {error && <ErrorState kind="read" message={error} onRetry={load} />}
       {!error && calendar === null && (
         <LoadingState label="Loading your judging calendar…" />
       )}

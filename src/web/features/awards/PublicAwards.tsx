@@ -15,7 +15,8 @@ export function PublicAwards({ eventId }: { eventId: string }) {
     { describe: (status) => `Could not load awards (${status}).` },
   );
   const awards = Array.isArray(data) ? data : [];
-  if (error) return <ErrorState message={error.message} onRetry={reload} />;
+  if (error)
+    return <ErrorState kind="read" message={error.message} onRetry={reload} />;
   if (awards.length === 0) return null;
   return (
     <section aria-label="Awards">

@@ -82,7 +82,11 @@ export function CompletenessPanel({ workspaceId }: { workspaceId: string }) {
         setting.
       </p>
       {load.error && (
-        <ErrorState message={load.error.message} onRetry={load.reload} />
+        <ErrorState
+          kind="read"
+          message={load.error.message}
+          onRetry={load.reload}
+        />
       )}
       {!load.error && !data && <LoadingState label="Loading completeness…" />}
       {data && (

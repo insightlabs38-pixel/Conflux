@@ -381,3 +381,40 @@ for (const width of [390, 1440]) {
     await expect(panel.locator("tbody tr").first()).toBeVisible();
   });
 }
+
+// S-ERR: a failed read says what happened, that nothing was changed, and what Try again does; the
+// retry then loads the data. Read-only: the list request is answered with a server error once.
+for (const width of [390, 1440]) {
+  test(`a failed grid load says nothing was changed and recovers on retry at ${width}`, async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+    await page.setViewportSize({ width, height: 900 });
+    await signIn(page, "organizer");
+    await openWorkspace(page);
+    const { workspace, event } = await eventIds(page);
+    let fail = true;
+    await page.route("**/entities/applications/**", async (route) => {
+      if (fail)
+        await route.fulfill({
+          status: 500,
+          json: { detail: "The list could not be loaded." },
+        });
+      else await route.continue();
+    });
+    await page.goto(`/app/w/${workspace}/participants?event=${event}`);
+    await goToTask(page, "Registration");
+    const panel = page.locator('[data-entity="applications"]');
+    const alert = panel.getByRole("alert");
+    await expect(alert).toContainText("The list could not be loaded.");
+    await expect(alert).toContainText("Nothing was changed.");
+    const retry = alert.getByRole("button", { name: "Try again" });
+    await expect(retry).toHaveAccessibleDescription(/loads it again/);
+    await accessible(page);
+    await noHorizontalOverflow(page);
+    fail = false;
+    await retry.click();
+    await expect(alert).toHaveCount(0);
+    await expect(panel.locator("tbody tr").first()).toBeVisible();
+  });
+}

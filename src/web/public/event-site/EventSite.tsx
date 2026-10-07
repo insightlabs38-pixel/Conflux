@@ -105,7 +105,9 @@ export function EventSite({ eventId }: { eventId: string }) {
         }
       >
         {loading && <LoadingState label="Loading event…" />}
-        {!loading && error && <ErrorState message={error} onRetry={load} />}
+        {!loading && error && (
+          <ErrorState kind="read" message={error} onRetry={load} />
+        )}
         {!loading && !error && event && (
           <article aria-label={`${event.name} event page`}>
             <section

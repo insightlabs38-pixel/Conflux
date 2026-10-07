@@ -155,6 +155,7 @@ export function ProjectMentorshipPanel({
       {requests.loading && <LoadingState label="Loading your requests…" />}
       {requests.error && (
         <ErrorState
+          kind="read"
           message={requests.error.message}
           onRetry={requests.reload}
         />
@@ -191,7 +192,11 @@ export function ProjectMentorshipPanel({
       )}
       <h4>Office hours</h4>
       {slots.error && (
-        <ErrorState message={slots.error.message} onRetry={slots.reload} />
+        <ErrorState
+          kind="read"
+          message={slots.error.message}
+          onRetry={slots.reload}
+        />
       )}
       {slots.data && (
         <SlotList slots={slots.data}>
@@ -331,7 +336,11 @@ export function MentorDeskPanel({
       <h4>Help requests</h4>
       {queue.loading && <LoadingState label="Loading the queue…" />}
       {queue.error && (
-        <ErrorState message={queue.error.message} onRetry={queue.reload} />
+        <ErrorState
+          kind="read"
+          message={queue.error.message}
+          onRetry={queue.reload}
+        />
       )}
       {queue.data && queue.data.length === 0 && (
         <EmptyState

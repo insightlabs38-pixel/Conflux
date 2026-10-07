@@ -152,6 +152,7 @@ function WorkspaceRoute() {
           <SignIn onSignedIn={sessionChanged} />
         ) : roleState === "error" ? (
           <ErrorState
+            kind="read"
             message="Could not check workspace access."
             onRetry={() => void me.refetch()}
           />

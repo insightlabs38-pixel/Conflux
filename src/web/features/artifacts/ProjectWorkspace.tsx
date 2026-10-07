@@ -98,7 +98,7 @@ export function ProjectWorkspace({
     return (
       <section aria-label="My projects">
         <h2>My projects</h2>
-        <ErrorState message={error} onRetry={retry} />
+        <ErrorState kind="read" message={error} onRetry={retry} />
       </section>
     );
 

@@ -69,6 +69,7 @@ export function TeamWorkspace({ workspaceId }: { workspaceId: string }) {
       {loading && <LoadingState label="Loading events…" />}
       {error && (
         <ErrorState
+          kind="read"
           message={error}
           onRetry={() => void eventsQuery.refetch()}
         />

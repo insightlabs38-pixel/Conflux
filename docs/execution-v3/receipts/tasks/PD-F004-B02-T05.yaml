@@ -1,0 +1,94 @@
+version: 3
+task: PD-F004-B02-T05
+batch: PD-F004-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: bd8aa52
+  head_commit: null
+changed_paths:
+- src/web/lib/failure.ts
+- src/web/lib/failure.test.ts
+- src/web/components/ErrorState.tsx
+- src/web/components/ErrorState.test.tsx
+- src/web/components/DeniedState.tsx
+- src/web/components/components.test.tsx
+- src/web/hooks/useOperation.ts
+- src/web/hooks/useOperation.test.tsx
+- src/web/components/OperationStatus.tsx
+- src/web/components/OperationStatus.test.tsx
+- 54 read-failure call sites (kind="read")
+- src/web/styles/components.css
+- tests/test_visual_ratchets.py
+- tests/e2e/visual-foundation.spec.ts
+deliverables:
+- item: Error states explain whether data was preserved and what can be retried
+  result: pass
+  evidence: 'lib/failure.ts states what is known and no more: a failed read changed nothing; a write the
+    server refused (4xx) was not saved; a write that failed without a refusal (5xx, dropped connection)
+    says ''We could not confirm whether the change was saved. Check before repeating it.'' ErrorState
+    shows the data statement, a Try again button whose aria-describedby names what it will do, and a reference
+    when the server supplies one. 54 load-failure call sites are kind="read"; OperationStatus (writes,
+    via useOperation) carries kept and retry from describeFailure; a ratchet fails any ErrorState with
+    onRetry that states neither'
+- item: Reuse POLICY_EXPLAIN
+  result: pass
+  evidence: DeniedState accepts the server's Explanation and draws it with ExplanationView (outcome, reasons,
+    where to resolve) and never composes a reason of its own
+invariants:
+- item: Server authority; nothing reassures without a basis
+  result: pass
+  evidence: no ATOMIC_REQUESTS in the project, so a server error is NOT described as 'nothing saved';
+    tests assert a 500, a network error and a string failure do not claim the data is safe
+- item: Writes are never retried automatically
+  result: pass
+  evidence: useOperation unchanged in that respect; its test still shows one call until the user retries
+- item: Accessibility preserved
+  result: pass
+  evidence: role=alert kept, retry described by its note, axe passed on the failed grid at 390 and 1440
+- item: No test weakened
+  result: pass
+  evidence: useOperation and OperationStatus tests assert the new failed-state fields; toEqual became
+    toMatchObject only because the state gained two fields, with the new fields asserted separately
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 676 passed (new failure, ErrorState and DeniedState tests)
+- command: uv run --frozen pytest tests/test_visual_ratchets.py -q
+  result: pass
+  note: 22 passed
+- command: docker compose up -d --build app; npx playwright test -c tests/e2e/playwright.config.ts visual-foundation
+    uiv2-gate --project=desktop
+  result: pass
+  note: 25 passed including a held-then-failed-then-recovered applications grid at 390 and 1440
+design_refs:
+- ref: design/state-matrix
+  result: pass
+  note: S-ERR (whether data was kept, what retry does, a reference, partial success names the parts)
+- ref: design/system-v3
+  result: pass
+  note: V-COLOR-2 icon plus word
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: failure helper, ErrorState, DeniedState, OperationStatus
+- surface: docs
+  result: pass
+  evidence: contract in spec 004
+migrations: []
+findings:
+- 'P2-gap the server sends no request or error reference (no X-Request-ID is emitted anywhere in src/api),
+  so the mono reference of the design cannot be real yet; ErrorState supports `reference` and shows nothing
+  until the API provides one. Follow-up: a request-id middleware plus ApiError capture, owned by the API/observability
+  work, not invented here.'
+- P3 partial success naming the parts (the design's '231 sent, 12 failed') is the bulk-job result of BULK_PLAN,
+  which already reports applied and skipped counts; no change here.
+escalations: []
+limitations:
+- Write failures outside useOperation (hand-rolled try/catch in feature panels) still show their message
+  without the data statement; the ratchet covers ErrorState with a retry, not every inline error text.
+next: review

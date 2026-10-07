@@ -88,7 +88,11 @@ export function TimelinePanel({
         <LoadingState label="Loading the timeline…" />
       )}
       {shown.error && (
-        <ErrorState message={shown.error.message} onRetry={shown.reload} />
+        <ErrorState
+          kind="read"
+          message={shown.error.message}
+          onRetry={shown.reload}
+        />
       )}
       {timeline && (
         <>

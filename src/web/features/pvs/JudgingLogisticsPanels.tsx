@@ -115,7 +115,11 @@ export function JudgeAssignmentsPanel({ planBase }: { planBase: string }) {
       </p>
       {rows.loading && <LoadingState label="Loading assignments…" />}
       {rows.error && (
-        <ErrorState message={rows.error.message} onRetry={rows.reload} />
+        <ErrorState
+          kind="read"
+          message={rows.error.message}
+          onRetry={rows.reload}
+        />
       )}
       {problem && <p role="alert">{problem}</p>}
       {rows.data && rows.data.length === 0 && (
@@ -190,7 +194,11 @@ export function JudgeRoutePanel({ planBase }: { planBase: string }) {
       <h3>Your judging route</h3>
       {route.loading && <LoadingState label="Loading your route…" />}
       {route.error && (
-        <ErrorState message={route.error.message} onRetry={route.reload} />
+        <ErrorState
+          kind="read"
+          message={route.error.message}
+          onRetry={route.reload}
+        />
       )}
       {route.data && (
         <>
@@ -383,7 +391,11 @@ export function OrganizerJudgingLogisticsPanel({
       )}
       {routes.loading && <LoadingState label="Loading routes…" />}
       {routes.error && (
-        <ErrorState message={routes.error.message} onRetry={routes.reload} />
+        <ErrorState
+          kind="read"
+          message={routes.error.message}
+          onRetry={routes.reload}
+        />
       )}
       {routes.data && routes.data.judges.length === 0 && (
         <EmptyState
@@ -561,6 +573,7 @@ export function ArtifactInspector({
         {artifacts.loading && <LoadingState label="Loading artifacts…" />}
         {artifacts.error && artifacts.error.status !== 404 && (
           <ErrorState
+            kind="read"
             message={artifacts.error.message}
             onRetry={artifacts.reload}
           />

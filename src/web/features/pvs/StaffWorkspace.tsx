@@ -43,7 +43,11 @@ export function StaffWorkspace({
       <Destination id="overview">
         {events.loading && <LoadingState label="Loading events…" />}
         {events.error && (
-          <ErrorState message={events.error.message} onRetry={events.reload} />
+          <ErrorState
+            kind="read"
+            message={events.error.message}
+            onRetry={events.reload}
+          />
         )}
         {events.data && events.data.length === 0 && (
           <EmptyState

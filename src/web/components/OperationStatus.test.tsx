@@ -74,7 +74,12 @@ describe("OperationStatus", () => {
     const onRetry = vi.fn();
     const container = render(
       <OperationStatus
-        state={{ status: "failed", error: "Upload failed (403)." }}
+        state={{
+          status: "failed",
+          error: "Upload failed (403).",
+          kept: "The server refused the change, so nothing was saved.",
+          retry: "Try again sends the same change.",
+        }}
         onRetry={onRetry}
       />,
     );

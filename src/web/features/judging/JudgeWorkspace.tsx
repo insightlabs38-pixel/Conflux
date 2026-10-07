@@ -548,7 +548,8 @@ function PlanQueue({
   }, [base, owner]);
 
   if (loading) return <LoadingState label="Loading your review queue…" />;
-  if (error) return <ErrorState message={error} onRetry={refresh} />;
+  if (error)
+    return <ErrorState kind="read" message={error} onRetry={refresh} />;
   if (!rubric)
     return (
       <EmptyState

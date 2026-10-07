@@ -47,7 +47,13 @@ export function ThreadPanel({ subject }: { subject: Subject }) {
   }
 
   if (load.error)
-    return <ErrorState message={load.error.message} onRetry={load.reload} />;
+    return (
+      <ErrorState
+        kind="read"
+        message={load.error.message}
+        onRetry={load.reload}
+      />
+    );
   if (!thread) return <LoadingState label="Loading notes…" />;
   const people = knownPeople(thread);
 

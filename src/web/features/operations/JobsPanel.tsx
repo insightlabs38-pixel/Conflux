@@ -193,7 +193,11 @@ export function JobsPanel({
       {problem && <p role="alert">{problem}</p>}
       {jobs.loading && !jobs.data && <LoadingState label="Loading jobs…" />}
       {jobs.error && (
-        <ErrorState message={jobs.error.message} onRetry={jobs.reload} />
+        <ErrorState
+          kind="read"
+          message={jobs.error.message}
+          onRetry={jobs.reload}
+        />
       )}
       {jobs.data && rows.length === 0 && (
         <EmptyState

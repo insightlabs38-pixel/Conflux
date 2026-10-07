@@ -112,7 +112,9 @@ export function CommunityVoting({ eventId }: { eventId: string }) {
   if (statusState === "loading")
     return <LoadingState label="Loading voting…" />;
   if (statusState === "error")
-    return <ErrorState message={error} onRetry={statusLoad.reload} />;
+    return (
+      <ErrorState kind="read" message={error} onRetry={statusLoad.reload} />
+    );
   if (!status) return null;
 
   return (

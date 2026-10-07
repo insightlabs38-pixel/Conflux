@@ -48,7 +48,13 @@ export function NotificationPreferences({
   }
 
   if (load.error)
-    return <ErrorState message={load.error.message} onRetry={load.reload} />;
+    return (
+      <ErrorState
+        kind="read"
+        message={load.error.message}
+        onRetry={load.reload}
+      />
+    );
   if (!load.data) return <LoadingState label="Loading notification choices…" />;
   return (
     <section aria-label="Notification preferences" className="cx-notifications">

@@ -30,6 +30,7 @@ export function PortfolioPanel({ workspaceId }: { workspaceId: string }) {
       {portfolio.loading && <LoadingState label="Loading your portfolio…" />}
       {portfolio.error && (
         <ErrorState
+          kind="read"
           message={portfolio.error.message}
           onRetry={portfolio.reload}
         />
@@ -168,7 +169,11 @@ export function ProjectContinuationPanel({
       )}
       {item.loading && <LoadingState label="Loading…" />}
       {item.error && !missing && (
-        <ErrorState message={item.error.message} onRetry={item.reload} />
+        <ErrorState
+          kind="read"
+          message={item.error.message}
+          onRetry={item.reload}
+        />
       )}
       {problem && <p role="alert">{problem}</p>}
       {status && <p role="status">{status}</p>}
@@ -301,7 +306,11 @@ export function ContinuationsAdminPanel({
       <h3>Post-event continuation</h3>
       {items.loading && <LoadingState label="Loading continuation listings…" />}
       {items.error && (
-        <ErrorState message={items.error.message} onRetry={items.reload} />
+        <ErrorState
+          kind="read"
+          message={items.error.message}
+          onRetry={items.reload}
+        />
       )}
       {problem && <p role="alert">{problem}</p>}
       {items.data && items.data.length === 0 && (
@@ -391,6 +400,7 @@ export function ChallengesPanel({
   if (challenges.error)
     return (
       <ErrorState
+        kind="read"
         message={challenges.error.message}
         onRetry={challenges.reload}
       />

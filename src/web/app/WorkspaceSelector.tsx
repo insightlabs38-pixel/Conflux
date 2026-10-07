@@ -52,7 +52,8 @@ export function WorkspaceSelector({
   if (state === "loading")
     return <LoadingState label="Loading your workspaces…" />;
   if (state === "signed-out") return <SignIn onSignedIn={sessionChanged} />;
-  if (state === "error") return <ErrorState message={error} onRetry={reload} />;
+  if (state === "error")
+    return <ErrorState kind="read" message={error} onRetry={reload} />;
   if (workspaces.length === 0)
     return (
       <EmptyState

@@ -74,6 +74,7 @@ export function FormPreviewAs({
   if (!last)
     return state.kind === "error" ? (
       <ErrorState
+        kind="read"
         message={state.message}
         onRetry={() => setAttempt((n) => n + 1)}
       />

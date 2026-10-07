@@ -137,7 +137,9 @@ export function ProjectEligibilityPanel({
         response. The organizers then decide whether to resolve or waive it.
       </p>
       {loading && <LoadingState label="Loading eligibility review…" />}
-      {error && <ErrorState message={error.message} onRetry={reload} />}
+      {error && (
+        <ErrorState kind="read" message={error.message} onRetry={reload} />
+      )}
       {problem && <p role="alert">{problem}</p>}
       {review && (
         <>
@@ -229,7 +231,8 @@ function ReviewDetail({
   }
 
   if (loading) return <LoadingState label="Loading review…" />;
-  if (error) return <ErrorState message={error.message} onRetry={reload} />;
+  if (error)
+    return <ErrorState kind="read" message={error.message} onRetry={reload} />;
   if (!review) return null;
   return (
     <Card title="Review detail" as="h4">
@@ -398,7 +401,11 @@ export function EligibilityReviewPanel({
       </div>
       {reviews.loading && <LoadingState label="Loading reviews…" />}
       {reviews.error && (
-        <ErrorState message={reviews.error.message} onRetry={reviews.reload} />
+        <ErrorState
+          kind="read"
+          message={reviews.error.message}
+          onRetry={reviews.reload}
+        />
       )}
       {reviews.data && all.length === 0 && (
         <EmptyState

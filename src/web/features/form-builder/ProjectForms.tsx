@@ -223,6 +223,7 @@ function ProjectForm({
         <p role="status">Loading answers…</p>
       ) : !loaded ? (
         <ErrorState
+          kind="read"
           message={error}
           onRetry={() => setRetry((count) => count + 1)}
         />

@@ -320,3 +320,19 @@ def test_every_empty_state_says_why_and_none_is_a_bare_headline():
         for match in re.finditer(r"<EmptyState\b(.*?)(?:/>|>)", text, re.S):
             opening = match.group(1)
             assert re.search(r"\bwhy=", opening), (str(path.relative_to(WEB)), opening[:80])
+
+
+# Not a plain failed load: the error boundary renders a crash, and the config history panel merges its
+# load and restore errors into one message.
+ERROR_STATE_EXEMPT = {"features/pvs/Guarded.tsx", "features/audit/ConfigHistoryPanel.tsx"}
+
+
+def test_every_error_state_with_a_retry_says_what_failed_and_what_retry_does():
+    for path in web_sources():
+        rel = str(path.relative_to(WEB))
+        if ".test." in path.name or rel in ERROR_STATE_EXEMPT or path.name == "ErrorState.tsx":
+            continue
+        for match in re.finditer(r"<ErrorState\b(.*?)/>", path.read_text(), re.S):
+            opening = match.group(1)
+            if "onRetry" in opening:
+                assert re.search(r'kind="read"|\bkept=', opening), (rel, opening[:90])

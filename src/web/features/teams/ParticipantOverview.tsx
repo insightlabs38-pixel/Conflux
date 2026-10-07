@@ -87,6 +87,7 @@ export function ParticipantOverview({
   if (error)
     return (
       <ErrorState
+        kind="read"
         message={error}
         onRetry={() => setRetry((count) => count + 1)}
       />

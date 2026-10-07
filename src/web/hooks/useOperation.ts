@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { describeFailure } from "../lib/failure";
 
 /**
  * The async-operation contract (PD-B04-T05) for anything a user starts that is not an immediate
@@ -28,7 +29,7 @@ export type OperationState<T> =
   | { status: "idle" }
   | { status: "pending"; progress: Progress | null; cancellable: boolean }
   | { status: "success"; result: T }
-  | { status: "failed"; error: string }
+  | { status: "failed"; error: string; kept: string; retry: string }
   | { status: "cancelled" };
 
 export type OperationContext = {
@@ -103,7 +104,11 @@ export function useOperation<A, T>(
     } catch (error) {
       if (!live()) return false;
       pending.current = false;
-      setState({ status: "failed", error: messageOf(error) });
+      setState({
+        status: "failed",
+        error: messageOf(error),
+        ...describeFailure(error, "write"),
+      });
       return false;
     }
   }, []);

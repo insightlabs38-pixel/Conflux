@@ -82,7 +82,12 @@ describe("useOperation", () => {
     mount(d.run);
     act(() => void op.start("args-1"));
     await act(async () => d.calls[0].reject(new Error("Disk full.")));
-    expect(op.state).toEqual({ status: "failed", error: "Disk full." });
+    expect(op.state).toMatchObject({ status: "failed", error: "Disk full." });
+    // a failure with no refusal from the server does not claim the data is safe
+    expect(op.state).toHaveProperty(
+      "kept",
+      expect.stringContaining("could not confirm"),
+    );
     expect(d.calls).toHaveLength(1); // never retried by itself
     act(() => void op.retry());
     expect(d.calls).toHaveLength(2);
@@ -96,7 +101,7 @@ describe("useOperation", () => {
     mount(d.run);
     act(() => void op.start("a"));
     await act(async () => d.calls[0].reject(undefined));
-    expect(op.state).toEqual({
+    expect(op.state).toMatchObject({
       status: "failed",
       error: "The operation failed.",
     });

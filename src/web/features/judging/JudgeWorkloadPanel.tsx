@@ -32,7 +32,7 @@ export function JudgeWorkloadPanel({
 
   return (
     <Card title="Judge workload">
-      {error && <ErrorState message={error} onRetry={load} />}
+      {error && <ErrorState kind="read" message={error} onRetry={load} />}
       {!error && rows === null && (
         <LoadingState label="Loading judge workload…" />
       )}

@@ -166,7 +166,11 @@ export function OnsiteOperationsPanel({
       {status && <p role="status">{status}</p>}
       {summary.loading && <LoadingState label="Loading on-site summary…" />}
       {summary.error && (
-        <ErrorState message={summary.error.message} onRetry={summary.reload} />
+        <ErrorState
+          kind="read"
+          message={summary.error.message}
+          onRetry={summary.reload}
+        />
       )}
       {summary.data && (
         <>
@@ -463,7 +467,11 @@ export function MyOnsitePanel({
       <h3>Attending</h3>
       {mine.loading && <LoadingState label="Loading your RSVP…" />}
       {mine.error && (
-        <ErrorState message={mine.error.message} onRetry={mine.reload} />
+        <ErrorState
+          kind="read"
+          message={mine.error.message}
+          onRetry={mine.reload}
+        />
       )}
       {problem && <p role="alert">{problem}</p>}
       {mine.data && (

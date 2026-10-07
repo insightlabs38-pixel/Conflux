@@ -73,6 +73,7 @@ export function JudgeSummary({ planBase }: { planBase: string }) {
   if (candidates.error)
     return (
       <ErrorState
+        kind="read"
         message={candidates.error.message}
         onRetry={candidates.reload}
       />

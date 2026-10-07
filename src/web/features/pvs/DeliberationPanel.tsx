@@ -384,7 +384,11 @@ export function DeliberationPanel({
       <>
         {awards.loading && <LoadingState label="Loading awards…" />}
         {awards.error && (
-          <ErrorState message={awards.error.message} onRetry={awards.reload} />
+          <ErrorState
+            kind="read"
+            message={awards.error.message}
+            onRetry={awards.reload}
+          />
         )}
         {awards.data && awards.data.length === 0 && (
           <EmptyState
@@ -465,7 +469,11 @@ export function DeliberationPanel({
         </form>
       )}
       {room.error && room.error.status !== 404 && (
-        <ErrorState message={room.error.message} onRetry={room.reload} />
+        <ErrorState
+          kind="read"
+          message={room.error.message}
+          onRetry={room.reload}
+        />
       )}
       {data && (
         <Card title="Deliberation room" as="h4">

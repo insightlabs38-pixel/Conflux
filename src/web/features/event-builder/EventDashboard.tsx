@@ -279,7 +279,11 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
       {error && <p role="alert">{error}</p>}
       {loadingEvents && <LoadingState label="Loading events…" />}
       {loadError && (
-        <ErrorState message={loadError} onRetry={eventsLoad.reload} />
+        <ErrorState
+          kind="read"
+          message={loadError}
+          onRetry={eventsLoad.reload}
+        />
       )}
       <Destination id="setup">
         <details className="cx-create-event" open={events.length === 0}>

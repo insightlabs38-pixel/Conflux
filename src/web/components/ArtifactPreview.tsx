@@ -165,7 +165,13 @@ export function PreviewLoader({
     absent: [404],
   });
   if (load.error)
-    return <ErrorState message={load.error.message} onRetry={load.reload} />;
+    return (
+      <ErrorState
+        kind="read"
+        message={load.error.message}
+        onRetry={load.reload}
+      />
+    );
   if (load.loading && !load.data)
     return <LoadingState label="Loading preview…" />;
   if (!load.data)

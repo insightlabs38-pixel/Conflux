@@ -29,7 +29,11 @@ export function ExtensionsPanel({ workspaceId }: { workspaceId: string }) {
         declarations match what is registered.
       </p>
       {load.error && (
-        <ErrorState message={load.error.message} onRetry={load.reload} />
+        <ErrorState
+          kind="read"
+          message={load.error.message}
+          onRetry={load.reload}
+        />
       )}
       {!load.error && !data && <LoadingState label="Loading extensions…" />}
       {data && (

@@ -76,7 +76,11 @@ export function ApprovalsPanel({
     <Card title="Approvals">
       <h4>Operations that need a second person</h4>
       {gates.error && (
-        <ErrorState message={gates.error.message} onRetry={gates.reload} />
+        <ErrorState
+          kind="read"
+          message={gates.error.message}
+          onRetry={gates.reload}
+        />
       )}
       {gates.loading && !gates.data && <LoadingState label="Loading…" />}
       <ul className="cx-plain-list">
@@ -125,7 +129,11 @@ export function ApprovalsPanel({
       {problem && <p role="alert">{problem}</p>}
       {list.loading && !list.data && <LoadingState label="Loading requests…" />}
       {list.error && (
-        <ErrorState message={list.error.message} onRetry={list.reload} />
+        <ErrorState
+          kind="read"
+          message={list.error.message}
+          onRetry={list.reload}
+        />
       )}
       {list.data && list.data.length === 0 && (
         <EmptyState

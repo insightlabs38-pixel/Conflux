@@ -35,7 +35,9 @@ export function FrozenSubmissionPreview({
         outside this preview.
       </p>
       {loading && <LoadingState label="Loading frozen evidence…" />}
-      {error && <ErrorState message={error.message} onRetry={reload} />}
+      {error && (
+        <ErrorState kind="read" message={error.message} onRetry={reload} />
+      )}
       {data && Array.isArray(data.artifacts) && (
         <>
           <p>

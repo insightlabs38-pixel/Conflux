@@ -99,7 +99,13 @@ export function DataGrid<Row extends { id: string }>({
     );
   if (status.kind === "denied") return <DeniedState message={status.message} />;
   if (status.kind === "error")
-    return <ErrorState message={status.message} onRetry={status.onRetry} />;
+    return (
+      <ErrorState
+        kind="read"
+        message={status.message}
+        onRetry={status.onRetry}
+      />
+    );
 
   if (rows.length === 0)
     return filtered ? (

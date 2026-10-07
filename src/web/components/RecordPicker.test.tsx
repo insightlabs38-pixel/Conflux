@@ -3,13 +3,26 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, expect, it, vi } from "vitest";
 import { withQuery } from "../lib/test-router";
-import { RecordPicker } from "./RecordPicker";
+import {
+  RecordPicker,
+  entitySource,
+  participantSource,
+  type PickerSource,
+} from "./RecordPicker";
 
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
 ).IS_REACT_ACT_ENVIRONMENT = true;
 
-async function mount(rows: unknown[], total = rows.length) {
+async function mount(
+  rows: unknown[],
+  total = rows.length,
+  source: PickerSource = entitySource("/e/", "projects", "team", "team_id"),
+  shape: (rows: unknown[], total: number) => unknown = (r, t) => ({
+    total: t,
+    rows: r,
+  }),
+) {
   const urls: string[] = [];
   vi.stubGlobal(
     "fetch",
@@ -18,13 +31,7 @@ async function mount(rows: unknown[], total = rows.length) {
       return {
         ok: true,
         status: 200,
-        json: async () => ({
-          entity: "teams",
-          total,
-          limit: 100,
-          offset: 0,
-          rows,
-        }),
+        json: async () => shape(rows, total),
       };
     }),
   );
@@ -36,9 +43,7 @@ async function mount(rows: unknown[], total = rows.length) {
     root.render(
       withQuery(
         <RecordPicker
-          base="/api/v1/workspaces/w/events/e/entities/"
-          entity="teams"
-          field="name"
+          source={source}
           label="Team"
           noun="team"
           value=""
@@ -55,9 +60,11 @@ async function mount(rows: unknown[], total = rows.length) {
 
 describe("record picker", () => {
   it("lists records by name and reports the chosen id", async () => {
+    // a team is found through its project: the project row's own id is not the team's
     const { container, chosen, urls, root } = await mount([
-      { id: "t-1", name: "Alpha" },
-      { id: "t-2", name: "Beta" },
+      { id: "p-1", team: "Alpha", team_id: "t-1" },
+      { id: "p-2", team: "Beta", team_id: "t-2" },
+      { id: "p-3", team: "Beta", team_id: "t-2" },
     ]);
     const select = container.querySelector("select")!;
     expect([...select.options].map((o) => o.textContent)).toEqual([
@@ -65,8 +72,10 @@ describe("record picker", () => {
       "Alpha",
       "Beta",
     ]);
-    expect(container.textContent).not.toContain("t-1");
-    expect(urls[0]).toContain("/entities/teams/");
+    expect(container.textContent).not.toContain("t-1"); // beta listed once
+    expect(container.textContent).not.toContain("p-1");
+    expect(urls[0]).toContain("/e/projects/");
+    expect(decodeURIComponent(urls[0])).toContain("columns=team,team_id");
     await act(async () => {
       select.value = "t-2";
       select.dispatchEvent(new Event("change", { bubbles: true }));
@@ -82,12 +91,40 @@ describe("record picker", () => {
     expect(empty.container.textContent).toContain("No team matches.");
     await act(async () => empty.root.unmount());
     empty.container.remove();
-    const long = await mount([{ id: "t-1", name: "Alpha" }], 250);
+    const long = await mount(
+      [{ id: "p-1", team: "Alpha", team_id: "t-1" }],
+      250,
+    );
     expect(long.container.textContent).toContain(
       "Showing 1 of 250; type to narrow.",
     );
     await act(async () => long.root.unmount());
     long.container.remove();
+    vi.unstubAllGlobals();
+  });
+
+  it("lists the workspace's participants by username and sends what was typed", async () => {
+    const { container, chosen, urls, root } = await mount(
+      [{ user: "u-1", username: "ada" }],
+      1,
+      participantSource("w"),
+      (rows, total) => ({ total, results: rows }),
+    );
+    const select = container.querySelector("select")!;
+    expect([...select.options].map((o) => o.textContent)).toEqual([
+      "Choose a team…",
+      "ada",
+    ]);
+    expect(urls[0]).toBe(
+      "/api/v1/workspaces/w/portfolio/participants/?limit=100",
+    );
+    await act(async () => {
+      select.value = "u-1";
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    expect(chosen).toEqual(["u-1"]);
+    await act(async () => root.unmount());
+    container.remove();
     vi.unstubAllGlobals();
   });
 });

@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { ExplanationView } from "../../components/ExplanationView";
-import { RecordPicker } from "../../components/RecordPicker";
+import { RecordPicker, entitySource } from "../../components/RecordPicker";
 import { entityBase } from "../../lib/entityQuery";
 import { apiJson } from "../../lib/api";
 import type { Explanation } from "../../lib/explain";
@@ -400,9 +400,20 @@ export function PolicyBuilder({
         {(debugAction === "submit" || debugAction === "join") && (
           <RecordPicker
             key={debugAction}
-            base={entityBase(workspaceId, eventId)}
-            entity={debugAction === "submit" ? "projects" : "teams"}
-            field="name"
+            source={
+              debugAction === "submit"
+                ? entitySource(
+                    entityBase(workspaceId, eventId),
+                    "projects",
+                    "name",
+                  )
+                : entitySource(
+                    entityBase(workspaceId, eventId),
+                    "projects",
+                    "team",
+                    "team_id",
+                  )
+            }
             label={`${debugAction === "submit" ? "Project" : "Team"} for grant check`}
             noun={debugAction === "submit" ? "project" : "team"}
             value={debugSubjectId}

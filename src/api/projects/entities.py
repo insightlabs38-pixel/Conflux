@@ -26,6 +26,16 @@ entities.register(
             ),
             entities.Field("track", entities.TEXT, "track__name", "Track"),
             entities.Field("team", entities.TEXT, "team__name", "Team"),
+            # lets a screen choose a team by its name without showing or asking for its id
+            entities.Field(
+                "team_id",
+                entities.UUID,
+                "team__public_id",
+                "Team reference",
+                default=False,
+                sortable=False,
+                filterable=False,
+            ),
             entities.Field("created_by", entities.TEXT, "created_by__username", "Created by"),
             entities.Field("gallery_visible", entities.BOOL, "gallery_visible", "In gallery"),
             entities.Field(

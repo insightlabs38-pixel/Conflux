@@ -52,7 +52,7 @@ register_feature(
             ),
             "search": provided(
                 "entity:projects",
-                "fields:name,description,track,team,created_by,gallery_visible,gallery_blocked,created_at",
+                "fields:name,description,track,team,team_id,created_by,gallery_visible,gallery_blocked,created_at",
                 "test:tests/integration/test_entity_query.py::test_every_registered_field_resolves_against_the_database",
             ),
             "ui_base": provided(

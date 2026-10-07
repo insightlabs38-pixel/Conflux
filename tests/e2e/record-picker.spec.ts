@@ -32,5 +32,17 @@ for (const width of [1440, 390]) {
     await picker.selectOption({ index: 1 });
     await page.getByRole("button", { name: "Check policy" }).click();
     await expect(page.getByLabel("Policy debug result")).toBeVisible();
+
+    // a team is chosen by its name too, found through the projects that carry it
+    await page.getByLabel("Debug action").selectOption("join");
+    const teams = page.getByRole("combobox", { name: "Team for grant check" });
+    await expect(teams.locator("option")).not.toHaveCount(1);
+    const teamNames = await teams.locator("option").allTextContents();
+    expect(teamNames[0]).toMatch(/^Choose a team/);
+    expect(teamNames[1]).not.toMatch(/^[0-9a-f]{8}-/);
+    expect(new Set(teamNames).size).toBe(teamNames.length); // each team once
+    await teams.selectOption({ index: 1 });
+    await page.getByRole("button", { name: "Check policy" }).click();
+    await expect(page.getByLabel("Policy debug result")).toBeVisible();
   });
 }

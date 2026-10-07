@@ -74,7 +74,7 @@ def names(response):
 def test_the_catalogue_lists_what_the_caller_may_query_with_types_and_operators():
     _, _, _, client, judge, base = world()
     catalogue = client.get(base).json()
-    assert {e["key"] for e in catalogue} == {"applications", "people", "projects", "teams"}
+    assert {e["key"] for e in catalogue} == {"applications", "projects"}
     applications = next(e for e in catalogue if e["key"] == "applications")
     status = next(f for f in applications["fields"] if f["key"] == "status")
     assert status["type"] == "enum" and "in" in status["operators"]

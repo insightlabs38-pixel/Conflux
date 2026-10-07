@@ -4,6 +4,7 @@
     "extended-embed",
     "foundations",
     "public",
+    "record-picker",
     "roles",
     "realtime",
     "routing",

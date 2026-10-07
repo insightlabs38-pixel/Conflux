@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { apiRequest } from "../../lib/api";
 import { useLoad } from "../../hooks/useLoad";
-import { RecordPicker } from "../../components/RecordPicker";
-import { entityBase } from "../../lib/entityQuery";
+import { RecordPicker, participantSource } from "../../components/RecordPicker";
 
 type Access = "roles" | "any_authenticated" | "public" | "unknown";
 type MatrixEntry = {
@@ -206,9 +205,7 @@ export function PermissionMatrixExplorer({
         </select>
       ) : (
         <RecordPicker
-          base={entityBase(workspaceId, eventId)}
-          entity="people"
-          field="username"
+          source={participantSource(workspaceId)}
           label="Person"
           noun="person"
           value={subjectUserId}

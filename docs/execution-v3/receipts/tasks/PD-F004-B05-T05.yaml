@@ -22,8 +22,10 @@ changed_paths:
 - src/web/features/policy-builder/PolicyBuilder.timezone.test.tsx
 - src/web/features/event-builder/PermissionMatrixExplorer.tsx
 - src/web/features/form-builder/FormBuilder.tsx
-- src/api/accounts/entities.py
-- src/api/participation/entities.py
+- src/api/projects/entities.py
+- src/api/projects/features.py
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
 - tests/integration/test_entity_pickers.py
 - tests/integration/test_entity_query.py
 deliverables:
@@ -37,18 +39,21 @@ deliverables:
   result: pass
   evidence: 'the first live run found a real failure: Setup > Policies asked for "Project ID / Team ID for grant check".
     Source search found one more, the Permissions dry run ("User public ID"). Both now use RecordPicker, a
-    by-name list over the existing entity query (projects; new teams and people entities, organizer/admin only,
-    username only). Exception: FormBuilder "Field id" is authored, marked data-authored-key.'
+    by-name list over sources that already exist: the projects entity (a project by name; a team through its
+    project via a new non-default team_id field) and the organizer-only portfolio participants endpoint (a person
+    by username). New registered entities were tried and backed out: each must be claimed by a feature, manifest
+    and search contract (17 inventory tests failed), a blast radius beyond this task. Exception: FormBuilder "Field id" is authored, marked data-authored-key.'
 - item: No product behavior added for the guardrail
   result: pass
   evidence: 'product change is limited to replacing typed ids with pickers over the canonical entity query
-    (QUERY primitive); the policy-debug and authz-dry-run APIs and their payloads are unchanged (still receive
-    the record id).'
+    (QUERY primitive) and the portfolio participants list; the policy-debug and authz-dry-run APIs and payloads
+    are unchanged (still receive the record id).'
 invariants:
 - item: One canonical source of truth, server authorization authoritative
   result: pass
-  evidence: pickers read core.entities (roles organizer/admin, event-scoped base querysets); test_only_organizers_may_list_people_and_teams
-    shows a judge gets 403; policy-debug still 404s a subject outside the event.
+  evidence: pickers read core.entities (organizer/admin, event-scoped) and the organizer-only portfolio endpoint;
+    tests/integration/test_entity_pickers.py shows a judge gets 403 on both; policy-debug still 404s a subject
+    outside the event.
 - item: The gate can fail
   result: pass
   evidence: self-test 'the audit sees a box that asks for an opaque id' expects exactly 3 findings (placeholder,
@@ -57,20 +62,20 @@ invariants:
 - item: No test weakened
   result: pass
   evidence: PolicyBuilder tests gained a QueryClient wrapper; the debugger test now also asserts subject_id is the
-    chosen project's id; the catalogue test lists the two new entities.
+    chosen project's id; the projects claim lists the one new field (team_id) and test_feature_search holds it.
 verification:
 - command: npx playwright test -c tests/e2e/playwright.config.ts slop-audit --project=desktop --workers=3
   result: pass
   note: 76 passed, after docker compose up -d --build app (first run, old bundle, failed 2 Policies pages with the opaqueIds finding)
 - command: npx playwright test -c tests/e2e/playwright.config.ts record-picker --project=desktop
   result: pass
-  note: 2 passed (1440 and 390), project chosen by name on live Policies page and policy check returns a result
+  note: 2 passed (1440 and 390), project and team chosen by name on the live Policies page, each team listed once, policy check returns a result
 - command: cd src/web && npx tsc --noEmit && npx vitest run
   result: pass
-  note: 130 files, 703 tests
-- command: pytest tests/integration/test_entity_pickers.py tests/integration/test_entity_query.py tests/integration/test_shared_primitives_b01_regression.py -n 4
+  note: 130 files, 704 tests
+- command: pytest tests/integration/test_entity_pickers.py test_entity_query.py test_feature_search.py test_feature_contract.py test_extension_manifest.py -n 6
   result: pass
-  note: 48 passed (env DJANGO_SECRET_KEY and RECORD_SIGNING_KEY_SEED as in Makefile)
+  note: 227 passed (env as in Makefile); full pytest is in the T90 verify-fast run
 design_refs:
 - ref: design/system-v3
   result: pass
@@ -89,10 +94,11 @@ migrations: []
 findings:
 - P3 the Permissions dry run sits behind a dashboard tab the audit does not walk; its picker is covered by unit
   tests and the shared component, not by the live audit.
-- P3 first live pass uses the same running stack as other specs; the app image was rebuilt once (make up equivalent).
+- P3 record-picker is classified read-only in tests/e2e/tiers.json (the policy check is a dry run), weight 6.
 escalations: []
 limitations:
 - A picker lists at most 100 records and narrows by typed name; events with more people than that rely on search.
-- people lists everyone holding a role in the workspace, not only the event.
+- the person picker lists workspace participants (members of projects), so a judge or mentor with no project is not offered; the dry run for those roles uses the hypothetical-role mode.
+- a team with no project is not offered in the team picker (teams are searched through projects by contract).
 - Static audit text rules do not see ids typed into a free-text field that is not labelled as one.
 next: review

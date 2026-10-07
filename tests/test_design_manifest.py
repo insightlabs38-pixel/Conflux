@@ -152,3 +152,43 @@ def test_the_contract_cites_every_rule_the_system_readme_summarises():
 def test_a_failing_pair_is_named_with_its_ratio():
     assert contrast("#777777", "#ffffff") < 4.5
     assert round(contrast("#000000", "#ffffff")) == 21
+
+
+def board(ref, name):
+    return (DESIGN / "references" / ref / "html" / f"{name}.html").read_text()
+
+
+def test_data_surface_board_keeps_its_must_preserve_contract():
+    page = board("organizer-data-surface", "Data-Surface")
+    for marker in (
+        'role="grid"',
+        "aria-rowcount",
+        "Select all 243",
+        "Frozen snapshot",
+        "plan first",
+        "virtualized",
+        "Reset",
+        "Save view",
+        "Copy link",
+        "registration:confirmed AND waiver:!signed",
+        "Restricted",
+        "Esc closes",
+    ):
+        assert marker in page, marker
+    assert "ANY OF" in page and "Add group" in page
+
+
+def test_shell_boards_keep_the_navigation_contract():
+    organizer = board("app-shell", "Shell-Organizer")
+    for label in ("Manage event", "Advanced", "Operations &amp; audit", "Needs attention"):
+        assert label in organizer, label
+    assert 'aria-current="page"' in organizer
+    assert "Preview as" in organizer
+    assert "dialog" in board("app-shell", "Shell-Overlays")
+    assert "More" in board("app-shell", "Shell-Mobile")
+
+
+def test_decision_eleven_is_indexed_and_the_ledger_cites_it():
+    assert "011" in (DESIGN / "decisions/README.md").read_text()
+    ledger = (DESIGN / "reviews/B00_APPROVAL.md").read_text()
+    assert "D-011" in ledger and "approved for implementation" in ledger

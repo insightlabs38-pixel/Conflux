@@ -1,0 +1,106 @@
+version: 3
+task: PD-DESIGN-B00-T03
+batch: PD-DESIGN-B00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: design-review
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 3d67a1a
+  head_commit: null
+changed_paths:
+- docs/product-depth-v3/design/reviews/B00_APPROVAL.md
+- docs/product-depth-v3/design/decisions/011-shell-rail-and-type-floor.md
+- docs/product-depth-v3/design/decisions/README.md
+- tests/test_design_manifest.py
+deliverables:
+- item: Approve concrete desktop/mobile shell plus a realistic dense organizer data-grid and split-inspector
+    workflow with navigation, filtering, selection, bulk action and async-operation states
+  result: pass
+  evidence: Shell-Organizer and Data-Surface screenshots opened at full resolution; Dense, Overlays, Mobile,
+    Participant, Judge, Data-Filters, Resp-1024, Wide-1920 and Dark-Organizer must-preserve lists read;
+    ledger section T03 states disposition approved for implementation
+invariants:
+- item: Domain behavior, authorization and gates unchanged
+  result: pass
+  evidence: docs and one test only
+- item: Design artifacts stay local and unmodified
+  result: pass
+  evidence: no board or screenshot edited; D-011 clarifies two rules without changing a board
+- item: Mutation/authorization/idempotency behavior is specified, not invented
+  result: pass
+  evidence: obligations O-1 (audited server-side reveal) and O-2 (canonical services, version/idempotency
+    conflicts shown) recorded; shipped BULK_PLAN and QUERY (depth 4 server vs 3 UI) checked against D-003
+verification:
+- command: uv run --frozen pytest tests/test_design_manifest.py -q
+  result: pass
+  note: 13 passed; asserts the Data-Surface, Shell-Organizer, Overlays and Mobile boards keep their must-preserve
+    markers; negative case from T01 and T02 stays
+- command: Playwright chromium at 1440x1000 over Data-Surface.html and Shell-Organizer.html measuring
+    geometry and computed fonts
+  result: pass
+  note: top 44px, rail 216px, inspector 372px, rows 28px dense, Plex Sans and Mono only; 10px avatar and
+    count text found (F-2)
+- command: python3 scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid, 0 errors
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/app-shell
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/organizer-data-surface
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/participant-my-event
+  result: na
+  note: not in this task's scope
+- ref: design/project-story-editor
+  result: na
+  note: not in this task's scope
+- ref: design/judge-review
+  result: na
+  note: not in this task's scope
+- ref: design/deliberation-awards
+  result: na
+  note: not in this task's scope
+- ref: design/public-event
+  result: na
+  note: not in this task's scope
+- ref: design/public-project
+  result: na
+  note: not in this task's scope
+- ref: design/event-builder
+  result: na
+  note: not in this task's scope
+- ref: design/onsite-mobile
+  result: na
+  note: not in this task's scope
+- ref: design/state-matrix
+  result: na
+  note: not in this task's scope
+surface_matrix:
+- surface: web
+  result: deferred-by-contract
+  evidence: design approval only; implementation is PD-F004 onward
+- surface: docs
+  result: pass
+  evidence: reviews/B00_APPROVAL.md T03 section and decisions/011
+migrations: []
+findings:
+- P3 F-1 organizer rail has 8 default items against the D-002 limit of 6; resolved by D-011
+- P3 F-2 boards draw 10px avatar initials, below the 11px floor; resolved by D-011 (build at --fs-11)
+- P3 F-3 shipped DataGrid lacks J/K/X/E/V/F shortcuts and aria-sort drawn in the design; implementation
+  obligation for PD-F004
+escalations: []
+limitations:
+- Static comps; hover, focus, axe and reduced-motion behavior are implementation QA.
+- Board view, column resize/reorder handles and collapse animation are not designed (named in the READMEs,
+  outside this task).
+- Approval is by the single implementing agent (same-account limitation, as for T95); the owner signed
+  the direction off in reviews/CONFLUX_R2_SIGNOFF_REVIEW.md.
+next: review

@@ -40,7 +40,9 @@ def test_the_primitive_registry_marks_the_owner_implemented():
 
 
 def test_the_surfaces_are_exactly_what_production_registers_and_the_inventory_agrees():
-    assert set(preview_context.SURFACES) == {"form"}
+    assert set(preview_context.SURFACES) == {"form", "page"}
+    page = preview_context.SURFACES["page"]  # the public page, with an unsaved appearance as input
+    assert page.version_source is None and page.roles == () and page.input_schema
     form = preview_context.SURFACES["form"]
     assert form.version_source == "form" and form.roles == (
         "participant",
@@ -52,7 +54,7 @@ def test_the_surfaces_are_exactly_what_production_registers_and_the_inventory_ag
     kinds = {
         c["kind"]: {e["id"]: e["manifest"] for e in c["entries"]} for c in snapshot["capabilities"]
     }
-    assert kinds["preview_surface"] == {"form": "forms"}
+    assert kinds["preview_surface"] == {"form": "forms", "page": "presentation"}
     assert snapshot["ok"] is True and snapshot["problems"] == []
 
 
@@ -60,7 +62,7 @@ def test_no_context_is_read_by_a_header_cookie_session_or_a_domain_write():
     """The context is the body of one endpoint; nothing elsewhere reads it."""
     allowed = {
         "core/manifest_core.py", "core/preview_context.py", "core/preview_context_views.py",
-        "core/urls.py", "forms/preview.py",
+        "core/urls.py", "forms/preview.py", "presentation/preview.py",
     }  # fmt: skip
     readers = {
         str(p.relative_to(SRC))

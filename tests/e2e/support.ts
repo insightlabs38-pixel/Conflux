@@ -86,10 +86,21 @@ export async function noHorizontalOverflow(page: Page) {
   ).toBeLessThanOrEqual(0);
 }
 
-export async function accessible(page: Page) {
-  const { violations } = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
-    .analyze();
+/**
+ * axe on the whole page. `exclude` names frames axe cannot enter (a sandboxed preview frame hangs
+ * it); the frame's own document is the public page and is checked on its own URL, the frame element
+ * stays in the scan (its title and size) because only its contents are left out.
+ */
+export async function accessible(page: Page, exclude: string[] = []) {
+  let builder = new AxeBuilder({ page }).withTags([
+    "wcag2a",
+    "wcag2aa",
+    "wcag21a",
+    "wcag21aa",
+    "wcag22aa",
+  ]);
+  for (const selector of exclude) builder = builder.exclude(selector);
+  const { violations } = await builder.analyze();
   expect(
     violations.map(
       (v) =>

@@ -2982,3 +2982,37 @@ html {
 .cx-shell__main .cx-entity-grid__tools {
   border-top: 0;
 }
+
+/* Organizer preview of the public page: the frame is as wide as the device it stands for and is
+   scaled down to the room there is, so the page's own breakpoints apply. */
+.cx-page-preview__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-4);
+}
+.cx-page-preview__bar h3 {
+  margin: 0;
+}
+.cx-page-preview__bar [role="group"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.cx-page-preview__bar [aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.cx-page-preview__stage {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  background: var(--surface);
+}
+.cx-page-preview__stage iframe {
+  display: block;
+  border: 0;
+  transform-origin: top left;
+  background: var(--bg);
+}

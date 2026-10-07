@@ -68,22 +68,22 @@ def _blocks_with_live_data(event, page):
     return blocks
 
 
+def landing_context(event, page):
+    """What the landing template needs: one place, so the page a visitor gets and the organizer's
+    preview of it (preview.py) cannot differ."""
+    blocks = _blocks_with_live_data(event, page)
+    return {
+        "event": event,
+        "theme": page.theme if page else "default",
+        "blocks": blocks,
+        "has_hero": any(block.kind in (PageBlockKind.HERO, PageBlockKind.LEAD) for block in blocks),
+    }
+
+
 def event_landing(request, event_public_id):
     event = get_public_event(event_public_id)
     page = Page.objects.filter(event=event).first()
-    blocks = _blocks_with_live_data(event, page)
-    return render(
-        request,
-        "presentation/event_landing.html",
-        {
-            "event": event,
-            "theme": page.theme if page else "default",
-            "blocks": blocks,
-            "has_hero": any(
-                block.kind in (PageBlockKind.HERO, PageBlockKind.LEAD) for block in blocks
-            ),
-        },
-    )
+    return render(request, "presentation/event_landing.html", landing_context(event, page))
 
 
 GALLERY_PAGE_SIZE = 24

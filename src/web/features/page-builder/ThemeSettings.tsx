@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "../../components/Button";
+import { PagePreview } from "./PagePreview";
 import {
   Field,
   Select,
@@ -50,11 +51,13 @@ export function ThemeSettings({
   theme,
   config,
   eventId,
+  workspaceId,
   onSave,
 }: {
   theme: "default" | "dark" | "minimal";
   config: ThemeConfig;
   eventId: string;
+  workspaceId?: string;
   onSave: (
     theme: "default" | "dark" | "minimal",
     config: ThemeConfig,
@@ -65,6 +68,7 @@ export function ThemeSettings({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
   function update(key: string, value: string | number) {
     setSaved(false);
     setDraft((current) => ({ ...current, [key]: value }));
@@ -288,6 +292,22 @@ export function ThemeSettings({
           </div>
         </fieldset>
       </fieldset>
+      {workspaceId && (
+        <details
+          className="cx-theme-preview"
+          onToggle={(event) => setPreviewing(event.currentTarget.open)}
+        >
+          <summary>Preview at desktop, tablet and mobile widths</summary>
+          {previewing && (
+            <PagePreview
+              workspaceId={workspaceId}
+              eventId={eventId}
+              theme={mode}
+              config={draft}
+            />
+          )}
+        </details>
+      )}
       {error && <p role="alert">{error}</p>}
       {saved && <p role="status">Event appearance saved.</p>}
       {!saved &&

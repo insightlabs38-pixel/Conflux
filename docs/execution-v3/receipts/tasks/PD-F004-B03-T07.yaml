@@ -1,0 +1,105 @@
+version: 3
+task: PD-F004-B03-T07
+batch: PD-F004-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: f5e6740
+  head_commit: null
+changed_paths:
+- src/api/presentation/preview.py
+- src/api/presentation/apps.py
+- src/api/presentation/manifest.py
+- src/api/presentation/site_views.py
+- src/api/presentation/templatetags/presentation_tags.py
+- src/api/core/features_extension.py
+- src/web/features/page-builder/PagePreview.tsx
+- src/web/features/page-builder/PagePreview.test.tsx
+- src/web/features/page-builder/ThemeSettings.tsx
+- src/web/features/page-builder/PageBuilder.tsx
+- src/web/styles/components.css
+- tests/integration/test_page_preview.py
+- tests/integration/test_preview_context.py
+- tests/integration/test_shared_primitives_b03_regression.py
+- tests/e2e/hero-size.spec.ts
+- tests/e2e/support.ts
+- tests/e2e/weights.json
+- docs/operations/PREVIEW_CONTEXT.md
+deliverables:
+- item: Organizer preview at desktop, tablet and mobile
+  result: pass
+  evidence: 'a disclosure under the appearance form ("Preview at desktop, tablet and mobile widths", closed,
+    no request until opened) shows the public page in a frame as wide as the device (1440, 768, 390px),
+    scaled to the room so the page''s own breakpoints apply, redrawn 350ms after the last change; it
+    draws the form''s draft appearance (saved or not) over the saved blocks'
+- item: Reuse of the canonical primitive PREVIEW_CONTEXT
+  result: pass
+  evidence: a new registered surface `page` on the existing preview-as endpoint (no new endpoint; OpenAPI and
+    SDKs unchanged), declared in the presentation manifest and recorded in the surface and reader lists of
+    the primitive''s own regression tests; PREVIEW_CONTEXT.md now says unsaved edits are previewed only through a
+    surface''s declared input
+- item: One source of truth for the page
+  result: pass
+  evidence: the preview renders the real landing template with `site_views.landing_context`, the same function
+    the visitor''s view calls, and `event_theme` reads an injected unsaved Page; the draft is validated by
+    `clean_theme_config`, the saving rule, with the same sentences
+invariants:
+- item: Read-only, no state, server authority
+  result: pass
+  evidence: organizer and admin only (403 for participant and judge), event must belong to the workspace (404),
+    no Page, block or audit row is created or changed (counts asserted), a refusal changes nothing
+- item: Untrusted content
+  result: pass
+  evidence: scripts and noscript are stripped from the HTML, the frame is sandboxed with no flags (no scripts,
+    storage or navigation), unsafe block links never render (T05 filter)
+- item: Accessibility
+  result: pass
+  evidence: width buttons are a named group with aria-pressed, the frame has a title naming device and width,
+    the builder page passes axe with the frame element in scope
+verification:
+- command: uv run --frozen pytest -n auto -q
+  result: pass
+  note: 2937 passed, 34 skipped (test_page_preview.py 5, plus the three primitive and extension registers updated)
+- command: cd src/web && npx tsc --noEmit && npx vitest run; make openapi-check sdk-check block-schema-check
+  result: pass
+  note: 683 passed; generated artifacts unchanged
+- command: iso-min fixture; npx playwright test event-themes preview-context hero-size --project=desktop --project=mobile
+  result: pass
+  note: 31 passed, 31 skipped by project guard, including the preview at 390 and 1440 (draft shown, saved page
+    unchanged, three widths, refused draft explained)
+- command: npx playwright test public showcase foundations --project=desktop
+  result: pass
+  note: 23 passed
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-HERO-1 (organizer preview is Advanced and disclosed), V-FOCUS-1, V-ELEV-1 (no shadow on the frame)
+- ref: design/state-matrix
+  result: pass
+  note: loading, refusal and failure states use LoadingState and ErrorState with kept and retry text
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: builder preview component and styles
+- surface: docs
+  result: pass
+  evidence: PREVIEW_CONTEXT.md
+- surface: api
+  result: pass
+  evidence: not_required; the existing preview-as endpoint serves the new surface, OpenAPI unchanged
+migrations: []
+findings:
+- 'P3 axe hangs on a sandboxed srcdoc frame (it tries to open a page per frame): accessible() gained an
+  optional exclude list used only for the frame whose contents are the public page, which its own specs
+  check; the frame element stays in scope.'
+- P3 the first render showed the language form's noscript Go button because the frame runs no scripts;
+  noscript is now stripped from the preview.
+escalations: []
+limitations:
+- The preview shows the saved blocks; unsaved block edits are not previewed (the block editor has its own
+  save). The frame is left-aligned at widths narrower than the room.
+next: review

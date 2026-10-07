@@ -1,6 +1,6 @@
 # Preview as a person, a version or a time (PREVIEW_CONTEXT)
 
-An organizer often needs to know what somebody else would see: a participant looking at a form, a judge at a rubric, the public at a page, as it is now, as it was at a deadline, or as it was in version 2. This is one primitive for all of them, **without impersonation**. Code: `core/preview_context.py` (model, parsing, version choice), `core/preview_context_views.py` (endpoint). Web: `lib/previewContext.ts` and `components/PreviewBar.tsx`. Adopter: the saved-form preview in the form builder (`forms/preview.py`, `features/form-builder/FormPreviewAs.tsx`).
+An organizer often needs to know what somebody else would see: a participant looking at a form, a judge at a rubric, the public at a page, as it is now, as it was at a deadline, or as it was in version 2. This is one primitive for all of them, **without impersonation**. Code: `core/preview_context.py` (model, parsing, version choice), `core/preview_context_views.py` (endpoint). Web: `lib/previewContext.ts` and `components/PreviewBar.tsx`. Adopters: the saved-form preview in the form builder (`forms/preview.py`, `features/form-builder/FormPreviewAs.tsx`) and the public page preview in the appearance settings (`presentation/preview.py`, `features/page-builder/PagePreview.tsx`).
 
 ## A context is data, not an identity
 
@@ -52,7 +52,11 @@ Register from `<app>/preview.py` in `AppConfig.ready()` (after the version sourc
 
 ## What it is not
 
-No impersonation, no way to act as another person, no persisted preview, no preview of unsaved edits (a server cannot know them: the form builder's live editor preview stays local and the saved-form preview sits beside it), no client-supplied surface, schema or version snapshot.
+No impersonation, no way to act as another person, no persisted preview, no client-supplied surface, schema or version snapshot. Unsaved edits are previewed only where a surface declares them as its `input`: the form surface takes none (the form builder's live editor preview stays local beside it), the `page` surface takes the drafted appearance.
+
+## The `page` surface (PD-F004-B03-T07)
+
+`ref: {event}`, no roles, no versions; `input: {theme, theme_config}` is the appearance as it is in the form (every key optional; omitted means the saved one, so an event with no page yet previews the default). The server renders the real landing template with the saved blocks and that appearance (`site_views.landing_context` is shared with the visitor's view, so the two cannot differ), validates the input with `themes.clean_theme_config` (the same rule as saving: a refusal is a 400 keyed `input.theme_config` with the same sentence) and returns `data: {html, theme, theme_config}`. It stores and audits nothing, creates no page, and strips scripts and `noscript` from the HTML; the web draws it in an `<iframe sandbox>` with no flags (no scripts, storage or navigation) at the width of the chosen device (1440, 768 or 390px, scaled to the room), debounced 350ms after the last change. The organizer sees the saved blocks; unsaved block edits are not previewed.
 
 ## Compatibility
 

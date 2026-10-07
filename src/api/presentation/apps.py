@@ -6,4 +6,6 @@ class PresentationConfig(AppConfig):
     name = "presentation"
 
     def ready(self):
-        from . import manifest  # noqa: F401 - declares what this app provides
+        from . import manifest, preview  # noqa: F401 - manifest declares what this app provides
+
+        preview.register()

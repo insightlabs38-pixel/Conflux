@@ -305,6 +305,85 @@ for (const width of [390, 1440]) {
   });
 }
 
+// PD-F004-B03-T07: the organizer previews the public page at desktop, tablet and phone widths with
+// the appearance as it is in the form, before saving. The frame is as wide as the device, so the
+// page's own breakpoints apply; nothing is saved by looking.
+for (const width of [390, 1440]) {
+  test(`the preview shows the drafted appearance at three widths without saving it at ${width}`, async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+    await page.setViewportSize({ width, height: 900 });
+    await signIn(page, "organizer");
+    const { workspace, event } = await eventIds(page);
+    await page.goto("/app/");
+    await openWorkspace(page);
+    await chooseWorkspaceEvent(page);
+    await goToDestination(page, "setup");
+    await goToTask(page, "Public page");
+    await page.getByRole("tab", { name: /^Appearance/ }).click();
+    await settled(page);
+
+    const savedConfig = (
+      await (
+        await page.request.get(
+          `/api/v1/workspaces/${workspace}/events/${event}/page/`,
+        )
+      ).json()
+    ).theme_config;
+    const details = page.locator("details.cx-theme-preview");
+    await expect(details).not.toHaveAttribute("open", ""); // advanced: closed, and no request, until asked
+    await details.locator("summary").click();
+    const preview = page.getByRole("region", { name: "Public page preview" });
+    const frame = (device: string) =>
+      preview.locator(`iframe[data-device="${device}"]`);
+    await expect(frame("desktop")).toBeVisible();
+    const inside = () => preview.frameLocator("iframe").locator("body");
+    await expect(inside()).toHaveAttribute("data-hero-size", "compact");
+
+    // the form's draft is what is drawn, not the saved page
+    await page.getByLabel("Hero size", { exact: true }).selectOption("none");
+    await expect(inside()).toHaveAttribute("data-hero-size", "none");
+    const publicSite = await page.context().newPage();
+    await publicSite.goto(`/e/${event}/`);
+    await expect(publicSite.locator("body")).toHaveAttribute(
+      "data-hero-size",
+      "compact",
+    ); // nothing was saved by previewing
+    await publicSite.close();
+
+    // each device is drawn at its real width, scaled to fit, and the page answers to it
+    for (const [name, label, device] of [
+      ["tablet", /Tablet 768px/, 768],
+      ["mobile", /Mobile 390px/, 390],
+      ["desktop", /Desktop 1440px/, 1440],
+    ] as const) {
+      await preview.getByRole("button", { name: label }).click();
+      await expect(frame(name)).toHaveAttribute("width", String(device));
+      const box = await frame(name).boundingBox();
+      const stage = await preview
+        .locator(".cx-page-preview__stage")
+        .boundingBox();
+      expect(box!.width).toBeLessThanOrEqual(stage!.width + 1); // scaled, never wider than the room
+    }
+    await preview.getByRole("button", { name: /Mobile 390px/ }).click();
+    await expect(inside()).toHaveAttribute("data-hero-size", "none");
+    await accessible(page, ["iframe[data-device]"]); // its contents are the public page, checked elsewhere
+    await noHorizontalOverflow(page);
+
+    // a draft the server would refuse is said in words and nothing was stored
+    await page.getByLabel("Accent color").fill("#ffffff");
+    await expect(preview.getByRole("alert")).toContainText("4.5:1");
+    await expect(preview.getByRole("alert")).toContainText("nothing was saved");
+    const stored = await (
+      await page.request.get(
+        `/api/v1/workspaces/${workspace}/events/${event}/page/`,
+      )
+    ).json();
+    expect(stored.theme_config).toEqual(savedConfig);
+  });
+}
+
 // PD-F004-B03-T05: an event-specific lead replaces the hero. It is added through the page builder, its
 // action link is checked by the server, and the public page shows one h1 with no default hero.
 for (const width of [390, 1440]) {

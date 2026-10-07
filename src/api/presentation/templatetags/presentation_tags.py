@@ -23,12 +23,17 @@ def safe_href(value):
     return _safe_href(value)
 
 
-@register.simple_tag
-def event_theme(event):
+@register.simple_tag(takes_context=True)
+def event_theme(context, event):
     from ..models import Page
     from ..themes import resolved_theme
 
-    settings = resolved_theme(Page.objects.filter(event=event).first() if event else None)
+    # An organizer's preview renders the page with an unsaved appearance (PREVIEW_CONTEXT surface
+    # `page`); a visitor's request has none and reads the stored one.
+    page = context.get("preview_page")
+    if page is None:
+        page = Page.objects.filter(event=event).first() if event else None
+    settings = resolved_theme(page)
     settings["style"] = ";".join(f"{key}:{value}" for key, value in settings["variables"].items())
     return settings
 

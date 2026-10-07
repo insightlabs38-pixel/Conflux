@@ -17,7 +17,8 @@ manifest.register_manifest(
         id="presentation",
         version="1.0.0",
         label="Public pages",
-        provides=tuple(
+        provides=(("preview_surface", "page"),)
+        + tuple(
             ("page_block", key)
             for key in (
                 "announcements",

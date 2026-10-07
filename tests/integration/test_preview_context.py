@@ -455,7 +455,7 @@ def test_no_domain_code_reads_a_preview_context():
     )  # fmt: skip
     assert users == [
         "core/manifest_core.py", "core/preview_context.py", "core/preview_context_views.py",
-        "core/urls.py", "forms/preview.py",
+        "core/urls.py", "forms/preview.py", "presentation/preview.py",
     ]  # fmt: skip
     for p in src.rglob("*.py"):
         if "migrations" in p.parts or p.name.startswith("test_"):
@@ -472,4 +472,5 @@ def test_the_inventory_lists_the_surface_and_the_forms_manifest_claims_it(world)
     kinds = {
         c["kind"]: {e["id"]: e["manifest"] for e in c["entries"]} for c in snapshot["capabilities"]
     }
-    assert kinds["preview_surface"] == {"form": "forms"} and snapshot["ok"] is True
+    assert kinds["preview_surface"] == {"form": "forms", "page": "presentation"}
+    assert snapshot["ok"] is True

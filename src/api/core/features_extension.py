@@ -41,6 +41,10 @@ OUTSIDE = {
         "presentation",
         "page_block",
     ): "page blocks belong to the public event page, not a feature of the registry yet",
+    (
+        "presentation",
+        "preview_surface",
+    ): "the public page preview belongs to the public event page, not a registry feature yet",
 }
 
 

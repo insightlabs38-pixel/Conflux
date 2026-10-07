@@ -377,6 +377,7 @@ export function PageBuilder({
                 theme={page.theme}
                 config={page.theme_config || {}}
                 eventId={eventId}
+                workspaceId={workspaceId}
                 onSave={setAppearance}
               />
             ) : (

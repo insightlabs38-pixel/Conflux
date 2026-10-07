@@ -1790,29 +1790,54 @@
   margin: 0;
   padding-left: var(--sp-4);
 }
-.cx-ops-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: var(--sp-3);
+/* A summary is one strip of figures that link to the records behind them (V-SLOP-3), not a row of
+   cards: hairlines between the items, no boxes, no coloured tops. */
+.cx-strip,
+.cx-decision-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) 0;
+  margin: 0 0 var(--sp-4);
+  padding: var(--sp-2) 0;
+  list-style: none;
+  border-block: 1px solid var(--line);
 }
-.cx-ops-card {
-  border: 1px solid var(--color-border);
-  border-top: 3px solid var(--color-accent);
-  background: var(--color-surface-raised);
-  padding: var(--sp-3) var(--sp-4);
+.cx-strip__item,
+.cx-decision-facts > div {
   display: grid;
-  gap: var(--sp-2);
+  gap: var(--sp-1);
   align-content: start;
+  padding-inline: var(--sp-4);
+  border-right: 1px solid var(--line);
 }
-.cx-ops-card h4 {
-  margin: 0;
+.cx-strip__item:first-child,
+.cx-decision-facts > div:first-child {
+  padding-left: 0;
 }
-.cx-ops-card p {
-  margin: 0;
+.cx-strip__item:last-child,
+.cx-decision-facts > div:last-child {
+  border-right: 0;
 }
-.cx-ops-card progress {
-  width: 100%;
-  accent-color: var(--color-accent);
+.cx-strip__item strong {
+  font-size: var(--fs-20);
+}
+.cx-strip__link {
+  color: var(--ink);
+  text-decoration: none;
+}
+.cx-strip__link:hover {
+  text-decoration: underline;
+}
+.cx-ops-coming h4 {
+  margin: 0 0 var(--sp-2);
+}
+@media (max-width: 40rem) {
+  .cx-strip__item,
+  .cx-decision-facts > div {
+    flex: 1 1 45%;
+    padding-inline: 0 var(--sp-3);
+    border-right: 0;
+  }
 }
 .cx-queue-filters {
   display: flex;
@@ -1900,17 +1925,6 @@
 .cx-steps li[data-state="current"] .cx-steps__mark {
   border-color: var(--color-accent);
   color: var(--color-accent);
-}
-.cx-decision-facts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
-  gap: var(--sp-3);
-  margin: 0 0 var(--sp-3);
-}
-.cx-decision-facts > div {
-  border: 1px solid var(--color-border);
-  border-top: 3px solid var(--color-accent);
-  padding: var(--sp-2) var(--sp-3);
 }
 .cx-decision-facts dt {
   font-size: var(--fs-12);
@@ -2016,10 +2030,6 @@
 }
 .cx-inline-link:hover {
   color: var(--color-accent-strong);
-}
-.cx-ops-card .cx-button {
-  justify-self: start;
-  text-decoration: none;
 }
 .cx-shell__main table {
   width: 100%;
@@ -2423,15 +2433,12 @@
 /* UIV2-B09 operational and raw-form surfaces */
 .cx-ops-sections {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: var(--sp-3);
+  gap: 0;
   margin-top: var(--sp-3);
 }
 .cx-ops-sections > section {
-  border: 1px solid var(--color-border);
-  border-top: 3px solid var(--color-accent);
-  background: var(--color-surface-subtle);
-  padding: var(--sp-3) var(--sp-4);
+  padding: var(--sp-3) 0;
+  border-top: 1px solid var(--line);
 }
 .cx-ops-sections > section > h4 {
   margin-top: 0;

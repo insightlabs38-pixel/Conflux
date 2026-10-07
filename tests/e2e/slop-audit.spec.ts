@@ -7,12 +7,12 @@ import {
   settled,
   signIn,
 } from "./support";
-import { slopProblems, type SlopRule } from "./slop";
+import { slopProblems, stable, type SlopRule } from "./slop";
 
 // The anti-slop gate of spec 004 (V-SLOP-1..) measured on the live pages of every role and on the
 // public site, at 390 and 1440. Read-only. One test per page and width: pages are large and each
 // is measured on its own. A rule is added to RULES by the task that implements it.
-const RULES: SlopRule[] = ["gradient", "iconTile"];
+const RULES: SlopRule[] = ["gradient", "iconTile", "kpiCards"];
 
 const PAGES: Record<string, string[]> = {
   organizer: [
@@ -67,6 +67,7 @@ for (const width of [390, 1440]) {
         await open(page, role);
         await goToDestination(page, id);
         await settled(page);
+        await stable(page);
         expect(await slopProblems(page, RULES)).toEqual({});
       });
     }
@@ -81,6 +82,7 @@ for (const width of [390, 1440]) {
       const { event } = await eventIds(page);
       await page.goto(`/e/${event}/${path}`);
       await page.waitForLoadState("networkidle");
+      await stable(page);
       expect(await slopProblems(page, RULES)).toEqual({});
     });
   }
@@ -108,4 +110,25 @@ test("the audit sees a gradient and an icon in a coloured square", async ({
   });
   const found = await slopProblems(page, ["gradient", "iconTile"]);
   expect(Object.keys(found).sort()).toEqual(["gradient", "iconTile"]);
+});
+
+test("the audit sees a row of cards", async ({ page }, info) => {
+  test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, "organizer");
+  await goToDestination(page, "overview");
+  await settled(page);
+  await page.evaluate(() => {
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex;gap:8px";
+    row.innerHTML = [1, 2, 3]
+      .map(
+        (n) =>
+          `<div style="width:200px;height:80px;border:1px solid #888">Card ${n}</div>`,
+      )
+      .join("");
+    document.querySelector("main")!.prepend(row);
+  });
+  const found = await slopProblems(page, ["kpiCards"]);
+  expect(found.kpiCards?.[0]).toContain("3 cards in a row");
 });

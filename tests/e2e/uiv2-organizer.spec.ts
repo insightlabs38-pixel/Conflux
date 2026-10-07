@@ -28,6 +28,7 @@ for (const width of [390, 768, 1024, 1440]) {
     await expect(
       page.getByRole("region", { name: "Needs action" }),
     ).toBeVisible();
+    const summary = page.getByRole("list", { name: "Event summary" });
     for (const metric of [
       "Registrations",
       "Eligibility workload",
@@ -35,7 +36,7 @@ for (const width of [390, 768, 1024, 1440]) {
       "Results and publication",
       "On-site readiness",
     ])
-      await expect(page.getByRole("region", { name: metric })).toBeVisible();
+      await expect(summary.locator(`[data-figure="${metric}"]`)).toBeVisible();
     await settled(page);
     await accessible(page);
     await noHorizontalOverflow(page);

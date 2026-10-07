@@ -1,4 +1,24 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
+
+/** Waits until the page stops changing: the element count is the same on four reads 120 ms apart,
+ * so a panel that renders after its data arrives is measured, not its loading shell. */
+export async function stable(page: Page) {
+  let last = -1;
+  let same = 0;
+  await expect
+    .poll(
+      async () => {
+        const count = await page.evaluate(
+          () => document.body.querySelectorAll("*").length,
+        );
+        same = count === last ? same + 1 : 0;
+        last = count;
+        return same;
+      },
+      { intervals: [120], timeout: 10_000 },
+    )
+    .toBeGreaterThanOrEqual(4);
+}
 
 /**
  * The anti-slop gate (spec 004, V-SLOP-*) measured on the rendered page. Each rule is a function
@@ -70,6 +90,38 @@ export async function slopProblems(page: Page, rules: SlopRule[]) {
         }
       }
     }
+    if (wanted.includes("kpiCards")) {
+      // a row of three or more boxes with their own border or fill is a card dashboard (V-SLOP-3,
+      // V-SLOP-14); a summary is one strip of figures, and a list of records is a table. Only the
+      // application: the public gallery is browsing and its cards are the content.
+      const boxed = (el: Element) => {
+        const style = getComputedStyle(el);
+        const border =
+          parseFloat(style.borderTopWidth) > 0 ||
+          parseFloat(style.borderLeftWidth) > 0;
+        return border || filled(style.backgroundColor);
+      };
+      for (const parent of all) {
+        if (!parent.closest("main") || parent.closest(".cx-event-site"))
+          continue;
+        const kids = [...parent.children].filter(
+          (kid) =>
+            shown(kid) &&
+            boxed(kid) &&
+            kid.getBoundingClientRect().width >= 140 &&
+            kid.getBoundingClientRect().height >= 48 &&
+            !kid.matches("td, th, tr, li, option, button, a, input, select"),
+        );
+        if (kids.length < 3) continue;
+        const tops = kids.map((kid) =>
+          Math.round(kid.getBoundingClientRect().top),
+        );
+        const inARow = kids.filter((_, i) => Math.abs(tops[i] - tops[0]) <= 2);
+        if (inARow.length >= 3)
+          add("kpiCards", `${inARow.length} cards in a row in ${name(parent)}`);
+      }
+    }
+
     if (wanted.includes("iconTile")) {
       // an icon is for recognition where it helps, not a decoration in front of every heading
       const headings = [

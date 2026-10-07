@@ -1,0 +1,77 @@
+version: 3
+task: PD-F004-B04-T03
+batch: PD-F004-B04
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: e92cd25
+  head_commit: null
+changed_paths:
+- src/web/features/event-builder/OrganizerOverview.tsx
+- src/web/features/event-builder/OrganizerOverview.test.tsx
+- src/web/styles/components.css
+- tests/e2e/slop.ts
+- tests/e2e/slop-audit.spec.ts
+- tests/e2e/uiv2-gate.spec.ts
+- tests/e2e/uiv2-organizer.spec.ts
+deliverables:
+- item: A compact summary strip or table instead of giant KPI cards
+  result: pass
+  evidence: 'new live rule kpiCards (three or more boxed siblings in one row in the application) found three
+    violations at 1440 on seed 7: the organizer overview (four bordered cards with accent tops and a button
+    each), the on-site and deliberation facts (`dl.cx-decision-facts`, four boxes) and the operations center
+    sections (three cards in a Card). Fixed: the overview is now one strip of figures (applications, to review,
+    ballots submitted, awaiting approval, checked in; at most six, each figure is the link to its records) with
+    hairlines and no boxes, followed by "Coming up" as a plain list; `.cx-decision-facts` shares the strip
+    style, which fixes all three panels that use it; the operations sections are one column separated by
+    hairlines'
+- item: States
+  result: pass
+  evidence: each figure loads and fails on its own place (Loading… or "could not load" with Retry) so the
+    others stay readable; tested in vitest and in uiv2-gate
+invariants:
+- item: Information and routes are unchanged
+  result: pass
+  evidence: the same endpoints, the same destinations and sections; the per-metric buttons became the figure link
+- item: The gate can fail
+  result: pass
+  evidence: self-test "the audit sees a row of cards"
+- item: No test weakened
+  result: pass
+  evidence: uiv2-gate and uiv2-organizer keep every assertion (alert text, loading text, figures present), now
+    addressed by figure instead of by card region
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 701 passed (strip of at most six linked figures, one figure failing alone)
+- command: docker compose up -d --build app; npx playwright test slop-audit uiv2-gate timeline --project=desktop --workers=4
+  result: pass
+  note: kpiCards clean on every page at 390 and 1440; uiv2-uiv2-organizer is a canary-chain spec (needs the lifecycle state) and is
+    verified by make e2e-fast at the batch close
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-SLOP-3, V-SLOP-14
+- ref: design/state-matrix
+  result: pass
+  note: S-LOAD and S-ERR per figure
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: overview, facts, operations center
+- surface: docs
+  result: pass
+  evidence: spec 004 contract at T91
+migrations: []
+findings:
+- 'P3 the first audit run passed because it measured the loading shell of the overview; `stable(page)` now
+  waits for the element count to settle before any rule runs (T01 and T02 were re-run with it and stay clean).'
+escalations: []
+limitations:
+- The rule fires on a row of three or more boxed siblings; it does not judge a single wide card or a card
+  whose content is a table.
+next: review

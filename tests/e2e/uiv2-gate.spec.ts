@@ -79,24 +79,15 @@ test("error, empty, loading and denied states are explicit and accessible", asyn
     await route.continue();
   });
   await chooseWorkspaceEvent(page);
-  const eligibility = page.getByRole("region", {
-    name: "Eligibility workload",
-  });
-  await expect(eligibility.getByRole("alert")).toContainText("could not load");
-  await expect(
-    page
-      .getByRole("region", { name: "Judging progress" })
-      .getByText("Loading…"),
-  ).toBeVisible();
+  const summary = page.getByRole("list", { name: "Event summary" });
+  const figure = (label: string) => summary.locator(`[data-figure="${label}"]`);
+  await expect(figure("Eligibility workload").getByRole("alert")).toContainText(
+    "could not load",
+  );
+  await expect(figure("Judging progress")).toContainText("Loading…");
   await accessible(page);
-  await expect(
-    page
-      .getByRole("region", { name: "Judging progress" })
-      .getByText(/ballots submitted/),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("region", { name: "Registrations" }),
-  ).toContainText("applications");
+  await expect(figure("Judging progress")).toContainText("ballots submitted");
+  await expect(figure("Registrations")).toContainText("applications");
   await noHorizontalOverflow(page);
 
   // Denied: a judge whose events request is refused sees a message, not a blank page.

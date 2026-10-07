@@ -29,42 +29,52 @@ function list<T>(value: T[] | null): T[] {
   return Array.isArray(value) ? value : [];
 }
 
-function Metric({
+/**
+ * One figure of the summary strip: a number that is a link to the records behind it, and one line
+ * of detail. A figure that is still loading or failed says so in its own place, so the others
+ * stay readable (S-LOAD, S-ERR); nothing here is a card (V-SLOP-3).
+ */
+function Figure({
   label,
   load,
-  render,
+  figure,
+  unit,
+  detail,
   destination,
   section,
-  action,
 }: {
   label: string;
   load: Pick<Loaded<unknown>, "data" | "error" | "loading" | "reload">;
-  render: () => ReactNode;
+  figure: ReactNode;
+  unit: string;
+  detail: ReactNode;
   destination: string;
   section?: string;
-  action: string;
 }) {
   return (
-    <section className="cx-ops-card" aria-label={label}>
-      <h4>{label}</h4>
-      {load.loading && <p className="cx-muted">Loading…</p>}
+    <li className="cx-strip__item" data-figure={label}>
+      {load.loading && <span className="cx-muted">{label}: Loading…</span>}
       {load.error && (
-        <p role="alert">
+        <span role="alert">
           {label} could not load.{" "}
           <button type="button" onClick={load.reload}>
             Retry
           </button>
-        </p>
+        </span>
       )}
-      {!load.loading && !load.error && load.data !== null && render()}
-      <DestinationLink
-        id={destination}
-        section={section}
-        className="cx-button cx-button--secondary"
-      >
-        {action}
-      </DestinationLink>
-    </section>
+      {!load.loading && !load.error && load.data !== null && (
+        <>
+          <DestinationLink
+            id={destination}
+            section={section}
+            className="cx-strip__link"
+          >
+            <strong>{figure}</strong> {unit}
+          </DestinationLink>
+          <span className="cx-muted">{detail}</span>
+        </>
+      )}
+    </li>
   );
 }
 
@@ -213,112 +223,99 @@ export function OrganizerOverview({
           </ul>
         )}
       </section>
-      <div className="cx-ops-grid">
-        <Metric
-          label="Coming up"
-          load={upcoming}
-          destination="operations"
-          section="TimelinePanel"
-          action="Open the timeline"
-          render={() =>
-            coming.length === 0 ? (
-              <p>Nothing else is scheduled.</p>
-            ) : (
-              <ul className="cx-plain-list">
-                {coming.map((item) => (
-                  <li key={item.key}>
-                    <span className="cx-muted">
-                      {dayHeading(wall(item.local_starts_at).date)}{" "}
-                      {rangeText(item)}
-                    </span>{" "}
-                    {item.label}
-                  </li>
-                ))}
-              </ul>
-            )
-          }
-        />
-        <Metric
+      <ul className="cx-strip" aria-label="Event summary">
+        <Figure
           label="Registrations"
           load={applications}
+          figure={apps.length}
+          unit="applications"
+          detail={`${apps.filter((a) => a.status === "approved").length} approved · ${apps.filter((a) => a.status === "pending").length} pending`}
           destination="participants"
-          action="Manage participants"
-          render={() => (
-            <p>
-              <strong>{apps.length}</strong> applications ·{" "}
-              {apps.filter((a) => a.status === "approved").length} approved ·{" "}
-              {apps.filter((a) => a.status === "pending").length} pending
-            </p>
-          )}
         />
         {eligibilityOn && (
-          <Metric
+          <Figure
             label="Eligibility workload"
             load={reviews}
+            figure={needsReview}
+            unit="to review"
+            detail={`${rows.length} reviewed records · ${rows.filter((r) => r.status === "cleared").length} cleared`}
             destination="eligibility"
-            action="Open review queue"
-            render={() => (
-              <p>
-                <strong>{needsReview}</strong> to review · {rows.length}{" "}
-                reviewed records ·{" "}
-                {rows.filter((r) => r.status === "cleared").length} cleared
-              </p>
-            )}
           />
         )}
-        <Metric
+        <Figure
           label="Judging progress"
           load={workload}
+          figure={`${submitted} of ${assigned}`}
+          unit="ballots submitted"
+          detail={`${judges.length} judges`}
           destination="judging"
-          action="Manage judging"
-          render={() => (
-            <>
-              <p>
-                <strong>
-                  {submitted} of {assigned}
-                </strong>{" "}
-                ballots submitted · {judges.length} judges
-              </p>
-              <progress
-                max={Math.max(assigned, 1)}
-                value={submitted}
-                aria-label="Judging progress"
-              />
-            </>
-          )}
         />
-        <Metric
+        <Figure
           label="Results and publication"
           load={requests}
+          figure={awaitingApproval}
+          unit="awaiting approval"
+          detail={`${reqs.filter((r) => r.status === "approved").length} approved`}
           destination="results"
-          action="Deliberate and publish"
-          render={() => (
-            <p>
-              <strong>{awaitingApproval}</strong> awaiting approval ·{" "}
-              {reqs.filter((r) => r.status === "approved").length} approved
-            </p>
-          )}
         />
         {onsiteOn && (
-          <Metric
+          <Figure
             label="On-site readiness"
             load={onsite}
-            destination="onsite"
-            action="Open on-site desk"
-            render={() =>
-              onsite.data && (
-                <p>
-                  <strong>
-                    {onsite.data.checked_in} of {onsite.data.participants}
-                  </strong>{" "}
-                  checked in · {onsite.data.projects_placed} of{" "}
-                  {onsite.data.projects} projects placed
-                </p>
-              )
+            figure={
+              onsite.data
+                ? `${onsite.data.checked_in} of ${onsite.data.participants}`
+                : ""
             }
+            unit="checked in"
+            detail={
+              onsite.data
+                ? `${onsite.data.projects_placed} of ${onsite.data.projects} projects placed`
+                : ""
+            }
+            destination="onsite"
           />
         )}
-      </div>
+      </ul>
+      <section className="cx-ops-coming" aria-label="Coming up">
+        <h4>Coming up</h4>
+        {upcoming.loading && <p className="cx-muted">Loading…</p>}
+        {upcoming.error && (
+          <p role="alert">
+            Coming up could not load.{" "}
+            <button type="button" onClick={upcoming.reload}>
+              Retry
+            </button>
+          </p>
+        )}
+        {!upcoming.loading &&
+          !upcoming.error &&
+          upcoming.data !== null &&
+          (coming.length === 0 ? (
+            <p>Nothing else is scheduled.</p>
+          ) : (
+            <ul className="cx-plain-list">
+              {coming.map((item) => (
+                <li key={item.key}>
+                  <span className="cx-muted">
+                    {dayHeading(wall(item.local_starts_at).date)}{" "}
+                    {rangeText(item)}
+                  </span>{" "}
+                  {item.label}
+                </li>
+              ))}
+            </ul>
+          ))}
+        <p>
+          <DestinationLink
+            id="operations"
+            section="TimelinePanel"
+            className="cx-inline-link"
+          >
+            Open the timeline
+          </DestinationLink>
+        </p>
+      </section>
     </section>
   );
 }

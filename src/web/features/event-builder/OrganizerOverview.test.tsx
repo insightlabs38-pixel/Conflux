@@ -116,3 +116,70 @@ describe("OrganizerOverview coming up", () => {
     ).not.toContain("scheduling conflict");
   });
 });
+
+describe("OrganizerOverview summary", () => {
+  it("is one strip of at most six figures that link to the records behind them, with no cards", async () => {
+    await mount({
+      event: "e1",
+      timezone: "UTC",
+      total: 0,
+      items: [],
+      conflicts: [],
+    });
+    const strip = container.querySelector('ul[aria-label="Event summary"]')!;
+    const items = [...strip.querySelectorAll(":scope > li")];
+    expect(items.length).toBeGreaterThan(0);
+    expect(items.length).toBeLessThanOrEqual(6);
+    for (const item of items) {
+      const link = item.querySelector("a")!;
+      expect(link.querySelector("strong")).not.toBeNull(); // the figure is the link
+    }
+    expect(container.querySelector(".cx-ops-card, .cx-ops-grid")).toBeNull();
+  });
+
+  it("lets one figure fail on its own while the others still render", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) =>
+        String(url).includes("/applications/")
+          ? jsonResponse(500, { detail: "boom" })
+          : jsonResponse(
+              200,
+              String(url).includes("/timeline/")
+                ? {
+                    event: "e1",
+                    timezone: "UTC",
+                    total: 0,
+                    items: [],
+                    conflicts: [],
+                  }
+                : [],
+            ),
+      ),
+    );
+    await act(async () =>
+      root.render(
+        withRouter(
+          <OrganizerOverview
+            workspaceId="w"
+            eventId="e1"
+            starts={null}
+            ends={null}
+            status="open"
+            readiness={READINESS}
+          />,
+        ),
+      ),
+    );
+    await act(async () => new Promise((r) => setTimeout(r, 10)));
+    const failed = container.querySelector('[data-figure="Registrations"]')!;
+    expect(failed.querySelector("[role=alert]")!.textContent).toContain(
+      "could not load",
+    );
+    expect(failed.querySelector("button")!.textContent).toBe("Retry");
+    const judging = container.querySelector(
+      '[data-figure="Judging progress"]',
+    )!;
+    expect(judging.textContent).toContain("ballots submitted");
+  });
+});

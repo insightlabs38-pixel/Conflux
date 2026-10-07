@@ -1,0 +1,45 @@
+version: 1
+checkpoint_id: CP-PD-F004-B05
+created_at: '2026-10-07T21:34:39Z'
+canonical_commit: a9a3c46
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+- PD-B02
+- PD-B03
+- PD-B04
+- PD-F001-B01
+- PD-F001-B02
+- PD-F002-B01
+- PD-F002-B02
+- PD-F002-B03
+- PD-F003-B01
+- PD-F003-B02
+- PD-F003-B03
+- PD-DESIGN-B00
+- PD-F004-B01
+- PD-F004-B02
+- PD-F004-B03
+- PD-F004-B04
+- PD-F004-B05
+active_batches:
+- PD-F005-B01
+active_claims: []
+open_escalations: []
+last_completed_task: PD-F004-B05-T91
+ready_summary:
+- PD-F005-B01 (professional application-shell depth: routes, switcher, navigation, command palette, search, inbox,
+  account; promoted IN_PROGRESS, not started). Design refs design/app-shell and design/state-matrix.
+verification_summary:
+- make verify-fast clean (pytest 2943, vitest 704); make e2e-fast clean run alone (docs/verification/PD-F004-B05/T90-e2e-fast.log);
+  tests/e2e/slop-audit.spec.ts (76 tests, 13 rules, a self-test per rule); tests/e2e/record-picker.spec.ts
+recovery_notes:
+- 'Contract: spec 004 section PD-F004-B05 canonical contract; guide docs/operations/VISUAL_FOUNDATION.md. Choose a record
+  by name with RecordPicker (src/web/components/RecordPicker.tsx), never an id input. New query entities need a feature,
+  manifest and search claim; prefer an existing source.'
+- 'Run make verify-fast and make e2e-fast one at a time: in parallel they flake (useRealtime test, canary uiv2-organizer 390).'
+- 'After changing web or api source run docker compose up -d --build app before browser tests; scripts/e2e-stack status reports freshness.'
+- Python and pytest need the Makefile env (DJANGO_SECRET_KEY, RECORD_SIGNING_KEY_SEED) and .venv/bin/python; plain python is not installed, use python3 for scripts/pdv3.
+- main unpushed; untracked design handoff zips untouched; supervisor.py modification is the owner's and left uncommitted

@@ -1,0 +1,97 @@
+version: 3
+task: PD-DESIGN-B00-T04
+batch: PD-DESIGN-B00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: design-review
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: e1ce1f8
+  head_commit: null
+changed_paths:
+- docs/product-depth-v3/design/reviews/B00_APPROVAL.md
+- tests/test_design_manifest.py
+deliverables:
+- item: Approve representative My Event, project editor, judge review, deliberation/results, public event/project,
+    event-builder and onsite-mobile surfaces
+  result: pass
+  evidence: eight screenshots opened at full resolution, eight must-preserve lists and D-005/D-006/D-010
+    read, each reference checked against the shipped primitives; ledger T04 states approved for implementation
+invariants:
+- item: Domain behavior, authorization and gates unchanged
+  result: pass
+  evidence: docs and one test only
+- item: Mutation, authorization and untrusted-content behavior specified, not invented
+  result: pass
+  evidence: O-3 (server decides check-in eligibility), O-4 (rich content through core/rich.py sanitizer),
+    F-5 (approval rule comes from APPROVAL policy)
+verification:
+- command: uv run --frozen pytest tests/test_design_manifest.py -q
+  result: pass
+  note: 15 passed; asserts domain markers in six boards and that no board is wider than declared (45 boards
+    in the dimension report)
+- command: exports/r2.1/qa/dimension-report.json and Resp-768 screenshot reviewed for narrow behavior
+  result: pass
+  note: narrow rules are on the phone frames and Resp-768; loading, empty and error states are the State-matrix
+    task (T05)
+- command: python3 scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid, 0 errors
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/app-shell
+  result: na
+  note: not in this task's scope
+- ref: design/organizer-data-surface
+  result: na
+  note: not in this task's scope
+- ref: design/participant-my-event
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/project-story-editor
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/judge-review
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/deliberation-awards
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/public-event
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/public-project
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/event-builder
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/onsite-mobile
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/state-matrix
+  result: na
+  note: not in this task's scope
+surface_matrix:
+- surface: web
+  result: deferred-by-contract
+  evidence: design approval only; implementation is PD-F004 onward
+- surface: docs
+  result: pass
+  evidence: reviews/B00_APPROVAL.md T04 section
+migrations: []
+findings:
+- P3 F-4 phone boards are three-phone artboards, presentation only
+- P3 F-5 approval count copy differs across the finalization board; policy decides the rule
+escalations: []
+limitations:
+- Static comps; hover, focus, axe and reduced motion are implementation QA.
+- Approval by the single implementing agent (same-account limitation); the owner signed the direction
+  off in CONFLUX_R2_SIGNOFF_REVIEW.md.
+- Only eight of the sixteen boards of these references were opened by me at full resolution in this session;
+  the rest were read through the r2.1 QA ledger and READMEs.
+next: review

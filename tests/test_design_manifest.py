@@ -192,3 +192,51 @@ def test_decision_eleven_is_indexed_and_the_ledger_cites_it():
     assert "011" in (DESIGN / "decisions/README.md").read_text()
     ledger = (DESIGN / "reviews/B00_APPROVAL.md").read_text()
     assert "D-011" in ledger and "approved for implementation" in ledger
+
+
+def test_surface_boards_keep_their_domain_markers():
+    markers = {
+        ("participant-my-event", "MyEvent"): ("Do next", "Now", "frozen revision", "Save offline"),
+        ("judge-review", "Judge-Review"): (
+            "Frozen r3",
+            "Submit score",
+            "Recuse",
+            "Flag for organizer",
+        ),
+        ("deliberation-awards", "Deliberation-Finalize"): (
+            "Frozen inputs",
+            "Written reason",
+            "Proposer can",
+            "Publication preview",
+            "Receipt",
+        ),
+        ("public-project", "Public-Project"): (
+            "Living",
+            "As judged",
+            "Long description",
+            "Renderer",
+        ),
+        ("event-builder", "Builder-Plan"): (
+            "Event-as-Code diff",
+            "Must be https",
+            "Test connection",
+        ),
+        ("project-story-editor", "Story-Editor"): (
+            "Preflight",
+            "blocking",
+            "Frozen r3",
+            "autosaved",
+        ),
+    }
+    for (ref, name), words in markers.items():
+        page = board(ref, name)
+        for word in words:
+            assert word.lower() in page.lower(), f"{name}: {word}"
+
+
+def test_phone_boards_are_declared_and_fit_their_artboard():
+    report = json.loads((DESIGN / "exports/r2.1/qa/dimension-report.json").read_text())
+    assert len(report) == 45
+    for entry in report:
+        declared_w = int(entry["declared"].split("x")[0])
+        assert entry["scrollW"] <= declared_w, entry["name"]

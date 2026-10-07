@@ -49,7 +49,7 @@ surface_matrix:
   evidence: spec 004 contract at T91
 migrations: []
 findings:
-- no violation existed on the reference pages.
+- 'CORRECTION (found at T06): at the T05 commit the pills rule was written and self-tested but not yet in the spec RULES list (a prettier reflow defeated the scripted edit), so it did not run on the 50 pages. It was enabled in the T06 commit and the pages were clean; no violation existed. The claim of 50 clean pages in the evidence above holds from that commit.'
 escalations: []
 limitations:
 - Rows are tr and li; a bespoke flex row of tags that is neither is only caught if it is pill-shaped.

@@ -1,0 +1,72 @@
+version: 3
+task: PD-F004-B04-T06
+batch: PD-F004-B04
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: adf4fa2
+  head_commit: null
+changed_paths:
+- src/web/features/page-builder/PageBuilder.tsx
+- src/web/features/page-builder/PageBuilder.test.tsx
+- src/web/styles/components.css
+- tests/e2e/slop.ts
+- tests/e2e/slop-audit.spec.ts
+- tests/e2e/weights.json
+- docs/execution-v3/receipts/tasks/PD-F004-B04-T05.yaml
+deliverables:
+- item: Not every section is a card inside another card
+  result: pass
+  evidence: 'new live rule nestedCards: a box with its own border (all four sides) or a filled, padded surface
+    inside another such box, ignoring controls, table parts, groups and the content of a closed disclosure.
+    The audit now visits every task tab of every destination, not only the first. It found four real cases, all
+    fixed: the Public page editor drew its block detail inside a Card titled "Public page" that repeated the tab''s
+    own title (the Card is gone; the intro and editor stand on the page), and on the operations tabs the
+    empty states (Approvals, Exports and jobs) and the table regions (Completeness, Extensions) framed
+    themselves inside their card; inside a card the empty and loading states and the table region have no frame,
+    while error and denied states keep theirs because the border carries meaning. The earlier operations sections
+    (T03) already became hairline-separated'
+invariants:
+- item: The gate can fail
+  result: pass
+  evidence: self-test "the audit sees a card inside a card"
+- item: Meaning is not removed with chrome
+  result: pass
+  evidence: error and denied states keep their border and tint; only decorative frames inside a card go
+- item: No test weakened
+  result: pass
+  evidence: PageBuilder.test checks the intro text instead of a heading that no longer exists; every other assertion unchanged
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run page-builder
+  result: pass
+  note: 16 passed
+- command: docker compose up -d --build app; npx playwright test slop-audit --project=desktop --workers=4 (three times)
+  result: pass
+  note: 65 passed each time, about 57 s; one earlier run had a single 'Loading' wait fail on eligibility at 390 that did
+    not repeat in 3 further full runs and 3 single runs (recorded, not masked)
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-SLOP-4, V-LINE-1
+- ref: design/state-matrix
+  result: pass
+  note: error and denied states unchanged
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: page builder, card inner states, live audit
+- surface: docs
+  result: pass
+  evidence: spec 004 contract at T91
+migrations: []
+findings:
+- 'CORRECTION to T05 (see its receipt): the pills rule was not yet enabled in the spec at that commit; it is now and the pages are clean.'
+- P3 one unexplained flake in the audit (a Loading text still present after 5 s on one run); not reproduced in 6 runs.
+escalations: []
+limitations:
+- Other panels not reachable from a task tab (dialogs, open disclosures, per-record detail views) are not walked by the audit.
+next: review

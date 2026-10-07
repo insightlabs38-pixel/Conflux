@@ -43,7 +43,11 @@ export async function slopProblems(page: Page, rules: SlopRule[]) {
       `${el.tagName.toLowerCase()}${el.className && typeof el.className === "string" ? "." + el.className.trim().split(/\s+/).slice(0, 2).join(".") : ""}`;
     const shown = (el: Element) => {
       const box = el.getBoundingClientRect();
-      return box.width > 0 && box.height > 0 && !el.closest("[hidden]");
+      if (box.width <= 0 || box.height <= 0 || el.closest("[hidden]"))
+        return false;
+      // the content of a closed disclosure is not on the page for anyone
+      const closed = el.closest("details:not([open])");
+      return !closed || !!el.closest("summary");
     };
     const filled = (color: string) => {
       const m = color.match(/rgba?\(([^)]+)\)/);
@@ -150,6 +154,43 @@ export async function slopProblems(page: Page, rules: SlopRule[]) {
         const tags = [...row.querySelectorAll(".cx-tag")].filter(shown);
         if (tags.length > 1)
           add("pills", `${tags.length} tags in one ${name(row)}`);
+      }
+    }
+
+    if (wanted.includes("nestedCards")) {
+      // a box with its own border or fill inside another such box is a card in a card (V-SLOP-4):
+      // hierarchy comes from hairlines and spacing. Controls, table parts, groups and code are not cards.
+      const cardlike = (el: Element) => {
+        if (
+          el.matches(
+            "input, select, textarea, button, a, td, th, tr, thead, tbody, table, li, option, fieldset, legend, summary, pre, code, kbd, progress, meter, img, svg, iframe, video, canvas, dialog, [role=tab], [role=tablist], [role=progressbar], [role=listbox], [role=menu], [role=alert], [role=status], [role=grid], .cx-avatar, .cx-tag, .cx-status, .cx-scroll-region",
+          )
+        )
+          return false;
+        const style = getComputedStyle(el);
+        const box = el.getBoundingClientRect();
+        if (box.width < 120 || box.height < 40) return false;
+        const border =
+          parseFloat(style.borderTopWidth) > 0 &&
+          parseFloat(style.borderRightWidth) > 0 &&
+          parseFloat(style.borderBottomWidth) > 0 &&
+          parseFloat(style.borderLeftWidth) > 0;
+        const padded =
+          parseFloat(style.paddingTop) >= 12 &&
+          parseFloat(style.paddingLeft) >= 12;
+        return border || (filled(style.backgroundColor) && padded);
+      };
+      for (const el of all) {
+        if (!shown(el) || !el.closest("main") || !cardlike(el)) continue;
+        for (
+          let up = el.parentElement;
+          up && up.tagName !== "MAIN";
+          up = up.parentElement
+        )
+          if (cardlike(up)) {
+            add("nestedCards", `${name(el)} inside ${name(up)}`);
+            break;
+          }
       }
     }
 

@@ -7,7 +7,7 @@ describe("page builder", () => {
     const html = renderToStaticMarkup(
       <PageBuilder workspaceId="workspace-id" eventId="event-id" />,
     );
-    expect(html).toContain("Public page");
+    expect(html).toContain("Compose the public event page");
     expect(html).toContain("no blocks yet");
   });
 });

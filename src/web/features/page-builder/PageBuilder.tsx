@@ -4,7 +4,6 @@ import { configDefaults, configError, type ConfigSchema } from "./configSchema";
 import { ConfigFields } from "./ConfigFields";
 import { Status } from "../../components/Status";
 import { Button } from "../../components/Button";
-import { Card } from "../../components/Card";
 import { EmptyState } from "../../components/EmptyState";
 import { WorkflowSections } from "../../components/WorkflowSections";
 
@@ -349,7 +348,7 @@ export function PageBuilder({
   );
 
   return (
-    <Card title="Public page">
+    <div className="cx-page-builder">
       <p className="cx-block-intro">
         Compose the public event page from blocks, set its appearance, and check
         accessibility.{" "}
@@ -412,6 +411,6 @@ export function PageBuilder({
           },
         ]}
       />
-    </Card>
+    </div>
   );
 }

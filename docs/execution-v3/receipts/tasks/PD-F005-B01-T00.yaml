@@ -1,0 +1,72 @@
+version: 3
+task: PD-F005-B01-T00
+batch: PD-F005-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: architecture
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: bd3ea34
+  head_commit: null
+changed_paths:
+- docs/product-depth-v3/specs/005-professional-application-shell-depth.md
+- docs/execution-v3/escalations/ESC-20260930-007.yaml
+- docs/verification/PD-F005-B01/T00-census.log
+deliverables:
+- item: Update spec 005 with canonical state/data model, lifecycle, authority boundary, migration plan and cross-surface applicability
+  result: pass
+  evidence: spec 005 section 'PD-F005-B01 canonical contract' covers what exists, source of truth and names (routes.ts and urlState.ts as the route model, roleDestinations as the one list of places, commands.ts, shellPreferences.ts), lifecycle per task (T01-T08), authority (no server state, URL and storage are requests), migration (legacy URLs, versioned device keys), the surface matrix as interpreted (audit as verified delegation, no new endpoint) and the test strategy
+- item: Resolve reuse of shared primitives and forbid duplicate local representations
+  result: pass
+  evidence: forbidden list in the contract; ROUTER and COMMANDS adopted forward (ESC-20260930-007); QUERY, NOTIFICATIONS and the existing inbox endpoints reused; ASYNC_JOB has no B01 consumer and is stated as the only source of slow work
+- item: Record unresolved architecture/product ambiguity as an escalation instead of guessing
+  result: pass
+  evidence: ESC-20260930-007 (plan_defect, P2, RESOLVED option A) and two entries in .claude-supervisor/QUESTIONS.md (ROUTER/COMMANDS ownership, device-local versus server shell preferences), each with a conservative reversible default
+invariants:
+- item: No duplicate source of truth, no UI-only business rule
+  result: pass
+  evidence: every shell surface derives from roleDestinations, RouteTarget, the entity catalogue and the existing inbox; no new endpoint, table or entity
+verification:
+- command: python3 scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid, 331 batches, 3110 tasks, no errors
+- command: cd src/web && npx vitest run lib/routes lib/urlState
+  result: pass
+  note: the route and URL-state baseline the contract extends is green
+- command: census (docs/verification/PD-F005-B01/T00-census.log)
+  result: pass
+  note: facts in 'What exists' checked against the repository (39 routes call sites, 7 url-state modules, inbox endpoints, 2 registered entities, 1 localStorage use, ROUTER and COMMANDS PLANNED)
+- command: browser verification at 1440 and 390 with loading, empty and error states
+  result: skipped
+  note: T00 changes no behavior; browser evidence is owned by T01-T08 and T90
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: must-preserve list read and mapped to tasks (event switcher with current/favorites/recent, palette, notification center, account menu, bottom nav with More, skip link and dialog semantics); role switch, preview-as, density and shortcuts are B02 and mount in the same account menu
+- ref: design/state-matrix
+  result: pass
+  note: inbox and palette states follow S-LOAD, S-EMPTY, S-ERR, S-DENY
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: contract
+- surface: audit
+  result: pass
+  evidence: reclassified in the contract as verified delegation (no new event type; T90 and T91 prove mutations use existing audited endpoints); stated, not skipped
+- surface: search
+  result: pass
+  evidence: T06 contract (fan-out over the entity catalogue)
+- surface: docs
+  result: pass
+  evidence: spec section
+migrations: []
+findings:
+- P2 plan_defect ROUTER and COMMANDS owners are later than their first consumers (ESC-20260930-007, resolved by adopting forward).
+- P3 global entity search is organizer and admin only because the entity catalogue is; participants and judges get destination and event search only.
+escalations:
+- ESC-20260930-007
+limitations:
+- The design boards are static; real routing, collapse animation and palette ranking are implementation choices recorded as adaptable in the design README.
+next: review

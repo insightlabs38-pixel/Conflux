@@ -1,0 +1,36 @@
+version: 1
+id: ESC-20260930-007
+task: PD-F005-B01-T00
+batch: PD-F005-B01
+category: plan_defect
+severity: P2
+status: RESOLVED
+summary: PD-F005-B01 tasks reuse the ROUTER and COMMANDS primitives, whose owner tasks (PD-F071-B01-T01, PD-F071-B02-T01) sit in later batches and are still PLANNED.
+observed:
+- "PRIMITIVE_REGISTRY lists ROUTER (owner PD-F071-B01-T01, depends on PD-F006-B05) and COMMANDS (owner PD-F071-B02-T01, depends on PD-F071-B01) as PLANNED; PD-F005-B01-T01, T03 reuse ROUTER and T05 reuses COMMANDS, so ready_tasks offers them while their primitive does not exist."
+- "A stable nested route model already exists in the repository from PD-B04-T01/T04: src/web/lib/routes.ts (hierarchy, legacy mapping, base path) and src/web/lib/urlState.ts (location, context, panel state, entry token rules), used by 39 call sites and 7 modules (docs/verification/PD-F005-B01/T00-census.log)."
+- "No command or shortcut registry exists anywhere in src/web."
+attempts:
+- Census of the shell, routes, URL state, inbox, entity catalogue and storage use.
+- Read the F071 owner tasks and the registry consumers; the primitive deliverables there are 'implement the contract as a reusable primitive', which a first consumer cannot wait for without stalling the whole shell track.
+decision_needed: Wait for the owners, or let this batch land the primitive's first implementation without creating a second source of truth?
+options:
+- option: A, adopt forward (implemented as the default)
+  tradeoff: ROUTER is the existing routes.ts and urlState.ts, extended in place by T01 with typed builders; COMMANDS is created once, by T05, as src/web/lib/commands.ts with the palette as its reference consumer. PD-F071-B01-T01 and PD-F071-B02-T01 later formalise, document and harden these exact modules (no rebuild, no second registry). Cost - the registry owner field names tasks that run after the first consumers; recorded in spec 005.
+- option: B, move ownership into this batch in PRIMITIVE_REGISTRY
+  tradeoff: honest ownership, but edits the registry and the F071 task list now, outside this task's authority and with 40 and 4 consumers depending on the shapes.
+- option: C, stop the shell track until PD-F006-B05 and PD-F071-B01/B02 are done
+  tradeoff: no ambiguity, but F005-B02, B03 and much of the later UI work depend on this batch, so the program stalls on an unrelated chain.
+recommended: A now; owner may choose B or C later, nothing built under A prevents it.
+affected_invariants:
+- No duplicate source of truth.
+- Reuse before duplication.
+affected_tasks:
+- PD-F005-B01-T01, T03, T05
+- PD-F071-B01-T01, PD-F071-B02-T01 (adopt the modules instead of creating them)
+- PD-F005-B02-T07 and PD-F005-B03-T04 (consume the same command registry)
+artifacts:
+- docs/product-depth-v3/specs/005-professional-application-shell-depth.md
+- docs/verification/PD-F005-B01/T00-census.log
+resolution: |
+  Decision: option A. The route model stays src/web/lib/routes.ts plus urlState.ts, and the command registry is src/web/lib/commands.ts created by PD-F005-B01-T05. The contract, the forbidden list and the adoption note for the F071 owners are in spec 005 (PD-F005-B01 canonical contract). No registry or queue edit was made; the F071 owner tasks must read this escalation first. Logged in .claude-supervisor/QUESTIONS.md for the owner.

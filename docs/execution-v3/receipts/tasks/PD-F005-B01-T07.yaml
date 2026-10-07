@@ -1,0 +1,82 @@
+version: 3
+task: PD-F005-B01-T07
+batch: PD-F005-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 46a4f28
+  head_commit: null
+changed_paths:
+- src/web/hooks/useInbox.ts
+- src/web/components/InboxCenter.tsx
+- src/web/components/InboxCenter.test.tsx
+- src/web/features/communications/Inbox.tsx
+- src/web/components/AppShell.tsx
+- src/web/components/Icon.tsx
+- src/web/styles/components.css
+- tests/e2e/inbox-center.spec.ts
+- tests/e2e/event-switcher.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Notification and inbox center as a complete workflow
+  result: pass
+  evidence: a bell in the top bar of every role shell shows the unread count (named for assistive technology, capped at 99+) and opens a panel with the latest eight messages (subject, body clamped to three lines, event, time), a New status and a Mark read button per unread message, All messages (for roles that have a Messages destination) and Notification preferences (opens the profile disclosure). Opening it marks nothing; reading is explicit. Organizers, who had no inbox UI at all, now have one.
+- item: Reuses the canonical primitive and existing endpoints
+  result: pass
+  evidence: one hook, useInbox, over the existing GET /inbox/ and POST /inbox/{id}/read/ with the existing query key and the realtime hint (workspace:<id>:inbox); the Messages destination card was refactored onto it, so there is one query, one cache entry and one mark-read path; preferences stay the NOTIFICATIONS screen; no endpoint, table or SDK change
+- item: States, keyboard, accessibility
+  result: pass
+  evidence: loading, all caught up, error with Try again (what is shown is kept), and a failed mark-read alert; native disclosure, Escape closes and returns focus, a link inside the panel closes it, 44px controls, at 390 the panel is pinned inside the viewport (tested); the unread figure is plain accent text, not a pill; axe, landmark and slop gates stay green with the control present
+invariants:
+- item: Server authority and member scope
+  result: pass
+  evidence: the list and the read call are the member-scoped endpoints (a person reads and marks only their own); the shell only presents them
+- item: No new storage, no parallel inbox
+  result: pass
+  evidence: nothing is stored on the device for the inbox; the Messages card and the bell share useInbox
+- item: No test weakened
+  result: pass
+  evidence: the Inbox card keeps its markup and tests (Inbox.test.tsx unchanged and green); a test of mine that raced the switcher list was made to wait for it
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 135 files, 739 tests (InboxCenter 6 covering count, mark read, opening marks nothing, caught up, 99+ and the cap of eight, links by role, load error)
+- command: scripts/e2e fixture run of inbox-center.spec.ts (create iso-min fixture, run, dispose; the runner's own with_fixture steps)
+  result: pass
+  note: 4 passed on an isolated fixture with a real organizer broadcast - a participant sees the count, the row and New, marks it read (count falls by one), it stays read after reload, Escape returns focus to the bell, at 1440 and 390 with the panel inside the viewport; All messages shows the message in the Messages card; Notification preferences opens the disclosure; an organizer is told they are caught up with no All messages link; a 503 on the list says so and Try again recovers
+- command: npx playwright test -c tests/e2e/playwright.config.ts account-menu event-switcher shell-responsive workspace-shell visual-foundation uiv2-gate slop-audit roles routing --project=desktop --workers=4
+  result: pass
+  note: 195 passed with the bell present; one event-switcher test raced its own list and passes alone and after the wait added (see findings)
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: notification center with actionable rows in the top bar; grouping and ranking are adaptable per the README
+- ref: design/state-matrix
+  result: pass
+  note: S-LOAD, S-EMPTY, S-ERR handled in the panel
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit, component, isolated browser and accessibility tests
+- surface: audit
+  result: pass
+  evidence: mark read goes through the existing audited-by-service endpoint; the shell writes nothing of its own
+- surface: docs
+  result: pass
+  evidence: contract in spec 005; release note at T91
+migrations: []
+findings:
+- P3 the server returns the newest 100, so the unread figure is of those (shown as 99+ at the limit); a count endpoint would need an API change, which this batch does not make.
+- P3 there is no mark-all-read endpoint; reading is per message.
+- P3 event-switcher judge/participant test read the list before it loaded under load; it now waits for the first choice.
+escalations:
+- ESC-20260930-007
+limitations:
+- Rows do not deep-link to the message (the inbox has no per-message route); All messages is the list.
+- Messages with long bodies are clamped in the panel; the Messages card shows them in full.
+next: review

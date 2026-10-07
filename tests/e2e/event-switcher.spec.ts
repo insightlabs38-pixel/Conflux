@@ -96,6 +96,7 @@ for (const role of ["participant-01", "judge-01"]) {
     await trigger(page).click();
     const panel = page.locator(".cx-switcher__panel");
     await expect(panel).toBeVisible();
+    await expect(panel.locator(".cx-switcher__choice").first()).toBeVisible(); // the list loads after it opens
     const events = await panel
       .locator(".cx-switcher__choice")
       .allTextContents();

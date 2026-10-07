@@ -13,6 +13,7 @@ import {
   type Theme,
 } from "../lib/shellPreferences";
 import { EventSwitcher } from "./EventSwitcher";
+import { InboxCenter } from "./InboxCenter";
 import { SkipLink } from "./SkipLink";
 import { Icon, type IconName } from "./Icon";
 
@@ -167,6 +168,7 @@ export function AppShell({
             {nav}
           </nav>
         )}
+        {destinations && <InboxCenter />}
         {destinations && (
           <details
             className="cx-account"

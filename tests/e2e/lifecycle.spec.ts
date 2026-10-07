@@ -160,7 +160,7 @@ test("organizer requests changes; participant remediates; organizer approves", a
   await queue.getByLabel("Outcome").selectOption("needs_remediation");
   await queue.getByRole("button", { name: "Record decision" }).click();
   await expect(
-    queue.locator(".cx-badge", { hasText: "Changes requested" }).first(),
+    queue.locator(".cx-status", { hasText: "Changes requested" }).first(),
   ).toBeVisible();
 
   const part = await (
@@ -208,12 +208,12 @@ test("organizer requests changes; participant remediates; organizer approves", a
   await again.getByRole("button", { name: `Review ${PROJECT}` }).click();
   await again.getByRole("button", { name: "Mark resolved" }).click();
   await expect(
-    again.locator(".cx-badge", { hasText: "resolved" }).first(),
+    again.locator(".cx-status", { hasText: "resolved" }).first(),
   ).toBeVisible();
   await again.getByLabel("Outcome").selectOption("cleared");
   await again.getByRole("button", { name: "Record decision" }).click();
   await expect(
-    again.locator(".cx-badge", { hasText: "Cleared" }).first(),
+    again.locator(".cx-status", { hasText: "Cleared" }).first(),
   ).toBeVisible();
   await shot(part, "participant-remediation", "Eligibility review");
   await shot(org, "organizer-eligibility", "Eligibility review queue");

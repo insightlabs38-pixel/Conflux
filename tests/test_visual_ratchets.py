@@ -350,3 +350,11 @@ def test_a_scroll_region_contains_its_absolutely_positioned_cells():
     # and made the whole page scroll sideways at 390px (organizer eligibility queue)
     block = dict(rules((WEB / "styles/components.css").read_text()))
     assert "position: relative" in block[".cx-scroll-region"]
+
+
+def test_no_browser_spec_selects_the_removed_badge_class():
+    # a spec that waits for `.cx-badge` times out forever once Badge is gone (lifecycle and pvs did)
+    for spec in sorted((ROOT / "tests/e2e").glob("*.spec.ts")):
+        if spec.name == "visual-foundation.spec.ts":  # asserts the class is absent
+            continue
+        assert "cx-badge" not in spec.read_text(), spec.name

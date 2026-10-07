@@ -168,7 +168,7 @@ test("participant requests a deadline exception and the organizer decides it", a
     .fill("Venue Wi-Fi outage.");
   await exception.getByRole("button", { name: "Request exception" }).click();
   await expect(
-    exception.locator(".cx-badge", { hasText: "pending" }),
+    exception.locator(".cx-status", { hasText: "pending" }),
   ).toBeVisible();
 
   const org = await (await browser.newContext()).newPage();
@@ -183,7 +183,7 @@ test("participant requests a deadline exception and the organizer decides it", a
   await card.getByLabel("Note").fill("Approved for one hour.");
   await card.getByRole("button", { name: "Approve" }).click();
   await expect(
-    card.locator(".cx-badge", { hasText: "approved" }),
+    card.locator(".cx-status", { hasText: "approved" }),
   ).toBeVisible();
 });
 

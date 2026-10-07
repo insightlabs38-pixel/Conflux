@@ -1,0 +1,83 @@
+version: 3
+task: PD-F004-B02-T90
+batch: PD-F004-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 879ab0a
+  head_commit: null
+changed_paths:
+- docs/verification/PD-F004-B02/MATRIX.md
+- docs/verification/PD-F004-B02/T90-verify-fast.log
+- docs/verification/PD-F004-B02/T90-e2e-fast.log
+- tests/e2e/lifecycle.spec.ts
+- tests/e2e/pvs.spec.ts
+- tests/test_visual_ratchets.py
+deliverables:
+- item: Verification matrix for the 8 capability tasks, each linked to at least one executable proof
+  result: pass
+  evidence: docs/verification/PD-F004-B02/MATRIX.md maps T01-T08 to a positive proof, a negative or boundary
+    proof and compatibility or authority notes, plus state, viewport, authorization and migration sections
+- item: Positive, negative, authorization, lifecycle/migration and concurrency coverage
+  result: pass
+  evidence: 'migration: a theme without hero_size resolves to compact (test_event_themes.py); authorization:
+    the only mutation is the existing organizer-only page PATCH, and an unsupported hero_size is refused
+    with nothing stored (unit, API and browser); lifecycle and concurrency: no new state'
+- item: UI states and viewports verified, not only screenshots
+  result: pass
+  evidence: computed-style and geometry assertions at 390 and 1440 (status, motion, loading, empty, error,
+    disclosure, hero band); axe and overflow on every organizer destination at four widths in workspace-shell
+- item: Exact commands and results recorded
+  result: pass
+  evidence: below, with logs in docs/verification/PD-F004-B02/
+invariants:
+- item: No test, gate or assertion weakened
+  result: pass
+  evidence: no timeout raised, no skip added; the two e2e selectors that still named the removed Badge
+    class were updated to Status (same assertions) and a ratchet now fails any spec that selects it
+- item: Failures root-caused
+  result: pass
+  evidence: 'first e2e-fast failed on three things: lifecycle and pvs waited for .cx-badge, which T01 removed
+    (never run in the T01 slice; fixed in the specs, ratchet added), the eligibility queue overflowed at
+    390 by 57px (found earlier by workspace-shell, fixed in .cx-scroll-region), and auth-states "a wrong
+    password" saw a leftover state file once (see findings)'
+verification:
+- command: make verify-fast
+  result: pass
+  note: pytest 2892 passed, 34 skipped; vitest 677 passed; ruff, prettier, build, sdk-check, block-schema-check clean (T90-verify-fast.log)
+- command: make e2e-fast
+  result: pass
+  note: 'final run exit 0 (read-only ok, isolated-mutation ok, canary ok); first run failed as described
+    in the invariants, log of the clean run in T90-e2e-fast.log'
+- command: uv run --frozen pytest tests/test_visual_ratchets.py -q
+  result: pass
+  note: 25 passed
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-HERO-1, V-LINE-1, V-MOTION-1, V-COLOR-2, V-SLOP rules asserted by ratchets and e2e
+- ref: design/state-matrix
+  result: pass
+  note: S-LOAD, S-EMPTY, S-ERR, S-DENY covered by tests in the matrix
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: see MATRIX.md
+- surface: docs
+  result: pass
+  evidence: MATRIX.md; SURFACES.md in T91
+migrations: []
+findings:
+- 'P3 test-reliability: in the first e2e-fast run auth-states "a wrong password fails ... writes no state"
+  saw sponsor.json already present once and passed on the tool''s diagnostic re-run and on the next two
+  full runs; the cause was not established (the file is per fixture seed, and nothing in this batch touches
+  authentication). Recorded, not masked: no timeout or retry was added; a repeat run is the follow-up if
+  it recurs.'
+escalations: []
+limitations:
+- e2e-report history still carries the red runs of this batch until clean runs accumulate (not edited).
+next: review

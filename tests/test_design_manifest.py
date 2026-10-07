@@ -284,3 +284,22 @@ def test_state_boards_still_draw_the_cells_the_matrix_cites():
         "Pass",
     ):
         assert cell.lower() in states.lower(), cell
+
+
+def test_every_stored_role_is_accounted_for_in_the_design_review():
+    source = (ROOT / "src/api/workspaces/models.py").read_text()
+    roles = re.findall(r'^\s+[A-Z]+ = "(\w+)", ', source, re.M)
+    assert {"participant", "judge", "organizer", "admin", "mentor", "volunteer", "sponsor"} <= set(
+        roles
+    )
+    ledger = (DESIGN / "reviews/B00_APPROVAL.md").read_text()
+    for role in roles:
+        assert role in ledger, role
+
+
+def test_touch_token_and_decision_twelve_exist():
+    light, _ = themes()
+    assert light["--h-touch"] == "44px"
+    text = (DESIGN / "decisions/012-touch-targets-and-hero-budget.md").read_text()
+    assert "--h-touch" in text and "hero band" in text
+    assert "D-012" in (DESIGN / "system/VISUAL_CONTRACT.md").read_text()

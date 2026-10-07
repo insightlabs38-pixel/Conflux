@@ -44,3 +44,33 @@ Opened at full resolution: `MyEvent`, `Story-Editor`, `Judge-Review`, `Resp-768`
 - O-4 story, figure, diagram and math content is untrusted: rendering goes through `core/rich.py` and its sanitizer, public pages use the same output, alt text is required by the preflight, never trusted from the client.
 
 Disposition: **approved for implementation** with F-5, O-3, O-4.
+
+## T06 · design against roles, workflows, density, accessibility and the compact direction
+Method: the real `Role` enum (`workspaces/models.py`) and `roleDestinations` (`WorkspaceNavigation.tsx`) are the requirement; each is matched to drawn boards. Boards were measured in Chromium (hero bands, mobile hit areas, landmarks, serif reading column 720px).
+
+| Role | Drawn | Not drawn, and why that is acceptable |
+|---|---|---|
+| participant | MyEvent, MyEvent-Mobile, Story-*, Public-Event/Project | Team and resources pages inherit the Ledger list/inspector and reading patterns |
+| judge | Judge-Review, Resp-768, Judge-Mobile, Pairwise-*, Judge-Dialogs, Shell-Judge | none |
+| organizer, admin | Shell-Organizer, Data-*, Builder-*, Deliberation*, Wide-1920, Dark-* | Admin is the organizer shell; workspace-level screens inherit it |
+| mentor, volunteer | Onsite-A (desk, scan, pass), Onsite-B (mentor queue, route, pitch queue) | the desktop desk inherits the Overview strip plus queue table |
+| sponsor | none (the role has one narrow capability and no `roleDestinations` entry) | sponsor workflows are a just-in-time refinement (`DESIGN_HANDOFF_PROTOCOL.md`, `LATER_DESIGN_PASSES.md`); inherits Ledger until its batch |
+
+| Organizer destination | Reference |
+|---|---|
+| Overview, Participants, Projects and eligibility, Operations and audit | Shell-Organizer, Data-Surface, Data-Filters, Shell-Dense (ops mode) |
+| Event setup, Integrations | Builder-Setup, Builder-Pages, Builder-Plan |
+| Judging, Results and publication | Judge-*, Pairwise-*, Deliberation, Deliberation-Finalize, Public-Project |
+| Communications | no composer board; audience = `QUERY` filters, send = bulk plan (Data-Filters), body = rich editor (Story-*). Inherits |
+| On-site | Onsite-A, Onsite-B |
+| Judging setup, assignment optimization | `LATER_DESIGN_PASSES.md` "Design first" before that batch |
+
+Checks: **density**: 28/36/44px rows measured, Wide-1920 draws 5,012 people and 10 columns. **Accessibility**: contrast tested for every token pair; status is icon plus word in every board opened; grid, dialog, nav and landmark semantics are in the READMEs and, where drawn, in the HTML (`role="grid"`, `aria-rowcount`, dialogs); public pages have one h1, a main, a nav and a footer. **Progressive disclosure**: Advanced rail group, Advanced fields collapsed in the builder, "More" after four bulk actions, Query text behind a toggle. **Compact hero**: measured, D-012. **Operational complexity**: stale-plan validity, frozen snapshots, offline buffers, recusal and conflict handling, approvals, masking, partial bulk failure and real 5,012-row scale are all drawn, so no board was rejected for omitting complexity.
+
+### Findings and disposition
+- F-6 (P2 for implementation, P3 for design) the mobile boards draw 40px controls, against the 44px rule. Resolved by D-012 and token `--h-touch`.
+- F-7 (P3) hero heights in the comps (137px desktop, 157px and 186px mobile) did not match the stated budgets as literally read. Resolved by D-012 (band, not action row; the lower bound is not a floor).
+- F-8 (P3) sponsor has no board. Recorded as the planned just-in-time pass; not a foundation gap.
+- Nothing was rejected; nothing conflicts with a product or domain invariant (no escalation).
+
+Disposition: **design verified against roles and workflows**.

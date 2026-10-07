@@ -8,7 +8,7 @@ Frozen by PD-DESIGN-B00-T02. This page is the rule list; values live in `tokens.
 | V-TYPE-1 | Typography | IBM Plex Sans (UI), Plex Mono (ids, code, tokens), Source Serif 4 (public long-form only). Self-hosted in production, system fallbacks stay in `--font-*`. |
 | V-TYPE-2 | Typography | Sizes come only from 11/12/13/14/16/20/24/32 (`--fs-*`); line heights `--lh-tight` 1.25, `--lh-ui` 1.4, `--lh-read` 1.65. App page titles are at most 20px; 24/32 are public pages only. |
 | V-SPACE-1 | Spacing | 4px base, steps 4/8/12/16/20/24/32/40/48 (`--sp-*`). No other literal paddings or gaps. |
-| V-DENS-1 | Density | Rows comfortable 44 / standard 36 / dense 28, controls 40/32/28. Standard is the default; Dense is an explicit per-user choice (offered once on about 1800px+ displays); density never changes with viewport. Touch targets stay at least 44px on mobile. |
+| V-DENS-1 | Density | Rows comfortable 44 / standard 36 / dense 28, controls 40/32/28. Standard is the default; Dense is an explicit per-user choice (offered once on about 1800px+ displays); density never changes with viewport. Touch targets stay at least 44px (`--h-touch`, D-012) on touch layouts. |
 | V-COLOR-1 | Color | Cool neutrals plus ONE accent (`--accent`) for action, selection, focus and links. Semantic ok/warn/err/info/mute each have ink, tint and line. |
 | V-COLOR-2 | Color | Every text/surface pair is at least 4.5:1; control borders (`--line-3`) and focus at least 3:1, in light and dark. Status is icon plus word, never colour alone. Public themes may override `--pub-accent` only after a contrast check. |
 | V-THEME-1 | Theme | Authenticated surfaces: system / light / dark per user (default system). A dark theme root re-declares `color` and `background-color`; public pages follow the organizer theme, not the app theme. |
@@ -18,7 +18,7 @@ Frozen by PD-DESIGN-B00-T02. This page is the rule list; values live in `tokens.
 | V-ICON-1 | Icons | Lucide-compatible stroke set, 16px in controls (24px grid), `currentColor`, no coloured tiles beside headings. |
 | V-MOTION-1 | Motion | State transitions only, 120ms (`--t-fast`) to 180ms (`--t-base`); everything honours `prefers-reduced-motion`. |
 | V-FOCUS-1 | Focus | Visible two-ring focus (`--focus`) on every interactive element; never removed. |
-| V-HERO-1 | Compact hero | Public hero is none / compact (default, 160-240px) / standard (at most 360px) / immersive (opt-in, Advanced). Mobile at most 120px. Project content stays near the fold; missing art falls back to a typographic lockup. Operator screens have no hero. |
+| V-HERO-1 | Compact hero | Public hero is none / compact (default, 160-240px) / standard (at most 360px) / immersive (opt-in, Advanced). Mobile at most 120px. Project content stays near the fold; missing art falls back to a typographic lockup. Operator screens have no hero. Heights apply to the hero band, not the action row under it (D-012). |
 | V-RESP-1 | Responsive | Breakpoints wide 1440, desktop 1024, tablet 768, mobile below (`decisions/009`); mobile has at most five bottom-nav items plus More. |
 
 ## Anti-slop gate (review checklist; a violation needs a written exception)

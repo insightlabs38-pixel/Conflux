@@ -1,0 +1,102 @@
+version: 3
+task: PD-DESIGN-B00-T06
+batch: PD-DESIGN-B00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: design-review
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: a2aa60f
+  head_commit: null
+changed_paths:
+- docs/product-depth-v3/design/reviews/B00_APPROVAL.md
+- docs/product-depth-v3/design/decisions/012-touch-targets-and-hero-budget.md
+- docs/product-depth-v3/design/decisions/README.md
+- docs/product-depth-v3/design/system/tokens.css
+- docs/product-depth-v3/design/system/tokens.json
+- docs/product-depth-v3/design/system/VISUAL_CONTRACT.md
+- tests/test_design_manifest.py
+deliverables:
+- item: Review the design against real roles, density, accessibility, progressive disclosure, compact
+    hero and existing domain workflows; reject prototypes that omit required operational complexity
+  result: pass
+  evidence: all seven stored roles and all organizer destinations matched to boards (gaps named with reason);
+    density, hero bands, mobile hit areas and landmarks measured in Chromium; nothing rejected, three
+    findings resolved by D-012 or planned
+invariants:
+- item: Domain behavior and gates unchanged
+  result: pass
+  evidence: docs, one token added (--h-touch), one test file
+- item: No design/product-invariant conflict left unrecorded
+  result: pass
+  evidence: no escalation condition met; F-6..F-8 recorded
+verification:
+- command: uv run --frozen pytest tests/test_design_manifest.py -q
+  result: pass
+  note: 19 passed; every Role enum value appears in the ledger (negative if a role is added without review),
+    css/json token parity includes --h-touch
+- command: Playwright chromium measurements at 1440 (hero bands of Public-Event, Themed, Mobile; control
+    heights in four mobile boards; landmarks)
+  result: pass
+  note: found 40px mobile controls (F-6) and hero heights outside the literal budget (F-7), both resolved
+    by D-012; one h1, main, nav, footer on desktop public pages
+- command: python3 scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid, 0 errors
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/app-shell
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/organizer-data-surface
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/participant-my-event
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/project-story-editor
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/judge-review
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/deliberation-awards
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/public-event
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/public-project
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/event-builder
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/onsite-mobile
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/state-matrix
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+surface_matrix:
+- surface: web
+  result: deferred-by-contract
+  evidence: design approval only; implementation is PD-F004 onward
+- surface: docs
+  result: pass
+  evidence: reviews/B00_APPROVAL.md T06 section, decisions/012
+migrations: []
+findings:
+- P3 F-6 mobile boards draw 40px controls; D-012 and --h-touch
+- P3 F-7 hero heights vs literal budgets; D-012
+- P3 F-8 sponsor has no board; planned just-in-time pass
+escalations: []
+limitations:
+- Review by the single implementing agent (same-account limitation); axe and screen-reader runs are implementation
+  QA.
+- Public-Event-Mobile has no main/nav landmark in the comp; the README's landmark rule governs the build.
+next: review

@@ -36,7 +36,7 @@
   /* geometry */
   --r-1: 3px; --r-2: 5px; --r-3: 8px; --r-pill: 999px;
   --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-10: 40px; --sp-12: 48px;
-  --h-ctl: 32px; --h-ctl-sm: 28px; --h-ctl-lg: 40px; --h-row: 36px; --h-row-dense: 28px; --h-row-comfy: 44px; --h-top: 44px;
+  --h-ctl: 32px; --h-ctl-sm: 28px; --h-ctl-lg: 40px; --h-row: 36px; --h-row-dense: 28px; --h-row-comfy: 44px; --h-top: 44px; --h-touch: 44px;
   --sh-pop: 0 8px 24px rgba(16, 24, 40, .14), 0 0 0 1px rgba(16, 24, 40, .08);
   --sh-dlg: 0 16px 48px rgba(16, 24, 40, .22), 0 0 0 1px rgba(16, 24, 40, .1);
   --focus: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent);

@@ -1,0 +1,84 @@
+version: 3
+task: PD-DESIGN-B00-T01
+batch: PD-DESIGN-B00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: design-review
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 9b786f0
+  head_commit: null
+changed_paths:
+- docs/product-depth-v3/design/exports/r2.1/SOURCE.md
+- tests/test_design_manifest.py
+deliverables:
+- item: Import the approved Claude Design export; preserve files, README/context, prototypes and screenshots; record exact source revision
+  result: pass
+  evidence: "The r2.1 tree was already committed in 5680dcd; unzip of conflux_v3_claude_design_handoff_r2_1.zip plus diff -rq against docs/product-depth-v3/design reports 0 differences. SOURCE.md records revision r2.1 and the archive sha256."
+invariants:
+- item: Approved artifacts are stored locally and versioned, usable without a hosted conversation
+  result: pass
+  evidence: "all 14 manifest references resolve to committed README, html and screenshot files (tests/test_design_manifest.py); native canvas under exports/r2.1/canvas"
+- item: No domain behavior, tests or gates changed
+  result: pass
+  evidence: docs and one new test only
+verification:
+- command: uv run --frozen pytest tests/test_design_manifest.py -q
+  result: pass
+  note: "5 passed; covers happy path (12 foundation ids APPROVED, every artifact exists) and the negative case (a dangling artifact is reported with its reference id)"
+- command: python3 scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid, 0 errors
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: present, APPROVED r2.1
+- ref: design/app-shell
+  result: pass
+  note: present, APPROVED r2.1
+- ref: design/organizer-data-surface
+  result: pass
+  note: present, APPROVED r2.1
+- ref: design/participant-my-event
+  result: pass
+  note: present, APPROVED r2.1
+- ref: design/project-story-editor
+  result: pass
+  note: present, APPROVED r2.1
+- ref: design/judge-review
+  result: pass
+  note: present, APPROVED r2.1
+- ref: design/deliberation-awards
+  result: pass
+  note: present, APPROVED r2.1
+- ref: design/public-event
+  result: pass
+  note: present, APPROVED r2.1
+- ref: design/public-project
+  result: pass
+  note: present, APPROVED r2.1
+- ref: design/event-builder
+  result: pass
+  note: present, APPROVED r2.1
+- ref: design/onsite-mobile
+  result: pass
+  note: present, APPROVED r2.1
+- ref: design/state-matrix
+  result: pass
+  note: present, APPROVED r2.1
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: design artifacts committed; no component change in this task
+- surface: docs
+  result: pass
+  evidence: SOURCE.md
+migrations: []
+findings: []
+escalations: []
+limitations:
+- The zip stays untracked at the repo root (owner's); the committed tree is authoritative.
+- Whether the designs are good enough is the T02-T0x freeze tasks and the owner's sign-off, not this ingest.
+next: review

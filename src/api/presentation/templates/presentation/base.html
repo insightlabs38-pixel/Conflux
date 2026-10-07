@@ -27,7 +27,7 @@
       {% csrf_token %}
       <input type="hidden" name="next" value="{{ request.path }}">
       <label>
-        {% trans "Language" %}
+        <span class="cx-shell__language-label">{% trans "Language" %}</span>
         <select name="language" onchange="this.form.submit()">
           {% get_current_language as CURRENT_LANGUAGE %}
           {% get_available_languages as LANGUAGES %}

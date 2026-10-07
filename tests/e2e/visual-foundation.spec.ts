@@ -413,6 +413,41 @@ for (const width of [390, 1440]) {
     await accessible(page);
   });
 
+  // Spec 004: on a phone the chrome collapses too. The public header is two rows (name, then
+  // navigation with the language control), and each public page has its title and first content
+  // within the first screen.
+  test(`public pages collapse their header and start their content high at ${width}`, async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+    const height = width < 768 ? 844 : 900;
+    await page.setViewportSize({ width, height });
+    await signIn(page, "organizer");
+    const { event } = await eventIds(page);
+    for (const path of ["", "gallery/", "results/"]) {
+      await page.goto(`/e/${event}/${path}`);
+      await page.waitForLoadState("networkidle");
+      const at = await page.evaluate(() => {
+        const bottom = (s: string) =>
+          document.querySelector(s)?.getBoundingClientRect().bottom ?? 0;
+        const top = (s: string) =>
+          document.querySelector(s)?.getBoundingClientRect().top ?? 0;
+        return {
+          header: bottom("header.cx-shell__header"),
+          h1: top("main h1"),
+          language: document
+            .querySelector(".cx-shell__language select")
+            ?.getAttribute("aria-label"),
+          labelled: document.querySelector(".cx-shell__language label")
+            ?.textContent,
+        };
+      });
+      expect(at.header, path).toBeLessThanOrEqual(width < 768 ? 120 : 100);
+      expect(at.h1, path).toBeLessThan(height * 0.3);
+      expect(at.labelled).toContain("Language"); // still the control's name
+    }
+  });
+
   // V-HERO-1 / D-012: the default public hero is compact. The band (lockup or art, title, status)
   // is 160-240px on desktop (the lower bound is not a floor) and at most 120px on mobile; the
   // description and the one primary action sit under it; no text sits over art; no sideways scroll.

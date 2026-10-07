@@ -481,8 +481,18 @@
 @media (max-width: 48rem) {
   .cx-event-site .cx-shell__header {
     flex-wrap: wrap;
-    gap: var(--sp-3);
-    padding-inline: var(--sp-4);
+    gap: var(--sp-2) var(--sp-3);
+    padding: var(--sp-3) var(--sp-4);
+  }
+  /* the language word steps aside (it stays the control's accessible name) so navigation and the
+     language control share one row and the header is two rows, not three */
+  .cx-event-site .cx-shell__language-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
   .cx-event-site .cx-shell__brand {
     width: 100%;
@@ -491,6 +501,9 @@
   .cx-event-site .cx-shell__nav {
     flex: 1;
     gap: var(--sp-2);
+  }
+  .cx-event-site .cx-shell__nav a {
+    padding-inline: var(--sp-1);
   }
   .cx-event-site .cx-shell__language {
     margin-left: 0;

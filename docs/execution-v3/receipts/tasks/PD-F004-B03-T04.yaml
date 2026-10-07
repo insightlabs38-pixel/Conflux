@@ -1,0 +1,62 @@
+version: 3
+task: PD-F004-B03-T04
+batch: PD-F004-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 28024bb
+  head_commit: null
+changed_paths:
+- src/web/styles/presentation.css
+- src/api/presentation/templates/presentation/base.html
+- tests/e2e/visual-foundation.spec.ts
+deliverables:
+- item: On mobile, hero height collapses aggressively
+  result: pass
+  evidence: 'the hero band (PD-F004-B02-T07, at most 120px) and the project page cover (T03) already collapse;
+    this task measured the rest of the first screen on seed 7 at 390x844 and found the public header at
+    180px (brand row, a wrapped navigation, and a separate language row). It is now 120px or less: the
+    word Language steps aside on a phone (it stays the select''s accessible name via its label), the
+    navigation links use 4px side padding, and navigation and language share one row; the landing, gallery
+    and results pages all put their h1 within the top 30% of the screen'
+- item: Boundary
+  result: pass
+  evidence: on a narrower phone the navigation still wraps rather than overflowing (nowrap was tried and
+    reverted because it overflows below about 340px); touch targets stay 44px or taller
+invariants:
+- item: Accessibility
+  result: pass
+  evidence: the language control keeps its visible label on desktop and its label text on mobile (visually
+    hidden, not removed); axe and overflow pass on public, showcase and foundations
+- item: No server behaviour change
+  result: pass
+  evidence: template markup gains one span; the language form and endpoint are unchanged
+verification:
+- command: npx playwright test visual-foundation public showcase foundations --project=desktop
+  result: pass
+  note: 45 passed, including the new header and first-screen test on landing, gallery and results at 390 and 1440
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-HERO-1 (mobile at most 120px), V-RESP-1, D-012 (44px touch)
+- ref: design/state-matrix
+  result: pass
+  note: no state component changed
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: public stylesheet, base template
+- surface: docs
+  result: pass
+  evidence: spec 004 contract and VISUAL_FOUNDATION.md at T91
+migrations: []
+findings: []
+escalations: []
+limitations:
+- The authenticated app header still wraps its navigation below 1024px until the mobile bottom navigation of
+  PD-F005; this task covers the public site.
+next: review

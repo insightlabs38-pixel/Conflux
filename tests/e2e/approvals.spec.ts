@@ -55,7 +55,7 @@ for (const width of [390, 1440]) {
     });
     const gate = panel.getByLabel("Sending a message to an audience");
     await expect(gate).not.toBeChecked();
-    await expect(panel.getByText("Nothing here")).toBeVisible();
+    await expect(panel.getByText("No approval requests")).toBeVisible();
     await noHorizontalOverflow(page);
 
     // Switch the gate on in the page; the server now holds the message.
@@ -98,7 +98,7 @@ for (const width of [390, 1440]) {
 
     // Withdrawing it removes it from the waiting list and keeps the record.
     await requests.getByRole("button", { name: "Withdraw" }).click();
-    await expect(panel.getByText("Nothing here")).toBeVisible();
+    await expect(panel.getByText("No approval requests")).toBeVisible();
     const after = await (
       await page.request.get(`${api}/approvals/${body.approval.public_id}/`)
     ).json();

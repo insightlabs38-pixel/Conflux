@@ -27,8 +27,10 @@ export function ModuleGate({
   // The list may still describe another event (or the workspace union) right after a switch.
   const settled = modules.eventId === eventId;
   return (
-    <EmptyState title={`${state.label} is not turned on for this event.`}>
-      <p>{state.description}</p>
+    <EmptyState
+      title={`${state.label} is not turned on for this event.`}
+      why={state.description}
+    >
       {error && <p role="alert">{error}</p>}
       <Button
         variant="primary"

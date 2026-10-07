@@ -63,12 +63,29 @@ describe("state primitives", () => {
 
   it("EmptyState renders a title and optional action", () => {
     const html = renderToStaticMarkup(
-      <EmptyState title="No projects yet">
-        <Button variant="primary">Create one</Button>
-      </EmptyState>,
+      <EmptyState
+        title="No projects yet"
+        why="Projects appear here once a team creates one."
+        next={<Button variant="primary">Create one</Button>}
+      />,
     );
     expect(html).toContain("No projects yet");
+    expect(html).toContain("Projects appear here once a team creates one.");
     expect(html).toContain("Create one");
+  });
+  it("EmptyState has a place for the one next action and omits it when the viewer has none", () => {
+    expect(
+      renderToStaticMarkup(<EmptyState title="Nothing" why="Because." />),
+    ).not.toContain("cx-state__next");
+    expect(
+      renderToStaticMarkup(
+        <EmptyState
+          title="Nothing"
+          why="Because."
+          next={<a href="/x">Do it</a>}
+        />,
+      ),
+    ).toContain('cx-state__next"><a href="/x">Do it</a>');
   });
 
   it("ErrorState announces via role=alert and offers retry", () => {

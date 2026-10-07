@@ -55,9 +55,10 @@ export function WorkspaceSelector({
   if (state === "error") return <ErrorState message={error} onRetry={reload} />;
   if (workspaces.length === 0)
     return (
-      <EmptyState title="You are not a member of any workspace yet.">
-        <p>Ask your event organizer for an invitation to get started.</p>
-      </EmptyState>
+      <EmptyState
+        title="You are not a member of any workspace yet."
+        why="Ask your event organizer for an invitation to get started."
+      />
     );
 
   return (

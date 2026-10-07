@@ -128,9 +128,10 @@ export function ApprovalsPanel({
         <ErrorState message={list.error.message} onRetry={list.reload} />
       )}
       {list.data && list.data.length === 0 && (
-        <EmptyState title="Nothing here">
-          Requests appear when a gated operation is attempted.
-        </EmptyState>
+        <EmptyState
+          title="No approval requests"
+          why="Requests appear when a gated operation is attempted."
+        />
       )}
       <ul aria-label="Approval requests" className="cx-plain-list">
         {(list.data ?? []).map((item) => (

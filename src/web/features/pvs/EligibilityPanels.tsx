@@ -401,9 +401,10 @@ export function EligibilityReviewPanel({
         <ErrorState message={reviews.error.message} onRetry={reviews.reload} />
       )}
       {reviews.data && all.length === 0 && (
-        <EmptyState title="No eligibility reviews yet.">
-          <p>Pick a project below to run its first check.</p>
-        </EmptyState>
+        <EmptyState
+          title="No eligibility reviews yet."
+          why="Pick a project below to run its first check."
+        />
       )}
       {all.length > 0 && visible.length === 0 && (
         <p className="cx-muted">No reviews match this filter.</p>

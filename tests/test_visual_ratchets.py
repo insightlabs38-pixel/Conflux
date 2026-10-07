@@ -310,3 +310,13 @@ def test_reduced_motion_overrides_every_component():
     ):
         assert needle in block
     assert "scroll-behavior: auto !important" in block
+
+
+def test_every_empty_state_says_why_and_none_is_a_bare_headline():
+    for path in web_sources():
+        text = path.read_text()
+        if path.name in ("EmptyState.tsx",) or ".test." in path.name:
+            continue
+        for match in re.finditer(r"<EmptyState\b(.*?)(?:/>|>)", text, re.S):
+            opening = match.group(1)
+            assert re.search(r"\bwhy=", opening), (str(path.relative_to(WEB)), opening[:80])

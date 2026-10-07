@@ -196,10 +196,10 @@ export function JobsPanel({
         <ErrorState message={jobs.error.message} onRetry={jobs.reload} />
       )}
       {jobs.data && rows.length === 0 && (
-        <EmptyState title="No jobs yet">
-          Exports and other long operations appear here while they run and after
-          they finish.
-        </EmptyState>
+        <EmptyState
+          title="No jobs yet"
+          why="Exports and other long operations appear here while they run and after they finish."
+        />
       )}
       {rows.length > 0 && (
         <DataTable label="Recent background jobs">

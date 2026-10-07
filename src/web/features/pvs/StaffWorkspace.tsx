@@ -46,7 +46,10 @@ export function StaffWorkspace({
           <ErrorState message={events.error.message} onRetry={events.reload} />
         )}
         {events.data && events.data.length === 0 && (
-          <EmptyState title="No events are open right now." />
+          <EmptyState
+            title="No events are open right now."
+            why="Events you can staff appear here while they are open."
+          />
         )}
         {events.data && events.data.length > 0 && (
           <label>

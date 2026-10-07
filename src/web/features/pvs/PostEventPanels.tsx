@@ -35,7 +35,10 @@ export function PortfolioPanel({ workspaceId }: { workspaceId: string }) {
         />
       )}
       {portfolio.data && portfolio.data.projects.length === 0 && (
-        <EmptyState title="You have no projects yet." />
+        <EmptyState
+          title="You have no projects yet."
+          why="Projects you are a member of appear here."
+        />
       )}
       {portfolio.data && portfolio.data.projects.length > 0 && (
         <>
@@ -302,9 +305,10 @@ export function ContinuationsAdminPanel({
       )}
       {problem && <p role="alert">{problem}</p>}
       {items.data && items.data.length === 0 && (
-        <EmptyState title="No project has posted a continuation yet.">
-          <p>Continuation opens for teams once the event has closed.</p>
-        </EmptyState>
+        <EmptyState
+          title="No project has posted a continuation yet."
+          why="Continuation opens for teams once the event has closed."
+        />
       )}
       {items.data?.map((item) => (
         <Card key={item.project} title={item.name} as="h4">

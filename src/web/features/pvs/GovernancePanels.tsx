@@ -59,7 +59,10 @@ export function RulesPanel({
       )}
       {problem && <p role="alert">{problem}</p>}
       {rules.data && !rules.data.current && (
-        <EmptyState title="No rules have been published for this event." />
+        <EmptyState
+          title="No rules have been published for this event."
+          why="Participants see the rules once an organizer publishes a version."
+        />
       )}
       {rules.data?.current && (
         <Card

@@ -54,11 +54,14 @@ export function ThreadPanel({ subject }: { subject: Subject }) {
   return (
     <div className="cx-thread">
       {thread.total === 0 && (
-        <EmptyState title="No notes yet">
-          {thread.can_post
-            ? "Write the first one below."
-            : "Nothing has been written here."}
-        </EmptyState>
+        <EmptyState
+          title="No notes yet"
+          why={
+            thread.can_post
+              ? "Write the first one below."
+              : "Nothing has been written here."
+          }
+        />
       )}
       {thread.total > thread.comments.length && (
         <p className="cx-muted">

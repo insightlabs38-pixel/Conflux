@@ -92,7 +92,7 @@ describe("ApprovalsPanel", () => {
     )!;
     expect(box.checked).toBe(false);
     expect(container.textContent).toContain("Off by default");
-    expect(container.textContent).toContain("Nothing here");
+    expect(container.textContent).toContain("No approval requests");
     await act(async () => box.click());
     await settle();
     const put = calls.find((c) => c.method === "PUT")!;
@@ -161,6 +161,6 @@ describe("ApprovalsPanel", () => {
     fail = false;
     await act(async () => button("Try again").click());
     await settle();
-    expect(container.textContent).toContain("Nothing here");
+    expect(container.textContent).toContain("No approval requests");
   });
 });

@@ -119,12 +119,10 @@ export function JudgeAssignmentsPanel({ planBase }: { planBase: string }) {
       )}
       {problem && <p role="alert">{problem}</p>}
       {rows.data && rows.data.length === 0 && (
-        <EmptyState title="No projects are assigned to you for this plan.">
-          <p>
-            Nothing needs an accept or decline response. Projects you can score
-            appear in your review queue.
-          </p>
-        </EmptyState>
+        <EmptyState
+          title="No projects are assigned to you for this plan."
+          why="Nothing needs an accept or decline response. Projects you can score appear in your review queue."
+        />
       )}
       {rows.data && rows.data.length > 0 && (
         <ul className="cx-assignments">
@@ -294,7 +292,10 @@ export function OrganizerJudgingLogisticsPanel({
     <section aria-label="Judging logistics">
       <h3>Judging logistics</h3>
       {picker.stages.data && picker.stages.data.length === 0 && (
-        <EmptyState title="This event has no stages yet." />
+        <EmptyState
+          title="This event has no stages yet."
+          why="The organizer has not added a stage; plans and routes need one."
+        />
       )}
       {picker.stages.data && picker.stages.data.length > 0 && (
         <label>
@@ -385,7 +386,10 @@ export function OrganizerJudgingLogisticsPanel({
         <ErrorState message={routes.error.message} onRetry={routes.reload} />
       )}
       {routes.data && routes.data.judges.length === 0 && (
-        <EmptyState title="No judges have routes for this plan." />
+        <EmptyState
+          title="No judges have routes for this plan."
+          why="Routes appear once assignments exist for this plan."
+        />
       )}
       {routes.data && routes.data.judges.length > 0 && (
         <div

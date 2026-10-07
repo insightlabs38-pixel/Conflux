@@ -134,10 +134,10 @@ export function TimelinePanel({
             </section>
           )}
           {timeline.items.length === 0 && (
-            <EmptyState title="Nothing scheduled">
-              Dates, windows, sessions and reminders appear here once they are
-              set.
-            </EmptyState>
+            <EmptyState
+              title="Nothing scheduled"
+              why="Dates, windows, sessions and reminders appear here once they are set."
+            />
           )}
           {timeline.total > timeline.items.length && (
             <p className="cx-muted">

@@ -622,7 +622,10 @@ export function EvaluationBuilder({
     <Card title="Judging">
       {error && <p role="alert">{error}</p>}
       {stages.length === 0 ? (
-        <EmptyState title="Add a stage first to configure judging for it." />
+        <EmptyState
+          title="Add a stage first to configure judging for it."
+          why="Judging is set up per stage, so there is nothing to configure yet. Add a stage in Event setup."
+        />
       ) : (
         <label>
           Stage{" "}

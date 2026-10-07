@@ -550,10 +550,18 @@ function PlanQueue({
   if (loading) return <LoadingState label="Loading your review queue…" />;
   if (error) return <ErrorState message={error} onRetry={refresh} />;
   if (!rubric)
-    return <EmptyState title="This plan has no published rubric yet." />;
+    return (
+      <EmptyState
+        title="This plan has no published rubric yet."
+        why="Scoring starts once the organizer publishes the rubric; it will appear here."
+      />
+    );
   if (candidates.length === 0)
     return (
-      <EmptyState title="You have no projects assigned to review right now." />
+      <EmptyState
+        title="You have no projects assigned to review right now."
+        why="Assignments appear here once the organizer publishes them. Ask the organizer if you expected some."
+      />
     );
 
   const outboxProjects = new Set(
@@ -802,7 +810,10 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
       {error && <p role="alert">{error}</p>}
       {loadingEvents && <LoadingState label="Loading judging events…" />}
       {!loadingEvents && !error && events.length === 0 && (
-        <EmptyState title="No events are available for judging." />
+        <EmptyState
+          title="No events are available for judging."
+          why="Events appear here when you are invited as a judge and judging is open."
+        />
       )}
       <div
         className="cx-judge-context"
@@ -855,13 +866,19 @@ export function JudgeWorkspace({ workspaceId }: { workspaceId: string }) {
       </div>
       {eventId && loadingStages && <LoadingState label="Loading stages…" />}
       {eventId && !loadingStages && !error && stages.length === 0 && (
-        <EmptyState title="This event has no stages yet." />
+        <EmptyState
+          title="This event has no stages yet."
+          why="The organizer has not added a stage; judging cannot start until they do."
+        />
       )}
       {stageId && loadingPlans && (
         <LoadingState label="Loading evaluation plans…" />
       )}
       {stageId && !loadingPlans && !error && plans.length === 0 && (
-        <EmptyState title="This stage has no evaluation plans yet." />
+        <EmptyState
+          title="This stage has no evaluation plans yet."
+          why="The organizer has not created an evaluation plan for this stage; scoring waits for one."
+        />
       )}
       {eventId && (
         <Destination id={["overview", "schedule"]}>

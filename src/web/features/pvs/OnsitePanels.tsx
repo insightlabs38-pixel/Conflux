@@ -229,7 +229,10 @@ export function OnsiteOperationsPanel({
       {canManage && attendance.data && (
         <>
           {attendance.data.length === 0 ? (
-            <EmptyState title="Nobody has RSVP'd yet." />
+            <EmptyState
+              title="Nobody has RSVP'd yet."
+              why="RSVPs appear here as participants respond."
+            />
           ) : (
             <>
               <div className="cx-attendance-tools">
@@ -313,7 +316,10 @@ export function OnsiteOperationsPanel({
       )}
       <h4>Rooms, tables and booths</h4>
       {locations.data && locations.data.length === 0 && (
-        <EmptyState title="No rooms or tables have been set up." />
+        <EmptyState
+          title="No rooms or tables have been set up."
+          why="Add rooms, tables or booths so projects can be placed and found."
+        />
       )}
       {locations.data && locations.data.length > 0 && (
         <div

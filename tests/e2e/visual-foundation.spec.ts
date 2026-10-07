@@ -229,6 +229,21 @@ async function motion(page: Page) {
   }));
 }
 
+/** Empty states without a reason, with every closed disclosure opened first. */
+async function emptyProblems(page: Page) {
+  return page.evaluate(() => {
+    document.querySelectorAll("details").forEach((d) => (d.open = true));
+    return [...document.querySelectorAll<HTMLElement>(".cx-state--empty")]
+      .filter((el) => el.checkVisibility())
+      .filter(
+        (el) => !(el.querySelector(".cx-state__why")?.textContent ?? "").trim(),
+      )
+      .map((el) =>
+        (el.querySelector(".cx-state__title")?.textContent ?? "").trim(),
+      );
+  });
+}
+
 const ROLES = ["organizer", "participant-01", "judge-01"];
 for (const width of [390, 1440]) {
   for (const role of ROLES) {
@@ -294,6 +309,7 @@ for (const width of [390, 1440]) {
         manyPrimaries: [],
         dangerAtRest: [],
       });
+      expect(await emptyProblems(page)).toEqual([]);
       const title = await page
         .locator("main h1")
         .first()

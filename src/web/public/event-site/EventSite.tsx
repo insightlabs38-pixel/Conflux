@@ -143,7 +143,10 @@ export function EventSite({ eventId }: { eventId: string }) {
             <section className="cx-block" aria-label="Tracks">
               <h2>Tracks</h2>
               {event.tracks.length === 0 ? (
-                <EmptyState title="Tracks will be announced soon." />
+                <EmptyState
+                  title="Tracks will be announced soon."
+                  why="The organizers have not published the tracks yet."
+                />
               ) : (
                 <ul className="cx-grid">
                   {event.tracks.map((track) => (
@@ -160,7 +163,10 @@ export function EventSite({ eventId }: { eventId: string }) {
             <section className="cx-block" aria-label="Prizes">
               <h2>Prizes</h2>
               {event.base_prizes.length === 0 ? (
-                <EmptyState title="Prizes will be announced soon." />
+                <EmptyState
+                  title="Prizes will be announced soon."
+                  why="The organizers have not published the prizes yet."
+                />
               ) : (
                 <ul className="cx-grid">
                   {event.base_prizes.map((prize) => (

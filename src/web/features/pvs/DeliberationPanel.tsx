@@ -205,7 +205,10 @@ function EvidencePanel({
         </p>
       )}
       {results.data && results.data.length === 0 && (
-        <EmptyState title="No ranked results yet." />
+        <EmptyState
+          title="No ranked results yet."
+          why="Results appear once judging has produced scores for this event."
+        />
       )}
       {results.data && results.data.length > 0 && (
         <div
@@ -384,7 +387,10 @@ export function DeliberationPanel({
           <ErrorState message={awards.error.message} onRetry={awards.reload} />
         )}
         {awards.data && awards.data.length === 0 && (
-          <EmptyState title="No awards are configured for this event." />
+          <EmptyState
+            title="No awards are configured for this event."
+            why="Add an award in the event configuration to deliberate on it."
+          />
         )}
         {awards.data && awards.data.length > 0 && (
           <label>

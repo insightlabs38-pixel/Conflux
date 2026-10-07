@@ -1,0 +1,83 @@
+version: 3
+task: PD-F004-B02-T04
+batch: PD-F004-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 5f6d758
+  head_commit: null
+changed_paths:
+- src/web/components/EmptyState.tsx
+- src/web/components/components.test.tsx
+- 24 feature and component files with an empty state (all 30 call sites)
+- src/web/features/operations/ApprovalsPanel.test.tsx
+- src/web/styles/components.css
+- tests/e2e/approvals.spec.ts
+- tests/e2e/visual-foundation.spec.ts
+- tests/test_visual_ratchets.py
+deliverables:
+- item: Empty states tell the user the next useful action
+  result: pass
+  evidence: EmptyState now takes a required `why` and an optional `next` (the one action); all 30 call
+    sites were rewritten to say why the list is empty and what happens or what to do next, in the viewer's
+    terms (organizer actions named, such as 'Add a stage in Event setup'; participant and judge states
+    say who acts); a filtered grid passes Clear filter as next, an unfiltered one says nothing has been
+    added yet; a bare headline no longer type-checks
+- item: No data and no matches stay different states
+  result: pass
+  evidence: DataGrid keeps its two branches with different titles, reasons and next
+invariants:
+- item: No invented product facts
+  result: pass
+  evidence: each reason restates what the title and surrounding code already say or names the actor from
+    the existing flow; claims I could not verify were left out (for example no ordering, deadlines or
+    eligibility rules were asserted)
+- item: Accessibility preserved
+  result: pass
+  evidence: axe passed in uiv2-gate and visual-foundation; the reason is a paragraph under the title
+- item: No test weakened
+  result: pass
+  evidence: the approvals specs and unit test track one headline I changed from 'Nothing here' to 'No
+    approval requests' (the old headline named nothing); every other assertion is kept
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 669 passed
+- command: uv run --frozen pytest tests/test_visual_ratchets.py -q
+  result: pass
+  note: 21 passed; the ratchet fails on any EmptyState without why
+- command: docker compose up -d --build app; npx playwright test -c tests/e2e/playwright.config.ts visual-foundation
+    uiv2-gate --project=desktop
+  result: pass
+  note: 23 passed; the live audit reports visible empty states without a reason (first run failed only
+    because my audit opened the account menu before the shadow check, test ordering fixed)
+- command: iso-min fixture; npx playwright test approvals --project=desktop --project=mobile
+  result: pass
+  note: 2 passed, 2 skipped by project guard
+design_refs:
+- ref: design/state-matrix
+  result: pass
+  note: S-EMPTY (say why, offer the one next action, tell no-data from no-matches)
+- ref: design/system-v3
+  result: pass
+  note: V-SLOP-6 no marketing copy in operator screens
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: EmptyState and its call sites
+- surface: docs
+  result: pass
+  evidence: contract in spec 004
+migrations: []
+findings:
+- P3 most organizer empty states name the next place in words rather than link to it, because the shared
+  components render in tests and public pages without a workspace router; a real link needs the destination
+  context and is left to the screens' own batches
+escalations: []
+limitations:
+- 'Public-page empties (''Tracks will be announced soon'') have no action by design: a visitor has none.'
+next: review

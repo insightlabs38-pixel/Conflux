@@ -236,7 +236,10 @@ export function PageBuilder({
     <div className="cx-block-editor">
       <div className="cx-block-outline">
         {blocks.length === 0 ? (
-          <EmptyState title="This event's public page has no blocks yet." />
+          <EmptyState
+            title="This event's public page has no blocks yet."
+            why="Add a block to start building the page; until then visitors see the default layout."
+          />
         ) : (
           <ol aria-label="Page blocks">
             {blocks.map((block, index) => (

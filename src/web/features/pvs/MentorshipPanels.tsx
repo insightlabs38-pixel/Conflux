@@ -334,7 +334,10 @@ export function MentorDeskPanel({
         <ErrorState message={queue.error.message} onRetry={queue.reload} />
       )}
       {queue.data && queue.data.length === 0 && (
-        <EmptyState title="The queue is empty." />
+        <EmptyState
+          title="The queue is empty."
+          why="Teams that ask for help appear here."
+        />
       )}
       {queue.data?.map((item) => (
         <Card

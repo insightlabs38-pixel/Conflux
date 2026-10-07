@@ -2914,3 +2914,12 @@ html {
   height: var(--sp-3);
   margin-block: calc((var(--h-row) - var(--sp-3)) / 2);
 }
+
+/* Empty (S-EMPTY): the headline, why, and the one next action. */
+.cx-state__why {
+  margin: 0 auto;
+  max-width: 48ch;
+}
+.cx-state__next {
+  margin-top: var(--sp-3);
+}

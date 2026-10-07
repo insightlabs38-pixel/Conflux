@@ -103,15 +103,24 @@ export function DataGrid<Row extends { id: string }>({
 
   if (rows.length === 0)
     return filtered ? (
-      <EmptyState title="No rows match this filter">
-        {onClearFilter && (
-          <Button variant="secondary" onClick={onClearFilter}>
-            Clear filter
-          </Button>
-        )}
-      </EmptyState>
+      <EmptyState
+        title="No rows match this filter"
+        why="Nothing in this list meets the conditions that are set."
+        next={
+          onClearFilter && (
+            <Button variant="secondary" onClick={onClearFilter}>
+              Clear filter
+            </Button>
+          )
+        }
+      />
     ) : (
-      <EmptyState title={`No ${label.toLowerCase()} yet`}>{empty}</EmptyState>
+      <EmptyState
+        title={`No ${label.toLowerCase()} yet`}
+        why="Nothing has been added to this list yet."
+      >
+        {empty}
+      </EmptyState>
     );
 
   const selectable = Boolean(onSelect);

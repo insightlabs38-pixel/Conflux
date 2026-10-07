@@ -18,7 +18,7 @@
 {% if result %}
   {% if result.valid %}
     <div class="cx-card">
-      <p><span class="cx-badge cx-badge--info">Valid</span></p>
+      <p>{% include "presentation/status.html" with tone="success" label="Valid" %}</p>
       <dl>
         <dt>Kind</dt><dd>{{ result.claims.kind }}</dd>
         <dt>Event</dt><dd>{{ result.claims.event.name }}</dd>

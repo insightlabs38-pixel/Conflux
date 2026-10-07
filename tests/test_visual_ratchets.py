@@ -358,3 +358,9 @@ def test_no_browser_spec_selects_the_removed_badge_class():
         if spec.name == "visual-foundation.spec.ts":  # asserts the class is absent
             continue
         assert "cx-badge" not in spec.read_text(), spec.name
+
+
+def test_server_rendered_pages_do_not_use_the_removed_badge_class():
+    # the public templates kept `cx-badge` after the React Badge went, so statuses rendered as bare text
+    for template in sorted((ROOT / "src/api").glob("**/templates/**/*.html")):
+        assert "cx-badge" not in template.read_text(), str(template.relative_to(ROOT))

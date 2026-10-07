@@ -6,7 +6,7 @@
 <article aria-label="Project highlight">
   <p><a href="{% url 'site-results' event.public_id %}">&larr; {% trans "Published results" %}</a></p>
   <header class="cx-project-header"><div><p class="cx-event-kicker">{{ event.name }} · {% trans "Project highlight" %}</p><h1>{{ project.name }}</h1><p class="cx-project-lede">{{ project.showcase.summary|truncatewords:32 }}</p></div><div class="cx-project-cover" aria-hidden="true"><span>{{ project.showcase.initials }}</span>{% if project.showcase.cover %}<img src="{{ project.showcase.cover.url }}" alt="" decoding="async">{% endif %}</div></header>
-  {% if project.track %}<p><span class="cx-badge cx-badge--info">{{ project.track.name }}</span></p>{% endif %}
+  {% if project.track %}<p><span class="cx-tag">{{ project.track.name }}</span></p>{% endif %}
   {% if project.team %}<p>{{ project.team.name }}</p>{% endif %}
   {% if project.description %}<div class="cx-technical-description">{{ description_html|safe }}</div>{% endif %}
   <section class="cx-block" aria-label="Published awards">

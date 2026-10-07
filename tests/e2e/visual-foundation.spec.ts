@@ -356,6 +356,25 @@ for (const width of [390, 1440]) {
     expect(h1).toBeLessThanOrEqual(32);
   });
 
+  // The server-rendered public pages follow the same rules as the app: a state is an icon and a word
+  // (`Status`), an attribute is a `Tag`, and the removed Badge class is not rendered anywhere.
+  test(`public gallery and project pages show states as icon and word at ${width}`, async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+    await page.setViewportSize({ width, height: 900 });
+    await signIn(page, "organizer");
+    const { event } = await eventIds(page);
+    await page.goto(`/e/${event}/gallery/`);
+    await page.waitForLoadState("networkidle");
+    expect(await statusProblems(page)).toEqual([]);
+    await page.locator(".cx-project-card a").first().click();
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator("h1")).toHaveCount(1);
+    expect(await statusProblems(page)).toEqual([]);
+    expect(await page.locator(".cx-status").count()).toBeGreaterThan(0); // Finalized
+  });
+
   // V-HERO-1 / D-012: the default public hero is compact. The band (lockup or art, title, status)
   // is 160-240px on desktop (the lower bound is not a floor) and at most 120px on mobile; the
   // description and the one primary action sit under it; no text sits over art; no sideways scroll.

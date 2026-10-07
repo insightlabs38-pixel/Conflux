@@ -1,0 +1,65 @@
+version: 3
+task: PD-F004-B03-T91
+batch: PD-F004-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: b5a87a2
+  head_commit: null
+changed_paths:
+- docs/verification/PD-F004-B03/SURFACES.md
+- docs/operations/UPGRADES.md
+- docs/operations/VISUAL_FOUNDATION.md
+- docs/operations/PREVIEW_CONTEXT.md
+- docs/product-depth-v3/specs/004-visual-direction-professional-clean-compact-deliberate.md
+deliverables:
+- item: Close the batch's explicit surface matrix
+  result: pass
+  evidence: SURFACES.md lists all twelve surfaces; web and docs required and done; api, sdk, cli, mcp, event_as_code,
+    audit, webhook, archive, analytics and search not_required, each with the reason (the block kind `lead`
+    and the `page` preview surface are the two additive contract changes, both checked)
+- item: Every required surface delegates to the same canonical operation and generated contracts stay synchronized
+  result: pass
+  evidence: hero size, art direction, the lead and link safety are server-validated settings of the page API;
+    the preview renders the visitor's own template and context; make openapi-check and sdk-check clean
+- item: Documentation and migration notes for externally visible behavior
+  result: pass
+  evidence: UPGRADES.md (immersive, crop, lead, preview, public page changes for every event, the link rule and
+    what to check before upgrading, initials), VISUAL_FOUNDATION.md (hero, crop, lead and links), PREVIEW_CONTEXT.md
+    (the page surface), spec 004 "PD-F004-B03 canonical contract"
+invariants:
+- item: One source of truth, server authority
+  result: pass
+  evidence: no client-side rule for hero, lead, links, focus or preview
+- item: Progressive disclosure and design intent preserved
+  result: pass
+  evidence: immersive, crop, phone image and preview are in closed disclosures; the default stays compact
+verification:
+- command: make openapi-check sdk-check; npx prettier --check docs
+  result: pass
+  note: clean
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-HERO-1, D-005, D-012 written into the contract
+- ref: design/state-matrix
+  result: pass
+  note: S-LOAD, S-ERR for the preview recorded in the contract
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: SURFACES.md
+- surface: docs
+  result: pass
+  evidence: SURFACES.md
+migrations:
+- presentation 0006_pageblock_kind_lead (choices only, documented in UPGRADES.md)
+findings: []
+escalations: []
+limitations:
+- Tel and other non-http schemes in block links are refused; the upgrade note tells operators to check for them.
+next: review

@@ -145,3 +145,14 @@ No database migration, no new endpoint and no change to either SDK; the build is
 - **Loading shows the grid's header over placeholders; empty states say why and offer the next step; failed loads say whether anything changed and what Try again does** (a failed read changed nothing; a save that failed without a refusal says the change could not be confirmed, check before repeating it).
 - **Public presentation payload**: `presentation.hero_size` is added (`compact`, `none`, `standard`); clients that ignore it keep working. A saved theme containing any other value is refused with a 400 naming `hero_size`.
 - Advanced sections now share one disclosure look and borders are solid; no behavior or default open state changed.
+
+## Moving to a build with hero art direction, the lead block and the page preview (PD-F004-B03)
+
+One choices-only migration (`presentation 0006`, the allowed block kinds) and one additive OpenAPI and SDK change (the block kind `lead`); nothing stored is rewritten. What an operator or organizer will notice:
+
+- **Hero size gains `immersive`** (a full-width image above the title; needs a hero image URL, refused without one) and **hero image crop** (focal point sliders and an optional phone image) under Event setup, Public page, Appearance, in a closed section. Events that set none of this look as before.
+- **A Lead block** (Public page, Content, Add block) replaces the default hero with a title, a short body, up to four facts and one action. It is placed first when added.
+- **Preview**: a closed section "Preview at desktop, tablet and mobile widths" draws the public page with the appearance as it is in the form, saved or not, at 1440, 768 and 390px. Nothing is saved.
+- **Public page changes for every event**: the hero shows the status and dates (in the event's timezone); on a phone the header is two rows; project pages put their story and evidence above the fold with a small cover tile; project covers, tags and statuses use the same lettered identity, tags and status words as the app.
+- **Security hardening (links in page blocks).** Links typed into blocks must be a path or anchor on the site, or an `http(s)` or `mailto` link. Saving anything else is refused with that sentence, and a link already stored that does not meet the rule is no longer rendered as a link (it used to be written into the page as typed, including `javascript:`). Check pages that use unusual schemes (`tel:`, `ftp:`) before upgrading; they now render without a link until changed to an allowed form.
+- **Initials**: a name starting with punctuation or an emoji now draws its first letters ("(Open) Data" is OD, not "(D"); only an empty name draws "?".

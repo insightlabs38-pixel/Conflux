@@ -928,11 +928,13 @@
 .cx-nav-toggle {
   display: none;
 }
-.cx-account {
+.cx-account,
+.cx-switcher {
   position: relative;
   font-size: var(--fs-14);
 }
-.cx-account summary {
+.cx-account summary,
+.cx-switcher summary {
   cursor: pointer;
   min-height: var(--h-ctl);
   display: flex;
@@ -942,13 +944,15 @@
   max-width: 16rem;
   overflow-wrap: anywhere;
 }
-.cx-account summary > span {
+.cx-account summary > span,
+.cx-switcher summary > span {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.cx-account__panel {
+.cx-account__panel,
+.cx-switcher__panel {
   position: absolute;
   z-index: var(--z-menu);
   top: 100%;
@@ -960,6 +964,73 @@
   background: var(--float-bg);
   padding: var(--sp-4);
   box-shadow: var(--sh-pop);
+}
+.cx-switcher summary {
+  max-width: 18rem;
+}
+.cx-switcher__panel {
+  right: auto;
+  left: 0;
+  width: 20rem;
+  max-height: min(28rem, 70vh);
+  overflow-y: auto;
+  padding: var(--sp-2) var(--sp-3) var(--sp-3);
+}
+.cx-switcher__panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.cx-switcher__group {
+  margin: var(--sp-3) 0 var(--sp-1);
+  color: var(--ink-3);
+  font-size: var(--fs-12);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.cx-switcher__row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.cx-switcher__choice {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  min-height: var(--h-ctl);
+  padding: 0 var(--sp-2);
+  border-left: 2px solid transparent;
+  color: var(--ink);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cx-switcher__choice:hover {
+  background: var(--surface-2);
+}
+.cx-switcher__choice[aria-current="true"] {
+  border-left-color: var(--accent);
+  background: var(--accent-tint);
+  font-weight: var(--font-weight-semibold);
+}
+.cx-switcher__star {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: var(--h-ctl);
+  height: var(--h-ctl);
+  border: 0;
+  background: none;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+.cx-switcher__star[aria-pressed="true"] {
+  color: var(--accent);
+}
+.cx-switcher__star[aria-pressed="true"] .cx-icon {
+  fill: currentColor;
 }
 .cx-account__link {
   display: flex;
@@ -1140,6 +1211,21 @@
 }
 
 @media (max-width: 40rem) {
+  .cx-shell--workspace .cx-switcher {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .cx-switcher summary {
+    max-width: 100%;
+  }
+  .cx-switcher__panel {
+    position: fixed;
+    top: auto; /* below the button, where it would have been */
+    left: var(--sp-4);
+    right: var(--sp-4);
+    width: auto;
+    max-height: 60vh;
+  }
   .cx-account summary > span {
     display: none;
   }
@@ -1147,7 +1233,9 @@
     content: "Account";
   }
   .cx-account summary {
-    max-width: 6rem;
+    max-width: none;
+    white-space: nowrap;
+    overflow-wrap: normal;
   }
 }
 

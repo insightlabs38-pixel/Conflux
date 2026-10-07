@@ -5,6 +5,7 @@ import {
   roleDestinations,
   useWorkspaceNavigation,
 } from "./WorkspaceNavigation";
+import { EventSwitcher } from "./EventSwitcher";
 import { SkipLink } from "./SkipLink";
 import { Icon, type IconName } from "./Icon";
 
@@ -96,6 +97,7 @@ export function AppShell({
                 ? `${workspaceName} · ${role === "admin" ? "organizer" : role}`
                 : `${role === "admin" ? "Organizer" : role} workspace`}
             </span>
+            <EventSwitcher />
             <button
               ref={toggle}
               type="button"

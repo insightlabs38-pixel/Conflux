@@ -1,0 +1,79 @@
+version: 3
+task: PD-F005-B01-T02
+batch: PD-F005-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 7ec6982
+  head_commit: null
+changed_paths:
+- src/web/lib/shellPreferences.ts
+- src/web/lib/shellPreferences.test.ts
+- src/web/hooks/useShellEvents.ts
+- src/web/hooks/useMe.ts
+- src/web/components/EventSwitcher.tsx
+- src/web/components/EventSwitcher.test.tsx
+- src/web/components/AppShell.tsx
+- src/web/components/WorkspaceNavigation.tsx
+- src/web/components/WorkspaceNavigation.modules.test.tsx
+- src/web/components/Icon.tsx
+- src/web/styles/components.css
+- tests/e2e/event-switcher.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+- docs/product-depth-v3/specs/005-professional-application-shell-depth.md
+deliverables:
+- item: Event/workspace switcher with recent and favorite events, as a complete workflow
+  result: pass
+  evidence: a top-bar control (EventSwitcher) on every role shell shows the selected event and opens a panel with Favorites, Recent, the other events and, for people with more than one membership, Workspaces. Choosing an event links to the same view through routes.target with the event param (a history entry; stage, plan and invite are dropped), a star toggles a favorite (aria-pressed, 12 at most, refused with the list unchanged beyond that), and a recent is recorded when an event is chosen (8 at most, newest first, once each).
+- item: Wired to canonical state, no mock
+  result: pass
+  evidence: the lists are the ones each role already uses (events, judge-events, participant-events), so the server decides what a person may see; the selected event is the URL's event param validated against that list; a stored favorite or recent that is no longer listed is not shown; browser tests run on the live seeded stack for organizer, participant and judge
+- item: States, keyboard, accessibility, base clutter
+  result: pass
+  evidence: loading ("Loading events…"), none ("No events", panel text), error with Try again, nothing selected ("Choose an event"); a native disclosure with Escape closing it and returning focus to its button, links for choices (new tab works), 44px targets on touch, a labelled star per row; at 390 the panel is pinned to the viewport margins and the header stays two rows; one control in the base state, no extra chrome
+invariants:
+- item: Stored values are requests, never authority; nothing typed or personal in storage
+  result: pass
+  evidence: shellPreferences.ts validates ids on read (damaged JSON, non-ids, duplicates read as empty or dropped), refuses non-id values on write, namespaces by person and workspace, tolerates blocked storage, and is cleared at sign-out (clearShellPreferences from useSignOut); the browser test shows no conflux:v1 key survives sign-out
+- item: One list of events and one preference store
+  result: pass
+  evidence: no second events fetch shape or storage; every remembered value goes through shellPreferences (the single module spec 005 names)
+- item: No test weakened
+  result: pass
+  evidence: WorkspaceNavigation.modules.test counted all requests; it now counts the module requests it was about, since the shell also reads the account and events; the account-menu selector collision was fixed by giving the switcher its own class instead of changing tests
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 132 files, 728 tests (shellPreferences 6, EventSwitcher 8, modules navigation adjusted)
+- command: npx playwright test -c tests/e2e/playwright.config.ts event-switcher shell-responsive visual-foundation uiv2-gate slop-audit roles routing --project=desktop --workers=4
+  result: pass
+  note: 140 passed on the rebuilt stack, including the event-switcher spec (6) at 1440 and 390, Back returning to the place before choosing, sign-out clearing the device store, participant and judge lists matching their own event lists
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: event switcher with current, favorites and recent in the top bar; the board's role switch, preview-as and switch-event rows in the phone sheet follow with B02
+- ref: design/state-matrix
+  result: pass
+  note: S-LOAD, S-EMPTY, S-ERR handled in the panel
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit, component and browser tests
+- surface: docs
+  result: pass
+  evidence: contract in spec 005 (task order corrected - T02 creates shellPreferences and T08 adds the theme)
+migrations: []
+findings:
+- P3 the seeded demo has one event per workspace, so multi-event ordering (favorites before recent before other) is proven by component tests rather than the live stack.
+- P3 the header switcher shares the account menu's disclosure styles through grouped selectors; the phone header is brand, switcher, account on one row.
+escalations:
+- ESC-20260930-007
+limitations:
+- Favorites and recents follow the device, not the person (QUESTIONS.md 2026-10-07T21:40Z).
+- Dependent context other than stage, plan and invite is not cleared on an event change because no other event-dependent param exists yet.
+next: review

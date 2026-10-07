@@ -113,6 +113,8 @@ export function barDestinations(destinations: Destination[]): {
 }
 
 type Navigation = {
+  workspaceId: string;
+  role: string;
   view: string;
   navigate: (id: string) => void;
   /** Link to a destination; `section` opens one of its tabs (see WorkflowSections `linkable`). */
@@ -185,7 +187,17 @@ export function WorkspaceNavigationProvider({
     [destinations, go, href],
   );
   return (
-    <Context value={{ view, navigate, href, destinations: visible, modules }}>
+    <Context
+      value={{
+        workspaceId,
+        role,
+        view,
+        navigate,
+        href,
+        destinations: visible,
+        modules,
+      }}
+    >
       {children}
     </Context>
   );

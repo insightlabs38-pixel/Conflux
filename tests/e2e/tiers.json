@@ -1,6 +1,7 @@
 {
   "read-only": [
     "async-operations",
+    "event-switcher",
     "extended-embed",
     "foundations",
     "public",

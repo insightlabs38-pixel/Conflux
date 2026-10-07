@@ -86,15 +86,19 @@ const headings = (container: HTMLElement) =>
     (p) => p.textContent,
   );
 
+/** The module requests among everything the shell asked for (it also reads the account and events). */
+const moduleRequests = (fetchMock: { mock: { calls: unknown[][] } }) =>
+  fetchMock.mock.calls
+    .map(([url]) => String(url))
+    .filter((url) => url.includes("/modules/"));
+
 describe("organizer navigation follows the event's enabled modules", () => {
   it("hides destinations of modules that are off and moves the group heading", async () => {
     const { container, fetchMock, root } = await render(
       "organizer",
       offModules(null),
     );
-    expect(String(fetchMock.mock.calls[0][0])).toContain(
-      "/workspaces/w/modules/",
-    );
+    expect(moduleRequests(fetchMock)[0]).toContain("/workspaces/w/modules/");
     expect(labels(container)).toEqual([
       "Overview",
       "Event setup",
@@ -122,7 +126,7 @@ describe("organizer navigation follows the event's enabled modules", () => {
       body,
       "/w/w/overview?event=e1",
     );
-    expect(String(fetchMock.mock.calls[0][0])).toContain("modules/?event=e1");
+    expect(moduleRequests(fetchMock)[0]).toContain("modules/?event=e1");
     expect(labels(container)).toContain("On-site");
     expect(labels(container)).not.toContain("Integrations");
     expect(headings(container)).toEqual([
@@ -157,7 +161,7 @@ describe("organizer navigation follows the event's enabled modules", () => {
       "participant",
       offModules(null),
     );
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(moduleRequests(fetchMock)).toEqual([]); // the shell's own reads (me, events) are not module reads
     expect(labels(container)).toContain("Team");
     await act(async () => root.unmount());
   });

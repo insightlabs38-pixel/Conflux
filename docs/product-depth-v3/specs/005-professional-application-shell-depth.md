@@ -197,7 +197,7 @@ Written by PD-F005-B01-T00 against the approved design (`design/app-shell`, `des
 
 - ROUTER and COMMANDS: adopt forward (ESC-20260930-007). The F071 owner tasks must adopt `routes.ts`, `urlState.ts` and `commands.ts`.
 - Shell preferences are device-local (QUESTIONS.md, 2026-10-07T21:40Z). Moving them to a per-user server store later changes only `shellPreferences.ts`; B02 density and B03 column preferences should decide whether to join it.
-- Task order inside the batch: T01 (route targets) first because everything produces one; then T03 and T04 (navigation, breadcrumbs), T02 (switcher), T08 (account and theme, which creates `shellPreferences`), T07 (inbox), T06 (search), T05 (palette last, since it lists what the others expose).
+- Task order inside the batch: T01 (route targets) first because everything produces one; then T03 and T04 (navigation, breadcrumbs), T02 (switcher, which creates `shellPreferences`), T08 (account and theme, which adds the theme to it), T07 (inbox), T06 (search), T05 (palette last, since it lists what the others expose).
 
 ### Test strategy
 

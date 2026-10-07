@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { MembershipSummarySchema, UserSummarySchema } from "@conflux/sdk";
 import { apiCall, ApiError } from "../lib/api";
 import { queryKeys } from "../lib/query";
+import { clearShellPreferences } from "../lib/shellPreferences";
 import { useRealtimeHub } from "./useRealtime";
 
 export type Me = UserSummarySchema;
@@ -48,6 +49,7 @@ export function useSignOut() {
       apiCall("post_api_v1_accounts_logout", {}).catch(() => undefined),
     onSettled: () => {
       hub?.reset();
+      clearShellPreferences();
       return client.resetQueries();
     },
   });

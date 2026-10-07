@@ -32,6 +32,7 @@
   "isolated-mutation:version-diff": 26.4,
   "read-only:async-operations": 2.0,
   "read-only:auth-states": 2.9,
+  "read-only:event-switcher": 25,
   "read-only:extended-embed": 1.7,
   "read-only:fixture-isolation": 4.9,
   "read-only:foundations": 10.2,

@@ -1,0 +1,44 @@
+version: 1
+checkpoint_id: CP-PD-F004-B04
+created_at: '2026-10-07T12:30:00Z'
+canonical_commit: 44a2fe2
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+- PD-B02
+- PD-B03
+- PD-B04
+- PD-F001-B01
+- PD-F001-B02
+- PD-F002-B01
+- PD-F002-B02
+- PD-F002-B03
+- PD-F003-B01
+- PD-F003-B02
+- PD-F003-B03
+- PD-DESIGN-B00
+- PD-F004-B01
+- PD-F004-B02
+- PD-F004-B03
+- PD-F004-B04
+active_batches:
+- PD-F004-B05
+active_claims: []
+open_escalations: []
+last_completed_task: PD-F004-B04-T91
+ready_summary:
+- PD-F004-B05 (no 3-column dashboard where a sortable table is the task, advanced capabilities not gating the basics;
+  promoted IN_PROGRESS, not started). Extend the live audit (tests/e2e/slop.ts) rather than adding parallel checks.
+verification_summary:
+- make verify-fast clean (pytest 2940, vitest 701); make e2e-fast clean on the first run (docs/verification/PD-F004-B04/T90-e2e-fast.log);
+  tests/e2e/slop-audit.spec.ts (67 tests, 8 rules, a self-test per rule)
+recovery_notes:
+- 'Contract: spec 004 section PD-F004-B04 canonical contract; guide docs/operations/VISUAL_FOUNDATION.md (the anti-slop
+  audit, how to add a rule). Rules live in slopProblems (tests/e2e/slop.ts); add a name to SlopRule, RULES in
+  slop-audit.spec.ts and a self-test. slop-audit weight in tests/e2e/weights.json is 220.'
+- Renamed card headings Communications -> Send a message and Judging -> Evaluation setup; e2e finders updated.
+- 'Open decisions in .claude-supervisor/QUESTIONS.md (untracked), all at their defaults.'
+- main unpushed; untracked design handoff zips untouched; supervisor.py modification is the owner's and
+  left uncommitted

@@ -192,7 +192,6 @@
   border: 1px solid var(--color-border);
   border-radius: var(--r-3);
   padding: var(--sp-4);
-  box-shadow: var(--shadow-sm);
 }
 .cx-card__title {
   margin: 0 0 var(--sp-2);
@@ -935,10 +934,10 @@
   min-width: 12rem;
   max-width: min(20rem, 85vw);
   border: 1px solid var(--color-border);
-  border-radius: var(--r-2);
-  background: var(--color-surface-raised);
+  border-radius: var(--r-3);
+  background: var(--float-bg);
   padding: var(--sp-4);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--sh-pop);
 }
 .cx-account__link {
   display: flex;
@@ -1752,7 +1751,7 @@
     position: sticky;
     bottom: 0;
     z-index: var(--z-navigation);
-    box-shadow: 0 -4px 8px rgb(0 0 0 / 8%);
+    border-top: 1px solid var(--line);
   }
   .cx-route__stop {
     grid-template-columns: 2rem minmax(0, 1fr);
@@ -2320,7 +2319,7 @@
   display: grid;
   place-items: center;
   padding: var(--sp-4);
-  background: rgb(0 0 0 / 45%);
+  background: var(--scrim);
 }
 .cx-consequence {
   width: min(100%, 34rem);
@@ -2328,9 +2327,10 @@
   overflow-y: auto;
   padding: var(--sp-4);
   border: 1px solid var(--color-border-strong);
-  border-radius: var(--r-2);
-  background: var(--color-surface-raised);
+  border-radius: var(--r-3);
+  background: var(--float-bg);
   color: var(--color-text);
+  box-shadow: var(--sh-dlg);
 }
 .cx-consequence h2 {
   margin-top: 0;

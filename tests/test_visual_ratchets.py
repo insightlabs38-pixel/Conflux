@@ -185,3 +185,29 @@ def test_radii_come_from_the_three_step_scale():
 def test_no_status_label_is_a_pill():
     text = (WEB / "styles/components.css").read_text()
     assert dict(declarations(text, "border-radius"))[".cx-badge"] == "var(--r-1)"
+
+
+# Shadows belong to floating layers only (V-ELEV-1); the rest is hairlines and spacing.
+SHADOW_ALLOWED = {
+    "styles/components.css": {
+        ".cx-account__panel": "var(--sh-pop)",
+        ".cx-consequence": "var(--sh-dlg)",
+    },
+}
+
+
+def test_shadows_exist_only_on_floating_layers_with_the_elevation_tokens():
+    for sheet in SHEETS:
+        rel = str(sheet.relative_to(WEB))
+        for selector, value in declarations(sheet.read_text(), "box-shadow"):
+            if value == "none":
+                continue
+            assert SHADOW_ALLOWED.get(rel, {}).get(selector) == value, (rel, selector, value)
+        assert "--shadow-" not in sheet.read_text(), rel
+
+
+def test_overlays_use_the_scrim_and_floating_background_tokens():
+    text = (WEB / "styles/components.css").read_text()
+    assert dict(declarations(text, "background"))[".cx-consequence__backdrop"] == "var(--scrim)"
+    assert dict(declarations(text, "background"))[".cx-consequence"] == "var(--float-bg)"
+    assert dict(declarations(text, "background"))[".cx-account__panel"] == "var(--float-bg)"

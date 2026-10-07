@@ -80,6 +80,18 @@ async function offScaleRadii(page: Page) {
   });
 }
 
+/** Elements at rest that cast a shadow, as `tag.class`; only floating layers may. */
+async function shadowed(page: Page) {
+  return page.evaluate(() =>
+    [...document.querySelectorAll<HTMLElement>("body *")]
+      .filter(
+        (el) =>
+          getComputedStyle(el).boxShadow !== "none" && el.checkVisibility(),
+      )
+      .map((el) => `${el.tagName.toLowerCase()}.${el.className}`),
+  );
+}
+
 const ROLES = ["organizer", "participant-01", "judge-01"];
 for (const width of [390, 1440]) {
   for (const role of ROLES) {
@@ -103,6 +115,11 @@ for (const width of [390, 1440]) {
       // standard density keeps controls at 28px or more; touch layouts at the 44px hit area
       expect(await shortControls(page, width < 768 ? 44 : 28)).toEqual([]);
       expect(await offScaleRadii(page)).toEqual([]);
+      expect(await shadowed(page)).toEqual([]);
+      if (role === "organizer" && width >= 768) {
+        await page.locator(".cx-account summary").click();
+        expect(await shadowed(page)).toEqual(["div.cx-account__panel"]);
+      }
       const title = await page
         .locator("main h1")
         .first()

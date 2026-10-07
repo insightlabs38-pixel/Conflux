@@ -143,3 +143,16 @@ def test_radii_equal_the_design_and_legacy_radius_names_are_gone():
     for name in ("r-1", "r-2", "r-3", "r-pill"):
         assert LIGHT["--" + name] == DESIGN["light"]["--" + name], name
     assert not re.search(r"--radius-", CSS)
+
+
+def norm(value):
+    return re.sub(r"\s+", " ", value.replace(" .", " 0.").replace("(.", "(0.")).strip()
+
+
+def test_elevation_tokens_equal_the_design_in_both_themes():
+    for name in ("sh-pop", "sh-dlg"):
+        assert norm(LIGHT["--" + name]) == norm(DESIGN["light"]["--" + name]), name
+        assert norm(DARK["--" + name]) == norm(DESIGN["dark"]["--" + name]), name
+    assert LIGHT["--float-bg"] == "var(--surface)"
+    assert DARK["--float-bg"] == "var(--surface-2)"
+    assert not re.search(r"--shadow-", CSS)

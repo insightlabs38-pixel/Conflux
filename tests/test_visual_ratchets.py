@@ -361,6 +361,6 @@ def test_no_browser_spec_selects_the_removed_badge_class():
 
 
 def test_server_rendered_pages_do_not_use_the_removed_badge_class():
-    # the public templates kept `cx-badge` after the React Badge went, so statuses rendered as bare text
+    # the public templates kept `cx-badge` after the React Badge went; statuses were bare text
     for template in sorted((ROOT / "src/api").glob("**/templates/**/*.html")):
         assert "cx-badge" not in template.read_text(), str(template.relative_to(ROOT))

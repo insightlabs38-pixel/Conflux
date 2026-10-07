@@ -79,7 +79,9 @@ def event_landing(request, event_public_id):
             "event": event,
             "theme": page.theme if page else "default",
             "blocks": blocks,
-            "has_hero": any(block.kind == PageBlockKind.HERO for block in blocks),
+            "has_hero": any(
+                block.kind in (PageBlockKind.HERO, PageBlockKind.LEAD) for block in blocks
+            ),
         },
     )
 

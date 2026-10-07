@@ -227,6 +227,75 @@ test("a long hero title wraps inside the compact band and the action stays above
   }
 });
 
+// PD-F004-B03-T05: an event-specific lead replaces the hero. It is added through the page builder, its
+// action link is checked by the server, and the public page shows one h1 with no default hero.
+for (const width of [390, 1440]) {
+  test(`a lead block added in the page builder replaces the hero on the public page at ${width}`, async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+    await page.setViewportSize({ width, height: 900 });
+    await signIn(page, "organizer");
+    const { workspace, event } = await eventIds(page);
+    const base = `/api/v1/workspaces/${workspace}/events/${event}/page/blocks/`;
+    const openers = (
+      (await (await page.request.get(base)).json()) as {
+        kind: string;
+        public_id: string;
+      }[]
+    ).filter((block) => block.kind === "hero" || block.kind === "lead");
+    for (const block of openers)
+      await page.request.delete(`${base}${block.public_id}/`);
+    await page.goto("/app/");
+    await openWorkspace(page);
+    await chooseWorkspaceEvent(page);
+    await goToDestination(page, "setup");
+    await goToTask(page, "Public page");
+    await settled(page);
+
+    await page
+      .getByLabel("Add block")
+      .selectOption({ label: "Lead (replaces the hero)" });
+    await page.getByRole("button", { name: "Add", exact: true }).click();
+    const editor = page.getByRole("region", {
+      name: "Edit Lead (replaces the hero) block",
+    });
+    await editor
+      .getByLabel("Title", { exact: true })
+      .fill("Applications close Friday");
+    await editor
+      .getByLabel("Body", { exact: true })
+      .fill("Bring a laptop and a team of up to four.");
+    await editor.getByLabel("Action label").fill("Apply now");
+    await editor.getByLabel("Action link").fill("javascript:alert(1)");
+    await editor.getByRole("button", { name: "Save block" }).click();
+    await expect(editor.getByRole("alert")).toContainText("path on this site");
+    await editor.getByLabel("Action link").fill("/apply/");
+    await editor.getByRole("button", { name: "Save block" }).click();
+    await expect(editor.getByText("All changes saved")).toBeVisible();
+    await accessible(page);
+
+    const site = await page.context().newPage();
+    await site.setViewportSize({ width, height: 900 });
+    await site.goto(`/e/${event}/`);
+    await site.waitForLoadState("networkidle");
+    await expect(site.locator("h1")).toHaveCount(1);
+    await expect(site.locator("h1")).toHaveText("Applications close Friday");
+    await expect(site.getByRole("link", { name: "Apply now" })).toHaveAttribute(
+      "href",
+      "/apply/",
+    );
+    await expect(site.locator(".cx-hero")).toHaveCount(0);
+    const top = await site.evaluate(
+      () => document.querySelector(".cx-lead h1")!.getBoundingClientRect().top,
+    );
+    expect(top).toBeLessThan(900 * 0.3);
+    await noHorizontalOverflow(site);
+    await accessible(site);
+    await site.close();
+  });
+}
+
 test("an unsupported hero size is refused by the server and nothing is stored", async ({
   page,
 }, info) => {

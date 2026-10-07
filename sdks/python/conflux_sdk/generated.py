@@ -3403,9 +3403,9 @@ class InputOfPageBlock(TypedDict):
     position: NotRequired[int]
     config: NotRequired[Any]
 
-PageBlockKindEnum = Literal['hero', 'tracks', 'prizes', 'schedule', 'sponsors', 'faq', 'resources', 'gallery', 'results', 'announcements', 'rich_text', 'cta']
+PageBlockKindEnum = Literal['hero', 'lead', 'tracks', 'prizes', 'schedule', 'sponsors', 'faq', 'resources', 'gallery', 'results', 'announcements', 'rich_text', 'cta']
 
-InputOfPageBlockKindEnum = Literal['hero', 'tracks', 'prizes', 'schedule', 'sponsors', 'faq', 'resources', 'gallery', 'results', 'announcements', 'rich_text', 'cta']
+InputOfPageBlockKindEnum = Literal['hero', 'lead', 'tracks', 'prizes', 'schedule', 'sponsors', 'faq', 'resources', 'gallery', 'results', 'announcements', 'rich_text', 'cta']
 
 class PageBlockOrderInput(TypedDict):
     block_ids: list[str]

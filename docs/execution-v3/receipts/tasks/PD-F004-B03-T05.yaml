@@ -1,0 +1,99 @@
+version: 3
+task: PD-F004-B03-T05
+batch: PD-F004-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 9751c5f
+  head_commit: null
+changed_paths:
+- src/api/presentation/block_types.py
+- src/api/presentation/blocks.py
+- src/api/presentation/models.py
+- src/api/presentation/migrations/0006_pageblock_kind_lead.py
+- src/api/presentation/manifest.py
+- src/api/presentation/views.py
+- src/api/presentation/site_views.py
+- src/api/presentation/accessibility.py
+- src/api/presentation/templatetags/presentation_tags.py
+- src/api/presentation/templates/presentation/event_landing.html
+- src/web/styles/presentation.css
+- src/web/features/page-builder/PageBuilder.tsx
+- src/web/features/page-builder/blockSchemas.generated.ts
+- docs/api/openapi.yaml
+- sdks/python/conflux_sdk/generated.py
+- sdks/typescript/generated.ts
+- tests/integration/test_page_lead_block.py
+- tests/e2e/hero-size.spec.ts
+- tests/e2e/weights.json
+- docs/operations/VISUAL_FOUNDATION.md
+deliverables:
+- item: The hero can be replaced with an event-specific lead block
+  result: pass
+  evidence: 'new block kind `lead` (one required title, body up to 600 characters, up to four label/value
+    facts, one action) in the existing block schema catalog, so the builder form, generated schemas and
+    both SDKs follow from the one definition. Adding a lead puts it first, and its presence suppresses
+    the default hero (has_hero), leaving exactly one h1; the audit counts a lead as the page''s h1 and
+    checks its action text'
+- item: Reuse of canonical primitives
+  result: pass
+  evidence: block catalog and schema subset (SCHEMA_SUBSET), page block API and builder, accessibility audit;
+    no second block model or renderer
+- item: Migration and compatibility
+  result: pass
+  evidence: 0006 is a choices-only AlterField (no data change); existing pages are untouched; OpenAPI and
+    both SDKs regenerated, make openapi-check, sdk-check and block-schema-check clean
+invariants:
+- item: Server-side validation and authorization remain authoritative
+  result: pass
+  evidence: organizer-only page API unchanged; the lead and every link field are validated on save
+- item: Untrusted content
+  result: pass
+  evidence: title, body and facts are escaped by the template; links pass safe_href at save and at render
+verification:
+- command: uv run --frozen pytest -n auto -q
+  result: pass
+  note: 2929 passed, 34 skipped (test_page_lead_block.py 29 cases incl. a 15-value safe_href table, unsafe links
+    refused for hero, lead, cta, sponsors and resources, a stored javascript link dropped at render, ordering)
+- command: cd src/web && npx tsc --noEmit && npx vitest run; make openapi-check sdk-check block-schema-check
+  result: pass
+  note: 678 passed; generated artifacts in sync
+- command: iso-min fixture; npx playwright test hero-size --project=desktop
+  result: pass
+  note: 9 passed, including a Lead added through the page builder at 390 and 1440 (rejected javascript link shown,
+    saved with /apply/, public page shows one h1, no hero, link href, title in the top 30% of the screen,
+    axe and no overflow); first attempt failed because a new block was appended last and the dialog
+    name carries the full kind label (fixed in the product and the spec, no timeout changed)
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-HERO-1 (hero replaceable), V-SLOP-3 (facts as a short list, not KPI cards), V-SLOP-6
+- ref: design/state-matrix
+  result: pass
+  note: the builder's error, saved and unsaved states are the shared ones
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: builder (schema driven), public template, stylesheet
+- surface: docs
+  result: pass
+  evidence: VISUAL_FOUNDATION.md Lead block and block links
+- surface: api
+  result: pass
+  evidence: not_required by the batch; the block kind enum gained `lead` in OpenAPI, SDKs regenerated and checked
+migrations:
+- presentation 0006_pageblock_kind_lead (choices only)
+findings:
+- 'P2-fixed organizer-typed links in public page blocks were rendered unchecked on an origin shared with
+  the app, so a stored `javascript:` link would run as the visitor. Fixed with save-time validation of
+  hero, lead and cta links and sponsor and resource URLs plus a render-time filter, 15-value table test
+  and a stored-value test (QUESTIONS.md 2026-10-07T08:05Z, default A).'
+escalations: []
+limitations:
+- A link stored before the rule that is unsafe now renders without a link instead of failing; there is no
+  data migration that rewrites it. The lead has no art by design; art-led openings are the immersive size.
+next: review

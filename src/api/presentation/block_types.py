@@ -21,11 +21,11 @@ def object_schema(properties, *, strict=False):
     return {"type": "object", "properties": properties, "additionalProperties": not strict}
 
 
-def item_schema(fields):
+def item_schema(fields, *, maximum=20, title="Items"):
     return {
         "type": "array",
-        "title": "Items",
-        "maxItems": 20,
+        "title": title,
+        "maxItems": maximum,
         "default": [],
         "items": object_schema({name: text(name, 500) for name in fields}, strict=True),
     }
@@ -40,6 +40,22 @@ BLOCK_TYPES = {
                 "subtitle": text("Subtitle", 400),
                 "cta_label": text("CTA label", 60),
                 "cta_href": text("CTA link", 2000),
+            }
+        ),
+    },
+    # An event-specific lead (PD-F004-B03-T05): replaces the default hero for an event that has
+    # something more useful to open with than a banner (a deadline, what to bring, who it is
+    # for). One h1, a short body, up to four label/value facts and one action; no art, so it
+    # never pushes the content down.
+    "lead": {
+        "title": "Lead (replaces the hero)",
+        "schema": object_schema(
+            {
+                "title": text("Title", 200, required=True, create_default="Start here"),
+                "body": text("Body", 600, widget="textarea"),
+                "facts": item_schema(["label", "value"], maximum=4, title="Key facts"),
+                "cta_label": text("Action label", 60),
+                "cta_href": text("Action link", 2000),
             }
         ),
     },

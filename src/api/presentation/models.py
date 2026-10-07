@@ -15,6 +15,7 @@ class PageTheme(models.TextChoices):
 
 class PageBlockKind(models.TextChoices):
     HERO = "hero", "Hero"
+    LEAD = "lead", "Lead"
     TRACKS = "tracks", "Tracks"
     PRIZES = "prizes", "Prizes"
     SCHEDULE = "schedule", "Schedule"

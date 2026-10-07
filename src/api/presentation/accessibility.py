@@ -138,7 +138,7 @@ def _heading_warnings(block) -> list[dict]:
 
 def _accessible_name_warnings(block) -> list[dict]:
     warnings = []
-    if block.kind == "hero":
+    if block.kind in ("hero", "lead"):
         label = block.config.get("cta_label", "")
         if block.config.get("cta_href") and label.strip().lower() in VAGUE_LINK_TEXT:
             warnings.append(
@@ -208,13 +208,13 @@ def audit_page(page) -> list[dict]:
         warnings.append(_warning("contrast", " ".join(exc.messages)))
     hero_count = 0
     for block in page.blocks.all():
-        if block.kind == "hero":
+        if block.kind in ("hero", "lead"):
             hero_count += 1
             if hero_count > 1:
                 warnings.append(
                     _warning(
                         "heading",
-                        "More than one hero block on this page means more than "
+                        "More than one hero or lead block on this page means more than "
                         "one h1 -- a page should have exactly one.",
                         block=block,
                     )

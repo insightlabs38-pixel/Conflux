@@ -25,6 +25,7 @@ manifest.register_manifest(
                 "faq",
                 "gallery",
                 "hero",
+                "lead",
                 "prizes",
                 "resources",
                 "results",

@@ -4,6 +4,7 @@ from django import template
 from django.utils import formats, timezone
 from django.utils.safestring import mark_safe
 
+from ..blocks import safe_href as _safe_href
 from ..sanitize import sanitize_html as _sanitize_html
 
 register = template.Library()
@@ -14,6 +15,12 @@ def sanitize_html(value):
     """Re-sanitize at render time (defense in depth on top of save-time
     cleaning in blocks.clean_config) before marking safe for `{{ }}`."""
     return mark_safe(_sanitize_html(value or ""))
+
+
+@register.filter(name="safe_href")
+def safe_href(value):
+    """A link an organizer typed, or '' when it is not a path, anchor, http(s) or mailto link."""
+    return _safe_href(value)
 
 
 @register.simple_tag

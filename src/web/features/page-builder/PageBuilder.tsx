@@ -61,7 +61,8 @@ function defaultConfig(kind: Kind): Record<string, unknown> {
 }
 
 function summarize(block: Block): string {
-  if (block.kind === "hero") return String(block.config.title ?? "");
+  if (block.kind === "hero" || block.kind === "lead")
+    return String(block.config.title ?? "");
   if (block.kind === "cta") return String(block.config.label ?? "");
   if (block.kind === "rich_text") return "Rich text block";
   if (LIST_FIELDS[block.kind]) {

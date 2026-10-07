@@ -3679,6 +3679,7 @@ export type InputOfPageBlock = {
 
 export type PageBlockKindEnum =
   | "hero"
+  | "lead"
   | "tracks"
   | "prizes"
   | "schedule"
@@ -3693,6 +3694,7 @@ export type PageBlockKindEnum =
 
 export type InputOfPageBlockKindEnum =
   | "hero"
+  | "lead"
   | "tracks"
   | "prizes"
   | "schedule"

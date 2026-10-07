@@ -315,6 +315,42 @@
   width: 100%;
   height: clamp(12rem, 28vw, 22rem);
 }
+/* An event-specific lead replaces the hero: a title, a short body, up to four facts and one action,
+   no art, so the content below begins as high as with a compact hero. */
+.cx-event-site .cx-lead {
+  margin-block: var(--sp-4) var(--sp-8);
+  padding-block: var(--sp-5);
+  border-bottom: 1px solid var(--line);
+}
+.cx-lead h1 {
+  font-size: var(--fs-display);
+  line-height: var(--lh-tight);
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+  margin: 0 0 var(--sp-2);
+}
+.cx-lead__body {
+  max-width: 42rem;
+  margin: 0 0 var(--sp-3);
+}
+.cx-lead__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-8);
+  margin: 0 0 var(--sp-4);
+}
+.cx-lead__facts dt {
+  font-size: var(--fs-12);
+  color: var(--color-text-muted);
+}
+.cx-lead__facts dd {
+  margin: 0;
+  font-size: var(--fs-16);
+  font-weight: var(--font-weight-medium);
+}
+.cx-lead p {
+  margin: 0;
+}
 /* none: no band. The page keeps one h1 and the primary action; art, lockup and kicker are dropped. */
 .cx-event-site[data-hero-size="none"] {
   --hero-pad: var(--sp-2);

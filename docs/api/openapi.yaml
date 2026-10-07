@@ -24216,6 +24216,7 @@ components:
     PageBlockKindEnum:
       enum:
       - hero
+      - lead
       - tracks
       - prizes
       - schedule
@@ -24230,6 +24231,7 @@ components:
       type: string
       description: |-
         * `hero` - Hero
+        * `lead` - Lead
         * `tracks` - Tracks
         * `prizes` - Prizes
         * `schedule` - Schedule

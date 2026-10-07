@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import transaction
+from django.db.models import F
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, inline_serializer
 from events.views import OrganizerView
@@ -50,6 +51,10 @@ class PageBlockListView(PageMixin):
         next_position = (page.blocks.count()) or 0
         try:
             with transaction.atomic():
+                if serializer.validated_data.get("kind") == "lead":
+                    # a lead opens the page: it goes first and the other blocks move down one
+                    page.blocks.update(position=F("position") + 1)
+                    next_position = 0
                 block = serializer.save(page=page, position=next_position)
                 block.full_clean()
                 block.save()

@@ -44,6 +44,7 @@ export function DataGrid<Row extends { id: string }>({
   onPage,
   density = "comfortable",
   selected,
+  highlightedId,
   onSelect,
   rowLabel,
   actions,
@@ -64,6 +65,8 @@ export function DataGrid<Row extends { id: string }>({
   density?: GridDensity;
   selected?: ReadonlySet<string>;
   onSelect?: (ids: Set<string>) => void;
+  /** The row whose details are open beside the list: marked, and never scrolled away. */
+  highlightedId?: string;
   /** Accessible name of a row's checkbox, for example the applicant's name. */
   rowLabel?: (row: Row) => string;
   /** A column of per-row actions, rendered last. */
@@ -271,7 +274,9 @@ export function DataGrid<Row extends { id: string }>({
             {rows.map((row, index) => (
               <tr
                 key={row.id}
+                data-row-id={row.id}
                 aria-selected={selectable ? chosen.has(row.id) : undefined}
+                aria-current={row.id === highlightedId ? "true" : undefined}
               >
                 {selectable && (
                   <td className="cx-datagrid__select" data-label="Select">

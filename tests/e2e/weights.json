@@ -59,5 +59,6 @@
   "read-only:shortcuts": 25,
   "isolated-mutation:role-switcher": 25,
   "isolated-mutation:pinned-views": 25,
-  "isolated-mutation:recent-activity": 25
+  "isolated-mutation:recent-activity": 25,
+  "read-only:inspector": 30
 }

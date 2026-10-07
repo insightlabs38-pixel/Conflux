@@ -114,6 +114,7 @@
 
   /* shell (v3): the rail is 216px (52px icons from 1024 to 1439), top bar is --h-top; the inspector belongs to PD-F005-B02 */
   --w-rail: 13.5rem;
+  --w-inspector: 22rem; /* docked inspector from 1024px (D-009 gives 340-420) */
   --w-rail-icon: 3.25rem; /* 1024-1439: icons only, labels in the tooltip (D-009) */
   --h-bar: 3.5rem; /* phone bottom navigation */
 }

@@ -3,7 +3,9 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { jsonResponse } from "../lib/test-http";
-import { withRouter } from "../lib/test-router";
+import { createTestQueryClient, withRouter } from "../lib/test-router";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { MemoryRouter, useLocation } from "react-router";
 import { EntityGrid } from "./EntityGrid";
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -135,9 +137,9 @@ describe("EntityGrid", () => {
       () => container.querySelector("tbody tr:not([aria-hidden])") !== null,
     );
     expect(
-      [...container.querySelectorAll("thead th")].map((h) =>
-        h.textContent?.replace(/,.*$/, "").trim(),
-      ),
+      [...container.querySelectorAll("thead th")]
+        .filter((h) => h.textContent?.trim() !== "Actions") // the Details column has no visible heading
+        .map((h) => h.textContent?.replace(/,.*$/, "").trim()),
     ).toEqual(["Applicant", "Status", "Applied"]);
     expect(container.textContent).toContain("Mar 1, 2027");
     expect(container.textContent).toContain("UTC");
@@ -293,6 +295,156 @@ describe("EntityGrid", () => {
     );
     await until(() => container.textContent?.includes("Try again") ?? false);
     expect(container.querySelector("table")).toBeNull();
+    await act(async () => root.unmount());
+  });
+});
+
+function Where() {
+  const location = useLocation();
+  return <p data-testid="where">{location.search}</p>;
+}
+const search = () =>
+  document.querySelector('[data-testid="where"]')!.textContent;
+
+/** The grid inside a router whose location is readable, starting at `url`. */
+async function mountAt(
+  url: string,
+  props: Partial<React.ComponentProps<typeof EntityGrid>> = {},
+) {
+  const pages: Params[] = [];
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (input: unknown) => {
+      const u = new URL(String(input), "http://x");
+      if (u.pathname.endsWith("/entities/"))
+        return jsonResponse(200, CATALOGUE);
+      if (u.pathname.includes("/views/")) return jsonResponse(200, []);
+      if (u.pathname.includes("/accounts/me/"))
+        return jsonResponse(200, { public_id: "u1", memberships: [] });
+      pages.push(Object.fromEntries(u.searchParams));
+      return jsonResponse(200, page(ROWS));
+    }),
+  );
+  const container = document.createElement("div");
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  await act(async () =>
+    root.render(
+      <QueryClientProvider client={createTestQueryClient()}>
+        <MemoryRouter initialEntries={[url]}>
+          <Where />
+          <EntityGrid
+            workspaceId="w"
+            eventId="e"
+            entity="applications"
+            label="Applications"
+            {...props}
+          />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    ),
+  );
+  await act(async () => new Promise((resolve) => setTimeout(resolve, 0)));
+  return { container, pages, root };
+}
+
+describe("EntityGrid inspector", () => {
+  afterEach(() => {
+    document.body.innerHTML = ""; // each test reads the document, so none may leave its grid in it
+  });
+  const details = (c: HTMLElement, id: string) =>
+    c.querySelector<HTMLButtonElement>(`[data-inspect="${id}"]`)!;
+  const inspector = () => document.querySelector(".cx-inspector");
+  const fieldsShown = () =>
+    [...document.querySelectorAll(".cx-inspector__fields > div")].map((row) => [
+      row.querySelector("dt")?.textContent,
+      row.querySelector("dd")?.textContent,
+    ]);
+
+  it("opens a record beside the list with every field, marks it in the list and keeps the list as it was", async () => {
+    const { container, pages, root } = await mountAt("/w/w/participants");
+    await until(() => container.querySelector("tbody tr") !== null);
+    expect(inspector()).toBeNull();
+    await act(async () => details(container, "2").click());
+    await until(() => inspector() !== null);
+    expect(inspector()!.getAttribute("aria-labelledby")).toBeTruthy();
+    expect(inspector()!.querySelector("h3")!.textContent).toBe("ben");
+    expect(fieldsShown().map(([label]) => label)).toEqual([
+      "Applicant",
+      "Status",
+      "Applied",
+      "Note", // a field the list does not show
+    ]);
+    expect(fieldsShown()[1]).toEqual(["Status", "approved"]);
+    expect(fieldsShown()[3]).toEqual(["Note", "—"]);
+    // the row is marked and is the same element as before (the list was not remounted)
+    expect(
+      container
+        .querySelector('tr[data-row-id="2"]')!
+        .getAttribute("aria-current"),
+    ).toBe("true");
+    expect(search()).toBe("?row_applications=2"); // panel state in the URL
+    // the detail read asked for every field, the list's own for its columns
+    expect(
+      pages.some((p) => (p.columns ?? "").split(",").includes("note")),
+    ).toBe(true);
+    await act(async () => root.unmount());
+  });
+
+  it("steps to the neighbouring record, says where it is, and closes with Escape giving focus back", async () => {
+    const { container, root } = await mountAt("/w/w/participants");
+    await until(() => container.querySelector("tbody tr") !== null);
+    await act(async () => details(container, "1").click());
+    await until(() => inspector() !== null);
+    const [previous, next] = [
+      ...inspector()!.querySelectorAll<HTMLButtonElement>(
+        ".cx-inspector__step button",
+      ),
+    ];
+    expect(previous.disabled).toBe(true); // first record
+    expect(
+      inspector()!.querySelector(".cx-inspector__step span")!.textContent,
+    ).toBe("1 of 2");
+    await act(async () => next.click());
+    expect(inspector()!.querySelector("h3")!.textContent).toBe("ben");
+    expect(search()).toBe("?row_applications=2");
+    expect(
+      inspector()!.querySelectorAll<HTMLButtonElement>(
+        ".cx-inspector__step button",
+      )[1].disabled,
+    ).toBe(true);
+    await act(async () => {
+      inspector()!
+        .querySelector("h3")!
+        .dispatchEvent(
+          new KeyboardEvent("keydown", { key: "Escape", bubbles: true }),
+        );
+    });
+    expect(inspector()).toBeNull();
+    expect(search()).toBe("");
+    await act(async () => new Promise((resolve) => setTimeout(resolve, 20)));
+    expect(document.activeElement).toBe(details(container, "2"));
+    await act(async () => root.unmount());
+  });
+
+  it("opens from a link, and says so when the record is not on this page", async () => {
+    const { container, root } = await mountAt(
+      "/w/w/participants?row_applications=99",
+    );
+    await until(() => inspector() !== null);
+    expect(inspector()!.textContent).toContain("not on the current page");
+    expect(container.querySelector("tr[aria-current]")).toBeNull();
+    await act(async () => root.unmount());
+  });
+
+  it("offers no Details button when a list opts out", async () => {
+    window.history.replaceState({}, "", "/");
+    const { container, root } = await mount(
+      () => jsonResponse(200, page(ROWS)),
+      { inspect: false },
+    );
+    await until(() => container.querySelector("tbody tr") !== null);
+    expect(container.querySelector("[data-inspect]")).toBeNull();
     await act(async () => root.unmount());
   });
 });

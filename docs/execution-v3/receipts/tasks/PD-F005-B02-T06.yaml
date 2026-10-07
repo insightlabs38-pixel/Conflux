@@ -1,0 +1,79 @@
+version: 3
+task: PD-F005-B02-T06
+batch: PD-F005-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: de340f1
+  head_commit: null
+changed_paths:
+- src/web/components/Inspector.tsx
+- src/web/components/EntityGrid.tsx
+- src/web/components/EntityGrid.test.tsx
+- src/web/components/DataGrid.tsx
+- src/web/styles/components.css
+- src/web/styles/tokens.css
+- tests/e2e/inspector.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Contextual side inspector that preserves list position, as a complete workflow
+  result: pass
+  evidence: every entity list (the QUERY consumer, EntityGrid) has a labelled Details button per row. It opens the record in an Inspector beside the list - docked from 1024px (22rem), a full-height sheet with a scrim below it (design D-009) - showing every field of the entity (the same page read again with all columns, the server still deciding what is visible), the record's name as its heading (focus lands on it), Previous and Next with the position (3 of 25), and a close button. The list is not remounted, so its scroll position, page, filter and selection survive; the open record is marked in the list (aria-current) and stays in view. The record is panel state in the URL (row_<entity>, a public id, replaced so Back leaves the page), so a link reopens it; one that is not on the current page says so. Escape closes it and focus returns to the row's Details button.
+- item: Reuses the canonical primitives
+  result: pass
+  evidence: QUERY (the entity page and catalogue), DATA_GRID (a highlightedId prop and a data-row-id on rows) and the URL-state rules (useUrlParam) are used as they are; the field formatting is the grid's own; no new endpoint, model or list plumbing
+- item: States, keyboard, accessibility
+  result: pass
+  evidence: complementary region labelled by its heading; the stepper is real buttons; a failed full-field read shows Try again and keeps the list's own values; axe passes with the inspector open at 1440, 1100, 800 and 390; no hidden menus (V-SLOP-8)
+invariants:
+- item: No parallel list or detail source
+  result: pass
+  evidence: the inspector reads the entity query only; per-entity actions are not added here
+- item: No test weakened
+  result: pass
+  evidence: the EntityGrid headers test ignores the new visually hidden Actions heading; the inspector got four tests
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 144 files, 793 tests (EntityGrid inspector 4 - every field including one the list hides and the row marked with the list not remounted, stepping and position and Escape returning focus, a link to a record not on the page, opt-out)
+- command: npx playwright test -c tests/e2e/playwright.config.ts slop-audit visual-foundation uiv2-gate uiv2-surfaces roles inspector --project=desktop --workers=4
+  result: pass
+  note: 158 passed on the rebuilt stack, including the new inspector spec (5) - docked beside the list at 1440 and 1100 with scroll position kept and the row marked and in view, stepping, the URL param, a sheet at 800 and 390 closed by its button, a link opening a record and one that is not on the page
+- command: scripts/e2e fixture runs of entity-grid.spec.ts and bulk-planner.spec.ts
+  result: pass
+  note: 2 passed each on isolated fixtures - the Details column does not disturb filtering, saved views or the bulk planner
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: right inspector for operators; docked at 1024 and up, a sheet below
+- ref: design/responsive-wide
+  result: pass
+  note: inspector docked push 1024-1439, sheet 768-1023 and below (D-009)
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit, browser and accessibility tests
+- surface: audit
+  result: pass
+  evidence: read-only
+- surface: search
+  result: pass
+  evidence: reads the same entity query the search and grids use
+- surface: docs
+  result: pass
+  evidence: developer and release notes at T91
+migrations: []
+findings:
+- P3 narrowing the list for a docked inspector can rewrap cells, so a row may move within the list; the browser test asserts it stays in view and the scroll position is unchanged, not pixel-identical.
+- P3 every list now has a Details column; lists that must not (a future compact picker) pass inspect false.
+escalations: []
+limitations:
+- The inspector is read-only: it shows fields and steps through records but has no per-record actions yet; actions stay in the list's own columns.
+- Stepping moves within the current page of the list, not across pages.
+- The record's title is the list's first column.
+next: review

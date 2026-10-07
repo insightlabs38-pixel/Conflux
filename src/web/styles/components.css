@@ -2586,6 +2586,111 @@
   display: flex;
   gap: var(--sp-2);
 }
+.cx-entity-grid--inspecting {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--w-inspector);
+  gap: var(--sp-4);
+  align-items: start;
+}
+.cx-entity-grid__main {
+  min-width: 0;
+}
+.cx-datagrid tr[aria-current="true"] > td {
+  background: var(--accent-tint);
+}
+.cx-inspector {
+  position: sticky;
+  top: var(--sp-4);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - var(--sp-8));
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  background: var(--surface);
+}
+.cx-inspector__scrim {
+  display: none;
+}
+.cx-inspector__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--line);
+}
+.cx-inspector__title {
+  margin: 0;
+  font-size: var(--fs-16);
+  overflow-wrap: anywhere;
+}
+.cx-inspector__title:focus {
+  outline: none;
+}
+.cx-inspector__close {
+  display: inline-grid;
+  place-items: center;
+  width: var(--h-ctl);
+  height: var(--h-ctl);
+  border: 0;
+  background: none;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.cx-inspector__step {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-3);
+  font-size: var(--fs-13);
+}
+.cx-inspector__body {
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--sp-2) var(--sp-3) var(--sp-3);
+}
+.cx-inspector__fields {
+  margin: 0;
+}
+.cx-inspector__fields > div {
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--line);
+}
+.cx-inspector__fields dt {
+  color: var(--ink-3);
+  font-size: var(--fs-12);
+}
+.cx-inspector__fields dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+/* Below 1024 the inspector is a full-height sheet over the list (D-009) */
+@media (max-width: 63.9375rem) {
+  .cx-entity-grid--inspecting {
+    display: block;
+  }
+  .cx-inspector {
+    position: fixed;
+    inset: 0 0 0 auto;
+    z-index: var(--z-menu);
+    width: min(24rem, 100vw);
+    max-height: none;
+    border-radius: 0;
+    border-width: 0 0 0 1px;
+    box-shadow: var(--sh-pop);
+  }
+  .cx-inspector__scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-menu) - 1);
+    border: 0;
+    background: var(--scrim);
+  }
+}
 .cx-entity-grid__tools {
   margin-bottom: var(--sp-3);
 }

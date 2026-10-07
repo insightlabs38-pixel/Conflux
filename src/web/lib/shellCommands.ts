@@ -1,4 +1,5 @@
 import { registerCommandProvider, type Command } from "./commands";
+import { SEARCH_TARGETS } from "./searchTargets";
 
 /**
  * The commands of the application shell. They are navigation and presentation only: going to a
@@ -6,6 +7,30 @@ import { registerCommandProvider, type Command } from "./commands";
  * places and events come from `context.places` / `context.events`, which the palette fills from what
  * the shell already holds, so a place or event the person cannot see is never offered.
  */
+// pinned views come first: they are what the person chose to keep at hand
+registerCommandProvider((context) =>
+  context.pinned.flatMap((pin): Command[] => {
+    const target = SEARCH_TARGETS[pin.entity];
+    if (!target) return [];
+    return [
+      {
+        id: `view.${pin.id}`,
+        label: `Open view ${pin.name}`,
+        group: "Pinned views",
+        keywords: ["view", "pinned", pin.name, target.nouns],
+        run: (ctx) =>
+          ctx.go(
+            ctx.target({
+              view: target.view,
+              section: target.section,
+              params: { [`view_${pin.entity}`]: pin.id },
+            }),
+          ),
+      },
+    ];
+  }),
+);
+
 registerCommandProvider((context) => {
   const commands: Command[] = [];
   for (const place of context.places)

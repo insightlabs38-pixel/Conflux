@@ -31,6 +31,8 @@ export type CommandContext = {
   go: (to: string) => void;
   /** A location in this workspace that keeps the current event and role (`navigation.target`). */
   target: (target: RouteTarget) => string;
+  /** The person's pinned saved views of the selected event that still exist. */
+  pinned: { id: string; entity: string; name: string }[];
   /** The roles the person holds here, the one being viewed as marked. */
   roles: { role: string; label: string; current: boolean }[];
   /** Everything else a command may need is handed in by the shell as named capabilities. */

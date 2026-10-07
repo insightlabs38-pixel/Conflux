@@ -64,6 +64,9 @@ async function mount(
       if (url.pathname.endsWith("/entities/"))
         return jsonResponse(200, CATALOGUE);
       if (url.pathname.includes("/views/")) return jsonResponse(200, []);
+      if (url.pathname.includes("/accounts/me/"))
+        // the view bar knows whose pins to read
+        return jsonResponse(200, { public_id: "u1", memberships: [] });
       const params = Object.fromEntries(url.searchParams);
       pages.push(params);
       return respond(params, url.pathname);

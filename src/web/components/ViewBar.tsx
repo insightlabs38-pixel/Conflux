@@ -11,6 +11,8 @@ import {
   type ViewDefinition,
 } from "../lib/savedViews";
 import { Button } from "./Button";
+import { useMe } from "../hooks/useMe";
+import { togglePinnedView, usePinnedViews } from "../lib/shellPreferences";
 
 /**
  * Pick, save, rename, share and delete saved views of one entity. The selected view is the `view_<entity>`
@@ -43,8 +45,18 @@ export function ViewBar({
   const [failure, setFailure] = useState("");
   const [note, setNote] = useState("");
 
+  const user = useMe().data?.public_id ?? "";
+  const pins = usePinnedViews(user, workspaceId);
   const views = load.data ?? [];
   const selected = views.find((v) => v.public_id === selectedId) ?? null;
+  const pinned =
+    !!selected &&
+    pins.some(
+      (pin) =>
+        pin.event === eventId &&
+        pin.entity === entity &&
+        pin.view === selected.public_id,
+    );
   const changed = selected ? !sameDefinition(selected.query, current) : false;
 
   // An unknown or no-longer-visible id falls back to "no view"; the URL is corrected quietly.
@@ -124,6 +136,25 @@ export function ViewBar({
           )}
         </select>
       </label>
+      {selected && user && (
+        <button
+          type="button"
+          aria-pressed={pinned}
+          title="Pinned views are offered first in the palette (Ctrl K) on this device"
+          onClick={() => {
+            if (
+              !togglePinnedView(user, workspaceId, {
+                event: eventId,
+                entity,
+                view: selected.public_id,
+              })
+            )
+              setNote("You can pin up to 12 views; unpin one first.");
+          }}
+        >
+          {pinned ? "Unpin view" : "Pin view"}
+        </button>
+      )}
       {changed && <span role="status">Changed since saved</span>}
       {selected && !selected.mine && (
         <span className="cx-muted">

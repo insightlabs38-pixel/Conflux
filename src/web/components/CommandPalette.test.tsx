@@ -96,6 +96,15 @@ async function render(
           200,
           handlers.applications ?? { total: 0, rows: [] },
         );
+      if (path.includes("/views/"))
+        return jsonResponse(200, [
+          {
+            public_id: "v1",
+            name: "Late projects",
+            entity: "projects",
+            mine: true,
+          },
+        ]);
       if (path.endsWith("/events/") || path.includes("-events/"))
         return jsonResponse(200, EVENTS);
       return jsonResponse(200, { modules: [] });
@@ -363,6 +372,37 @@ describe("palette record search", () => {
     expect(
       calls.some((p) => p.includes("/entities/") && !p.endsWith("/entities/")),
     ).toBe(false);
+    await act(async () => root.unmount());
+  });
+});
+
+describe("pinned views", () => {
+  it("offers a pinned view first, opens it at its list with the view selected, and hides a stale pin", async () => {
+    window.localStorage.setItem(
+      "conflux:v1:u1:w:pinned-views",
+      JSON.stringify(["e1:projects:v1", "e1:projects:gone", "e2:projects:v1"]),
+    );
+    const { root } = await render("organizer", "/w/w/overview?event=e1");
+    await open();
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50)); // the views are listed by the server
+    });
+    expect(groups()[0]).toBe("Pinned views");
+    expect(labels().filter((label) => label?.startsWith("Open view"))).toEqual([
+      "Open view Late projects", // gone no longer exists, and e2's pin is for another event
+    ]);
+    await type("late");
+    await key("Enter");
+    expect(where()).toBe(
+      "/w/w/participants?event=e1&view_projects=v1&section=ProjectsGrid",
+    );
+    await act(async () => root.unmount());
+  });
+
+  it("offers no pinned group when nothing is pinned", async () => {
+    const { root } = await render("organizer", "/w/w/overview?event=e1");
+    await open();
+    expect(groups()).not.toContain("Pinned views");
     await act(async () => root.unmount());
   });
 });

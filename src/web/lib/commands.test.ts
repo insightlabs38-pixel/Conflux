@@ -19,6 +19,7 @@ const context = (over: Partial<CommandContext> = {}): CommandContext => ({
   go: () => {},
   target: (t) => `/w/w/${t.view}`,
   roles: [],
+  pinned: [],
   capabilities: {},
   ...over,
 });

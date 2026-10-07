@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 
 /**
  * Everything the shell remembers about a person, in one place (spec 005, PD-F005-B01). It is
@@ -162,6 +162,66 @@ export const useSingleKeyShortcuts = (user: string) =>
     () => singleKeyShortcuts(user),
     () => true,
   );
+
+/**
+ * Pinned views: a person's shortcut to one saved view of an entity in an event. A pin is the three
+ * ids "event:entity:view"; the view itself (its name, filter, columns) stays the server's, so a pin
+ * to a view that was deleted or is no longer visible simply does not resolve and is not shown.
+ */
+export const MAX_PINS = 12;
+export type PinnedView = { event: string; entity: string; view: string };
+
+const pinText = (pin: PinnedView) => `${pin.event}:${pin.entity}:${pin.view}`;
+
+export function pinnedViews(user: string, workspace: string): PinnedView[] {
+  const out: PinnedView[] = [];
+  for (const text of readIds(user, workspace, "pinned-views")) {
+    const [event, entity, view, extra] = text.split(":");
+    if (event && entity && view && extra === undefined)
+      out.push({ event, entity, view });
+  }
+  return out.slice(0, MAX_PINS);
+}
+
+/** Pin or unpin. Returns false when the pins are full and nothing was added. */
+export function togglePinnedView(
+  user: string,
+  workspace: string,
+  pin: PinnedView,
+): boolean {
+  if (
+    ![pin.event, pin.entity, pin.view].every(
+      (part) => ID.test(part) && !part.includes(":"),
+    )
+  )
+    return false;
+  const text = pinText(pin);
+  const current = pinnedViews(user, workspace).map(pinText);
+  if (current.includes(text)) {
+    writeIds(
+      user,
+      workspace,
+      "pinned-views",
+      current.filter((other) => other !== text),
+    );
+    return true;
+  }
+  if (current.length >= MAX_PINS) return false;
+  writeIds(user, workspace, "pinned-views", [...current, text]);
+  return true;
+}
+
+export const usePinnedViews = (
+  user: string,
+  workspace: string,
+): PinnedView[] => {
+  const snapshot = useSyncExternalStore(
+    subscribe,
+    () => JSON.stringify(pinnedViews(user, workspace)),
+    () => "[]",
+  );
+  return useMemo(() => JSON.parse(snapshot) as PinnedView[], [snapshot]);
+};
 
 const MAX_RECENT_COMMANDS = 5;
 const COMMAND_ID = /^[a-z][a-z0-9._-]{0,80}$/i;

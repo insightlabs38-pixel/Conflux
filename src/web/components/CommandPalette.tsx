@@ -10,6 +10,7 @@ import { useLocation, useNavigate } from "react-router";
 import { useMe } from "../hooks/useMe";
 import { useGlobalSearch, MIN_QUERY } from "../hooks/useGlobalSearch";
 import { useShellEvents } from "../hooks/useShellEvents";
+import { usePinnedViewList } from "../hooks/usePinnedViewList";
 import {
   commandsFor,
   rankCommands,
@@ -118,6 +119,7 @@ function CommandPalette({
     ? requested
     : "";
   const recent = useRecentCommands(user, workspaceId);
+  const pinned = usePinnedViewList(workspaceId, eventId, user);
   const search = useGlobalSearch({ workspaceId, eventId, query });
   const text = query.trim();
   const canSearchRecords = role === "organizer" || role === "admin";
@@ -147,6 +149,7 @@ function CommandPalette({
       })),
       go,
       target: navigation.target,
+      pinned,
       roles: navigation.roles.map((held) => ({
         role: held,
         label: roleLabel(held),
@@ -161,7 +164,7 @@ function CommandPalette({
     }),
     // `go` only closes over `navigate`, which is stable
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [role, workspaceId, eventId, navigation, events, onSignOut, user],
+    [role, workspaceId, eventId, navigation, events, onSignOut, user, pinned],
   );
 
   const options = useMemo(() => {

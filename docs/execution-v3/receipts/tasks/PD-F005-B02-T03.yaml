@@ -1,0 +1,79 @@
+version: 3
+task: PD-F005-B02-T03
+batch: PD-F005-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 6bbf185
+  head_commit: null
+changed_paths:
+- src/web/lib/shellPreferences.ts
+- src/web/lib/shellPreferences.test.ts
+- src/web/hooks/usePinnedViewList.ts
+- src/web/lib/commands.ts
+- src/web/lib/commands.test.ts
+- src/web/lib/shellCommands.ts
+- src/web/components/ViewBar.tsx
+- src/web/components/CommandPalette.tsx
+- src/web/components/CommandPalette.test.tsx
+- src/web/components/ShortcutsHelp.tsx
+- src/web/components/EntityGrid.test.tsx
+- tests/e2e/pinned-views.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Pinned organizer views as a complete workflow
+  result: pass
+  evidence: a saved view is the server's (SAVED_VIEWS, per entity and event, under the viewer's rights). The view bar of a grid gained a Pin view or Unpin view toggle (aria-pressed) for the selected view; a pin is three ids kept on the device by shellPreferences (event, entity, view; 12 at most, refused with a message beyond that). The palette offers the selected event's pinned views first, in a Pinned views group, as Open view and the view's current name; running one goes to the entity's list (the search target's view and section) with the view_<entity> param that selects it, so the existing view bar applies it.
+- item: The server stays the source of the view
+  result: pass
+  evidence: usePinnedViewList reads each pinned entity's view list from the existing endpoint through the server-state layer and shows a pin only when the view is in the list, with its current name; a view that was deleted, renamed, made private to someone else or belongs to another event is not shown or is shown under its new name (browser test deletes the view and the pin disappears)
+- item: States, keyboard, accessibility
+  result: pass
+  evidence: the toggle is a button with aria-pressed and a title saying pins are offered in the palette on this device; the palette group is keyboard reachable like any command; pins are forgotten at sign-out (browser test); at 390 the palette and the grid tools work the same
+invariants:
+- item: A pin is a request, never authority; nothing typed or personal stored
+  result: pass
+  evidence: the three ids are validated on read and write (a part with a colon or a non-id is refused), damaged storage reads as empty; the view's filter and name are never stored
+- item: One saved-view source and one preference store
+  result: pass
+  evidence: no new server model or endpoint; the pins live in shellPreferences with the other remembered values
+- item: No test weakened
+  result: pass
+  evidence: the EntityGrid test's request recorder now answers the account read the view bar makes (it records pages, and the extra request was being counted as one); the palette gained tests
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 143 files, 783 tests (pins 2 in shellPreferences, the palette 2 - a pinned view first and opened with the view selected while a stale pin and another event's pin are hidden, no group when nothing is pinned)
+- command: scripts/e2e fixture run of pinned-views.spec.ts (create iso-min fixture, run, dispose; the runner's own with_fixture steps)
+  result: pass
+  note: 3 passed on an isolated fixture with a real saved view - pin it in the Projects grid, the palette offers it first from the overview and opens it selected with the section and view params at 1440 and 390; unpin removes it, deleting the view on the server hides the pin, sign-out forgets the pins
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: pinned views as a shortcut kept by the person; the rail is unchanged
+- ref: design/state-matrix
+  result: pass
+  note: a pin that no longer resolves is not shown, so there is no broken state to design
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: audit
+  result: pass
+  evidence: nothing is written to the server; the saved view in the test was created through its existing endpoint
+- surface: docs
+  result: pass
+  evidence: developer and release notes at T91
+migrations: []
+findings:
+- P3 the Registration and Projects grids are both mounted, so a browser finder must scope to the grid it means; the spec does.
+escalations: []
+limitations:
+- Pins follow the device, not the person, like the other shell preferences (QUESTIONS.md 2026-10-07T21:40Z).
+- Pinning lives inside the grid's collapsed Filter, views and columns disclosure, where views are managed; the pinned views appear in the palette, not in the rail.
+next: review

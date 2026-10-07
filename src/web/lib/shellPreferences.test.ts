@@ -8,12 +8,15 @@ import {
   recentCommands,
   recentEvents,
   densityPreference,
+  MAX_PINS,
+  pinnedViews,
   rememberCommand,
   rememberEvent,
   setDensityPreference,
   setThemePreference,
   themePreference,
   toggleFavoriteEvent,
+  togglePinnedView,
 } from "./shellPreferences";
 
 beforeEach(() => window.localStorage.clear());
@@ -136,5 +139,35 @@ describe("shell preferences", () => {
     expect(window.localStorage.getItem("conflux:v1:u:device:density")).toBe(
       "tiny",
     );
+  });
+
+  it("pins a saved view as three ids, per person and workspace, once, capped, and unpins it", () => {
+    const pin = { event: "e1", entity: "projects", view: "v1" };
+    expect(togglePinnedView("u", "w", pin)).toBe(true);
+    expect(togglePinnedView("u", "w", { ...pin, view: "v2" })).toBe(true);
+    expect(pinnedViews("u", "w")).toEqual([pin, { ...pin, view: "v2" }]);
+    expect(pinnedViews("u", "w2")).toEqual([]);
+    expect(pinnedViews("other", "w")).toEqual([]);
+    expect(togglePinnedView("u", "w", pin)).toBe(true); // a second toggle unpins
+    expect(pinnedViews("u", "w")).toEqual([{ ...pin, view: "v2" }]);
+    for (let i = 0; i < MAX_PINS; i++)
+      togglePinnedView("u", "w", { ...pin, view: `x${i}` });
+    expect(pinnedViews("u", "w")).toHaveLength(MAX_PINS);
+    expect(togglePinnedView("u", "w", { ...pin, view: "overflow" })).toBe(
+      false,
+    );
+  });
+
+  it("reads damaged pins as nothing and refuses a pin with a non-id part", () => {
+    window.localStorage.setItem(
+      "conflux:v1:u:w:pinned-views",
+      JSON.stringify(["e1:projects:v1", "just-one", "a:b", "a:b:c:d", 5]),
+    );
+    expect(pinnedViews("u", "w")).toEqual([
+      { event: "e1", entity: "projects", view: "v1" },
+    ]);
+    expect(
+      togglePinnedView("u", "w", { event: "e 1", entity: "p", view: "v" }),
+    ).toBe(false);
   });
 });

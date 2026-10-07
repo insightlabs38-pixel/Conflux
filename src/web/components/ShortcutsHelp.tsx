@@ -120,6 +120,7 @@ function ShortcutsDialog({
       go: () => {},
       target: navigation.target,
       roles: [],
+      pinned: [],
       capabilities: { openShortcuts: () => {} },
     }),
     [navigation, requested],

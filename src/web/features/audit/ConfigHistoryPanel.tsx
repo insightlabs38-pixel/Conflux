@@ -153,6 +153,7 @@ export function ConfigHistoryPanel({
                       their current values.
                     </p>
                     <Button
+                      variant="primary"
                       disabled={restoring}
                       onClick={() => void restore(entry)}
                     >

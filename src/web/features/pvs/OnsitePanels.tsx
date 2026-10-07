@@ -414,7 +414,7 @@ export function OnsiteOperationsPanel({
                 ))}
               </ul>
               {plan.assignments.length > 0 && (
-                <Button onClick={() => void autoAssign(true)}>
+                <Button variant="primary" onClick={() => void autoAssign(true)}>
                   Apply these placements
                 </Button>
               )}

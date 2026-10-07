@@ -92,6 +92,40 @@ async function shadowed(page: Page) {
   );
 }
 
+/**
+ * Contexts (form, dialog, section, panel, list row) holding more than one visible primary button,
+ * and destructive-final buttons visible at rest, with every closed disclosure opened first.
+ */
+async function actionHierarchy(page: Page) {
+  return page.evaluate(() => {
+    document.querySelectorAll("details").forEach((d) => (d.open = true));
+    const context =
+      "dialog,[role=dialog],form,section,article,[role=region],.cx-card,.cx-state,fieldset,li";
+    const byContext = new Map<Element, string[]>();
+    const danger: string[] = [];
+    for (const b of document.querySelectorAll<HTMLElement>(
+      "main .cx-button--primary, main .cx-button--danger",
+    )) {
+      if (!b.checkVisibility()) continue;
+      const label = (b.textContent ?? "").trim().slice(0, 24);
+      if (b.classList.contains("cx-button--danger")) danger.push(label);
+      else {
+        const c = b.closest(context) ?? document.body;
+        byContext.set(c, [...(byContext.get(c) ?? []), label]);
+      }
+    }
+    return {
+      manyPrimaries: [...byContext]
+        .filter(([, labels]) => labels.length > 1)
+        .map(
+          ([c, labels]) =>
+            `${c.tagName.toLowerCase()}.${(c as HTMLElement).className}: ${labels.join(" / ")}`,
+        ),
+      dangerAtRest: danger,
+    };
+  });
+}
+
 const ROLES = ["organizer", "participant-01", "judge-01"];
 for (const width of [390, 1440]) {
   for (const role of ROLES) {
@@ -120,6 +154,10 @@ for (const width of [390, 1440]) {
         await page.locator(".cx-account summary").click();
         expect(await shadowed(page)).toEqual(["div.cx-account__panel"]);
       }
+      expect(await actionHierarchy(page)).toEqual({
+        manyPrimaries: [],
+        dangerAtRest: [],
+      });
       const title = await page
         .locator("main h1")
         .first()

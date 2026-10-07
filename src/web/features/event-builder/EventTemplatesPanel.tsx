@@ -226,7 +226,7 @@ export function EventTemplatesPanel({
           onChange={(e) => setTemplateName(e.target.value)}
           required
         />
-        <Button type="submit" disabled={busy}>
+        <Button variant="primary" type="submit" disabled={busy}>
           Save as template
         </Button>
       </form>
@@ -245,7 +245,7 @@ export function EventTemplatesPanel({
           onChange={(e) => setSlug(e.target.value)}
           required
         />
-        <Button type="submit" disabled={busy}>
+        <Button variant="primary" type="submit" disabled={busy}>
           Clone directly to a new event now
         </Button>
       </form>
@@ -283,6 +283,7 @@ function TemplateRow({
 }) {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
+  const [removing, setRemoving] = useState(false);
   return (
     <li>
       <strong>{template.name}</strong> (from {template.source_event_name}) —{" "}
@@ -301,6 +302,7 @@ function TemplateRow({
           onChange={(e) => setSlug(e.target.value)}
         />
         <Button
+          variant="primary"
           type="button"
           onClick={() => void onInstantiate(template, name, slug)}
         >
@@ -308,12 +310,32 @@ function TemplateRow({
         </Button>
         <Button
           type="button"
-          variant="danger"
-          onClick={() => void onDelete(template)}
+          variant="secondary"
+          onClick={() => setRemoving(true)}
         >
           Delete template
         </Button>
       </div>
+      {removing && (
+        <p role="group" aria-label="Confirm template deletion">
+          Delete “{template.name}”? The template is removed and cannot be
+          restored; events already created from it are not changed.{" "}
+          <Button
+            type="button"
+            variant="danger"
+            onClick={() => void onDelete(template)}
+          >
+            Delete template
+          </Button>{" "}
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => setRemoving(false)}
+          >
+            Keep template
+          </Button>
+        </p>
+      )}
     </li>
   );
 }

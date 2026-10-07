@@ -169,7 +169,7 @@ export function JudgeAssignmentsPanel({ planBase }: { planBase: string }) {
                   Accept
                 </Button>{" "}
                 <Button
-                  variant="danger"
+                  variant="secondary"
                   onClick={() => void respond(row, "declined")}
                   aria-label={`Decline ${row.name}`}
                 >

@@ -321,6 +321,7 @@ export default function ApiExplorer() {
                         </label>
                       )}
                       <Button
+                        variant="primary"
                         type="submit"
                         disabled={sending || (!!writes && !confirmed)}
                       >

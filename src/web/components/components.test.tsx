@@ -13,7 +13,11 @@ import { VisuallyHidden } from "./VisuallyHidden";
 
 describe("Button", () => {
   it("defaults to a primary, non-submitting button and forwards handlers", () => {
-    const html = renderToStaticMarkup(<Button onClick={vi.fn()}>Go</Button>);
+    const html = renderToStaticMarkup(
+      <Button variant="primary" onClick={vi.fn()}>
+        Go
+      </Button>,
+    );
     expect(html).toContain('type="button"');
     expect(html).toContain("cx-button--primary");
     expect(html).toContain("Go");
@@ -54,7 +58,7 @@ describe("state primitives", () => {
   it("EmptyState renders a title and optional action", () => {
     const html = renderToStaticMarkup(
       <EmptyState title="No projects yet">
-        <Button>Create one</Button>
+        <Button variant="primary">Create one</Button>
       </EmptyState>,
     );
     expect(html).toContain("No projects yet");

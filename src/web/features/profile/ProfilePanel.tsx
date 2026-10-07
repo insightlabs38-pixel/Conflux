@@ -341,7 +341,7 @@ export function ProfilePanel({ workspaceId }: { workspaceId?: string }) {
           </fieldset>
           {error && <p role="alert">{error}</p>}
           {saved && <p role="status">Profile saved.</p>}
-          <Button type="submit" disabled={busy}>
+          <Button variant="primary" type="submit" disabled={busy}>
             {busy ? "Saving…" : "Save profile"}
           </Button>
         </form>

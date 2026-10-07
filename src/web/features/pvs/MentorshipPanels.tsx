@@ -351,7 +351,9 @@ export function MentorDeskPanel({
             {item.claimed_by && <> · claimed by {item.claimed_by}</>}
           </p>
           {item.status === "pending" && (
-            <Button onClick={() => void post(item, "claim")}>Claim</Button>
+            <Button variant="primary" onClick={() => void post(item, "claim")}>
+              Claim
+            </Button>
           )}
           {item.status === "claimed" && (
             <>
@@ -368,6 +370,7 @@ export function MentorDeskPanel({
                 />
               </label>{" "}
               <Button
+                variant="primary"
                 onClick={() =>
                   void post(item, "resolve", {
                     note: notes[item.public_id] ?? "",

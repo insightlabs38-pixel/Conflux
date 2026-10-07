@@ -270,7 +270,7 @@ export function CommunicationsPanel({
             required
           />
         </div>
-        <Button type="submit" disabled={busy}>
+        <Button variant="primary" type="submit" disabled={busy}>
           Send message
         </Button>
       </form>
@@ -321,7 +321,7 @@ export function CommunicationsPanel({
             required
           />
         </div>
-        <Button type="submit" disabled={busy}>
+        <Button variant="primary" type="submit" disabled={busy}>
           Schedule reminder
         </Button>
       </form>

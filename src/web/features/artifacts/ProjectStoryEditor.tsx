@@ -73,7 +73,7 @@ export function ProjectStoryEditor({
           value={description}
           onChange={setDescription}
         />
-        <Button type="submit" disabled={busy}>
+        <Button variant="primary" type="submit" disabled={busy}>
           {busy ? "Saving story…" : "Save project story"}
         </Button>
         {error && <p role="alert">{error}</p>}

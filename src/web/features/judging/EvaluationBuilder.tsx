@@ -264,7 +264,11 @@ function ProgressPanel({ planUrl }: { planUrl: string }) {
           </Badge>
         )}
       </p>
-      <Button disabled={busy} onClick={() => void computeAndPublish()}>
+      <Button
+        variant="primary"
+        disabled={busy}
+        onClick={() => void computeAndPublish()}
+      >
         {busy ? "Computing…" : "Compute normalization and publish results"}
       </Button>
       {progress.results_published && (
@@ -523,7 +527,10 @@ function PlanEditor({
         Keep judge identity anonymous in released feedback
       </label>
       <CriteriaEditor criteria={criteria} onChange={setCriteria} />
-      <Button onClick={() => void patch({ draft_criteria: criteria })}>
+      <Button
+        variant="primary"
+        onClick={() => void patch({ draft_criteria: criteria })}
+      >
         Save criteria
       </Button>
       <Button variant="secondary" onClick={() => void publish()}>
@@ -653,7 +660,11 @@ export function EvaluationBuilder({
               onChange={(event) => setPoolName(event.target.value)}
             />
           </label>
-          <Button disabled={!poolName.trim()} onClick={() => void createPool()}>
+          <Button
+            variant="primary"
+            disabled={!poolName.trim()}
+            onClick={() => void createPool()}
+          >
             Create pool
           </Button>
           {selectedPool && (
@@ -690,6 +701,7 @@ export function EvaluationBuilder({
             Prize judging plan
           </label>
           <Button
+            variant="primary"
             disabled={!name.trim() || (prizeJudging && !selectedPool)}
             onClick={() => void createPlan()}
           >

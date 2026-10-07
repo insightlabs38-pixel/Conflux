@@ -190,7 +190,9 @@ export function CommunityVotingBuilder({
             {plan.results_published_at ? "published" : "not published"}
           </Badge>
         </p>
-        <Button onClick={() => void publishResults()}>Publish results</Button>
+        <Button variant="primary" onClick={() => void publishResults()}>
+          Publish results
+        </Button>
         {results && (
           <ul>
             {results.map((result) => (

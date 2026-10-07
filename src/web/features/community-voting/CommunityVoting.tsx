@@ -135,7 +135,9 @@ export function CommunityVoting({ eventId }: { eventId: string }) {
                 onChange={(event) => setEmail(event.target.value)}
               />
             </label>
-            <Button type="submit">Request a voting link</Button>
+            <Button variant="primary" type="submit">
+              Request a voting link
+            </Button>
           </form>
         )}
       {status.is_open && status.identity_mode === "token" && !voteToken && (

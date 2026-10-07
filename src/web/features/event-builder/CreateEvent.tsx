@@ -273,7 +273,7 @@ export function CreateEvent({
         </label>
       </details>
       {error && <p role="alert">{error}</p>}
-      <Button type="submit" disabled={busy || !name.trim()}>
+      <Button variant="primary" type="submit" disabled={busy || !name.trim()}>
         {format ? `Create ${format.label.toLowerCase()} event` : "Create event"}
       </Button>
     </form>

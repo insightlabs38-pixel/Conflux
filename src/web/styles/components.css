@@ -114,46 +114,80 @@
 }
 
 .cx-button {
-  text-decoration: none;
-  font-family: var(--font-sans);
-  font-size: var(--fs-16);
-  font-weight: 600;
-  line-height: 1.2;
-  padding: var(--sp-2) var(--sp-4);
-  border-radius: var(--r-2);
-  border: 1px solid transparent;
-  cursor: pointer;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--sp-2);
-  min-height: 2.75rem;
+  min-height: var(--h-ctl);
+  padding: 0 var(--sp-3);
+  border: 1px solid transparent;
+  border-radius: var(--r-2);
+  font-family: var(--font-sans);
+  font-size: var(--fs-14);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--lh-tight);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background var(--motion-fast) var(--motion-ease);
+}
+.cx-button--sm {
+  min-height: var(--h-ctl-sm);
+  padding: 0 var(--sp-2);
+  font-size: var(--fs-13);
+}
+.cx-button--lg {
+  min-height: var(--h-ctl-lg);
+  padding: 0 var(--sp-4);
+}
+/* one filled control per context */
+.cx-button--primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+.cx-button--primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+/* outlined at line-3 (3:1), visibly subordinate to primary */
+.cx-button--secondary {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--line-3);
+}
+.cx-button--secondary:hover:not(:disabled) {
+  background: var(--surface-2);
+}
+.cx-button--ghost {
+  background: transparent;
+  color: var(--ink-2);
+}
+.cx-button--ghost:hover:not(:disabled) {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+/* the final confirm of a destructive step, never its trigger */
+.cx-button--danger {
+  background: var(--err);
+  color: var(--surface);
+}
+.cx-button--danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--err) 88%, var(--ink));
 }
 .cx-button:disabled {
   cursor: not-allowed;
-  opacity: 0.6;
+  background: var(--surface-2);
+  border-color: var(--line);
+  color: var(--ink-3);
 }
-.cx-button--primary {
-  background: var(--color-accent);
-  color: var(--color-accent-contrast);
+.cx-shell a.cx-button--primary {
+  color: var(--accent-ink);
 }
-.cx-button--primary:hover:not(:disabled) {
-  background: var(--color-accent-strong);
+.cx-shell a.cx-button--secondary {
+  color: var(--ink);
 }
-.cx-button--secondary {
-  background: var(--color-surface-raised);
-  color: var(--color-text);
-  border-color: var(--color-border-strong);
+.cx-shell a.cx-button--ghost {
+  color: var(--ink-2);
 }
-.cx-button--secondary:hover:not(:disabled) {
-  background: var(--color-surface);
-}
-.cx-button--danger {
-  background: var(--color-danger-bg);
-  color: var(--color-danger);
-  border-color: var(--color-danger);
-}
-.cx-button--danger:hover:not(:disabled) {
-  background: var(--color-danger);
+.cx-shell a.cx-button--danger {
   color: var(--surface);
 }
 
@@ -308,17 +342,24 @@
   color: var(--color-text-muted);
 }
 .cx-shell__main button:not([class]) {
-  font-weight: 600;
-  padding: var(--sp-2) var(--sp-4);
+  font-size: var(--fs-14);
+  font-weight: var(--font-weight-medium);
+  padding: 0 var(--sp-3);
   min-height: var(--h-ctl);
-  border: 1px solid var(--color-border-strong);
+  border: 1px solid var(--line-3);
   border-radius: var(--r-2);
-  background: var(--color-surface-raised);
-  color: var(--color-text);
+  background: var(--surface);
+  color: var(--ink);
   cursor: pointer;
 }
 .cx-shell__main button:not([class]):hover:not(:disabled) {
-  background: var(--color-surface);
+  background: var(--surface-2);
+}
+.cx-shell__main button:not([class]):disabled {
+  cursor: not-allowed;
+  background: var(--surface-2);
+  border-color: var(--line);
+  color: var(--ink-3);
 }
 
 /* Long option text (e.g. API endpoint pickers) must not widen the page: cap the
@@ -362,22 +403,6 @@
 .cx-shell__main {
   max-width: var(--content-app);
   padding: var(--sp-10) var(--sp-8);
-}
-.cx-button {
-  border-radius: var(--r-2);
-  min-height: var(--h-ctl);
-  font-size: var(--fs-14);
-  transition: background var(--motion-fast) var(--motion-ease);
-  justify-content: center;
-}
-.cx-shell a.cx-button--primary {
-  color: var(--color-accent-contrast);
-}
-.cx-shell a.cx-button--secondary {
-  color: var(--color-text);
-}
-.cx-button--primary:active:not(:disabled) {
-  background: var(--color-accent-active);
 }
 .cx-badge {
   border-radius: var(--r-1);

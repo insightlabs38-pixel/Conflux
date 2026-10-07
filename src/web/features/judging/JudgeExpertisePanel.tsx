@@ -66,7 +66,7 @@ export function JudgeExpertisePanel({ workspaceId }: { workspaceId: string }) {
         Track expertise tags, separated by commas{" "}
         <input value={tags} onChange={(event) => setTags(event.target.value)} />
       </label>
-      <Button disabled={saving} onClick={() => void save()}>
+      <Button variant="primary" disabled={saving} onClick={() => void save()}>
         Save expertise
       </Button>
       {savedTags.length > 0 && <p>Saved: {savedTags.join(", ")}</p>}

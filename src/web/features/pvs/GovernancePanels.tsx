@@ -74,6 +74,7 @@ export function RulesPanel({
               </p>
             ) : (
               <Button
+                variant="primary"
                 onClick={() =>
                   void run(() =>
                     api(`${base}rules/acknowledge/`, "POST", {
@@ -565,7 +566,10 @@ export function ExceptionRequestsPanel({
                   }
                 />
               </label>{" "}
-              <Button onClick={() => void decide(item, "approve")}>
+              <Button
+                variant="primary"
+                onClick={() => void decide(item, "approve")}
+              >
                 Approve
               </Button>{" "}
               <Button

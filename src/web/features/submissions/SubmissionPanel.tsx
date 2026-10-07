@@ -257,6 +257,7 @@ export function SubmissionPanel({
                     : "Draft saved"}
               </p>
               <Button
+                variant="primary"
                 disabled={finalizing || saving}
                 onClick={() => void finalize()}
               >

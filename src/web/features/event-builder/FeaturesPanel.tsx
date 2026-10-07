@@ -63,6 +63,7 @@ export function FeaturesPanel({ eventId }: { eventId: string }) {
               </Button>
             ) : (
               <Button
+                variant="primary"
                 type="button"
                 disabled={!settled || pending !== ""}
                 aria-label={`Turn on ${module.label.toLowerCase()}`}

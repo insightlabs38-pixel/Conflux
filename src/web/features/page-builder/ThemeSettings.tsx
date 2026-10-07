@@ -209,7 +209,7 @@ export function ThemeSettings({
           </p>
         )}
       <div className="cx-stack cx-stack--horizontal">
-        <Button type="submit" disabled={saving}>
+        <Button variant="primary" type="submit" disabled={saving}>
           {saving ? "Saving…" : "Save appearance"}
         </Button>
         <ButtonLink

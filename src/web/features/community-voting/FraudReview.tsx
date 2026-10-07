@@ -162,7 +162,10 @@ export function FraudReview({
                       }))
                     }
                   />
-                  <Button onClick={() => void resolve(signal.public_id)}>
+                  <Button
+                    variant="primary"
+                    onClick={() => void resolve(signal.public_id)}
+                  >
                     Resolve signal
                   </Button>
                 </div>

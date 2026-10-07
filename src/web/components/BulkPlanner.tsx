@@ -181,7 +181,9 @@ export function BulkPlanner({
           {phase.kind === "applied" ? "Close" : "Cancel"}
         </Button>
         {phase.kind === "stale" && (
-          <Button onClick={() => void preview()}>Preview again</Button>
+          <Button variant="primary" onClick={() => void preview()}>
+            Preview again
+          </Button>
         )}
         {phase.kind === "refused" && (
           <Button variant="secondary" onClick={() => void preview()}>
@@ -189,10 +191,14 @@ export function BulkPlanner({
           </Button>
         )}
         {phase.kind === "unsure" && (
-          <Button onClick={() => void apply(phase.preview)}>Try again</Button>
+          <Button variant="primary" onClick={() => void apply(phase.preview)}>
+            Try again
+          </Button>
         )}
         {phase.kind === "held" && (
-          <Button onClick={() => void apply(phase.preview)}>Apply again</Button>
+          <Button variant="primary" onClick={() => void apply(phase.preview)}>
+            Apply again
+          </Button>
         )}
         {(phase.kind === "ready" || phase.kind === "applying") && (
           <Button

@@ -143,7 +143,11 @@ function SettingEditor({
         disabled={busy}
         timeZone={timeZone}
       />
-      <Button type="submit" disabled={busy || problems.length > 0}>
+      <Button
+        variant="primary"
+        type="submit"
+        disabled={busy || problems.length > 0}
+      >
         Save
       </Button>{" "}
       <Button variant="secondary" disabled={busy} onClick={() => onDone(false)}>

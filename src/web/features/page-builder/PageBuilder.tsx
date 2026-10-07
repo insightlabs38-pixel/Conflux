@@ -113,7 +113,7 @@ function BlockEditor({
         onChange={setConfig}
       />
       <div className="cx-block-form__actions">
-        <Button disabled={!dirty || saving} onClick={save}>
+        <Button variant="primary" disabled={!dirty || saving} onClick={save}>
           {saving ? "Saving…" : "Save block"}
         </Button>
         <span role="status" className="cx-muted">
@@ -296,7 +296,9 @@ export function PageBuilder({
               ))}
             </select>
           </label>
-          <Button onClick={() => void addBlock()}>Add</Button>
+          <Button variant="primary" onClick={() => void addBlock()}>
+            Add
+          </Button>
         </div>
       </div>
       {selected && (

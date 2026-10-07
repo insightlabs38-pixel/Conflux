@@ -177,6 +177,7 @@ export function ApprovalsPanel({
                   />
                 </label>{" "}
                 <Button
+                  variant="primary"
                   disabled={busy}
                   onClick={() =>
                     void act(() =>

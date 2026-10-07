@@ -293,7 +293,7 @@ function Composer({
           </>
         )}
       </p>
-      <Button type="submit" disabled={empty || busy}>
+      <Button variant="primary" type="submit" disabled={empty || busy}>
         {submit}
       </Button>{" "}
       {onCancel && (

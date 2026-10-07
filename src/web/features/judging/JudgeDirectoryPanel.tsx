@@ -86,7 +86,11 @@ export function JudgeDirectoryPanel({
           ))}
         </select>
       </label>
-      <Button disabled={!judgeId} onClick={() => void invite()}>
+      <Button
+        variant="primary"
+        disabled={!judgeId}
+        onClick={() => void invite()}
+      >
         Send invitation
       </Button>
       {judgeId &&

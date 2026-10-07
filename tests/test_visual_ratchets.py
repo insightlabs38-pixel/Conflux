@@ -19,7 +19,7 @@ SOLID_FILL_ALLOWED = {
         '.cx-queue-filters button[aria-pressed="true"]',
         '.cx-steps li[data-state="done"] .cx-steps__mark',
         ".cx-meter",
-        ".cx-button--danger:hover:not(:disabled)",
+        ".cx-button--danger",
         ".cx-shell a.cx-skip-link",
     },
     "styles/presentation.css": {".cx-hero__identity"},

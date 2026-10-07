@@ -449,6 +449,7 @@ function BallotForm({
                   </Button>
                 )}
                 <Button
+                  variant="primary"
                   type="submit"
                   disabled={!loaded || submitting || saving}
                   onClick={() => {

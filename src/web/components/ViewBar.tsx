@@ -204,7 +204,7 @@ export function ViewBar({
         )}
         {selected?.mine && (
           <Button
-            variant="danger"
+            variant="secondary"
             disabled={busy}
             onClick={() => setRemoving(true)}
           >
@@ -248,7 +248,11 @@ export function ViewBar({
               onChange={(e) => setName(e.target.value)}
             />
           </label>
-          <Button type="submit" disabled={busy || !name.trim()}>
+          <Button
+            variant="primary"
+            type="submit"
+            disabled={busy || !name.trim()}
+          >
             {naming === "new" ? "Save view" : "Rename view"}
           </Button>
           <Button variant="secondary" onClick={() => setNaming(null)}>

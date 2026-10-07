@@ -31,6 +31,7 @@ export function ModuleGate({
       <p>{state.description}</p>
       {error && <p role="alert">{error}</p>}
       <Button
+        variant="primary"
         type="button"
         disabled={busy || !settled}
         onClick={() => {

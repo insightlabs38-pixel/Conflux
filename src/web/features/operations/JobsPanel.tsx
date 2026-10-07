@@ -157,7 +157,7 @@ export function JobsPanel({
           />{" "}
           Sign it so others can verify it
         </label>{" "}
-        <Button type="submit" disabled={exporting.busy}>
+        <Button variant="primary" type="submit" disabled={exporting.busy}>
           Start export
         </Button>
       </form>

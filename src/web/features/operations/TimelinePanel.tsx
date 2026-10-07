@@ -265,7 +265,7 @@ function TimesForm({
         </label>
       )}{" "}
       <span className="cx-muted">({timezone})</span>{" "}
-      <Button type="submit" disabled={busy}>
+      <Button variant="primary" type="submit" disabled={busy}>
         Save
       </Button>{" "}
       <Button variant="secondary" disabled={busy} onClick={() => onDone(false)}>

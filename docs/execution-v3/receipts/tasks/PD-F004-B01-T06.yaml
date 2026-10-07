@@ -1,0 +1,90 @@
+version: 3
+task: PD-F004-B01-T06
+batch: PD-F004-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 283cc0d
+  head_commit: null
+changed_paths:
+- src/web/components/Button.tsx
+- src/web/components/Button.test.tsx
+- src/web/styles/components.css
+- src/web/components/ViewBar.tsx
+- src/web/features/event-builder/EventTemplatesPanel.tsx
+- src/web/features/pvs/JudgingLogisticsPanels.tsx
+- 45 Button call sites (explicit variant="primary" where the old default applied)
+- tests/test_visual_ratchets.py
+- tests/e2e/visual-foundation.spec.ts
+deliverables:
+- item: One primary action per local context; secondary actions visibly subordinate
+  result: pass
+  evidence: Button takes variant primary|secondary|ghost|danger and size sm|md|lg; the default is now
+    secondary, so a context only gains a filled button by an explicit choice (45 existing default-primary
+    call sites were made explicit by a TypeScript-AST codemod, behavior unchanged); secondary is outlined
+    at line-3, ghost is borderless, disabled follows the design (surface-2 fill, line border, ink-3 text)
+- item: Destructive controls neutral until the final step
+  result: pass
+  evidence: danger is the filled final confirm only; the triggers 'Delete view' and 'Decline' became secondary,
+    and 'Delete template' (which deleted immediately) now asks first with a named confirm group stating
+    the template is a frozen copy so created events are not changed (verified against EventTemplate model
+    docs)
+- item: Observable diagnostics
+  result: pass
+  evidence: e2e actionHierarchy reports any context with more than one visible primary (disclosures opened
+    first) and any danger button visible at rest, on three role pages at 390 and 1440
+invariants:
+- item: One canonical Button, no per-feature copies
+  result: pass
+  evidence: buttonClass is exported for link-styled actions so anchors reuse the same classes
+- item: Server authority and behavior unchanged
+  result: pass
+  evidence: no handler or request changed; template deletion still calls the same endpoint after the confirm
+    step
+- item: Accessibility preserved
+  result: pass
+  evidence: disabled keeps native disabled semantics; entity-grid, bulk-planner, approvals, uiv2-gate
+    and public specs passed (axe included)
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 661 passed (3 new Button tests)
+- command: uv run --frozen pytest tests/test_visual_ratchets.py tests/integration/test_visual_tokens.py
+    -q
+  result: pass
+  note: 32 passed, 3 preset-on-dark skips by design
+- command: docker compose up -d --build app; npx playwright test -c tests/e2e/playwright.config.ts visual-foundation
+    --project=desktop
+  result: pass
+  note: 8 passed; the first run after adding the hierarchy check failed on an ordering bug of mine (the
+    check opened the account menu that the next step then closed), fixed in the test
+- command: iso-min fixture; npx playwright test entity-grid bulk-planner approvals --project=desktop --project=mobile
+  result: pass
+  note: 6 passed, 6 skipped by project guards; fixture disposed
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-SLOP-8 neighbours, S-DEST destructive rule, D-008 outlined buttons at line-3
+- ref: design/state-matrix
+  result: pass
+  note: S-DEST (neutral until the last step; final button is the only red)
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: Button, styles, three call-site changes
+- surface: docs
+  result: pass
+  evidence: contract in spec 004
+migrations: []
+findings:
+- P3 hover of danger uses color-mix of --err with --ink, a derived colour not in the token table; kept
+  because both inputs are tokens and contrast stays above 7:1 in light, flagged for review in T90
+escalations: []
+limitations:
+- Per-row primaries (for example 'Create event from template' in each template row) are allowed because
+  a list row is its own context; icon-only buttons and the Status/Tag split are T07 and B02.
+next: review

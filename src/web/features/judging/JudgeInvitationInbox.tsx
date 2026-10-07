@@ -57,10 +57,16 @@ export function JudgeInvitationInbox({ workspaceId }: { workspaceId: string }) {
           {pending.map((invitation) => (
             <li key={invitation.public_id}>
               {invitation.event_name} · {invitation.pool_name}{" "}
-              <Button onClick={() => void respond(invitation, "accept")}>
+              <Button
+                variant="primary"
+                onClick={() => void respond(invitation, "accept")}
+              >
                 Accept
               </Button>{" "}
-              <Button onClick={() => void respond(invitation, "decline")}>
+              <Button
+                variant="primary"
+                onClick={() => void respond(invitation, "decline")}
+              >
                 Decline
               </Button>
             </li>

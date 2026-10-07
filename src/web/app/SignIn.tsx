@@ -111,7 +111,11 @@ export function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
             )}
           </Field>
           {error && <Alert tone="danger">{error}</Alert>}
-          <Button type="submit" disabled={pending || !username || !password}>
+          <Button
+            variant="primary"
+            type="submit"
+            disabled={pending || !username || !password}
+          >
             {pending ? "Signing in…" : "Sign in"}
           </Button>
         </form>

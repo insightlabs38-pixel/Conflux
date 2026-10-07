@@ -1,0 +1,54 @@
+version: 1
+checkpoint_id: CP-PD-F004-B03
+created_at: '2026-10-07T09:30:00Z'
+canonical_commit: 6dab773
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+- PD-B02
+- PD-B03
+- PD-B04
+- PD-F001-B01
+- PD-F001-B02
+- PD-F002-B01
+- PD-F002-B02
+- PD-F002-B03
+- PD-F003-B01
+- PD-F003-B02
+- PD-F003-B03
+- PD-DESIGN-B00
+- PD-F004-B01
+- PD-F004-B02
+- PD-F004-B03
+active_batches:
+- PD-F004-B04
+active_claims: []
+open_escalations: []
+last_completed_task: PD-F004-B03-T91
+ready_summary:
+- PD-F004-B04 (no default gradients, no coloured icon tiles, KPI cards replaced by summary strips, restrained
+  operator copy, pills and badges only where needed, frequently used actions not hidden in kebab menus;
+  promoted IN_PROGRESS, not started). Most of it is already enforced by ratchets from PD-F004-B01/B02;
+  verify against the live pages before adding more.
+verification_summary:
+- make verify-fast clean (pytest 2939, vitest 699); make e2e-fast green on rerun (docs/verification/PD-F004-B03/T90-e2e-fast.log);
+  tests/e2e/hero-size.spec.ts, tests/integration/test_page_lead_block.py, test_page_preview.py, test_event_themes.py,
+  tests/e2e/visual-foundation.spec.ts
+recovery_notes:
+- 'Contract: spec 004 section PD-F004-B03 canonical contract; guides docs/operations/VISUAL_FOUNDATION.md
+  and PREVIEW_CONTEXT.md. hero_size is compact|none|standard|immersive in theme_config (absent = compact);
+  banner_focus_x/y and banner_mobile_url are optional keys; the lead block replaces the hero; block links
+  go through presentation/blocks.py safe_href at save and render.'
+- Page preview is surface page of PREVIEW_CONTEXT (input = drafted appearance); a new surface must be
+  added to the surface and reader lists in test_shared_primitives_b03_regression.py, test_preview_context.py
+  and features_extension.OUTSIDE when its app has no registry feature.
+- 'e2e traps: axe hangs on a sandboxed iframe (use accessible(page, [selector])); getByLabel("Hero image
+  URL") needs exact:true; goToTask now waits for the tab or the advanced disclosure; uiv2-surfaces is
+  one test per surface and runs in parallel inside its file.'
+- 'Open decisions in .claude-supervisor/QUESTIONS.md (untracked): font binaries (default A), organizer
+  navigation split (C), hero size vocabulary (A), immersive design (A), block link safety (A), uiv2-surfaces
+  split (C), plus earlier ones at their defaults'
+- main unpushed; untracked design handoff zips untouched; supervisor.py modification is the owner's and
+  left uncommitted

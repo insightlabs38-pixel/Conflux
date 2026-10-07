@@ -15,7 +15,6 @@ SOLID_FILL_ALLOWED = {
         ".cx-shell a.cx-skip-link:visited",
         ".cx-button--primary",
         '.cx-timeline [data-status="current"] .cx-timeline__marker',
-        ".cx-brand-mark",
         '.cx-queue-filters button[aria-pressed="true"]',
         '.cx-steps li[data-state="done"] .cx-steps__mark',
         ".cx-meter",

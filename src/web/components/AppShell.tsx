@@ -154,7 +154,6 @@ export function AppShell({
               if ((event.target as HTMLElement).closest("a")) setNavOpen(false);
             }}
           >
-            <p className="cx-eyebrow">Your workspace</p>
             {destinations.map((item) => (
               <div key={item.id}>
                 {item.group && (
@@ -169,7 +168,6 @@ export function AppShell({
               </div>
             ))}
           </nav>
-          <p className="cx-sidebar__footer">Conflux · build with confidence</p>
         </aside>
       )}
 

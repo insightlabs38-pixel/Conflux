@@ -152,6 +152,33 @@ async function iconProblems(page: Page) {
   });
 }
 
+/** Shell chrome measurements: top bar, rail, brand mark and the absence of marketing copy. */
+async function shellGeometry(page: Page) {
+  return page.evaluate(() => {
+    const box = (selector: string) => {
+      const el = document.querySelector<HTMLElement>(selector);
+      const r = el?.getBoundingClientRect();
+      return r
+        ? {
+            w: Math.round(r.width),
+            h: Math.round(r.height),
+            y: Math.round(r.y),
+          }
+        : null;
+    };
+    const mark = document.querySelector<HTMLElement>(".cx-brand-mark");
+    return {
+      header: box(".cx-shell--workspace > .cx-shell__header"),
+      rail: box(".cx-sidebar"),
+      markBackground: mark ? getComputedStyle(mark).backgroundColor : null,
+      inkColor: getComputedStyle(document.documentElement)
+        .getPropertyValue("--ink")
+        .trim(),
+      marketing: /build with confidence/i.test(document.body.innerText),
+    };
+  });
+}
+
 const ROLES = ["organizer", "participant-01", "judge-01"];
 for (const width of [390, 1440]) {
   for (const role of ROLES) {
@@ -176,6 +203,23 @@ for (const width of [390, 1440]) {
       expect(await shortControls(page, width < 768 ? 44 : 28)).toEqual([]);
       expect(await offScaleRadii(page)).toEqual([]);
       expect(await iconProblems(page)).toEqual([]);
+      const shell = await shellGeometry(page);
+      expect(shell.marketing).toBe(false);
+      // below 1024px the header still wraps its navigation onto rows until the mobile navigation (PD-F005)
+      if (width >= 1024) expect(shell.header).toMatchObject({ h: 44 }); // --h-top, hairline included
+      expect(shell.markBackground).toBe("rgb(22, 26, 33)"); // --ink: neutral mark, not the accent
+      if (width >= 1024) {
+        expect(shell.rail?.w).toBe(216);
+        // one line per rail item: a wrapped label costs density (the rail is 216px)
+        const tall = await page
+          .locator(".cx-sidebar__link")
+          .evaluateAll((links) =>
+            links
+              .map((l) => l.getBoundingClientRect().height)
+              .filter((h) => h > 36),
+          );
+        expect(tall).toEqual([]);
+      }
       if (width >= 1024)
         expect(
           await page

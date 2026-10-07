@@ -110,7 +110,8 @@
   --z-toast: 80;
   --z-skip-link: 100;
 
-  --header-height: 3.5rem;
+  /* shell (v3): the rail is 216px, top bar is --h-top; collapse and inspector belong to PD-F005 */
+  --w-rail: 13.5rem;
 }
 
 /* Touch layouts (below 768px, or a coarse pointer) keep every control at the 44px hit area (D-012). */

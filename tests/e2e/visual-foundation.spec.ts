@@ -375,6 +375,44 @@ for (const width of [390, 1440]) {
     expect(await page.locator(".cx-status").count()).toBeGreaterThan(0); // Finalized
   });
 
+  // Spec 004 hero policy: a project page starts with its story, not a decorative hero. The cover is a
+  // small tile (a strip of at most 120px on a phone, and no initials-only tile there), and the story and
+  // the submission evidence both begin above the fold.
+  test(`a public project page puts its story and evidence near the fold at ${width}`, async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+    const height = width < 768 ? 844 : 900;
+    await page.setViewportSize({ width, height });
+    await signIn(page, "organizer");
+    const { event } = await eventIds(page);
+    await page.goto(`/e/${event}/gallery/`);
+    await page.locator(".cx-project-card a").first().click();
+    await page.waitForLoadState("networkidle");
+    const at = await page.evaluate(() => {
+      const top = (s: string) =>
+        document.querySelector(s)?.getBoundingClientRect().top ?? null;
+      const cover = document.querySelector(
+        ".cx-project-header .cx-project-cover",
+      );
+      return {
+        story: top(".cx-project-story h2"),
+        evidence: top(".cx-project-evidence"),
+        coverHeight:
+          cover && getComputedStyle(cover).display !== "none"
+            ? cover.getBoundingClientRect().height
+            : 0,
+        wide: document.documentElement.scrollWidth - innerWidth,
+      };
+    });
+    expect(at.story).not.toBeNull();
+    expect(at.story!).toBeLessThan(height * (width < 768 ? 0.6 : 0.6));
+    if (width >= 768) expect(at.evidence!).toBeLessThan(height * 0.6); // beside the story
+    expect(at.coverHeight).toBeLessThanOrEqual(width < 768 ? 120 : 136);
+    expect(at.wide).toBeLessThanOrEqual(0);
+    await accessible(page);
+  });
+
   // V-HERO-1 / D-012: the default public hero is compact. The band (lockup or art, title, status)
   // is 160-240px on desktop (the lower bound is not a floor) and at most 120px on mobile; the
   // description and the one primary action sit under it; no text sits over art; no sideways scroll.

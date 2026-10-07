@@ -1,0 +1,64 @@
+version: 3
+task: PD-F004-B03-T03
+batch: PD-F004-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 6410573
+  head_commit: null
+changed_paths:
+- src/web/styles/presentation.css
+- tests/e2e/visual-foundation.spec.ts
+deliverables:
+- item: On project pages, project content begins above or near the fold; no decorative hero pushes evidence down
+  result: pass
+  evidence: 'measured before (seed 7 project page): header 368px with a 304px initials tile, story at y=517
+    of 900 on a desktop and y=646 of 844 on a phone. Now the cover is a 14rem by 8rem tile beside the title
+    (a 120px strip on a phone, and no tile at all when it is only initials), the story starts at about
+    y=380 desktop and the submission evidence sits beside it; the header padding fell from 32px to 16/24px'
+- item: Boundary and states
+  result: pass
+  evidence: a real cover image keeps its strip (at most 120px mobile, 136px desktop); the initials fallback
+    disappears on mobile with :not(:has(img)); axe and no horizontal overflow asserted on the page
+invariants:
+- item: Gallery card covers are unchanged
+  result: pass
+  evidence: the new rules are scoped to .cx-project-header .cx-project-cover; the card cover glyph allowlist is untouched
+- item: Accessibility
+  result: pass
+  evidence: cover stays aria-hidden and decorative; axe passes at 390 and 1440
+verification:
+- command: npx playwright test visual-foundation -g "project page|public gallery" --project=desktop
+  result: pass
+  note: 4 passed (story and evidence within 60% of the viewport height, cover height caps, no overflow, axe)
+- command: uv run --frozen pytest tests/test_visual_ratchets.py -q
+  result: pass
+  note: 26 passed
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-HERO-1 (project content near the fold), V-SLOP-6
+- ref: design/state-matrix
+  result: pass
+  note: no state component changed
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: public project page stylesheet and e2e
+- surface: docs
+  result: pass
+  evidence: spec 004 contract and VISUAL_FOUNDATION.md updated at T91
+migrations: []
+findings:
+- 'P2-fixed the server-rendered public templates still emitted the removed `cx-badge` class (tags, track,
+  Finalized, Valid), so statuses were bare text; replaced with Tag and a server-side status include (icon
+  and word), with a ratchet over every template and an e2e check on the gallery and project page (commit
+  6410573, correction to PD-F004-B02-T01).'
+escalations: []
+limitations:
+- Project cover art keeps a fixed crop (cover); focal point control is PD-F004-B03-T06.
+next: review

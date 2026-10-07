@@ -1,0 +1,49 @@
+version: 1
+checkpoint_id: CP-PD-F005-B01
+created_at: '2026-10-07T23:18:36Z'
+canonical_commit: 014d8d4
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+- PD-B02
+- PD-B03
+- PD-B04
+- PD-F001-B01
+- PD-F001-B02
+- PD-F002-B01
+- PD-F002-B02
+- PD-F002-B03
+- PD-F003-B01
+- PD-F003-B02
+- PD-F003-B03
+- PD-DESIGN-B00
+- PD-F004-B01
+- PD-F004-B02
+- PD-F004-B03
+- PD-F004-B04
+- PD-F004-B05
+- PD-F005-B01
+active_batches:
+- PD-F005-B02
+active_claims: []
+open_escalations: []
+last_completed_task: PD-F005-B01-T91
+ready_summary:
+- PD-F005-B02 (event state indicator, recent objects and actions, pinned views, role switcher, preview-as, side inspector,
+  shortcut help, density; promoted IN_PROGRESS, not started). Mount new account items in AccountMenu (AppShell), commands
+  through lib/commands.ts providers, remembered values through lib/shellPreferences.ts. Design refs design/app-shell and
+  design/state-matrix.
+verification_summary:
+- make verify-fast clean (pytest 2946, vitest 759) then make e2e-fast clean (read-only 308 passed, isolated and canary ok), run one after the other
+  (docs/verification/PD-F005-B01/T90-*.log); nine new or extended browser specs, matrix in docs/verification/PD-F005-B01/MATRIX.md
+recovery_notes:
+- 'Contract: spec 005 sections PD-F005-B01 canonical contract and As built; ESC-20260930-007 (ROUTER and COMMANDS adopted forward: lib/routes.ts,
+  lib/urlState.ts, lib/commands.ts); owner questions in .claude-supervisor/QUESTIONS.md (device-local shell preferences).'
+- 'Run make verify-fast and make e2e-fast one at a time; in parallel they flake. After changing web or api source run docker compose up -d --build app
+  before browser tests. Never pkill -f with a pattern that appears in your own command line. e2e_fixture sweep --older-than-minutes 0 deletes the
+  fixtures of a run in progress.'
+- 'Isolated spec by hand: create a fixture (manage.py e2e_fixture create iso-min), run playwright with E2E_DEMO_SEED and E2E_DEMO_PASSWORD, dispose.
+  Python and pytest need the Makefile env (DJANGO_SECRET_KEY, RECORD_SIGNING_KEY_SEED) and .venv/bin/python; scripts/pdv3 use python3.'
+- main unpushed; untracked design handoff zips untouched; supervisor.py modification is the owner's and left uncommitted

@@ -157,12 +157,13 @@ export async function goToTask(page: Page, label: string) {
   const tab = page.getByRole("tab", {
     name: new RegExp(`^${escaped}(?:\\s|$)`),
   });
-  // Advanced tabs stay behind a disclosure until asked for (PD-F001-B01-T02).
-  if (!(await tab.isVisible())) {
-    const disclosure = page.locator(".cx-workflow__advanced:visible").first();
-    if ((await disclosure.count()) && (await disclosure.isEnabled()))
-      await disclosure.click();
-  }
+  // Advanced tabs stay behind a disclosure until asked for (PD-F001-B01-T02). Wait for either the
+  // tab or the disclosure to exist: asking before the workflow has rendered found neither under
+  // load and then waited for a tab that was still collapsed.
+  const disclosure = page.locator(".cx-workflow__advanced:visible").first();
+  await expect(tab.or(disclosure).first()).toBeVisible();
+  if (!(await tab.isVisible()) && (await disclosure.isEnabled()))
+    await disclosure.click();
   await tab.click();
   await expect(tab).toHaveAttribute("aria-selected", "true");
 }

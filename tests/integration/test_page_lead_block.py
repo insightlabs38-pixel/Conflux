@@ -127,6 +127,8 @@ def test_a_link_stored_before_the_rule_existed_is_dropped_at_render_time():
         PageBlock.objects.create(page=page, kind=kind, position=position, config=config)
     body = Client().get(f"/e/{event.public_id}/").content.decode()
     assert "javascript:" not in body
+    assert 'href=""' not in body  # the link is gone, not replaced by a link to this page
+    assert "<li>R</li>" in body and ">A<" in body  # the text stays, only the link is dropped
 
 
 def test_the_accessibility_audit_counts_a_lead_as_the_pages_h1_and_checks_its_action_text():

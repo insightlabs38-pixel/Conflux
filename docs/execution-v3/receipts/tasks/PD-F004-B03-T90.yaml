@@ -1,0 +1,95 @@
+version: 3
+task: PD-F004-B03-T90
+batch: PD-F004-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: f8f4c26
+  head_commit: null
+changed_paths:
+- docs/verification/PD-F004-B03/MATRIX.md
+- docs/verification/PD-F004-B03/T90-verify-fast.log
+- docs/verification/PD-F004-B03/T90-e2e-fast.log
+- src/api/presentation/templates/presentation/event_landing.html
+- tests/integration/test_page_lead_block.py
+- tests/e2e/uiv2-surfaces.spec.ts
+- tests/e2e/extensions.spec.ts
+- tests/e2e/support.ts
+- tests/e2e/weights.json
+deliverables:
+- item: Verification matrix for the 8 capability tasks, each linked to at least one executable proof
+  result: pass
+  evidence: docs/verification/PD-F004-B03/MATRIX.md maps T01-T08 to a positive proof, a negative or boundary
+    proof and compatibility or authority notes, plus state, viewport, authorization and migration sections
+- item: Positive, negative, authorization, lifecycle/migration and concurrency coverage
+  result: pass
+  evidence: 'authorization: preview is organizer and admin only (403, 404 cross-workspace), page and block
+    writes are the existing organizer-only API; negative: unsafe links, an immersive hero without art, bad
+    focus and phone image values, refused drafts, five facts; migration: choices-only 0006, absent keys keep
+    their meaning; concurrency: none new (lead insertion shifts positions in one transaction)'
+- item: UI states and viewports verified, not only screenshots
+  result: pass
+  evidence: measured geometry and computed style at 390 and 1440 for every capability, axe and overflow on
+    the builder and the public pages; screenshots were opened as a check only
+- item: Exact commands and results recorded
+  result: pass
+  evidence: below and in docs/verification/PD-F004-B03/
+invariants:
+- item: No test, gate or assertion weakened
+  result: pass
+  evidence: no timeout raised and no skip added; uiv2-surfaces was split into one test per surface with every
+    assertion kept and set to run in parallel (QUESTIONS.md 2026-10-07T09:05Z, default C); the extensions
+    spec's loose text selector became an exact one; accessible() gained an exclude list used for one sandboxed
+    frame only
+- item: Failures were root-caused
+  result: pass
+  evidence: 'the first e2e-fast failed on three things: the extensions spec matched "hero)" as a substring
+    and the new block title also contains it (selector made exact); uiv2-surfaces needed 21 s of its 30 s
+    budget alone and timed out under load (split); and a latent race in goToTask (it looked for the advanced
+    disclosure before the workflow had rendered) that the parallel split exposed twice (fixed by waiting for
+    the tab or the disclosure). The final run is clean and the new uiv2-surfaces passed three times in a row
+    at four workers'
+- item: Unsafe stored links are dropped, not turned into links to this page
+  result: pass
+  evidence: found while writing the matrix, the template rendered an empty href for a dropped hero or
+    call-to-action link; now the element is omitted (resources and sponsors keep their text), test added
+verification:
+- command: make verify-fast
+  result: pass
+  note: pytest 2939 passed, 34 skipped; vitest 699 passed; ruff, prettier, build, sdk-check, block-schema-check clean (T90-verify-fast.log)
+- command: make e2e-fast
+  result: pass
+  note: final run exit 0 (read-only ok, isolated-mutation ok, canary ok); the first run failed as described above
+    (T90-e2e-fast.log is the clean run)
+- command: npx playwright test uiv2-surfaces --project=desktop --workers=4 (three times)
+  result: pass
+  note: 36 passed each time, about 46 s
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-HERO-1, D-005, D-012, V-SLOP-2, V-SLOP-7, V-TYPE-2 asserted by tests and measurements
+- ref: design/state-matrix
+  result: pass
+  note: S-LOAD, S-ERR on the preview; refusal sentences shared with saving
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: MATRIX.md
+- surface: docs
+  result: pass
+  evidence: MATRIX.md; SURFACES.md in T91
+migrations: []
+findings:
+- 'P3 test-reliability: `uiv2-surfaces` timing out under the parallel read-only tier was a latent budget
+  problem (13 axe scans of about 1.8 s on pages of about 10,000 elements); recorded in QUESTIONS.md and fixed
+  by structure, not by time.'
+escalations: []
+limitations:
+- The serial-equivalent weight of uiv2-surfaces in weights.json is 165 s although it now runs in parallel
+  inside its file (the plan only needs an upper bound).
+- e2e-report history still carries the red runs of this batch until clean runs accumulate (not edited).
+next: review

@@ -44,7 +44,7 @@ for (const width of [390, 1440]) {
     await expect(sources).toContainText("Public pages");
     // A capability opens to its entries and who declared them.
     await panel.getByText(/^Page block \(\d+\)/).click();
-    await expect(panel.getByText("hero)", { exact: false })).toBeVisible();
+    await expect(panel.getByText("(hero)", { exact: true })).toBeVisible();
     await expect(
       panel.getByText(/^Archive exporter \(\d+\) · declared only/),
     ).toBeVisible();

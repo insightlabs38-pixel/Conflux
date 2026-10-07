@@ -30,7 +30,7 @@
         </div>
         <div class="cx-hero__after">
           {% if block.config.subtitle %}<p>{{ block.config.subtitle }}</p>{% endif %}
-          {% if block.config.cta_label and block.config.cta_href %}
+          {% if block.config.cta_label and block.config.cta_href|safe_href %}
             <a class="cx-button cx-button--primary" href="{{ block.config.cta_href|safe_href }}">{{ block.config.cta_label }}</a>
           {% endif %}
         </div>
@@ -91,7 +91,7 @@
         <h2>{% trans "Sponsors" %}</h2>
         <ul class="cx-grid">
           {% for item in block.config.items %}
-            <li class="cx-card">{% if item.url %}<a href="{{ item.url|safe_href }}">{{ item.name }}</a>{% else %}{{ item.name }}{% endif %}</li>
+            <li class="cx-card">{% if item.url|safe_href %}<a href="{{ item.url|safe_href }}">{{ item.name }}</a>{% else %}{{ item.name }}{% endif %}</li>
           {% endfor %}
         </ul>
       </section>
@@ -106,7 +106,7 @@
       <section class="cx-block" aria-label="Resources">
         <h2>{% trans "Resources" %}</h2>
         <ul class="cx-grid cx-event-resources">
-          {% for item in block.config.items %}<li><a href="{{ item.url|safe_href }}">{{ item.label }} <span aria-hidden="true">↗</span></a></li>{% endfor %}
+          {% for item in block.config.items %}{% if item.url|safe_href %}<li><a href="{{ item.url|safe_href }}">{{ item.label }} <span aria-hidden="true">↗</span></a></li>{% else %}<li>{{ item.label }}</li>{% endif %}{% endfor %}
         </ul>
       </section>
     {% elif block.kind == "gallery" %}
@@ -163,7 +163,7 @@
       <section class="cx-block" aria-label="Content">{{ block.config.html|sanitize_html }}</section>
     {% elif block.kind == "cta" %}
       <section class="cx-block" aria-label="Call to action">
-        <p><a class="cx-button cx-button--primary" href="{{ block.config.href|safe_href }}">{{ block.config.label }}</a></p>
+        {% if block.config.href|safe_href %}<p><a class="cx-button cx-button--primary" href="{{ block.config.href|safe_href }}">{{ block.config.label }}</a></p>{% endif %}
       </section>
     {% endif %}
   {% endfor %}

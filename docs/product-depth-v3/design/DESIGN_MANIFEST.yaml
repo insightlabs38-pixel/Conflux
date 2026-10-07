@@ -1,5 +1,6 @@
 version: 3
 status: FOUNDATION_FROZEN_FOR_IMPLEMENTATION
+implementation_review: approved by PD-DESIGN-B00 (reviews/B00_APPROVAL.md); owner direction sign-off in reviews/CONFLUX_R2_SIGNOFF_REVIEW.md
 design_revision: r2.1
 date: 2026-09-30
 author: Claude Design pass (r2.1 micro-polish / final sign-off of Ledger)
@@ -37,7 +38,12 @@ legacy_ui_policy:
 tokens: system/tokens.css
 tokens_json: system/tokens.json
 component_mapping: system/component-mapping.md
-decisions: decisions/
+decisions: decisions/   # D-001..D-012 (011, 012 added by PD-DESIGN-B00 approval)
+visual_contract: system/VISUAL_CONTRACT.md   # citable rule ids V-*
+state_matrix: states/STATE_MATRIX.md   # citable rule ids S-*
+approval_ledger: reviews/B00_APPROVAL.md   # per-reference approval, findings, obligations
+implementation_handoff: IMPLEMENTATION_HANDOFF.md
+source_record: exports/r2.1/SOURCE.md
 resolved_in_r2_1:
   - "Outlined-button border: line-3 in light and dark; ghost/text borderless; hairlines unchanged; no toolbar variant needed (D-008)"
   - "Density: Standard default; Dense explicit, suggested on ~1800px+ displays; never auto-switched by viewport (D-009)"

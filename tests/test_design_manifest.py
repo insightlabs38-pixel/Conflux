@@ -303,3 +303,30 @@ def test_touch_token_and_decision_twelve_exist():
     text = (DESIGN / "decisions/012-touch-targets-and-hero-budget.md").read_text()
     assert "--h-touch" in text and "hero band" in text
     assert "D-012" in (DESIGN / "system/VISUAL_CONTRACT.md").read_text()
+
+
+def test_manifest_points_at_the_contracts_and_the_handoff_cites_real_decisions():
+    manifest = load()
+    for key in (
+        "visual_contract",
+        "state_matrix",
+        "approval_ledger",
+        "implementation_handoff",
+        "source_record",
+    ):
+        assert (DESIGN / manifest[key]).is_file(), key
+    handoff = (DESIGN / manifest["implementation_handoff"]).read_text()
+    decisions = {p.name[:3] for p in (DESIGN / "decisions").glob("0*.md")}
+    assert {f"{i:03d}" for i in range(1, 13)} <= decisions
+    for cited in re.findall(r"D-(\d{3})", handoff):
+        assert cited in decisions, cited
+    for rule in ("V-", "S-", "D-", "F-", "O-"):
+        assert rule in handoff
+
+
+def test_every_design_ref_used_by_the_queue_is_in_the_manifest():
+    known = {r["id"] for r in load()["references"]}
+    used = set()
+    queue = (ROOT / "TASKS.yaml").read_text()
+    used |= set(re.findall(r"^\s*- (design/[\w-]+)\s*$", queue, re.M))
+    assert used and used <= known, sorted(used - known)

@@ -1,0 +1,89 @@
+version: 3
+task: PD-DESIGN-B00-T07
+batch: PD-DESIGN-B00
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: design-review
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 769c9ba
+  head_commit: null
+changed_paths:
+- docs/product-depth-v3/design/DESIGN_MANIFEST.yaml
+- docs/product-depth-v3/design/IMPLEMENTATION_HANDOFF.md
+- docs/product-depth-v3/design/README.md
+- tests/test_design_manifest.py
+deliverables:
+- item: Commit stable design reference IDs, exported artifacts and a concise decision record that tasks
+    can cite; record adaptable vs must-preserve
+  result: pass
+  evidence: manifest now points at VISUAL_CONTRACT (V-*), STATE_MATRIX (S-*), approval ledger (F-/O-),
+    decisions D-001..D-012, SOURCE.md and IMPLEMENTATION_HANDOFF.md, which states what to cite, must-preserve
+    vs adaptable, and the obligations PD-F004 inherits
+invariants:
+- item: Artifacts local, versioned, independent of the hosted conversation
+  result: pass
+  evidence: every pointer is a committed file (tested)
+- item: Domain behavior and gates unchanged
+  result: pass
+  evidence: docs and test only
+verification:
+- command: uv run --frozen pytest tests/test_design_manifest.py -q
+  result: pass
+  note: 21 passed; manifest pointers resolve, handoff cites only existing decisions, every design ref
+    used by TASKS.yaml is in the manifest
+- command: python3 scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid, 0 errors (manifest still parses and refs resolve)
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/app-shell
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/organizer-data-surface
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/participant-my-event
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/project-story-editor
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/judge-review
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/deliberation-awards
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/public-event
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/public-project
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/event-builder
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/onsite-mobile
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+- ref: design/state-matrix
+  result: pass
+  note: reviewed and approved in reviews/B00_APPROVAL.md
+surface_matrix:
+- surface: web
+  result: deferred-by-contract
+  evidence: design approval only; implementation is PD-F004 onward
+- surface: docs
+  result: pass
+  evidence: IMPLEMENTATION_HANDOFF.md and manifest pointers
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Prototype exports remain static comps; implementation QA covers hover, focus, axe and motion.
+next: review

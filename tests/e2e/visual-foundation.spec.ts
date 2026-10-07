@@ -212,6 +212,20 @@ async function statusProblems(page: Page) {
   });
 }
 
+/** Running animations (ambient motion) and the transition time of the first button. */
+async function motion(page: Page) {
+  return page.evaluate(() => ({
+    running: document
+      .getAnimations()
+      .filter((a) => a.playState === "running" && !(a instanceof CSSTransition))
+      .length,
+    button: parseFloat(
+      getComputedStyle(document.querySelector(".cx-button")!)
+        .transitionDuration,
+    ),
+  }));
+}
+
 const ROLES = ["organizer", "participant-01", "judge-01"];
 for (const width of [390, 1440]) {
   for (const role of ROLES) {
@@ -238,6 +252,13 @@ for (const width of [390, 1440]) {
       expect(await shortSummaries(page)).toEqual([]);
       expect(await iconProblems(page)).toEqual([]);
       expect(await statusProblems(page)).toEqual([]);
+      await page.emulateMedia({ reducedMotion: "no-preference" }); // the suite runs with reduce
+      const still = await motion(page);
+      expect(still.running).toBe(0); // nothing moves on its own
+      expect(still.button).toBeGreaterThanOrEqual(0.12);
+      expect(still.button).toBeLessThanOrEqual(0.18);
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      expect((await motion(page)).button).toBeLessThanOrEqual(0.00001);
       const shell = await shellGeometry(page);
       expect(shell.marketing).toBe(false);
       // below 1024px the header still wraps its navigation onto rows until the mobile navigation (PD-F005)

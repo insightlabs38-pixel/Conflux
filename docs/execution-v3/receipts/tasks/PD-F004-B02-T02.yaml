@@ -1,0 +1,76 @@
+version: 3
+task: PD-F004-B02-T02
+batch: PD-F004-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: a68d11e
+  head_commit: null
+changed_paths:
+- src/web/styles/tokens.css
+- src/web/styles/components.css
+- tests/integration/test_visual_tokens.py
+- tests/test_visual_ratchets.py
+- tests/e2e/visual-foundation.spec.ts
+deliverables:
+- item: Motion communicates a state transition; no ambient motion
+  result: pass
+  evidence: tokens --t-fast 120ms, --t-base 180ms, --ease replace the --motion-* names (200ms is gone);
+    one rule transitions only background-color, border-color and color on buttons, rail links, inline
+    links, tags, summaries and bare buttons; the app has no keyframes or animation; a global prefers-reduced-motion
+    rule forces 0.01ms transitions and animations and auto scroll for every component; the old per-button
+    reduced-motion rule was superseded
+- item: Observable proof
+  result: pass
+  evidence: 'e2e motion(): document.getAnimations has no running non-transition animation on three role
+    overviews at 390 and 1440, the button transition is 120-180ms, and with reduced motion emulated it
+    is at most 0.01ms (the suite itself runs with reduce, so the test switches to no-preference to measure
+    the real value)'
+invariants:
+- item: One canonical source of truth
+  result: pass
+  evidence: motion tokens compared with design tokens.json; legacy names removed, not aliased
+- item: Accessibility preserved
+  result: pass
+  evidence: reduced motion honoured globally; uiv2-gate reduced-motion assertion still passes
+- item: No test weakened
+  result: pass
+  evidence: no existing assertion edited
+verification:
+- command: uv run --frozen pytest tests/test_visual_ratchets.py tests/integration/test_visual_tokens.py
+    -q
+  result: pass
+  note: 42 passed, 3 skipped by design
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 665 passed
+- command: docker compose up -d --build app; npx playwright test -c tests/e2e/playwright.config.ts visual-foundation
+    uiv2-gate --project=desktop
+  result: pass
+  note: 21 passed; two first-run failures were test defects of mine (the suite emulates reduced motion;
+    a judge page has no main button) fixed in the test, not in the product
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-MOTION-1
+- ref: design/state-matrix
+  result: pass
+  note: S-LOAD progress motion is T03
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: stylesheets
+- surface: docs
+  result: pass
+  evidence: contract in spec 004
+migrations: []
+findings: []
+escalations: []
+limitations:
+- The ratchet allows no keyframes at all; the pending-state indicator that T03 adds must name its animation
+  in ANIMATIONS_ALLOWED with a reduced-motion fallback.
+next: review

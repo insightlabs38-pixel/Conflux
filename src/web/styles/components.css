@@ -129,7 +129,6 @@
   line-height: var(--lh-tight);
   text-decoration: none;
   cursor: pointer;
-  transition: background var(--motion-fast) var(--motion-ease);
 }
 .cx-button--sm {
   min-height: var(--h-ctl-sm);
@@ -827,11 +826,6 @@
   }
   .cx-workspace-choice {
     padding: var(--sp-4);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .cx-button {
-    transition: none;
   }
 }
 
@@ -2859,4 +2853,28 @@ html {
   min-height: var(--sp-6);
   padding-block: var(--sp-1);
   cursor: pointer;
+}
+
+/* Motion (V-MOTION-1): only a state change animates, only these properties, 120 to 180ms. */
+.cx-button,
+.cx-sidebar__link,
+.cx-inline-link,
+.cx-tag,
+.cx-shell__main summary,
+.cx-shell__main button:not([class]) {
+  transition:
+    background-color var(--t-fast) var(--ease),
+    border-color var(--t-fast) var(--ease),
+    color var(--t-fast) var(--ease);
+}
+/* Anyone who asks for less motion gets none, whatever a component declares. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -267,3 +267,46 @@ def test_status_is_an_icon_and_a_word_and_never_a_fill():
         if selector.startswith(".cx-status"):
             assert "background" not in body, selector
     assert (WEB / "components/Status.tsx").read_text().count("<Icon") == 1
+
+
+TRANSITION_PROPERTIES = {"background-color", "border-color", "color"}
+# State indicators that animate while work is pending; each needs a reduced-motion fallback.
+ANIMATIONS_ALLOWED: set[str] = set()
+
+
+def test_motion_is_a_short_state_transition_and_nothing_is_ambient():
+    for sheet in SHEETS:
+        text = sheet.read_text()
+        assert "--motion-" not in text, sheet.name
+        for selector, value in declarations(text, "transition"):
+            if value == "none":
+                continue
+            assert "all" not in value.split(), (sheet.name, selector, value)
+            parts = [p.strip() for p in value.split(",")]
+            for part in parts:
+                prop = part.split()[0]
+                assert prop in TRANSITION_PROPERTIES, (sheet.name, selector, part)
+                assert "var(--t-fast)" in part or "var(--t-base)" in part, (
+                    sheet.name,
+                    selector,
+                    part,
+                )
+        for name in re.findall(r"@keyframes\s+([\w-]+)", text):
+            assert name in ANIMATIONS_ALLOWED, (sheet.name, name)
+        for selector, value in declarations(text, "animation"):
+            assert value == "none" or value.split()[0] in ANIMATIONS_ALLOWED, (
+                sheet.name,
+                selector,
+                value,
+            )
+
+
+def test_reduced_motion_overrides_every_component():
+    text = (WEB / "styles/components.css").read_text()
+    block = re.search(r"@media \(prefers-reduced-motion: reduce\) \{(.*?)\n\}", text, re.S).group(1)
+    for needle in (
+        "transition-duration: 0.01ms !important",
+        "animation-duration: 0.01ms !important",
+    ):
+        assert needle in block
+    assert "scroll-behavior: auto !important" in block

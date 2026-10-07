@@ -188,3 +188,9 @@ def test_the_gate_still_refuses_a_low_contrast_accent_with_its_message():
     with pytest.raises(ValidationError) as caught:
         clean_theme_config({"accent": "#cccccc"}, "default")
     assert "4.5:1" in str(caught.value)
+
+
+def test_motion_tokens_equal_the_design_and_legacy_names_are_gone():
+    assert LIGHT["--t-fast"] == DESIGN["light"]["--t-fast"] == "120ms"
+    assert LIGHT["--t-base"] == DESIGN["light"]["--t-base"] == "180ms"
+    assert not re.search(r"--motion-", CSS)

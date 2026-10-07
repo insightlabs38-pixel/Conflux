@@ -62,6 +62,11 @@
   --line-height-tight: var(--lh-tight);
   --line-height-body: var(--lh-ui);
   --line-height-code: var(--lh-read);
+  /* motion (v3): a state change, 120 to 180ms; nothing moves on its own */
+  --t-fast: 120ms;
+  --t-base: 180ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
   /* radii (v3): controls 5, tags 3, panels and floating layers 8; pill only for circles */
   --r-1: 3px;
   --r-2: 5px;
@@ -101,9 +106,6 @@
   --breakpoint-mobile: 40rem;
   --breakpoint-desktop: 64rem;
   --breakpoint-wide: 90rem;
-  --motion-fast: 120ms;
-  --motion-normal: 200ms;
-  --motion-ease: cubic-bezier(0.2, 0, 0, 1);
   --z-navigation: 20;
   --z-menu: 40;
   --z-dialog: 60;

@@ -3,6 +3,7 @@
     "account-menu",
     "async-operations",
     "event-switcher",
+    "command-palette",
     "extended-embed",
     "foundations",
     "global-search",

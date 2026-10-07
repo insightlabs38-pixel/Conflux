@@ -104,6 +104,33 @@ export function rememberEvent(
   );
 }
 
+const MAX_RECENT_COMMANDS = 5;
+const COMMAND_ID = /^[a-z][a-z0-9._-]{0,80}$/i;
+
+export const recentCommands = (user: string, workspace: string) =>
+  readIds(user, workspace, "recent-commands")
+    .filter((id) => COMMAND_ID.test(id))
+    .slice(0, MAX_RECENT_COMMANDS);
+
+/** Remember a command that was run: newest first, once each, the latest five. */
+export function rememberCommand(user: string, workspace: string, id: string) {
+  if (!COMMAND_ID.test(id)) return;
+  const current = recentCommands(user, workspace);
+  if (current[0] === id) return;
+  writeIds(
+    user,
+    workspace,
+    "recent-commands",
+    [id, ...current.filter((other) => other !== id)].slice(
+      0,
+      MAX_RECENT_COMMANDS,
+    ),
+  );
+}
+
+export const useRecentCommands = (user: string, workspace: string) =>
+  useList(() => recentCommands(user, workspace));
+
 /** Forget everything the shell stored, for every person and workspace (called at sign-out). */
 export function clearShellPreferences() {
   const store = storage();

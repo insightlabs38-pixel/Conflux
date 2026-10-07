@@ -2675,8 +2675,14 @@
   font: inherit;
   cursor: pointer;
 }
+.cx-search-open__keys {
+  color: var(--ink-3);
+  font: inherit;
+  font-size: var(--fs-12);
+}
 @media (max-width: 47.9375rem) {
-  .cx-search-open__word {
+  .cx-search-open__word,
+  .cx-search-open__keys {
     display: none;
   }
 }

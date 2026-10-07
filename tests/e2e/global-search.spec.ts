@@ -12,7 +12,8 @@ import {
 // through the universal query engine, and opens a hit at its place. Read-only on the reference event.
 test.skip(({ isMobile }) => isMobile, "sets its own viewport");
 
-const trigger = (page: Page) => page.getByRole("button", { name: "Search" });
+const trigger = (page: Page) =>
+  page.getByRole("button", { name: "Search or run a command" });
 const dialog = (page: Page) => page.getByRole("dialog");
 const box = (page: Page) => dialog(page).getByRole("combobox");
 
@@ -22,6 +23,7 @@ async function open(page: Page, role: string, width = 1440) {
   await openWorkspace(page);
   if (role === "organizer") await chooseWorkspaceEvent(page);
   await settled(page);
+  await expect(trigger(page)).toBeVisible(); // the workspace shell, not the workspace chooser
 }
 
 /** A seeded project's name and a few letters of it, from the same query the search uses. */
@@ -44,7 +46,7 @@ for (const width of [1440, 390]) {
     const { name, part, event } = await aProject(page);
     await trigger(page).click();
     await expect(box(page)).toBeFocused();
-    await expect(dialog(page)).toContainText("Type to search.");
+    await expect(dialog(page).getByRole("option").first()).toBeVisible(); // the commands, before anything is typed
     await box(page).fill(part);
     const group = dialog(page).locator(".cx-search__group", {
       hasText: "Projects",
@@ -71,16 +73,16 @@ for (const width of [1440, 390]) {
   });
 }
 
-test("places are found by name, Escape closes and focus returns to Search", async ({
+test("places are found as commands, Escape closes and focus returns to Search", async ({
   page,
 }) => {
   await open(page, "organizer");
   await trigger(page).click();
   await box(page).fill("judg");
   await expect(
-    dialog(page).locator(".cx-search__group", { hasText: "Places" }),
+    dialog(page).locator(".cx-search__group", { hasText: "Go to" }),
   ).toBeVisible();
-  await dialog(page).getByRole("option", { name: "Judging" }).click();
+  await dialog(page).getByRole("option", { name: "Go to Judging" }).click();
   await expect(page).toHaveURL(/\/judging/);
   await trigger(page).click();
   await box(page).fill("zzzzq");

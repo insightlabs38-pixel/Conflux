@@ -5,7 +5,9 @@ import {
   MAX_RECENTS,
   clearShellPreferences,
   favoriteEvents,
+  recentCommands,
   recentEvents,
+  rememberCommand,
   rememberEvent,
   setThemePreference,
   themePreference,
@@ -93,5 +95,26 @@ describe("shell preferences", () => {
       "purple",
     );
     expect(themePreference("")).toBe("system");
+  });
+
+  it("keeps the last five commands run, newest first, once each, and only command-like ids", () => {
+    for (const id of ["go.a", "go.b", "go.c", "go.d", "go.e", "go.f"])
+      rememberCommand("u", "w", id);
+    rememberCommand("u", "w", "go.c");
+    expect(recentCommands("u", "w")).toEqual([
+      "go.c",
+      "go.f",
+      "go.e",
+      "go.d",
+      "go.b",
+    ]);
+    rememberCommand("u", "w", "has space");
+    rememberCommand("u", "w", "<script>");
+    expect(recentCommands("u", "w")).toHaveLength(5);
+    window.localStorage.setItem(
+      "conflux:v1:u:w:recent-commands",
+      JSON.stringify(["1bad", "go.ok"]),
+    );
+    expect(recentCommands("u", "w")).toEqual(["go.ok"]);
   });
 });

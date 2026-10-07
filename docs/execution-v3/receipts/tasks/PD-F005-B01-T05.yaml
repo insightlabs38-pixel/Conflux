@@ -1,0 +1,80 @@
+version: 3
+task: PD-F005-B01-T05
+batch: PD-F005-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: e285e73
+  head_commit: null
+changed_paths:
+- src/web/lib/commands.ts
+- src/web/lib/commands.test.ts
+- src/web/lib/shellCommands.ts
+- src/web/lib/shellPreferences.ts
+- src/web/lib/shellPreferences.test.ts
+- src/web/components/CommandPalette.tsx
+- src/web/components/CommandPalette.test.tsx
+- src/web/components/AppShell.tsx
+- src/web/styles/components.css
+- tests/e2e/command-palette.spec.ts
+- tests/e2e/global-search.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Global command palette as a complete workflow
+  result: pass
+  evidence: Ctrl+K or Cmd+K from anywhere in the workspace (and the header button) opens one overlay of commands and record search; the same keys or Escape close it and focus goes back to where it was. With nothing typed it lists the person's recent commands first, then Go to, Events, Appearance and Account; typing ranks them (exact, prefix, word prefix, every typed word, substring, subsequence); arrow keys move (wrapping), Enter runs, the list is a labelled combobox and listbox with aria-activedescendant. Commands go to a place, switch event, set the theme, open notification preferences and sign out - through routes.target, shellPreferences and the existing sign-out; record hits from T06 sit below them.
+- item: One canonical registry, the primitive COMMANDS (ESC-20260930-007 option A)
+  result: pass
+  evidence: src/web/lib/commands.ts is the only registry - Command {id, label, group, keywords, shortcut, when, run}, providers that contribute commands for the context, deterministic ranking with the person's recent commands as the tie-break; src/web/lib/shellCommands.ts registers the shell's providers. The shortcut overlay (B02-T07) and selection-parameterised commands (B03-T04) read this registry; PD-F071-B02-T01 is to formalise this module, not create another.
+- item: States, keyboard, accessibility
+  result: pass
+  evidence: no match, searching, one entity that could not be searched, no event chosen, two-character minimum for records; a role lacks the commands it has no place for (a participant is not offered Go to Event setup, checked in the browser and the unit tests); at 390 the dialog sits inside the viewport; axe passes with the palette open; the header hint shows Ctrl K or the Cmd glyph and is hidden on a phone
+invariants:
+- item: A command never changes domain state; the server still refuses
+  result: pass
+  evidence: every shipped command navigates or changes presentation (theme is device-local) or calls the shell's existing sign-out; when() only narrows what is offered; the contract in commands.ts says a mutating command must use the canonical endpoint and the consequence step, and none ships
+- item: Typed text never in a URL; no second overlay
+  result: pass
+  evidence: the palette and T06's search are one component (CommandPalette, which replaced SearchDialog); URLs are built by routes.target from ids and fixed names (asserted in unit and browser tests)
+- item: No test weakened
+  result: pass
+  evidence: T06's tests were moved to the palette and kept, with the Places and Events groups replaced by the equivalent commands (Go to X, Switch to Y); the browser search spec follows the new button name
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 138 files, 757 tests (commands 7 - ranking order and ties, keywords, registry, when(); CommandPalette 10 - Ctrl and Cmd K, commands by role, run through routes.target, recents, theme and sign-out, record search states)
+- command: npx playwright test -c tests/e2e/playwright.config.ts command-palette global-search account-menu event-switcher shell-responsive workspace-shell visual-foundation uiv2-gate slop-audit roles routing --project=desktop --workers=4
+  result: pass
+  note: 206 passed on the rebuilt stack; command-palette spec 5 - open, filter, run, focus on the page and recents at 1440 and 390 with axe, arrow keys and wrap with aria-activedescendant and focus return, theme command and absent organizer commands for a participant, sign-out command ends the session
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: palette as a dialog with a listbox, selection-parameterised commands come in B03-T04; keyboard shortcut help in B02-T07
+- ref: design/state-matrix
+  result: pass
+  note: S-LOAD, S-EMPTY, S-ERR in the status line
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit, component, accessibility and browser tests
+- surface: audit
+  result: pass
+  evidence: the palette writes nothing itself; sign-out and (later) any mutation go through the existing endpoints
+- surface: docs
+  result: pass
+  evidence: contract in spec 005; release note and developer notes at T91
+migrations: []
+findings:
+- P3 the header button label is now Search or run a command (it was Search); finders that matched Search by substring keep working.
+- P3 first run of the participant and judge browser tests pressed Ctrl+K while the workspace chooser was still on screen (the shell is mounted a moment after openWorkspace returns); the tests now wait for the palette button.
+escalations:
+- ESC-20260930-007
+limitations:
+- No command is bound to a single-key shortcut yet (the shortcut field exists and is shown); G-then-letter navigation and the shortcut help overlay are PD-F005-B02-T07.
+- There is no command to open the notification panel; it is reachable from the bell.
+next: review

@@ -619,7 +619,7 @@ export function EvaluationBuilder({
   }
 
   return (
-    <Card title="Judging">
+    <Card title="Evaluation setup">
       {error && <p role="alert">{error}</p>}
       {stages.length === 0 ? (
         <EmptyState

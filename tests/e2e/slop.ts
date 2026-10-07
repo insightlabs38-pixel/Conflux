@@ -194,6 +194,39 @@ export async function slopProblems(page: Page, rules: SlopRule[]) {
       }
     }
 
+    if (wanted.includes("repeatedLabels")) {
+      // the same label must not be said again as a heading, a crumb and a card title (V-SLOP-7). The
+      // rail names where you are and is allowed to match the page title; headings, the selected
+      // task tab and breadcrumbs must each say something different.
+      const norm = (text: string | null) =>
+        (text ?? "").replace(/\s+/g, " ").trim().toLowerCase();
+      const scope = document.querySelector("main") ?? document.body;
+      const headings = [
+        ...scope.querySelectorAll("h1, h2, h3, h4, .cx-card__title"),
+      ]
+        .filter(shown)
+        .map((h) => ({ el: h, text: norm(h.textContent) }))
+        .filter((h) => h.text);
+      const seen = new Map<string, number>();
+      for (const h of headings) seen.set(h.text, (seen.get(h.text) ?? 0) + 1);
+      for (const [text, count] of seen)
+        if (count > 1)
+          add("repeatedLabels", `heading "${text}" appears ${count} times`);
+      const tab = scope.querySelector('[role="tab"][aria-selected="true"]');
+      const tabLabel = norm(tab?.firstElementChild?.textContent ?? "");
+      if (tabLabel && seen.has(tabLabel))
+        add(
+          "repeatedLabels",
+          `the selected tab "${tabLabel}" is repeated as a heading`,
+        );
+      const h1 = norm(scope.querySelector("h1")?.textContent ?? "");
+      for (const crumb of scope.querySelectorAll(
+        '.cx-breadcrumbs a, .cx-breadcrumbs span:not([aria-hidden="true"])',
+      ))
+        if (h1 && norm(crumb.textContent) === h1)
+          add("repeatedLabels", `breadcrumb "${h1}" repeats the page title`);
+    }
+
     if (wanted.includes("kpiCards")) {
       // a row of three or more boxes with their own border or fill is a card dashboard (V-SLOP-3,
       // V-SLOP-14); a summary is one strip of figures, and a list of records is a table. Only the

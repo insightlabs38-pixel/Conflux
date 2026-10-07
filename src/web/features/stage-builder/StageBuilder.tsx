@@ -200,7 +200,6 @@ export function StageBuilder({
 
   return (
     <section aria-label="Stage builder">
-      <h2>Stages</h2>
       {removing && (
         <ConsequenceDialog
           url={`${base}consequences/?action=${removing.kind === "stage" ? "stage.delete" : "stage_transition.delete"}&target=${removing.id}`}

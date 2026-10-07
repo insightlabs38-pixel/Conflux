@@ -29,7 +29,6 @@ export function FeaturesPanel({ eventId }: { eventId: string }) {
 
   return (
     <section aria-label="Features">
-      <h3>Features</h3>
       <p>
         Events start with the essentials. Turn on only what this event needs; a
         feature that already has content stays on.

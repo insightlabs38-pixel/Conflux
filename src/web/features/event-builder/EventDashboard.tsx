@@ -358,7 +358,6 @@ export function EventDashboard({ workspaceId }: { workspaceId: string }) {
                         onSubmit={saveSettings}
                         key={selected.public_id + selected.updated_at}
                       >
-                        <h3>Settings</h3>
                         <label>
                           Name{" "}
                           <input

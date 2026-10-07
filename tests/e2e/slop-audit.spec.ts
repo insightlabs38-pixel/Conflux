@@ -20,6 +20,7 @@ const RULES: SlopRule[] = [
   "operatorCopy",
   "pills",
   "nestedCards",
+  "repeatedLabels",
 ];
 
 const SETUP_TASKS = [
@@ -241,4 +242,31 @@ test("the audit sees a card inside a card", async ({ page }, info) => {
   });
   const found = await slopProblems(page, ["nestedCards"]);
   expect(found.nestedCards).toHaveLength(1);
+});
+
+test("the audit sees a label said twice and a crumb that repeats the title", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, "organizer");
+  await goToDestination(page, "overview");
+  await settled(page);
+  await page.evaluate(() => {
+    const main = document.querySelector("main")!;
+    const title = main.querySelector("h1")?.textContent ?? "Overview";
+    const nav = document.createElement("nav");
+    nav.className = "cx-breadcrumbs";
+    nav.innerHTML = `<span>${title}</span>`;
+    const twice = document.createElement("div");
+    twice.innerHTML = "<h3>Same words</h3><h4>Same words</h4>";
+    main.prepend(nav, twice);
+  });
+  const found = await slopProblems(page, ["repeatedLabels"]);
+  expect(
+    found.repeatedLabels?.some((p) => p.includes('"same words" appears 2')),
+  ).toBe(true);
+  expect(found.repeatedLabels?.some((p) => p.startsWith("breadcrumb"))).toBe(
+    true,
+  );
 });

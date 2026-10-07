@@ -230,7 +230,6 @@ export function PolicyBuilder({
 
   return (
     <section aria-label="Policy builder">
-      <h2>Policies</h2>
       {error && <p role="alert">{error}</p>}
 
       <ul aria-label="Policy list">

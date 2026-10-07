@@ -193,7 +193,8 @@ export function CommunicationsPanel({
   }
 
   return (
-    <Card title="Communications">
+    <Card>
+      <h4>Send a message</h4>
       {error && <p role="alert">{error}</p>}
       <form onSubmit={(event) => void send(event)}>
         <div className="cx-field-pair">

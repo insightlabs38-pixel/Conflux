@@ -304,7 +304,7 @@ test("organizer publishes results and the public results page shows them", async
   await chooseWorkspaceEvent(page);
   await goToDestination(page, "judging");
   const judging = page.locator(".cx-card").filter({
-    has: page.getByRole("heading", { name: "Judging", exact: true }),
+    has: page.getByRole("heading", { name: "Evaluation setup", exact: true }),
   });
   await judging.getByLabel("Stage").selectOption({ index: 1 });
   const publish = page.getByRole("button", {

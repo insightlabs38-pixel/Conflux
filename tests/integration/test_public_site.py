@@ -169,3 +169,29 @@ def test_project_detail_404s_for_a_project_without_a_finalized_submission():
     draft_project = Project.objects.create(event=event, name="Unfinished", created_by=user)
     response = Client().get(f"/e/{event.public_id}/projects/{draft_project.public_id}/")
     assert response.status_code == 404
+
+
+def test_the_hero_names_the_status_and_the_dates_in_the_events_own_timezone():
+    event, _, _ = make_public_event_with_finalized_project()
+    event.timezone = "Asia/Tokyo"
+    event.starts_at = "2026-01-01T20:00:00Z"  # Jan 2, 05:00 in Tokyo
+    event.ends_at = "2026-01-03T10:00:00Z"
+    event.save()
+    body = Client().get(f"/e/{event.public_id}/").content.decode()
+    assert '<p class="cx-hero__facts">Open · Jan. 2, 2026 – Jan. 3, 2026 · Asia/Tokyo</p>' in body
+    assert body.count("cx-button--primary") == 1  # one primary action in the hero
+    assert body.count("<h1") == 1
+
+
+def test_the_hero_facts_say_only_what_is_set():
+    event, _, _ = make_public_event_with_finalized_project()
+    event.starts_at = event.ends_at = None
+    event.save()
+    body = Client().get(f"/e/{event.public_id}/").content.decode()
+    assert '<p class="cx-hero__facts">Open</p>' in body
+    event.starts_at = "2026-01-01T00:00:00Z"
+    event.ends_at = "2026-01-01T09:00:00Z"
+    event.timezone = "Not/AZone"  # a bad stored zone falls back to UTC instead of a 500
+    event.save()
+    body = Client().get(f"/e/{event.public_id}/").content.decode()
+    assert '<p class="cx-hero__facts">Open · Jan. 1, 2026 · Not/AZone</p>' in body

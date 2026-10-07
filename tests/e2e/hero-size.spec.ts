@@ -185,6 +185,48 @@ test("a saved immersive hero cannot lose its art, and the refusal says why", asy
   }
 });
 
+// Boundary: a very long hero title wraps inside the compact band instead of being cut or pushing the
+// action off the screen; the band still stays within the 280px the spec allows on a desktop.
+test("a long hero title wraps inside the compact band and the action stays above the fold", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+  await signIn(page, "organizer");
+  const { workspace, event } = await eventIds(page);
+  const base = `/api/v1/workspaces/${workspace}/events/${event}/page/blocks/`;
+  const blocks = await (await page.request.get(base)).json();
+  const hero = (blocks.results ?? blocks).find(
+    (block: { kind: string }) => block.kind === "hero",
+  );
+  expect(hero).toBeTruthy();
+  const url = `${base}${hero.public_id}/`;
+  const title =
+    "The International Symposium of Applied Hackathon Engineering and Open Collaboration 2026";
+  try {
+    const renamed = await page.request.patch(url, {
+      data: { config: { ...hero.config, title } },
+    });
+    expect(renamed.ok()).toBe(true);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`/e/${event}/`);
+    await page.waitForLoadState("networkidle");
+    const measured = await page.evaluate(() => ({
+      band: document.querySelector(".cx-hero__band")!.getBoundingClientRect()
+        .height,
+      action: document
+        .querySelector(".cx-hero .cx-button--primary")
+        ?.getBoundingClientRect().bottom,
+      title: document.querySelector(".cx-hero h1")!.textContent,
+    }));
+    expect(measured.title).toBe(title); // not cut
+    expect(measured.band).toBeLessThanOrEqual(280);
+    if (measured.action !== undefined)
+      expect(measured.action).toBeLessThan(900);
+  } finally {
+    await page.request.patch(url, { data: { config: hero.config } });
+  }
+});
+
 test("an unsupported hero size is refused by the server and nothing is stored", async ({
   page,
 }, info) => {

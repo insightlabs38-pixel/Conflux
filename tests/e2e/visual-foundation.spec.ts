@@ -377,6 +377,8 @@ for (const width of [390, 1440]) {
       const art = document.querySelector<HTMLElement>(
         ".cx-hero__identity, .cx-hero__image",
       );
+      const inBand = (selector: string) =>
+        document.querySelectorAll(`.cx-hero__band ${selector}`).length;
       return {
         size: document.body.dataset.heroSize ?? "",
         band: band && { top: band.top, height: band.height },
@@ -384,6 +386,11 @@ for (const width of [390, 1440]) {
         action: action && { top: action.top, bottom: action.bottom },
         art: art && getComputedStyle(art).display,
         h1: document.querySelectorAll("h1").length,
+        identity: inBand("h1"),
+        facts: document.querySelector(".cx-hero__band .cx-hero__facts")
+          ?.textContent,
+        primaries: document.querySelectorAll(".cx-hero .cx-button--primary")
+          .length,
         wide: document.documentElement.scrollWidth - innerWidth,
       };
     });
@@ -395,6 +402,10 @@ for (const width of [390, 1440]) {
     );
     expect(hero.action!.bottom).toBeLessThan(900); // the primary action is above the fold
     expect(hero.h1).toBe(1);
+    // identity, status and dates in the band, exactly one primary action under it
+    expect(hero.identity).toBe(1);
+    expect(hero.facts).toMatch(/^(Open|Closed|Archived) · .*\d{4}/);
+    expect(hero.primaries).toBe(1);
     expect(hero.wide).toBeLessThanOrEqual(0);
     // the lockup or art is its own column on desktop and steps aside on mobile
     expect(hero.art === "none").toBe(width < 768);

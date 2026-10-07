@@ -118,7 +118,6 @@ export function EventSite({ eventId }: { eventId: string }) {
             >
               <div className="cx-hero__band">
                 <div className="cx-hero__story">
-                  <p className="cx-event-kicker">{event.timezone} · Conflux</p>
                   <h1>{event.name}</h1>
                   <Status tone="info">{event.status}</Status>
                   {schedule && <p>{schedule}</p>}

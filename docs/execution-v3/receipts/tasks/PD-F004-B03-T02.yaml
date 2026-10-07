@@ -1,0 +1,69 @@
+version: 3
+task: PD-F004-B03-T02
+batch: PD-F004-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: fca879e
+  head_commit: null
+changed_paths:
+- src/api/presentation/templatetags/presentation_tags.py
+- src/api/presentation/templates/presentation/event_landing.html
+- src/web/public/event-site/EventSite.tsx
+- src/web/styles/presentation.css
+- tests/integration/test_public_site.py
+- tests/e2e/visual-foundation.spec.ts
+- tests/e2e/hero-size.spec.ts
+deliverables:
+- item: Compact hero fits event identity, date and status, and one primary action in 160-280px on desktop
+  result: pass
+  evidence: 'the server-rendered hero carried neither dates nor status before this task; it now shows
+    `Open · Jan. 2, 2026 – Jan. 3, 2026 · Asia/Tokyo` (a template tag, dates in the event''s own timezone,
+    only what is set, a bad stored zone falls back to UTC). The React site already had status and schedule.
+    The band holds title and facts, the one primary action sits under it; measured at 1440 the band is
+    within 240px and a very long title wraps to under 280px with the action above the fold'
+- item: Redundant labels removed
+  result: pass
+  evidence: the timezone/Conflux kicker duplicated the facts line (V-SLOP-7); the default hero has no
+    kicker, a hero block keeps the event name as its kicker
+invariants:
+- item: Dates are not invented or reformatted client-side
+  result: pass
+  evidence: formatting is server-side from the stored instants and timezone; nothing is shown for an unset date
+- item: Accessibility and overflow
+  result: pass
+  evidence: public, showcase and foundations specs (axe, overflow) pass at 390 and 1440
+verification:
+- command: uv run --frozen pytest tests/integration/test_public_site.py tests/integration/test_event_themes.py tests/test_visual_ratchets.py -q
+  result: pass
+  note: 30 and 25 passed (facts in event timezone, only what is set, bad zone)
+- command: cd src/web && npx tsc --noEmit && npx vitest run public
+  result: pass
+  note: 4 passed
+- command: npx playwright test visual-foundation public showcase foundations --project=desktop; iso-min fixture hero-size
+  result: pass
+  note: public hero test now asserts identity, facts with status and year, one primary; hero-size long title test passes; fixture disposed
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-HERO-1, D-012, V-SLOP-7, V-SLOP-11 (event timezone)
+- ref: design/state-matrix
+  result: pass
+  note: no state component changed
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: template, tag, EventSite, stylesheet
+- surface: docs
+  result: pass
+  evidence: VISUAL_FOUNDATION.md Public hero (band contents)
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Dates show no relative hint ("in 3 days"); V-SLOP-11 asks for one on dates generally, which is a separate cross-page task.
+next: review

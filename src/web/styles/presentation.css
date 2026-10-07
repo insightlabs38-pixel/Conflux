@@ -356,6 +356,10 @@
 .cx-hero__story > * {
   margin: 0;
 }
+.cx-hero__facts {
+  font-size: var(--fs-14);
+  color: var(--color-text-muted);
+}
 .cx-hero__after {
   display: grid;
   justify-items: start;

@@ -35,7 +35,8 @@ export type SlopRule =
   | "repeatedLabels"
   | "hiddenActions"
   | "recordGrids"
-  | "alarmColors";
+  | "alarmColors"
+  | "fakeAi";
 
 export async function slopProblems(page: Page, rules: SlopRule[]) {
   return page.evaluate((wanted) => {
@@ -336,6 +337,46 @@ export async function slopProblems(page: Page, rules: SlopRule[]) {
         );
       if (marks.length > 6)
         add("alarmColors", `${marks.length} red marks on one page`);
+    }
+
+    if (wanted.includes("fakeAi")) {
+      // the deterministic workflows (scoring, eligibility, publication) must not borrow the look of
+      // an assistant: no sparkle, no "AI", copilot, magic or smart-suggest control (V-SLOP-10). Only
+      // the product's own controls are read (buttons, tabs, summaries, labels, legends, options and
+      // their accessible names); a project called "AI Tutor" in a link, heading, table or tag is
+      // participant content and stays as typed. "Email magic link" is a real sign-in method.
+      const fake =
+        /\bA\.?I\b|artificial intelligence|copilot|assistant|sparkle|magic(?! link)|smart (?:suggest|fill|assist|reply|draft)|auto-?generat|\bGPT\b|\bLLM\b|\u2728|\u{1FA84}|\u{1F916}/iu;
+      for (const el of document.querySelectorAll(
+        "button, summary, [role=tab], [role=button], legend, label, [aria-label], [title], input[placeholder], textarea[placeholder]",
+      )) {
+        if (!shown(el) || el.closest("table, .cx-tag, a, [data-user-content]"))
+          continue;
+        const own = [...el.childNodes]
+          .filter((n) => n.nodeType === 3)
+          .map((n) => n.textContent)
+          .join(" ");
+        const said = [
+          el.matches("button, summary, [role=tab], [role=button]")
+            ? el.textContent
+            : el.matches("legend, label")
+              ? own
+              : "",
+          el.getAttribute("aria-label"),
+          el.getAttribute("title"),
+          el.getAttribute("placeholder"),
+        ].filter(Boolean) as string[];
+        const hit = said.find((text) => fake.test(text));
+        if (hit)
+          add(
+            "fakeAi",
+            `assistant-like control "${hit.trim().slice(0, 40)}" in ${name(el)}`,
+          );
+      }
+      const decor = document.querySelector(
+        "main [class*='sparkle'], main [class*='magic'], main [class*='-ai-']",
+      );
+      if (decor) add("fakeAi", `sparkle styling in ${name(decor)}`);
     }
 
     if (wanted.includes("kpiCards")) {

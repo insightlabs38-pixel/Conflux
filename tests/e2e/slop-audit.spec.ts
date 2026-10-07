@@ -24,6 +24,7 @@ const RULES: SlopRule[] = [
   "hiddenActions",
   "recordGrids",
   "alarmColors",
+  "fakeAi",
 ];
 
 const SETUP_TASKS = [
@@ -368,4 +369,23 @@ test("the audit sees red outside a failure and a page of alarms", async ({
   expect(
     many.alarmColors?.some((p) => p.includes("red marks on one page")),
   ).toBe(true);
+});
+
+test("the audit sees an assistant look on a deterministic workflow", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, "organizer");
+  await goToDestination(page, "judging");
+  await settled(page);
+  await page.evaluate(() => {
+    const row = document.createElement("div");
+    row.innerHTML =
+      '<button type="button">\u2728 Suggest scores</button><button type="button" aria-label="Ask AI about this stage">Ask</button><button type="button">Email magic link</button><a href="#x">AI Tutor</a>';
+    document.querySelector("main")!.prepend(row);
+  });
+  const found = await slopProblems(page, ["fakeAi"]);
+  // the sparkle button and the AI-named control; a real magic-link sign-in and a project link are not
+  expect(found.fakeAi).toHaveLength(2);
 });

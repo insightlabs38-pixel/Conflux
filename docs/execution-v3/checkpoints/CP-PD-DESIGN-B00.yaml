@@ -1,0 +1,35 @@
+version: 1
+checkpoint_id: CP-PD-DESIGN-B00
+created_at: '2026-10-07T00:00:00Z'
+canonical_commit: ba64928
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+- PD-B02
+- PD-B03
+- PD-B04
+- PD-F001-B01
+- PD-F001-B02
+- PD-F002-B01
+- PD-F002-B02
+- PD-F002-B03
+- PD-F003-B01
+- PD-F003-B02
+- PD-F003-B03
+- PD-DESIGN-B00
+active_batches:
+- PD-F004-B01
+active_claims: []
+open_escalations: []
+last_completed_task: PD-DESIGN-B00-T07
+ready_summary:
+- PD-F004-B01 (visual direction, spec 004; promoted IN_PROGRESS, not started; read docs/product-depth-v3/design/IMPLEMENTATION_HANDOFF.md first)
+verification_summary:
+- tests/test_design_manifest.py 21 passed; validate_queue valid; Chromium measurements recorded in reviews/B00_APPROVAL.md
+recovery_notes:
+- 'Design authority: DESIGN_MANIFEST.yaml (r2.1, frozen), system/VISUAL_CONTRACT.md (V-*), states/STATE_MATRIX.md (S-*), decisions D-001..D-012, reviews/B00_APPROVAL.md (findings, obligations O-1..O-4, F-3, F-5)'
+- 'Token change: --h-touch 44px added to tokens.css/json (css equals json is tested); no src/web file reads the tokens yet, adoption is PD-F004'
+- 'Open decisions in .claude-supervisor/QUESTIONS.md (untracked) from earlier batches stay at their defaults'
+- main unpushed; untracked design handoff zips untouched (r2_1 zip sha256 recorded in exports/r2.1/SOURCE.md); supervisor.py modification is the owner's and left uncommitted

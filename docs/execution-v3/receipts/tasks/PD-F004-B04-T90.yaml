@@ -1,0 +1,57 @@
+version: 3
+task: PD-F004-B04-T90
+batch: PD-F004-B04
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: c379a97
+  head_commit: null
+changed_paths:
+- docs/verification/PD-F004-B04/MATRIX.md
+- docs/verification/PD-F004-B04/T90-e2e-fast.log
+- docs/verification/PD-F004-B04/T90-verify-fast.log
+deliverables:
+- item: Verification matrix for the eight capability tasks
+  result: pass
+  evidence: docs/verification/PD-F004-B04/MATRIX.md links each rule (T01-T08) to a positive proof on every audited page and to a self-test that proves the gate can fail
+- item: Positive, negative, authorization, lifecycle cases
+  result: pass
+  evidence: the batch changes no endpoint, model or lifecycle, so authorization and migration are unchanged and stated as such in the matrix; negative proof is the self-test per rule
+- item: UI states
+  result: pass
+  evidence: 390 and 1440 on all three roles and the public site; loading, empty and error states stay covered by visual-foundation, uiv2-gate and uiv2-final-states in the same green run
+- item: Exact commands and results recorded
+  result: pass
+  evidence: T90 logs in docs/verification/PD-F004-B04
+invariants:
+- item: No gate weakened
+  result: pass
+  evidence: the audit gained four rules and eight self-tests; no budget raised, no assertion removed
+verification:
+- command: make e2e-fast
+  result: pass
+  note: clean on the first run, read-only 264 passed, 40+ isolated specs and the canary chain ok
+- command: make verify-fast
+  result: pass
+  note: format, ruff, 2940 pytest passed (34 skipped), 701 vitest, build, openapi, sdk, block-schema checks
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-SLOP-1..8
+- ref: design/state-matrix
+  result: pass
+  note: unchanged states stay green
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: live audit
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Dialogs, open disclosures and per-record detail views are not walked by the audit.
+next: review

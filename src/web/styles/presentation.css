@@ -411,11 +411,16 @@
   color: var(--color-text-muted);
   margin-bottom: var(--sp-2);
 }
+.cx-hero__art {
+  display: contents; /* the picture only carries the phone alternative; the img is the grid item */
+}
 .cx-hero__image {
   display: block;
   width: var(--hero-art-w);
   height: var(--hero-art-h);
   object-fit: cover;
+  /* the organizer's focal point: where the crop is taken from (centre when none is set) */
+  object-position: var(--hero-focus-x, 50%) var(--hero-focus-y, 50%);
   border-radius: var(--r-2);
 }
 /* The fallback identity is a typographic lockup: the event initial and year in a hairline frame. */

@@ -11,6 +11,9 @@ export type ThemeConfig = {
   accent?: string;
   logo_url?: string;
   banner_url?: string;
+  banner_mobile_url?: string;
+  banner_focus_x?: number;
+  banner_focus_y?: number;
   typography?: string;
   personality?: string;
   density?: string;
@@ -62,7 +65,7 @@ export function ThemeSettings({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
-  function update(key: string, value: string) {
+  function update(key: string, value: string | number) {
     setSaved(false);
     setDraft((current) => ({ ...current, [key]: value }));
   }
@@ -128,6 +131,74 @@ export function ThemeSettings({
               </Field>
             ))}
           </div>
+          <details className="cx-theme-art">
+            <summary>Hero image crop and phone image</summary>
+            <div className="cx-grid">
+              <Field
+                label="Phone hero image URL"
+                hint="Optional. Shown instead of the hero image on a phone; needs the hero image first."
+              >
+                {(props) => (
+                  <TextInput
+                    {...props}
+                    type="url"
+                    value={draft.banner_mobile_url || ""}
+                    onChange={(event) =>
+                      update("banner_mobile_url", event.target.value)
+                    }
+                  />
+                )}
+              </Field>
+              {(
+                [
+                  [
+                    "banner_focus_x",
+                    "Focal point, left to right",
+                    "from the left",
+                  ],
+                  [
+                    "banner_focus_y",
+                    "Focal point, top to bottom",
+                    "from the top",
+                  ],
+                ] as const
+              ).map(([key, label, where]) => (
+                <Field
+                  key={key}
+                  label={label}
+                  hint={`${draft[key] ?? 50}% ${where}. The crop keeps this point in view.`}
+                >
+                  {(props) => (
+                    <input
+                      {...props}
+                      type="range"
+                      min={0}
+                      max={100}
+                      step={1}
+                      value={draft[key] ?? 50}
+                      onChange={(event) =>
+                        update(key, Number(event.target.value))
+                      }
+                    />
+                  )}
+                </Field>
+              ))}
+            </div>
+            <Button
+              variant="secondary"
+              type="button"
+              disabled={
+                (draft.banner_focus_x ?? 50) === 50 &&
+                (draft.banner_focus_y ?? 50) === 50
+              }
+              onClick={() => {
+                update("banner_focus_x", 50);
+                update("banner_focus_y", 50);
+              }}
+            >
+              Centre the crop
+            </Button>
+          </details>
           {/^#[0-9a-fA-F]{6}$/.test(draft.accent ?? "") && (
             <p className="cx-theme-swatch" aria-hidden="true">
               <span style={{ background: draft.accent }} />

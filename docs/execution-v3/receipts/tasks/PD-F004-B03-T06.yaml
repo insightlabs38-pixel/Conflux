@@ -1,0 +1,85 @@
+version: 3
+task: PD-F004-B03-T06
+batch: PD-F004-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 5816801
+  head_commit: null
+changed_paths:
+- src/api/presentation/themes.py
+- src/api/presentation/templates/presentation/event_landing.html
+- src/web/public/event-site/EventSite.tsx
+- src/web/features/page-builder/ThemeSettings.tsx
+- src/web/features/page-builder/ThemeSettings.test.tsx
+- src/web/styles/presentation.css
+- tests/integration/test_event_themes.py
+- tests/e2e/hero-size.spec.ts
+- tests/e2e/weights.json
+- docs/operations/VISUAL_FOUNDATION.md
+deliverables:
+- item: Image focal point and crop
+  result: pass
+  evidence: 'banner_focus_x and banner_focus_y (whole percent 0-100) in the page theme_config, validated
+    server-side (floats, strings, bools, out-of-range refused with ''whole number of percent''; 50 stored
+    as no setting). They reach both renderers as --hero-focus-x/y in the presentation variables and are
+    drawn as the hero image''s object-position; a form disclosure has two sliders, a live readout and
+    a Centre the crop button'
+- item: Responsive art direction
+  result: pass
+  evidence: banner_mobile_url (same safe-URL check as the other images, needs the hero image first); both
+    renderers draw a picture element with a max-width 48rem source so the browser loads one image; verified
+    through currentSrc at 390 (phone image) and 1440 (hero image)
+- item: Progressive disclosure and diagnostics
+  result: pass
+  evidence: the controls sit in a closed details (checked by test); a refused value shows the server message
+    in the form alert and the saved page is unchanged
+invariants:
+- item: Server authority and untrusted URLs
+  result: pass
+  evidence: the page API validates every key; unknown keys are still refused; no CSS or script reaches the page,
+    only integers formatted as percents
+- item: No parallel source
+  result: pass
+  evidence: same theme_config, same presentation payload; no new model or endpoint
+- item: Migration and compatibility
+  result: pass
+  evidence: absent keys mean centre and no phone image; stored themes unchanged; no OpenAPI change (theme_config is free JSON)
+verification:
+- command: uv run --frozen pytest -n auto -q
+  result: pass
+  note: 2932 passed, 34 skipped (focus table, phone image rules, render of source and variables, reset to centre)
+- command: cd src/web && npx tsc --noEmit && npx vitest run; make openapi-check sdk-check block-schema-check
+  result: pass
+  note: all passed, generated artifacts in sync
+- command: iso-min fixture; npx playwright test hero-size --project=desktop
+  result: pass
+  note: 11 passed, including the focal point and phone image at 390 and 1440 (object-position 30% 70%,
+    currentSrc, art caps, axe, no overflow, refused phone URL keeps the saved page)
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-HERO-1 (focal point, responsive art direction are Advanced and disclosed), V-FOCUS-1 on the sliders
+- ref: design/state-matrix
+  result: pass
+  note: form error and saved states are the shared ones
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: builder disclosure, both public renderers, stylesheet
+- surface: docs
+  result: pass
+  evidence: VISUAL_FOUNDATION.md Hero image crop and phone image
+migrations: []
+findings:
+- 'P3 the first e2e run matched two fields for the label Hero image URL (the new Phone hero image URL contains it);
+  selectors made exact. No product change.'
+escalations: []
+limitations:
+- The crop is set with sliders and read back as numbers; clicking the picture to place the point and seeing
+  the crop at three widths is the organizer preview of PD-F004-B03-T07. Project cover art keeps a fixed centre crop.
+next: review

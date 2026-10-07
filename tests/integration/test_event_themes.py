@@ -173,3 +173,57 @@ def test_immersive_page_renders_with_its_art_and_removing_the_art_is_refused():
     assert 'data-hero-size="immersive"' in body
     assert f'class="cx-hero__image" src="{ART}"' in body
     assert body.count("<h1") == 1
+
+
+def test_focal_point_is_a_whole_percent_and_the_centre_means_no_setting():
+    cleaned = clean_theme_config({"banner_url": ART, "banner_focus_x": 20, "banner_focus_y": 100})
+    assert (cleaned["banner_focus_x"], cleaned["banner_focus_y"]) == (20, 100)
+    assert "banner_focus_x" not in clean_theme_config({"banner_url": ART, "banner_focus_x": 50})
+    for bad in (-1, 101, 12.5, "30", True, None):
+        with pytest.raises(ValidationError, match="whole number of percent"):
+            clean_theme_config({"banner_url": ART, "banner_focus_y": bad})
+
+
+def test_phone_image_is_a_safe_url_that_needs_the_hero_image():
+    ok = clean_theme_config({"banner_url": ART, "banner_mobile_url": ART + "?m=1"})
+    assert ok["banner_mobile_url"].endswith("?m=1")
+    with pytest.raises(ValidationError, match="add the hero image first"):
+        clean_theme_config({"banner_mobile_url": ART})
+    with pytest.raises(ValidationError, match="safe absolute"):
+        clean_theme_config({"banner_url": ART, "banner_mobile_url": "javascript:alert(1)"})
+    assert "banner_mobile_url" not in clean_theme_config(
+        {"banner_url": ART, "banner_mobile_url": ""}
+    )
+
+
+def test_public_page_and_payload_carry_the_focal_point_and_the_phone_image():
+    from django.test import Client
+    from presentation.models import PageBlock
+    from test_public_site import make_public_event_with_finalized_project
+
+    event, _, _ = make_public_event_with_finalized_project()
+    page = Page.objects.create(
+        event=event,
+        theme_config={
+            "banner_url": ART,
+            "banner_mobile_url": ART.replace("hero", "hero-phone"),
+            "banner_focus_x": 30,
+            "banner_focus_y": 70,
+        },
+    )
+    PageBlock.objects.create(page=page, kind="hero", config={"title": event.name})
+    body = Client().get(f"/e/{event.public_id}/").content.decode()
+    assert "--hero-focus-x:30%" in body and "--hero-focus-y:70%" in body
+    assert (
+        '<source media="(max-width: 48rem)" srcset="https://art.example.org/hero-phone.jpg">'
+        in body
+    )
+    public = Client().get(f"/api/v1/events/{event.public_id}/").json()["presentation"]
+    assert public["variables"]["--hero-focus-x"] == "30%"
+    assert public["banner_mobile_url"].endswith("hero-phone.jpg")
+    page.theme_config = {}
+    page.save()
+    body = Client().get(f"/e/{event.public_id}/").content.decode()
+    assert (
+        "--hero-focus-x:50%" in body and "<source" not in body
+    )  # nothing set: centre, no phone image

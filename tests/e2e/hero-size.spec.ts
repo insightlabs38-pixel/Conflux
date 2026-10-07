@@ -105,7 +105,7 @@ for (const width of [390, 1440]) {
     const size = page.getByLabel("Hero size", { exact: true });
     // opt-in: not selectable until there is art
     await expect(size.locator("option[value=immersive]")).toBeDisabled();
-    await page.getByLabel("Hero image URL").fill(ART);
+    await page.getByLabel("Hero image URL", { exact: true }).fill(ART);
     await expect(size.locator("option[value=immersive]")).toBeEnabled();
     await size.selectOption("immersive");
     await page.getByRole("button", { name: "Save appearance" }).click();
@@ -152,7 +152,7 @@ for (const width of [390, 1440]) {
 
     // back to the default so the fixture is left as found
     await size.selectOption("compact");
-    await page.getByLabel("Hero image URL").fill("");
+    await page.getByLabel("Hero image URL", { exact: true }).fill("");
     await page.getByRole("button", { name: "Save appearance" }).click();
     await expect(page.getByText("Event appearance saved.")).toBeVisible();
   });
@@ -226,6 +226,84 @@ test("a long hero title wraps inside the compact band and the action stays above
     await page.request.patch(url, { data: { config: hero.config } });
   }
 });
+
+// PD-F004-B03-T06: image focal point and a phone image. Set through the form (a disclosure under the
+// brand settings), stored as whole percents, drawn as the crop's object-position, and the phone image
+// is what the browser picks on a phone.
+const PHONE = "https://art.example.org/hero-phone.png";
+for (const width of [390, 1440]) {
+  test(`the focal point sets the crop and a phone image replaces the art on a phone at ${width}`, async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+    for (const url of [ART, PHONE])
+      await page
+        .context()
+        .route(url, (route) =>
+          route.fulfill({ contentType: "image/png", body: PNG }),
+        );
+    await page.setViewportSize({ width, height: 900 });
+    await signIn(page, "organizer");
+    const { event } = await eventIds(page);
+    await page.goto("/app/");
+    await openWorkspace(page);
+    await chooseWorkspaceEvent(page);
+    await goToDestination(page, "setup");
+    await goToTask(page, "Public page");
+    await page.getByRole("tab", { name: /^Appearance/ }).click();
+    await settled(page);
+
+    await page.getByLabel("Hero image URL", { exact: true }).fill(ART);
+    const crop = page.locator("details.cx-theme-art");
+    await expect(crop).not.toHaveAttribute("open", ""); // advanced: closed until asked for
+    await crop.locator("summary").click();
+    await crop.getByLabel("Phone hero image URL").fill(PHONE);
+    await crop.getByLabel("Focal point, left to right").fill("30");
+    await crop.getByLabel("Focal point, top to bottom").fill("70");
+    await expect(crop.getByText("30% from the left")).toBeVisible();
+    await page
+      .getByLabel("Hero size", { exact: true })
+      .selectOption("immersive");
+    await page.getByRole("button", { name: "Save appearance" }).click();
+    await expect(page.getByText("Event appearance saved.")).toBeVisible();
+
+    const site = await page.context().newPage();
+    await site.setViewportSize({ width, height: 900 });
+    await site.goto(`/e/${event}/`);
+    await site.waitForLoadState("networkidle");
+    const art = await site.evaluate(() => {
+      const img = document.querySelector<HTMLImageElement>(".cx-hero__image")!;
+      return {
+        position: getComputedStyle(img).objectPosition,
+        source: img.currentSrc,
+        height: img.getBoundingClientRect().height,
+      };
+    });
+    expect(art.position).toBe("30% 70%");
+    expect(art.source).toBe(width < 768 ? PHONE : ART);
+    expect(art.height).toBeLessThanOrEqual(width < 768 ? 120 : 352);
+    await noHorizontalOverflow(site);
+    await accessible(site);
+    await site.close();
+
+    // a refused crop says why and keeps the draft; the saved page is not changed
+    await crop.getByLabel("Phone hero image URL").fill("javascript:alert(1)");
+    await page.getByRole("button", { name: "Save appearance" }).click();
+    await expect(page.getByRole("alert")).toContainText("safe absolute");
+    await page.reload();
+    await page.getByRole("tab", { name: /^Appearance/ }).click();
+    await page.locator("details.cx-theme-art summary").click();
+    await expect(page.getByLabel("Phone hero image URL")).toHaveValue(PHONE);
+
+    // restore the default so the fixture is left as found
+    await page.getByLabel("Hero size", { exact: true }).selectOption("compact");
+    await page.getByLabel("Hero image URL", { exact: true }).fill("");
+    await page.getByLabel("Phone hero image URL").fill("");
+    await page.getByRole("button", { name: "Centre the crop" }).click();
+    await page.getByRole("button", { name: "Save appearance" }).click();
+    await expect(page.getByText("Event appearance saved.")).toBeVisible();
+  });
+}
 
 // PD-F004-B03-T05: an event-specific lead replaces the hero. It is added through the page builder, its
 // action link is checked by the server, and the public page shows one h1 with no default hero.

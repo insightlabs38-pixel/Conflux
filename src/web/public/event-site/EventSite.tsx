@@ -41,6 +41,7 @@ type PublicEvent = {
     project_card: string;
     logo_url?: string;
     banner_url?: string;
+    banner_mobile_url?: string;
     variables: Record<string, string>;
   };
   tracks: Track[];
@@ -123,13 +124,21 @@ export function EventSite({ eventId }: { eventId: string }) {
                   {schedule && <p>{schedule}</p>}
                 </div>
                 {event.presentation?.banner_url ? (
-                  <img
-                    className="cx-hero__image"
-                    src={event.presentation.banner_url}
-                    alt=""
-                    width={960}
-                    height={640}
-                  />
+                  <picture className="cx-hero__art">
+                    {event.presentation.banner_mobile_url && (
+                      <source
+                        media="(max-width: 48rem)"
+                        srcSet={event.presentation.banner_mobile_url}
+                      />
+                    )}
+                    <img
+                      className="cx-hero__image"
+                      src={event.presentation.banner_url}
+                      alt=""
+                      width={960}
+                      height={640}
+                    />
+                  </picture>
                 ) : (
                   <div className="cx-hero__identity" aria-hidden="true">
                     <span>{Array.from(event.name)[0]}</span>

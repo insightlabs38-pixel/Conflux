@@ -21,6 +21,11 @@ ENUMS = {
     "project_card": ("visual", "compact"),
 }
 DEFAULTS = {key: values[0] for key, values in ENUMS.items()}
+# Hero art direction (PD-F004-B03-T06): where the picture is cropped from, as a percentage from the
+# left and the top (the CSS object-position), and an optional picture used instead on a phone.
+FOCUS_KEYS = {"banner_focus_x", "banner_focus_y"}
+URL_KEYS = {"logo_url", "banner_url", "banner_mobile_url"}
+FOCUS_DEFAULT = 50
 PRESETS = {
     "technical": {
         "typography": "technical",
@@ -51,7 +56,7 @@ PRESETS = {
 
 def clean_theme_config(value, theme="default"):
     if not isinstance(value, dict) or set(value) - (
-        set(ENUMS) | {"accent", "logo_url", "banner_url"}
+        set(ENUMS) | URL_KEYS | FOCUS_KEYS | {"accent"}
     ):
         raise ValidationError(
             {"theme_config": "Use only supported brand and presentation settings."}
@@ -60,9 +65,15 @@ def clean_theme_config(value, theme="default"):
     for key, choices in ENUMS.items():
         if key in result and result[key] not in choices:
             raise ValidationError({"theme_config": f"Unsupported {key} preset."})
-    for key in ("logo_url", "banner_url"):
-        if key not in result:
-            continue
+    for key in sorted(FOCUS_KEYS & set(result)):
+        number = result[key]
+        if isinstance(number, bool) or not isinstance(number, int) or not 0 <= number <= 100:
+            raise ValidationError(
+                {"theme_config": f"{key} is a whole number of percent from 0 to 100."}
+            )
+        if number == FOCUS_DEFAULT:
+            result.pop(key)  # the centre is what no setting means
+    for key in sorted(URL_KEYS & set(result)):
         url = result[key]
         if not isinstance(url, str) or len(url) > 2048:
             raise ValidationError({"theme_config": f"Invalid {key}."})
@@ -88,6 +99,13 @@ def clean_theme_config(value, theme="default"):
             {
                 "theme_config": "The immersive hero is built around artwork: add a hero image URL "
                 "first, or choose compact or standard."
+            }
+        )
+    if result.get("banner_mobile_url") and not result.get("banner_url"):
+        raise ValidationError(
+            {
+                "theme_config": "A phone image is an alternative to the hero image: "
+                "add the hero image first."
             }
         )
     if "accent" in result:
@@ -117,7 +135,12 @@ def resolved_theme(page):
     settings["accent"] = accent
     colors = THEME_COLORS.get(theme, THEME_COLORS["default"])
     tint = _accent_tint(accent, colors["surface"])
+    focus = {
+        f"--hero-focus-{axis}": f"{config.get(f'banner_focus_{axis}', FOCUS_DEFAULT)}%"
+        for axis in ("x", "y")
+    }
     settings["variables"] = {
+        **focus,
         # v3 names: what new CSS reads. The legacy --color-* names resolve from these in the
         # stylesheet; they are listed too so clients that already apply them keep working.
         "--accent": accent,

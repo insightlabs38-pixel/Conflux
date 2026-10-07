@@ -50,7 +50,7 @@ it("saves mode and constrained settings together and retains the draft on reject
     "Event appearance saved.",
   );
   expect(host.querySelector("a")?.getAttribute("href")).toBe("/e/event/");
-  expect(host.querySelectorAll("label").length).toBe(12);
+  expect(host.querySelectorAll("label").length).toBe(15);
   await act(async () => root.unmount());
   host.remove();
 });
@@ -120,6 +120,70 @@ it("offers the immersive hero once a hero image URL is set", async () => {
   expect(
     size.querySelector<HTMLOptionElement>('[value="immersive"]')?.disabled,
   ).toBe(false);
+  await act(async () => root.unmount());
+  host.remove();
+});
+
+it("keeps the crop controls behind a disclosure, saves a focal point as numbers and can centre it again", async () => {
+  const host = document.createElement("div");
+  document.body.appendChild(host);
+  const root = createRoot(host);
+  const save = vi.fn().mockResolvedValue(undefined);
+  await act(async () =>
+    root.render(
+      <ThemeSettings
+        theme="default"
+        config={{ banner_url: "https://art.example.org/hero.jpg" }}
+        eventId="event"
+        onSave={save}
+      />,
+    ),
+  );
+  const details = host.querySelector("details.cx-theme-art")!;
+  expect(details.hasAttribute("open")).toBe(false); // advanced: closed by default
+  const slider = (name: string) =>
+    [...host.querySelectorAll("label")]
+      .find((label) => label.textContent === name)
+      ?.closest("div")
+      ?.querySelector("input") as HTMLInputElement;
+  const horizontal = slider("Focal point, left to right");
+  expect(horizontal.type).toBe("range");
+  expect(horizontal.value).toBe("50");
+  const set = async (input: HTMLInputElement, value: string) =>
+    act(async () => {
+      Object.getOwnPropertyDescriptor(
+        HTMLInputElement.prototype,
+        "value",
+      )!.set!.call(input, value);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+  await set(horizontal, "30");
+  await set(slider("Focal point, top to bottom"), "70");
+  const submit = () =>
+    act(async () =>
+      host
+        .querySelector("form")!
+        .dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true }),
+        ),
+    );
+  await submit();
+  expect(save).toHaveBeenLastCalledWith("default", {
+    banner_url: "https://art.example.org/hero.jpg",
+    banner_focus_x: 30,
+    banner_focus_y: 70,
+  });
+  await act(async () =>
+    [...host.querySelectorAll("button")]
+      .find((button) => button.textContent === "Centre the crop")!
+      .click(),
+  );
+  await submit();
+  expect(save).toHaveBeenLastCalledWith("default", {
+    banner_url: "https://art.example.org/hero.jpg",
+    banner_focus_x: 50,
+    banner_focus_y: 50,
+  });
   await act(async () => root.unmount());
   host.remove();
 });

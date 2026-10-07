@@ -1,0 +1,80 @@
+version: 3
+task: PD-F005-B01-T06
+batch: PD-F005-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: a3b2e16
+  head_commit: null
+changed_paths:
+- src/web/lib/searchTargets.json
+- src/web/lib/searchTargets.ts
+- src/web/hooks/useGlobalSearch.ts
+- src/web/components/SearchDialog.tsx
+- src/web/components/SearchDialog.test.tsx
+- src/web/components/Modal.tsx
+- src/web/components/AppShell.tsx
+- src/web/styles/components.css
+- tests/integration/test_search_targets.py
+- tests/e2e/global-search.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Global entity search through the canonical query layer
+  result: pass
+  evidence: the header Search opens a dialog (accessible combobox and listbox, arrow keys and Enter, Escape) that finds places and events by name for every role and, for roles whose own entity catalogue offers them, the records of the selected event - each entity asked once with a contains filter on its label field through the universal query engine (QUERY primitive, GET entities/{key}/), at most five hits per entity, grouped under the entity's name with a second field beside the title. Typing is debounced (200 ms), reads go through the server-state layer (a newer query cancels the one in flight, a repeated query is cached), and a hit opens at its view and section through routes.target with the event; the typed text never enters a URL.
+- item: Diagnostics and next action
+  result: pass
+  evidence: the status line says Type to search, the two-character minimum, Searching, No results for the text, Choose an event to search its records (organizer and admin with no event), Showing the first few of each, and names an entity that could not be searched while the others still answer
+- item: Authorization stays with the server and a new entity forces a decision
+  result: pass
+  evidence: a judge's catalogue is empty so no record read is made (browser test asserts no entity query is sent for participant-01 or judge-01); tests/integration/test_search_targets.py fails when a registered entity has no entry in src/web/lib/searchTargets.json (read by both the app and the test), when an entry's fields do not exist or the label cannot be searched with contains, or when its view is not an organizer destination
+invariants:
+- item: No new endpoint, entity, table or second search; the typed text is not stored
+  result: pass
+  evidence: web only; the two registered entities (projects, applications) are the only record sources; nothing is saved on the device
+- item: No test weakened
+  result: pass
+  evidence: the first design used an effect-based fetch and tripped the repository's server-state ratchet (lib/serverState.test.ts), so the hook was rebuilt on useQueries and useEntityCatalogue rather than the ratchet being widened
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 136 files, 744 tests (SearchDialog 5 - role scoping, grouped records with the exact query sent, opening a hit at its view and section with no typed text in the URL, no results, one failed entity, no event chosen, two-character minimum)
+- command: pytest tests/integration/test_search_targets.py
+  result: pass
+  note: 3 passed (env as in the Makefile)
+- command: npx playwright test -c tests/e2e/playwright.config.ts global-search account-menu event-switcher shell-responsive workspace-shell visual-foundation uiv2-gate slop-audit roles routing --project=desktop --workers=4
+  result: pass
+  note: 201 passed on the rebuilt stack; global-search spec 5 - an organizer finds a seeded project at 1440 and 390, the dialog stays inside the viewport and passes axe, Enter opens /participants with event and section ProjectsGrid and the Projects tab selected, places and no-results, Escape returns focus to Search, participant and judge are offered no record search
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: global entity search with a listbox overlay near the top; the board's palette is the same overlay once T05 adds commands to it
+- ref: design/state-matrix
+  result: pass
+  note: S-LOAD, S-EMPTY, S-ERR in the status line
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit, component, accessibility and browser tests
+- surface: search
+  result: pass
+  evidence: the search surface of the matrix is this task - fan-out over the entity catalogue, held to the registry by test_search_targets
+- surface: docs
+  result: pass
+  evidence: contract in spec 005; release note at T91
+migrations: []
+findings:
+- P2 found while testing - Modal took an autofocused field for its opener, so closing never returned focus to the button that opened it; it now reads the opener at first render. This fixes every dialog that uses Modal (consequence and bulk planner), recorded here because it is a shared component change.
+- P3 a hit opens the list that holds the record (Projects, Registration), not the record, because no record route or selection param exists yet; the side inspector (B02-T06) is where that lands.
+- P3 the record search is organizer and admin only because the entity catalogue is; participants and judges search places and events.
+escalations:
+- ESC-20260930-007
+limitations:
+- Only projects and applications are searchable today (the registered entities); teams, people and others join by registering an entity with its feature, manifest and search claims, and an entry in searchTargets.json.
+- A hit does not filter or highlight the target list.
+next: review

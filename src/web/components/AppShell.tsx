@@ -14,6 +14,7 @@ import {
 } from "../lib/shellPreferences";
 import { EventSwitcher } from "./EventSwitcher";
 import { InboxCenter } from "./InboxCenter";
+import { SearchButton } from "./SearchDialog";
 import { SkipLink } from "./SkipLink";
 import { Icon, type IconName } from "./Icon";
 
@@ -168,6 +169,7 @@ export function AppShell({
             {nav}
           </nav>
         )}
+        {destinations && <SearchButton />}
         {destinations && <InboxCenter />}
         {destinations && (
           <details

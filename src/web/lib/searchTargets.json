@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "noun": "Project",
+    "nouns": "Projects",
+    "labelField": "name",
+    "detailField": "track",
+    "view": "participants",
+    "section": "ProjectsGrid"
+  },
+  "applications": {
+    "noun": "Application",
+    "nouns": "Applications",
+    "labelField": "username",
+    "detailField": "status",
+    "view": "participants",
+    "section": "RegistrationPanel"
+  }
+}

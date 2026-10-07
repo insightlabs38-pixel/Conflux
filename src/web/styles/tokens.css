@@ -35,18 +35,33 @@
   --mute-tint: #eef0f3;
   --mute-line: #cfd4db;
 
+  /* type (v3): Plex first, system stack as fallback; sizes in rem equal to the design's px at a 16px root */
+  --font-sans:
+    "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
   --font-mono:
-    ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
-  --font-size-xs: 0.75rem;
-  --font-size-2xl: 2.25rem;
-  --font-size-display: clamp(2.5rem, 5vw, 4.5rem);
+    "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-read: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  --fs-11: 0.6875rem;
+  --fs-12: 0.75rem;
+  --fs-13: 0.8125rem;
+  --fs-14: 0.875rem;
+  --fs-16: 1rem;
+  --fs-20: 1.25rem;
+  --fs-24: 1.5rem;
+  --fs-32: 2rem;
+  /* public page titles: fluid between two steps of the scale, never beyond them */
+  --fs-display: clamp(var(--fs-24), 4vw, var(--fs-32));
+  --lh-tight: 1.25;
+  --lh-ui: 1.4;
+  --lh-read: 1.65;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
-  --font-weight-bold: 700;
-  --line-height-tight: 1.15;
-  --line-height-body: 1.55;
-  --line-height-code: 1.65;
+  /* Plex is loaded at 400/500/600 only, so bold is semibold */
+  --font-weight-bold: var(--font-weight-semibold);
+  --line-height-tight: var(--lh-tight);
+  --line-height-body: var(--lh-ui);
+  --line-height-code: var(--lh-read);
   --space-10: 2.5rem;
   --space-12: 3rem;
   --space-16: 4rem;
@@ -80,12 +95,6 @@
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 10px;
-
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-size-sm: 0.875rem;
-  --font-size-md: 1rem;
-  --font-size-lg: 1.25rem;
-  --font-size-xl: 1.75rem;
 
   --header-height: 3.5rem;
   --shadow-sm: 0 1px 2px rgba(22, 32, 43, 0.08);

@@ -61,3 +61,71 @@ def test_solid_saturated_fills_stay_on_actions_and_state_markers():
 def test_ratchet_names_a_new_decorative_fill():
     sample = ".cx-card--promo { background: var(--color-accent); }"
     assert [sel for sel, body in rules(sample) if SOLID.search(body)] == [".cx-card--promo"]
+
+
+# Decorative glyphs of the public hero and project cover (a letter or monogram, not text). The hero
+# redesign (PD-F004-B02/B03) replaces them; until then they are the only literal sizes.
+GLYPH_SIZES = {
+    "styles/presentation.css": {
+        ".cx-hero__identity span",
+        '.cx-event-site[data-hero="poster"] .cx-hero__identity span',
+        ".cx-project-cover",
+        ".cx-project-card__cover, .cx-project-cover",
+    },
+}
+FONT_SIZE = re.compile(r"font-size:\s*([^;]+);")
+SCALE = re.compile(r"var\(--fs-(11|12|13|14|16|20|24|32|display)\)")
+
+
+def declarations(text, prop):
+    """Yield (selector, value) for `prop` in every rule, including rules inside @media."""
+    text = re.sub(r"/\*.*?\*/", "", text, flags=re.S)
+    for match in re.finditer(r"([^{}]+)\{([^{}]*)\}", text):
+        selector = " ".join(match.group(1).split()).split("}")[-1].strip()
+        for value in re.findall(prop + r":\s*([^;]+);", match.group(2)):
+            yield selector, value.strip()
+
+
+def test_every_font_size_comes_from_the_type_scale():
+    for sheet in SHEETS:
+        if sheet.name == "tokens.css":
+            continue
+        rel = str(sheet.relative_to(WEB))
+        for selector, value in declarations(sheet.read_text(), "font-size"):
+            if selector in GLYPH_SIZES.get(rel, set()):
+                continue
+            assert SCALE.fullmatch(value) or value in ("inherit", "100%", "1em"), (
+                rel,
+                selector,
+                value,
+            )
+
+
+def test_legacy_font_size_names_are_gone_and_weights_stay_on_plex_steps():
+    for sheet in SHEETS:
+        text = sheet.read_text()
+        assert "--font-size-" not in text, sheet.name
+        for _, value in declarations(text, "font-weight"):
+            assert value in (
+                "var(--font-weight-normal)",
+                "var(--font-weight-medium)",
+                "var(--font-weight-semibold)",
+                "var(--font-weight-bold)",
+                "inherit",
+                "500",
+                "600",
+            ), (sheet.name, value)
+
+
+def test_application_headings_stay_at_or_below_20px():
+    text = (WEB / "styles/components.css").read_text()
+    sizes = dict(
+        (sel, val)
+        for sel, val in declarations(text, "font-size")
+        if sel.startswith(".cx-shell :where(h")
+    )
+    assert sizes == {
+        ".cx-shell :where(h1)": "var(--fs-20)",
+        ".cx-shell :where(h2)": "var(--fs-16)",
+        ".cx-shell :where(h3)": "var(--fs-14)",
+    }

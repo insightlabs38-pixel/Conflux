@@ -13,6 +13,7 @@
     "uiv2-gate",
     "uiv2-surfaces",
     "url-state",
+    "visual-foundation",
     "workspace-shell"
   ],
   "self-isolating": ["auth-states", "fixture-isolation"],

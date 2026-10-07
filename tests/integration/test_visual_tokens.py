@@ -92,3 +92,23 @@ def test_a_custom_accent_gets_a_tint_that_keeps_it_readable():
     assert variables["--accent"] == "#6b4fb3"
     assert variables["--accent-tint"] != "#ffffff"
     assert contrast_ratio("#6b4fb3", variables["--accent-tint"]) >= 4.5
+
+
+def px(value):
+    value = value.strip()
+    return float(value[:-3]) * 16 if value.endswith("rem") else float(value[:-2])
+
+
+def test_type_scale_equals_the_design_in_px():
+    scale = {int(k[5:]): px(v) for k, v in LIGHT.items() if re.fullmatch(r"--fs-\d+", k)}
+    assert sorted(scale) == DESIGN["type_scale_px"]
+    assert all(scale[size] == size for size in scale)
+    for name in ("lh-tight", "lh-ui", "lh-read"):
+        assert LIGHT["--" + name] == DESIGN["light"]["--" + name]
+    for name in ("font-sans", "font-mono", "font-read"):
+        assert LIGHT["--" + name].split(",")[0] == DESIGN["light"]["--" + name].split(",")[0]
+    assert "system-ui" in LIGHT["--font-sans"], "public pages assert a system fallback"
+
+
+def test_display_size_stays_inside_the_scale():
+    assert LIGHT["--fs-display"] == "clamp(var(--fs-24), 4vw, var(--fs-32))"

@@ -1,0 +1,91 @@
+version: 3
+task: PD-F004-B01-T04
+batch: PD-F004-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: '7172864'
+  head_commit: null
+changed_paths:
+- src/web/styles/tokens.css
+- src/web/styles/components.css
+- src/web/styles/presentation.css
+- src/web/features/api-explorer/explorer.css
+- tests/integration/test_visual_tokens.py
+- tests/test_visual_ratchets.py
+- tests/e2e/visual-foundation.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Strong typography scale with fewer arbitrary font sizes, through the canonical token layer
+  result: pass
+  evidence: tokens.css defines --fs-11/12/13/14/16/20/24/32 (rem equal to the design px), --lh-*, the
+    Plex-first font stacks and --font-read; every font-size in components.css, presentation.css and feature
+    css is var(--fs-*) except three named decorative hero/cover glyph selectors; the 7 legacy --font-size-*
+    names are removed outright (no alias remains); weights are 400/500/600 (bold is semibold)
+- item: Application headings follow the contract (page title at most 20px)
+  result: pass
+  evidence: .cx-shell h1/h2/h3 = 20/16/14px, panel and stat figures moved to the scale; asserted by a
+    ratchet and by computed style on three role overviews
+- item: Observable diagnostics for drift
+  result: pass
+  evidence: 'ratchets fail with file, selector and value; the e2e spec reports each off-scale element
+    as size, tag.class and text (negative proved by removing the 14px step: 26 elements reported)'
+invariants:
+- item: One canonical source of truth
+  result: pass
+  evidence: type values live only in tokens.css; test_type_scale_equals_the_design_in_px compares them
+    with design tokens.json
+- item: Accessibility preserved
+  result: pass
+  evidence: browser zoom and user font size still scale (rem); axe and no-overflow gates in public/foundations
+    passed at 390 and 1440; the public body stack keeps system-ui
+- item: No test weakened
+  result: pass
+  evidence: no existing assertion edited; new ratchets only add checks
+verification:
+- command: uv run --frozen pytest tests/test_visual_ratchets.py tests/integration/test_visual_tokens.py
+    tests/test_design_manifest.py tests/test_e2e_tiers.py -q
+  result: pass
+  note: all passed (3 preset-on-dark skips by design)
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 658 passed
+- command: docker compose up -d --build app; npx playwright test -c tests/e2e/playwright.config.ts visual-foundation
+    --project=desktop
+  result: pass
+  note: 8 passed at 390 and 1440 for organizer, participant, judge overviews and a public event page
+- command: npx playwright test -c tests/e2e/playwright.config.ts public foundations --project=desktop
+    --project=mobile; python3 scripts/e2e-tiers smoke
+  result: pass
+  note: 25 passed, 9 skipped by project guards; smoke 16 passed
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-TYPE-1/2 type scale, line heights, page-title cap, weights
+- ref: design/state-matrix
+  result: pass
+  note: not affected by this task
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: stylesheets and tokens
+- surface: docs
+  result: pass
+  evidence: contract in spec 004; font hosting default logged in QUESTIONS.md
+migrations: []
+findings:
+- P3 public hero poster/editorial glyphs (6-12rem monogram) and the project cover monogram stay literal
+  sizes on an explicit allowlist until PD-F004-B02/B03 redesign the hero; the hero h1 now uses --fs-display
+  (24-32px fluid) instead of up to 72px
+escalations: []
+limitations:
+- Plex and Source Serif 4 are named first in the stacks but no font binaries ship (QUESTIONS.md, default
+  A); hosts without them render the system fallback. --font-read is defined but not yet applied to public
+  long-form text (public project page work).
+- Visual effect on public sites: hero titles are smaller than before by design (V-TYPE-2).
+next: review

@@ -68,7 +68,7 @@
 .cx-api-operation code,
 .cx-api-endpoint code {
   font-family: var(--font-mono);
-  font-size: var(--font-size-sm, 0.875rem);
+  font-size: var(--fs-14);
   overflow-wrap: anywhere;
 }
 .cx-method {
@@ -77,7 +77,7 @@
   padding: 0.1rem var(--space-2);
   border-radius: var(--radius-sm);
   font-family: var(--font-mono);
-  font-size: var(--font-size-xs);
+  font-size: var(--fs-12);
   font-weight: var(--font-weight-bold);
   text-align: center;
   color: var(--color-info);
@@ -108,7 +108,7 @@
 }
 .cx-api-auth {
   margin-left: auto;
-  font-size: var(--font-size-xs);
+  font-size: var(--fs-12);
   color: var(--color-text-muted);
 }
 .cx-api-auth[data-mode="bearer"] {
@@ -132,7 +132,7 @@
 .cx-code,
 .cx-code-input {
   font-family: var(--font-mono);
-  font-size: var(--font-size-sm, 0.875rem);
+  font-size: var(--fs-14);
   line-height: var(--line-height-code);
 }
 .cx-code {

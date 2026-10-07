@@ -33,7 +33,8 @@ export type SlopRule =
   | "pills"
   | "nestedCards"
   | "repeatedLabels"
-  | "hiddenActions";
+  | "hiddenActions"
+  | "recordGrids";
 
 export async function slopProblems(page: Page, rules: SlopRule[]) {
   return page.evaluate((wanted) => {
@@ -254,6 +255,42 @@ export async function slopProblems(page: Page, rules: SlopRule[]) {
       }
       for (const menu of document.querySelectorAll('main [role="menu"]'))
         if (shown(menu)) add("hiddenActions", `a menu popup in ${name(menu)}`);
+    }
+
+    if (wanted.includes("recordGrids")) {
+      // records the organizer works through (people, projects, submissions) are rows of a sortable
+      // table, not a grid of boxed items three across (V-SLOP-14). kpiCards catches boxed blocks;
+      // this catches list items and articles laid out in columns. Only the application: the public
+      // gallery is browsing and its cards are the content.
+      const boxedItem = (el: Element) => {
+        const style = getComputedStyle(el);
+        return (
+          parseFloat(style.borderTopWidth) > 0 ||
+          parseFloat(style.borderLeftWidth) > 0 ||
+          filled(style.backgroundColor)
+        );
+      };
+      for (const parent of all) {
+        if (!parent.closest("main") || parent.closest(".cx-event-site"))
+          continue;
+        const kids = [...parent.children].filter(
+          (kid) =>
+            shown(kid) &&
+            kid.matches("li, article") &&
+            boxedItem(kid) &&
+            kid.getBoundingClientRect().width >= 140,
+        );
+        if (kids.length < 3) continue;
+        const tops = kids.map((kid) =>
+          Math.round(kid.getBoundingClientRect().top),
+        );
+        const across = kids.filter((_, i) => Math.abs(tops[i] - tops[0]) <= 2);
+        if (across.length >= 3)
+          add(
+            "recordGrids",
+            `${across.length} boxed items across in ${name(parent)}`,
+          );
+      }
     }
 
     if (wanted.includes("kpiCards")) {

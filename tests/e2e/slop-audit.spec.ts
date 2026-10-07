@@ -22,6 +22,7 @@ const RULES: SlopRule[] = [
   "nestedCards",
   "repeatedLabels",
   "hiddenActions",
+  "recordGrids",
 ];
 
 const SETUP_TASKS = [
@@ -289,3 +290,48 @@ test("the audit sees actions hidden behind three dots", async ({
   const found = await slopProblems(page, ["hiddenActions"]);
   expect(found.hiddenActions).toHaveLength(3);
 });
+
+test("the audit sees boxed records laid out three across", async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await open(page, "organizer");
+  await goToDestination(page, "participants");
+  await settled(page);
+  await page.evaluate(() => {
+    const list = document.createElement("ul");
+    list.style.cssText =
+      "display:grid;grid-template-columns:repeat(3,1fr);gap:8px;list-style:none;padding:0";
+    list.innerHTML = [1, 2, 3]
+      .map(
+        (n) =>
+          `<li style="border:1px solid #888;padding:8px;height:40px">Person ${n}</li>`,
+      )
+      .join("");
+    document.querySelector("main")!.prepend(list);
+  });
+  const found = await slopProblems(page, ["recordGrids"]);
+  expect(found.recordGrids).toHaveLength(1);
+});
+
+// The work the organizer does record by record (registrations, projects) is a sortable table, not a
+// grid of boxed items (V-SLOP-14). Reference tables (permissions, extensions, completeness) are read,
+// not worked through, and are the recorded exception.
+for (const width of [390, 1440])
+  for (const task of ["Registration", "Projects"])
+    test(`organizer ${task} are rows of a sortable table at ${width}`, async ({
+      page,
+    }, info) => {
+      test.skip(info.project.name !== "desktop", "explicit viewport matrix");
+      await page.setViewportSize({ width, height: 900 });
+      await open(page, "organizer");
+      await goToDestination(page, "participants");
+      await goToTask(page, task);
+      await settled(page);
+      await stable(page);
+      const table = page.locator("main table").first();
+      await expect(table.locator("tbody tr").nth(9)).toBeAttached();
+      await expect(table.locator("th[aria-sort]").first()).toBeAttached();
+      expect(await slopProblems(page, ["recordGrids", "kpiCards"])).toEqual({});
+    });

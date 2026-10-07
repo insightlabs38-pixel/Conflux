@@ -1,0 +1,67 @@
+version: 3
+task: PD-F004-B05-T01
+batch: PD-F004-B05
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: c491adb
+  head_commit: null
+changed_paths:
+- tests/e2e/slop.ts
+- tests/e2e/slop-audit.spec.ts
+deliverables:
+- item: Rule encoded in the visual audit contract
+  result: pass
+  evidence: 'live rule recordGrids (V-SLOP-14) in tests/e2e/slop.ts, enabled in RULES of slop-audit.spec.ts: three
+    or more boxed li or article items laid out across one row in the application are a card grid of records and
+    fail (kpiCards from B04 already catches boxed blocks). Positive proof that the record work itself is a table:
+    organizer Registration and Projects are tables of at least ten rows with sortable headers (th aria-sort) at
+    390 and 1440.'
+- item: Rule applied to the approved reference surfaces, exceptions recorded
+  result: pass
+  evidence: 'every audited page passes without a product change (the DataGrid from PD-F002-B01 already carries registrations
+    and projects). Recorded exception with rationale: reference tables that are read, not worked through, are not
+    sortable today (permissions matrix 485 rows, extensions 14, completeness 15, judge workload 6, on-site 4 and
+    9, review queue 2).'
+- item: No product behavior added for the guardrail
+  result: pass
+  evidence: test-only change unless stated above
+invariants:
+- item: The gate can fail
+  result: pass
+  evidence: self-test 'the audit sees boxed records laid out three across' injects a three-column list of boxed
+    items and expects one finding
+- item: No test weakened
+  result: pass
+  evidence: a rule and a self-test were added; nothing removed or loosened
+verification:
+- command: npx playwright test slop-audit --project=desktop --workers=4
+  result: pass
+  note: 68 passed in 1.0 min for the audit pages and self-tests; the 4 new sortable-table tests plus the self-test
+    passed (7.5 s)
+design_refs:
+- ref: design/system-v3
+  result: pass
+  note: V-SLOP-14
+- ref: design/state-matrix
+  result: pass
+  note: states untouched
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: live audit
+- surface: docs
+  result: pass
+  evidence: spec 004 contract at T91
+migrations: []
+findings:
+- P3 reference tables with ten or more rows are not sortable (permissions matrix, extensions, completeness); sorting
+  them is a product decision, not a guardrail fix, and is left to the owner.
+escalations: []
+limitations:
+- Dialogs, open disclosures and per-record detail views are not walked by the audit.
+next: review

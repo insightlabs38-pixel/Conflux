@@ -199,6 +199,17 @@ No migration. Two small additive API changes (OpenAPI and both SDKs regenerated)
 - **On a phone** the brand word hides so the event switcher keeps its room; the browser suite's `goToDestination` is unchanged.
 - Integrators: scripts that read the event lists will now see `phase`; clients that list a person's memberships may see several rows for one workspace (one per role), as before.
 
+## Moving to a build with the second slice of the data grid (PD-F006-B02)
+
+No migration. Two more additive optional parameters on the entity query (`group`, `subgroup`, with `groupable` in the catalogue; OpenAPI and both SDKs regenerated), carried by the CLI and the MCP tool.
+
+- **Narrow screens**: on a phone the header becomes a bar above the rows (Select page, sort buttons); from 641 to 1023px a wide list keeps its select box and name column while it scrolls sideways.
+- **Filters**: nested groups (Add group), operators worded and entered by type (date and number boxes, ranges as two boxes, several enum values as checkboxes); a filter with a refused value is explained beside its condition.
+- **Saved views**: Reset, who can see a view, pinned views first in the picker, a conflict reloads the view; views may carry a grouping.
+- **Links**: a filter whose values are all structured is in the address (`f_<entity>`) and opens the same list; a filter with text is not, and the page says to save a view.
+- **Group by** (and Then by): collapsible groups with counts, each opening its rows; selection and bulk actions are in the flat list.
+- Integrators: older builds ignore `group_`, `then_` and `f_` params; a view saved with `group` is refused by a build that does not know it.
+
 ## Moving to a build with the first slice of the data grid (PD-F006-B01)
 
 No migration. One additive API parameter (`search` on the entity query, with `search_fields` in the catalogue; OpenAPI and both SDKs regenerated) and one new CLI command group and MCP tool that call existing routes.

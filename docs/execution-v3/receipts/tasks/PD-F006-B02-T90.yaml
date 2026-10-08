@@ -1,0 +1,85 @@
+version: 3
+task: PD-F006-B02-T90
+batch: PD-F006-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: f49dac5
+  head_commit: null
+changed_paths:
+- docs/verification/PD-F006-B02/MATRIX.md
+- docs/verification/PD-F006-B02/T90-verify-fast.log
+- docs/verification/PD-F006-B02/T90-e2e-fast.log
+- tests/e2e/grid-sticky-header.spec.ts
+deliverables:
+- item: Verification matrix for the eight capability tasks
+  result: pass
+  evidence: docs/verification/PD-F006-B02/MATRIX.md links T01-T08 to unit, browser and negative proofs and to each product change
+- item: Positive, negative, authorization, lifecycle cases
+  result: pass
+  evidence: the matrix and its cross-cutting section - groups tested inside the entity's own rows and roles, saved-view rules unchanged, definitions carry group and search only when used, links checked against the catalogue and refused whole
+- item: UI states
+  result: pass
+  evidence: desktop and the 390 mobile project for every spec or the reason it is desktop only; loading, empty, refused, truncated, conflict and pinned states in unit or browser tests; axe on each surface
+- item: Exact commands and results recorded
+  result: pass
+  evidence: T90-verify-fast.log and T90-e2e-fast.log
+invariants:
+- item: No gate weakened
+  result: pass
+  evidence: no assertion, timeout or budget loosened; earlier assertions that encoded limits this batch lifts were updated with the same intent and are named in the matrix
+verification:
+- command: make verify-fast
+  result: pass
+  note: run alone - format, ruff, 2978 pytest passed (34 skipped), 859 vitest in 152 files, build, openapi, sdk and block-schema checks
+- command: make e2e-fast
+  result: pass
+  note: run alone after verify-fast on the final code - read-only ok (359 passed), every isolated spec ok including saved-views-flow and bulk-planner, the canary chain ok. The first run of the same command failed one read-only test (an axe colour-contrast flag on the existing search button in uiv2-gate); it was treated as a failure, uiv2-gate passed 52 of 52 repeated alone, and the whole gate was rerun clean
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: see the matrix
+- ref: design/responsive-wide
+  result: pass
+  note: phone bar and 641 to 1023px sticky columns
+- ref: design/state-matrix
+  result: pass
+  note: see the matrix
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: matrix
+- surface: api
+  result: pass
+  evidence: two additive parameters, tested, regenerated
+- surface: sdk
+  result: pass
+  evidence: regenerated and checked by verify-fast
+- surface: cli
+  result: pass
+  evidence: T91
+- surface: mcp
+  result: pass
+  evidence: T91
+- surface: audit
+  result: pass
+  evidence: existing saved-view audit; reads only
+- surface: search
+  result: pass
+  evidence: buckets narrowed by search
+- surface: docs
+  result: pass
+  evidence: T91
+migrations: []
+findings:
+- P3 an intermittent axe colour-contrast flag on the existing header search button appeared once under four-worker load and not in 52 repeats alone; not caused by this batch's CSS, recorded as a possible pre-existing flake for the owner
+- P3 the visual ratchets had not been run since B01 and caught three CSS items from this batch, fixed in T08
+escalations: []
+limitations:
+- Selection, bulk actions and the inspector stay in the flat list when grouped.
+- A second-organizer browser test is not possible on the single-organizer demo seed.
+next: review

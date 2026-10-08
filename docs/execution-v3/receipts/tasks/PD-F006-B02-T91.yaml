@@ -1,0 +1,82 @@
+version: 3
+task: PD-F006-B02-T91
+batch: PD-F006-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: f49dac5
+  head_commit: null
+changed_paths:
+- sdks/python/conflux_sdk/cli.py
+- src/api/mcp_adapter/tools.py
+- tests/integration/test_cli_entities.py
+- tests/integration/test_mcp_entity_query.py
+- docs/verification/PD-F006-B02/SURFACES.md
+- docs/api/ENTITY_QUERY.md
+- docs/api/CLI.md
+- docs/operations/UPGRADES.md
+- docs/operations/VISUAL_FOUNDATION.md
+- docs/product-depth-v3/specs/006-universal-data-grid-and-saved-view-system.md
+deliverables:
+- item: Surface matrix closed, no undocumented skip
+  result: pass
+  evidence: docs/verification/PD-F006-B02/SURFACES.md closes every surface of spec 006 for this batch - web, api, cli, mcp, audit, search and docs done, sdk regenerated, the rest not required with the reason
+- item: CLI and MCP carry the new parameters
+  result: pass
+  evidence: entities query takes --group and --subgroup and the MCP tool query_entity takes group and subgroup, both calling the same route as the credential; tests send only reads, show buckets and surface the server's refusal
+- item: Documentation and migration notes
+  result: pass
+  evidence: ENTITY_QUERY.md (group and subgroup), CLI.md, UPGRADES.md (what people and integrators notice, no migration), VISUAL_FOUNDATION.md (second slice for developers, including the ratchet rule) and spec 006 As built
+invariants:
+- item: No second source of truth
+  result: pass
+  evidence: no query logic outside core/query.py; the CLI and the tool add parameters of the existing route only
+verification:
+- command: .venv/bin/python -m pytest tests/integration/test_cli_entities.py tests/integration/test_mcp_entity_query.py tests/integration/test_feature_cli.py tests/integration/test_feature_mcp.py -q
+  result: pass
+  note: part of the 2978 passed in the T90 make verify-fast, run after these changes (T90-verify-fast.log)
+- command: python3 scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid, 331 batches, 3110 tasks
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: nothing visual in this task
+- ref: design/state-matrix
+  result: pass
+  note: not applicable
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: T90
+- surface: api
+  result: pass
+  evidence: SURFACES.md
+- surface: sdk
+  result: pass
+  evidence: SURFACES.md
+- surface: cli
+  result: pass
+  evidence: tests/integration/test_cli_entities.py
+- surface: mcp
+  result: pass
+  evidence: tests/integration/test_mcp_entity_query.py
+- surface: audit
+  result: pass
+  evidence: SURFACES.md
+- surface: search
+  result: pass
+  evidence: SURFACES.md
+- surface: docs
+  result: pass
+  evidence: files above
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Saved-view references from the CLI and MCP, a text query language and exports remain B04.
+next: review

@@ -75,6 +75,15 @@ Every workspace screen (organizer, participant, judge, mentor, volunteer) has th
 - **Preview as.** `PreviewAsDialog` asks `previewAs` (PREVIEW_CONTEXT) for the saved form as a participant, judge or the public and for the public page in a script-less frame; register a new surface with the primitive and add it to the dialog to preview it.
 - Keep the shell's key listeners in layout effects or behind a ref: a re-render must not drop a half-typed chord, and a key pressed as the control appears must work.
 
+### The data grid, second slice (PD-F006-B02)
+
+- **Narrow screens.** CSS in `components.css` plus the `cx-datagrid__name` and `cx-datagrid__table--selectable` classes: at 640px and below the thead becomes a flex bar (select page text, sort buttons), from 641 to 1023px the select and name cells are sticky inside the grid's own scroll container.
+- **Filter builder.** `FilterBuilder.tsx` is recursive over the server's tree with render functions (not components defined in the render, which would remount inputs and lose focus); conditions are numbered in document order; `operatorLabel` and `describeFilter` in `lib/entityQuery.ts` word operators by type; problems are keyed by node path.
+- **Saved views.** `ViewBar.tsx` adds Reset, the visibility line, the Pinned group and the reload after a 409.
+- **Transient views.** `lib/transientView.ts` encodes only structured filters (choices from the field's list, yes or no, numbers, dates, emptiness); `routes.ts` has one extra key class, `f_`, with a longer URL-safe value; a link is decoded and checked against the catalogue and refused whole.
+- **Grouping.** `core/query.run_groups` counts buckets over the same filtered queryset; `GroupedRows.tsx` opens a bucket with the ordinary query plus the bucket's value; fields opt in with `groupable`.
+- **CSS ratchets** (`tests/test_visual_ratchets.py`): scale tokens for sizes, radii, weights; no shadows or glyph content strings outside the allowlist - run `make verify-fast` before closing a task that adds CSS.
+
 ### The data grid, first slice (PD-F006-B01)
 
 - **One query model.** Search, sort, filter, columns and paging are parameters of the one entity query (`core/query.py`); `EntityGrid` sends them and renders what comes back, nothing is filtered, sorted or paged in the browser. `Entity.search_fields` (registered text fields) makes a list searchable. Search text is transient state: not in the address or storage, only in a saved view.

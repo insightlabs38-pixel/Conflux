@@ -229,6 +229,11 @@ Engine and API: pytest for search (terms, limits, multi-field OR, AND with filte
 - CLI `entities list|query` and MCP `query_entity` are thin read-only calls of the entity routes, recorded as outside the feature registry with reasons.
 - Limitations carried: the phone's stacked rows have no header row, so multi-key sort and select-all-on-page are desktop gestures until B02; only the projects grid has a bulk action; select-all-matching (frozen snapshot) is B05.
 
+### As built (PD-F006-B02)
+
+- B02 has no T00; its decisions are in the receipts and QUESTIONS.md. Phone: the header is a bar above the row list, not hidden; 641 to 1023px keeps the select and name columns sticky. Filters: a recursive builder over the server tree (three group levels, twenty conditions), negations kept, operators worded and entered by type. Saved views: Reset, visibility line, Pinned group, conflict reload. Transient views: `f_<entity>`, structured values only, refused whole when it does not fit (numbers and dates count as structured - one function to tighten). Group and subgroup: `group` and `subgroup` return buckets with counts from the same filtered queryset, a bucket opens through the ordinary query, saved views may carry them.
+- Limitations carried: selection, bulk and the inspector stay in the flat list; a count is the only aggregate; negations cannot be authored; pins are device-local; a second-organizer browser test needs a second organizer in the seed.
+
 ### Open questions (logged in QUESTIONS.md with the defaults above)
 
 Search text transient rather than in the URL (P3); pagination without client virtualization (P2); CLI and MCP read path in B01 rather than B04 (P3).

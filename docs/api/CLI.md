@@ -52,6 +52,7 @@ in public logs.
 ```sh
 scripts/conflux-admin entities list EVENT_PUBLIC_UUID
 scripts/conflux-admin entities query EVENT_PUBLIC_UUID projects --search robot --sort=-name --limit 25
+scripts/conflux-admin entities query EVENT_PUBLIC_UUID projects --group track --subgroup gallery_visible
 scripts/conflux-admin entities query EVENT_PUBLIC_UUID applications --filter '{"field":"status","op":"eq","value":"pending"}'
 ```
 

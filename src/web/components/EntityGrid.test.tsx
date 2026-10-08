@@ -488,3 +488,51 @@ describe("EntityGrid sort and page in the URL", () => {
     await act(async () => root.unmount());
   });
 });
+
+describe("remembered columns", () => {
+  const headers = (c: HTMLElement) =>
+    [...c.querySelectorAll("th")].map((th) => th.textContent?.trim());
+
+  it("remembers the picker's choice per person and list, offers a reset, and ignores keys the list no longer has", async () => {
+    window.localStorage.clear();
+    const first = await mount(() => jsonResponse(200, page(ROWS)));
+    await until(() => first.container.querySelector("tbody tr") !== null);
+    await until(
+      () => first.container.textContent?.includes("remembered") ?? false,
+    );
+    const note = [...first.container.querySelectorAll("label")]
+      .find((l) => l.textContent?.includes("Note"))!
+      .querySelector("input") as HTMLInputElement;
+    await act(async () => note.click());
+    expect(
+      JSON.parse(
+        window.localStorage.getItem("conflux:v1:u1:w:columns:applications")!,
+      ),
+    ).toEqual(["username", "status", "created_at", "note"]);
+    await act(async () => first.root.unmount());
+
+    // a new visit, same person: the choice is back without touching the picker
+    const again = await mount(() => jsonResponse(200, page(ROWS)));
+    await until(() => headers(again.container).includes("Note"));
+
+    // reset forgets it
+    await act(async () => press(again.container, "Reset columns"));
+    expect(
+      window.localStorage.getItem("conflux:v1:u1:w:columns:applications"),
+    ).toBeNull();
+    await until(() => !headers(again.container).includes("Note"));
+    await act(async () => again.root.unmount());
+
+    // a stored key that no longer exists never leaves the list without columns
+    window.localStorage.setItem(
+      "conflux:v1:u1:w:columns:applications",
+      JSON.stringify(["gone"]),
+    );
+    const stale = await mount(() => jsonResponse(200, page(ROWS)));
+    await until(() =>
+      headers(stale.container).some((h) => h?.startsWith("Applicant")),
+    );
+    await act(async () => stale.root.unmount());
+    window.localStorage.clear();
+  });
+});

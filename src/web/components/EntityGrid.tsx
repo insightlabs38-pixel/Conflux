@@ -26,6 +26,8 @@ import { FilterBuilder } from "./FilterBuilder";
 import { ViewBar } from "./ViewBar";
 import { Inspector } from "./Inspector";
 import { useUrlParam } from "../lib/urlState";
+import { useMe } from "../hooks/useMe";
+import { columnPreference, setColumnPreference } from "../lib/shellPreferences";
 
 const PAGE_SIZE = 25;
 
@@ -98,7 +100,27 @@ export function EntityGrid({
     clears: [`page_${entity}`],
   });
   const [pageParam, setPageParam] = useUrlParam(`page_${entity}`);
-  const [visible, setVisible] = useState<string[]>([]);
+  // Columns: a saved view's own win while it is open, otherwise the person's remembered choice for
+  // this list on this device (shellPreferences), otherwise the list's defaults. Only a choice made in
+  // the picker is remembered; a view's columns never overwrite it.
+  const user = useMe().data?.public_id ?? "";
+  const [visible, setVisible] = useState<string[]>(() =>
+    columnPreference(user, workspaceId, entity),
+  );
+  const remembered = useRef(user);
+  useEffect(() => {
+    // the person arrives after the first render: adopt their choice once, unless one was already made
+    if (user && remembered.current !== user) {
+      remembered.current = user;
+      setVisible((now) =>
+        now.length ? now : columnPreference(user, workspaceId, entity),
+      );
+    }
+  }, [user, workspaceId, entity]);
+  const chooseColumns = (keys: string[]) => {
+    setVisible(keys);
+    setColumnPreference(user, workspaceId, entity, keys);
+  };
   const [density, setDensity] = useState<GridDensity>("comfortable");
   const requestedPage = /^[0-9]{1,6}$/.test(pageParam) ? Number(pageParam) : 1;
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -117,17 +139,22 @@ export function EntityGrid({
     setPageParam(next > 0 ? String(Math.floor(next / PAGE_SIZE) + 1) : "", {
       replace: true,
     });
+  // a remembered key the list no longer has is dropped; if none remain the defaults show
+  const known = useMemo(
+    () => visible.filter((k) => fields.some((f) => f.key === k)),
+    [fields, visible],
+  );
   const shown = useMemo(
     () =>
-      visible.length > 0
-        ? fields.filter((f) => visible.includes(f.key))
+      known.length > 0
+        ? fields.filter((f) => known.includes(f.key))
         : fields.filter((f) => f.default),
-    [fields, visible],
+    [fields, known],
   );
   const page = useEntityPage(description ? base : null, entity, {
     filter,
     sort,
-    columns: visible,
+    columns: known,
     limit: PAGE_SIZE,
     offset,
   });
@@ -171,21 +198,26 @@ export function EntityGrid({
   // choosing a view by hand applies the view's sort as before.
   const sortRef = useRef(sortParam);
   sortRef.current = sortParam;
+  const userRef = useRef(user);
+  userRef.current = user;
   const apply = useCallback(
     (view: SavedView | null, fromLink = false) => {
       const query = view?.query;
       setFilter(query?.filter ?? null);
       if (!(fromLink && sortRef.current)) setSort(query?.sort ?? "");
-      setVisible(query?.columns ?? []);
+      setVisible(
+        query?.columns ??
+          columnPreference(userRef.current, workspaceId, entity),
+      );
       setDensity(query?.density ?? "comfortable");
       setOffset(0);
       setSelected(new Set());
     },
     // the setters only call the URL setters, which are stable
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [workspaceId, entity],
   );
-  const current: ViewDefinition = { filter, sort, columns: visible, density };
+  const current: ViewDefinition = { filter, sort, columns: known, density };
 
   const columns: GridColumn<EntityRow>[] = shown.map((field) => ({
     key: field.key,
@@ -292,7 +324,7 @@ export function EntityGrid({
                     const keys = new Set(shown.map((f) => f.key));
                     if (e.target.checked) keys.add(field.key);
                     else keys.delete(field.key);
-                    setVisible(
+                    chooseColumns(
                       fields.filter((f) => keys.has(f.key)).map((f) => f.key),
                     );
                   }}
@@ -300,9 +332,10 @@ export function EntityGrid({
                 {field.label}
               </label>
             ))}
-            <button type="button" onClick={() => setVisible([])}>
+            <button type="button" onClick={() => chooseColumns([])}>
               Reset columns
             </button>
+            {user && <small>Your choice is remembered on this device.</small>}
           </fieldset>
           <label>
             Sort by{" "}

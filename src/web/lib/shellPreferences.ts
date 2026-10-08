@@ -332,6 +332,55 @@ export const useFavoriteEvents = (user: string, workspace: string) =>
 export const useRecentEvents = (user: string, workspace: string) =>
   useList(() => recentEvents(user, workspace));
 
+/**
+ * Which columns a person keeps visible in a list (PD-F005-B03-T01): per person, workspace and entity,
+ * the field keys in the order the list shows them. A stored key is only a request - the list honours
+ * the ones it still has and falls back to its defaults when none remain. A saved view's own columns
+ * win while that view is open; this is what the list shows otherwise.
+ */
+export const MAX_COLUMNS = 60;
+
+export const columnPreference = (
+  user: string,
+  workspace: string,
+  entity: string,
+): string[] =>
+  ID.test(entity)
+    ? readIds(user, workspace, `columns:${entity}`).slice(0, MAX_COLUMNS)
+    : [];
+
+/** Remember the columns; an empty list forgets them so the list returns to its defaults. */
+export function setColumnPreference(
+  user: string,
+  workspace: string,
+  entity: string,
+  keys: string[],
+) {
+  if (!user || !workspace || !ID.test(entity)) return;
+  const name = `columns:${entity}`;
+  if (keys.length === 0) {
+    try {
+      storage()?.removeItem(key(user, workspace, name));
+    } catch {
+      // blocked storage: nothing was remembered
+    }
+    changed();
+    return;
+  }
+  writeIds(
+    user,
+    workspace,
+    name,
+    keys.filter((k) => ID.test(k)).slice(0, MAX_COLUMNS),
+  );
+}
+
+export const useColumnPreference = (
+  user: string,
+  workspace: string,
+  entity: string,
+) => useList(() => columnPreference(user, workspace, entity));
+
 /** The colour theme of the app's own screens; "system" follows the operating system (design D-008). */
 export type Theme = "system" | "light" | "dark";
 const THEMES: readonly Theme[] = ["system", "light", "dark"];

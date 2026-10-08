@@ -1,0 +1,66 @@
+version: 3
+task: PD-F005-B03-T01
+batch: PD-F005-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 719ccfe
+  head_commit: null
+changed_paths:
+- src/web/lib/shellPreferences.ts
+- src/web/components/EntityGrid.tsx
+- src/web/components/EntityGrid.test.tsx
+- tests/e2e/column-preferences.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Per-user column preferences as a complete workflow
+  result: pass
+  evidence: the column picker's choice is remembered per person, workspace and list (columnPreference / setColumnPreference in shellPreferences, key columns:<entity>), restored on the next visit, undone by Reset columns, and stated in words in the picker (remembered on this device). Precedence is fixed - an open saved view's columns, then the person's choice, then the list's defaults - and a view's columns never overwrite the choice
+- item: Degraded and edge states
+  result: pass
+  evidence: blocked storage remembers nothing and the list still works; a stored key the list no longer has is dropped and, if none remain, the defaults show (never an empty table); signed-out sessions store nothing; sign-out clears it with the other shell preferences
+invariants:
+- item: One preference store, no second source of truth
+  result: pass
+  evidence: spec 005 forbids a second preference store; the value goes through shellPreferences with the same validation (id-like keys, bounded length) as pins and recents. The server still decides which fields exist and which a person may read - the stored keys are only a request filtered by the catalogue
+- item: No test weakened
+  result: pass
+  evidence: one unit test and one browser spec added; none changed
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 146 files, 811 tests (new - choice remembered per person and list, reset forgets it, stale key falls back to defaults); the new test was run 7 times, one early run failed on a wrong header match and was corrected
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts column-preferences share-link (stack rebuilt first)
+  result: pass
+  note: 4 passed at desktop and mobile - a non-default column picked, kept after reload, absent from the URL, gone after Reset columns and a reload, axe clean
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: no new chrome - the existing Columns group in the list tools gained one line of text
+- ref: design/state-matrix
+  result: pass
+  note: default, remembered, reset, stale and storage-blocked states
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: audit
+  result: pass
+  evidence: a device-local display choice, nothing to audit
+- surface: search
+  result: pass
+  evidence: not affected - the palette is unchanged
+- surface: docs
+  result: pass
+  evidence: developer note and release note at T91
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Device-local by the standing decision in spec 005 (QUESTIONS.md 2026-10-07); a per-user server store remains an owner question and would change only shellPreferences.ts. Column order is the list's field order, not user-ordered.
+next: review

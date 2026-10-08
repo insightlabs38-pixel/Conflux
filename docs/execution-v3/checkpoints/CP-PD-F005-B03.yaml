@@ -1,0 +1,55 @@
+version: 1
+checkpoint_id: CP-PD-F005-B03
+created_at: '2026-10-08T03:30:00Z'
+canonical_commit: e8f609e
+program_state: ACTIVE
+completed_batches:
+- PD-R00
+- PD-B00
+- PD-B01
+- PD-B02
+- PD-B03
+- PD-B04
+- PD-F001-B01
+- PD-F001-B02
+- PD-F002-B01
+- PD-F002-B02
+- PD-F002-B03
+- PD-F003-B01
+- PD-F003-B02
+- PD-F003-B03
+- PD-DESIGN-B00
+- PD-F004-B01
+- PD-F004-B02
+- PD-F004-B03
+- PD-F004-B04
+- PD-F004-B05
+- PD-F005-B01
+- PD-F005-B02
+- PD-F005-B03
+active_batches:
+- PD-F006-B01
+active_claims: []
+open_escalations: []
+last_completed_task: PD-F005-B03-T91
+ready_summary:
+- PD-F006-B01 (universal data-grid and saved-view system; promoted IN_PROGRESS, not started). Reuse DATA_GRID (components/EntityGrid.tsx, DataGrid.tsx),
+  QUERY, saved views (lib/savedViews.ts), selection (lib/selection.ts), column preferences and share links (lib/shellPreferences.ts, lib/shareLink.ts).
+verification_summary:
+- make verify-fast clean (pytest 2955, vitest 827) then make e2e-fast clean (read-only 332 passed, isolated and canary ok), run one after the other (docs/verification/PD-F005-B03/T90-*.log);
+  matrix in docs/verification/PD-F005-B03/MATRIX.md
+recovery_notes:
+- 'Contract: spec 005 sections PD-F005-B01 and PD-F005-B02 canonical contract and As built; ESC-20260930-007 (ROUTER and COMMANDS adopted forward). Two
+  additive API changes in B02 (event phase, audit mine and limit), OpenAPI and SDKs regenerated with .venv/bin/python src/api/manage.py spectacular and
+  scripts/generate_sdks.py (verify with scripts/check_openapi_artifact.py and --check).'
+- 'Owner questions in .claude-supervisor/QUESTIONS.md (untracked): device-local shell preferences, default density, preview-as meaning, phase definition.'
+- Run make verify-fast and make e2e-fast one at a time. Isolated specs have a test.skip for the mobile project when they set their own viewport. After changing
+  web or api source run docker compose up -d --build app before browser tests. Never pkill -f with a pattern in your own command line. e2e_fixture sweep
+  --older-than-minutes 0 deletes the fixtures of a run in progress. Shell key listeners live in layout effects or refs.
+- 'Isolated spec by hand: create a fixture (manage.py e2e_fixture create iso-min), run playwright with E2E_DEMO_SEED and E2E_DEMO_PASSWORD, dispose. Python
+  and pytest need the Makefile env (DJANGO_SECRET_KEY, RECORD_SIGNING_KEY_SEED) and .venv/bin/python; scripts/pdv3 use python3. Receipt YAML plain scalars
+  must not start with a quote or a question mark nor contain a colon followed by a space.'
+- main unpushed; untracked design handoff zips untouched; supervisor.py modification is the owner's and left uncommitted
+- 'B03 notes: new CSS classes must not reuse existing prefixes (cx-ops belongs to the operations overview; the pane is cx-opspane). Palette-driven browser
+  steps wait for the option before Enter. New CSS uses scale tokens (tests/test_visual_ratchets.py). Single isolated spec by hand: scripts/e2e-tiers with_fixture("iso-min",
+  group, [spec]) loaded via importlib. Owner confirmed the operations pane decision (QUESTIONS.md, untracked).'

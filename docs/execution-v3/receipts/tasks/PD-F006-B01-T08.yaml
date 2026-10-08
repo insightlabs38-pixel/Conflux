@@ -1,0 +1,66 @@
+version: 3
+task: PD-F006-B01-T08
+batch: PD-F006-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: a336061
+  head_commit: null
+changed_paths:
+- tests/e2e/grid-sticky-header.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Sticky header where appropriate, verified and kept
+  result: pass
+  evidence: contract decision 9. The existing rule (header cells sticky at the top of the grid's own scroll container, opaque surface background, above the rows) was verified rather than rewritten - at 1440 and at 1100 with the inspector docked beside the list, after scrolling a list that is taller than its container, the header sits at the container's top edge (within 1px), has an opaque background and nothing scrolls over it. Where it does not apply the header is not drawn - at 640px and below the list is a row list whose cells carry their own labels and the header row is visually hidden but kept for assistive technology
+invariants:
+- item: One grid, no second header mechanism
+  result: pass
+  evidence: no product change was needed; the check is the new browser spec
+- item: No test weakened
+  result: pass
+  evidence: a spec added; the probe waits for the layout to settle after the inspector docks instead of asserting in the frame it opens (a first version asserted too early and failed at 1100)
+verification:
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts grid-sticky-header --repeat-each 3
+  result: pass
+  note: 9 passed - 1440 and 1100 each with the inspector open, and the phone project's row list with no drawn header
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: sticky toolbar and header cues for a tall list; at 1100 the list scrolls sideways inside its container beside the docked inspector, as the 1024 to 1439 rule allows
+- ref: design/state-matrix
+  result: pass
+  note: top, scrolled, inspector docked, phone row list
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: browser spec
+- surface: api
+  result: pass
+  evidence: not required
+- surface: cli
+  result: pass
+  evidence: not applicable to a visual behaviour
+- surface: mcp
+  result: pass
+  evidence: not applicable to a visual behaviour
+- surface: audit
+  result: pass
+  evidence: none
+- surface: search
+  result: pass
+  evidence: none
+- surface: docs
+  result: pass
+  evidence: T91
+migrations: []
+findings: []
+escalations: []
+limitations:
+- The toolbar (search, filter line) is not sticky, only the header; the 768 to 1023 sticky first column and the phone's reachable sort and select-all are the B02 responsive fallback.
+next: review

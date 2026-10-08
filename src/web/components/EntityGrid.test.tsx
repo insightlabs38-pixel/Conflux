@@ -7,6 +7,8 @@ import { createTestQueryClient, withRouter } from "../lib/test-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, useLocation } from "react-router";
 import { EntityGrid } from "./EntityGrid";
+import { RealtimeProvider } from "../hooks/useRealtime";
+import { manualTransport, RealtimeHub } from "../lib/realtime";
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
 ).IS_REACT_ACT_ENVIRONMENT = true;
@@ -57,6 +59,7 @@ type Params = Record<string, string>;
 async function mount(
   respond: (params: Params, path: string) => Response,
   props: Partial<React.ComponentProps<typeof EntityGrid>> = {},
+  wrap: (node: React.ReactNode) => React.ReactNode = (node) => node,
 ) {
   const pages: Params[] = [];
   vi.stubGlobal(
@@ -79,14 +82,16 @@ async function mount(
   const root = createRoot(container);
   await act(async () =>
     root.render(
-      withRouter(
-        <EntityGrid
-          workspaceId="w"
-          eventId="e"
-          entity="applications"
-          label="Applications"
-          {...props}
-        />,
+      wrap(
+        withRouter(
+          <EntityGrid
+            workspaceId="w"
+            eventId="e"
+            entity="applications"
+            label="Applications"
+            {...props}
+          />,
+        ),
       ),
     ),
   );
@@ -490,8 +495,11 @@ describe("EntityGrid sort and page in the URL", () => {
 });
 
 describe("remembered columns", () => {
+  // a header reads "Note" or "Note, activate to sort ascending" depending on when it is read
   const headers = (c: HTMLElement) =>
-    [...c.querySelectorAll("th")].map((th) => th.textContent?.trim());
+    [...c.querySelectorAll("th")].map(
+      (th) => th.textContent?.split(",")[0].trim() ?? "",
+    );
 
   it("remembers the picker's choice per person and list, offers a reset, and ignores keys the list no longer has", async () => {
     window.localStorage.clear();
@@ -529,10 +537,78 @@ describe("remembered columns", () => {
       JSON.stringify(["gone"]),
     );
     const stale = await mount(() => jsonResponse(200, page(ROWS)));
-    await until(() =>
-      headers(stale.container).some((h) => h?.startsWith("Applicant")),
-    );
+    await until(() => headers(stale.container).includes("Applicant"));
     await act(async () => stale.root.unmount());
+    window.localStorage.clear();
+  });
+});
+
+describe("live operations", () => {
+  it("is off until chosen, then shows the connection and the data's age, refreshes on a hint and holds actions while offline", async () => {
+    window.localStorage.clear();
+    const feed = manualTransport();
+    const hub = new RealtimeHub(feed.transport);
+    let reads = 0;
+    const { container, root } = await mount(
+      () => {
+        reads += 1;
+        return jsonResponse(200, page(ROWS));
+      },
+      { actions: () => <button type="button">Approve</button> },
+      (node) => <RealtimeProvider hub={hub}>{node}</RealtimeProvider>,
+    );
+    await until(() => container.querySelector("tbody tr") !== null);
+    expect(container.querySelector(".cx-live")).toBeNull();
+
+    const toggle = [...container.querySelectorAll("button")].find(
+      (b) => b.textContent === "Live operations",
+    )!;
+    expect(toggle.getAttribute("aria-pressed")).toBe("false");
+    await act(async () => toggle.click());
+    await until(() => container.querySelector(".cx-live") !== null);
+    expect(
+      window.localStorage.getItem("conflux:v1:u1:device:live-operations"),
+    ).toBe("on");
+    expect(container.querySelector(".cx-live")?.textContent).toContain(
+      "Live operations · Connected",
+    );
+    expect(container.querySelector(".cx-live")?.textContent).toContain(
+      "Data as of",
+    );
+
+    // a hint asks the server again
+    const before = reads;
+    await act(async () =>
+      feed.emit("workspace:w:event:e:applications:ops", "poll"),
+    );
+    await until(() => reads > before);
+
+    // offline: the status says so, row actions wait with the reason, the rows stay
+    await act(async () =>
+      feed.setStatus("workspace:w:event:e:applications:ops", "offline"),
+    );
+    await until(
+      () =>
+        container.querySelector(".cx-live")?.getAttribute("data-tone") ===
+        "offline",
+    );
+    const held = container.querySelector("fieldset[disabled]");
+    expect(held?.getAttribute("title")).toContain("no connection");
+    expect(held?.textContent).toContain("Approve");
+    expect(container.querySelectorAll("tbody tr").length).toBe(2);
+
+    // back online: actions are available again
+    await act(async () =>
+      feed.setStatus("workspace:w:event:e:applications:ops", "polling"),
+    );
+    await until(() => container.querySelector("fieldset[disabled]") === null);
+    expect(container.querySelector(".cx-live")?.textContent).toContain(
+      "every 15 s",
+    );
+
+    await act(async () => toggle.click());
+    expect(container.querySelector(".cx-live")).toBeNull();
+    await act(async () => root.unmount());
     window.localStorage.clear();
   });
 });

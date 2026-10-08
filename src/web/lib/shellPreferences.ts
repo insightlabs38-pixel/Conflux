@@ -381,6 +381,31 @@ export const useColumnPreference = (
   entity: string,
 ) => useList(() => columnPreference(user, workspace, entity));
 
+/**
+ * Live operations mode (PD-F005-B03-T05): lists refresh themselves and show the connection's health.
+ * A device choice of the person, off by default, stored only when on.
+ */
+export const liveOperations = (user: string) =>
+  !!user && storage()?.getItem(key(user, DEVICE, "live-operations")) === "on";
+
+export function setLiveOperations(user: string, on: boolean) {
+  if (!user) return;
+  try {
+    if (on) storage()?.setItem(key(user, DEVICE, "live-operations"), "on");
+    else storage()?.removeItem(key(user, DEVICE, "live-operations"));
+  } catch {
+    // blocked storage: the choice lasts until the page is closed
+  }
+  changed();
+}
+
+export const useLiveOperations = (user: string) =>
+  useSyncExternalStore(
+    subscribe,
+    () => liveOperations(user),
+    () => false,
+  );
+
 /** The colour theme of the app's own screens; "system" follows the operating system (design D-008). */
 export type Theme = "system" | "light" | "dark";
 const THEMES: readonly Theme[] = ["system", "light", "dark"];

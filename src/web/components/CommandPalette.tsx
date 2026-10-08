@@ -30,6 +30,8 @@ import { announce } from "../lib/shellNotice";
 import {
   rememberCommand,
   setDensityPreference,
+  setLiveOperations,
+  useLiveOperations,
   setThemePreference,
   useRecentCommands,
 } from "../lib/shellPreferences";
@@ -113,6 +115,7 @@ function CommandPalette({
   const navigate = useNavigate();
   const location = useLocation();
   const user = useMe().data?.public_id ?? "";
+  const live = useLiveOperations(user);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const titleId = useId();
@@ -174,6 +177,8 @@ function CommandPalette({
         setTheme: (theme) => setThemePreference(user, theme),
         setDensity: (density) => setDensityPreference(user, density),
         openShortcuts: () => openShellOverlay("shortcuts"),
+        liveOperations: live,
+        setLiveOperations: (on) => setLiveOperations(user, on),
         copyLink: () => {
           const href = shareableHref(
             window.location.pathname,
@@ -202,6 +207,7 @@ function CommandPalette({
       events,
       onSignOut,
       user,
+      live,
       pinned,
       recentViews,
     ],

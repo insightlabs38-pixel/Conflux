@@ -70,6 +70,27 @@ registerCommandProvider((context) => {
   return commands;
 });
 
+registerCommandProvider(() => [
+  {
+    id: "live.on",
+    label: "Turn on live operations",
+    group: "Appearance",
+    keywords: ["live", "operations", "realtime", "refresh", "ops"],
+    when: (ctx) =>
+      !!ctx.capabilities.setLiveOperations && !ctx.capabilities.liveOperations,
+    run: (ctx) => ctx.capabilities.setLiveOperations?.(true),
+  },
+  {
+    id: "live.off",
+    label: "Turn off live operations",
+    group: "Appearance",
+    keywords: ["live", "operations", "realtime", "refresh", "ops"],
+    when: (ctx) =>
+      !!ctx.capabilities.setLiveOperations && !!ctx.capabilities.liveOperations,
+    run: (ctx) => ctx.capabilities.setLiveOperations?.(false),
+  },
+]);
+
 registerCommandProvider(() => {
   const theme = (
     value: "system" | "light" | "dark",

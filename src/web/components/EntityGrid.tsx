@@ -27,7 +27,16 @@ import { ViewBar } from "./ViewBar";
 import { Inspector } from "./Inspector";
 import { useUrlParam } from "../lib/urlState";
 import { useMe } from "../hooks/useMe";
-import { columnPreference, setColumnPreference } from "../lib/shellPreferences";
+import { useConnectionStatus, useRealtime } from "../hooks/useRealtime";
+import { describeHealth } from "../lib/liveOps";
+import { liveOpsTopic, LIVE_OPS_INTERVAL_MS } from "../lib/realtime";
+import { LiveStatus } from "./LiveStatus";
+import {
+  columnPreference,
+  setColumnPreference,
+  setLiveOperations,
+  useLiveOperations,
+} from "../lib/shellPreferences";
 
 const PAGE_SIZE = 25;
 
@@ -117,6 +126,14 @@ export function EntityGrid({
       );
     }
   }, [user, workspaceId, entity]);
+  // Live operations mode (a device choice): the list asks the server again on every hint and shows
+  // the connection's health and the data's age. Offline, actions that need fresh data wait.
+  const live = useLiveOperations(user);
+  const opsTopic = liveOpsTopic(workspaceId, eventId, entity);
+  const health = describeHealth(
+    useConnectionStatus(live ? opsTopic : null),
+    LIVE_OPS_INTERVAL_MS / 1000,
+  );
   const chooseColumns = (keys: string[]) => {
     setVisible(keys);
     setColumnPreference(user, workspaceId, entity, keys);
@@ -177,6 +194,9 @@ export function EntityGrid({
   const lastPage = useRef(page.data);
   if (page.data) lastPage.current = page.data;
   const shownPage = page.data ?? lastPage.current;
+  // the age of what is on screen: a failed refresh keeps the last good time instead of going blank
+  const lastUpdated = useRef<number | null>(null);
+  if (page.data && page.updatedAt) lastUpdated.current = page.updatedAt;
 
   const first = useRef(true);
   useEffect(() => {
@@ -230,6 +250,7 @@ export function EntityGrid({
     catalogue.data !== null && description === null
       ? "You do not have access to this list."
       : null;
+  useRealtime(opsTopic, () => void page.reload(), live && description !== null);
   const failure = catalogue.error ?? page.error;
   const status = denied
     ? ({ kind: "denied", message: denied } as const)
@@ -268,7 +289,17 @@ export function EntityGrid({
   const inspectAction = inspect
     ? (row: EntityRow) => (
         <>
-          {actions?.(row)}
+          {live && health.blocksActions ? (
+            <fieldset
+              disabled
+              className="cx-entity-grid__held"
+              title={health.detail}
+            >
+              {actions?.(row)}
+            </fieldset>
+          ) : (
+            actions?.(row)
+          )}
           <button
             type="button"
             className="cx-inspect"
@@ -337,6 +368,15 @@ export function EntityGrid({
             </button>
             {user && <small>Your choice is remembered on this device.</small>}
           </fieldset>
+          {user && (
+            <button
+              type="button"
+              aria-pressed={live}
+              onClick={() => setLiveOperations(user, !live)}
+            >
+              Live operations
+            </button>
+          )}
           <label>
             Sort by{" "}
             <select
@@ -372,6 +412,9 @@ export function EntityGrid({
             ))}
           </div>
         </details>
+        {live && (
+          <LiveStatus topic={opsTopic} updatedAt={lastUpdated.current} />
+        )}
         <DataGrid<EntityRow>
           label={label}
           columns={columns}

@@ -6,6 +6,8 @@ export type Loaded<T> = {
   data: T | null;
   error: ApiError | null;
   loading: boolean;
+  /** When the data shown was last fetched successfully (ms since the epoch), null before the first answer. */
+  updatedAt?: number | null;
   /** Refetch now; resolves when the fresh answer (or failure) is in. Does nothing while `url` is null. */
   reload: () => Promise<void>;
   /** Apply a server-confirmed change (e.g. a mutation's response) to what is shown, without a refetch. */
@@ -76,6 +78,10 @@ export function useLoad<T>(
     data: failed || url === null ? null : (query.data ?? null),
     error,
     loading: url !== null && query.isFetching,
+    updatedAt:
+      failed || url === null || !query.dataUpdatedAt
+        ? null
+        : query.dataUpdatedAt,
     reload,
     update,
   };

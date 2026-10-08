@@ -3696,3 +3696,41 @@ html {
     background: var(--scrim);
   }
 }
+
+.cx-live {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-1) var(--sp-3);
+  padding: var(--sp-1) 0;
+  font-size: var(--fs-14);
+}
+.cx-live__state {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-weight: 600;
+}
+.cx-live__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+.cx-live[data-tone="degraded"] .cx-live__dot {
+  border-radius: 1px;
+}
+.cx-live[data-tone="offline"] .cx-live__dot {
+  border-radius: 0;
+  transform: rotate(45deg);
+}
+.cx-live__age {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+.cx-entity-grid__held {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  opacity: 0.6;
+}

@@ -1,0 +1,79 @@
+version: 3
+task: PD-F005-B03-T05
+batch: PD-F005-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: f414edb
+  head_commit: null
+changed_paths:
+- src/web/lib/liveOps.ts
+- src/web/lib/liveOps.test.ts
+- src/web/lib/realtime.ts
+- src/web/lib/shellPreferences.ts
+- src/web/lib/commands.ts
+- src/web/lib/shellCommands.ts
+- src/web/hooks/useLoad.ts
+- src/web/components/LiveStatus.tsx
+- src/web/components/EntityGrid.tsx
+- src/web/components/EntityGrid.test.tsx
+- src/web/components/CommandPalette.tsx
+- src/web/components/CommandPalette.test.tsx
+- src/web/styles/components.css
+- tests/e2e/live-operations.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Live operations mode with connection and realtime health
+  result: pass
+  evidence: a device choice (off by default; a Live operations button in a list's tools and palette commands Turn on/off live operations). On, a list subscribes to its own REALTIME topic, reloads its page on every hint, and shows one line - Live operations, the connection word (Connected, Checking, Connecting, Offline), a sentence saying what that means, and Data as of HH:MM:SS with a ticking age. Only a change of connection is announced
+- item: Degraded and offline states (design States-2, S-OFF)
+  result: pass
+  evidence: polling states the interval (15 s for live topics against 60 s for the quiet default, pollingTransport); offline keeps the rows and the last good time, and disables the row actions (fieldset disabled with the reason as its title) until the connection returns
+invariants:
+- item: REALTIME primitive reused, hints carry no data
+  result: pass
+  evidence: no new channel or endpoint; the hub, useRealtime and useConnectionStatus are used as they are, a hint only triggers the existing authorized read. useLoad gained an optional updatedAt (additive)
+- item: Base state unchanged
+  result: pass
+  evidence: nothing renders and nothing polls faster until the mode is on
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 147 files, 816 tests (liveOps 3, grid live mode 1 covering toggle, health line, hint reload, offline hold and return, palette 1)
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts live-operations (stack rebuilt first)
+  result: pass
+  note: 2 passed, desktop and mobile - real context.setOffline drives the line to Offline with rows kept, no horizontal overflow, axe clean, back online clears it, choice survives reload
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: one compact line inside the list, no new chrome, status by word plus shape (dot, square, diamond) not colour alone
+- ref: design/state-matrix
+  result: pass
+  note: S-OFF - connection health and data age, actions needing live data disabled with a reason
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: audit
+  result: pass
+  evidence: reads only
+- surface: search
+  result: pass
+  evidence: palette commands found by live, operations, realtime, refresh
+- surface: docs
+  result: pass
+  evidence: developer note and release note at T91
+migrations: []
+findings:
+- P3 a T01 unit test was flaky (a header reads with or without its sort hint); the test matcher was fixed, 12 consecutive passes after.
+- P3 the polling transport reports no latency, so the design's "42 ms" is not shown; it appears when a push transport provides it.
+escalations: []
+limitations:
+- Health is per list topic, not a single shell-wide indicator; two lists on one page show two lines.
+- Server-pushed updates still wait on a push channel; today's hints are polling.
+next: review

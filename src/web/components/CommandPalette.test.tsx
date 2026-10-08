@@ -531,3 +531,28 @@ describe("copy link", () => {
     await act(async () => root.unmount());
   });
 });
+
+describe("live operations", () => {
+  it("offers the opposite of the current state and switches it", async () => {
+    window.localStorage.clear();
+    const { root } = await render("organizer", "/w/w/overview?event=e1");
+    await open();
+    await type("live operations");
+    expect(document.body.textContent).toContain("Turn on live operations");
+    expect(document.body.textContent).not.toContain("Turn off live operations");
+    await key("Enter");
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    });
+    expect(
+      [...Object.keys(window.localStorage)].some((k) =>
+        k.endsWith(":live-operations"),
+      ),
+    ).toBe(true);
+    await open();
+    await type("live operations");
+    expect(document.body.textContent).toContain("Turn off live operations");
+    await act(async () => root.unmount());
+    window.localStorage.clear();
+  });
+});

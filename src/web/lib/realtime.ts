@@ -142,6 +142,15 @@ export class RealtimeHub {
   }
 }
 
+/** Live operations mode asks the server more often than the quiet default (design States-2: every 15 s). */
+export const LIVE_OPS_INTERVAL_MS = 15_000;
+export const isLiveOpsTopic = (topic: string) => topic.endsWith(":ops");
+export const liveOpsTopic = (
+  workspaceId: string,
+  eventId: string,
+  entity: string,
+) => `workspace:${workspaceId}:event:${eventId}:${entity}:ops`;
+
 /**
  * The transport that works against today's API: a periodic "may have changed" hint per topic,
  * paused while the tab is hidden or the browser offline and fired once on resume. A push transport
@@ -149,7 +158,8 @@ export class RealtimeHub {
  */
 export function pollingTransport({
   intervalMs = 60_000,
-}: { intervalMs?: number } = {}): RealtimeTransport {
+  opsIntervalMs = LIVE_OPS_INTERVAL_MS,
+}: { intervalMs?: number; opsIntervalMs?: number } = {}): RealtimeTransport {
   return {
     open(topic, deliver, setStatus) {
       const visible = () =>
@@ -163,7 +173,10 @@ export function pollingTransport({
         if (visible() && online()) deliver({ topic, kind: "poll" });
       };
       sync();
-      const timer = setInterval(hint, intervalMs);
+      const timer = setInterval(
+        hint,
+        isLiveOpsTopic(topic) ? opsIntervalMs : intervalMs,
+      );
       const resume = () => {
         if (visible()) hint();
       };

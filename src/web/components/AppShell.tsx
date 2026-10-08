@@ -22,7 +22,8 @@ import { EventSwitcher } from "./EventSwitcher";
 import { InboxCenter } from "./InboxCenter";
 import { CommandPaletteButton } from "./CommandPalette";
 import { ShellShortcuts } from "./ShortcutsHelp";
-import { openShellOverlay } from "../lib/shellEvents";
+import { onShellOverlay, openShellOverlay } from "../lib/shellEvents";
+import { PreviewAsDialog } from "./PreviewAsDialog";
 import { SkipLink } from "./SkipLink";
 import { Icon, type IconName } from "./Icon";
 
@@ -68,6 +69,45 @@ function RoleChoice() {
         </Link>
       ))}
     </nav>
+  );
+}
+
+/**
+ * Preview as a participant, a judge or the public (organizers and admins): server-evaluated, read
+ * only, never an impersonation. The dialog is opened by the account menu or a command.
+ */
+function PreviewAsHost() {
+  const [role, setRole] = useState<string | null>(null);
+  useEffect(
+    () => onShellOverlay("preview", (arg) => setRole(arg || "participant")),
+    [],
+  );
+  return role ? (
+    <PreviewAsDialog initialRole={role} onClose={() => setRole(null)} />
+  ) : null;
+}
+
+function PreviewAsMenu() {
+  const navigation = useWorkspaceNavigation();
+  if (
+    !navigation ||
+    (navigation.role !== "organizer" && navigation.role !== "admin")
+  )
+    return null;
+  return (
+    <div className="cx-account__roles">
+      <p className="cx-account__legend">Preview as</p>
+      {["participant", "judge", "public"].map((value) => (
+        <button
+          key={value}
+          type="button"
+          className="cx-account__link cx-account__shortcuts"
+          onClick={() => openShellOverlay("preview", value)}
+        >
+          {roleLabel(value)}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -194,6 +234,7 @@ export function AppShell({
     <div className={`cx-shell ${destinations ? "cx-shell--workspace" : ""}`}>
       {destinations && <ThemeApplier />}
       {destinations && <ShellShortcuts />}
+      {destinations && <PreviewAsHost />}
       <SkipLink targetId={MAIN_ID} />
       <header className="cx-shell__header">
         <Brand className="cx-shell__brand">
@@ -271,6 +312,7 @@ export function AppShell({
                 </>
               )}
               <RoleChoice />
+              <PreviewAsMenu />
               <ThemeChoice />
               <DensityChoice />
               <button

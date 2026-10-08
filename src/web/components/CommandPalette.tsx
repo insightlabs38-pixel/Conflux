@@ -170,6 +170,7 @@ function CommandPalette({
         setTheme: (theme) => setThemePreference(user, theme),
         setDensity: (density) => setDensityPreference(user, density),
         openShortcuts: () => openShellOverlay("shortcuts"),
+        openPreview: (who) => openShellOverlay("preview", who),
       },
     }),
     // `go` only closes over `navigate`, which is stable

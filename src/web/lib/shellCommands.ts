@@ -108,6 +108,21 @@ registerCommandProvider(() => {
   ];
 });
 
+// a preview is read-only and server-evaluated; only those who author these things are offered it
+registerCommandProvider((context) =>
+  context.role !== "organizer" && context.role !== "admin"
+    ? []
+    : (["participant", "judge", "public"] as const)
+        .filter(() => !!context.capabilities.openPreview)
+        .map((who): Command => ({
+          id: `preview.${who}`,
+          label: `Preview as ${who}`,
+          group: "Preview",
+          keywords: ["preview", "see", "what", "view as", who],
+          run: (ctx) => ctx.capabilities.openPreview?.(who),
+        })),
+);
+
 registerCommandProvider((context) =>
   // only when the person holds more than one role here; viewing as another is choosing a screen
   context.roles.length < 2

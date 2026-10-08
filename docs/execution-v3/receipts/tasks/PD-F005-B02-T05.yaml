@@ -1,0 +1,75 @@
+version: 3
+task: PD-F005-B02-T05
+batch: PD-F005-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 6b7a619
+  head_commit: null
+changed_paths:
+- src/web/components/PreviewAsDialog.tsx
+- src/web/components/PreviewAsDialog.test.tsx
+- src/web/components/AppShell.tsx
+- src/web/components/CommandPalette.tsx
+- src/web/lib/shellEvents.ts
+- src/web/lib/commands.ts
+- src/web/lib/commands.test.ts
+- src/web/lib/shellCommands.ts
+- src/web/styles/components.css
+- tests/e2e/preview-as.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Preview as participant, judge or public as a complete workflow
+  result: pass
+  evidence: organizers and admins get a Preview as section in the account menu and three palette commands. The dialog asks the server, through the PREVIEW_CONTEXT primitive (POST preview-as), for the event's saved application form as that role meets it - the fields shown, their types and whether required, how many are not shown, and the server's own sentence naming who and what - and, for the public, the public page drawn in an iframe whose sandbox forbids scripts, forms and navigation. The role can be changed inside the dialog; Escape closes it.
+- item: Without unsafe impersonation
+  result: pass
+  evidence: a context is request data in one body, never an identity, a header, a cookie or a stored row (core/preview_context.py); the caller stays the actor, so a preview only shows a subset of what they could already read. The dialog says so in words (Nothing is saved or sent, you are still signed in as you with your own permissions) and the browser test checks the session still gets 200 from an organizer endpoint after previewing; no role is granted or assumed, nothing is written
+- item: States, keyboard, accessibility
+  result: pass
+  evidence: no event chosen (asks to choose one), loading, no forms, a form with nothing published (the server's sentence), and a retry; a modal dialog with focus return and a role radio group; axe passes at 1440 and 390 with it open; a judge or participant is shown no preview control (unit and browser tests)
+invariants:
+- item: One primitive, one preview path
+  result: pass
+  evidence: previewAs from lib/previewContext.ts is used as it is and the two registered surfaces (form, page) are the only ones asked for; no new endpoint, no client-side computation of what a role sees
+- item: No test weakened
+  result: pass
+  evidence: tests were added; the shell overlay bus gained an optional argument without changing the existing overlays
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 145 files, 799 tests (PreviewAsDialog 5 - offered to organizers and admins only, the exact server request and what is listed, the sandboxed frame for the public, no event and no forms and a failed form, role change; commands 1)
+- command: scripts/e2e fixture run of preview-as.spec.ts (create iso-min fixture, run, dispose; the runner's own with_fixture steps)
+  result: pass
+  note: 3 passed on an isolated fixture with a published three-field form - participant sees Pitch and Repository with one field hidden, judge sees Pitch and Judge notes, public sees none and the page in an empty-sandbox frame, still an organizer to the server, axe and the 390 viewport fit, the palette opens it and a judge and a participant are offered nothing
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: account menu with a read-only preview as; role switch, density and shortcuts live in the same menu
+- ref: design/state-matrix
+  result: pass
+  note: loading, empty and error states of the dialog
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit, browser and accessibility tests
+- surface: audit
+  result: pass
+  evidence: reads only, nothing is recorded
+- surface: docs
+  result: pass
+  evidence: developer note and release note at T91
+migrations: []
+findings:
+- P2 the shell-level meaning of preview as was ambiguous (whole-app impersonation or a server-evaluated preview); decided as the latter and logged for the owner in QUESTIONS.md.
+- P3 only two surfaces are registered with PREVIEW_CONTEXT (form, page); a judge's rubric or a participant's own screens cannot be previewed until they register.
+escalations: []
+limitations:
+- The preview shows the form's field list, not a rendered form; the public page preview is the saved page, not unsaved edits (the page builder has its own live preview).
+- It previews the first form unless the event has several, then a selector appears; there is no cross-surface "walk the participant's whole journey".
+next: review

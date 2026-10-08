@@ -161,4 +161,23 @@ describe("command registry", () => {
     );
     expect(gone).toEqual(["/w/w/overview?as=participant"]);
   });
+
+  it("offers Preview as only to organizers and admins, and only when the shell can open it", () => {
+    const open = () => {};
+    const has = (role: string, capable = true) =>
+      commandsFor(
+        context({ role, capabilities: capable ? { openPreview: open } : {} }),
+      )
+        .filter((c) => c.id.startsWith("preview."))
+        .map((c) => c.label);
+    expect(has("organizer")).toEqual([
+      "Preview as participant",
+      "Preview as judge",
+      "Preview as public",
+    ]);
+    expect(has("admin")).toHaveLength(3);
+    expect(has("judge")).toEqual([]);
+    expect(has("participant")).toEqual([]);
+    expect(has("organizer", false)).toEqual([]);
+  });
 });

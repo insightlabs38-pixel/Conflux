@@ -21,6 +21,8 @@ import {
   DataGrid,
   type GridColumn,
   type GridDensity,
+  describeSort,
+  MAX_SORT_KEYS,
   type SortState,
 } from "./DataGrid";
 import { FilterBuilder } from "./FilterBuilder";
@@ -62,11 +64,15 @@ function show(field: EntityField, value: unknown): string {
 }
 
 function sortState(sort: string): SortState {
-  const first = sort.split(",")[0]?.trim();
-  if (!first) return null;
-  return first.startsWith("-")
-    ? { key: first.slice(1), descending: true }
-    : { key: first, descending: false };
+  return sort
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) =>
+      part.startsWith("-")
+        ? { key: part.slice(1), descending: true }
+        : { key: part, descending: false },
+    );
 }
 
 /**
@@ -173,9 +179,15 @@ export function EntityGrid({
   const fields = description?.fields ?? [];
   // the URL is a request: only a field this list can sort by is honoured, anything else is ignored
   const sortable = new Set(fields.filter((f) => f.sortable).map((f) => f.key));
-  const sort =
-    sortParam && sortable.has(sortParam.replace(/^-/, "")) ? sortParam : "";
-  const setSort = (value: string) => setSortParam(value, { replace: true });
+  // In the address the keys are joined with ":" (a comma is not an id-like character, lib/urlState.ts);
+  // the server takes the same keys as a comma list. Each key is checked on its own.
+  const sort = sortParam
+    .split(":")
+    .filter((key) => sortable.has(key.replace(/^-/, "")))
+    .slice(0, MAX_SORT_KEYS)
+    .join(",");
+  const setSort = (value: string) =>
+    setSortParam(value.split(",").filter(Boolean).join(":"), { replace: true });
   const offset = requestedPage > 1 ? (requestedPage - 1) * PAGE_SIZE : 0;
   const setOffset = (next: number) =>
     setPageParam(next > 0 ? String(Math.floor(next / PAGE_SIZE) + 1) : "", {
@@ -500,13 +512,18 @@ export function EntityGrid({
           <label>
             Sort by{" "}
             <select
-              value={sort}
+              value={sortState(sort).length > 1 ? "__several" : sort}
               onChange={(e) => {
                 setSort(e.target.value);
                 restart();
               }}
             >
               <option value="">Default order</option>
+              {sortState(sort).length > 1 && (
+                <option value="__several" disabled>
+                  Several columns (set in the headers)
+                </option>
+              )}
               {fields
                 .filter((f) => f.sortable)
                 .flatMap((f) => [
@@ -541,8 +558,30 @@ export function EntityGrid({
           rows={shownPage?.rows ?? []}
           status={status}
           sort={sortState(sort)}
-          onSort={(next) => {
-            setSort(next ? `${next.descending ? "-" : ""}${next.key}` : "");
+          onSort={(next, additive) => {
+            const before = sortState(sort);
+            if (
+              additive &&
+              before.length >= MAX_SORT_KEYS &&
+              next.length === before.length &&
+              next.every(
+                (n, i) =>
+                  n.key === before[i].key &&
+                  n.descending === before[i].descending,
+              )
+            )
+              return announce(
+                `Sort by at most ${MAX_SORT_KEYS} columns. Clear one first.`,
+              );
+            setSort(
+              next.map((n) => `${n.descending ? "-" : ""}${n.key}`).join(","),
+            );
+            announce(
+              describeSort(
+                next,
+                (key) => fields.find((f) => f.key === key)?.label ?? key,
+              ),
+            );
             restart();
           }}
           total={shownPage?.total}

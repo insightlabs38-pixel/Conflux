@@ -483,6 +483,36 @@ describe("EntityGrid sort and page in the URL", () => {
     await act(async () => bad.root.unmount());
   });
 
+  it("reads several sort keys from a link, drops the ones it cannot honour and writes a Shift-added key joined with a colon", async () => {
+    const { container, pages, root } = await mountAt(
+      "/w/w/participants?sort_applications=-username:password:status",
+    );
+    await until(() => pages.length > 0);
+    expect(lastQuery(pages).sort).toBe("-username,status"); // password is not sortable
+    const headers = () => [
+      ...container.querySelectorAll<HTMLButtonElement>("th button"),
+    ];
+    const created = headers().find((b) =>
+      b.textContent?.startsWith("Applied"),
+    )!;
+    await act(async () => {
+      created.dispatchEvent(
+        new MouseEvent("click", { bubbles: true, shiftKey: true }),
+      );
+    });
+    expect(search()).toBe("?sort_applications=-username%3Astatus%3Acreated_at");
+    // a fourth key is refused and said so
+    const note = headers().find((b) => b.textContent?.startsWith("Note"));
+    if (note)
+      await act(async () => {
+        note.dispatchEvent(
+          new MouseEvent("click", { bubbles: true, shiftKey: true }),
+        );
+      });
+    expect(search()).toBe("?sort_applications=-username%3Astatus%3Acreated_at");
+    await act(async () => root.unmount());
+  });
+
   it("writes a chosen sort to the URL (replacing, back to the first page) so a link reproduces the list", async () => {
     const { container, root } = await mountAt(
       "/w/w/participants?page_applications=2",

@@ -3863,3 +3863,9 @@ html {
   margin: var(--sp-1) 0 0;
   font-size: var(--fs-13);
 }
+
+.cx-datagrid__rank {
+  margin-left: var(--sp-1);
+  font-size: var(--fs-12);
+  font-variant-numeric: tabular-nums;
+}

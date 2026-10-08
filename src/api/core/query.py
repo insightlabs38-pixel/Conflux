@@ -11,7 +11,7 @@ import math
 from datetime import UTC, date, datetime, time
 from uuid import UUID as UuidValue
 
-from django.db.models import Q
+from django.db.models import F, Q
 from django.utils.dateparse import parse_date, parse_datetime
 from rest_framework.exceptions import ValidationError
 
@@ -240,6 +240,20 @@ def parse_sort(entity: Entity, raw):
     return order or list(entity.default_sort)
 
 
+def ordering(sort):
+    """ORM ordering for parsed sort keys, with empty values last in both directions so the order
+    reads the same on every database (PostgreSQL and SQLite differ by default)."""
+    out = []
+    for item in sort:
+        column = item.lstrip("-")
+        out.append(
+            F(column).desc(nulls_last=True)
+            if item.startswith("-")
+            else F(column).asc(nulls_last=True)
+        )
+    return out
+
+
 def parse_columns(entity: Entity, raw):
     if not raw:
         return [f for f in entity.fields if f.default]
@@ -281,7 +295,7 @@ def run(entity: Entity, event, user, *, tree, sort, columns, limit, offset, sear
         queryset = queryset.filter(compile_search(entity, search))
     if tree:
         queryset = queryset.filter(compile_filter(entity, tree))
-    queryset = queryset.order_by(*sort, "pk")
+    queryset = queryset.order_by(*ordering(sort), "pk")
     total = queryset.count()
     page = queryset[offset : offset + limit]
     rows = [{"id": str(obj.public_id), **{f.key: _read(obj, f) for f in columns}} for obj in page]

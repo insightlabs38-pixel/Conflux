@@ -388,3 +388,24 @@ def test_search_fields_must_be_registered_text_fields():
                 search_fields=("n",),
             )
         )
+
+
+def test_sort_puts_empty_values_last_in_both_directions_and_is_stable():
+    _, event, _, client, _, base = world()
+    applicants(event, ROWS)  # only the two waitlisted rows have a waitlist position
+    up = ask(client, base, sort="waitlist_position,username")
+    assert names(up) == ["cyd", "dee", "ada", "ben", "eve"]
+    down = ask(client, base, sort="-waitlist_position,username")
+    assert names(down) == [
+        "dee",
+        "cyd",
+        "ada",
+        "ben",
+        "eve",
+    ]  # empty still last, ties by the next key
+    # three keys are allowed, four are refused with the key named
+    assert ask(client, base, sort="status,username,created_at").status_code == 200
+    refused = ask(client, base, sort="status,username,created_at,waitlist_position")
+    assert refused.status_code == 400 and "sort" in refused.json()
+    # the same request twice reads the same order (primary key breaks the last tie)
+    assert names(ask(client, base, sort="status")) == names(ask(client, base, sort="status"))

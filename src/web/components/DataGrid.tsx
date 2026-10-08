@@ -23,7 +23,53 @@ export type GridColumn<Row> = {
   align?: "start" | "end";
   render?: (row: Row) => ReactNode;
 };
-export type SortState = { key: string; descending: boolean } | null;
+export type SortKey = { key: string; descending: boolean };
+/** The keys the list is ordered by, first is primary; empty means the list's default order. */
+export type SortState = SortKey[];
+/** The engine's limit (core.query.MAX_SORT). */
+export const MAX_SORT_KEYS = 3;
+
+/**
+ * What activating a header does. Plain: that column alone, ascending, then descending, then none.
+ * With Shift: that column joins (or cycles within, or leaves) the existing keys, up to three.
+ * Returns null when a fourth key was asked for.
+ */
+export function nextSort(
+  sort: SortState,
+  key: string,
+  additive: boolean,
+): SortState | null {
+  const at = sort.findIndex((item) => item.key === key);
+  const current = at >= 0 ? sort[at] : null;
+  const cycled: SortKey | null = !current
+    ? { key, descending: false }
+    : !current.descending
+      ? { key, descending: true }
+      : null;
+  if (!additive) {
+    // alone on this column it cycles; from anything else it starts again here, ascending
+    if (sort.length === 1 && current) return cycled ? [cycled] : [];
+    return [{ key, descending: false }];
+  }
+  if (!current) return sort.length >= MAX_SORT_KEYS ? null : [...sort, cycled!];
+  return cycled
+    ? sort.map((item, index) => (index === at ? cycled : item))
+    : sort.filter((_, index) => index !== at);
+}
+
+/** "Applicant ascending, then Status descending": the order in words. */
+export function describeSort(
+  sort: SortState,
+  labelOf: (key: string) => string,
+): string {
+  if (sort.length === 0) return "Sort cleared. Showing the default order.";
+  return `Sorted by ${sort
+    .map(
+      (item) =>
+        `${labelOf(item.key)} ${item.descending ? "descending" : "ascending"}`,
+    )
+    .join(", then ")}.`;
+}
 export type GridDensity = "compact" | "comfortable";
 export type GridStatus =
   | { kind: "ready" }
@@ -57,7 +103,8 @@ export function DataGrid<Row extends { id: string }>({
   rows: Row[];
   status?: GridStatus;
   sort?: SortState;
-  onSort?: (next: SortState) => void;
+  /** `additive` is Shift held: the column joins the existing keys. */
+  onSort?: (next: SortState, additive: boolean) => void;
   total?: number;
   limit?: number;
   offset?: number;
@@ -209,7 +256,10 @@ export function DataGrid<Row extends { id: string }>({
                 </th>
               )}
               {columns.map((column) => {
-                const active = sort?.key === column.key;
+                const position =
+                  sort?.findIndex((item) => item.key === column.key) ?? -1;
+                const active = position >= 0;
+                const direction = active ? sort![position].descending : false;
                 return (
                   <th
                     key={column.key}
@@ -217,7 +267,7 @@ export function DataGrid<Row extends { id: string }>({
                     aria-sort={
                       column.sortable
                         ? active
-                          ? sort!.descending
+                          ? direction
                             ? "descending"
                             : "ascending"
                           : "none"
@@ -231,30 +281,33 @@ export function DataGrid<Row extends { id: string }>({
                       <button
                         type="button"
                         className="cx-datagrid__sort"
-                        onClick={() =>
+                        onClick={(event) =>
                           onSort(
-                            !active
-                              ? { key: column.key, descending: false }
-                              : !sort!.descending
-                                ? { key: column.key, descending: true }
-                                : null,
+                            nextSort(sort ?? [], column.key, event.shiftKey) ??
+                              sort ??
+                              [],
+                            event.shiftKey,
                           )
                         }
                       >
                         {column.label}
                         {active && (
                           <Icon
-                            name={
-                              sort!.descending ? "chevron-down" : "chevron-up"
-                            }
+                            name={direction ? "chevron-down" : "chevron-up"}
                           />
+                        )}
+                        {active && sort!.length > 1 && (
+                          <span
+                            className="cx-datagrid__rank"
+                            aria-hidden="true"
+                          >
+                            {position + 1}
+                          </span>
                         )}
                         <span className="cx-visually-hidden">
                           {active
-                            ? sort!.descending
-                              ? ", sorted descending; activate to clear"
-                              : ", sorted ascending; activate to sort descending"
-                            : ", activate to sort ascending"}
+                            ? `${direction ? ", sorted descending" : ", sorted ascending"}${sort!.length > 1 ? `, sort key ${position + 1} of ${sort!.length}` : ""}; ${direction ? "activate to clear" : "activate to sort descending"}`
+                            : ", activate to sort ascending; hold Shift to add it as another sort"}
                         </span>
                       </button>
                     ) : (

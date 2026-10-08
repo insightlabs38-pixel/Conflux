@@ -67,7 +67,7 @@ describe("DataGrid", () => {
   it("sorts through the server: header state, cycle asc, desc, none, and never reorders rows itself", async () => {
     const seen: SortState[] = [];
     function Host() {
-      const [sort, setSort] = useState<SortState>(null);
+      const [sort, setSort] = useState<SortState>([]);
       return (
         <DataGrid
           label="People"
@@ -90,13 +90,13 @@ describe("DataGrid", () => {
     const sortButton = () =>
       container.querySelector<HTMLButtonElement>("th button")!;
     await act(async () => sortButton().click());
-    expect(seen.at(-1)).toEqual({ key: "name", descending: false });
+    expect(seen.at(-1)).toEqual([{ key: "name", descending: false }]);
     expect(heads()[0]).toBe("ascending");
     await act(async () => sortButton().click());
-    expect(seen.at(-1)).toEqual({ key: "name", descending: true });
+    expect(seen.at(-1)).toEqual([{ key: "name", descending: true }]);
     expect(heads()[0]).toBe("descending");
     await act(async () => sortButton().click());
-    expect(seen.at(-1)).toBeNull();
+    expect(seen.at(-1)).toEqual([]);
     expect(heads()[0]).toBe("none");
     // The rows stay exactly as given whatever the sort state.
     expect(
@@ -104,6 +104,74 @@ describe("DataGrid", () => {
         (c) => c.textContent,
       ),
     ).toEqual(["Ada", "Ben", "Cyd"]);
+    act(() => root.unmount());
+  });
+
+  it("adds a second and third sort key with Shift, shows their order and refuses a fourth", async () => {
+    const COLS = [
+      ...COLUMNS,
+      { key: "a", label: "A", sortable: true },
+      { key: "b", label: "B", sortable: true },
+    ];
+    function Host() {
+      const [sort, setSort] = useState<SortState>([]);
+      return (
+        <DataGrid
+          label="People"
+          columns={COLS}
+          rows={ROWS}
+          sort={sort}
+          onSort={(next) => setSort(next)}
+        />
+      );
+    }
+    const { container, root } = mount(<Host />);
+    const button = (label: string) =>
+      [...container.querySelectorAll<HTMLButtonElement>("th button")].find(
+        (b) => b.textContent?.startsWith(label),
+      )!;
+    const click = (label: string, shiftKey = false) =>
+      act(async () => {
+        button(label).dispatchEvent(
+          new MouseEvent("click", { bubbles: true, shiftKey }),
+        );
+      });
+    const state = () =>
+      Object.fromEntries(
+        [...container.querySelectorAll("th")]
+          .filter((h) => h.getAttribute("aria-sort"))
+          .map((h) => [
+            h.textContent?.split(",")[0].replace(/\d$/, ""),
+            h.getAttribute("aria-sort"),
+          ]),
+      );
+    await click("Name");
+    await click("Score", true);
+    await click("A", true);
+    expect(state()).toMatchObject({
+      Name: "ascending",
+      Score: "ascending",
+      A: "ascending",
+      B: "none",
+    });
+    expect(container.querySelectorAll(".cx-datagrid__rank").length).toBe(3);
+    expect(button("A").textContent).toContain("sort key 3 of 3");
+    await click("B", true); // a fourth key is refused: nothing changes
+    expect(state().B).toBe("none");
+    await click("Score", true); // cycles within the keys: descending
+    expect(state().Score).toBe("descending");
+    await click("Score", true); // and leaves
+    expect(state()).toMatchObject({
+      Name: "ascending",
+      Score: "none",
+      A: "ascending",
+    });
+    await click("A"); // a plain click on another column starts again there
+    expect(state()).toMatchObject({
+      Name: "none",
+      Score: "none",
+      A: "ascending",
+    });
     act(() => root.unmount());
   });
 

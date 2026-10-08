@@ -1,0 +1,87 @@
+version: 3
+task: PD-F006-B01-T01
+batch: PD-F006-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: c82b935
+  head_commit: null
+changed_paths:
+- src/api/core/query.py
+- tests/integration/test_entity_query.py
+- src/web/components/DataGrid.tsx
+- src/web/components/DataGrid.test.tsx
+- src/web/components/EntityGrid.tsx
+- src/web/components/EntityGrid.test.tsx
+- src/web/styles/components.css
+- tests/e2e/grid-sort.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Sortable columns as a complete workflow
+  result: pass
+  evidence: a header cycles one column ascending, descending, none; Shift adds a column as another key up to three (the engine's limit), cycles it within the keys or removes it; a fourth is refused and said so in the shell notice. The order is shown as 1, 2, 3 beside the arrows, each header carries aria-sort and a spoken position (sort key 2 of 3), and every change is announced in words (Sorted by Project descending, then Track ascending)
+- item: Deterministic order
+  result: pass
+  evidence: the server orders with empty values last in both directions on every database (nulls_last) and the primary key breaks the final tie; two identical requests read the same
+- item: Address and tools
+  result: pass
+  evidence: several keys are joined with a colon in sort_<entity> because a comma is not an id-like character in the address (single-key links unchanged); each key is validated on its own and unsortable ones are dropped; the Sort by control in the grid tools (the phone's way, since the stacked layout has no header row) stays single-key and says Several columns when the headers set more
+invariants:
+- item: Rows are ordered by the server only
+  result: pass
+  evidence: no client-side sorting; the DataGrid test asserts the rows stay as given
+- item: No test weakened
+  result: pass
+  evidence: the one existing DataGrid sort test was updated for the array state it now has, with the same assertions; every other existing test unchanged
+verification:
+- command: .venv/bin/python -m pytest tests/integration/test_entity_query.py tests/integration/test_saved_views.py -q
+  result: pass
+  note: 54 passed (empty values last up and down, tie by next key, three keys allowed and a fourth refused, stable repeat)
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 150 files, 832 tests (DataGrid multi-key Shift test, EntityGrid multi-key address test)
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts grid-sort grid-search (stack rebuilt first)
+  result: pass
+  note: desktop - header cycle, order equals the API's, address keeps it, Shift adds Track with ranks 1 and 2, reload keeps both, plain click elsewhere restarts, axe; mobile - Sort by sorts to the API's order, axe
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: sortable headers with aria-sort kept; order shown by number, not colour
+- ref: design/state-matrix
+  result: pass
+  note: none, one key, several keys, refused fourth, cleared
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: ordering made deterministic; no contract change
+- surface: cli
+  result: pass
+  evidence: T91 per the contract (sort is already a parameter of the route)
+- surface: mcp
+  result: pass
+  evidence: T91 per the contract
+- surface: audit
+  result: pass
+  evidence: reads only
+- surface: search
+  result: pass
+  evidence: not affected
+- surface: docs
+  result: pass
+  evidence: spec 006 and T91
+migrations: []
+findings:
+- P1-in-scope the grid treated the whole sort parameter as one key, so a second key would have been silently dropped; each key is now checked on its own
+- P3 empty values ordered differently on PostgreSQL and SQLite; now explicit
+escalations: []
+limitations:
+- The phone has no header row, so multi-key sort is a desktop gesture; its Sort by control picks one column (responsive fallback is B02).
+next: review

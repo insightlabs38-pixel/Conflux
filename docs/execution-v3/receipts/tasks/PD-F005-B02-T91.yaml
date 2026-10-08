@@ -1,0 +1,67 @@
+version: 3
+task: PD-F005-B02-T91
+batch: PD-F005-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: f033290
+  head_commit: null
+changed_paths:
+- docs/verification/PD-F005-B02/SURFACES.md
+- docs/operations/VISUAL_FOUNDATION.md
+- docs/operations/UPGRADES.md
+- docs/product-depth-v3/specs/005-professional-application-shell-depth.md
+deliverables:
+- item: Surface matrix closed, no undocumented skip
+  result: pass
+  evidence: docs/verification/PD-F005-B02/SURFACES.md closes every surface of spec 005 - web, audit, search and docs done; api reclassified for T01 and T02 with the two additive read-only changes named and tested; sdk regenerated; the rest not required with the check that backs it
+- item: Every required surface delegates to the same canonical operation, contracts synchronized
+  result: pass
+  evidence: the shell reads existing endpoints (events lists, audit read, saved views, entity query, preview-as) and the one derivation of the event phase; make verify-fast OpenAPI and SDK checks passed in T90 after regeneration
+- item: User, operator and developer documentation and migration notes
+  result: pass
+  evidence: VISUAL_FOUNDATION.md gained the second slice for developers (phase, roles and navigation.target, density and theme, the shortcut logic, pins and recents, the inspector, preview as, and the listener rule); UPGRADES.md lists what people will notice and the two API changes for integrators; spec 005 gained As built
+invariants:
+- item: No second source of truth
+  result: pass
+  evidence: one phase function, one role picker, one preference store, one command registry, one preview primitive, one entity query for lists and the inspector
+verification:
+- command: npx prettier --check docs src/web tests/e2e
+  result: pass
+  note: formatting only; behaviour was verified in T90 on the same code
+- command: python3 scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid, 331 batches, 3110 tasks
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: see T90 matrix
+- ref: design/responsive-wide
+  result: pass
+  note: see T90 matrix
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: T90
+- surface: api
+  result: pass
+  evidence: SURFACES.md
+- surface: audit
+  result: pass
+  evidence: SURFACES.md
+- surface: search
+  result: pass
+  evidence: SURFACES.md
+- surface: docs
+  result: pass
+  evidence: files above
+migrations: []
+findings: []
+escalations: []
+limitations:
+- The ROUTER and COMMANDS owner tasks in PD-F071 still list those primitives as PLANNED; they must adopt routes.ts, urlState.ts and commands.ts as recorded in ESC-20260930-007.
+next: review

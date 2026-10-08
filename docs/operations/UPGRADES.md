@@ -186,3 +186,15 @@ No migration, no endpoint, no SDK change; web only. Every existing URL keeps wor
 - **Notification preferences** are one click from the account menu and the bell; they open the profile section directly.
 - The browser suite's read-only tier gained `shell-responsive`, `event-switcher`, `account-menu`, `global-search` and `command-palette`, the isolated tier gained `inbox-center`, and `slop-audit` has a `crumbs` rule. `Modal` now returns focus to the control that opened it (a fix for an autofocused field being mistaken for the opener).
 - Integrators: a new query entity now needs an entry in `src/web/lib/searchTargets.json` (a test fails otherwise), and the inbox read is shared by `useInbox`.
+
+## Moving to a build with the second slice of the application shell (PD-F005-B02)
+
+No migration. Two small additive API changes (OpenAPI and both SDKs regenerated): the three event lists (organizer, judge, participant) gained a read-only `phase` object (`key`, `label`, `reason`), and `GET /audit/{workspace}/` accepts optional `mine` and `limit` (1 to 200, newest first) and answers exactly as before without them. What people will notice:
+
+- **The event's phase** (Draft, Open, Closed, Judging, Published, Archived) beside its name in the event switcher; hover for the reason. Judging means a judge has submitted a ballot (practice ballots do not count), Published means an award is published.
+- **Account menu**: Viewing as (only if you hold several roles; the default is now your most privileged role, a link with as chooses another), Preview as participant, judge or public (organizers and admins; read-only, nothing is saved or sent), Theme, Table density (comfortable, the long-standing look, compact, high density) and Keyboard shortcuts.
+- **Keyboard**: ? shows the shortcuts, / opens the palette, G then a letter goes to a place (G then J for Judging); single-key shortcuts can be turned off in the help, Ctrl or Cmd K always works.
+- **Palette**: pinned views first (pin one in a list's view bar), your latest actions from the audit log, views you opened lately, View as and Preview as commands.
+- **Lists**: every list has a Details button that opens the record in an inspector beside the list (a sheet below 1024px); a link with row_<entity> reopens it.
+- **On a phone** the brand word hides so the event switcher keeps its room; the browser suite's `goToDestination` is unchanged.
+- Integrators: scripts that read the event lists will now see `phase`; clients that list a person's memberships may see several rows for one workspace (one per role), as before.

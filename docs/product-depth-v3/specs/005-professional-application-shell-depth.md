@@ -233,3 +233,17 @@ Written while building PD-F005-B02 (this batch has no T00), against `design/app-
 - **Inspector (T06).** `Inspector` beside `EntityGrid`: a Details button per row, the record as `row_<entity>` panel state in the URL, every field of the entity read through the same entity query, docked from 1024px and a sheet below, the list not remounted so its position survives.
 - **Preview as (T05).** A read-only dialog over the PREVIEW_CONTEXT primitive for organizers and admins: the saved application form as a participant, judge or the public meets it, and the public page in a script-less frame; no impersonation by construction (owner question logged).
 - **Event state (T01).** The phase (draft, open, closed, judging, published, archived) is derived on the server (`events/lifecycle.py`) and sent as an additive read-only `phase` on the organizer, judge and participant event lists; **a second reclassification of the api surface** (OpenAPI and SDKs regenerated and checked); shown beside the event name in the switcher (owner question logged).
+
+### As built (recorded at the close of PD-F005-B02)
+
+- **Event state (T01).** `events/lifecycle.py` is the one derivation; `phase` is an additive read-only field on the organizer, judge and participant event lists (reclassifying the api surface for that task); the switcher shows it. Judging is read from submitted ballots, not a judging window.
+- **Recent (T02).** The audit read gained `mine` and `limit`; recent views are device-local ids resolved against the server.
+- **Pinned (T03).** Three ids per pin on the device, a Pin toggle in the view bar, a Pinned views group in the palette.
+- **Roles (T04).** `as` context param, `lib/roles.ts`, `navigation.target`; the default for several roles is the most privileged.
+- **Preview as (T05).** A read-only dialog over PREVIEW_CONTEXT; only the form and the public page are registered surfaces today.
+- **Inspector (T06).** `Inspector` plus a Details column on every `EntityGrid`; read-only; stepping is within the current page.
+- **Shortcuts (T07).** `lib/shortcuts.ts`, the help overlay and the off switch; a chord survives re-renders.
+- **Density (T08).** Three values on the document, default today's look; device-local.
+- **Surfaces as closed.** web required (done), api reclassified for T01 and T02 (additive and read-only, tested, regenerated), audit (the audit log is read; nothing in the shell writes), search (palette and inspector read the entity query), docs; sdk regenerated; cli, mcp, event_as_code, webhook, archive and analytics unchanged.
+- **Open for B03.** Per-user column preferences, workspace-aware tabs that keep drafts, a multi-pane operations mode, selection-parameterised commands, live operations health and a route state that links an exact operational context; a per-user server store for the shell's device-local preferences remains an owner question.
+

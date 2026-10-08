@@ -1,0 +1,71 @@
+version: 3
+task: PD-F006-B02-T03
+batch: PD-F006-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: bac9efc
+  head_commit: null
+changed_paths:
+- src/web/components/FilterBuilder.tsx
+- src/web/components/FilterBuilder.test.tsx
+- src/web/lib/entityQuery.ts
+- tests/e2e/grid-filter.spec.ts
+deliverables:
+- item: Filter operators and inputs appropriate to the data type
+  result: pass
+  evidence: the operators come from the catalogue per type (the server's table) and are now worded for what they compare - dates before, on or before, after, on or after, between, is empty; numbers less than, at most, more than, at least; text is, is not, is one of, contains, starts with. The value control follows the type and operator - a date box for dates, a number box for numbers, yes or no for booleans, one choice for an enum and checkboxes for several (is one of), two boxes for a range (between) typed as numbers or dates, a comma list for text and ids. Changing the operator keeps what it can (a pair gives its first item to a single value, a single value starts a pair or a list). The active-filter sentence uses the same words
+invariants:
+- item: The server decides what is allowed
+  result: pass
+  evidence: operators and choices are read from the catalogue; nothing is added client-side; the server still validates every value and its refusals are shown beside the condition (T03 of B01, nested in T02)
+- item: No test weakened
+  result: pass
+  evidence: two interactions that the better controls replace were updated with the same intent - a range is now typed in two boxes instead of 2, 5 in one, and the refused-value browser case uses a list of 51 values (the date box no longer accepts text); every other assertion unchanged
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 151 files, 846 tests (wording by type, date box, range boxes typed per field, operator changes keep the value, enum checkboxes)
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts grid-filter (stack rebuilt first)
+  result: pass
+  note: 6 passed, desktop and mobile - date operators in the date words, a date range in two date boxes with the API's total, a 51-value list refused beside its condition with the rows kept, nested groups, axe clean
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: Data-Filters - operators by type with a query line
+- ref: design/state-matrix
+  result: pass
+  note: each type, pair and list shapes, refused value
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: unchanged
+- surface: cli
+  result: pass
+  evidence: the operators are the CLI's --filter operators
+- surface: mcp
+  result: pass
+  evidence: the same for the tool
+- surface: audit
+  result: pass
+  evidence: reads only
+- surface: search
+  result: pass
+  evidence: not affected
+- surface: docs
+  result: pass
+  evidence: T91
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Dates are chosen as calendar days and read as UTC midnight by the server; a time of day cannot be chosen in the box (a saved or linked filter that has one is kept and shown).
+- A person or team picker for id fields is not part of this task.
+next: review

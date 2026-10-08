@@ -118,6 +118,29 @@ export function useEntityPage<Row = EntityRow>(
   );
 }
 
+/** The words for an operator depend on what it compares: "after" a date, "more than" a number. */
+export function operatorLabel(type: FieldType | undefined, op: string): string {
+  if (type === "date") {
+    const dates: Record<string, string> = {
+      lt: "before",
+      lte: "on or before",
+      gt: "after",
+      gte: "on or after",
+    };
+    if (dates[op]) return dates[op];
+  }
+  if (type === "number") {
+    const numbers: Record<string, string> = {
+      lt: "less than",
+      lte: "at most",
+      gt: "more than",
+      gte: "at least",
+    };
+    if (numbers[op]) return numbers[op];
+  }
+  return OPERATOR_LABELS[op] ?? op;
+}
+
 export const OPERATOR_LABELS: Record<string, string> = {
   eq: "is",
   ne: "is not",
@@ -146,12 +169,13 @@ const valueText = (value: unknown): string =>
  */
 export function describeFilter(
   filter: FilterNode | null,
-  fields: { key: string; label: string }[],
+  fields: { key: string; label: string; type?: FieldType }[],
   inner = false,
 ): string {
   if (filter === null) return "";
   const label = (key: string) =>
     fields.find((f) => f.key === key)?.label ?? key;
+  const typeOf = (key: string) => fields.find((f) => f.key === key)?.type;
   if ("and" in filter || "or" in filter) {
     const mode = "and" in filter ? "and" : "or";
     const children = (filter as Record<string, FilterNode[]>)[mode]
@@ -164,7 +188,7 @@ export function describeFilter(
     return `not (${describeFilter(filter.not, fields, true)})`;
   if (filter.op === "is_null")
     return `${label(filter.field)} is ${filter.value === false ? "not " : ""}empty`;
-  const op = OPERATOR_LABELS[filter.op] ?? filter.op;
+  const op = operatorLabel(typeOf(filter.field), filter.op);
   if (filter.op === "between" && Array.isArray(filter.value))
     return `${label(filter.field)} ${op} ${filter.value.join(" and ")}`;
   return `${label(filter.field)} ${op} ${valueText(filter.value)}`.trim();

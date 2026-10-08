@@ -118,7 +118,12 @@ describe("FilterBuilder", () => {
     await act(async () =>
       set(by(container, "Operator of condition 1"), "between"),
     );
-    await act(async () => set(by(container, "Value of condition 1"), "2, 5"));
+    // a range is two boxes, typed as numbers for a number field
+    expect(by(container, "Start of condition 1").getAttribute("type")).toBe(
+      "number",
+    );
+    await act(async () => set(by(container, "Start of condition 1"), "2"));
+    await act(async () => set(by(container, "End of condition 1"), "5"));
     expect(seen.at(-1)).toEqual({
       field: "waitlist_position",
       op: "between",
@@ -154,6 +159,76 @@ describe("FilterBuilder", () => {
       field: "gallery_visible",
       op: "is_null",
       value: true,
+    });
+    await act(async () => root.unmount());
+  });
+
+  it("words operators for what they compare, uses a date box for dates, checkboxes for several enum values, and keeps a value across operator changes", async () => {
+    const { container, seen, root } = mount({
+      field: "created_at",
+      op: "gt",
+      value: "2027-03-01",
+    });
+    const labels = () =>
+      [
+        ...by(container, "Operator of condition 1").querySelectorAll("option"),
+      ].map((o) => o.textContent);
+    expect(labels()).toEqual(["after", "between", "is empty"]);
+    expect(by(container, "Value of condition 1").getAttribute("type")).toBe(
+      "date",
+    );
+    await act(async () =>
+      set(by(container, "Operator of condition 1"), "between"),
+    );
+    expect(seen.at(-1)).toEqual({
+      field: "created_at",
+      op: "between",
+      value: ["2027-03-01"],
+    });
+    await act(async () =>
+      set(by(container, "End of condition 1"), "2027-03-05"),
+    );
+    expect(seen.at(-1)).toEqual({
+      field: "created_at",
+      op: "between",
+      value: ["2027-03-01", "2027-03-05"],
+    });
+    await act(async () => set(by(container, "Operator of condition 1"), "gt"));
+    expect(seen.at(-1)).toEqual({
+      field: "created_at",
+      op: "gt",
+      value: "2027-03-01",
+    }); // the first of the pair
+
+    await act(async () =>
+      set(by(container, "Field of condition 1"), "waitlist_position"),
+    );
+    expect(
+      [
+        ...by(container, "Operator of condition 1").querySelectorAll("option"),
+      ].map((o) => o.textContent),
+    ).toContain("at least");
+
+    await act(async () => set(by(container, "Field of condition 1"), "status"));
+    await act(async () => set(by(container, "Operator of condition 1"), "in"));
+    const boxes = () => [
+      ...container.querySelectorAll<HTMLInputElement>(
+        '[aria-label="Values of condition 1"] input',
+      ),
+    ];
+    expect(boxes().length).toBe(2);
+    await act(async () => boxes()[1].click());
+    await act(async () => boxes()[0].click());
+    expect(seen.at(-1)).toEqual({
+      field: "status",
+      op: "in",
+      value: ["pending", "approved"],
+    });
+    await act(async () => boxes()[0].click());
+    expect(seen.at(-1)).toEqual({
+      field: "status",
+      op: "in",
+      value: ["approved"],
     });
     await act(async () => root.unmount());
   });

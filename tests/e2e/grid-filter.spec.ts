@@ -46,17 +46,20 @@ test("a condition filters through the server and reads back as a sentence; a ref
   await expect(grid(page)).toContainText(`of ${expected.total}`);
   expect(page.url()).not.toContain(track); // typed values are not in the address
 
-  // a value the server refuses is said beside its condition and the rows stay
+  // a value the server refuses is said beside its condition and the rows stay (more than 50 in a list)
   const rows = await grid(page).locator("tbody tr").count();
   await grid(page)
     .getByLabel("Field of condition 1")
-    .selectOption({ label: "Created" });
+    .selectOption({ label: "Project" });
   await grid(page)
     .getByLabel("Operator of condition 1")
-    .selectOption({ label: "after or more than" });
-  await grid(page).getByLabel("Value of condition 1").fill("not-a-date");
+    .selectOption({ label: "is one of" });
+  await grid(page)
+    .getByLabel("Value of condition 1")
+    .fill(Array.from({ length: 51 }, (_, i) => `p${i}`).join(","));
   const problem = grid(page).locator("[role=alert].cx-filter-problem");
   await expect(problem).toContainText("Condition 1:");
+  await expect(problem).toContainText("At most 50 values");
   await expect(grid(page).getByLabel("Value of condition 1")).toHaveAttribute(
     "aria-invalid",
     "true",
@@ -136,4 +139,61 @@ test("conditions nest in groups, read back as one sentence, and match what the A
   await g.getByRole("button", { name: "Remove group 1" }).click();
   await expect(active).toContainText(`Filter: Track is ${track}`);
   await expect(active).not.toContainText("(");
+});
+
+test("a date is chosen in a date box with date words, a range is two boxes, and the sentence says what it means", async ({
+  page,
+}) => {
+  await signIn(page, "organizer");
+  const { workspace, event } = await eventIds(page);
+  const api = `/api/v1/workspaces/${workspace}/events/${event}/entities/projects/`;
+  const tree = {
+    field: "created_at",
+    op: "between",
+    value: ["2026-01-01", "2026-12-31"],
+  };
+  const expected = await (
+    await page.request.get(
+      `${api}?filter=${encodeURIComponent(JSON.stringify(tree))}`,
+    )
+  ).json();
+  await page.goto(
+    `/app/w/${workspace}/participants?event=${event}&section=ProjectsGrid`,
+  );
+  await settled(page);
+  await expect(grid(page).locator("tbody tr").first()).toBeVisible();
+  await openTools(page);
+  const g = grid(page);
+  await g.getByRole("button", { name: "Add condition", exact: true }).click();
+  await g.getByLabel("Field of condition 1").selectOption({ label: "Created" });
+  const operators = await g
+    .getByLabel("Operator of condition 1")
+    .locator("option")
+    .allInnerTexts();
+  expect(operators).toEqual([
+    "before",
+    "on or before",
+    "after",
+    "on or after",
+    "between",
+    "is empty",
+  ]);
+  await g
+    .getByLabel("Operator of condition 1")
+    .selectOption({ label: "between" });
+  await expect(g.getByLabel("Start of condition 1")).toHaveAttribute(
+    "type",
+    "date",
+  );
+  await g.getByLabel("Start of condition 1").fill("2026-01-01");
+  await g.getByLabel("End of condition 1").fill("2026-12-31");
+  await expect(g.getByRole("group", { name: "Active filter" })).toContainText(
+    "Created between 2026-01-01 and 2026-12-31",
+  );
+  await expect(g).toContainText(
+    expected.total === 0
+      ? "Showing 0 of 0"
+      : `of ${expected.total.toLocaleString("en-US")}`,
+  );
+  await accessible(page);
 });

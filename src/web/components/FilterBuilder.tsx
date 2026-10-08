@@ -1,6 +1,6 @@
-import { Fragment, useId } from "react";
+import { Fragment, useId, type ReactNode } from "react";
 import {
-  OPERATOR_LABELS,
+  operatorLabel,
   type EntityField,
   type FilterNode,
   type FilterProblems,
@@ -163,10 +163,138 @@ export function FilterBuilder({
       "aria-invalid": problem ? true : undefined,
       "aria-describedby": problem ? problemId : undefined,
     } as const;
+    const label = `condition ${number}`;
+    const set = (next: unknown) =>
+      change({ field: field.key, op, value: next });
+    const list = (v: unknown): string[] =>
+      Array.isArray(v)
+        ? v.map(String)
+        : v === "" || v === undefined || v === null
+          ? []
+          : [String(v)];
+    const scalarType =
+      field?.type === "number"
+        ? "number"
+        : field?.type === "date"
+          ? "date"
+          : "text";
+    const parse = (text: string): unknown =>
+      field?.type === "number" ? (text === "" ? "" : Number(text)) : text;
+    let control: ReactNode;
+    if (op === "is_null") {
+      control = (
+        <select
+          aria-label={`Value of ${label}`}
+          {...invalid}
+          value={String(condition.value !== false)}
+          onChange={(e) => set(e.target.value === "true")}
+        >
+          <option value="true">yes</option>
+          <option value="false">no</option>
+        </select>
+      );
+    } else if (field?.type === "bool") {
+      control = (
+        <select
+          aria-label={`Value of ${label}`}
+          {...invalid}
+          value={String(condition.value === true)}
+          onChange={(e) => set(e.target.value === "true")}
+        >
+          <option value="true">yes</option>
+          <option value="false">no</option>
+        </select>
+      );
+    } else if (field?.type === "enum" && op === "in") {
+      const chosen = new Set(list(condition.value));
+      control = (
+        <fieldset aria-label={`Values of ${label}`} {...invalid}>
+          {field.choices.map((choice) => (
+            <label key={choice}>
+              <input
+                type="checkbox"
+                checked={chosen.has(choice)}
+                onChange={(e) => {
+                  const next = new Set(chosen);
+                  if (e.target.checked) next.add(choice);
+                  else next.delete(choice);
+                  set(field.choices.filter((c) => next.has(c)));
+                }}
+              />{" "}
+              {choice}
+            </label>
+          ))}
+        </fieldset>
+      );
+    } else if (field?.type === "enum") {
+      control = (
+        <select
+          aria-label={`Value of ${label}`}
+          {...invalid}
+          value={show(condition.value)}
+          onChange={(e) => set(e.target.value)}
+        >
+          <option value="" />
+          {field.choices.map((choice) => (
+            <option key={choice} value={choice}>
+              {choice}
+            </option>
+          ))}
+        </select>
+      );
+    } else if (op === "between") {
+      const [from = "", to = ""] = list(condition.value);
+      const pair = (start: string, end: string) =>
+        set(
+          [start, end].map((v) =>
+            scalarType === "number" && v !== "" ? Number(v) : v,
+          ),
+        );
+      control = (
+        <>
+          <input
+            aria-label={`Start of ${label}`}
+            {...invalid}
+            type={scalarType}
+            value={from}
+            onChange={(e) => pair(e.target.value, to)}
+          />{" "}
+          and{" "}
+          <input
+            aria-label={`End of ${label}`}
+            {...invalid}
+            type={scalarType}
+            value={to}
+            onChange={(e) => pair(from, e.target.value)}
+          />
+        </>
+      );
+    } else if (op === "in") {
+      control = (
+        <input
+          aria-label={`Value of ${label}`}
+          {...invalid}
+          type="text"
+          placeholder="comma separated"
+          value={show(condition.value)}
+          onChange={(e) => set(typed(field, op, e.target.value))}
+        />
+      );
+    } else {
+      control = (
+        <input
+          aria-label={`Value of ${label}`}
+          {...invalid}
+          type={scalarType}
+          value={show(condition.value)}
+          onChange={(e) => set(parse(e.target.value))}
+        />
+      );
+    }
     return (
       <li>
         <select
-          aria-label={`Field of condition ${number}`}
+          aria-label={`Field of ${label}`}
           value={field?.key}
           onChange={(e) => {
             const next = fieldOf(e.target.value)!;
@@ -184,100 +312,33 @@ export function FilterBuilder({
           ))}
         </select>
         <select
-          aria-label={`Operator of condition ${number}`}
+          aria-label={`Operator of ${label}`}
           value={op}
-          onChange={(e) =>
-            change({
-              field: field.key,
-              op: e.target.value,
-              value: e.target.value === "is_null" ? true : condition.value,
-            })
-          }
+          onChange={(e) => {
+            const next = e.target.value;
+            // the value keeps what it can: a pair or a list gives its first item to a single
+            // value, a single value starts a pair or a list
+            const current = condition.value;
+            const keep =
+              next === "is_null"
+                ? true
+                : next === "between"
+                  ? list(current).slice(0, 2)
+                  : next === "in"
+                    ? list(current)
+                    : Array.isArray(current)
+                      ? (current[0] ?? "")
+                      : current;
+            change({ field: field.key, op: next, value: keep });
+          }}
         >
           {operators.map((o) => (
             <option key={o} value={o}>
-              {OPERATOR_LABELS[o] ?? o}
+              {operatorLabel(field.type, o)}
             </option>
           ))}
         </select>
-        {op === "is_null" ? (
-          <select
-            aria-label={`Value of condition ${number}`}
-            {...invalid}
-            value={String(condition.value !== false)}
-            onChange={(e) =>
-              change({
-                field: field.key,
-                op,
-                value: e.target.value === "true",
-              })
-            }
-          >
-            <option value="true">yes</option>
-            <option value="false">no</option>
-          </select>
-        ) : field?.type === "enum" && op === "eq" ? (
-          <select
-            aria-label={`Value of condition ${number}`}
-            {...invalid}
-            value={show(condition.value)}
-            onChange={(e) =>
-              change({
-                field: field.key,
-                op,
-                value: e.target.value,
-              })
-            }
-          >
-            <option value="" />
-            {field.choices.map((choice) => (
-              <option key={choice} value={choice}>
-                {choice}
-              </option>
-            ))}
-          </select>
-        ) : field?.type === "bool" ? (
-          <select
-            aria-label={`Value of condition ${number}`}
-            {...invalid}
-            value={String(condition.value === true)}
-            onChange={(e) =>
-              change({
-                field: field.key,
-                op,
-                value: e.target.value === "true",
-              })
-            }
-          >
-            <option value="true">yes</option>
-            <option value="false">no</option>
-          </select>
-        ) : (
-          <input
-            aria-label={`Value of condition ${number}`}
-            {...invalid}
-            type={
-              field?.type === "number" && op !== "in" && op !== "between"
-                ? "number"
-                : "text"
-            }
-            placeholder={
-              op === "in" || op === "between"
-                ? "comma separated"
-                : field?.type === "date"
-                  ? "2027-03-05 or 2027-03-05T09:00:00Z"
-                  : ""
-            }
-            value={show(condition.value)}
-            onChange={(e) =>
-              change({
-                field: field.key,
-                op,
-                value: typed(field, op, e.target.value),
-              })
-            }
-          />
-        )}
+        {control}{" "}
         <Button
           variant="secondary"
           aria-label={`Remove condition ${number}`}

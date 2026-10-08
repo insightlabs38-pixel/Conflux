@@ -30,7 +30,7 @@ invariants:
 verification:
 - command: cd src/web && npx tsc --noEmit && npx vitest run
   result: pass
-  note: 151 files, 848 tests (ViewBar - Reset only while changed with the visibility line, a conflict reloads and the next save carries the new version, pinned views first and only while they exist)
+  note: 151 files, 849 tests (ViewBar - Reset only while changed with the visibility line, a conflict reloads and the next save carries the new version, pinned views first and only while they exist)
 - command: scripts/e2e-tiers with_fixture iso-min saved-views-flow (the runner's own provision, run and dispose; stack rebuilt first)
   result: pass
   note: 1 passed on an isolated fixture, desktop - save sorted by project, Private to you, change shows Changed since saved, Reset returns to the saved order, Save keeps a change across reload, a duplicate name is refused in words, Share shows Visible to every organizer and the API agrees, Pin lists it first, delete states its consequence; axe clean

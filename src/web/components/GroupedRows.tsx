@@ -180,7 +180,7 @@ export function GroupedRows({
 }
 
 /** The rows of one bucket: the ordinary query with the bucket as a condition, paged like the list. */
-function BucketRows({
+export function BucketRows({
   base,
   entity,
   label,

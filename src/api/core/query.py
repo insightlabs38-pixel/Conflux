@@ -8,14 +8,16 @@ part by its path (`and[1].op`) so a client can fix it. Stateless: nothing here i
 
 import json
 import math
-from datetime import UTC, date, datetime, time
+import re
+from datetime import UTC, date, datetime, time, timedelta
 from uuid import UUID as UuidValue
 
 from django.db.models import Count, F, Q
+from django.db.models.functions import TruncDate
 from django.utils.dateparse import parse_date, parse_datetime
 from rest_framework.exceptions import ValidationError
 
-from .entities import BOOL, DATE, ENUM, NUMBER, OPERATORS, TEXT, UUID, Entity
+from .entities import BOOL, DATE, ENUM, LAYOUTS, NUMBER, OPERATORS, TEXT, UUID, Entity
 
 VERSION = 1
 MAX_DEPTH = 4
@@ -260,6 +262,49 @@ def parse_group(entity: Entity, group, subgroup):
     return found[0], found[1]
 
 
+def parse_layout(entity: Entity, layout, calendar):
+    """A saved layout and the date field of a calendar, checked against what the entity offers."""
+    layout = layout or "list"
+    if layout not in LAYOUTS:
+        raise QueryError("", f"Use one of {', '.join(LAYOUTS)}.", root="layout")
+    if layout not in entity.layouts():
+        raise QueryError(
+            "",
+            f"This list has no {layout} layout; use one of {', '.join(entity.layouts())}.",
+            root="layout",
+        )
+    if layout != "calendar":
+        if calendar:
+            raise QueryError("", "Only a calendar names a date field.", root="calendar")
+        return layout, None
+    key = calendar or entity.calendar_fields[0]
+    if key not in entity.calendar_fields:
+        raise QueryError(
+            "",
+            f"Cannot place rows by {key!r}; use {', '.join(entity.calendar_fields)}.",
+            root="calendar",
+        )
+    return layout, entity.field(key)
+
+
+_MONTH = re.compile(r"^(\d{4})-(0[1-9]|1[0-2])$")
+
+
+def parse_month(raw):
+    """`2027-03` -> the first instant of that month and of the next, in UTC; empty is this month."""
+    if raw in (None, ""):
+        today = datetime.now(UTC)
+        year, month = today.year, today.month
+    else:
+        found = _MONTH.match(str(raw))
+        if not found or not 1970 <= int(found.group(1)) <= 2200:
+            raise QueryError("", "A month is written 2027-03.", root="month")
+        year, month = int(found.group(1)), int(found.group(2))
+    start = datetime(year, month, 1, tzinfo=UTC)
+    following = datetime(year + (month == 12), month % 12 + 1, 1, tzinfo=UTC)
+    return f"{year:04d}-{month:02d}", start, following
+
+
 def _label(field, value):
     if value is None:
         return "(none)"
@@ -315,6 +360,32 @@ def run_groups(entity: Entity, event, user, *, tree, search, group, subgroup):
     for item in groups:
         del item["_raw"]
     return {"groups": groups, "truncated": truncated, "total": sum(g["count"] for g in groups)}
+
+
+def run_days(entity: Entity, event, user, *, tree, search, field, month):
+    """The rows of one month placed on days: a count per calendar day (UTC) for the current filter
+    and search. No rows - a day is opened with the ordinary query and the day as two conditions."""
+    label, start, following = month
+    queryset = entity.base(event, user)
+    if tree:
+        queryset = queryset.filter(compile_filter(entity, tree))
+    if search:
+        queryset = queryset.filter(compile_search(entity, search))
+    queryset = queryset.filter(**{f"{field.column}__gte": start, f"{field.column}__lt": following})
+    days = (
+        queryset.order_by()
+        .annotate(_day=TruncDate(field.column, tzinfo=UTC))
+        .values("_day")
+        .annotate(n=Count("pk"))
+        .order_by("_day")
+    )
+    found = [{"date": row["_day"].isoformat(), "count": row["n"]} for row in days]
+    return {"month": label, "days": found, "total": sum(d["count"] for d in found)}
+
+
+def next_day(day):
+    """The ISO date after `day`, for the exclusive end of a day's range."""
+    return (date.fromisoformat(day) + timedelta(days=1)).isoformat()
 
 
 def ordering(sort):
@@ -377,3 +448,69 @@ def run(entity: Entity, event, user, *, tree, sort, columns, limit, offset, sear
     page = queryset[offset : offset + limit]
     rows = [{"id": str(obj.public_id), **{f.key: _read(obj, f) for f in columns}} for obj in page]
     return {"total": total, "rows": rows}
+
+
+def one(entity: Entity, event, user, public_id):
+    """One row with every registered field, or None when this person may not see it (or there is
+    none): the same base queryset as the list, so a record is never reachable by id alone."""
+    obj = entity.base(event, user).filter(public_id=public_id).first()
+    if obj is None:
+        return None
+    return {"id": str(obj.public_id), **{f.key: _read(obj, f) for f in entity.fields}}
+
+
+def answer(
+    entity: Entity,
+    event,
+    user,
+    *,
+    tree,
+    order,
+    columns,
+    terms,
+    group=None,
+    subgroup=None,
+    calendar=None,
+    month=None,
+    limit,
+    offset,
+):
+    """The one response of the entity query for the parts already parsed: rows, buckets or days.
+    The route and a saved view's run both end here, so they can never answer differently."""
+    body = {
+        "entity": entity.key,
+        "limit": limit,
+        "offset": offset,
+        "filter": tree,
+        "sort": order,
+        "search": " ".join(terms),
+        "columns": [f.key for f in columns],
+        "rows": [],
+    }
+    if calendar is not None:
+        placed = run_days(entity, event, user, tree=tree, search=terms, field=calendar, month=month)
+        body.update(
+            total=placed["total"], calendar=calendar.key, month=placed["month"], days=placed["days"]
+        )
+    elif group is not None:
+        buckets = run_groups(
+            entity, event, user, tree=tree, search=terms, group=group, subgroup=subgroup
+        )
+        body.update(total=buckets["total"], group=group.key, groups=buckets["groups"])
+        body["truncated"] = buckets["truncated"]
+        if subgroup:
+            body["subgroup"] = subgroup.key
+    else:
+        result = run(
+            entity,
+            event,
+            user,
+            tree=tree,
+            sort=order,
+            columns=columns,
+            limit=limit,
+            offset=offset,
+            search=terms,
+        )
+        body.update(total=result["total"], rows=result["rows"])
+    return body

@@ -52,6 +52,7 @@
   "read-only:uiv2-surfaces": 165,
   "read-only:share-link": 3,
   "read-only:grid-group": 5,
+  "read-only:grid-layouts": 6,
   "read-only:grid-transient-view": 5,
   "read-only:grid-responsive": 4,
   "read-only:grid-sticky-header": 5,

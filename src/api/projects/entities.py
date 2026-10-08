@@ -15,6 +15,8 @@ entities.register(
         ),
         default_sort=("name",),
         search_fields=("name", "description", "track", "team", "created_by"),
+        board_field="track",
+        calendar_fields=("created_at",),
         fields=(
             entities.Field("name", entities.TEXT, "name", "Project"),
             entities.Field(

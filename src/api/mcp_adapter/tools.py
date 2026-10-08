@@ -113,6 +113,17 @@ TOOLS = [
                 "maxLength": 60,
                 "description": "A second groupable field.",
             },
+            "calendar": {
+                "type": "string",
+                "maxLength": 60,
+                "description": "A date field of a list with a calendar: the month's days with "
+                "counts instead of rows.",
+            },
+            "month": {
+                "type": "string",
+                "pattern": "^[0-9]{4}-[0-9]{2}$",
+                "description": "With calendar: 2027-03 (default: the current month, UTC).",
+            },
             "limit": {"type": "string", "pattern": "^[0-9]{1,3}$", "description": "1 to 100."},
             "offset": {"type": "string", "pattern": "^[0-9]{1,7}$"},
         },

@@ -4,6 +4,7 @@ import {
   canonicalFilter,
   type EntityQuery,
   type FilterNode,
+  type Layout,
 } from "./entityQuery";
 
 /**
@@ -22,6 +23,10 @@ export type ViewDefinition = {
   /** Grouping (PD-F006-B02-T08); stored only when used. */
   group?: string;
   subgroup?: string;
+  /** How it is laid out (PD-F006-B03-T01); stored only when it is not the list. */
+  layout?: Layout;
+  /** The date field of a calendar layout. */
+  calendar?: string;
 };
 export type SavedView = {
   public_id: string;
@@ -79,6 +84,8 @@ export function sameDefinition(a: ViewDefinition, b: ViewDefinition): boolean {
       d.search ?? "",
       d.group ?? "",
       d.subgroup ?? "",
+      d.layout ?? "list",
+      d.layout === "calendar" ? (d.calendar ?? "") : "",
     ]);
   return text(a) === text(b);
 }

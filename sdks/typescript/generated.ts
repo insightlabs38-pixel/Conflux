@@ -1963,6 +1963,9 @@ export type EntityPageSchema = {
   subgroup?: string;
   groups?: Record<string, unknown>[];
   truncated?: boolean;
+  calendar?: string;
+  month?: string;
+  days?: Record<string, unknown>[];
 };
 
 export type InputOfEntityPageSchema = {
@@ -1979,6 +1982,16 @@ export type InputOfEntityPageSchema = {
   subgroup?: string;
   groups?: Record<string, unknown>[];
   truncated?: boolean;
+  calendar?: string;
+  month?: string;
+  days?: Record<string, unknown>[];
+};
+
+export type EntityRowSchema = { entity: string; row: Record<string, unknown> };
+
+export type InputOfEntityRowSchema = {
+  entity: string;
+  row: Record<string, unknown>;
 };
 
 export type EntitySchema = {
@@ -1986,6 +1999,9 @@ export type EntitySchema = {
   label: string;
   default_sort: string[];
   search_fields: string[];
+  layouts: string[];
+  board_field: string;
+  calendar_fields: string[];
   fields: EntityFieldSchema[];
 };
 
@@ -1994,6 +2010,9 @@ export type InputOfEntitySchema = {
   label: string;
   default_sort: string[];
   search_fields: string[];
+  layouts: string[];
+  board_field: string;
+  calendar_fields: string[];
   fields: InputOfEntityFieldSchema[];
 };
 
@@ -5448,7 +5467,11 @@ export type SavedViewPageSchema = {
   subgroup?: string;
   groups?: Record<string, unknown>[];
   truncated?: boolean;
+  calendar?: string;
+  month?: string;
+  days?: Record<string, unknown>[];
   density: string;
+  layout: string;
   view: SavedViewSchema;
 };
 
@@ -5466,7 +5489,11 @@ export type InputOfSavedViewPageSchema = {
   subgroup?: string;
   groups?: Record<string, unknown>[];
   truncated?: boolean;
+  calendar?: string;
+  month?: string;
+  days?: Record<string, unknown>[];
   density: string;
+  layout: string;
   view: InputOfSavedViewSchema;
 };
 
@@ -7465,10 +7492,12 @@ export interface Operations {
         workspace_public_id: string;
       };
       query?: {
+        calendar?: string;
         columns?: string;
         filter?: string;
         group?: string;
         limit?: number;
+        month?: string;
         offset?: number;
         search?: string;
         sort?: string;
@@ -7476,6 +7505,17 @@ export interface Operations {
       };
     };
     response: EntityPageSchema;
+  };
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_entities_entity_key_row_public_id: {
+    request: {
+      path: {
+        entity_key: string;
+        event_public_id: string;
+        row_public_id: string;
+        workspace_public_id: string;
+      };
+    };
+    response: EntityRowSchema;
   };
   get_api_v1_workspaces_workspace_public_id_events_event_public_id_evaluation_pools: {
     request: { path: { event_public_id: string; workspace_public_id: string } };
@@ -10035,7 +10075,7 @@ export interface Operations {
         view_public_id: string;
         workspace_public_id: string;
       };
-      query?: { limit?: number; offset?: number };
+      query?: { limit?: number; month?: string; offset?: number };
     };
     response: SavedViewPageSchema;
   };
@@ -11695,15 +11735,31 @@ export const operations = {
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/entities/{entity_key}/",
       path_params: ["entity_key", "event_public_id", "workspace_public_id"],
       query_params: [
+        "calendar",
         "columns",
         "filter",
         "group",
         "limit",
+        "month",
         "offset",
         "search",
         "sort",
         "subgroup",
       ],
+      request_body: false,
+      response_kind: "json",
+    },
+  get_api_v1_workspaces_workspace_public_id_events_event_public_id_entities_entity_key_row_public_id:
+    {
+      method: "GET",
+      path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/entities/{entity_key}/{row_public_id}/",
+      path_params: [
+        "entity_key",
+        "event_public_id",
+        "row_public_id",
+        "workspace_public_id",
+      ],
+      query_params: [],
       request_body: false,
       response_kind: "json",
     },
@@ -14970,7 +15026,7 @@ export const operations = {
       method: "GET",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/views/{view_public_id}/run/",
       path_params: ["event_public_id", "view_public_id", "workspace_public_id"],
-      query_params: ["limit", "offset"],
+      query_params: ["limit", "month", "offset"],
       request_body: false,
       response_kind: "json",
     },

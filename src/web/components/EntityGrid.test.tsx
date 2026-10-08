@@ -329,6 +329,15 @@ async function mountAt(
       const u = new URL(String(input), "http://x");
       if (u.pathname.endsWith("/entities/"))
         return jsonResponse(200, CATALOGUE);
+      // one record by its id (the inspector): every field, or absent
+      const record = /\/entities\/applications\/([^/]+)\/$/.exec(u.pathname);
+      if (record) {
+        pages.push({ record: record[1] });
+        const found = ROWS.find((r) => r.id === record[1]);
+        return found
+          ? jsonResponse(200, { entity: "applications", row: found })
+          : jsonResponse(404, { detail: "No such record." });
+      }
       if (u.pathname.includes("/views/")) return jsonResponse(200, []);
       if (u.pathname.includes("/accounts/me/"))
         return jsonResponse(200, { public_id: "u1", memberships: [] });
@@ -395,10 +404,8 @@ describe("EntityGrid inspector", () => {
         .getAttribute("aria-current"),
     ).toBe("true");
     expect(search()).toBe("?row_applications=2"); // panel state in the URL
-    // the detail read asked for every field, the list's own for its columns
-    expect(
-      pages.some((p) => (p.columns ?? "").split(",").includes("note")),
-    ).toBe(true);
+    // the detail is the record read by its id (every field), the list's own read has its columns
+    expect(pages.some((p) => p.record === "2")).toBe(true);
     await act(async () => root.unmount());
   });
 
@@ -438,14 +445,21 @@ describe("EntityGrid inspector", () => {
     await act(async () => root.unmount());
   });
 
-  it("opens from a link, and says so when the record is not on this page", async () => {
+  it("opens a record that is not on this page by its id, and says so when there is none", async () => {
     const { container, root } = await mountAt(
-      "/w/w/participants?row_applications=99",
+      "/w/w/participants?row_applications=2&page_applications=2",
     );
     await until(() => inspector() !== null);
-    expect(inspector()!.textContent).toContain("not on the current page");
-    expect(container.querySelector("tr[aria-current]")).toBeNull();
+    await until(() => fieldsShown().length > 0);
+    expect(fieldsShown()[0]).toEqual(["Applicant", "ben"]);
     await act(async () => root.unmount());
+    document.body.innerHTML = "";
+    const missing = await mountAt("/w/w/participants?row_applications=99");
+    await until(
+      () => inspector()?.textContent?.includes("could not be found") === true,
+    );
+    expect(missing.container.querySelector("tr[aria-current]")).toBeNull();
+    await act(async () => missing.root.unmount());
   });
 
   it("offers no Details button when a list opts out", async () => {
@@ -1123,6 +1137,237 @@ describe("grouping", () => {
     expect(search()).toContain("then_applications=note");
     await until(() => asked.some((p) => p.subgroup === "note"));
     expect(search()).toContain("group_applications=status");
+    await act(async () => root.unmount());
+  });
+});
+
+describe("layouts (board, matrix, calendar)", () => {
+  afterEach(() => {
+    document.body.innerHTML = "";
+  });
+  const WITH_LAYOUTS = [
+    {
+      ...CATALOGUE[0],
+      layouts: ["list", "board", "matrix", "calendar"],
+      board_field: "status",
+      calendar_fields: ["created_at"],
+    },
+  ];
+  const bucket = (
+    key: string | null,
+    count: number,
+    subgroups?: unknown[],
+  ) => ({
+    key,
+    label: key ?? "(none)",
+    null: key === null,
+    count,
+    ...(subgroups ? { subgroups } : {}),
+  });
+
+  async function mountLayout(url: string, catalogue: unknown = WITH_LAYOUTS) {
+    const asked: Record<string, string>[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: unknown) => {
+        const u = new URL(String(input), "http://x");
+        if (u.pathname.endsWith("/entities/"))
+          return jsonResponse(200, catalogue);
+        if (u.pathname.includes("/views/")) return jsonResponse(200, []);
+        if (u.pathname.includes("/accounts/me/"))
+          return jsonResponse(200, { public_id: "u1", memberships: [] });
+        const record = /\/entities\/applications\/([^/]+)\/$/.exec(u.pathname);
+        if (record)
+          return jsonResponse(200, {
+            entity: "applications",
+            row: ROWS.find((r) => r.id === record[1]),
+          });
+        const params = Object.fromEntries(u.searchParams);
+        asked.push(params);
+        if (params.calendar)
+          return jsonResponse(200, {
+            ...page([]),
+            total: 3,
+            calendar: params.calendar,
+            month: params.month ?? "2027-03",
+            days: [
+              { date: `${params.month ?? "2027-03"}-03`, count: 2 },
+              { date: `${params.month ?? "2027-03"}-17`, count: 1 },
+            ],
+          });
+        if (params.group && params.subgroup)
+          return jsonResponse(200, {
+            ...page([]),
+            total: 3,
+            group: params.group,
+            subgroup: params.subgroup,
+            groups: [
+              bucket("approved", 1, [bucket("hi", 1)]),
+              bucket("pending", 2, [bucket("hi", 1), bucket(null, 1)]),
+            ],
+            truncated: false,
+          });
+        if (params.group)
+          return jsonResponse(200, {
+            ...page([]),
+            total: 3,
+            group: params.group,
+            groups: [bucket("pending", 3)],
+            truncated: false,
+          });
+        return jsonResponse(200, page(ROWS));
+      }),
+    );
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    await act(async () =>
+      root.render(
+        <QueryClientProvider client={createTestQueryClient()}>
+          <MemoryRouter initialEntries={[url]}>
+            <Where />
+            <EntityGrid
+              workspaceId="w"
+              eventId="e"
+              entity="applications"
+              label="Applications"
+            />
+          </MemoryRouter>
+        </QueryClientProvider>,
+      ),
+    );
+    return { container, asked, root };
+  }
+  const layoutButtons = () => [
+    ...document.querySelectorAll<HTMLButtonElement>(
+      '[aria-label="Layout"] button',
+    ),
+  ];
+
+  it("offers a switch only when the list has more than one layout, and an unknown layout is the list", async () => {
+    const plain = await mountLayout("/w/w/participants", CATALOGUE);
+    await until(() => document.querySelector("tbody tr") !== null);
+    expect(layoutButtons()).toHaveLength(0);
+    await act(async () => plain.root.unmount());
+    document.body.innerHTML = "";
+    const odd = await mountLayout(
+      "/w/w/participants?layout_applications=gantt",
+    );
+    await until(() => document.querySelector("tbody tr") !== null);
+    expect(layoutButtons().map((b) => b.textContent)).toEqual([
+      "List",
+      "Board",
+      "Matrix",
+      "Calendar",
+    ]);
+    expect(layoutButtons()[0].getAttribute("aria-pressed")).toBe("true");
+    await act(async () => odd.root.unmount());
+  });
+
+  it("switches layout through the address and asks the one entity query for what the layout needs", async () => {
+    const { asked, root } = await mountLayout("/w/w/participants");
+    await until(() => document.querySelector("tbody tr") !== null);
+    await act(async () => layoutButtons()[1].click());
+    expect(search()).toBe("?layout_applications=board");
+    await until(() => asked.some((p) => p.group === "status"));
+    expect(layoutButtons()[1].getAttribute("aria-pressed")).toBe("true");
+    await act(async () => layoutButtons()[0].click());
+    expect(search()).toBe("");
+    await act(async () => root.unmount());
+  });
+
+  it("shows a board with a column for every value of an enum, empty ones included, and opens a card in the inspector", async () => {
+    const { container, root } = await mountLayout(
+      "/w/w/participants?layout_applications=board",
+    );
+    await until(() => container.querySelector(".cx-board") !== null);
+    const heads = () =>
+      [...container.querySelectorAll(".cx-board__head")].map((h) =>
+        h.textContent?.replace(/\s+/g, " ").trim(),
+      );
+    expect(heads()).toEqual(["pending · 3", "approved · 0"]); // approved is empty, still a column
+    expect(container.textContent).toContain("None.");
+    await until(() => container.querySelector(".cx-board__open") !== null);
+    await act(async () =>
+      container.querySelector<HTMLButtonElement>(".cx-board__open")!.click(),
+    );
+    expect(search()).toContain("row_applications=1");
+    await until(() => document.querySelector(".cx-inspector") !== null);
+    await act(async () => root.unmount());
+  });
+
+  it("shows a matrix as a table with totals and opens a cell's rows with both values as conditions", async () => {
+    const { container, asked, root } = await mountLayout(
+      "/w/w/participants?layout_applications=matrix",
+    );
+    await until(() => container.querySelector(".cx-matrix__table") !== null);
+    expect(
+      asked.some((p) => p.group === "status" && p.subgroup === "note"),
+    ).toBe(true);
+    const head = [...container.querySelectorAll("thead th")].map(
+      (th) => th.textContent,
+    );
+    expect(head).toEqual(["Status", "hi", "(none)", "Total"]);
+    const body = [...container.querySelectorAll("tbody tr")].map((tr) =>
+      [...tr.children].map((c) => c.textContent),
+    );
+    expect(body).toEqual([
+      ["approved", "1", "0", "1"],
+      ["pending", "1", "1", "2"],
+    ]);
+    expect(
+      [...container.querySelectorAll("tfoot td")].map((c) => c.textContent),
+    ).toEqual(["2", "1", "3"]);
+    const cell =
+      container.querySelectorAll<HTMLButtonElement>(".cx-matrix__cell")[1];
+    await act(async () => cell.click());
+    await until(() => asked.some((p) => p.filter && !p.group));
+    expect(
+      JSON.parse(asked.find((p) => p.filter && !p.group)!.filter!),
+    ).toEqual({
+      and: [
+        { field: "status", op: "eq", value: "pending" },
+        { field: "note", op: "eq", value: "hi" },
+      ],
+    });
+    expect(cell.getAttribute("aria-expanded")).toBe("true");
+    await act(async () => root.unmount());
+  });
+
+  it("shows a calendar month with counts per day, opens a day with two conditions and steps months in the address", async () => {
+    const { container, asked, root } = await mountLayout(
+      "/w/w/participants?layout_applications=calendar&month_applications=2027-03",
+    );
+    await until(() => container.querySelector(".cx-calendar__table") !== null);
+    expect(
+      asked.some((p) => p.calendar === "created_at" && p.month === "2027-03"),
+    ).toBe(true);
+    expect(container.querySelector(".cx-calendar__title")!.textContent).toBe(
+      "March 2027",
+    );
+    const days = [
+      ...container.querySelectorAll<HTMLButtonElement>(".cx-calendar__open"),
+    ];
+    expect(days.map((d) => d.getAttribute("aria-label"))).toEqual([
+      "March 3, 2027: 2 rows. Show them",
+      "March 17, 2027: 1 row. Show them",
+    ]);
+    await act(async () => days[0].click());
+    await until(() => asked.some((p) => p.filter && !p.calendar));
+    expect(
+      JSON.parse(asked.find((p) => p.filter && !p.calendar)!.filter!),
+    ).toEqual({
+      and: [
+        { field: "created_at", op: "gte", value: "2027-03-03" },
+        { field: "created_at", op: "lt", value: "2027-03-04" },
+      ],
+    });
+    const next = [...container.querySelectorAll("button")].find(
+      (b) => b.textContent === "Next month",
+    )!;
+    await act(async () => next.click());
+    expect(search()).toContain("month_applications=2027-04");
+    await until(() => asked.some((p) => p.month === "2027-04"));
     await act(async () => root.unmount());
   });
 });

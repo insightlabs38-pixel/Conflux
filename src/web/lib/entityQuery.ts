@@ -26,7 +26,20 @@ export type EntityDescription = {
   default_sort: string[];
   /** Keys of the fields a free-text search looks in; none means the list has no search. */
   search_fields?: string[];
+  /** The layouts that mean something for this list (always includes "list"). */
+  layouts?: Layout[];
+  /** The groupable field whose values are a board's columns. */
+  board_field?: string;
+  /** The date fields a calendar may place rows on. */
+  calendar_fields?: string[];
   fields: EntityField[];
+};
+export type Layout = "list" | "board" | "matrix" | "calendar";
+export const LAYOUT_LABELS: Record<Layout, string> = {
+  list: "List",
+  board: "Board",
+  matrix: "Matrix",
+  calendar: "Calendar",
 };
 
 export type Predicate = { field: string; op: string; value?: unknown };
@@ -46,9 +59,13 @@ export type EntityQuery = {
   /** A groupable field (and a second inside it): the page lists buckets with counts, not rows. */
   group?: string;
   subgroup?: string;
+  /** A date field and a month (`2027-03`): the page lists the month's days with counts, not rows. */
+  calendar?: string;
+  month?: string;
   limit?: number;
   offset?: number;
 };
+export type EntityDay = { date: string; count: number };
 export type EntityBucket = {
   key: unknown;
   label: string;
@@ -71,6 +88,9 @@ export type EntityPage<Row = EntityRow> = {
   subgroup?: string;
   groups?: EntityGroup[];
   truncated?: boolean;
+  calendar?: string;
+  month?: string;
+  days?: EntityDay[];
 };
 
 function sorted(value: unknown): unknown {
@@ -110,6 +130,8 @@ export function entityUrl(
   if (query.search) params.set("search", query.search);
   if (query.group) params.set("group", query.group);
   if (query.subgroup) params.set("subgroup", query.subgroup);
+  if (query.calendar) params.set("calendar", query.calendar);
+  if (query.calendar && query.month) params.set("month", query.month);
   if (query.columns?.length) params.set("columns", query.columns.join(","));
   if (query.limit !== undefined) params.set("limit", String(query.limit));
   if (query.offset) params.set("offset", String(query.offset));
@@ -253,4 +275,16 @@ export function filterProblems(detail: unknown): FilterProblems | null {
         : text;
   }
   return any ? found : null;
+}
+
+/** One record with every registered field (the inspector's source), found by its public id. */
+export function useEntityRow(
+  base: string | null,
+  entity: string,
+  id: string,
+): Loaded<{ entity: string; row: EntityRow }> {
+  return useLoad<{ entity: string; row: EntityRow }>(
+    base === null || !id ? null : `${base}${entity}/${encodeURIComponent(id)}/`,
+    { describe: describeProblem },
+  );
 }

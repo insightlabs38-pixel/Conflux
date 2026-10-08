@@ -141,6 +141,10 @@ def parser():
     querying.add_argument("--search", help="Free-text words; every word must match")
     querying.add_argument("--group", help="A groupable field: list its buckets with counts, not rows")
     querying.add_argument("--subgroup", help="A second groupable field inside each group")
+    querying.add_argument(
+        "--calendar", help="A date field of a list with a calendar: the month's days with counts"
+    )
+    querying.add_argument("--month", help="With --calendar: 2027-03 (default: the current month)")
     querying.add_argument("--limit", type=int, help="Rows per page, 1 to 100")
     querying.add_argument("--offset", type=int, help="Rows to skip")
     return root
@@ -161,7 +165,18 @@ def execute(args, client):
         path["entity_key"] = args.entity
         query = {
             name: getattr(args, name)
-            for name in ("filter", "sort", "columns", "search", "group", "subgroup", "limit", "offset")
+            for name in (
+                "filter",
+                "sort",
+                "columns",
+                "search",
+                "group",
+                "subgroup",
+                "calendar",
+                "month",
+                "limit",
+                "offset",
+            )
             if getattr(args, name) is not None
         }
         return client.call(COMMANDS["entities query"][0], path=path, query=query)

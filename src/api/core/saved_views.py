@@ -14,7 +14,17 @@ from .models import SavedView
 
 MAX_PER_OWNER = 50
 DENSITIES = ("compact", "comfortable")
-_KEYS = {"filter", "sort", "columns", "density", "search", "group", "subgroup"}
+_KEYS = {
+    "filter",
+    "sort",
+    "columns",
+    "density",
+    "search",
+    "group",
+    "subgroup",
+    "layout",
+    "calendar",
+}
 
 
 class ViewOutdated(Exception):
@@ -47,6 +57,16 @@ def normalize(entity, raw):
     if not isinstance(group, str) or not isinstance(subgroup, str):
         raise ValidationError({"group": ["Group is a field key."]})
     grouped = query.parse_group(entity, group, subgroup)
+    layout, calendar = raw.get("layout") or "", raw.get("calendar") or ""
+    if not isinstance(layout, str) or not isinstance(calendar, str):
+        raise ValidationError({"layout": ["Layout is a name."]})
+    layout, calendar_field = query.parse_layout(entity, layout, calendar)
+    if layout == "matrix" and (grouped[0] is None or grouped[1] is None):
+        raise ValidationError({"layout": ["A matrix needs a group and a subgroup."]})
+    if layout == "board" and grouped[1] is not None:
+        raise ValidationError({"layout": ["A board has one field for its columns, no subgroup."]})
+    if layout == "calendar" and grouped[0] is not None:
+        raise ValidationError({"layout": ["A calendar is not grouped."]})
     density = raw.get("density") or "comfortable"
     if density not in DENSITIES:
         raise ValidationError({"density": [f"Use one of {', '.join(DENSITIES)}."]})
@@ -62,6 +82,10 @@ def normalize(entity, raw):
         definition["group"] = grouped[0].key
         if grouped[1] is not None:
             definition["subgroup"] = grouped[1].key
+    if layout != "list":  # additive (PD-F006-B03-T01): how it is laid out, never what it holds
+        definition["layout"] = layout
+        if calendar_field is not None:
+            definition["calendar"] = calendar_field.key
     return definition
 
 
@@ -160,9 +184,10 @@ def save(*, actor, workspace, event, entity, name, definition, visibility, insta
         raise ValidationError({"name": ["You already have a view with this name."]}) from exc
 
 
-def run(view, event, user, *, limit, offset):
+def run(view, event, user, *, limit, offset, month=None):
     """The view's page under the viewer's authorization; a definition that no longer fits is
-    reported, never silently loosened."""
+    reported, never silently loosened. A board reads the entity's board field when the view names
+    no group; a calendar answers for `month` (parsed by the caller; default: now)."""
     entity = entities.get(view.entity)
     if entity is None:
         raise ViewOutdated("This view's entity is no longer available.")
@@ -175,50 +200,29 @@ def run(view, event, user, *, limit, offset):
         group, subgroup = query.parse_group(
             entity, definition.get("group"), definition.get("subgroup")
         )
+        layout, calendar = query.parse_layout(
+            entity, definition.get("layout"), definition.get("calendar")
+        )
+        if layout == "board" and group is None:
+            group, subgroup = query.parse_group(entity, entity.board_field, "")
+        asked = (month or query.parse_month(None)) if calendar is not None else None
     except ValidationError as exc:
         raise ViewOutdated(
             "; ".join(f"{key}: {' '.join(map(str, value))}" for key, value in exc.detail.items())
         ) from exc
-    if group is not None:
-        buckets = query.run_groups(
-            entity, event, user, tree=tree, search=terms, group=group, subgroup=subgroup
-        )
-        return {
-            "entity": entity.key,
-            "total": buckets["total"],
-            "limit": limit,
-            "offset": offset,
-            "filter": tree,
-            "sort": order,
-            "search": " ".join(terms),
-            "columns": [f.key for f in columns],
-            "rows": [],
-            "group": group.key,
-            **({"subgroup": subgroup.key} if subgroup else {}),
-            "groups": buckets["groups"],
-            "truncated": buckets["truncated"],
-            "density": definition["density"],
-        }
-    result = query.run(
+    page = query.answer(
         entity,
         event,
         user,
         tree=tree,
-        sort=order,
+        order=order,
         columns=columns,
+        terms=terms,
+        group=group,
+        subgroup=subgroup,
+        calendar=calendar,
+        month=asked,
         limit=limit,
         offset=offset,
-        search=terms,
     )
-    return {
-        "entity": entity.key,
-        "total": result["total"],
-        "limit": limit,
-        "offset": offset,
-        "filter": tree,
-        "sort": order,
-        "search": " ".join(terms),
-        "columns": [f.key for f in columns],
-        "rows": result["rows"],
-        "density": definition["density"],
-    }
+    return {**page, "density": definition["density"], "layout": layout}

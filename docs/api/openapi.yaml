@@ -4803,6 +4803,13 @@ paths:
         parsing their own query parameters.
       parameters:
       - in: query
+        name: calendar
+        schema:
+          type: string
+        description: 'A date field of a list that has a calendar: the response lists
+          the days of `month` with counts instead of rows; open a day with the ordinary
+          query and the day as conditions.'
+      - in: query
         name: columns
         schema:
           type: string
@@ -4834,6 +4841,11 @@ paths:
         name: limit
         schema:
           type: integer
+      - in: query
+        name: month
+        schema:
+          type: string
+        description: 'With `calendar`: 2027-03 (default: now).'
       - in: query
         name: offset
         schema:
@@ -4871,6 +4883,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EntityPageSchema'
+          description: ''
+  /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/entities/{entity_key}/{row_public_id}/:
+    get:
+      operationId: get_api_v1_workspaces_workspace_public_id_events_event_public_id_entities_entity_key_row_public_id
+      description: |-
+        One record of a list with every field, for the inspector: whatever the list's own query
+        would let this person see, found by its public id and absent otherwise.
+      parameters:
+      - in: path
+        name: entity_key
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: event_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: row_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_public_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - workspaces
+      security:
+      - sessionCookie: []
+      - scopedBearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityRowSchema'
           description: ''
   /api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/evaluation-pools/:
     get:
@@ -16333,6 +16387,11 @@ paths:
         schema:
           type: integer
       - in: query
+        name: month
+        schema:
+          type: string
+        description: 'For a calendar view: 2027-03 (default: now).'
+      - in: query
         name: offset
         schema:
           type: integer
@@ -21541,6 +21600,15 @@ components:
             additionalProperties: {}
         truncated:
           type: boolean
+        calendar:
+          type: string
+        month:
+          type: string
+        days:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
       required:
       - columns
       - entity
@@ -21551,6 +21619,17 @@ components:
       - search
       - sort
       - total
+    EntityRowSchema:
+      type: object
+      properties:
+        entity:
+          type: string
+        row:
+          type: object
+          additionalProperties: {}
+      required:
+      - entity
+      - row
     EntitySchema:
       type: object
       properties:
@@ -21566,15 +21645,28 @@ components:
           type: array
           items:
             type: string
+        layouts:
+          type: array
+          items:
+            type: string
+        board_field:
+          type: string
+        calendar_fields:
+          type: array
+          items:
+            type: string
         fields:
           type: array
           items:
             $ref: '#/components/schemas/EntityFieldSchema'
       required:
+      - board_field
+      - calendar_fields
       - default_sort
       - fields
       - key
       - label
+      - layouts
       - search_fields
     ErrorSchema:
       type: object
@@ -27049,7 +27141,18 @@ components:
             additionalProperties: {}
         truncated:
           type: boolean
+        calendar:
+          type: string
+        month:
+          type: string
+        days:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
         density:
+          type: string
+        layout:
           type: string
         view:
           $ref: '#/components/schemas/SavedViewSchema'
@@ -27058,6 +27161,7 @@ components:
       - density
       - entity
       - filter
+      - layout
       - limit
       - offset
       - rows

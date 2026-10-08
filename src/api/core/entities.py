@@ -15,6 +15,8 @@ from django.utils.module_loading import autodiscover_modules
 
 TEXT, NUMBER, DATE, BOOL, ENUM, UUID = "text", "number", "date", "bool", "enum", "uuid"
 TYPES = (TEXT, NUMBER, DATE, BOOL, ENUM, UUID)
+LIST, BOARD, MATRIX, CALENDAR = "list", "board", "matrix", "calendar"
+LAYOUTS = (LIST, BOARD, MATRIX, CALENDAR)
 
 # The operators each field type offers. Anything else is refused with the list of these.
 OPERATORS = {
@@ -55,9 +57,27 @@ class Entity:
     default_sort: tuple = ()  # e.g. ("-created_at",)
     # Keys of the TEXT fields a free-text search looks in; empty means the list has no search box.
     search_fields: tuple = ()
+    # The groupable field whose values are the columns of a board (a workflow-like field), and the
+    # DATE fields a calendar may place rows on (PD-F006-B03-T01). Empty means that layout is not
+    # meaningful for the list and is not offered.
+    board_field: str = ""
+    calendar_fields: tuple = ()
 
     def field(self, key):
         return next((f for f in self.fields if f.key == key), None)
+
+    def layouts(self):
+        """The ways this list may be laid out, from what is registered: a list always; a board
+        when a board field is named; a matrix when two fields can be grouped; a calendar when a
+        date field may place rows."""
+        found = [LIST]
+        if self.board_field:
+            found.append(BOARD)
+        if sum(1 for f in self.fields if f.groupable) >= 2:
+            found.append(MATRIX)
+        if self.calendar_fields:
+            found.append(CALENDAR)
+        return found
 
 
 _ENTITIES: dict[str, Entity] = {}
@@ -75,6 +95,14 @@ def register(entity: Entity):
         found = entity.field(key)
         if found is None or found.type != TEXT:
             raise ValueError(f"{entity.key}: search field {key!r} must be a registered text field")
+    if entity.board_field:
+        found = entity.field(entity.board_field)
+        if found is None or not found.groupable:
+            raise ValueError(f"{entity.key}: board field {entity.board_field!r} must be groupable")
+    for key in entity.calendar_fields:
+        found = entity.field(key)
+        if found is None or found.type != DATE or not found.filterable:
+            raise ValueError(f"{entity.key}: calendar field {key!r} must be a filterable date")
     if entity.key in _ENTITIES and _ENTITIES[entity.key] != entity:
         raise ValueError(f"Entity {entity.key!r} is already registered")
     _ENTITIES[entity.key] = entity

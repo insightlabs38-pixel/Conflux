@@ -8,7 +8,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 
-from . import entities, saved_views
+from . import entities, query, saved_views
 from .authz import has_any_role
 from .entity_views import EntityPageSchema, _EntityView
 from .models import SavedView
@@ -37,6 +37,7 @@ class SavedViewInputSchema(serializers.Serializer):
 
 class SavedViewPageSchema(EntityPageSchema):
     density = serializers.CharField()
+    layout = serializers.CharField()
     view = SavedViewSchema()
 
 
@@ -158,7 +159,13 @@ class SavedViewDetailView(_ViewBase):
 
 class SavedViewRunView(_ViewBase):
     @extend_schema(
-        parameters=[OpenApiParameter("limit", int), OpenApiParameter("offset", int)],
+        parameters=[
+            OpenApiParameter(
+                "month", str, description="For a calendar view: 2027-03 (default: now)."
+            ),
+            OpenApiParameter("limit", int),
+            OpenApiParameter("offset", int),
+        ],
         responses=SavedViewPageSchema,
     )
     def get(self, request, workspace_public_id, event_public_id, view_public_id):
@@ -166,7 +173,16 @@ class SavedViewRunView(_ViewBase):
         self.entity_for(view.entity)
         limit, offset = page_params(request, default=25, maximum=100)
         try:
-            page = saved_views.run(view, self.get_event(), request.user, limit=limit, offset=offset)
+            page = saved_views.run(
+                view,
+                self.get_event(),
+                request.user,
+                limit=limit,
+                offset=offset,
+                month=query.parse_month(request.query_params["month"])
+                if request.query_params.get("month")
+                else None,
+            )
         except saved_views.ViewOutdated as exc:
             return Response({"code": "view_outdated", "detail": str(exc)}, status=409)
         return Response({**page, "view": saved_views.describe(view, request.user)})

@@ -9,12 +9,16 @@ import {
 } from "react";
 import {
   entityBase,
+  LAYOUT_LABELS,
   useEntityCatalogue,
   useEntityPage,
+  useEntityRow,
   type EntityField,
   type EntityRow,
   type FilterNode,
+  type Layout,
 } from "../lib/entityQuery";
+import { currentMonth, isMonth } from "../lib/calendar";
 import { ApiError } from "../lib/api";
 import type { SavedView, ViewDefinition } from "../lib/savedViews";
 import {
@@ -37,11 +41,15 @@ import { Inspector } from "./Inspector";
 import { useUrlParam } from "../lib/urlState";
 import { useMe } from "../hooks/useMe";
 import { announce } from "../lib/shellNotice";
+import { showValue } from "../lib/entityFormat";
 import { useConnectionStatus, useRealtime } from "../hooks/useRealtime";
 import { describeHealth } from "../lib/liveOps";
 import { liveOpsTopic, LIVE_OPS_INTERVAL_MS } from "../lib/realtime";
 import { LiveStatus } from "./LiveStatus";
 import { GroupedRows } from "./GroupedRows";
+import { BoardLayout } from "./BoardLayout";
+import { MatrixLayout } from "./MatrixLayout";
+import { CalendarLayout } from "./CalendarLayout";
 import {
   countOf,
   publishSelection,
@@ -57,20 +65,6 @@ import {
 const PAGE_SIZES = [25, 50, 100];
 /** The most rows one selection holds: a page is never larger, and the bulk planner takes no more per operation. */
 const MAX_SELECTION = 100;
-
-function show(field: EntityField, value: unknown): string {
-  if (value === null || value === undefined || value === "") return "—";
-  if (field.type === "bool") return value ? "Yes" : "No";
-  if (field.type === "date" && typeof value === "string")
-    return (
-      new Date(value).toLocaleString("en-US", {
-        dateStyle: "medium",
-        timeStyle: "short",
-        timeZone: "UTC",
-      }) + " UTC"
-    );
-  return String(value).replace(/_/g, " ");
-}
 
 function sortState(sort: string): SortState {
   return sort
@@ -213,6 +207,31 @@ export function EntityGrid({
     setGroupParam(value, { replace: true });
     setThenParam(value ? then : "", { replace: true });
   };
+  // Layout is panel state as well (PD-F006-B03-T01): a fixed set the catalogue offers for this list.
+  // A board's columns, a matrix's two fields and a calendar's date field are the same few params,
+  // and each layout reads the one entity query - no layout has rows of its own.
+  const layouts = description?.layouts ?? (["list"] as Layout[]);
+  const [layoutParam, setLayoutParam] = useUrlParam(`layout_${entity}`, {
+    clears: [`page_${entity}`],
+  });
+  const layout: Layout = layouts.includes(layoutParam as Layout)
+    ? (layoutParam as Layout)
+    : "list";
+  const calendarFields = description?.calendar_fields ?? [];
+  const [calParam, setCalParam] = useUrlParam(`cal_${entity}`);
+  const calendar = calendarFields.includes(calParam)
+    ? calParam
+    : (calendarFields[0] ?? "");
+  const [monthParam, setMonthParam] = useUrlParam(`month_${entity}`);
+  const month = isMonth(monthParam) ? monthParam : currentMonth();
+  const boardField =
+    layout === "board" ? group || description?.board_field || "" : "";
+  const matrixRows =
+    layout === "matrix" ? group || groupable[0]?.key || "" : "";
+  const matrixColumns =
+    layout === "matrix"
+      ? subgroup || (groupable.find((f) => f.key !== matrixRows)?.key ?? "")
+      : "";
   // rows per page is panel state like sort and page: a fixed set, so a link reproduces the list
   const [sizeParam, setSizeParam] = useUrlParam(`size_${entity}`, {
     clears: [`page_${entity}`],
@@ -257,24 +276,31 @@ export function EntityGrid({
     search,
     sort,
     columns: known,
-    group: group || undefined,
-    subgroup: subgroup || undefined,
+    group:
+      (layout === "list"
+        ? group
+        : layout === "board"
+          ? boardField
+          : matrixRows) || undefined,
+    subgroup:
+      (layout === "list"
+        ? subgroup
+        : layout === "matrix"
+          ? matrixColumns
+          : "") || undefined,
+    calendar: layout === "calendar" ? calendar : undefined,
+    month: layout === "calendar" ? month : undefined,
     limit: PAGE_SIZE,
     offset,
   });
 
-  // The inspector shows every field, not only the columns the list chose: the same page again with
-  // all of them (the server still decides what this person may see). Read only while one is open.
-  const detail = useEntityPage(
+  // The inspector shows every field, not only the columns the list chose, and finds the record by its
+  // id (`entities/<key>/<id>/`), so it opens from the list, a board card, a group or a calendar day
+  // alike. The server still decides whether this person may see it. Read only while one is open.
+  const record = useEntityRow(
     description && inspect && openId ? base : null,
     entity,
-    {
-      filter,
-      sort,
-      columns: fields.map((f) => f.key),
-      limit: PAGE_SIZE,
-      offset,
-    },
+    openId,
   );
 
   // While the next page loads, keep showing the last one (marked busy) instead of blanking the list.
@@ -324,6 +350,13 @@ export function EntityGrid({
       );
       setDensity(query?.density ?? "comfortable");
       setGroup(query?.group ?? "", query?.subgroup ?? "");
+      setLayoutParam(
+        query?.layout && query.layout !== "list" ? query.layout : "",
+        {
+          replace: true,
+        },
+      );
+      setCalParam(query?.calendar ?? "", { replace: true });
       setOffset(0);
       setSelected(new Set());
     },
@@ -331,20 +364,37 @@ export function EntityGrid({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [workspaceId, entity],
   );
+  // What a view keeps of the grouping depends on the layout: a matrix always names both of its
+  // fields, a board only a column field the person chose, a calendar none.
+  const savedGrouping =
+    layout === "matrix"
+      ? { group: matrixRows, subgroup: matrixColumns }
+      : layout === "calendar"
+        ? {}
+        : layout === "board"
+          ? group
+            ? { group }
+            : {}
+          : group
+            ? { group, ...(subgroup ? { subgroup } : {}) }
+            : {};
   const current: ViewDefinition = {
     filter,
     sort,
     columns: known,
     density,
     ...(search ? { search } : {}),
-    ...(group ? { group, ...(subgroup ? { subgroup } : {}) } : {}),
+    ...(layout !== "list"
+      ? { layout, ...(layout === "calendar" ? { calendar } : {}) }
+      : {}),
+    ...savedGrouping,
   };
 
   const columns: GridColumn<EntityRow>[] = shown.map((field) => ({
     key: field.key,
     label: field.label,
     sortable: field.sortable,
-    render: renderers[field.key] ?? ((row) => show(field, row[field.key])),
+    render: renderers[field.key] ?? ((row) => showValue(field, row[field.key])),
   }));
 
   const denied =
@@ -511,7 +561,9 @@ export function EntityGrid({
   const active = filter ? 1 : 0;
   const rows = shownPage?.rows ?? [];
   const at = openId ? rows.findIndex((row) => row.id === openId) : -1;
-  const opened = at >= 0 ? rows[at] : null;
+  const listed = at >= 0 ? rows[at] : null;
+  // every field once the record has loaded; until then (or if it cannot) the columns the list has
+  const opened = record.data?.row ?? listed;
   const closeInspector = () => {
     const id = openId;
     setOpenId("", { replace: true });
@@ -551,9 +603,6 @@ export function EntityGrid({
         </>
       )
     : actions;
-  const full = opened
-    ? (detail.data?.rows.find((r) => r.id === openId) ?? opened)
-    : null;
   return (
     <div
       className={`cx-entity-grid${openId && inspect ? " cx-entity-grid--inspecting" : ""}`}
@@ -610,6 +659,109 @@ export function EntityGrid({
                 This filter could not be applied, so the list shows the last
                 results. Open Filter, views and columns to fix it.
               </p>
+            )}
+          </div>
+        )}
+        {layouts.length > 1 && (
+          <div className="cx-entity-grid__layouts">
+            <div role="group" aria-label="Layout">
+              {layouts.map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={layout === value}
+                  onClick={() => {
+                    if (layout === value) return;
+                    setLayoutParam(value === "list" ? "" : value, {
+                      replace: true,
+                    });
+                    clearSelection();
+                    announce(`${LAYOUT_LABELS[value]} layout.`);
+                  }}
+                >
+                  {LAYOUT_LABELS[value]}
+                </button>
+              ))}
+            </div>
+            {layout === "board" && (
+              <label>
+                Columns by{" "}
+                <select
+                  value={boardField}
+                  onChange={(e) =>
+                    setGroup(
+                      e.target.value === description?.board_field
+                        ? ""
+                        : e.target.value,
+                    )
+                  }
+                >
+                  {groupable.map((f) => (
+                    <option key={f.key} value={f.key}>
+                      {f.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            {layout === "matrix" && (
+              <>
+                <label>
+                  Rows{" "}
+                  <select
+                    value={matrixRows}
+                    onChange={(e) =>
+                      setGroup(
+                        e.target.value,
+                        e.target.value === matrixColumns ? "" : matrixColumns,
+                      )
+                    }
+                  >
+                    {groupable.map((f) => (
+                      <option key={f.key} value={f.key}>
+                        {f.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Columns{" "}
+                  <select
+                    value={matrixColumns}
+                    onChange={(e) => setGroup(matrixRows, e.target.value)}
+                  >
+                    {groupable
+                      .filter((f) => f.key !== matrixRows)
+                      .map((f) => (
+                        <option key={f.key} value={f.key}>
+                          {f.label}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+              </>
+            )}
+            {layout === "calendar" && calendarFields.length > 1 && (
+              <label>
+                Date{" "}
+                <select
+                  value={calendar}
+                  onChange={(e) =>
+                    setCalParam(
+                      e.target.value === calendarFields[0]
+                        ? ""
+                        : e.target.value,
+                      { replace: true },
+                    )
+                  }
+                >
+                  {calendarFields.map((key) => (
+                    <option key={key} value={key}>
+                      {fields.find((f) => f.key === key)?.label ?? key}
+                    </option>
+                  ))}
+                </select>
+              </label>
             )}
           </div>
         )}
@@ -696,7 +848,7 @@ export function EntityGrid({
               Live operations
             </button>
           )}
-          {groupable.length > 0 && (
+          {groupable.length > 0 && layout === "list" && (
             <>
               <label>
                 Group by{" "}
@@ -783,7 +935,110 @@ export function EntityGrid({
         {live && (
           <LiveStatus topic={opsTopic} updatedAt={lastUpdated.current} />
         )}
-        {group ? (
+        {layout !== "list" ? (
+          failure ? (
+            <p role="alert">
+              {failure instanceof ApiError
+                ? failure.message
+                : "Could not load the layout."}{" "}
+              <button type="button" onClick={() => void page.reload()}>
+                Try again
+              </button>
+            </p>
+          ) : layout === "board" ? (
+            shownPage?.group !== boardField || !shownPage?.groups ? (
+              <p aria-busy="true" className="cx-muted">
+                Loading the board…
+              </p>
+            ) : (
+              <BoardLayout
+                key={`${boardField}|${queryFilter ? canonicalFilter(queryFilter) : ""}|${search}|${sort}`}
+                base={base}
+                entity={entity}
+                label={label}
+                field={fields.find((f) => f.key === boardField)!}
+                groups={shownPage.groups}
+                filter={queryFilter}
+                search={search}
+                sort={sort}
+                columnKeys={known}
+                fields={fields}
+                rowLabel={rowLabel}
+                onOpen={
+                  inspect ? (id) => setOpenId(id, { replace: true }) : undefined
+                }
+                openId={inspect ? openId : undefined}
+              />
+            )
+          ) : layout === "matrix" ? (
+            shownPage?.group !== matrixRows ||
+            shownPage?.subgroup !== matrixColumns ||
+            !shownPage?.groups ? (
+              <p aria-busy="true" className="cx-muted">
+                Loading the matrix…
+              </p>
+            ) : (
+              <MatrixLayout
+                key={`${matrixRows}|${matrixColumns}|${queryFilter ? canonicalFilter(queryFilter) : ""}|${search}|${sort}`}
+                base={base}
+                entity={entity}
+                label={label}
+                rowLabelText={
+                  fields.find((f) => f.key === matrixRows)?.label ?? matrixRows
+                }
+                columnLabelText={
+                  fields.find((f) => f.key === matrixColumns)?.label ??
+                  matrixColumns
+                }
+                rowField={matrixRows}
+                columnField={matrixColumns}
+                groups={shownPage.groups}
+                truncated={shownPage.truncated === true}
+                filter={queryFilter}
+                search={search}
+                sort={sort}
+                columnKeys={known}
+                columns={columns}
+                density={density}
+                rowLabel={rowLabel}
+                actions={inspectAction}
+              />
+            )
+          ) : shownPage?.calendar !== calendar ||
+            shownPage?.month !== month ||
+            !shownPage?.days ? (
+            <p aria-busy="true" className="cx-muted">
+              Loading the calendar…
+            </p>
+          ) : (
+            <CalendarLayout
+              key={`${calendar}|${queryFilter ? canonicalFilter(queryFilter) : ""}|${search}|${sort}`}
+              base={base}
+              entity={entity}
+              label={label}
+              fieldKey={calendar}
+              fieldLabel={
+                fields.find((f) => f.key === calendar)?.label ?? calendar
+              }
+              month={month}
+              onMonth={(next) =>
+                setMonthParam(next === currentMonth() ? "" : next, {
+                  replace: true,
+                })
+              }
+              days={shownPage.days}
+              total={shownPage.total}
+              filter={queryFilter}
+              search={search}
+              sort={sort}
+              columnKeys={known}
+              columns={columns}
+              density={density}
+              rowLabel={rowLabel}
+              actions={inspectAction}
+            />
+          )
+        ) : group ? (
           failure ? (
             <p role="alert">
               {failure instanceof ApiError
@@ -902,12 +1157,9 @@ export function EntityGrid({
       </div>
       {inspect && openId && shownPage !== null && (
         <Inspector
-          title={String(
-            full?.[shown[0]?.key ?? ""] ??
-              (opened ? "Record" : "Record not on this page"),
-          )}
+          title={String(opened?.[shown[0]?.key ?? ""] ?? "Record")}
           position={
-            opened
+            at >= 0
               ? `${(offset ?? 0) + at + 1} of ${shownPage.total}`
               : undefined
           }
@@ -924,18 +1176,25 @@ export function EntityGrid({
           }
         >
           {!opened ? (
-            <p role="status">
-              This record is not on the current page of the list.{" "}
-              <button type="button" onClick={closeInspector}>
-                Close
-              </button>
-            </p>
+            record.error ? (
+              <p role="alert">
+                This record could not be found. It may have been removed, or you
+                may not be able to see it.{" "}
+                <button type="button" onClick={closeInspector}>
+                  Close
+                </button>
+              </p>
+            ) : (
+              <p role="status" aria-busy="true" className="cx-muted">
+                Loading the record…
+              </p>
+            )
           ) : (
             <>
-              {detail.error && (
+              {record.error && (
                 <p role="alert">
                   Some fields could not be loaded.{" "}
-                  <button type="button" onClick={() => void detail.reload()}>
+                  <button type="button" onClick={() => void record.reload()}>
                     Try again
                   </button>
                 </p>
@@ -944,7 +1203,7 @@ export function EntityGrid({
                 {fields.map((field) => (
                   <div key={field.key}>
                     <dt>{field.label}</dt>
-                    <dd>{show(field, (full ?? opened)[field.key])}</dd>
+                    <dd>{showValue(field, opened[field.key])}</dd>
                   </div>
                 ))}
               </dl>

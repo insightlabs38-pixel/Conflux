@@ -79,3 +79,29 @@ def test_group_and_subgroup_return_buckets_through_the_tool(world):  # noqa: F81
     assert [(g["label"], g["count"]) for g in page["groups"]] == [("Yes", 1)]
     refused = tool(w, token, "query_entity", {"entity": "projects", "group": "name"})["result"]
     assert refused["isError"] is True and "Cannot group by" in refused["content"][0]["text"]
+
+
+def test_a_calendar_is_asked_through_the_tool_like_the_route(world):  # noqa: F811
+    w = world
+    token = credential(w, [f"POST:{MCP}", ACTION])
+    month = tool(
+        w,
+        token,
+        "query_entity",
+        {"entity": "projects", "calendar": "created_at", "month": "2099-01"},
+    )["result"]
+    page = rows(month)
+    assert page["calendar"] == "created_at" and page["month"] == "2099-01" and page["days"] == []
+    bad = tool(w, token, "query_entity", {"entity": "projects", "calendar": "name"})["result"]
+    assert bad["isError"] is True and "Cannot place rows by" in bad["content"][0]["text"]
+    malformed = tool(
+        w, token, "query_entity", {"entity": "projects", "calendar": "created_at", "month": "soon"}
+    )
+    assert "error" in malformed  # refused before any route runs
+    thirteenth = tool(
+        w,
+        token,
+        "query_entity",
+        {"entity": "projects", "calendar": "created_at", "month": "2027-13"},
+    )["result"]
+    assert thirteenth["isError"] is True and "month" in thirteenth["content"][0]["text"]

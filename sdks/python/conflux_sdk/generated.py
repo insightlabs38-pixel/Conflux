@@ -1783,6 +1783,9 @@ class EntityPageSchema(TypedDict):
     subgroup: NotRequired[str]
     groups: NotRequired[list[dict[str, Any]]]
     truncated: NotRequired[bool]
+    calendar: NotRequired[str]
+    month: NotRequired[str]
+    days: NotRequired[list[dict[str, Any]]]
 
 class InputOfEntityPageSchema(TypedDict):
     entity: str
@@ -1798,12 +1801,26 @@ class InputOfEntityPageSchema(TypedDict):
     subgroup: NotRequired[str]
     groups: NotRequired[list[dict[str, Any]]]
     truncated: NotRequired[bool]
+    calendar: NotRequired[str]
+    month: NotRequired[str]
+    days: NotRequired[list[dict[str, Any]]]
+
+class EntityRowSchema(TypedDict):
+    entity: str
+    row: dict[str, Any]
+
+class InputOfEntityRowSchema(TypedDict):
+    entity: str
+    row: dict[str, Any]
 
 class EntitySchema(TypedDict):
     key: str
     label: str
     default_sort: list[str]
     search_fields: list[str]
+    layouts: list[str]
+    board_field: str
+    calendar_fields: list[str]
     fields: list[EntityFieldSchema]
 
 class InputOfEntitySchema(TypedDict):
@@ -1811,6 +1828,9 @@ class InputOfEntitySchema(TypedDict):
     label: str
     default_sort: list[str]
     search_fields: list[str]
+    layouts: list[str]
+    board_field: str
+    calendar_fields: list[str]
     fields: list[InputOfEntityFieldSchema]
 
 class ErrorSchema(TypedDict):
@@ -5014,7 +5034,11 @@ class SavedViewPageSchema(TypedDict):
     subgroup: NotRequired[str]
     groups: NotRequired[list[dict[str, Any]]]
     truncated: NotRequired[bool]
+    calendar: NotRequired[str]
+    month: NotRequired[str]
+    days: NotRequired[list[dict[str, Any]]]
     density: str
+    layout: str
     view: SavedViewSchema
 
 class InputOfSavedViewPageSchema(TypedDict):
@@ -5031,7 +5055,11 @@ class InputOfSavedViewPageSchema(TypedDict):
     subgroup: NotRequired[str]
     groups: NotRequired[list[dict[str, Any]]]
     truncated: NotRequired[bool]
+    calendar: NotRequired[str]
+    month: NotRequired[str]
+    days: NotRequired[list[dict[str, Any]]]
     density: str
+    layout: str
     view: InputOfSavedViewSchema
 
 class SavedViewSchema(TypedDict):
@@ -6788,16 +6816,27 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                           'path_params': ['entity_key',
                                                                                                           'event_public_id',
                                                                                                           'workspace_public_id'],
-                                                                                          'query_params': ['columns',
+                                                                                          'query_params': ['calendar',
+                                                                                                           'columns',
                                                                                                            'filter',
                                                                                                            'group',
                                                                                                            'limit',
+                                                                                                           'month',
                                                                                                            'offset',
                                                                                                            'search',
                                                                                                            'sort',
                                                                                                            'subgroup'],
                                                                                           'request_body': False,
                                                                                           'response_kind': 'json'},
+ 'get_api_v1_workspaces_workspace_public_id_events_event_public_id_entities_entity_key_row_public_id': {'method': 'GET',
+                                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/entities/{entity_key}/{row_public_id}/',
+                                                                                                        'path_params': ['entity_key',
+                                                                                                                        'event_public_id',
+                                                                                                                        'row_public_id',
+                                                                                                                        'workspace_public_id'],
+                                                                                                        'query_params': [],
+                                                                                                        'request_body': False,
+                                                                                                        'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_evaluation_pools': {'method': 'GET',
                                                                                        'path': '/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/evaluation-pools/',
                                                                                        'path_params': ['event_public_id',
@@ -7837,6 +7876,7 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                                'view_public_id',
                                                                                                                'workspace_public_id'],
                                                                                                'query_params': ['limit',
+                                                                                                                'month',
                                                                                                                 'offset'],
                                                                                                'request_body': False,
                                                                                                'response_kind': 'json'},

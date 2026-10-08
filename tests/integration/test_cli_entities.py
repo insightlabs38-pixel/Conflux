@@ -141,3 +141,24 @@ def test_group_and_subgroup_are_the_same_parameters_as_the_route(monkeypatch, ca
     assert code == 0 and page["group"] == "gallery_visible" and page["rows"] == []
     assert [g["count"] for g in page["groups"]] == [2]
     assert "group=gallery_visible" in seen[-1][2]
+
+
+def test_calendar_and_month_are_the_same_parameters_as_the_route(monkeypatch, capsys):
+    event, prefix, factory, seen = setup(monkeypatch)
+    code = cli.main(
+        [
+            *prefix,
+            "entities",
+            "query",
+            str(event.public_id),
+            "projects",
+            "--calendar",
+            "created_at",
+            "--month",
+            "2099-01",
+        ],
+        client_factory=factory,
+    )
+    page = json.loads(capsys.readouterr().out)
+    assert code == 0 and page["calendar"] == "created_at" and page["days"] == []
+    assert "calendar=created_at" in seen[-1][2] and "month=2099-01" in seen[-1][2]

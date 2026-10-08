@@ -10,7 +10,7 @@ from .approval_views import (
     ApprovalGateView,
     ApprovalListView,
 )
-from .entity_views import EntityCatalogueView, EntityQueryView
+from .entity_views import EntityCatalogueView, EntityQueryView, EntityRowView
 from .feature_views import CompletenessView
 from .job_views import JobArtifactView, JobCancelView, JobDetailView, JobListView
 from .manifest_views import ExtensionsView
@@ -86,6 +86,11 @@ urlpatterns = [
         "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/entities/<slug:entity_key>/",
         EntityQueryView.as_view(),
         name="entity-query",
+    ),
+    path(
+        "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/entities/<slug:entity_key>/<uuid:row_public_id>/",
+        EntityRowView.as_view(),
+        name="entity-row",
     ),
     path(
         "workspaces/<uuid:workspace_public_id>/events/<uuid:event_public_id>/views/",

@@ -122,7 +122,7 @@ for (const width of [800, 390]) {
   });
 }
 
-test("a link opens the record, and a record that is not on the page is said so", async ({
+test("a link opens the record, one on another page opens too, and a record that is not there is said so", async ({
   page,
 }) => {
   const { workspace, event } = await open(page, 1440);
@@ -143,5 +143,17 @@ test("a link opens the record, and a record that is not on the page is said so",
     `/app/w/${workspace}/participants?event=${event}&section=ProjectsGrid&row_projects=00000000-0000-0000-0000-000000000000`,
   );
   await settled(page);
-  await expect(inspector(page)).toContainText("not on the current page");
+  await expect(inspector(page)).toContainText("could not be found");
+  // a record that exists but is not on the list's current page (page 2 of 25) is found by its id
+  const api = `/api/v1/workspaces/${workspace}/events/${event}/entities/projects/`;
+  const later = (
+    await (await page.request.get(`${api}?limit=1&offset=30`)).json()
+  ).rows[0];
+  if (later) {
+    await page.goto(
+      `/app/w/${workspace}/participants?event=${event}&section=ProjectsGrid&row_projects=${later.id}`,
+    );
+    await settled(page);
+    await expect(inspector(page)).toContainText(later.name);
+  }
 });

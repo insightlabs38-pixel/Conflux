@@ -1,0 +1,182 @@
+version: 3
+task: PD-F006-B03-T01
+batch: PD-F006-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: f6388f1
+  head_commit: null
+changed_paths:
+- src/api/core/entities.py
+- src/api/core/query.py
+- src/api/core/entity_views.py
+- src/api/core/saved_views.py
+- src/api/core/saved_view_views.py
+- src/api/core/urls.py
+- src/api/events/entities.py
+- src/api/projects/entities.py
+- src/api/mcp_adapter/tools.py
+- sdks/python/conflux_sdk/cli.py
+- docs/api/openapi.yaml
+- sdks/python/conflux_sdk/generated.py
+- sdks/typescript/generated.ts
+- docs/api/ENTITY_QUERY.md
+- docs/operations/DATA_GRID.md
+- src/web/components/EntityGrid.tsx
+- src/web/components/BoardLayout.tsx
+- src/web/components/MatrixLayout.tsx
+- src/web/components/CalendarLayout.tsx
+- src/web/components/GroupedRows.tsx
+- src/web/lib/entityQuery.ts
+- src/web/lib/entityFormat.ts
+- src/web/lib/calendar.ts
+- src/web/lib/savedViews.ts
+- src/web/styles/components.css
+- tests/integration/test_grid_layouts.py
+- tests/integration/test_cli_entities.py
+- tests/integration/test_mcp_entity_query.py
+- tests/e2e/grid-layouts.spec.ts
+- tests/e2e/inspector.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Layouts offered only where semantically valid
+  result: pass
+  evidence: 'The entity registration names board_field (a groupable field) and calendar_fields (filterable
+    dates); Entity.layouts() derives list always, board, matrix (two groupable fields) and calendar, the
+    catalogue publishes layouts, board_field and calendar_fields, and a layout the list does not offer
+    is refused by name. Applications: board by status, calendar by created or decided; projects: board
+    by track, calendar by created; both offer a matrix'
+- item: Board, matrix and calendar through the one query
+  result: pass
+  evidence: Board = group buckets with counts, one ordinary query per column with the bucket as a condition
+    (an enum shows every value, empty ones too); matrix = group x subgroup counts as a table with totals,
+    a cell opens its rows with two conditions; calendar = new calendar and month parameters answering
+    per-UTC-day counts for the same filter and search, a day opens through two ordinary conditions. query.answer
+    is now the single response builder for the route and for a saved view's run
+- item: Saved views keep the layout
+  result: pass
+  evidence: layout and calendar are additive optional keys stored only when not the list; a matrix needs
+    group and subgroup, a board no subgroup, a calendar no group (path-keyed refusals); a view runs a
+    board from the entity board field when it names no group and a calendar for the month asked; older
+    views are byte-identical
+- item: Record by id for the inspector
+  result: pass
+  evidence: GET entities/{key}/{row_id}/ returns every registered field under the same base queryset and
+    roles as the list; the inspector now opens from a card, a matrix row, a group, a calendar day or another
+    page; the page-sized second query it replaced is gone
+- item: Web
+  result: pass
+  evidence: Layout switch above the list (only when more than one layout), Columns by / Rows and Columns
+    / Date selectors, layout and params in the address, loading and error states per layout, stale data
+    of another layout never shown; Previous month, Next month, This month
+- item: CLI and MCP
+  result: pass
+  evidence: entities query --calendar --month and the query_entity calendar and month parameters call
+    the same route; layout itself is presentation and needs no parameter
+invariants:
+- item: One query model, no second source
+  result: pass
+  evidence: there is no layout-specific row endpoint or client-side grouping; counts and rows come from
+    one filtered queryset, tested to agree for a calendar day and a bucket
+- item: Authorization is the list's
+  result: pass
+  evidence: the row route and the calendar use entity.base and roles; a judge gets 403, another event's
+    record 404, tested
+- item: Untrusted content stays text
+  result: pass
+  evidence: cells render through showValue as text; no markup path added
+- item: No test weakened
+  result: pass
+  evidence: the old inspector test that asserted 'not on the current page' was replaced by the stronger
+    rule (a record is found by id, and a missing one says so) in vitest and in inspector.spec
+verification:
+- command: uv run --frozen pytest tests/integration/test_grid_layouts.py tests/integration/test_entity_query.py
+    tests/integration/test_saved_views.py tests/integration/test_cli_entities.py tests/integration/test_mcp_entity_query.py
+    tests/integration/test_feature_cli.py tests/integration/test_feature_mcp.py -q
+  result: pass
+  note: 20 new tests (layout catalogue, calendar days equal rows, filter and search narrow days, UTC month
+    boundary, refusals, judge 403, view layout round trip and run, refused layouts, record by id, other
+    event 404) plus the neighbours
+- command: uv run --frozen pytest -n auto --dist worksteal -q
+  result: pass
+  note: 3000 passed, 34 skipped
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 153 files, 870 tests (calendar arithmetic, board, matrix, calendar, switch, record by id)
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts grid-layouts
+  result: pass
+  note: '6 passed at desktop and mobile: board columns and counts equal the API, a card opens the inspector
+    by id, matrix cells equal the API, a calendar month and day, axe clean, no horizontal overflow'
+- command: npx playwright test ... grid- column-preferences inspector
+  result: pass
+  note: every grid spec and inspector spec pass after the stack rebuild (inspector.spec updated to the
+    by-id rule)
+- command: uv run --frozen ruff check/format, pnpm format:check, scripts/e2e-tiers check, openapi and
+    sdk regenerated
+  result: pass
+  note: clean
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: 'Ledger hierarchy kept: hairline columns, tables with real headers, tint for the open item, no
+    cards; the design only names a Board toggle, so board, matrix and calendar are built from approved
+    primitives (QUESTIONS.md, default A)'
+- ref: design/state-matrix
+  result: pass
+  note: loading, error with retry, empty column and empty month states per layout
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: switch, board, matrix, calendar, inspector by id; vitest and Playwright at 390 and 1440
+- surface: api
+  result: pass
+  evidence: calendar and month parameters, layouts in the catalogue, record route, layout in views; OpenAPI
+    regenerated
+- surface: sdk
+  result: na
+  evidence: regenerated and checked (not required)
+- surface: cli
+  result: pass
+  evidence: entities query --calendar --month
+- surface: mcp
+  result: pass
+  evidence: query_entity calendar and month
+- surface: event_as_code
+  result: na
+  evidence: not required
+- surface: audit
+  result: na
+  evidence: reads only; no new write
+- surface: webhook
+  result: na
+  evidence: not required
+- surface: archive
+  result: na
+  evidence: not required
+- surface: analytics
+  result: na
+  evidence: not required
+- surface: search
+  result: pass
+  evidence: search and filter narrow every layout exactly as rows
+- surface: docs
+  result: pass
+  evidence: ENTITY_QUERY.md and DATA_GRID.md
+migrations: []
+findings:
+- P3 the inspector found its record only on the loaded page; fixed by the by-id read (inseparable from
+  opening a record from a card or a calendar day)
+- 'P3 design names only a Board toggle: owner question logged with default A'
+escalations: []
+limitations:
+- Selection, bulk actions and range selection stay in the list layout; boards, matrices and calendars
+  are read and open-a-record surfaces
+- A calendar day is UTC (the same as every date in the lists); an event-timezone day would need the event
+  timezone in the query
+- A board column shows at most 100 cards and says to narrow with a filter
+next: review

@@ -5,7 +5,7 @@ from django.apps import apps
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -33,6 +33,9 @@ class EntitySchema(serializers.Serializer):
     label = serializers.CharField()
     default_sort = serializers.ListField(child=serializers.CharField())
     search_fields = serializers.ListField(child=serializers.CharField())
+    layouts = serializers.ListField(child=serializers.CharField())
+    board_field = serializers.CharField()
+    calendar_fields = serializers.ListField(child=serializers.CharField())
     fields = EntityFieldSchema(many=True)
 
 
@@ -50,6 +53,9 @@ class EntityPageSchema(serializers.Serializer):
     subgroup = serializers.CharField(required=False)
     groups = serializers.ListField(child=serializers.DictField(), required=False)
     truncated = serializers.BooleanField(required=False)
+    calendar = serializers.CharField(required=False)
+    month = serializers.CharField(required=False)
+    days = serializers.ListField(child=serializers.DictField(), required=False)
 
 
 def _describe(entity):
@@ -58,6 +64,9 @@ def _describe(entity):
         "label": entity.label,
         "default_sort": list(entity.default_sort),
         "search_fields": list(entity.search_fields),
+        "layouts": entity.layouts(),
+        "board_field": entity.board_field,
+        "calendar_fields": list(entity.calendar_fields),
         "fields": [
             {
                 "key": f.key,
@@ -123,6 +132,14 @@ class EntityQueryView(_EntityView):
             OpenApiParameter(
                 "subgroup", str, description="A second groupable field, inside each group."
             ),
+            OpenApiParameter(
+                "calendar",
+                str,
+                description="A date field of a list that has a calendar: the response lists the "
+                "days of `month` with counts instead of rows; open a day with the ordinary query "
+                "and the day as conditions.",
+            ),
+            OpenApiParameter("month", str, description="With `calendar`: 2027-03 (default: now)."),
             OpenApiParameter("limit", int),
             OpenApiParameter("offset", int),
         ],
@@ -132,8 +149,6 @@ class EntityQueryView(_EntityView):
         event = self.get_event()
         entity = entities.get(entity_key)
         if entity is None:
-            from rest_framework.exceptions import NotFound
-
             raise NotFound("Unknown entity.")
         if not self.allowed(entity):
             raise PermissionDenied("You do not have a role that permits this action.")
@@ -143,57 +158,52 @@ class EntityQueryView(_EntityView):
         columns = query.parse_columns(entity, params.get("columns"))
         terms = query.parse_search(entity, params.get("search"))
         group, subgroup = query.parse_group(entity, params.get("group"), params.get("subgroup"))
+        calendar = month = None
+        if params.get("calendar"):
+            if group is not None:
+                raise query.QueryError("", "A calendar cannot also be grouped.", root="calendar")
+            _, calendar = query.parse_layout(entity, "calendar", params.get("calendar"))
+            month = query.parse_month(params.get("month"))
         if tree:
             query.compile_filter(entity, tree)  # validate before touching the database
         limit, offset = page_params(request, default=25, maximum=100)
-        if group is not None:
-            buckets = query.run_groups(
+        return Response(
+            query.answer(
                 entity,
                 event,
                 request.user,
                 tree=tree,
-                search=terms,
+                order=order,
+                columns=columns,
+                terms=terms,
                 group=group,
                 subgroup=subgroup,
+                calendar=calendar,
+                month=month,
+                limit=limit,
+                offset=offset,
             )
-            return Response(
-                {
-                    "entity": entity.key,
-                    "total": buckets["total"],
-                    "limit": limit,
-                    "offset": offset,
-                    "filter": tree,
-                    "sort": order,
-                    "search": " ".join(terms),
-                    "columns": [f.key for f in columns],
-                    "rows": [],
-                    "group": group.key,
-                    **({"subgroup": subgroup.key} if subgroup else {}),
-                    "groups": buckets["groups"],
-                    "truncated": buckets["truncated"],
-                }
-            )
-        result = query.run(
-            entity,
-            event,
-            request.user,
-            tree=tree,
-            sort=order,
-            columns=columns,
-            limit=limit,
-            offset=offset,
-            search=terms,
         )
-        return Response(
-            {
-                "entity": entity.key,
-                "total": result["total"],
-                "limit": limit,
-                "offset": offset,
-                "filter": tree,
-                "sort": order,
-                "search": " ".join(terms),
-                "columns": [f.key for f in columns],
-                "rows": result["rows"],
-            }
-        )
+
+
+class EntityRowSchema(serializers.Serializer):
+    entity = serializers.CharField()
+    row = serializers.DictField()
+
+
+class EntityRowView(_EntityView):
+    """One record of a list with every field, for the inspector: whatever the list's own query
+    would let this person see, found by its public id and absent otherwise."""
+
+    @extend_schema(responses=EntityRowSchema)
+    def get(self, request, workspace_public_id, event_public_id, entity_key, row_public_id):
+        event = self.get_event()
+        entity = entities.get(entity_key)
+        if entity is None:
+            raise NotFound("Unknown entity.")
+        if not self.allowed(entity):
+            raise PermissionDenied("You do not have a role that permits this action.")
+        row = query.one(entity, event, request.user, row_public_id)
+        if row is None:
+            raise NotFound("No such record.")
+        return Response({"entity": entity.key, "row": row})

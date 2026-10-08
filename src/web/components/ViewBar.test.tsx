@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { jsonResponse } from "../lib/test-http";
 import { withRouter } from "../lib/test-router";
 import type { SavedView, ViewDefinition } from "../lib/savedViews";
+import { togglePinnedView } from "../lib/shellPreferences";
 import { ViewBar } from "./ViewBar";
 (
   globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -42,7 +43,7 @@ type Call = { url: string; method: string; body: unknown };
 
 async function mount(
   initial: SavedView[],
-  options: { url?: string; current?: ViewDefinition } = {},
+  options: { url?: string; current?: ViewDefinition; conflict?: boolean } = {},
 ) {
   let views = initial;
   const calls: Call[] = [];
@@ -53,6 +54,17 @@ async function mount(
       const method = init?.method ?? "GET";
       const body = init?.body ? JSON.parse(String(init.body)) : undefined;
       calls.push({ url, method, body });
+      if (url.includes("/accounts/me/"))
+        return jsonResponse(200, { public_id: "u1", memberships: [] });
+      if (method === "PATCH" && options.conflict) {
+        options.conflict = false;
+        views = views.map((v) => ({ ...v, version: v.version + 1 })); // someone else saved
+        return jsonResponse(409, {
+          code: "view_changed",
+          detail:
+            "This view changed since you loaded it; reload it and apply again.",
+        });
+      }
       if (method === "GET") return jsonResponse(200, views);
       if (method === "POST") {
         const created = view({
@@ -136,6 +148,31 @@ describe("ViewBar", () => {
     await act(async () => root.unmount());
   });
 
+  it("lists the pinned views first, only while they still exist", async () => {
+    window.localStorage.clear();
+    const pinned = view({});
+    togglePinnedView("u1", "w", {
+      event: "e",
+      entity: "applications",
+      view: pinned.public_id,
+    });
+    togglePinnedView("u1", "w", {
+      event: "e",
+      entity: "applications",
+      view: "99999999-9999-4999-8999-999999999999", // deleted since: not shown
+    });
+    const { container, root } = await mount([pinned, SHARED]);
+    const groups = [...container.querySelectorAll("optgroup")].map((g) =>
+      g.getAttribute("label"),
+    );
+    expect(groups).toEqual(["Pinned", "My views", "Shared by organizers"]);
+    expect(
+      container.querySelector('optgroup[label="Pinned"]')?.textContent,
+    ).toBe("Pending");
+    await act(async () => root.unmount());
+    window.localStorage.clear();
+  });
+
   it("opens the view named in the URL and drops an id that is not in the list", async () => {
     const opened = await mount([view({})], {
       url: `/w/w/setup?view_applications=${view({}).public_id}`,
@@ -165,6 +202,47 @@ describe("ViewBar", () => {
       query: { sort: "username" },
     });
     expect(container.textContent).toContain("View saved.");
+    await act(async () => root.unmount());
+  });
+
+  it("offers Reset only while changed, applies the saved definition again, and says who can see the view", async () => {
+    const changed = await mount([view({})], {
+      url: `/w/w/setup?view_applications=${view({}).public_id}`,
+      current: { ...PENDING, sort: "username" },
+    });
+    expect(changed.container.textContent).toContain("Private to you.");
+    const before = changed.applied.length;
+    await act(async () => button(changed.container, "Reset")!.click());
+    expect(changed.applied.length).toBe(before + 1);
+    expect(changed.applied.at(-1)?.name).toBe("Pending"); // the list goes back to the saved view
+    await act(async () => changed.root.unmount());
+
+    const same = await mount([view({ visibility: "organizers" })], {
+      url: `/w/w/setup?view_applications=${view({}).public_id}`,
+    });
+    expect(button(same.container, "Reset")).toBeUndefined();
+    expect(same.container.textContent).toContain("Visible to every organizer.");
+    await act(async () => same.root.unmount());
+  });
+
+  it("reloads a view that changed under the person, says so, and the next save carries the new version", async () => {
+    const { container, calls, root } = await mount([view({})], {
+      url: `/w/w/setup?view_applications=${view({}).public_id}`,
+      current: { ...PENDING, sort: "username" },
+      conflict: true,
+    });
+    await act(async () => button(container, "Save")!.click());
+    await settle();
+    expect(container.textContent).toContain(
+      "This view changed since you loaded it",
+    );
+    await settle();
+    await act(async () => button(container, "Save")!.click());
+    await settle();
+    const patches = calls.filter((c) => c.method === "PATCH");
+    expect(patches.map((c) => (c.body as { version: number }).version)).toEqual(
+      [1, 2],
+    );
     await act(async () => root.unmount());
   });
 
@@ -248,14 +326,19 @@ describe("ViewBar", () => {
       url: `/w/w/setup?view_applications=${view({}).public_id}`,
       current: { ...PENDING, sort: "username" },
     });
+    // only the save is refused; the list of views still loads (the bar reloads it after a 409)
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () =>
-        jsonResponse(409, {
-          code: "view_changed",
-          detail: "This view changed since you loaded it.",
-        }),
-      ),
+      vi.fn(async (input: unknown, init?: RequestInit) => {
+        if (String(input).includes("/accounts/me/"))
+          return jsonResponse(200, { public_id: "u1", memberships: [] });
+        return (init?.method ?? "GET") === "PATCH"
+          ? jsonResponse(409, {
+              code: "view_changed",
+              detail: "This view changed since you loaded it.",
+            })
+          : jsonResponse(200, [view({})]);
+      }),
     );
     await act(async () => button(container, "Save")!.click());
     await settle();

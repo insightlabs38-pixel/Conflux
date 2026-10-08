@@ -1,0 +1,71 @@
+version: 3
+task: PD-F006-B02-T04
+batch: PD-F006-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 13f2d72
+  head_commit: null
+changed_paths:
+- src/web/components/ViewBar.tsx
+- src/web/components/ViewBar.test.tsx
+- tests/e2e/saved-views-flow.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Saved private views, complete
+  result: pass
+  evidence: a view is private by default and says so (Private to you); the bar says when the list differs (Changed since saved) and now offers Reset, which applies the saved definition again, besides Save and Save as new view; a duplicate name or a view over the quota is refused with the server's words and nothing is lost; a view changed by someone else answers 409, which the bar now reloads so the next save carries the new version
+invariants:
+- item: Saved views stay definitions, authorized by the viewer
+  result: pass
+  evidence: no change to what a view stores or to the server's rules; running a view re-authorizes, only the owner can change or delete it (API tests unchanged and passing), and sharing widens who sees the definition, never the rows
+- item: No test weakened
+  result: pass
+  evidence: one existing ViewBar test stubbed every request as a 409 including the list reload; the bar now reloads after a 409 as it should, so the stub answers only the save with 409 and the list normally - same assertions
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 151 files, 848 tests (ViewBar - Reset only while changed with the visibility line, a conflict reloads and the next save carries the new version, pinned views first and only while they exist)
+- command: scripts/e2e-tiers with_fixture iso-min saved-views-flow (the runner's own provision, run and dispose; stack rebuilt first)
+  result: pass
+  note: 1 passed on an isolated fixture, desktop - save sorted by project, Private to you, change shows Changed since saved, Reset returns to the saved order, Save keeps a change across reload, a duplicate name is refused in words, Share shows Visible to every organizer and the API agrees, Pin lists it first, delete states its consequence; axe clean
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: saved-view control with modified, reset, save and copy link
+- ref: design/state-matrix
+  result: pass
+  note: private, shared, changed, conflict, refused name, pinned
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: unchanged; tests/integration/test_saved_views.py covers rules, quota, uniqueness, versions and sharing
+- surface: cli
+  result: pass
+  evidence: T91 of this batch
+- surface: mcp
+  result: pass
+  evidence: T91 of this batch
+- surface: audit
+  result: pass
+  evidence: create, update, share and delete are audited by the existing saved-view service
+- surface: search
+  result: pass
+  evidence: a view carries search (B01)
+- surface: docs
+  result: pass
+  evidence: T91
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Views are per event and per list; moving a view to another event is not offered.
+next: review

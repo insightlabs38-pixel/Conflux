@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ApiError } from "../lib/api";
 import { useUrlParam } from "../lib/urlState";
 import {
   createView,
@@ -87,6 +88,9 @@ export function ViewBar({
       setNote(done);
     } catch (cause) {
       setFailure(cause instanceof Error ? cause.message : "Request failed.");
+      // a view that changed under us: fetch it again so the next save carries its new version
+      if (cause instanceof ApiError && cause.status === 409)
+        await load.reload();
     } finally {
       setBusy(false);
     }
@@ -94,6 +98,11 @@ export function ViewBar({
 
   const mine = views.filter((v) => v.mine);
   const shared = views.filter((v) => !v.mine);
+  // the person's pins for this list (device-local), offered first and only while they still resolve
+  const pinnedViews = pins
+    .filter((pin) => pin.event === eventId && pin.entity === entity)
+    .map((pin) => views.find((v) => v.public_id === pin.view))
+    .filter((v): v is SavedView => v !== undefined);
 
   return (
     <div role="group" aria-label="Saved views">
@@ -126,6 +135,15 @@ export function ViewBar({
           }}
         >
           <option value="">Default</option>
+          {pinnedViews.length > 0 && (
+            <optgroup label="Pinned">
+              {pinnedViews.map((v) => (
+                <option key={`pin-${v.public_id}`} value={v.public_id}>
+                  {v.name}
+                </option>
+              ))}
+            </optgroup>
+          )}
           {mine.length > 0 && (
             <optgroup label="My views">
               {mine.map((v) => (
@@ -166,6 +184,22 @@ export function ViewBar({
         </button>
       )}
       {changed && <span role="status">Changed since saved</span>}
+      {changed && selected && (
+        <Button
+          variant="secondary"
+          disabled={busy}
+          onClick={() => onApply(selected)}
+        >
+          Reset
+        </Button>
+      )}
+      {selected?.mine && (
+        <span className="cx-muted">
+          {selected.visibility === "organizers"
+            ? "Visible to every organizer."
+            : "Private to you."}
+        </span>
+      )}
       {selected && !selected.mine && (
         <span className="cx-muted">
           Shared by {selected.owner}; save your changes as your own view.

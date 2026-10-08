@@ -3879,3 +3879,33 @@ html {
   font-size: var(--fs-13);
   color: var(--color-danger, var(--ink));
 }
+
+.cx-bulkbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-2);
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--fs-14);
+}
+.cx-bulkbar__count {
+  font-weight: 600;
+}
+.cx-bulkbar__more > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  padding: var(--sp-1) 0;
+}
+.cx-bulkbar__more summary {
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+.cx-bulkbar__reason {
+  flex-basis: 100%;
+  font-size: var(--fs-13);
+}

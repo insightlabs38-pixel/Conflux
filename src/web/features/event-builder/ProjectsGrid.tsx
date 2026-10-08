@@ -2,6 +2,7 @@ import { useCallback, useMemo, useState } from "react";
 import { BulkPlanner } from "../../components/BulkPlanner";
 import { NotesDialog } from "../../components/NotesDialog";
 import { EntityGrid } from "../../components/EntityGrid";
+import { BulkBar } from "../../components/BulkBar";
 import { Button } from "../../components/Button";
 import { countOf } from "../../lib/selection";
 
@@ -64,32 +65,36 @@ export function ProjectsGrid({
 
   return (
     <div>
-      {selected.size > 0 && (
-        <div role="group" aria-label="Bulk actions">
-          <span role="status">{selected.size} selected</span>{" "}
-          <label>
-            Move to track{" "}
-            <select value={track} onChange={(e) => setTrack(e.target.value)}>
-              <option value="" />
-              {tracks.map((t) => (
-                <option key={t.public_id} value={t.public_id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <Button
-            variant="secondary"
-            disabled={!track || operations.length > 20}
-            onClick={() => setPlanning(true)}
-          >
-            Preview move
-          </Button>
-          {tracks.length === 0 && (
-            <span className="cx-muted"> Add a track under Setup first.</span>
-          )}
-        </div>
-      )}
+      <BulkBar
+        count={selected.size}
+        actions={[
+          {
+            id: "preview-move",
+            label: "Preview move",
+            primary: true,
+            disabled: !track || operations.length > 20,
+            reason:
+              tracks.length === 0
+                ? "Add a track under Setup first."
+                : operations.length > 20
+                  ? "Select at most 2,000 projects to move at once."
+                  : "Choose a track to move to.",
+            run: () => setPlanning(true),
+          },
+        ]}
+      >
+        <label>
+          Move to track{" "}
+          <select value={track} onChange={(e) => setTrack(e.target.value)}>
+            <option value="" />
+            {tracks.map((t) => (
+              <option key={t.public_id} value={t.public_id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      </BulkBar>
       <EntityGrid
         workspaceId={workspaceId}
         eventId={eventId}

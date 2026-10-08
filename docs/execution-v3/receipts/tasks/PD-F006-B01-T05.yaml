@@ -1,0 +1,80 @@
+version: 3
+task: PD-F006-B01-T05
+batch: PD-F006-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 450efbd
+  head_commit: null
+changed_paths:
+- src/web/components/BulkBar.tsx
+- src/web/components/BulkBar.test.tsx
+- src/web/features/event-builder/ProjectsGrid.tsx
+- src/web/styles/components.css
+- tests/e2e/grid-bulk-bar.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: One bulk-action bar for every list
+  result: pass
+  evidence: BulkBar - a group named Bulk actions, the selected count, any controls an action needs (a track to move to), exactly one primary action (the marked one, else the first), at most four actions in view and the rest under More, and a visible reason tied to a disabled action by aria-describedby instead of hiding it. An action only starts the list's workflow; clearing stays the grid's own Clear selection so there is one
+- item: Existing bulk flow migrated, not duplicated
+  result: pass
+  evidence: ProjectsGrid's hand-built bar is replaced by BulkBar with the same track control and Preview move action; the bulk planner is unchanged, still previews, applies all or nothing and receipts; the move is not offered above 2,000 projects and says why
+invariants:
+- item: BULK_PLAN reused, no mutation from the bar
+  result: pass
+  evidence: the bar calls setPlanning; the browser test opens the preview and then confirms no project changed
+- item: No test weakened
+  result: pass
+  evidence: the existing isolated bulk-planner spec passes unmodified against the new bar (create track, select two, preview, apply, receipts)
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 151 files, 838 tests (BulkBar 3 - hidden without a selection, one primary with four visible and the rest under More, disabled with a reason)
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts grid-bulk-bar (stack rebuilt first)
+  result: pass
+  note: 2 passed - no bar without a selection, 2 selected, Preview move disabled with its reason, one primary, axe and no overflow, choosing a track enables it, the preview opens, Escape applies nothing and the rows are unchanged
+- command: scripts/e2e-tiers with_fixture iso-min bulk-planner (the runner's own provision, run and dispose)
+  result: pass
+  note: 2 passed on an isolated fixture - the unmodified planner spec against the migrated bar
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: one primary action, at most four plus More, count, reasons for unavailable actions; the frozen-snapshot cue belongs to B05
+- ref: design/state-matrix
+  result: pass
+  note: none, available, unavailable with reason, overflow
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: not required, unchanged
+- surface: cli
+  result: pass
+  evidence: the existing operations route already serves bulk plans; no new command in B01
+- surface: mcp
+  result: pass
+  evidence: not required in this task
+- surface: audit
+  result: pass
+  evidence: the planner's existing receipt and audit; the bar writes nothing
+- surface: search
+  result: pass
+  evidence: not affected
+- surface: docs
+  result: pass
+  evidence: T91
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Only the projects grid has a bulk action today; other lists adopt BulkBar as they gain one.
+- A frozen membership snapshot for select-all-matching is B05.
+next: review

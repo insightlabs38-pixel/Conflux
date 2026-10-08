@@ -10,9 +10,28 @@ import {
   useRecentEvents,
 } from "../lib/shellPreferences";
 import { Icon } from "./Icon";
+import { Status, type StatusTone } from "./Status";
 import { useWorkspaceNavigation } from "./WorkspaceNavigation";
 
 const RECENT_SHOWN = 5;
+
+/** The tone of a phase: calm for the quiet ones, a word-and-icon for the active ones (V-STATUS). */
+const PHASE_TONE: Record<string, StatusTone> = {
+  draft: "neutral",
+  open: "success",
+  closed: "warning",
+  judging: "info",
+  published: "success",
+  archived: "neutral",
+};
+const PhaseMark = ({ event }: { event: ShellEvent }) =>
+  event.phase ? (
+    <span className="cx-switcher__phase" title={event.phase.reason}>
+      <Status tone={PHASE_TONE[event.phase.key] ?? "neutral"}>
+        {event.phase.label}
+      </Status>
+    </span>
+  ) : null;
 
 /**
  * Choose the event the workspace is about, and the workspace itself. The selected event is the URL's
@@ -85,7 +104,8 @@ export function EventSwitcher() {
             if (details.current) details.current.open = false;
           }}
         >
-          {event.name}
+          <span className="cx-switcher__name">{event.name}</span>
+          <PhaseMark event={event} />
         </Link>
         <button
           type="button"
@@ -115,8 +135,11 @@ export function EventSwitcher() {
         }
       }}
     >
-      <summary aria-label={`Event: ${label}. Switch event`}>
+      <summary
+        aria-label={`Event: ${label}${current?.phase ? `, ${current.phase.label}` : ""}. Switch event`}
+      >
         <span>{label}</span>
+        {current && <PhaseMark event={current} />}
         <Icon name="chevron-down" />
       </summary>
       <div className="cx-switcher__panel">

@@ -1,7 +1,9 @@
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from . import lifecycle
 from .models import (
     Announcement,
     BasePrize,
@@ -16,9 +18,22 @@ from .models import (
 )
 
 
+class EventPhaseSchema(serializers.Serializer):
+    """Where the event is in its life, said once for every screen (events.lifecycle)."""
+
+    key = serializers.ChoiceField(choices=list(lifecycle.PHASES))
+    label = serializers.CharField()
+    reason = serializers.CharField()
+
+
 class EventSerializer(serializers.ModelSerializer):
     public_id = serializers.UUIDField(read_only=True)
     status = serializers.ChoiceField(choices=EventStatus.choices, read_only=True)
+    phase = serializers.SerializerMethodField()
+
+    @extend_schema_field(EventPhaseSchema)
+    def get_phase(self, event):
+        return lifecycle.phase(event)
 
     class Meta:
         model = Event
@@ -31,6 +46,7 @@ class EventSerializer(serializers.ModelSerializer):
             "starts_at",
             "ends_at",
             "status",
+            "phase",
             "is_public",
             "created_at",
             "updated_at",

@@ -1,7 +1,17 @@
 import { useLoad } from "./useLoad";
 import { describeProblem } from "../lib/api";
 
-export type ShellEvent = { public_id: string; name: string };
+/** Where an event is in its life, as the server derives it (events.lifecycle). */
+export type EventPhase = {
+  key: "draft" | "open" | "closed" | "judging" | "published" | "archived";
+  label: string;
+  reason: string;
+};
+export type ShellEvent = {
+  public_id: string;
+  name: string;
+  phase?: EventPhase;
+};
 
 /** The list each role already uses to choose an event (so these reads share one cache entry). */
 export function shellEventsUrl(workspaceId: string, role: string): string {

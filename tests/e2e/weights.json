@@ -61,5 +61,6 @@
   "isolated-mutation:pinned-views": 25,
   "isolated-mutation:recent-activity": 25,
   "read-only:inspector": 30,
-  "isolated-mutation:preview-as": 25
+  "isolated-mutation:preview-as": 25,
+  "isolated-mutation:event-phase": 25
 }

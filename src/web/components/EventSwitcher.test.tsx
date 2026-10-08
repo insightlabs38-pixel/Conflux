@@ -174,4 +174,55 @@ describe("event switcher", () => {
     expect(details.open).toBe(false);
     await act(async () => root.unmount());
   });
+
+  it("says the phase of the selected event beside its name and of each event in the list, with the server's reason", async () => {
+    const phased = [
+      {
+        public_id: "e1",
+        name: "Gauss Hack",
+        phase: {
+          key: "judging",
+          label: "Judging",
+          reason: "Judging has started: ballots have been submitted.",
+        },
+      },
+      {
+        public_id: "e2",
+        name: "Noether Night",
+        phase: {
+          key: "draft",
+          label: "Draft",
+          reason: "Not open yet: only organizers can see it.",
+        },
+      },
+    ];
+    const { container, root } = await render("/w/w/overview?event=e1", phased);
+    expect(summary(container).textContent).toContain("Gauss Hack");
+    expect(summary(container).textContent).toContain("Judging");
+    expect(summary(container).getAttribute("aria-label")).toBe(
+      "Event: Gauss Hack, Judging. Switch event",
+    );
+    expect(
+      summary(container)
+        .querySelector(".cx-switcher__phase")!
+        .getAttribute("title"),
+    ).toContain("ballots have been submitted");
+    const rowTexts = [
+      ...container.querySelectorAll(
+        '.cx-switcher section:not([aria-label="Workspaces"]) .cx-switcher__choice',
+      ),
+    ].map((a) => a.textContent);
+    expect(rowTexts).toEqual(["Gauss HackJudging", "Noether NightDraft"]);
+    // an event without a phase (an older server) shows none and nothing breaks
+    await act(async () => root.unmount());
+  });
+
+  it("shows no phase when the server sends none", async () => {
+    const { container, root } = await render("/w/w/overview?event=e1");
+    expect(summary(container).querySelector(".cx-switcher__phase")).toBeNull();
+    expect(summary(container).getAttribute("aria-label")).toBe(
+      "Event: Gauss Hack. Switch event",
+    );
+    await act(async () => root.unmount());
+  });
 });

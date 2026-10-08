@@ -1890,6 +1890,7 @@ class Event(TypedDict):
     starts_at: NotRequired[str | None]
     ends_at: NotRequired[str | None]
     status: EventStatus
+    phase: EventPhaseSchema
     is_public: NotRequired[bool]
     created_at: str
     updated_at: str
@@ -1966,6 +1967,7 @@ class EventCreate(TypedDict):
     starts_at: NotRequired[str | None]
     ends_at: NotRequired[str | None]
     status: EventStatus
+    phase: EventPhaseSchema
     is_public: NotRequired[bool]
     created_at: str
     updated_at: str
@@ -1990,6 +1992,16 @@ class InputOfEventDashboardSchema(TypedDict):
     track_count: int
     base_prize_count: int
     configuration_checks: list[str]
+
+class EventPhaseSchema(TypedDict):
+    key: KeyEnum
+    label: str
+    reason: str
+
+class InputOfEventPhaseSchema(TypedDict):
+    key: InputOfKeyEnum
+    label: str
+    reason: str
 
 EventQuestionStatus = Literal['pending', 'published', 'hidden']
 
@@ -2036,6 +2048,7 @@ class EventStatusSchema(TypedDict):
     starts_at: NotRequired[str | None]
     ends_at: NotRequired[str | None]
     status: EventStatus
+    phase: EventPhaseSchema
     is_public: NotRequired[bool]
     created_at: str
     updated_at: str
@@ -2662,10 +2675,12 @@ class InputOfJudgeDirectorySchema(TypedDict):
 class JudgeEventSummary(TypedDict):
     public_id: str
     name: str
+    phase: EventPhaseSchema
 
 class InputOfJudgeEventSummary(TypedDict):
     public_id: str
     name: str
+    phase: InputOfEventPhaseSchema
 
 class JudgeInvitationDecisionSchema(TypedDict):
     decision: JudgeInvitationDecisionSchemaDecisionEnum
@@ -2762,6 +2777,10 @@ class InputOfJudgeWorkloadRowSchema(TypedDict):
     assigned_count: int
     submitted_count: int
     completion_ratio: float
+
+KeyEnum = Literal['draft', 'open', 'closed', 'judging', 'published', 'archived']
+
+InputOfKeyEnum = Literal['draft', 'open', 'closed', 'judging', 'published', 'archived']
 
 LevelEnum = Literal['info', 'warning', 'blocked']
 
@@ -3493,10 +3512,12 @@ class InputOfPairwiseRunInputSchema(TypedDict):
 class ParticipantEventSummary(TypedDict):
     public_id: str
     name: str
+    phase: EventPhaseSchema
 
 class InputOfParticipantEventSummary(TypedDict):
     public_id: str
     name: str
+    phase: InputOfEventPhaseSchema
 
 class ParticipantFormSchema(TypedDict):
     public_id: str
@@ -3596,6 +3617,7 @@ class PatchedEvent(TypedDict):
     starts_at: NotRequired[str | None]
     ends_at: NotRequired[str | None]
     status: NotRequired[EventStatus]
+    phase: NotRequired[EventPhaseSchema]
     is_public: NotRequired[bool]
     created_at: NotRequired[str]
     updated_at: NotRequired[str]

@@ -21720,6 +21720,10 @@ components:
           allOf:
           - $ref: '#/components/schemas/EventStatus'
           readOnly: true
+        phase:
+          allOf:
+          - $ref: '#/components/schemas/EventPhaseSchema'
+          readOnly: true
         is_public:
           type: boolean
         created_at:
@@ -21733,6 +21737,7 @@ components:
       required:
       - created_at
       - name
+      - phase
       - public_id
       - slug
       - status
@@ -21876,6 +21881,10 @@ components:
           allOf:
           - $ref: '#/components/schemas/EventStatus'
           readOnly: true
+        phase:
+          allOf:
+          - $ref: '#/components/schemas/EventPhaseSchema'
+          readOnly: true
         is_public:
           type: boolean
         created_at:
@@ -21889,6 +21898,7 @@ components:
       required:
       - created_at
       - name
+      - phase
       - public_id
       - status
       - updated_at
@@ -21910,6 +21920,20 @@ components:
       - configuration_checks
       - event
       - track_count
+    EventPhaseSchema:
+      type: object
+      description: Where the event is in its life, said once for every screen (events.lifecycle).
+      properties:
+        key:
+          $ref: '#/components/schemas/KeyEnum'
+        label:
+          type: string
+        reason:
+          type: string
+      required:
+      - key
+      - label
+      - reason
     EventQuestionStatus:
       enum:
       - pending
@@ -22012,6 +22036,10 @@ components:
           allOf:
           - $ref: '#/components/schemas/EventStatus'
           readOnly: true
+        phase:
+          allOf:
+          - $ref: '#/components/schemas/EventPhaseSchema'
+          readOnly: true
         is_public:
           type: boolean
         created_at:
@@ -22029,6 +22057,7 @@ components:
       required:
       - created_at
       - name
+      - phase
       - public_id
       - readiness
       - slug
@@ -23026,8 +23055,11 @@ components:
           format: uuid
         name:
           type: string
+        phase:
+          $ref: '#/components/schemas/EventPhaseSchema'
       required:
       - name
+      - phase
       - public_id
     JudgeInvitationDecisionSchema:
       type: object
@@ -23187,6 +23219,22 @@ components:
       - completion_ratio
       - judge
       - submitted_count
+    KeyEnum:
+      enum:
+      - draft
+      - open
+      - closed
+      - judging
+      - published
+      - archived
+      type: string
+      description: |-
+        * `draft` - draft
+        * `open` - open
+        * `closed` - closed
+        * `judging` - judging
+        * `published` - published
+        * `archived` - archived
     LevelEnum:
       enum:
       - info
@@ -24419,8 +24467,11 @@ components:
           format: uuid
         name:
           type: string
+        phase:
+          $ref: '#/components/schemas/EventPhaseSchema'
       required:
       - name
+      - phase
       - public_id
     ParticipantFormSchema:
       type: object
@@ -24597,6 +24648,10 @@ components:
         status:
           allOf:
           - $ref: '#/components/schemas/EventStatus'
+          readOnly: true
+        phase:
+          allOf:
+          - $ref: '#/components/schemas/EventPhaseSchema'
           readOnly: true
         is_public:
           type: boolean

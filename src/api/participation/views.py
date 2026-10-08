@@ -5,7 +5,9 @@ from django.core.exceptions import ValidationError as ModelValidationError
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, inline_serializer
+from events import lifecycle
 from events.models import Event, EventStatus
+from events.serializers import EventPhaseSchema
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
@@ -52,11 +54,20 @@ class ParticipantView(APIView):
         return TeamMembership.objects.filter(team__event=event, user=self.request.user).first()
 
 
+def _summary(event):
+    """An event as a person choosing between events sees it: its name and the phase it is in."""
+    return {"public_id": str(event.public_id), "name": event.name, "phase": lifecycle.phase(event)}
+
+
 class ParticipantEventListView(ParticipantView):
     @extend_schema(
         responses=inline_serializer(
             "ParticipantEventSummary",
-            fields={"public_id": serializers.UUIDField(), "name": serializers.CharField()},
+            fields={
+                "public_id": serializers.UUIDField(),
+                "name": serializers.CharField(),
+                "phase": EventPhaseSchema(),
+            },
             many=True,
         )
     )
@@ -64,9 +75,7 @@ class ParticipantEventListView(ParticipantView):
         events = Event.objects.filter(workspace=self.get_workspace(), is_public=True).exclude(
             status__in=[EventStatus.DRAFT, EventStatus.ARCHIVED]
         )
-        return Response(
-            [{"public_id": str(event.public_id), "name": event.name} for event in events]
-        )
+        return Response([_summary(event) for event in events])
 
 
 class JudgeEventListView(ParticipantView):
@@ -75,7 +84,11 @@ class JudgeEventListView(ParticipantView):
     @extend_schema(
         responses=inline_serializer(
             "JudgeEventSummary",
-            fields={"public_id": serializers.UUIDField(), "name": serializers.CharField()},
+            fields={
+                "public_id": serializers.UUIDField(),
+                "name": serializers.CharField(),
+                "phase": EventPhaseSchema(),
+            },
             many=True,
         )
     )
@@ -85,9 +98,7 @@ class JudgeEventListView(ParticipantView):
             .exclude(status=EventStatus.ARCHIVED)
             .order_by("name")
         )
-        return Response(
-            [{"public_id": str(event.public_id), "name": event.name} for event in events]
-        )
+        return Response([_summary(event) for event in events])
 
 
 class MyTeamView(ParticipantView):

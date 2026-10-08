@@ -1090,6 +1090,23 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.cx-switcher__choice {
+  gap: var(--sp-2);
+}
+.cx-switcher__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cx-switcher__phase {
+  flex: none;
+  color: var(--ink-3);
+  font-size: var(--fs-12);
+}
+.cx-switcher summary > .cx-switcher__phase {
+  overflow: visible;
+}
 .cx-switcher__choice:hover {
   background: var(--surface-2);
 }

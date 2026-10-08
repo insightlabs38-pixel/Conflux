@@ -1,0 +1,90 @@
+version: 3
+task: PD-F005-B02-T01
+batch: PD-F005-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 11f8d3c
+  head_commit: null
+changed_paths:
+- src/api/events/lifecycle.py
+- src/api/events/serializers.py
+- src/api/participation/views.py
+- docs/api/openapi.yaml
+- sdks/python/conflux_sdk/generated.py
+- sdks/typescript/generated.ts
+- tests/integration/test_event_phase.py
+- src/web/hooks/useShellEvents.ts
+- src/web/components/EventSwitcher.tsx
+- src/web/components/EventSwitcher.test.tsx
+- src/web/styles/components.css
+- tests/e2e/event-phase.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Event state indicator, always available but unobtrusive, through the canonical domain layer
+  result: pass
+  evidence: events/lifecycle.py derives the phase once on the server from what is stored - archived and draft are what they say, a published award means published, a submitted non-calibration ballot means judging, otherwise closed or open - with no clock and no client input, and the word, a key and a sentence of reason are sent as an additive read-only phase on the organizer events list (EventSerializer), the judge events list and the participant events list. The event switcher shows the phase as a quiet icon-and-word status beside the selected event's name in the top bar and beside each event in the list, with the reason as its tooltip and in the control's accessible name; it is on every role's shell and nothing else changed in the header.
+- item: Observable state and diagnostics
+  result: pass
+  evidence: the reason sentence says why (for example Judging has started - ballots have been submitted); the API and the screen say the same thing because both read the one function; closing the event changes the word on the next read (browser test)
+- item: Integrates with authorization, audit and versioning
+  result: pass
+  evidence: read-only on the three lists, which keep their own authorization (the participant list still excludes drafts and archived events); changing the status still goes through the status endpoint, its consequences and its audit, none of which changed; a PATCH that tries to set the phase leaves it derived (tested); OpenAPI and both SDKs regenerated and checked
+invariants:
+- item: One source of truth
+  result: pass
+  evidence: no stored phase, no client derivation; the switcher only draws what the server sent and shows nothing for a server that sends none
+- item: Existing behaviour unchanged
+  result: pass
+  evidence: the new field is additive; the contract tests (rest, sdk, completeness) pass with it; the event lists return the same rows as before
+- item: No test weakened
+  result: pass
+  evidence: tests were added; the switcher's list test scopes to event rows now that workspaces share a class, nothing removed
+verification:
+- command: pytest tests/integration/test_event_phase.py test_feature_rest.py test_feature_sdk.py test_feature_contract.py -n 6
+  result: pass
+  note: 291 passed (env as in the Makefile); make openapi-check and make sdk-check pass after regeneration
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 145 files, 801 tests (the switcher shows the phase beside the name with the reason and in the accessible name, and nothing when the server sends none)
+- command: scripts/e2e fixture run of event-phase.spec.ts (create iso-min fixture, run, dispose; the runner's own with_fixture steps)
+  result: pass
+  note: 5 passed on an isolated fixture - the word beside the name equals the server's at 1440 and 390 with the sentence as tooltip and in the accessible name, participant and judge lists show it, closing the event changes it
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: event state indicator in the top bar next to the event switcher, quiet (no pill, an icon and a word)
+- ref: design/state-matrix
+  result: pass
+  note: icon plus word for status
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: reclassified by this task, an additive read-only phase field on three existing lists, tested, OpenAPI and SDKs regenerated and checked (spec 005 PD-F005-B02 contract)
+- surface: sdk
+  result: pass
+  evidence: generated clients regenerated for the new field
+- surface: audit
+  result: pass
+  evidence: nothing new is recorded; status changes keep their audit
+- surface: docs
+  result: pass
+  evidence: upgrade and developer notes at T91
+migrations: []
+findings:
+- P2 judging and published are not stored statuses; derived server-side as decided in QUESTIONS.md (2026-10-08T00:30Z); closed is kept as a sixth word because it is a real stored state.
+- P3 the reuse of the APPROVAL primitive named by the task is not exercised: the indicator does not show a pending approval, because no event status change is approval-gated today.
+- P3 each phase read costs two small existence queries per event; the lists are short, and a bulk annotation can replace them if lists grow.
+escalations: []
+limitations:
+- Judging is read from submitted ballots, not from a judging window; an event whose judging is scheduled but not started reads as open or closed.
+- Published means at least one award is published; a results page published without awards would not show.
+next: review

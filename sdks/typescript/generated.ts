@@ -2076,6 +2076,7 @@ export type Event = {
   starts_at?: string | null;
   ends_at?: string | null;
   status: EventStatus;
+  phase: EventPhaseSchema;
   is_public?: boolean;
   created_at: string;
   updated_at: string;
@@ -2159,6 +2160,7 @@ export type EventCreate = {
   starts_at?: string | null;
   ends_at?: string | null;
   status: EventStatus;
+  phase: EventPhaseSchema;
   is_public?: boolean;
   created_at: string;
   updated_at: string;
@@ -2186,6 +2188,14 @@ export type InputOfEventDashboardSchema = {
   track_count: number;
   base_prize_count: number;
   configuration_checks: string[];
+};
+
+export type EventPhaseSchema = { key: KeyEnum; label: string; reason: string };
+
+export type InputOfEventPhaseSchema = {
+  key: InputOfKeyEnum;
+  label: string;
+  reason: string;
 };
 
 export type EventQuestionStatus = "pending" | "published" | "hidden";
@@ -2233,6 +2243,7 @@ export type EventStatusSchema = {
   starts_at?: string | null;
   ends_at?: string | null;
   status: EventStatus;
+  phase: EventPhaseSchema;
   is_public?: boolean;
   created_at: string;
   updated_at: string;
@@ -2904,9 +2915,17 @@ export type InputOfJudgeDirectorySchema = {
   username: string;
 };
 
-export type JudgeEventSummary = { public_id: string; name: string };
+export type JudgeEventSummary = {
+  public_id: string;
+  name: string;
+  phase: EventPhaseSchema;
+};
 
-export type InputOfJudgeEventSummary = { public_id: string; name: string };
+export type InputOfJudgeEventSummary = {
+  public_id: string;
+  name: string;
+  phase: InputOfEventPhaseSchema;
+};
 
 export type JudgeInvitationDecisionSchema = {
   decision: JudgeInvitationDecisionSchemaDecisionEnum;
@@ -3010,6 +3029,12 @@ export type InputOfJudgeWorkloadRowSchema = {
   submitted_count: number;
   completion_ratio: number;
 };
+
+export type KeyEnum =
+  "draft" | "open" | "closed" | "judging" | "published" | "archived";
+
+export type InputOfKeyEnum =
+  "draft" | "open" | "closed" | "judging" | "published" | "archived";
 
 export type LevelEnum = "info" | "warning" | "blocked";
 
@@ -3793,11 +3818,16 @@ export type PairwiseRunInputSchema = { prior_games?: number };
 
 export type InputOfPairwiseRunInputSchema = { prior_games?: number };
 
-export type ParticipantEventSummary = { public_id: string; name: string };
+export type ParticipantEventSummary = {
+  public_id: string;
+  name: string;
+  phase: EventPhaseSchema;
+};
 
 export type InputOfParticipantEventSummary = {
   public_id: string;
   name: string;
+  phase: InputOfEventPhaseSchema;
 };
 
 export type ParticipantFormSchema = {
@@ -3900,6 +3930,7 @@ export type PatchedEvent = {
   starts_at?: string | null;
   ends_at?: string | null;
   status?: EventStatus;
+  phase?: EventPhaseSchema;
   is_public?: boolean;
   created_at?: string;
   updated_at?: string;

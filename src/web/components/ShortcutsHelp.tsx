@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useMe } from "../hooks/useMe";
 import { commandsFor, type CommandContext } from "../lib/commands";
@@ -32,9 +32,13 @@ export function ShellShortcuts() {
   const places = navigation?.destinations;
   const href = navigation?.href;
 
-  useEffect(() => onShellOverlay("shortcuts", () => setOpen(true)), []);
+  useLayoutEffect(() => onShellOverlay("shortcuts", () => setOpen(true)), []);
 
-  useEffect(() => {
+  // The listener reads the latest places and navigation through a ref, so it is subscribed once per
+  // on or off and a re-render (data arriving, the URL changing) can never drop a chord half typed.
+  const latest = useRef({ places, href, navigate });
+  latest.current = { places, href, navigate };
+  useLayoutEffect(() => {
     if (!enabled) return;
     const stop = () => {
       if (chord.current) clearTimeout(chord.current);
@@ -64,6 +68,7 @@ export function ShellShortcuts() {
         event.preventDefault();
         openShellOverlay("palette");
       } else if (action.type === "go") {
+        const { places, href, navigate } = latest.current;
         const place = places?.find((item) => item.key === action.letter);
         if (place && href) {
           event.preventDefault();
@@ -79,7 +84,7 @@ export function ShellShortcuts() {
       document.removeEventListener("keydown", listen);
       stop();
     };
-  }, [enabled, places, href, navigate]);
+  }, [enabled]);
 
   if (!navigation || !open) return null;
   return (

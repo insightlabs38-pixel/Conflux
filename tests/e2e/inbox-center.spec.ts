@@ -5,6 +5,7 @@ import { eventIds, openWorkspace, settled, signIn } from "./support";
 // through the existing endpoints: the unread count, the latest messages, mark one read, a link to
 // all messages and to the notification preferences. It sends a real message, so it runs on an
 // isolated fixture.
+test.skip(({ isMobile }) => isMobile, "sets its own viewport");
 const bell = (page: Page) => page.locator(".cx-inbox summary");
 const panel = (page: Page) => page.locator(".cx-inbox__panel");
 

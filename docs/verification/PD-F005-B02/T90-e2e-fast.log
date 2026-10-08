@@ -1,0 +1,51 @@
+./scripts/e2e-fast 
+ok   stack health — http://localhost:8080
+ok   reference scenario seed 7 — organizer signs in; event window open
+ok   source freshness — running API matches src/api
+ok   leftover fixtures — none
+ok   playwright chromium
+preflight 2.2s
+[iso-event-advanced] exit 0: 1 skipped; 1 passed (14.9s)
+[iso-event-configuration] exit 0: 2 skipped; 2 passed (23.7s)
+[iso-schema-form] exit 0: 2 skipped; 2 passed (25.4s)
+[canary-lifecycle] exit 0: 6 skipped; 6 passed (34.6s)
+[iso-rich-preview] exit 0: 2 skipped; 2 passed (20.1s)
+[iso-notifications] exit 0: 2 skipped; 2 passed (12.3s)
+[iso-artifact-preview] exit 0: 2 skipped; 2 passed (18.2s)
+[canary-scenes] exit 0: 5 passed (16.5s)
+[iso-inbox-center] exit 0: ✓  4 [desktop] › tests/e2e/inbox-center.spec.ts:107:5 › an organizer who received nothing is told they are caught up, and a failed read says so and recovers (3.8s); -  8 [mobile] › tests/e2e/inbox-center.spec.ts:107:5 › an organizer who received nothing is told t
+[iso-role-switcher] exit 0: 5 skipped; 5 passed (17.9s)
+[iso-pinned-views] exit 0: 3 skipped; 3 passed (21.5s)
+[iso-event-phase] exit 0: 5 skipped; 5 passed (16.0s)
+[iso-preview-as] exit 0: 3 skipped; 3 passed (24.0s)
+[iso-recent-activity] exit 0: 4 skipped; 4 passed (23.2s)
+[iso-version-diff] exit 0: 2 skipped; 2 passed (27.5s)
+[iso-explanations] exit 0: 2 skipped; 2 passed (16.9s)
+[canary-uiv2-organizer] exit 0: 4 skipped; 4 passed (1.3m)
+[iso-extensions] exit 0: 2 skipped; 2 passed (16.3s)
+[iso-provenance] exit 0: 2 skipped; 2 passed (36.7s)
+[iso-preview-context] exit 0: 2 skipped; 2 passed (21.7s)
+[iso-completeness] exit 0: 2 skipped; 2 passed (28.4s)
+[iso-timeline] exit 0: 2 skipped; 2 passed (25.9s)
+[iso-threads] exit 0: 2 skipped; 2 passed (24.4s)
+[iso-bulk-planner] exit 0: 2 skipped; 2 passed (20.2s)
+[canary-uiv2-final-states] exit 0: 6 skipped; 6 passed (1.5m)
+[iso-approvals] exit 0: 2 skipped; 2 passed (26.0s)
+[iso-jobs] exit 0: 2 skipped; 2 passed (25.4s)
+[canary-release-integrity] exit 0: 4 skipped; 4 passed (4.2s)
+[iso-event-modules] exit 0: 1 skipped; 1 passed (16.3s)
+[iso-event-consequences] exit 0: 2 skipped; 2 passed (22.0s)
+[iso-entity-grid] exit 0: 2 skipped; 2 passed (32.1s)
+[iso-event-presets] exit 0: ✓  3 [desktop] › tests/e2e/event-presets.spec.ts:98:5 › the create form explains a failed format list and recovers on retry (2.0s); -  6 [mobile] › tests/e2e/event-presets.spec.ts:98:5 › the create form explains a failed format list and recovers on retry; 3 skip
+[iso-event-readiness] exit 0: 2 skipped; 2 passed (20.0s)
+[iso-event-workflow] exit 0: 2 skipped; 2 passed (12.4s)
+[iso-event-themes] exit 0: 16 skipped; 16 passed (49.4s)
+[iso-profiles] exit 0: 2 skipped; 2 passed (7.6s)
+[iso-participant-workflow] exit 0: 4 skipped; 4 passed (34.6s)
+[iso-hero-size] exit 0: 13 skipped; 13 passed (1.4m)
+[iso-route-drafts] exit 0: 6 skipped; 6 passed (20.0s)
+[iso-uiv2-judge] exit 0: 4 skipped; 4 passed (13.6s)
+[iso-pvs] exit 0: 5 skipped; 15 passed (43.7s)
+[read-only] exit 0: ✓  560 [desktop] › tests/e2e/visual-foundation.spec.ts:588:7 › a failed grid load says nothing was changed and recovers on retry at 390 (3.1s); ✓  564 [desktop] › tests/e2e/visual-foundation.spec.ts:588:7 › a failed grid load says nothing was changed and recovers on r
+== read-only: ok, isolated-mutation: ok, canary: ok
+exit 0

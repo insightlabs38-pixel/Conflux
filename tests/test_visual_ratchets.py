@@ -181,6 +181,7 @@ SHADOW_ALLOWED = {
         ".cx-switcher__panel": "var(--sh-pop)",
         ".cx-inbox__panel": "var(--sh-pop)",
         ".cx-sidebar--open": "var(--sh-pop)",
+        ".cx-inspector": "var(--sh-pop)",  # the record inspector as a sheet below 1024px
         ".cx-consequence": "var(--sh-dlg)",
     },
 }

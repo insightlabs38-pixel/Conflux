@@ -1412,6 +1412,16 @@
 }
 
 @media (max-width: 40rem) {
+  /* the mark says who it is; the word gives its room to the event switcher but stays for screen readers */
+  .cx-shell--workspace .cx-brand-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
   .cx-shell--workspace .cx-switcher {
     flex: 1 1 0;
     min-width: 0;

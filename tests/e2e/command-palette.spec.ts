@@ -50,7 +50,7 @@ for (const width of [1440, 390]) {
     await accessible(page);
     await box(page).fill("go jud");
     await expect(dialog(page).getByRole("option")).toHaveCount(1);
-    await expect(dialog(page).getByRole("option")).toHaveText("Go to Judging");
+    await expect(dialog(page).getByRole("option")).toHaveText(/^Go to Judging/); // its shortcut is beside it
     await box(page).press("Enter");
     await expect(dialog(page)).toHaveCount(0);
     await expect(page).toHaveURL(/\/judging\?event=/);

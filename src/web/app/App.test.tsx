@@ -6,7 +6,7 @@ describe("bootstrap shell", () => {
   it("renders a stable heading", () => {
     const html = renderToStaticMarkup(<App />);
     expect(html).toMatch(
-      /<h1[^>]*><span[^>]*aria-hidden="true"[^>]*>C<\/span>Conflux<\/h1>/,
+      /<h1[^>]*><span[^>]*aria-hidden="true"[^>]*>C<\/span><span class="cx-brand-name">Conflux<\/span><\/h1>/,
     );
   });
 });

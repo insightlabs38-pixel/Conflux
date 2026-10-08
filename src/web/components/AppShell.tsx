@@ -241,7 +241,7 @@ export function AppShell({
           <span className="cx-brand-mark" aria-hidden="true">
             C
           </span>
-          {brand}
+          <span className="cx-brand-name">{brand}</span>
         </Brand>
         {destinations && (
           <>

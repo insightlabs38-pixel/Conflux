@@ -36,7 +36,9 @@ test("the menu lists profile, notification preferences, theme and sign-out", asy
   await expect(
     menu(page).getByRole("link", { name: "Notification preferences" }),
   ).toBeVisible();
-  const radios = menu(page).getByRole("radio");
+  const radios = menu(page)
+    .getByRole("group", { name: "Theme" })
+    .getByRole("radio");
   await expect(radios).toHaveCount(3);
   await expect(menu(page).getByRole("radio", { name: "System" })).toBeChecked();
   await expect(

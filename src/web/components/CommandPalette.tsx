@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useLayoutEffect,
   useId,
   useMemo,
   useRef,
@@ -59,8 +60,9 @@ export function CommandPaletteButton({
 }) {
   const [open, setOpen] = useState(false);
   const navigation = useWorkspaceNavigation();
-  useEffect(() => onShellOverlay("palette", () => setOpen(true)), []);
-  useEffect(() => {
+  // layout effects: the keys must work the moment the control is on screen, not a frame later
+  useLayoutEffect(() => onShellOverlay("palette", () => setOpen(true)), []);
+  useLayoutEffect(() => {
     const toggle = (event: globalThis.KeyboardEvent) => {
       if (
         (event.metaKey || event.ctrlKey) &&

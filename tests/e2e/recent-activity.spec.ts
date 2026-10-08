@@ -4,6 +4,7 @@ import { eventIds, settled, signIn } from "./support";
 // PD-F005-B02-T02: the palette offers the organizer's own latest actions (from the audit log) and
 // the saved views they opened lately. It performs a real audited change and creates a saved view, so
 // it runs on an isolated fixture.
+test.skip(({ isMobile }) => isMobile, "sets its own viewport");
 const dialog = (page: Page) => page.getByRole("dialog");
 const words = (action: string) => {
   const text = action.replace(/[._]+/g, " ").trim();

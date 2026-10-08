@@ -4,6 +4,7 @@ import { accessible, eventIds, settled, signIn } from "./support";
 // PD-F005-B02-T05: an organizer previews what a participant, a judge or the public would see, asked
 // of the server and read-only; it is never an impersonation. It creates and publishes a form, so it
 // runs on an isolated fixture.
+test.skip(({ isMobile }) => isMobile, "sets its own viewport");
 const dialog = (page: Page) => page.getByRole("dialog");
 const field = (id: string, label: string, visible_to: string[]) => ({
   id,

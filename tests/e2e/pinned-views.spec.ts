@@ -4,6 +4,7 @@ import { eventIds, settled, signIn } from "./support";
 // PD-F005-B02-T03: a saved view can be pinned and is then offered first in the palette. A pin is the
 // person's, kept on the device; the view itself is the server's. It creates a saved view, so it runs
 // on an isolated fixture.
+test.skip(({ isMobile }) => isMobile, "sets its own viewport");
 const dialog = (page: Page) => page.getByRole("dialog");
 // the Registration and Projects grids are both mounted; this is the Projects one
 const grid = (page: Page) =>

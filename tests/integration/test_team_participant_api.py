@@ -264,7 +264,11 @@ def test_participant_event_picker_shows_only_published_events_in_own_workspace()
         f"/api/v1/workspaces/{workspace.public_id}/participant-events/"
     )
     assert response.status_code == 200
-    assert response.json() == [{"public_id": str(event.public_id), "name": "Hack"}]
+    rows = response.json()
+    assert [(r["public_id"], r["name"]) for r in rows] == [(str(event.public_id), "Hack")]
+    assert (
+        rows[0]["phase"]["key"] == "closed"
+    )  # the phase is said beside the name (events.lifecycle)
     outsider = make_user("outsider")
     assert cookie_client(outsider).get(
         f"/api/v1/workspaces/{workspace.public_id}/participant-events/"
@@ -283,8 +287,8 @@ def test_judge_event_picker_includes_private_events_but_requires_judge_role():
     judge = add_member(workspace, "judge", Role.JUDGE)
     participant = add_member(workspace, "participant")
     url = f"/api/v1/workspaces/{workspace.public_id}/judge-events/"
-    assert cookie_client(judge).get(url).json() == [
-        {"public_id": str(event.public_id), "name": "Private final"}
-    ]
+    rows = cookie_client(judge).get(url).json()
+    assert [(r["public_id"], r["name"]) for r in rows] == [(str(event.public_id), "Private final")]
+    assert rows[0]["phase"]["key"] == "closed"
     assert cookie_client(participant).get(url).status_code == 403
     assert cookie_client(make_user("stranger")).get(url).status_code in (401, 403)

@@ -4,6 +4,7 @@ import { account, eventIds, openWorkspace, settled, signIn } from "./support";
 // PD-F005-B02-T04: a person who holds more than one role in a workspace chooses which to view it
 // as, with a clear "viewing as" state, and the choice is a screen, never a permission. It grants a
 // role through the real members endpoint, so it runs on an isolated fixture.
+test.skip(({ isMobile }) => isMobile, "sets its own viewport");
 const roleLinks = (page: Page) => page.locator(".cx-account__roles a");
 const railLink = (page: Page, id: string) =>
   page.locator(`#workspace-navigation a[href*="/${id}"]`);

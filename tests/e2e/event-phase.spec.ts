@@ -4,6 +4,7 @@ import { eventIds, openWorkspace, settled, signIn } from "./support";
 // PD-F005-B02-T01: the event's phase (draft, open, closed, judging, published, archived) is derived
 // once on the server and shown beside its name in the event switcher, always there but quiet. It
 // closes the event, so it runs on an isolated fixture.
+test.skip(({ isMobile }) => isMobile, "sets its own viewport");
 const trigger = (page: Page) => page.locator(".cx-switcher summary");
 
 for (const width of [1440, 390]) {

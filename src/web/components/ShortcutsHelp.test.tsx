@@ -188,4 +188,17 @@ describe("keyboard shortcuts", () => {
     expect(dialog()?.textContent).toContain("G then T"); // the participant's Team
     await act(async () => root.unmount());
   });
+
+  it("keeps a half-typed chord when the shell re-renders (data arriving) between the two keys", async () => {
+    const { root } = await render("organizer");
+    await press("g");
+    // the navigation context changes identity as the page loads: a new location, a new href
+    await act(async () => {
+      window.history.pushState({}, "", "/w/w/overview?event=e1&x=1");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
+    await press("j");
+    expect(where()).toBe("/w/w/judging?event=e1");
+    await act(async () => root.unmount());
+  });
 });

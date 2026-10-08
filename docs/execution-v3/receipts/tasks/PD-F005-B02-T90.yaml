@@ -1,0 +1,97 @@
+version: 3
+task: PD-F005-B02-T90
+batch: PD-F005-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 9904d76
+  head_commit: null
+changed_paths:
+- docs/verification/PD-F005-B02/MATRIX.md
+- docs/verification/PD-F005-B02/T90-e2e-fast.log
+- docs/verification/PD-F005-B02/T90-verify-fast.log
+- src/web/components/ShortcutsHelp.tsx
+- src/web/components/ShortcutsHelp.test.tsx
+- src/web/components/CommandPalette.tsx
+- src/web/components/AppShell.tsx
+- src/web/app/App.test.tsx
+- src/web/styles/components.css
+- tests/integration/test_team_participant_api.py
+- tests/test_visual_ratchets.py
+- tests/e2e/account-menu.spec.ts
+- tests/e2e/command-palette.spec.ts
+- tests/e2e/event-switcher.spec.ts
+- tests/e2e/event-phase.spec.ts
+- tests/e2e/pinned-views.spec.ts
+- tests/e2e/preview-as.spec.ts
+- tests/e2e/recent-activity.spec.ts
+- tests/e2e/role-switcher.spec.ts
+- tests/e2e/inbox-center.spec.ts
+deliverables:
+- item: Verification matrix for the eight capability tasks
+  result: pass
+  evidence: docs/verification/PD-F005-B02/MATRIX.md links each capability T01-T08 to unit, component, browser and negative proofs and to its product change
+- item: Positive, negative, authorization, lifecycle cases
+  result: pass
+  evidence: the matrix and its cross-cutting section - two additive read-only server changes each tested for who may read them, no model or migration, OpenAPI and SDKs regenerated and checked, device-local state validated and cleared at sign-out
+- item: UI states
+  result: pass
+  evidence: every new overlay inside the 390 viewport with axe, the inspector at 1440, 1100, 800 and 390, loading, empty, error and long-list states in component tests
+- item: Exact commands and results recorded
+  result: pass
+  evidence: T90 logs in docs/verification/PD-F005-B02
+invariants:
+- item: No gate weakened
+  result: pass
+  evidence: the visual ratchet allowlist gained the inspector sheet with the same elevation token; two exact-match assertions on event lists now read the new phase field instead of ignoring it; the App heading test accepts the brand word inside its span; no budget raised and no assertion removed
+verification:
+- command: make verify-fast
+  result: pass
+  note: run alone - format, ruff, 2955 pytest passed (34 skipped), 802 vitest, build, openapi, sdk and block-schema checks
+- command: make e2e-fast
+  result: pass
+  note: run alone after verify-fast - read-only 320 passed, every isolated spec ok (including the new inbox-center, role-switcher, pinned-views, recent-activity, preview-as and event-phase) and the canary chain ok
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: see the matrix
+- ref: design/responsive-wide
+  result: pass
+  note: inspector docked from 1024 and a sheet below, density never from the viewport, 44px targets
+- ref: design/state-matrix
+  result: pass
+  note: states covered in the matrix
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: matrix
+- surface: api
+  result: pass
+  evidence: two additive read-only changes (audit mine and limit, event phase), tested and regenerated
+- surface: sdk
+  result: pass
+  evidence: generated clients regenerated and checked
+- surface: audit
+  result: pass
+  evidence: the audit read is the source of recent actions; nothing in the shell writes
+- surface: search
+  result: pass
+  evidence: palette and inspector read the entity query
+- surface: docs
+  result: pass
+  evidence: T91
+migrations: []
+findings:
+- P1-in-scope a half-typed G chord was dropped whenever the shell re-rendered (found as an intermittent e2e failure and fixed with a ref-held listener and a regression test)
+- P1-in-scope the header squeezed the event switcher to a chevron on a phone after Search and the bell were added; the brand word now yields on phones
+- P3 Ctrl+K could be pressed a frame before its listener existed under load; the listeners are now layout effects
+- P3 verify-fast and e2e-fast were run one after the other each time, never together
+escalations: []
+limitations:
+- Dialogs, open disclosures and per-record detail views are still not walked by the slop audit; the new overlays are covered by their own specs and axe checks.
+- The seeded demo has one event per workspace and no forms or saved views, so those paths are proved on isolated fixtures that create them.
+next: review

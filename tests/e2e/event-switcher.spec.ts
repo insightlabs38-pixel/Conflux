@@ -97,9 +97,7 @@ for (const role of ["participant-01", "judge-01"]) {
     const panel = page.locator(".cx-switcher__panel");
     await expect(panel).toBeVisible();
     await expect(panel.locator(".cx-switcher__choice").first()).toBeVisible(); // the list loads after it opens
-    const events = await panel
-      .locator(".cx-switcher__choice")
-      .allTextContents();
+    const events = await panel.locator(".cx-switcher__name").allTextContents();
     expect(events.length).toBeGreaterThan(0);
     // the same list the role's own event picker offers
     const me = await (await page.request.get("/api/v1/accounts/me/")).json();

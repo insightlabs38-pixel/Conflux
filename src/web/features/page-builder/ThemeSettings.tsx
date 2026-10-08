@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useDraft } from "../../hooks/useDraft";
 import { Button } from "../../components/Button";
 import { PagePreview } from "./PagePreview";
 import {
@@ -63,8 +64,18 @@ export function ThemeSettings({
     config: ThemeConfig,
   ) => Promise<void>;
 }) {
-  const [draft, setDraft] = useState(config);
-  const [mode, setMode] = useState(theme);
+  // The edits are a draft the shell knows about: they survive going to another place and coming
+  // back, and the place shows as holding unsaved changes (hooks/useDraft.ts).
+  const [form, setForm, formState] = useDraft(
+    `theme:${eventId}`,
+    { draft: config, mode: theme },
+    "Event appearance",
+  );
+  const { draft, mode } = form;
+  const setDraft = (change: (current: ThemeConfig) => ThemeConfig) =>
+    setForm((current) => ({ ...current, draft: change(current.draft) }));
+  const setMode = (next: typeof theme) =>
+    setForm((current) => ({ ...current, mode: next }));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
@@ -84,6 +95,7 @@ export function ThemeSettings({
         setSaved(false);
         try {
           await onSave(mode, draft);
+          formState.saved();
           setSaved(true);
         } catch (cause) {
           setError(

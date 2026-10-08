@@ -25,14 +25,16 @@ import {
 import "../lib/shellCommands";
 import { roleLabel } from "../lib/roles";
 import { onShellOverlay, openShellOverlay } from "../lib/shellEvents";
-import { shareableHref } from "../lib/shareLink";
+import { placeKey, shareableHref, shareableTarget } from "../lib/shareLink";
 import { useSelection } from "../lib/selection";
 import { announce } from "../lib/shellNotice";
 import {
   rememberCommand,
   setDensityPreference,
   setLiveOperations,
+  setWorkspaceTabs,
   useLiveOperations,
+  useWorkspaceTabs,
   setThemePreference,
   useRecentCommands,
 } from "../lib/shellPreferences";
@@ -118,6 +120,9 @@ function CommandPalette({
   const user = useMe().data?.public_id ?? "";
   const live = useLiveOperations(user);
   const selection = useSelection();
+  const kept = useWorkspaceTabs(user, navigation.workspaceId);
+  const here = shareableTarget(location.pathname, location.search);
+  const tabKept = !!here && kept.some((to) => placeKey(to) === placeKey(here));
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const titleId = useId();
@@ -180,6 +185,12 @@ function CommandPalette({
         setTheme: (theme) => setThemePreference(user, theme),
         setDensity: (density) => setDensityPreference(user, density),
         openShortcuts: () => openShellOverlay("shortcuts"),
+        tabKept,
+        setTabKept: (on) => {
+          if (!here) return;
+          const others = kept.filter((to) => placeKey(to) !== placeKey(here));
+          setWorkspaceTabs(user, workspaceId, on ? [...others, here] : others);
+        },
         liveOperations: live,
         setLiveOperations: (on) => setLiveOperations(user, on),
         copyLink: () => {
@@ -212,6 +223,8 @@ function CommandPalette({
       user,
       live,
       selection,
+      kept,
+      here,
       pinned,
       recentViews,
     ],

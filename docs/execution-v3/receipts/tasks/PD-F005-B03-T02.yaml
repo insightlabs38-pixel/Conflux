@@ -1,0 +1,81 @@
+version: 3
+task: PD-F005-B03-T02
+batch: PD-F005-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 1cba9f4
+  head_commit: null
+changed_paths:
+- src/web/lib/drafts.ts
+- src/web/hooks/useDraft.ts
+- src/web/components/WorkspaceTabs.tsx
+- src/web/components/WorkspaceTabs.test.tsx
+- src/web/components/DraftGuard.tsx
+- src/web/components/AppShell.tsx
+- src/web/components/CommandPalette.tsx
+- src/web/lib/shareLink.ts
+- src/web/lib/shellPreferences.ts
+- src/web/lib/commands.ts
+- src/web/lib/shellCommands.ts
+- src/web/features/page-builder/ThemeSettings.tsx
+- src/web/styles/components.css
+- tests/e2e/workspace-tabs.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Workspace-aware tabs that preserve unsaved drafts
+  result: pass
+  evidence: a form adopts useDraft(scope, initial, label) in place of useState and its edits live in a shell-owned in-memory store (lib/drafts.ts) keyed by workspace and scope, so going to another place and back finds them as left. WorkspaceTabs shows the places the person kept open (palette Keep this place open / Close this place's tab) plus any place holding a draft, each marked with a dot and the words unsaved changes, each reopening where that place was left. The event appearance form (ThemeSettings) is the first adopter, as a real organizer workflow
+- item: Losing work is always a question
+  result: pass
+  evidence: closing a tab with a draft opens a dialog naming the draft and what discarding does; signing out with drafts asks first (DraftGuard) and discards only on yes; while any draft exists a reload or closing the browser tab triggers the browser's own warning; clearShellPreferences at sign-out also discards drafts
+invariants:
+- item: Deliberate state ownership, not keep-everything-mounted
+  result: pass
+  evidence: screens unmount normally; the draft is data in a store and the form is rebuilt from it (spec 005 section decision)
+- item: Typed text is never stored or linked
+  result: pass
+  evidence: drafts are memory only; the stored tab list holds validated router targets only (ids and fixed names via the share allowlist); a unit test checks nothing typed reaches localStorage
+- item: One preference store, one route model
+  result: pass
+  evidence: tabs persist through shellPreferences; targets are built by the same shareableTarget (lib/shareLink.ts) the copy-link command uses
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 149 files, 825 tests (WorkspaceTabs 5 - no strip in base state, edit survives away and back with the mark, save clears, close asks and sign-out asks, malformed stored tabs dropped)
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts workspace-tabs (stack rebuilt first)
+  result: pass
+  note: 4 passed, desktop and mobile - the real Public page appearance form keeps a changed hero size across another place and back, the tab is marked, beforeunload is cancelled while a draft exists, Keep editing keeps and Discard removes, nothing was saved; a kept place survives reload and reopens at its sort; axe and no horizontal overflow with the strip shown
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: the strip sits under the header only when there is something to show, one compact row that scrolls sideways on a phone, current place underlined and bold
+- ref: design/state-matrix
+  result: pass
+  note: none, kept, draft, draft while away, closing with a draft, signing out with a draft
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: audit
+  result: pass
+  evidence: no server write; nothing to audit until a draft is saved through its own endpoint
+- surface: search
+  result: pass
+  evidence: palette commands found by tab, keep, close, pin
+- surface: docs
+  result: pass
+  evidence: developer note and release note at T91
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Only the event appearance form uses useDraft so far; other forms keep plain useState until they adopt it (the hook is a drop-in for useState).
+- Drafts do not survive a reload or sign-out by design (typed text is not stored); the browser warns first.
+- Closing a kept tab from the palette never discards a draft; a place that still holds one stays in the strip until it is saved or discarded.
+next: review

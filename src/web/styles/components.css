@@ -3734,3 +3734,47 @@ html {
   padding: 0;
   opacity: 0.6;
 }
+
+.cx-tabs {
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+}
+.cx-tabs ul {
+  display: flex;
+  gap: var(--sp-1);
+  margin: 0;
+  padding: 0 var(--sp-4);
+  list-style: none;
+}
+.cx-tabs li {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+}
+.cx-tabs li[data-current] {
+  border-bottom-color: var(--color-accent);
+}
+.cx-tabs a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 2.75rem;
+  padding: 0 var(--sp-2);
+  font-size: var(--fs-14);
+  text-decoration: none;
+}
+.cx-tabs li[data-current] a {
+  font-weight: 600;
+}
+.cx-tabs__dirty {
+  font-size: 0.75em;
+}
+.cx-tabs button {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}

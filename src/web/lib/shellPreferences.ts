@@ -1,4 +1,5 @@
 import { useMemo, useSyncExternalStore } from "react";
+import { discardDrafts } from "./drafts";
 
 /**
  * Everything the shell remembers about a person, in one place (spec 005, PD-F005-B01). It is
@@ -297,6 +298,7 @@ export const useRecentCommands = (user: string, workspace: string) =>
 
 /** Forget everything the shell stored, for every person and workspace (called at sign-out). */
 export function clearShellPreferences() {
+  discardDrafts(); // unsaved edits are typed text: nothing of them outlives the session
   const store = storage();
   if (!store) return;
   try {
@@ -380,6 +382,56 @@ export const useColumnPreference = (
   workspace: string,
   entity: string,
 ) => useList(() => columnPreference(user, workspace, entity));
+
+/**
+ * Workspace tabs (PD-F005-B03-T02): places a person chose to keep open, per workspace, newest last.
+ * A tab is only a router target (a view and the ids of its context); what is typed in a form is
+ * never here (lib/drafts.ts keeps that, in memory). A stored target is parsed again when read.
+ */
+export const MAX_TABS = 8;
+const TAB =
+  /^\/w\/[A-Za-z0-9_.:-]{1,100}\/[a-z][a-z-]{0,39}(\?[A-Za-z0-9_.:=&-]{0,400})?$/;
+
+export function workspaceTabs(user: string, workspace: string): string[] {
+  if (!user || !workspace) return [];
+  const raw = storage()?.getItem(key(user, workspace, "tabs"));
+  if (!raw) return [];
+  try {
+    const value: unknown = JSON.parse(raw);
+    if (!Array.isArray(value)) return [];
+    return [
+      ...new Set(
+        value.filter(
+          (to): to is string => typeof to === "string" && TAB.test(to),
+        ),
+      ),
+    ].slice(-MAX_TABS);
+  } catch {
+    return [];
+  }
+}
+
+export function setWorkspaceTabs(
+  user: string,
+  workspace: string,
+  tabs: string[],
+) {
+  if (!user || !workspace) return;
+  try {
+    if (tabs.length === 0) storage()?.removeItem(key(user, workspace, "tabs"));
+    else
+      storage()?.setItem(
+        key(user, workspace, "tabs"),
+        JSON.stringify(tabs.filter((to) => TAB.test(to)).slice(-MAX_TABS)),
+      );
+  } catch {
+    // blocked storage: the tabs last until the page is closed
+  }
+  changed();
+}
+
+export const useWorkspaceTabs = (user: string, workspace: string) =>
+  useList(() => workspaceTabs(user, workspace));
 
 /**
  * Live operations mode (PD-F005-B03-T05): lists refresh themselves and show the connection's health.

@@ -25,6 +25,8 @@ import { ShellShortcuts } from "./ShortcutsHelp";
 import { onShellOverlay, openShellOverlay } from "../lib/shellEvents";
 import { PreviewAsDialog } from "./PreviewAsDialog";
 import { ShellNotice } from "./ShellNotice";
+import { WorkspaceTabs } from "./WorkspaceTabs";
+import { useDraftGuard } from "./DraftGuard";
 import { SkipLink } from "./SkipLink";
 import { Icon, type IconName } from "./Icon";
 
@@ -208,6 +210,7 @@ export function AppShell({
   brandAs?: "h1" | "p";
 }) {
   const [navOpen, setNavOpen] = useState(false);
+  const guard = useDraftGuard(onSignOut);
   // The control that opened the navigation (the header toggle on a tablet, "More" on a phone) gets
   // focus back when it closes.
   const opener = useRef<HTMLButtonElement | null>(null);
@@ -237,6 +240,7 @@ export function AppShell({
       {destinations && <ShellShortcuts />}
       {destinations && <PreviewAsHost />}
       {destinations && <ShellNotice />}
+      {guard.dialog}
       <SkipLink targetId={MAIN_ID} />
       <header className="cx-shell__header">
         <Brand className="cx-shell__brand">
@@ -278,7 +282,9 @@ export function AppShell({
             {nav}
           </nav>
         )}
-        {destinations && <CommandPaletteButton onSignOut={onSignOut} />}
+        {destinations && (
+          <CommandPaletteButton onSignOut={guard.requestSignOut} />
+        )}
         {destinations && <InboxCenter />}
         {destinations && (
           <details
@@ -329,7 +335,7 @@ export function AppShell({
                 <button
                   type="button"
                   className="cx-button cx-button--secondary"
-                  onClick={onSignOut}
+                  onClick={guard.requestSignOut}
                   disabled={signingOut}
                 >
                   {signingOut ? "Signing out…" : "Sign out"}
@@ -432,6 +438,7 @@ export function AppShell({
         </nav>
       )}
 
+      {destinations && <WorkspaceTabs />}
       <main id={MAIN_ID} className="cx-shell__main" tabIndex={-1}>
         {children}
       </main>

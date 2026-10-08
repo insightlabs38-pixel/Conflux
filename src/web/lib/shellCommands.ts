@@ -82,6 +82,25 @@ registerCommandProvider((ctx) =>
 
 registerCommandProvider(() => [
   {
+    id: "tab.keep",
+    label: "Keep this place open in a tab",
+    group: "Go to",
+    keywords: ["tab", "pin", "open", "keep", "workspace"],
+    when: (ctx) => !!ctx.capabilities.setTabKept && !ctx.capabilities.tabKept,
+    run: (ctx) => ctx.capabilities.setTabKept?.(true),
+  },
+  {
+    id: "tab.close",
+    label: "Close this place's tab",
+    group: "Go to",
+    keywords: ["tab", "close", "unpin"],
+    when: (ctx) => !!ctx.capabilities.setTabKept && !!ctx.capabilities.tabKept,
+    run: (ctx) => ctx.capabilities.setTabKept?.(false),
+  },
+]);
+
+registerCommandProvider(() => [
+  {
     id: "live.on",
     label: "Turn on live operations",
     group: "Appearance",

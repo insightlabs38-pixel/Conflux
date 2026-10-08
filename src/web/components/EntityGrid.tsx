@@ -495,7 +495,11 @@ export function EntityGrid({
                 onChange={(e) => setSearchText(e.target.value)}
               />
             </label>
-            <p id={searchHint} className="cx-muted" role="status">
+            <p
+              id={searchHint}
+              className="cx-muted"
+              role={tooShort || search ? "status" : undefined}
+            >
               {tooShort
                 ? "Each word needs at least 2 characters."
                 : search && shownPage

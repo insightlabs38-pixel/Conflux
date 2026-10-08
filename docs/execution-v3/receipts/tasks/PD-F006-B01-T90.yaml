@@ -1,0 +1,84 @@
+version: 3
+task: PD-F006-B01-T90
+batch: PD-F006-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: a18ecb7
+  head_commit: null
+changed_paths:
+- docs/verification/PD-F006-B01/MATRIX.md
+- docs/verification/PD-F006-B01/T90-verify-fast.log
+- docs/verification/PD-F006-B01/T90-e2e-fast.log
+- docs/verification/PD-F006-B01/T07-scale.log
+- src/web/components/EntityGrid.tsx
+deliverables:
+- item: Verification matrix for the eight capability tasks
+  result: pass
+  evidence: docs/verification/PD-F006-B01/MATRIX.md links T01-T08 to unit, browser and negative proofs and to each product change
+- item: Positive, negative, authorization, lifecycle cases
+  result: pass
+  evidence: the matrix and its cross-cutting section - one additive parameter tested for who may use it, search stored in a view only when used so older views round-trip, device and URL state validated, the 46 baseline query and saved-view tests unchanged
+- item: UI states
+  result: pass
+  evidence: every spec at desktop and the 390 mobile project or with the reason it is desktop only; loading, empty, refused filter, past-the-end page, one column left and cleared selection are in unit or browser tests; axe on each surface
+- item: Exact commands and results recorded
+  result: pass
+  evidence: T90-verify-fast.log, T90-e2e-fast.log, T07-scale.log
+invariants:
+- item: No gate weakened
+  result: pass
+  evidence: no assertion, timeout or budget was loosened to get green; the one existing-test conflict was fixed in the product (see findings)
+verification:
+- command: make verify-fast
+  result: pass
+  note: run alone - format, ruff, 2965 pytest passed (34 skipped), 842 vitest in 151 files, build, openapi, sdk and block-schema checks
+- command: make e2e-fast
+  result: pass
+  note: run alone after verify-fast on the final code - read-only ok (visual-foundation, slop-audit and every new grid spec), every isolated spec ok including bulk-planner on the migrated bar, the canary chain ok. A first run of the same command on the code before the fix failed one read-only test and its diagnostic re-run passed; it was treated as a failure, diagnosed and the gate rerun in full
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: see the matrix
+- ref: design/state-matrix
+  result: pass
+  note: see the matrix
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: matrix
+- surface: api
+  result: pass
+  evidence: one additive parameter, tested, regenerated
+- surface: sdk
+  result: pass
+  evidence: regenerated and checked by verify-fast
+- surface: cli
+  result: pass
+  evidence: T91
+- surface: mcp
+  result: pass
+  evidence: T91
+- surface: audit
+  result: pass
+  evidence: reads only; existing saved-view and bulk audit unchanged
+- surface: search
+  result: pass
+  evidence: T02 and the matrix
+- surface: docs
+  result: pass
+  evidence: T91
+migrations: []
+findings:
+- P1-in-scope the search box added a second status region inside the grid, so the existing loading test's single-status locator failed intermittently under load (visual-foundation); the static hint is now a status only when it reports a result or a problem
+- P1-in-scope during the batch a selection survived a page change, a second sort key was dropped, and a half-typed filter value replaced the list with an error; all fixed with tests in their tasks
+- P3 an early monitor read a stale gate log; verified by file time before relying on it
+escalations: []
+limitations:
+- The 5,012-row evidence is one machine and one run set; the guard test checks shape, not speed.
+- CLI and MCP read paths are not yet built; they are T91's deliverable and are verified there.
+next: review

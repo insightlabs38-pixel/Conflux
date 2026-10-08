@@ -240,7 +240,9 @@ export function DataGrid<Row extends { id: string }>({
         aria-label={label}
         tabIndex={0}
       >
-        <table className="cx-table cx-datagrid__table">
+        <table
+          className={`cx-table cx-datagrid__table${selectable ? " cx-datagrid__table--selectable" : ""}`}
+        >
           <caption className="cx-visually-hidden">
             {label}
             {total !== undefined ? `, ${total} in all` : ""}
@@ -260,7 +262,7 @@ export function DataGrid<Row extends { id: string }>({
                   />
                 </th>
               )}
-              {columns.map((column) => {
+              {columns.map((column, columnIndex) => {
                 const position =
                   sort?.findIndex((item) => item.key === column.key) ?? -1;
                 const active = position >= 0;
@@ -279,7 +281,12 @@ export function DataGrid<Row extends { id: string }>({
                         : undefined
                     }
                     className={
-                      column.align === "end" ? "cx-datagrid__end" : undefined
+                      [
+                        column.align === "end" ? "cx-datagrid__end" : "",
+                        columnIndex === 0 ? "cx-datagrid__name" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ") || undefined
                     }
                   >
                     {column.sortable && onSort ? (
@@ -348,12 +355,17 @@ export function DataGrid<Row extends { id: string }>({
                     />
                   </td>
                 )}
-                {columns.map((column) => (
+                {columns.map((column, columnIndex) => (
                   <td
                     key={column.key}
                     data-label={column.label}
                     className={
-                      column.align === "end" ? "cx-datagrid__end" : undefined
+                      [
+                        column.align === "end" ? "cx-datagrid__end" : "",
+                        columnIndex === 0 ? "cx-datagrid__name" : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ") || undefined
                     }
                   >
                     {column.render

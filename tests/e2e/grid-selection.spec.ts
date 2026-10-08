@@ -9,8 +9,7 @@ const grid = (page: Page) =>
 
 test("rows are selected by checkbox and keyboard, the page by the header, and the count is announced", async ({
   page,
-}, info) => {
-  const phone = info.project.name === "mobile";
+}) => {
   await signIn(page, "organizer");
   const { workspace, event } = await eventIds(page);
   await page.goto(
@@ -29,17 +28,15 @@ test("rows are selected by checkbox and keyboard, the page by the header, and th
   await page.keyboard.press("Space"); // the keyboard selects too
   await expect(footer).toContainText("2 selected");
   await expect(rows.nth(0)).toHaveAttribute("aria-selected", "true");
-  if (!phone) {
-    // the phone's stacked rows have no header row; select-all-on-page there belongs to the B02 fallback
-    const header = grid(page).getByRole("checkbox", {
-      name: /Select all projects on this page/,
-    });
-    expect(
-      await header.evaluate((el: HTMLInputElement) => el.indeterminate),
-    ).toBe(true);
-    await header.check();
-    await expect(footer).toContainText(`${count} selected`);
-  }
+  // the header's select-all is reachable on every width (on a phone it is the bar above the rows)
+  const header = grid(page).getByRole("checkbox", {
+    name: /Select all projects on this page/,
+  });
+  expect(
+    await header.evaluate((el: HTMLInputElement) => el.indeterminate),
+  ).toBe(true);
+  await header.check();
+  await expect(footer).toContainText(`${count} selected`);
   await accessible(page);
 
   await grid(page).getByRole("button", { name: "Clear selection" }).click();

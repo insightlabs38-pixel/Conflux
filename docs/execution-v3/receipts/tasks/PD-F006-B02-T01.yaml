@@ -1,0 +1,74 @@
+version: 3
+task: PD-F006-B02-T01
+batch: PD-F006-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: a163fbb
+  head_commit: null
+changed_paths:
+- src/web/components/DataGrid.tsx
+- src/web/styles/components.css
+- tests/e2e/grid-responsive.spec.ts
+- tests/e2e/grid-selection.spec.ts
+- tests/e2e/grid-sort.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Responsive fallback for narrow screens
+  result: pass
+  evidence: at 640px and below the rows stay a labelled row list and the header becomes a compact bar above them - the select-page checkbox with a visible Select page and the sort buttons as 44px touch targets, in the same elements the desktop uses, so multi-key sort and select-all-on-page (unreachable on a phone before) now work there; columns that cannot be sorted have nothing in the bar; not sticky. From 641 to 1023px a wide list scrolls sideways inside its own container and keeps the select box and the first data column (the name) in view on an opaque background
+invariants:
+- item: One grid, no second layout component
+  result: pass
+  evidence: CSS and two class names only (cx-datagrid__name, cx-datagrid__table--selectable); no duplicated controls, so there is nothing to keep in sync and no extra element in the accessibility tree
+- item: No test weakened
+  result: pass
+  evidence: the phone-only skips in the selection spec were removed and its assertions now run on every width
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 151 files, 842 tests
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts grid-responsive grid-selection grid-sort (stack rebuilt first)
+  result: pass
+  note: 6 passed, rest skipped by design - at 390 the bar, 44px sort targets, static header, sort and select-page, no overflow, axe; at 800 the select box at the container's left edge and the name column just right of it while scrolled sideways, opaque, axe; the phone project selects the page through the header; screenshot reviewed (tests/e2e/artifacts/phone-grid.png)
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: responsive rules of D-009 for 768 to 1023 (sticky name column, horizontal scroll) and below 768 (row list); the filters sheet is the existing tools disclosure
+- ref: design/state-matrix
+  result: pass
+  note: phone, tablet and desktop states
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: browser specs
+- surface: api
+  result: pass
+  evidence: not required
+- surface: cli
+  result: pass
+  evidence: not applicable to layout
+- surface: mcp
+  result: pass
+  evidence: not applicable to layout
+- surface: audit
+  result: pass
+  evidence: none
+- surface: search
+  result: pass
+  evidence: none
+- surface: docs
+  result: pass
+  evidence: T91
+migrations: []
+findings: []
+escalations: []
+limitations:
+- The bar wraps onto two lines at 390px with six sortable columns; horizontal scroll of the bar was not chosen because it hides sort options.
+- Row actions on a phone still sit at the foot of each row; a row action menu is not part of this task.
+next: review

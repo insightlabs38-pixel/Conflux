@@ -2783,12 +2783,48 @@
   gap: var(--sp-3);
 }
 @media (max-width: 40rem) {
+  /* The phone's row list keeps its header controls: the select-all box and the sort buttons form a
+     compact bar above the rows (the same elements, so there is nothing to duplicate); columns that
+     cannot be sorted have nothing to show there. Not sticky: the list is the page's own scroll. */
   .cx-datagrid__table thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
+    display: block;
+  }
+  .cx-datagrid__table thead tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-1) var(--sp-3);
+    padding: var(--sp-1) var(--sp-3);
+    border-bottom: 1px solid var(--line);
+  }
+  .cx-datagrid__table thead th {
+    position: static;
+    display: block;
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+  .cx-datagrid__table
+    thead
+    th:not(.cx-datagrid__select):not(:has(.cx-datagrid__sort)) {
+    display: none;
+  }
+  .cx-datagrid__table thead th.cx-datagrid__select {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    width: auto;
+  }
+  .cx-datagrid__table thead th.cx-datagrid__select::after {
+    content: "Select page";
+    font-size: var(--fs-13);
+  }
+  .cx-datagrid__table thead .cx-datagrid__sort {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+    font-size: var(--fs-13);
   }
   .cx-datagrid__table :where(tbody, tr, td) {
     display: block;
@@ -3916,4 +3952,29 @@ html {
 .cx-datagrid__where {
   font-variant-numeric: tabular-nums;
   padding: 0 var(--sp-2);
+}
+
+/* 641 to 1023px: a wide list scrolls sideways inside its container and keeps its first column (the
+   name) and the select box in view, so a row stays readable (design D-009, 768 to 1023). */
+@media (min-width: 40.0625rem) and (max-width: 63.9375rem) {
+  .cx-datagrid__table :where(td, th).cx-datagrid__select {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--color-surface-raised, var(--bg));
+  }
+  .cx-datagrid__table :where(td, th).cx-datagrid__name {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--color-surface-raised, var(--bg));
+    box-shadow: 1px 0 0 var(--line);
+  }
+  .cx-datagrid__table--selectable :where(td, th).cx-datagrid__name {
+    left: 2.5rem;
+  }
+  .cx-datagrid__table thead th.cx-datagrid__name,
+  .cx-datagrid__table thead th.cx-datagrid__select {
+    z-index: 3;
+  }
 }

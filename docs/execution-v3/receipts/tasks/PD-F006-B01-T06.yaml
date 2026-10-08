@@ -1,0 +1,69 @@
+version: 3
+task: PD-F006-B01-T06
+batch: PD-F006-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 337a7c7
+  head_commit: null
+changed_paths:
+- src/web/components/EntityGrid.tsx
+- src/web/components/EntityGrid.test.tsx
+- tests/e2e/column-preferences.spec.ts
+deliverables:
+- item: Column show and hide completed
+  result: pass
+  evidence: the picker (under the grid tools, a disclosure on every width) counts what is shown (Columns, 3 of 8 shown), keeps at least one column and says why the last cannot be hidden, offers Show all, and Reset columns back to the list's default (disabled when already there); each change is announced in words (Status column hidden). Remembered per person and list (T01 of B03) and saved with a saved view, which wins while open
+invariants:
+- item: The server decides which fields exist
+  result: pass
+  evidence: the picker lists the catalogue's fields only; stale remembered keys are dropped and never leave the list empty (existing, tested)
+- item: No test weakened
+  result: pass
+  evidence: tests added; the earlier column specs pass unchanged
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 151 files, 839 tests (picker - count, last column kept with its hint, show all, reset, announcements)
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts column-preferences (stack rebuilt first)
+  result: pass
+  note: desktop and mobile - the count follows every change, Show all and Reset enable and disable correctly, the last column is disabled with its reason, axe clean; the first desktop run right after a stack rebuild timed out waiting for rows (cold start), then 6 of 6 passed
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: column set per page, adaptable; no resize or reorder handles (a design limitation)
+- ref: design/state-matrix
+  result: pass
+  note: default, customised, one left, all shown
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: not required; the columns parameter already exists
+- surface: cli
+  result: pass
+  evidence: T91 (columns is a parameter of the route)
+- surface: mcp
+  result: pass
+  evidence: T91
+- surface: audit
+  result: pass
+  evidence: a device preference, nothing to audit
+- surface: search
+  result: pass
+  evidence: not affected
+- surface: docs
+  result: pass
+  evidence: T91
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Column order and width are not user-controlled (design limitation); order is the list's field order.
+next: review

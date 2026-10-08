@@ -50,3 +50,41 @@ test("a column chosen in the picker is still there after a reload, and Reset col
   await expect(headers.filter({ hasText: label })).toHaveCount(0);
   await accessible(page);
 });
+
+test("the picker counts the shown columns, keeps one, shows all and resets", async ({
+  page,
+}) => {
+  await signIn(page, "organizer");
+  const { workspace, event } = await eventIds(page);
+  await page.goto(
+    `/app/w/${workspace}/participants?event=${event}&section=ProjectsGrid`,
+  );
+  await settled(page);
+  await expect(grid(page).locator("tbody tr").first()).toBeVisible();
+  await openTools(page);
+  const columns = grid(page).getByRole("group", { name: /^Columns \(/ });
+  const boxes = columns.locator('input[type="checkbox"]');
+  const total = await boxes.count();
+  await expect(
+    columns.getByRole("button", { name: "Reset columns" }),
+  ).toBeDisabled();
+  await columns.getByRole("button", { name: "Show all" }).click();
+  await expect(columns).toContainText(`${total} of ${total} shown`);
+  await expect(
+    columns.getByRole("button", { name: "Show all" }),
+  ).toBeDisabled();
+  // hide all but one: the last stays and says why
+  for (let index = total - 1; index > 0; index--)
+    await boxes.nth(index).uncheck();
+  await expect(columns).toContainText(`1 of ${total} shown`);
+  await expect(boxes.nth(0)).toBeDisabled();
+  await expect(columns).toContainText("At least one column stays shown");
+  await expect(
+    grid(page).locator("thead th[aria-sort], thead th").first(),
+  ).toBeVisible();
+  await accessible(page);
+  await columns.getByRole("button", { name: "Reset columns" }).click();
+  await expect(
+    columns.getByRole("button", { name: "Reset columns" }),
+  ).toBeDisabled();
+});

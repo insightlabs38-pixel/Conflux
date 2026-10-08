@@ -853,3 +853,48 @@ describe("row selection", () => {
     await act(async () => root.unmount());
   });
 });
+
+describe("column picker", () => {
+  it("counts what is shown, keeps one column, can show everything and reset to the defaults, and says what it did", async () => {
+    window.localStorage.clear();
+    const { container, root } = await mount(() =>
+      jsonResponse(200, page(ROWS)),
+    );
+    await until(() => container.querySelector("tbody tr") !== null);
+    const legend = () =>
+      container.querySelector("fieldset legend")!.textContent;
+    expect(legend()).toContain("3 of 4 shown");
+    const box = (name: string) =>
+      [...container.querySelectorAll<HTMLInputElement>("fieldset input")].find(
+        (i) => i.parentElement?.textContent?.includes(name),
+      )!;
+    const note: string[] = [];
+    window.addEventListener("conflux:shell-notice", (e) =>
+      note.push((e as CustomEvent<string>).detail),
+    );
+    await act(async () => box("Status").click());
+    await act(async () => box("Applied").click());
+    expect(legend()).toContain("1 of 4 shown");
+    expect(box("Applicant").disabled).toBe(true); // the last one cannot be hidden
+    expect(container.querySelector("fieldset small")?.textContent).toContain(
+      "At least one column",
+    );
+    expect(note).toContain("Status column hidden.");
+    await act(async () => press(container, "Show all"));
+    expect(legend()).toContain("4 of 4 shown");
+    expect(
+      [...container.querySelectorAll("button")].find(
+        (b) => b.textContent === "Show all",
+      )!.disabled,
+    ).toBe(true);
+    await act(async () => press(container, "Reset columns"));
+    expect(legend()).toContain("3 of 4 shown");
+    expect(
+      [...container.querySelectorAll("button")].find(
+        (b) => b.textContent === "Reset columns",
+      )!.disabled,
+    ).toBe(true);
+    await act(async () => root.unmount());
+    window.localStorage.clear();
+  });
+});

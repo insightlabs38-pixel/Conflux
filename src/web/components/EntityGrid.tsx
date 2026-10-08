@@ -372,6 +372,7 @@ export function EntityGrid({
   useEffect(() => () => publishSelection(slot, null), [slot]);
   const searchable = (description?.search_fields?.length ?? 0) > 0;
   const searchHint = useId();
+  const columnsHint = useId();
   const searchLabels = (description?.search_fields ?? [])
     .map((key) => fields.find((f) => f.key === key)?.label ?? key)
     .join(", ")
@@ -531,30 +532,58 @@ export function EntityGrid({
               restart();
             }}
           />
-          <fieldset>
-            <legend>Columns</legend>
-            {fields.map((field) => (
-              <label key={field.key}>
-                <input
-                  type="checkbox"
-                  checked={shown.some((f) => f.key === field.key)}
-                  disabled={shown.length === 1 && shown[0].key === field.key}
-                  onChange={(e) => {
-                    const keys = new Set(shown.map((f) => f.key));
-                    if (e.target.checked) keys.add(field.key);
-                    else keys.delete(field.key);
-                    chooseColumns(
-                      fields.filter((f) => keys.has(f.key)).map((f) => f.key),
-                    );
-                  }}
-                />{" "}
-                {field.label}
-              </label>
-            ))}
-            <button type="button" onClick={() => chooseColumns([])}>
+          <fieldset aria-describedby={columnsHint}>
+            <legend>
+              Columns ({shown.length} of {fields.length} shown)
+            </legend>
+            {fields.map((field) => {
+              const only = shown.length === 1 && shown[0].key === field.key;
+              return (
+                <label key={field.key}>
+                  <input
+                    type="checkbox"
+                    checked={shown.some((f) => f.key === field.key)}
+                    disabled={only}
+                    onChange={(e) => {
+                      const keys = new Set(shown.map((f) => f.key));
+                      if (e.target.checked) keys.add(field.key);
+                      else keys.delete(field.key);
+                      chooseColumns(
+                        fields.filter((f) => keys.has(f.key)).map((f) => f.key),
+                      );
+                      announce(
+                        `${field.label} column ${e.target.checked ? "shown" : "hidden"}.`,
+                      );
+                    }}
+                  />{" "}
+                  {field.label}
+                </label>
+              );
+            })}
+            <button
+              type="button"
+              disabled={shown.length === fields.length}
+              onClick={() => {
+                chooseColumns(fields.map((f) => f.key));
+                announce("All columns shown.");
+              }}
+            >
+              Show all
+            </button>
+            <button
+              type="button"
+              disabled={known.length === 0}
+              onClick={() => {
+                chooseColumns([]);
+                announce("Columns back to the list's default.");
+              }}
+            >
               Reset columns
             </button>
-            {user && <small>Your choice is remembered on this device.</small>}
+            <small id={columnsHint}>
+              {shown.length === 1 ? "At least one column stays shown. " : ""}
+              {user ? "Your choice is remembered on this device." : ""}
+            </small>
           </fieldset>
           {user && (
             <button

@@ -4824,6 +4824,13 @@ paths:
           type: string
         description: Compact JSON filter tree (core.query).
       - in: query
+        name: group
+        schema:
+          type: string
+        description: 'A groupable field: the response lists its buckets with counts
+          instead of rows; open a bucket with the ordinary query and its value as
+          a condition.'
+      - in: query
         name: limit
         schema:
           type: integer
@@ -4842,6 +4849,11 @@ paths:
         schema:
           type: string
         description: Comma list of fields, `-` for descending.
+      - in: query
+        name: subgroup
+        schema:
+          type: string
+        description: A second groupable field, inside each group.
       - in: path
         name: workspace_public_id
         schema:
@@ -21462,10 +21474,13 @@ components:
           type: boolean
         default:
           type: boolean
+        groupable:
+          type: boolean
       required:
       - choices
       - default
       - filterable
+      - groupable
       - key
       - label
       - operators
@@ -21515,6 +21530,17 @@ components:
           items:
             type: object
             additionalProperties: {}
+        group:
+          type: string
+        subgroup:
+          type: string
+        groups:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        truncated:
+          type: boolean
       required:
       - columns
       - entity
@@ -27012,6 +27038,17 @@ components:
           items:
             type: object
             additionalProperties: {}
+        group:
+          type: string
+        subgroup:
+          type: string
+        groups:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        truncated:
+          type: boolean
         density:
           type: string
         view:

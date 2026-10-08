@@ -19,6 +19,9 @@ export type ViewDefinition = {
   density: "compact" | "comfortable";
   /** Free text search; stored only when used, so views saved before it existed are unchanged. */
   search?: string;
+  /** Grouping (PD-F006-B02-T08); stored only when used. */
+  group?: string;
+  subgroup?: string;
 };
 export type SavedView = {
   public_id: string;
@@ -60,6 +63,8 @@ export function definitionQuery(definition: ViewDefinition): EntityQuery {
     sort: definition.sort,
     columns: definition.columns,
     search: definition.search,
+    group: definition.group,
+    subgroup: definition.subgroup,
   };
 }
 
@@ -72,6 +77,8 @@ export function sameDefinition(a: ViewDefinition, b: ViewDefinition): boolean {
       d.columns,
       d.density,
       d.search ?? "",
+      d.group ?? "",
+      d.subgroup ?? "",
     ]);
   return text(a) === text(b);
 }

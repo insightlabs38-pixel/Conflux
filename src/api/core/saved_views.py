@@ -14,7 +14,7 @@ from .models import SavedView
 
 MAX_PER_OWNER = 50
 DENSITIES = ("compact", "comfortable")
-_KEYS = {"filter", "sort", "columns", "density", "search"}
+_KEYS = {"filter", "sort", "columns", "density", "search", "group", "subgroup"}
 
 
 class ViewOutdated(Exception):
@@ -43,6 +43,10 @@ def normalize(entity, raw):
     if not isinstance(search, str):
         raise ValidationError({"search": ["Search is text."]})
     terms = query.parse_search(entity, search)
+    group, subgroup = raw.get("group") or "", raw.get("subgroup") or ""
+    if not isinstance(group, str) or not isinstance(subgroup, str):
+        raise ValidationError({"group": ["Group is a field key."]})
+    grouped = query.parse_group(entity, group, subgroup)
     density = raw.get("density") or "comfortable"
     if density not in DENSITIES:
         raise ValidationError({"density": [f"Use one of {', '.join(DENSITIES)}."]})
@@ -54,6 +58,10 @@ def normalize(entity, raw):
     }
     if terms:  # additive (PD-F006-B01-T02): stored only when used, so older views are unchanged
         definition["search"] = " ".join(terms)
+    if grouped[0] is not None:  # additive (PD-F006-B02-T08), the same way
+        definition["group"] = grouped[0].key
+        if grouped[1] is not None:
+            definition["subgroup"] = grouped[1].key
     return definition
 
 
@@ -164,10 +172,33 @@ def run(view, event, user, *, limit, offset):
         order = query.parse_sort(entity, definition["sort"])
         columns = query.parse_columns(entity, ",".join(definition["columns"]))
         terms = query.parse_search(entity, definition.get("search"))
+        group, subgroup = query.parse_group(
+            entity, definition.get("group"), definition.get("subgroup")
+        )
     except ValidationError as exc:
         raise ViewOutdated(
             "; ".join(f"{key}: {' '.join(map(str, value))}" for key, value in exc.detail.items())
         ) from exc
+    if group is not None:
+        buckets = query.run_groups(
+            entity, event, user, tree=tree, search=terms, group=group, subgroup=subgroup
+        )
+        return {
+            "entity": entity.key,
+            "total": buckets["total"],
+            "limit": limit,
+            "offset": offset,
+            "filter": tree,
+            "sort": order,
+            "search": " ".join(terms),
+            "columns": [f.key for f in columns],
+            "rows": [],
+            "group": group.key,
+            **({"subgroup": subgroup.key} if subgroup else {}),
+            "groups": buckets["groups"],
+            "truncated": buckets["truncated"],
+            "density": definition["density"],
+        }
     result = query.run(
         entity,
         event,

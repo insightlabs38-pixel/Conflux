@@ -1928,6 +1928,7 @@ export type EntityFieldSchema = {
   sortable: boolean;
   filterable: boolean;
   default: boolean;
+  groupable: boolean;
 };
 
 export type InputOfEntityFieldSchema = {
@@ -1939,6 +1940,7 @@ export type InputOfEntityFieldSchema = {
   sortable: boolean;
   filterable: boolean;
   default: boolean;
+  groupable: boolean;
 };
 
 export type EntityFieldSchemaTypeEnum =
@@ -1957,6 +1959,10 @@ export type EntityPageSchema = {
   search: string;
   columns: string[];
   rows: Record<string, unknown>[];
+  group?: string;
+  subgroup?: string;
+  groups?: Record<string, unknown>[];
+  truncated?: boolean;
 };
 
 export type InputOfEntityPageSchema = {
@@ -1969,6 +1975,10 @@ export type InputOfEntityPageSchema = {
   search: string;
   columns: string[];
   rows: Record<string, unknown>[];
+  group?: string;
+  subgroup?: string;
+  groups?: Record<string, unknown>[];
+  truncated?: boolean;
 };
 
 export type EntitySchema = {
@@ -5434,6 +5444,10 @@ export type SavedViewPageSchema = {
   search: string;
   columns: string[];
   rows: Record<string, unknown>[];
+  group?: string;
+  subgroup?: string;
+  groups?: Record<string, unknown>[];
+  truncated?: boolean;
   density: string;
   view: SavedViewSchema;
 };
@@ -5448,6 +5462,10 @@ export type InputOfSavedViewPageSchema = {
   search: string;
   columns: string[];
   rows: Record<string, unknown>[];
+  group?: string;
+  subgroup?: string;
+  groups?: Record<string, unknown>[];
+  truncated?: boolean;
   density: string;
   view: InputOfSavedViewSchema;
 };
@@ -7449,10 +7467,12 @@ export interface Operations {
       query?: {
         columns?: string;
         filter?: string;
+        group?: string;
         limit?: number;
         offset?: number;
         search?: string;
         sort?: string;
+        subgroup?: string;
       };
     };
     response: EntityPageSchema;
@@ -11674,7 +11694,16 @@ export const operations = {
       method: "GET",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/entities/{entity_key}/",
       path_params: ["entity_key", "event_public_id", "workspace_public_id"],
-      query_params: ["columns", "filter", "limit", "offset", "search", "sort"],
+      query_params: [
+        "columns",
+        "filter",
+        "group",
+        "limit",
+        "offset",
+        "search",
+        "sort",
+        "subgroup",
+      ],
       request_body: false,
       response_kind: "json",
     },

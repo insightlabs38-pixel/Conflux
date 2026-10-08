@@ -34,9 +34,12 @@ const CATALOGUE = [
     search_fields: ["username", "note"],
     fields: [
       field("username", "Applicant", "text"),
-      field("status", "Status", "enum", { choices: ["pending", "approved"] }),
+      field("status", "Status", "enum", {
+        choices: ["pending", "approved"],
+        groupable: true,
+      }),
       field("created_at", "Applied", "date", { operators: ["gt", "between"] }),
-      field("note", "Note", "text", { default: false }),
+      field("note", "Note", "text", { default: false, groupable: true }),
     ],
   },
 ];
@@ -1013,6 +1016,113 @@ describe("transient view in the address", () => {
       () => container.textContent?.includes("not in the link") ?? false,
     );
     expect(container.textContent).toContain("Save it as a view to share it.");
+    await act(async () => root.unmount());
+  });
+});
+
+describe("grouping", () => {
+  it("lists buckets with counts from the server, opens one with the bucket as a condition, nests a subgroup and keeps the choice in the address", async () => {
+    const asked: Record<string, string>[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: unknown) => {
+        const url = new URL(String(input), "http://x");
+        if (url.pathname.endsWith("/entities/"))
+          return jsonResponse(200, CATALOGUE);
+        if (url.pathname.includes("/views/")) return jsonResponse(200, []);
+        if (url.pathname.includes("/accounts/me/"))
+          return jsonResponse(200, { public_id: "u1", memberships: [] });
+        const params = Object.fromEntries(url.searchParams);
+        asked.push(params);
+        if (params.group)
+          return jsonResponse(200, {
+            ...page([]),
+            total: 3,
+            group: "status",
+            groups: [
+              {
+                key: "approved",
+                label: "approved",
+                null: false,
+                count: 1,
+                ...(params.subgroup
+                  ? {
+                      subgroups: [
+                        { key: null, label: "(none)", null: true, count: 1 },
+                      ],
+                    }
+                  : {}),
+              },
+              {
+                key: "pending",
+                label: "pending",
+                null: false,
+                count: 2,
+                ...(params.subgroup
+                  ? {
+                      subgroups: [
+                        { key: null, label: "(none)", null: true, count: 2 },
+                      ],
+                    }
+                  : {}),
+              },
+            ],
+            truncated: false,
+          });
+        return jsonResponse(200, { ...page(ROWS), total: 2 });
+      }),
+    );
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    await act(async () =>
+      root.render(
+        <QueryClientProvider client={createTestQueryClient()}>
+          <MemoryRouter
+            initialEntries={["/w/w/participants?group_applications=status"]}
+          >
+            <Where />
+            <EntityGrid
+              workspaceId="w"
+              eventId="e"
+              entity="applications"
+              label="Applications"
+            />
+          </MemoryRouter>
+        </QueryClientProvider>,
+      ),
+    );
+    await until(() => container.querySelector(".cx-groups__head") !== null);
+    const heads = () => [
+      ...container.querySelectorAll<HTMLButtonElement>(".cx-groups__head"),
+    ];
+    expect(heads().map((h) => h.textContent)).toEqual([
+      "Status: approved · 1",
+      "Status: pending · 2",
+    ]);
+    expect(container.querySelector("tbody")).toBeNull(); // no rows until a bucket is opened
+    expect(heads()[0].getAttribute("aria-expanded")).toBe("false");
+
+    // opening a bucket asks the ordinary query with the bucket's value as a condition
+    await act(async () => heads()[1].click());
+    await until(() => asked.some((p) => p.filter && p.group === undefined));
+    expect(JSON.parse(asked.find((p) => p.filter && !p.group)!.filter)).toEqual(
+      {
+        field: "status",
+        op: "eq",
+        value: "pending",
+      },
+    );
+    await until(() => container.querySelector("tbody tr") !== null);
+
+    // a subgroup nests inside, and its bucket is both conditions together
+    const then = [
+      ...container.querySelectorAll<HTMLSelectElement>("select"),
+    ].find((s) => s.parentElement?.textContent?.startsWith("Then by"))!;
+    await act(async () => choose(then, "note"));
+    expect(search()).toContain("then_applications=note");
+    await until(() => asked.some((p) => p.subgroup === "note"));
+    expect(search()).toContain("group_applications=status");
     await act(async () => root.unmount());
   });
 });

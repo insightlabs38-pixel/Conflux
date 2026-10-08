@@ -17,6 +17,8 @@ export type EntityField = {
   sortable: boolean;
   filterable: boolean;
   default: boolean;
+  /** Rows may be grouped by this field (the server lists its buckets with counts). */
+  groupable?: boolean;
 };
 export type EntityDescription = {
   key: string;
@@ -41,9 +43,19 @@ export type EntityQuery = {
   columns?: string[];
   /** Free text: every word must appear in one of the list's search fields (server side). */
   search?: string;
+  /** A groupable field (and a second inside it): the page lists buckets with counts, not rows. */
+  group?: string;
+  subgroup?: string;
   limit?: number;
   offset?: number;
 };
+export type EntityBucket = {
+  key: unknown;
+  label: string;
+  null: boolean;
+  count: number;
+};
+export type EntityGroup = EntityBucket & { subgroups?: EntityBucket[] };
 export type EntityRow = { id: string } & Record<string, unknown>;
 export type EntityPage<Row = EntityRow> = {
   entity: string;
@@ -55,6 +67,10 @@ export type EntityPage<Row = EntityRow> = {
   search?: string;
   columns: string[];
   rows: Row[];
+  group?: string;
+  subgroup?: string;
+  groups?: EntityGroup[];
+  truncated?: boolean;
 };
 
 function sorted(value: unknown): unknown {
@@ -92,6 +108,8 @@ export function entityUrl(
   if (query.filter) params.set("filter", canonicalFilter(query.filter));
   if (query.sort) params.set("sort", query.sort);
   if (query.search) params.set("search", query.search);
+  if (query.group) params.set("group", query.group);
+  if (query.subgroup) params.set("subgroup", query.subgroup);
   if (query.columns?.length) params.set("columns", query.columns.join(","));
   if (query.limit !== undefined) params.set("limit", String(query.limit));
   if (query.offset) params.set("offset", String(query.offset));

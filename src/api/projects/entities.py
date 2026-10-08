@@ -25,7 +25,7 @@ entities.register(
                 default=False,
                 sortable=False,
             ),
-            entities.Field("track", entities.TEXT, "track__name", "Track"),
+            entities.Field("track", entities.TEXT, "track__name", "Track", groupable=True),
             entities.Field("team", entities.TEXT, "team__name", "Team"),
             # lets a screen choose a team by its name without showing or asking for its id
             entities.Field(
@@ -38,9 +38,16 @@ entities.register(
                 filterable=False,
             ),
             entities.Field("created_by", entities.TEXT, "created_by__username", "Created by"),
-            entities.Field("gallery_visible", entities.BOOL, "gallery_visible", "In gallery"),
             entities.Field(
-                "gallery_blocked", entities.BOOL, "gallery_blocked", "Blocked", default=False
+                "gallery_visible", entities.BOOL, "gallery_visible", "In gallery", groupable=True
+            ),
+            entities.Field(
+                "gallery_blocked",
+                entities.BOOL,
+                "gallery_blocked",
+                "Blocked",
+                default=False,
+                groupable=True,
             ),
             entities.Field("created_at", entities.DATE, "created_at", "Created"),
         ),

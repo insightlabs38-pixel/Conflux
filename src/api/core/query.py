@@ -11,7 +11,7 @@ import math
 from datetime import UTC, date, datetime, time
 from uuid import UUID as UuidValue
 
-from django.db.models import F, Q
+from django.db.models import Count, F, Q
 from django.utils.dateparse import parse_date, parse_datetime
 from rest_framework.exceptions import ValidationError
 
@@ -23,6 +23,7 @@ MAX_PREDICATES = 20
 MAX_IN = 50
 MAX_TEXT = 200
 MAX_SORT = 3
+MAX_GROUPS = 200
 MAX_TERMS = 5
 MIN_TERM = 2
 
@@ -238,6 +239,82 @@ def parse_sort(entity: Entity, raw):
             raise QueryError("", f"Cannot sort by {name!r}; use one of {names}.", root="sort")
         order.append(("-" if descending else "") + field.column)
     return order or list(entity.default_sort)
+
+
+def parse_group(entity: Entity, group, subgroup):
+    """`group` and `subgroup` as fields: both groupable, different, and a subgroup needs a group."""
+    found = []
+    for root, key in (("group", group), ("subgroup", subgroup)):
+        if not key:
+            found.append(None)
+            continue
+        field = entity.field(key)
+        if field is None or not field.groupable:
+            names = ", ".join(f.key for f in entity.fields if f.groupable) or "none"
+            raise QueryError("", f"Cannot group by {key!r}; use one of {names}.", root=root)
+        found.append(field)
+    if found[1] is not None and found[0] is None:
+        raise QueryError("", "A subgroup needs a group.", root="subgroup")
+    if found[1] is not None and found[1] is found[0]:
+        raise QueryError("", "The subgroup must differ from the group.", root="subgroup")
+    return found[0], found[1]
+
+
+def _label(field, value):
+    if value is None:
+        return "(none)"
+    if field.type == BOOL:
+        return "Yes" if value else "No"
+    return str(_plain(value))
+
+
+def run_groups(entity: Entity, event, user, *, tree, search, group, subgroup):
+    """The buckets of the current result: one per value of `group` (and of `subgroup` inside it),
+    each with its count, empty values last. No rows - a bucket is opened with the ordinary query
+    and the bucket's value as one more condition, so there is one way to read rows."""
+    queryset = entity.base(event, user)
+    if tree:
+        queryset = queryset.filter(compile_filter(entity, tree))
+    if search:
+        queryset = queryset.filter(compile_search(entity, search))
+    columns = [group.column] + ([subgroup.column] if subgroup else [])
+    buckets = (
+        queryset.order_by()
+        .values(*columns)
+        .annotate(n=Count("pk"))
+        .order_by(*[F(column).asc(nulls_last=True) for column in columns])
+    )
+    groups, truncated = [], False
+    for row in buckets:
+        value = row[group.column]
+        if not groups or groups[-1]["_raw"] != value:
+            if len(groups) >= MAX_GROUPS:
+                truncated = True
+                break
+            groups.append(
+                {
+                    "_raw": value,
+                    "key": _plain(value),
+                    "label": _label(group, value),
+                    "null": value is None,
+                    "count": 0,
+                    **({"subgroups": []} if subgroup else {}),
+                }
+            )
+        groups[-1]["count"] += row["n"]
+        if subgroup:
+            sub = row[subgroup.column]
+            groups[-1]["subgroups"].append(
+                {
+                    "key": _plain(sub),
+                    "label": _label(subgroup, sub),
+                    "null": sub is None,
+                    "count": row["n"],
+                }
+            )
+    for item in groups:
+        del item["_raw"]
+    return {"groups": groups, "truncated": truncated, "total": sum(g["count"] for g in groups)}
 
 
 def ordering(sort):

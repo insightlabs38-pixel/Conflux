@@ -409,3 +409,69 @@ def test_sort_puts_empty_values_last_in_both_directions_and_is_stable():
     assert refused.status_code == 400 and "sort" in refused.json()
     # the same request twice reads the same order (primary key breaks the last tie)
     assert names(ask(client, base, sort="status")) == names(ask(client, base, sort="status"))
+
+
+def test_group_lists_buckets_with_counts_empty_last_and_a_bucket_opens_through_the_ordinary_query():
+    _, event, _, client, _, base = world()
+    applicants(event, ROWS)  # pending 1, approved 1, waitlisted 2, rejected 1
+    page = ask(client, base, group="status").json()
+    assert page["group"] == "status" and page["rows"] == [] and page["total"] == 5
+    counts = {g["key"]: g["count"] for g in page["groups"]}
+    assert counts == {"approved": 1, "pending": 1, "rejected": 1, "waitlisted": 2}
+    assert sum(counts.values()) == page["total"]
+    # opening a bucket is the ordinary query with its value as one more condition
+    opened = ask(client, base, filter=tree(field="status", op="eq", value="waitlisted"))
+    assert names(opened) == ["cyd", "dee"]
+    # the filter and the search narrow the buckets exactly as they narrow rows
+    narrowed = ask(client, base, group="status", search="berlin").json()
+    assert {g["key"]: g["count"] for g in narrowed["groups"]} == {"waitlisted": 2}
+    filtered = ask(
+        client, base, group="status", filter=tree(field="status", op="ne", value="rejected")
+    ).json()
+    assert "rejected" not in {g["key"] for g in filtered["groups"]} and filtered["total"] == 4
+
+
+def test_a_subgroup_nests_inside_each_group_and_empty_values_form_a_last_labelled_bucket():
+    _, event, _, client, _, base = world()
+    applicants(event, ROWS)
+    both = ask(client, base, group="status", subgroup="decided_by").json()
+    waitlisted = next(g for g in both["groups"] if g["key"] == "waitlisted")
+    assert waitlisted["count"] == 2
+    assert [s["label"] for s in waitlisted["subgroups"]] == ["(none)"]  # nobody decided them
+    assert waitlisted["subgroups"][0]["null"] is True and waitlisted["subgroups"][0]["count"] == 2
+    assert all(sum(s["count"] for s in g["subgroups"]) == g["count"] for g in both["groups"])
+    # the empty bucket sorts last
+    projects = f"{base}projects/"  # noqa: F841
+    client_projects = ask(client, base, entity="projects", group="track").json()
+    assert client_projects["groups"] == []  # no projects yet: no buckets, not an error
+
+
+def test_group_refusals_name_the_part_and_the_catalogue_says_what_can_be_grouped():
+    _, event, _, client, _, base = world()
+    applicants(event, ROWS)
+    for params, key, fragment in [
+        ({"group": "username"}, "group", "Cannot group by"),
+        ({"group": "nope"}, "group", "Cannot group by"),
+        ({"subgroup": "status"}, "subgroup", "needs a group"),
+        ({"group": "status", "subgroup": "status"}, "subgroup", "must differ"),
+        ({"group": "status", "subgroup": "username"}, "subgroup", "Cannot group by"),
+    ]:
+        response = ask(client, base, **params)
+        assert response.status_code == 400, params
+        assert any(k.startswith(key) and fragment in v[0] for k, v in response.json().items())
+    catalogue = next(e for e in client.get(base).json() if e["key"] == "applications")
+    assert {f["key"] for f in catalogue["fields"] if f["groupable"]} == {"status", "decided_by"}
+
+
+def test_groups_are_capped_and_say_so():
+    from core import query as q
+
+    _, event, _, client, _, base = world()
+    applicants(event, ROWS)
+    original = q.MAX_GROUPS
+    q.MAX_GROUPS = 2
+    try:
+        page = ask(client, base, group="status").json()
+    finally:
+        q.MAX_GROUPS = original
+    assert len(page["groups"]) == 2 and page["truncated"] is True

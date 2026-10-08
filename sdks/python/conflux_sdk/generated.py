@@ -1752,6 +1752,7 @@ class EntityFieldSchema(TypedDict):
     sortable: bool
     filterable: bool
     default: bool
+    groupable: bool
 
 class InputOfEntityFieldSchema(TypedDict):
     key: str
@@ -1762,6 +1763,7 @@ class InputOfEntityFieldSchema(TypedDict):
     sortable: bool
     filterable: bool
     default: bool
+    groupable: bool
 
 EntityFieldSchemaTypeEnum = Literal['text', 'number', 'date', 'bool', 'enum', 'uuid']
 
@@ -1777,6 +1779,10 @@ class EntityPageSchema(TypedDict):
     search: str
     columns: list[str]
     rows: list[dict[str, Any]]
+    group: NotRequired[str]
+    subgroup: NotRequired[str]
+    groups: NotRequired[list[dict[str, Any]]]
+    truncated: NotRequired[bool]
 
 class InputOfEntityPageSchema(TypedDict):
     entity: str
@@ -1788,6 +1794,10 @@ class InputOfEntityPageSchema(TypedDict):
     search: str
     columns: list[str]
     rows: list[dict[str, Any]]
+    group: NotRequired[str]
+    subgroup: NotRequired[str]
+    groups: NotRequired[list[dict[str, Any]]]
+    truncated: NotRequired[bool]
 
 class EntitySchema(TypedDict):
     key: str
@@ -5000,6 +5010,10 @@ class SavedViewPageSchema(TypedDict):
     search: str
     columns: list[str]
     rows: list[dict[str, Any]]
+    group: NotRequired[str]
+    subgroup: NotRequired[str]
+    groups: NotRequired[list[dict[str, Any]]]
+    truncated: NotRequired[bool]
     density: str
     view: SavedViewSchema
 
@@ -5013,6 +5027,10 @@ class InputOfSavedViewPageSchema(TypedDict):
     search: str
     columns: list[str]
     rows: list[dict[str, Any]]
+    group: NotRequired[str]
+    subgroup: NotRequired[str]
+    groups: NotRequired[list[dict[str, Any]]]
+    truncated: NotRequired[bool]
     density: str
     view: InputOfSavedViewSchema
 
@@ -6772,10 +6790,12 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                           'workspace_public_id'],
                                                                                           'query_params': ['columns',
                                                                                                            'filter',
+                                                                                                           'group',
                                                                                                            'limit',
                                                                                                            'offset',
                                                                                                            'search',
-                                                                                                           'sort'],
+                                                                                                           'sort',
+                                                                                                           'subgroup'],
                                                                                           'request_body': False,
                                                                                           'response_kind': 'json'},
  'get_api_v1_workspaces_workspace_public_id_events_event_public_id_evaluation_pools': {'method': 'GET',

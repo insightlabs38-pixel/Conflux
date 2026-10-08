@@ -37,6 +37,8 @@ class Field:
     filterable: bool = True
     choices: tuple = ()  # allowed values of an enum field
     default: bool = True  # shown when the client names no columns
+    # May rows be grouped by it (PD-F006-B02-T08): a field with a modest number of distinct values.
+    groupable: bool = False
     # How to read the value off a row when the column path is not enough.
     read: Callable[[Any], Any] | None = None
 

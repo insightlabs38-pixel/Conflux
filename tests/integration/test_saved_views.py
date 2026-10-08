@@ -273,3 +273,23 @@ def test_a_view_may_carry_a_search_and_older_views_are_unchanged():
     # a bad search is refused at save time with the same diagnostics
     bad = post(clients["ana"], root, name="Bad", query={**PENDING, "search": "x"})
     assert bad.status_code == 400
+
+
+def test_a_view_may_carry_a_group_and_runs_as_buckets_and_older_views_are_unchanged():
+    _, _, event, users, clients, root = world()
+    for name, status in (("p1", "pending"), ("p2", "pending"), ("a1", "approved")):
+        user = User.objects.create_user(username=name, password="unused")
+        EventApplication.objects.create(event=event, user=user, status=status)
+    plain = post(clients["ana"], root)
+    assert plain.status_code == 201 and "group" not in plain.json()["query"]
+    grouped = post(
+        clients["ana"], root, name="By status", query={**PENDING, "filter": None, "group": "status"}
+    )
+    assert grouped.status_code == 201, grouped.content
+    assert grouped.json()["query"]["group"] == "status"
+    run = clients["ana"].get(root + f"views/{grouped.json()['public_id']}/run/").json()
+    assert run["group"] == "status" and run["rows"] == []
+    assert {g["key"]: g["count"] for g in run["groups"]} == {"approved": 1, "pending": 2}
+    assert clients["ana"].get(root + f"views/{plain.json()['public_id']}/run/").json()["rows"]
+    bad = post(clients["ana"], root, name="Bad", query={**PENDING, "group": "username"})
+    assert bad.status_code == 400

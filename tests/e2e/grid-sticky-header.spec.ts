@@ -76,20 +76,17 @@ for (const width of [1440, 1100]) {
   });
 }
 
-test("on a phone the list is a row list: no header row is drawn", async ({
+test("on a phone the list is a row list and its header is a bar that scrolls with the page, not a sticky row", async ({
   page,
 }, info) => {
   test.skip(info.project.name !== "mobile", "the phone project");
   await open(page, 390);
-  const box = await grid(page)
-    .locator("thead")
-    .evaluate((el) => {
-      const r = el.getBoundingClientRect();
-      return { width: r.width, height: r.height };
-    });
-  expect(box.width).toBeLessThanOrEqual(1);
-  expect(box.height).toBeLessThanOrEqual(1);
-  // each cell carries its own label instead
+  const head = await grid(page)
+    .locator("thead th")
+    .nth(1)
+    .evaluate((th) => getComputedStyle(th).position);
+  expect(head).toBe("static"); // nothing sticks on the phone: the list is the page's own scroll
+  // each cell carries its own label instead of a column header above it
   const label = await grid(page)
     .locator("tbody tr td")
     .nth(1)

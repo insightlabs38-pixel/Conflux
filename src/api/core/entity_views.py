@@ -25,6 +25,7 @@ class EntityFieldSchema(serializers.Serializer):
     sortable = serializers.BooleanField()
     filterable = serializers.BooleanField()
     default = serializers.BooleanField()
+    groupable = serializers.BooleanField()
 
 
 class EntitySchema(serializers.Serializer):
@@ -45,6 +46,10 @@ class EntityPageSchema(serializers.Serializer):
     search = serializers.CharField()
     columns = serializers.ListField(child=serializers.CharField())
     rows = serializers.ListField(child=serializers.DictField())
+    group = serializers.CharField(required=False)
+    subgroup = serializers.CharField(required=False)
+    groups = serializers.ListField(child=serializers.DictField(), required=False)
+    truncated = serializers.BooleanField(required=False)
 
 
 def _describe(entity):
@@ -63,6 +68,7 @@ def _describe(entity):
                 "sortable": f.sortable,
                 "filterable": f.filterable,
                 "default": f.default,
+                "groupable": f.groupable,
             }
             for f in entity.fields
         ],
@@ -108,6 +114,15 @@ class EntityQueryView(_EntityView):
                 str,
                 description="Free text: every word must appear in one of the list's search fields.",
             ),
+            OpenApiParameter(
+                "group",
+                str,
+                description="A groupable field: the response lists its buckets with counts instead "
+                "of rows; open a bucket with the ordinary query and its value as a condition.",
+            ),
+            OpenApiParameter(
+                "subgroup", str, description="A second groupable field, inside each group."
+            ),
             OpenApiParameter("limit", int),
             OpenApiParameter("offset", int),
         ],
@@ -127,9 +142,37 @@ class EntityQueryView(_EntityView):
         order = query.parse_sort(entity, params.get("sort"))
         columns = query.parse_columns(entity, params.get("columns"))
         terms = query.parse_search(entity, params.get("search"))
+        group, subgroup = query.parse_group(entity, params.get("group"), params.get("subgroup"))
         if tree:
             query.compile_filter(entity, tree)  # validate before touching the database
         limit, offset = page_params(request, default=25, maximum=100)
+        if group is not None:
+            buckets = query.run_groups(
+                entity,
+                event,
+                request.user,
+                tree=tree,
+                search=terms,
+                group=group,
+                subgroup=subgroup,
+            )
+            return Response(
+                {
+                    "entity": entity.key,
+                    "total": buckets["total"],
+                    "limit": limit,
+                    "offset": offset,
+                    "filter": tree,
+                    "sort": order,
+                    "search": " ".join(terms),
+                    "columns": [f.key for f in columns],
+                    "rows": [],
+                    "group": group.key,
+                    **({"subgroup": subgroup.key} if subgroup else {}),
+                    "groups": buckets["groups"],
+                    "truncated": buckets["truncated"],
+                }
+            )
         result = query.run(
             entity,
             event,

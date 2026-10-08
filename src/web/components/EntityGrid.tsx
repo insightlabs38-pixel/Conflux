@@ -41,6 +41,7 @@ import { useConnectionStatus, useRealtime } from "../hooks/useRealtime";
 import { describeHealth } from "../lib/liveOps";
 import { liveOpsTopic, LIVE_OPS_INTERVAL_MS } from "../lib/realtime";
 import { LiveStatus } from "./LiveStatus";
+import { GroupedRows } from "./GroupedRows";
 import {
   countOf,
   publishSelection,
@@ -196,6 +197,22 @@ export function EntityGrid({
     .join(",");
   const setSort = (value: string) =>
     setSortParam(value.split(",").filter(Boolean).join(":"), { replace: true });
+  // Grouping is panel state too: one groupable field, and a second inside it (fixed keys, so a link
+  // reproduces the list). Grouped, the page is buckets with counts and each bucket opens its rows.
+  const [groupParam, setGroupParam] = useUrlParam(`group_${entity}`, {
+    clears: [`page_${entity}`],
+  });
+  const [thenParam, setThenParam] = useUrlParam(`then_${entity}`);
+  const groupable = fields.filter((f) => f.groupable);
+  const group = groupable.some((f) => f.key === groupParam) ? groupParam : "";
+  const subgroup =
+    group && thenParam !== group && groupable.some((f) => f.key === thenParam)
+      ? thenParam
+      : "";
+  const setGroup = (value: string, then = "") => {
+    setGroupParam(value, { replace: true });
+    setThenParam(value ? then : "", { replace: true });
+  };
   // rows per page is panel state like sort and page: a fixed set, so a link reproduces the list
   const [sizeParam, setSizeParam] = useUrlParam(`size_${entity}`, {
     clears: [`page_${entity}`],
@@ -240,6 +257,8 @@ export function EntityGrid({
     search,
     sort,
     columns: known,
+    group: group || undefined,
+    subgroup: subgroup || undefined,
     limit: PAGE_SIZE,
     offset,
   });
@@ -304,6 +323,7 @@ export function EntityGrid({
           columnPreference(userRef.current, workspaceId, entity),
       );
       setDensity(query?.density ?? "comfortable");
+      setGroup(query?.group ?? "", query?.subgroup ?? "");
       setOffset(0);
       setSelected(new Set());
     },
@@ -317,6 +337,7 @@ export function EntityGrid({
     columns: known,
     density,
     ...(search ? { search } : {}),
+    ...(group ? { group, ...(subgroup ? { subgroup } : {}) } : {}),
   };
 
   const columns: GridColumn<EntityRow>[] = shown.map((field) => ({
@@ -675,6 +696,50 @@ export function EntityGrid({
               Live operations
             </button>
           )}
+          {groupable.length > 0 && (
+            <>
+              <label>
+                Group by{" "}
+                <select
+                  value={group}
+                  onChange={(e) => {
+                    setGroup(e.target.value);
+                    clearSelection();
+                    announce(
+                      e.target.value
+                        ? `Grouped by ${fields.find((f) => f.key === e.target.value)?.label}.`
+                        : "Grouping removed.",
+                    );
+                  }}
+                >
+                  <option value="">No grouping</option>
+                  {groupable.map((f) => (
+                    <option key={f.key} value={f.key}>
+                      {f.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {group && (
+                <label>
+                  Then by{" "}
+                  <select
+                    value={subgroup}
+                    onChange={(e) => setGroup(group, e.target.value)}
+                  >
+                    <option value="">Nothing</option>
+                    {groupable
+                      .filter((f) => f.key !== group)
+                      .map((f) => (
+                        <option key={f.key} value={f.key}>
+                          {f.label}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+              )}
+            </>
+          )}
           <label>
             Sort by{" "}
             <select
@@ -718,78 +783,122 @@ export function EntityGrid({
         {live && (
           <LiveStatus topic={opsTopic} updatedAt={lastUpdated.current} />
         )}
-        <DataGrid<EntityRow>
-          label={label}
-          columns={columns}
-          rows={shownPage?.rows ?? []}
-          status={status}
-          sort={sortState(sort)}
-          onSort={(next, additive) => {
-            const before = sortState(sort);
-            if (
-              additive &&
-              before.length >= MAX_SORT_KEYS &&
-              next.length === before.length &&
-              next.every(
-                (n, i) =>
-                  n.key === before[i].key &&
-                  n.descending === before[i].descending,
+        {group ? (
+          failure ? (
+            <p role="alert">
+              {failure instanceof ApiError
+                ? failure.message
+                : "Could not load the groups."}{" "}
+              <button type="button" onClick={() => void page.reload()}>
+                Try again
+              </button>
+            </p>
+          ) : !shownPage?.groups ? (
+            <p aria-busy="true" className="cx-muted">
+              Loading groups…
+            </p>
+          ) : (
+            <GroupedRows
+              key={`${group}|${subgroup}|${queryFilter ? canonicalFilter(queryFilter) : ""}|${search}|${sort}`}
+              base={base}
+              entity={entity}
+              label={label}
+              groupLabel={fields.find((f) => f.key === group)?.label ?? group}
+              subgroupLabel={
+                subgroup
+                  ? (fields.find((f) => f.key === subgroup)?.label ?? subgroup)
+                  : undefined
+              }
+              groupField={group}
+              subgroupField={subgroup || undefined}
+              groups={shownPage.groups}
+              truncated={shownPage.truncated === true}
+              filter={queryFilter}
+              search={search}
+              sort={sort}
+              columnKeys={known}
+              columns={columns}
+              density={density}
+              rowLabel={rowLabel}
+              actions={actions}
+            />
+          )
+        ) : (
+          <DataGrid<EntityRow>
+            label={label}
+            columns={columns}
+            rows={shownPage?.rows ?? []}
+            status={status}
+            sort={sortState(sort)}
+            onSort={(next, additive) => {
+              const before = sortState(sort);
+              if (
+                additive &&
+                before.length >= MAX_SORT_KEYS &&
+                next.length === before.length &&
+                next.every(
+                  (n, i) =>
+                    n.key === before[i].key &&
+                    n.descending === before[i].descending,
+                )
               )
-            )
-              return announce(
-                `Sort by at most ${MAX_SORT_KEYS} columns. Clear one first.`,
+                return announce(
+                  `Sort by at most ${MAX_SORT_KEYS} columns. Clear one first.`,
+                );
+              setSort(
+                next.map((n) => `${n.descending ? "-" : ""}${n.key}`).join(","),
               );
-            setSort(
-              next.map((n) => `${n.descending ? "-" : ""}${n.key}`).join(","),
-            );
-            announce(
-              describeSort(
-                next,
-                (key) => fields.find((f) => f.key === key)?.label ?? key,
-              ),
-            );
-            restart();
-          }}
-          total={shownPage?.total}
-          limit={PAGE_SIZE}
-          offset={offset}
-          pageSizes={PAGE_SIZES}
-          onPageSize={(size) => {
-            setSizeParam(size === PAGE_SIZES[0] ? "" : String(size), {
-              replace: true,
-            });
-            clearSelection();
-          }}
-          onPage={(next) => {
-            // a selection is of the rows in front of the person: another page starts with none
-            setOffset(next);
-            clearSelection();
-          }}
-          density={density}
-          selected={selectable ? selected : undefined}
-          onSelect={
-            selectable
-              ? (ids) => {
-                  const bounded = new Set([...ids].slice(0, MAX_SELECTION));
-                  if (bounded.size < ids.size)
-                    announce(`Select at most ${MAX_SELECTION} rows at a time.`);
-                  setSelected(bounded);
-                  onSelect?.(bounded);
-                }
-              : undefined
-          }
-          rowLabel={rowLabel}
-          actions={inspectAction}
-          highlightedId={inspect ? openId : undefined}
-          empty={empty}
-          filtered={filter !== null || search !== ""}
-          onClearFilter={() => {
-            setFilter(null);
-            setSearchText("");
-            setSearch("");
-            restart();
-          }}
-        />
+              announce(
+                describeSort(
+                  next,
+                  (key) => fields.find((f) => f.key === key)?.label ?? key,
+                ),
+              );
+              restart();
+            }}
+            total={shownPage?.total}
+            limit={PAGE_SIZE}
+            offset={offset}
+            pageSizes={PAGE_SIZES}
+            onPageSize={(size) => {
+              setSizeParam(size === PAGE_SIZES[0] ? "" : String(size), {
+                replace: true,
+              });
+              clearSelection();
+            }}
+            onPage={(next) => {
+              // a selection is of the rows in front of the person: another page starts with none
+              setOffset(next);
+              clearSelection();
+            }}
+            density={density}
+            selected={selectable ? selected : undefined}
+            onSelect={
+              selectable
+                ? (ids) => {
+                    const bounded = new Set([...ids].slice(0, MAX_SELECTION));
+                    if (bounded.size < ids.size)
+                      announce(
+                        `Select at most ${MAX_SELECTION} rows at a time.`,
+                      );
+                    setSelected(bounded);
+                    onSelect?.(bounded);
+                  }
+                : undefined
+            }
+            rowLabel={rowLabel}
+            actions={inspectAction}
+            highlightedId={inspect ? openId : undefined}
+            empty={empty}
+            filtered={filter !== null || search !== ""}
+            onClearFilter={() => {
+              setFilter(null);
+              setSearchText("");
+              setSearch("");
+              restart();
+            }}
+          />
+        )}
       </div>
       {inspect && openId && shownPage !== null && (
         <Inspector

@@ -2639,6 +2639,9 @@
 .cx-datagrid__select {
   width: 2.5rem;
 }
+.cx-datagrid__selecttext {
+  display: none;
+}
 .cx-datagrid__end {
   text-align: right;
 }
@@ -2815,8 +2818,8 @@
     gap: var(--sp-2);
     width: auto;
   }
-  .cx-datagrid__table thead th.cx-datagrid__select::after {
-    content: "Select page";
+  .cx-datagrid__selecttext {
+    display: inline;
     font-size: var(--fs-13);
   }
   .cx-datagrid__table thead .cx-datagrid__sort {
@@ -3968,7 +3971,7 @@ html {
     left: 0;
     z-index: 1;
     background: var(--color-surface-raised, var(--bg));
-    box-shadow: 1px 0 0 var(--line);
+    border-right: 1px solid var(--line);
   }
   .cx-datagrid__table--selectable :where(td, th).cx-datagrid__name {
     left: 2.5rem;
@@ -3977,4 +3980,33 @@ html {
   .cx-datagrid__table thead th.cx-datagrid__select {
     z-index: 3;
   }
+}
+
+.cx-groups ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cx-groups__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--sp-2) var(--sp-1);
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: none;
+  color: inherit;
+  font-size: var(--fs-14);
+  font-weight: var(--font-weight-semibold);
+  text-align: left;
+  cursor: pointer;
+}
+.cx-groups__head--sub {
+  padding-left: var(--sp-4);
+  font-weight: var(--font-weight-normal);
+}
+.cx-groups__body {
+  padding: var(--sp-1) 0 var(--sp-3) var(--sp-3);
 }

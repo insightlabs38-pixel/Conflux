@@ -260,6 +260,9 @@ export function DataGrid<Row extends { id: string }>({
                     }}
                     onChange={(e) => togglePage(e.target.checked)}
                   />
+                  <span className="cx-datagrid__selecttext" aria-hidden="true">
+                    Select page
+                  </span>
                 </th>
               )}
               {columns.map((column, columnIndex) => {

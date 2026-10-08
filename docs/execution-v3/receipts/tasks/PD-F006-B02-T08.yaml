@@ -1,0 +1,103 @@
+version: 3
+task: PD-F006-B02-T08
+batch: PD-F006-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 0e035ec
+  head_commit: null
+changed_paths:
+- src/api/core/entities.py
+- src/api/core/query.py
+- src/api/core/entity_views.py
+- src/api/core/saved_views.py
+- src/api/events/entities.py
+- src/api/projects/entities.py
+- docs/api/openapi.yaml
+- sdks/python/conflux_sdk/generated.py
+- sdks/typescript/generated.ts
+- tests/integration/test_entity_query.py
+- tests/integration/test_saved_views.py
+- src/web/components/GroupedRows.tsx
+- src/web/components/EntityGrid.tsx
+- src/web/components/EntityGrid.test.tsx
+- src/web/components/DataGrid.tsx
+- src/web/lib/entityQuery.ts
+- src/web/lib/savedViews.ts
+- src/web/lib/shareLink.ts
+- src/web/styles/components.css
+- tests/e2e/grid-group.spec.ts
+- tests/e2e/grid-sticky-header.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Group and subgroup through the one query
+  result: pass
+  evidence: the entity query gained group and subgroup (a groupable field, and a second different one inside it); the response lists the buckets with their counts for the current filter and search, empty values form a last bucket labelled (none), at most 200 groups with a truncated flag, no rows. A bucket is opened with the ordinary query and the bucket's value as one more condition, so the counts and the rows come from one rule. Fields opt in with groupable (projects - track, in gallery, blocked; applications - status, decided by); the catalogue says which. Refusals name the part (group, subgroup)
+- item: The grid shows it
+  result: pass
+  evidence: Group by and Then by in the grid tools, kept in the address (group_<entity>, then_<entity>) and in a saved view (stored only when used, older views unchanged); grouped, the list is collapsible headers with counts (aria-expanded, a chevron icon, 44px targets), each opening its rows as the same grid with its own paging, a subgroup nests inside, ungrouping returns the flat list; changes are announced in words
+invariants:
+- item: One query model, rows from one path
+  result: pass
+  evidence: there is no group-specific row endpoint or client-side grouping; the buckets are a count over the same filtered queryset, tested to equal the ordinary query's rows for a bucket
+- item: No test weakened
+  result: pass
+  evidence: tests added; the B01 phone-header assertion in grid-sticky-header (no header row is drawn) contradicted the B02 phone bar and was replaced by the real rule (the phone's header is static, not sticky)
+verification:
+- command: .venv/bin/python -m pytest tests/integration/test_entity_query.py tests/integration/test_saved_views.py tests/integration/test_entity_query_scale.py tests/integration/test_feature_cli.py tests/integration/test_feature_mcp.py -q
+  result: pass
+  note: 101 passed (buckets and counts, filter and search narrow them, subgroup nesting, empty bucket last, refusals, catalogue groupable, cap, saved view round trip)
+- command: .venv/bin/python scripts/check_openapi_artifact.py && .venv/bin/python scripts/generate_sdks.py --check
+  result: pass
+  note: after regeneration
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 152 files, 859 tests (grouping - buckets, open with a condition, subgroup, address)
+- command: .venv/bin/python -m pytest tests/test_visual_ratchets.py -q
+  result: pass
+  note: 27 passed after replacing a CSS glyph, a content string, a shadow and a raw weight from earlier tasks of this batch with markup, an icon, a border and tokens
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts grid- column-preferences (stack rebuilt first)
+  result: pass
+  note: every grid spec passes, desktop and mobile, after one cold start timeout in the first spec right after the rebuild (passed on rerun) - groups equal the API's counts, a bucket opens exactly its rows, a subgroup nests, reload keeps it, ungroup returns the flat list, axe clean
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: group rows with counts; aggregates beyond a count are B03
+- ref: design/state-matrix
+  result: pass
+  note: no groups, one, many, nested, truncated, loading, refused
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: two additive optional parameters and groupable in the catalogue; tested; OpenAPI regenerated
+- surface: cli
+  result: pass
+  evidence: the same parameters through entities query in T91
+- surface: mcp
+  result: pass
+  evidence: the same through query_entity in T91
+- surface: audit
+  result: pass
+  evidence: reads only
+- surface: search
+  result: pass
+  evidence: search narrows buckets exactly as rows
+- surface: docs
+  result: pass
+  evidence: T91
+migrations: []
+findings:
+- P3 three CSS items from earlier tasks of this batch (a box shadow, a content string and a raw weight) failed the visual ratchets, which had not been run since B01's T90; fixed here
+escalations: []
+limitations:
+- Selection, bulk actions and the inspector belong to the flat list; ungroup to use them (B03 brings range selection and richer interaction).
+- Only fields marked groupable can be grouped, and a count is the only aggregate (aggregate footers are B03).
+next: review

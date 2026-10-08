@@ -202,7 +202,9 @@ def parse_search(entity: Entity, raw):
     for index, term in enumerate(terms):
         if len(term) < MIN_TERM:
             raise QueryError(
-                f"[{index}]", f"Each search word needs at least {MIN_TERM} characters.", root="search"
+                f"[{index}]",
+                f"Each search word needs at least {MIN_TERM} characters.",
+                root="search",
             )
         if len(term) > MAX_TEXT:
             raise QueryError(

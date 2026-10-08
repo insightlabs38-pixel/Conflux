@@ -315,11 +315,16 @@ def test_the_legacy_applications_endpoint_is_unchanged():
 def test_search_matches_every_word_in_any_search_field_and_combines_with_the_filter():
     _, event, _, client, _, base = world()
     applicants(event, ROWS)
-    assert names(ask(client, base, search="berlin")) == ["cyd", "dee"]  # case-insensitive, in a note
+    assert names(ask(client, base, search="berlin")) == [
+        "cyd",
+        "dee",
+    ]  # case-insensitive, in a note
     assert names(ask(client, base, search="berlin too")) == ["dee"]  # every word must match
     assert names(ask(client, base, search="ADA")) == ["ada"]  # in the username
     assert names(ask(client, base, search="compilers ada")) == ["ada"]  # words in different fields
-    both = ask(client, base, search="berlin", filter=tree(field="status", op="eq", value="waitlisted"))
+    both = ask(
+        client, base, search="berlin", filter=tree(field="status", op="eq", value="waitlisted")
+    )
     assert names(both) == ["cyd", "dee"] and both.json()["total"] == 2
     none = ask(client, base, search="berlin", filter=tree(field="status", op="eq", value="pending"))
     assert names(none) == [] and none.json()["total"] == 0

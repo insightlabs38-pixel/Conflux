@@ -26,6 +26,7 @@ import "../lib/shellCommands";
 import { roleLabel } from "../lib/roles";
 import { onShellOverlay, openShellOverlay } from "../lib/shellEvents";
 import { shareableHref } from "../lib/shareLink";
+import { useSelection } from "../lib/selection";
 import { announce } from "../lib/shellNotice";
 import {
   rememberCommand,
@@ -116,6 +117,7 @@ function CommandPalette({
   const location = useLocation();
   const user = useMe().data?.public_id ?? "";
   const live = useLiveOperations(user);
+  const selection = useSelection();
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const titleId = useId();
@@ -152,6 +154,7 @@ function CommandPalette({
       workspaceId,
       eventId,
       view: navigation.view,
+      selection,
       places: navigation.destinations.map((place) => ({
         id: place.id,
         label: place.label,
@@ -208,6 +211,7 @@ function CommandPalette({
       onSignOut,
       user,
       live,
+      selection,
       pinned,
       recentViews,
     ],

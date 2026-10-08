@@ -1,0 +1,74 @@
+version: 3
+task: PD-F005-B03-T04
+batch: PD-F005-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 95e016f
+  head_commit: null
+changed_paths:
+- src/web/lib/selection.ts
+- src/web/lib/selection.test.ts
+- src/web/lib/commands.ts
+- src/web/lib/commands.test.ts
+- src/web/lib/shellCommands.ts
+- src/web/components/CommandPalette.tsx
+- src/web/components/ShortcutsHelp.tsx
+- src/web/components/EntityGrid.tsx
+- src/web/components/EntityGrid.test.tsx
+- src/web/features/event-builder/ProjectsGrid.tsx
+- tests/e2e/selection-commands.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Palette commands parameterized by the selected entities
+  result: pass
+  evidence: a selectable list publishes its selection (ids on the page, in memory only, lib/selection.ts) and the palette's COMMANDS registry offers it as a group named for the list - Open details for <name> for one row, the list's own commands (Move 2 projects to <track> on the projects grid), Copy the names of N, Clear the selection. The most recently changed list wins; an emptied or unmounted list withdraws its commands
+- item: Consequence step preserved
+  result: pass
+  evidence: Move N projects to <track> sets the track and opens the existing BulkPlanner preview (all or nothing, effects stated); the browser test checks that nothing has moved until it is applied
+invariants:
+- item: One command registry, no domain change from a command
+  result: pass
+  evidence: a registered provider reads CommandContext.selection; commands only start the list's workflow. No second palette, no new endpoint
+- item: Selection stays out of storage and URLs
+  result: pass
+  evidence: held in memory, ids never written to a link or to storage
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 148 files, 820 tests (selection store 2, command provider 1, grid publishing 1)
+- command: scripts/e2e-tiers with_fixture iso-min selection-commands (stack rebuilt first; the runner's own provision, run and dispose)
+  result: pass
+  note: 1 passed, mobile skipped by design - no selection offers nothing, one row offers Open details, two offer Move 2 projects to Palette track, Enter opens the preview with nothing moved, Clear the selection withdraws the commands, axe clean with the palette open
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: commands appear in the existing palette under a group named for the selection, no new chrome
+- ref: design/state-matrix
+  result: pass
+  note: empty (nothing offered), one, many, too many (over 2000 offers no move), emptied
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: audit
+  result: pass
+  evidence: the applied bulk operation keeps its existing receipt and audit; commands themselves record nothing
+- surface: search
+  result: pass
+  evidence: commands are found by selected, selection and the list's name
+- surface: docs
+  result: pass
+  evidence: developer note and release note at T91
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Only the projects grid supplies its own selection command (move to track); other selectable lists get the generic three until they add one.
+- The selection is one page of one list; changing page clears it, as before.
+next: review

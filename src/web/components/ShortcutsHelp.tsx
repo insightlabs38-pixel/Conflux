@@ -115,6 +115,7 @@ function ShortcutsDialog({
       workspaceId: navigation.workspaceId,
       eventId: requested,
       view: navigation.view,
+      selection: null,
       places: navigation.destinations.map((place) => ({
         id: place.id,
         label: place.label,

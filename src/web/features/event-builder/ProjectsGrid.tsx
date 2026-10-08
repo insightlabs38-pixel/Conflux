@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { BulkPlanner } from "../../components/BulkPlanner";
 import { NotesDialog } from "../../components/NotesDialog";
 import { EntityGrid } from "../../components/EntityGrid";
 import { Button } from "../../components/Button";
+import { countOf } from "../../lib/selection";
 
 const CHUNK = 100; // the planner takes at most 100 explicit targets per operation
 
@@ -44,6 +45,23 @@ export function ProjectsGrid({
     return chunks;
   }, [ids, track]);
 
+  // "Move 3 projects to Track A" in the palette: it fills in the track and opens the same preview
+  // as the button, so the consequence step is never skipped
+  const moveCommands = useCallback(
+    (chosen: string[]) =>
+      chosen.length > CHUNK * 20
+        ? []
+        : tracks.map((t) => ({
+            id: `move-${t.public_id}`,
+            label: `Move ${countOf(chosen.length, "projects")} to ${t.name}`,
+            run: () => {
+              setTrack(t.public_id);
+              setPlanning(true);
+            },
+          })),
+    [tracks],
+  );
+
   return (
     <div>
       {selected.size > 0 && (
@@ -80,6 +98,7 @@ export function ProjectsGrid({
         rowLabel={(row) => String(row.name ?? row.id)}
         selectable
         onSelect={setSelected}
+        selectionCommands={moveCommands}
         actions={(row) => (
           <Button
             variant="secondary"

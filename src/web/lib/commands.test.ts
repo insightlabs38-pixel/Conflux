@@ -14,6 +14,7 @@ const context = (over: Partial<CommandContext> = {}): CommandContext => ({
   workspaceId: "w",
   eventId: "",
   view: "overview",
+  selection: null,
   places: [],
   events: [],
   go: () => {},
@@ -179,5 +180,33 @@ describe("command registry", () => {
     expect(has("judge")).toEqual([]);
     expect(has("participant")).toEqual([]);
     expect(has("organizer", false)).toEqual([]);
+  });
+});
+
+describe("selection commands", () => {
+  it("are offered only while something is selected, named for the list", () => {
+    const none = commandsFor(context());
+    expect(none.some((c) => c.id.startsWith("selection."))).toBe(false);
+    const ran: string[] = [];
+    const some = commandsFor(
+      context({
+        selection: {
+          entity: "projects",
+          noun: "projects",
+          count: 2,
+          commands: [
+            {
+              id: "x",
+              label: "Move 2 projects to A",
+              run: () => ran.push("x"),
+            },
+          ],
+        },
+      }),
+    );
+    const found = some.find((c) => c.id === "selection.projects.x")!;
+    expect(found.group).toBe("Selected projects");
+    found.run(context());
+    expect(ran).toEqual(["x"]);
   });
 });

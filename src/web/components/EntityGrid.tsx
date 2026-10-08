@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -27,10 +28,16 @@ import { ViewBar } from "./ViewBar";
 import { Inspector } from "./Inspector";
 import { useUrlParam } from "../lib/urlState";
 import { useMe } from "../hooks/useMe";
+import { announce } from "../lib/shellNotice";
 import { useConnectionStatus, useRealtime } from "../hooks/useRealtime";
 import { describeHealth } from "../lib/liveOps";
 import { liveOpsTopic, LIVE_OPS_INTERVAL_MS } from "../lib/realtime";
 import { LiveStatus } from "./LiveStatus";
+import {
+  countOf,
+  publishSelection,
+  type SelectionCommand,
+} from "../lib/selection";
 import {
   columnPreference,
   setColumnPreference,
@@ -78,6 +85,7 @@ export function EntityGrid({
   renderers = {},
   selectable = false,
   onSelect,
+  selectionCommands,
   refreshToken = 0,
   empty,
   inspect = true,
@@ -92,6 +100,11 @@ export function EntityGrid({
   renderers?: Record<string, (row: EntityRow) => ReactNode>;
   selectable?: boolean;
   onSelect?: (ids: Set<string>) => void;
+  /**
+   * Commands for the palette that apply to the selected rows (their ids), next to the ones every
+   * list offers. They start the list's own workflow; they do not change anything by themselves.
+   */
+  selectionCommands?: (ids: string[]) => SelectionCommand[];
   /** Change it to reload the page (after a row action). */
   refreshToken?: number;
   empty?: ReactNode;
@@ -251,6 +264,55 @@ export function EntityGrid({
       ? "You do not have access to this list."
       : null;
   useRealtime(opsTopic, () => void page.reload(), live && description !== null);
+  // The selection is offered to the command palette as commands about those rows (lib/selection.ts).
+  const slot = useId();
+  const rowsOnPage = page.data?.rows ?? lastPage.current?.rows ?? [];
+  const nameOf = (row: EntityRow) =>
+    rowLabel ? rowLabel(row) : String(row[shown[0]?.key ?? ""] ?? row.id);
+  const clearSelection = () => {
+    setSelected(new Set());
+    onSelect?.(new Set());
+  };
+  useEffect(() => {
+    if (!selectable || selected.size === 0) return publishSelection(slot, null);
+    const chosen = rowsOnPage.filter((row) => selected.has(row.id));
+    const noun = label.toLowerCase();
+    const count = chosen.length;
+    const commands: SelectionCommand[] = [];
+    if (count === 1 && inspect)
+      commands.push({
+        id: "open",
+        label: `Open details for ${nameOf(chosen[0])}`,
+        run: () => setOpenId(chosen[0].id, { replace: true }),
+      });
+    commands.push(
+      ...(selectionCommands?.(chosen.map((row) => row.id)) ?? []),
+      {
+        id: "copy-names",
+        label: `Copy the names of ${countOf(count, label)}`,
+        run: () => {
+          const text = chosen.map(nameOf).join("\n");
+          if (!navigator.clipboard)
+            return announce("Could not copy. Select the names in the list.");
+          navigator.clipboard
+            .writeText(text)
+            .then(() => announce(`Copied ${countOf(count, label)}.`))
+            .catch(() =>
+              announce("Could not copy. Select the names in the list."),
+            );
+        },
+      },
+      {
+        id: "clear",
+        label: `Clear the selection of ${countOf(count, label)}`,
+        run: clearSelection,
+      },
+    );
+    publishSelection(slot, { entity, noun, count, commands });
+    // the closures read the latest state through the setters; the snapshot depends on what is chosen
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected, rowsOnPage, selectable, selectionCommands, label, inspect]);
+  useEffect(() => () => publishSelection(slot, null), [slot]);
   const failure = catalogue.error ?? page.error;
   const status = denied
     ? ({ kind: "denied", message: denied } as const)

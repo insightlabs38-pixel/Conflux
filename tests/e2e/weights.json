@@ -3,6 +3,7 @@
   "isolated-mutation:approvals": 19.0,
   "isolated-mutation:artifact-preview": 18.0,
   "isolated-mutation:bulk-planner": 15.1,
+  "isolated-mutation:selection-commands": 10,
   "isolated-mutation:completeness": 21.4,
   "isolated-mutation:entity-grid": 27.8,
   "isolated-mutation:event-advanced": 10.2,

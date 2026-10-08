@@ -15,6 +15,7 @@
  *   recent commands, then registration order. No model, no randomness.
  */
 import type { RouteTarget } from "./routes";
+import type { SelectionSnapshot } from "./selection";
 
 export type CommandContext = {
   role: string;
@@ -35,6 +36,8 @@ export type CommandContext = {
   pinned: { id: string; entity: string; name: string }[];
   /** The saved views they opened lately (still existing, not pinned), newest first. */
   recentViews: { id: string; entity: string; name: string }[];
+  /** What is selected in the list in front of the person (lib/selection.ts), or null. */
+  selection: SelectionSnapshot | null;
   /** The roles the person holds here, the one being viewed as marked. */
   roles: { role: string; label: string; current: boolean }[];
   /** Everything else a command may need is handed in by the shell as named capabilities. */

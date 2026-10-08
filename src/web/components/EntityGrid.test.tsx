@@ -7,6 +7,7 @@ import { createTestQueryClient, withRouter } from "../lib/test-router";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, useLocation } from "react-router";
 import { EntityGrid } from "./EntityGrid";
+import { currentSelection } from "../lib/selection";
 import { RealtimeProvider } from "../hooks/useRealtime";
 import { manualTransport, RealtimeHub } from "../lib/realtime";
 (
@@ -610,5 +611,53 @@ describe("live operations", () => {
     expect(container.querySelector(".cx-live")).toBeNull();
     await act(async () => root.unmount());
     window.localStorage.clear();
+  });
+});
+
+describe("selection commands", () => {
+  it("publishes the selected rows with their commands, adds the list's own and withdraws them with the selection", async () => {
+    const run: string[][] = [];
+    const { container, root } = await mount(
+      () => jsonResponse(200, page(ROWS)),
+      {
+        selectable: true,
+        rowLabel: (row) => String(row.username),
+        selectionCommands: (ids) => [
+          {
+            id: "x",
+            label: `Archive ${ids.length}`,
+            run: () => void run.push(ids),
+          },
+        ],
+      },
+    );
+    await until(() => container.querySelector("tbody tr") !== null);
+    expect(currentSelection()).toBeNull();
+    const box = (name: string) =>
+      container.querySelector(
+        `input[aria-label="Select ${name}"]`,
+      ) as HTMLInputElement;
+    await act(async () => box("ada").click());
+    expect(currentSelection()?.commands.map((c) => c.label)).toEqual([
+      "Open details for ada",
+      "Archive 1",
+      "Copy the names of 1 application",
+      "Clear the selection of 1 application",
+    ]);
+    await act(async () => box("ben").click());
+    const two = currentSelection()!;
+    expect(two.count).toBe(2);
+    expect(two.commands.map((c) => c.label)).toEqual([
+      "Archive 2",
+      "Copy the names of 2 applications",
+      "Clear the selection of 2 applications",
+    ]);
+    two.commands[0].run();
+    expect(run).toEqual([["1", "2"]]);
+    await act(async () => two.commands[2].run());
+    expect(currentSelection()).toBeNull();
+    await act(async () => box("ada").click());
+    await act(async () => root.unmount());
+    expect(currentSelection()).toBeNull(); // gone with the list
   });
 });

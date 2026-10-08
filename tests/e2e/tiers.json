@@ -54,6 +54,7 @@
     "approvals",
     "jobs",
     "bulk-planner",
+    "selection-commands",
     "entity-grid",
     "event-consequences",
     "event-modules",

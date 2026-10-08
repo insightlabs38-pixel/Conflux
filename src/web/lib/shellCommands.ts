@@ -70,6 +70,16 @@ registerCommandProvider((context) => {
   return commands;
 });
 
+registerCommandProvider((ctx) =>
+  (ctx.selection?.commands ?? []).map((command) => ({
+    id: `selection.${ctx.selection!.entity}.${command.id}`,
+    label: command.label,
+    group: `Selected ${ctx.selection!.noun}`,
+    keywords: ["selected", "selection", ctx.selection!.noun],
+    run: () => command.run(),
+  })),
+);
+
 registerCommandProvider(() => [
   {
     id: "live.on",

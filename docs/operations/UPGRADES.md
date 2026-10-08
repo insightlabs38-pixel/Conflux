@@ -198,3 +198,15 @@ No migration. Two small additive API changes (OpenAPI and both SDKs regenerated)
 - **Lists**: every list has a Details button that opens the record in an inspector beside the list (a sheet below 1024px); a link with row_<entity> reopens it.
 - **On a phone** the brand word hides so the event switcher keeps its room; the browser suite's `goToDestination` is unchanged.
 - Integrators: scripts that read the event lists will now see `phase`; clients that list a person's memberships may see several rows for one workspace (one per role), as before.
+
+## Moving to a build with the third slice of the application shell (PD-F005-B03)
+
+No migration and no API change. New device-local keys (versioned `conflux:v1:`): remembered columns, kept tabs, operations mode and live operations; they are cleared at sign-out. Unsaved edits in tabs are memory only.
+
+- **Columns**: the picker's choice for a list is remembered on this device; Reset columns forgets it. A saved view's own columns still win while it is open.
+- **Links**: lists put their sort and page in the address, and "Copy link to this view" (palette) copies exactly the view you are looking at, without the invite token or anything typed.
+- **Tabs**: "Keep this place open in a tab" (palette) keeps a place under the header; a place with unsaved changes (the event appearance form first) stays marked while you work elsewhere. Closing it or signing out asks first; a reload warns.
+- **Selected rows**: with rows selected, the palette offers commands for them, such as "Move 2 projects to <track>" which opens the usual preview.
+- **Live operations**: a button in a list's tools (or the palette) refreshes the list every 15 s and shows connection health and the age of the data; offline, row actions wait.
+- **Operations mode**: Account menu, or the palette, adds a second pane beside the page on displays 1800px wide or more (needs attention, recent actions, inbox).
+- Integrators: the browser suite gained `share-link`, `column-preferences`, `live-operations`, `workspace-tabs`, `operations-mode` (read-only) and `selection-commands` (isolated).

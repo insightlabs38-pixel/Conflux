@@ -27,6 +27,8 @@ import { roleLabel } from "../lib/roles";
 import { onShellOverlay, openShellOverlay } from "../lib/shellEvents";
 import { placeKey, shareableHref, shareableTarget } from "../lib/shareLink";
 import { useSelection } from "../lib/selection";
+import { firstOpsPanel } from "../lib/opsPanels";
+import "./opsPanels";
 import { announce } from "../lib/shellNotice";
 import {
   rememberCommand,
@@ -193,9 +195,9 @@ function CommandPalette({
           setOpsPane(
             user,
             on
-              ? role === "organizer" || role === "admin"
-                ? "attention"
-                : "inbox"
+              ? firstOpsPanel({
+                  organizer: role === "organizer" || role === "admin",
+                })
               : "",
           ),
         tabKept,

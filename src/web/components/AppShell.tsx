@@ -29,7 +29,9 @@ import { WorkspaceTabs } from "./WorkspaceTabs";
 import { useDraftGuard } from "./DraftGuard";
 import { OperationsHost } from "./OperationsPane";
 import { WIDE_DISPLAY_PX } from "../hooks/useWideDisplay";
-import { setOpsPane, useOpsPane, type OpsPane } from "../lib/shellPreferences";
+import { firstOpsPanel } from "../lib/opsPanels";
+import { setOpsPane, useOpsPane } from "../lib/shellPreferences";
+import "./opsPanels";
 import { SkipLink } from "./SkipLink";
 import { Icon, type IconName } from "./Icon";
 
@@ -150,7 +152,7 @@ function OperationsChoice() {
       <legend>Operations mode</legend>
       {[
         ["", "Off"],
-        [organizer ? "attention" : "inbox", "Second pane beside the page"],
+        [firstOpsPanel({ organizer }), "Second pane beside the page"],
       ].map(([value, text]) => (
         <label key={text}>
           <input
@@ -158,7 +160,7 @@ function OperationsChoice() {
             name="operations-mode"
             value={value}
             checked={value === "" ? pane === "" : pane !== ""}
-            onChange={() => setOpsPane(user, value as OpsPane | "")}
+            onChange={() => setOpsPane(user, value)}
           />{" "}
           {text}
         </label>

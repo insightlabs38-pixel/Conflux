@@ -247,3 +247,14 @@ Written while building PD-F005-B02 (this batch has no T00), against `design/app-
 - **Surfaces as closed.** web required (done), api reclassified for T01 and T02 (additive and read-only, tested, regenerated), audit (the audit log is read; nothing in the shell writes), search (palette and inspector read the entity query), docs; sdk regenerated; cli, mcp, event_as_code, webhook, archive and analytics unchanged.
 - **Open for B03.** Per-user column preferences, workspace-aware tabs that keep drafts, a multi-pane operations mode, selection-parameterised commands, live operations health and a route state that links an exact operational context; a per-user server store for the shell's device-local preferences remains an owner question.
 
+
+## PD-F005-B03 as built
+
+- **Columns (T01).** Device-local per person, workspace and list, through `shellPreferences` (the spec's standing decision; a server store would change only that file). Precedence: view, choice, defaults.
+- **Tabs and drafts (T02).** Deliberate state ownership: a form keeps its edits in `lib/drafts.ts` through `useDraft`, screens still unmount. Memory only because drafts are typed text; the shell asks before a close, a sign-out or a reload loses one. Tabs are validated router targets in `shellPreferences`.
+- **Operations mode (T03).** A contextual utility slot from 1800px with a panel registry (`lib/opsPanels.ts`); readiness, recent actions and inbox are the first panels (owner confirmed 2026-10-08: read-only, off by default, very wide only, a slot rather than a fixed set).
+- **Selection commands (T04).** `CommandContext.selection` from `lib/selection.ts`; commands start the list's own workflow.
+- **Live operations (T05).** The REALTIME hub and a 15 s live topic; `LiveStatus` is the one health line (also used by the pane).
+- **Route state (T06).** `sort_` and `page_` panel params and `lib/shareLink.ts`; Copy link command.
+- **Surfaces as closed.** web required (done); audit, reads only; search, palette commands; docs, VISUAL_FOUNDATION.md and UPGRADES.md; api, sdk, cli, mcp, event_as_code, webhook, archive, analytics not required and unchanged.
+- **Limitations.** Only the appearance form uses `useDraft`; only the projects grid supplies its own selection command; health is per list; the pane has no resize.

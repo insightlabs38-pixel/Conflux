@@ -388,17 +388,16 @@ export const useColumnPreference = (
  * keeps one thing in view while the person works. A device choice, off by default; the value names
  * what the pane watches. Stored only when on.
  */
-export type OpsPane = "attention" | "actions" | "inbox";
-export const OPS_PANES: readonly OpsPane[] = ["attention", "actions", "inbox"];
+export type OpsPane = string; // the id of a registered panel (lib/opsPanels.ts)
 
 export function opsPane(user: string): OpsPane | "" {
   if (!user) return "";
   const raw = storage()?.getItem(key(user, DEVICE, "ops-pane"));
-  return OPS_PANES.find((pane) => pane === raw) ?? "";
+  return raw && ID.test(raw) ? raw : ""; // whether it still exists is the registry's call
 }
 
 export function setOpsPane(user: string, pane: OpsPane | "") {
-  if (!user || (pane !== "" && !OPS_PANES.includes(pane))) return;
+  if (!user || (pane !== "" && !ID.test(pane))) return;
   try {
     if (pane) storage()?.setItem(key(user, DEVICE, "ops-pane"), pane);
     else storage()?.removeItem(key(user, DEVICE, "ops-pane"));

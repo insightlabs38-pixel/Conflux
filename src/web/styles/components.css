@@ -3714,11 +3714,11 @@ html {
 .cx-live__dot {
   width: 0.5rem;
   height: 0.5rem;
-  border-radius: 50%;
+  border-radius: var(--r-pill);
   background: currentColor;
 }
 .cx-live[data-tone="degraded"] .cx-live__dot {
-  border-radius: 1px;
+  border-radius: var(--r-1);
 }
 .cx-live[data-tone="offline"] .cx-live__dot {
   border-radius: 0;
@@ -3768,7 +3768,7 @@ html {
   font-weight: 600;
 }
 .cx-tabs__dirty {
-  font-size: 0.75em;
+  font-size: var(--fs-12);
 }
 .cx-tabs button {
   min-width: 2.75rem;
@@ -3792,13 +3792,13 @@ html {
   }
 }
 /* Operations mode: a second pane from 1800px, never stretched (design D-009). */
-.cx-shell--workspace:has(> .cx-ops) {
+.cx-shell--workspace:has(> .cx-opspane) {
   grid-template-columns: var(--w-rail) minmax(0, 1fr) 26rem;
 }
-.cx-shell--workspace:has(> .cx-ops) > .cx-tabs {
+.cx-shell--workspace:has(> .cx-opspane) > .cx-tabs {
   grid-column: 2 / -1;
 }
-.cx-ops {
+.cx-opspane {
   grid-column: 3;
   grid-row: 2 / -1;
   padding: var(--sp-4);
@@ -3807,42 +3807,42 @@ html {
   font-size: var(--fs-14);
   overflow-wrap: anywhere;
 }
-.cx-ops__head {
+.cx-opspane__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--sp-3);
 }
-.cx-ops h2 {
+.cx-opspane h2 {
   margin: 0;
-  font-size: var(--fs-16, 1rem);
+  font-size: var(--fs-16);
 }
-.cx-ops__choice {
+.cx-opspane__choice {
   display: flex;
   flex-wrap: wrap;
   gap: var(--sp-1);
   margin: var(--sp-3) 0;
 }
-.cx-ops__choice button[aria-pressed="true"] {
+.cx-opspane__choice button[aria-pressed="true"] {
   font-weight: 600;
   text-decoration: underline;
 }
-.cx-ops__list {
+.cx-opspane__list {
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.cx-ops__list li {
+.cx-opspane__list li {
   display: flex;
   justify-content: space-between;
   gap: var(--sp-3);
   padding: var(--sp-1) 0;
   border-bottom: 1px solid var(--line);
 }
-.cx-ops__list li[data-unread] > span:first-child {
+.cx-opspane__list li[data-unread] > span:first-child {
   font-weight: 600;
 }
-.cx-ops summary {
+.cx-opspane summary {
   display: flex;
   align-items: center;
   min-height: 2.75rem;

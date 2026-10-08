@@ -1,0 +1,64 @@
+version: 3
+task: PD-F005-B03-T91
+batch: PD-F005-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 6babeb5
+  head_commit: null
+changed_paths:
+- docs/verification/PD-F005-B03/SURFACES.md
+- docs/operations/VISUAL_FOUNDATION.md
+- docs/operations/UPGRADES.md
+- docs/product-depth-v3/specs/005-professional-application-shell-depth.md
+deliverables:
+- item: Surface matrix closed, no undocumented skip
+  result: pass
+  evidence: docs/verification/PD-F005-B03/SURFACES.md closes every surface of spec 005 - web, audit, search and docs done; the rest not required, with no API, SDK or stored server value changed
+- item: Every required surface delegates to the same canonical operation
+  result: pass
+  evidence: the shell reads existing endpoints and hooks (readiness, audit, inbox, entity query); commands start existing workflows; one preference store, one command registry, one route model
+- item: User, operator and developer documentation and migration notes
+  result: pass
+  evidence: VISUAL_FOUNDATION.md third slice for developers, UPGRADES.md for people and integrators (no migration), spec 005 "PD-F005-B03 as built"
+invariants:
+- item: No second source of truth
+  result: pass
+  evidence: shellPreferences for every remembered value, lib/shareLink.ts for every shareable address, lib/opsPanels.ts and lib/commands.ts as the only registries
+verification:
+- command: npx prettier --check docs src/web tests/e2e
+  result: pass
+  note: formatting; behaviour verified in T90 on the same code
+- command: python3 scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid, 331 batches, 3110 tasks
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: see T90 matrix
+- ref: design/state-matrix
+  result: pass
+  note: see T90 matrix
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: T90
+- surface: audit
+  result: pass
+  evidence: SURFACES.md
+- surface: search
+  result: pass
+  evidence: SURFACES.md
+- surface: docs
+  result: pass
+  evidence: files above
+migrations: []
+findings: []
+escalations: []
+limitations:
+- The ROUTER and COMMANDS owner tasks in PD-F071 still list those primitives as PLANNED; they must adopt routes.ts, urlState.ts and commands.ts as recorded in ESC-20260930-007.
+next: review

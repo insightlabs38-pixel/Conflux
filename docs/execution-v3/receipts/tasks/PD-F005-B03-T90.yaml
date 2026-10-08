@@ -1,0 +1,82 @@
+version: 3
+task: PD-F005-B03-T90
+batch: PD-F005-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: verification
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 6babeb5
+  head_commit: null
+changed_paths:
+- docs/verification/PD-F005-B03/MATRIX.md
+- docs/verification/PD-F005-B03/T90-verify-fast.log
+- docs/verification/PD-F005-B03/T90-e2e-fast.log
+- src/web/styles/components.css
+- src/web/components/OperationsPane.tsx
+- src/web/components/opsPanels.tsx
+- src/web/lib/opsPanels.ts
+- src/web/lib/opsPanels.test.ts
+- src/web/lib/shellPreferences.ts
+- src/web/components/AppShell.tsx
+- src/web/components/CommandPalette.tsx
+deliverables:
+- item: Verification matrix for the six capability tasks
+  result: pass
+  evidence: docs/verification/PD-F005-B03/MATRIX.md links T01-T06 to unit, browser and negative proofs and to each product change
+- item: Positive, negative, authorization, lifecycle cases
+  result: pass
+  evidence: the matrix and its cross-cutting section - no server change, device-local keys validated and cleared at sign-out, drafts memory only, organizer-only panels, selection commands that still open the previewed bulk planner
+- item: UI states
+  result: pass
+  evidence: desktop and mobile projects for every spec, the pane at 1920 and absent at 1440, offline, degraded, loading, empty and error states in component or browser tests, axe where each surface renders
+- item: Exact commands and results recorded
+  result: pass
+  evidence: T90-verify-fast.log and T90-e2e-fast.log
+invariants:
+- item: No gate weakened
+  result: pass
+  evidence: no assertion, timeout or budget changed to get green; the visual ratchets were satisfied by using scale tokens in new CSS; flaky palette-driven specs now wait for the option instead of retrying
+verification:
+- command: make verify-fast
+  result: pass
+  note: run alone - format, ruff, 2955 pytest passed (34 skipped), 827 vitest in 150 files, build, openapi, sdk and block-schema checks
+- command: make e2e-fast
+  result: pass
+  note: run alone after verify-fast on the final code - read-only 332 passed, every isolated spec ok including selection-commands, the canary chain ok. An earlier run of the same command failed slop-audit (nested card) and was fixed, see findings
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: see the matrix
+- ref: design/state-matrix
+  result: pass
+  note: see the matrix
+- ref: design/responsive-wide
+  result: pass
+  note: operations pane from 1800px, fixed width, absent below
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: matrix
+- surface: audit
+  result: pass
+  evidence: reads only
+- surface: search
+  result: pass
+  evidence: palette commands
+- surface: docs
+  result: pass
+  evidence: T91
+migrations: []
+findings:
+- P1-in-scope the operations pane class cx-ops collided with the existing operations overview, restyling it and failing slop-audit (nested card); the pane is now cx-opspane and the audit passes
+- P1-in-scope the first share-link allowlist let typed text through; an explicit key list replaced it before T06 closed
+- P3 hooks added to AppShell's body broke shells with no query client; moved into a child rendered only for workspace shells
+- P3 visual ratchets rejected raw sizes and radii in new CSS; scale tokens used
+escalations: []
+limitations:
+- Dialogs and open disclosures are still not walked by the slop audit; the new dialogs are covered by their own specs and axe checks.
+- The seeded demo has one event per workspace, so tab labels with several events are covered in component tests only.
+next: review

@@ -43,6 +43,8 @@ export type CommandContext = {
     setTheme: (theme: "system" | "light" | "dark") => void;
     setDensity: (density: "comfortable" | "compact" | "high") => void;
     openShortcuts: () => void;
+    /** Copy the address that reopens exactly this view (event, section, saved view, sort, page, record). */
+    copyLink: () => void;
     /** Open the read-only preview as a participant, a judge or the public. */
     openPreview: (role: "participant" | "judge" | "public") => void;
   }>;

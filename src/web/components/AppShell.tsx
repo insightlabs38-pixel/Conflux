@@ -24,6 +24,7 @@ import { CommandPaletteButton } from "./CommandPalette";
 import { ShellShortcuts } from "./ShortcutsHelp";
 import { onShellOverlay, openShellOverlay } from "../lib/shellEvents";
 import { PreviewAsDialog } from "./PreviewAsDialog";
+import { ShellNotice } from "./ShellNotice";
 import { SkipLink } from "./SkipLink";
 import { Icon, type IconName } from "./Icon";
 
@@ -235,6 +236,7 @@ export function AppShell({
       {destinations && <ThemeApplier />}
       {destinations && <ShellShortcuts />}
       {destinations && <PreviewAsHost />}
+      {destinations && <ShellNotice />}
       <SkipLink targetId={MAIN_ID} />
       <header className="cx-shell__header">
         <Brand className="cx-shell__brand">

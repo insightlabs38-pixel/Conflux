@@ -92,16 +92,31 @@ export function EntityGrid({
   const description = catalogue.data?.find((e) => e.key === entity) ?? null;
 
   const [filter, setFilter] = useState<FilterNode | null>(null);
-  const [sort, setSort] = useState("");
+  // The list's sort and page are panel state (lib/urlState.ts): fixed names, never typed text, so a
+  // link reproduces the list exactly. Changing the sort goes back to the first page.
+  const [sortParam, setSortParam] = useUrlParam(`sort_${entity}`, {
+    clears: [`page_${entity}`],
+  });
+  const [pageParam, setPageParam] = useUrlParam(`page_${entity}`);
   const [visible, setVisible] = useState<string[]>([]);
   const [density, setDensity] = useState<GridDensity>("comfortable");
-  const [offset, setOffset] = useState(0);
+  const requestedPage = /^[0-9]{1,6}$/.test(pageParam) ? Number(pageParam) : 1;
   const [selected, setSelected] = useState<Set<string>>(new Set());
   // The record open in the inspector is panel state: a public id in the URL (`row_<entity>`), replaced
   // rather than pushed, so Back leaves the page instead of stepping through every record looked at.
   const [openId, setOpenId] = useUrlParam(`row_${entity}`);
 
   const fields = description?.fields ?? [];
+  // the URL is a request: only a field this list can sort by is honoured, anything else is ignored
+  const sortable = new Set(fields.filter((f) => f.sortable).map((f) => f.key));
+  const sort =
+    sortParam && sortable.has(sortParam.replace(/^-/, "")) ? sortParam : "";
+  const setSort = (value: string) => setSortParam(value, { replace: true });
+  const offset = requestedPage > 1 ? (requestedPage - 1) * PAGE_SIZE : 0;
+  const setOffset = (next: number) =>
+    setPageParam(next > 0 ? String(Math.floor(next / PAGE_SIZE) + 1) : "", {
+      replace: true,
+    });
   const shown = useMemo(
     () =>
       visible.length > 0
@@ -152,15 +167,24 @@ export function EntityGrid({
     setSelected(new Set());
     onSelect?.(new Set());
   };
-  const apply = useCallback((view: SavedView | null) => {
-    const query = view?.query;
-    setFilter(query?.filter ?? null);
-    setSort(query?.sort ?? "");
-    setVisible(query?.columns ?? []);
-    setDensity(query?.density ?? "comfortable");
-    setOffset(0);
-    setSelected(new Set());
-  }, []);
+  // A view opened by a link that also names a sort keeps that sort over the view's own default;
+  // choosing a view by hand applies the view's sort as before.
+  const sortRef = useRef(sortParam);
+  sortRef.current = sortParam;
+  const apply = useCallback(
+    (view: SavedView | null, fromLink = false) => {
+      const query = view?.query;
+      setFilter(query?.filter ?? null);
+      if (!(fromLink && sortRef.current)) setSort(query?.sort ?? "");
+      setVisible(query?.columns ?? []);
+      setDensity(query?.density ?? "comfortable");
+      setOffset(0);
+      setSelected(new Set());
+    },
+    // the setters only call the URL setters, which are stable
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
   const current: ViewDefinition = { filter, sort, columns: visible, density };
 
   const columns: GridColumn<EntityRow>[] = shown.map((field) => ({

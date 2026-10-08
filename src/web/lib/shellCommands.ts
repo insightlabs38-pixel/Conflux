@@ -143,6 +143,17 @@ registerCommandProvider((context) =>
 
 registerCommandProvider(() => [
   {
+    id: "link.copy",
+    label: "Copy link to this view",
+    group: "Share",
+    keywords: ["share", "url", "address", "link", "copy"],
+    when: (ctx) => !!ctx.capabilities.copyLink,
+    run: (ctx) => ctx.capabilities.copyLink?.(),
+  },
+]);
+
+registerCommandProvider(() => [
+  {
     id: "help.shortcuts",
     label: "Show keyboard shortcuts",
     group: "Help",

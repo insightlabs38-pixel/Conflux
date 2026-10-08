@@ -25,6 +25,8 @@ import {
 import "../lib/shellCommands";
 import { roleLabel } from "../lib/roles";
 import { onShellOverlay, openShellOverlay } from "../lib/shellEvents";
+import { shareableHref } from "../lib/shareLink";
+import { announce } from "../lib/shellNotice";
 import {
   rememberCommand,
   setDensityPreference,
@@ -172,6 +174,21 @@ function CommandPalette({
         setTheme: (theme) => setThemePreference(user, theme),
         setDensity: (density) => setDensityPreference(user, density),
         openShortcuts: () => openShellOverlay("shortcuts"),
+        copyLink: () => {
+          const href = shareableHref(
+            window.location.pathname,
+            window.location.search,
+            window.location.origin,
+          );
+          if (!href) return announce("There is no link to copy for this page.");
+          const failed = () =>
+            announce("Could not copy. The link is in the address bar.");
+          if (!navigator.clipboard) return failed();
+          navigator.clipboard
+            .writeText(href)
+            .then(() => announce("Link copied."))
+            .catch(failed);
+        },
         openPreview: (who) => openShellOverlay("preview", who),
       },
     }),

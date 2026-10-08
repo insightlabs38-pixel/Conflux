@@ -48,6 +48,7 @@
   "read-only:record-picker": 6,
   "read-only:slop-audit": 220,
   "read-only:uiv2-surfaces": 165,
+  "read-only:share-link": 3,
   "read-only:url-state": 3.1,
   "read-only:visual-foundation": 5.6,
   "read-only:workspace-shell": 40.7,

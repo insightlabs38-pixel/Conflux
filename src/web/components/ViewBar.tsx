@@ -36,7 +36,7 @@ export function ViewBar({
   entity: string;
   current: ViewDefinition;
   /** A view was chosen (or cleared: null): show the list as that definition. */
-  onApply: (view: SavedView | null) => void;
+  onApply: (view: SavedView | null, fromLink?: boolean) => void;
 }) {
   const base = viewsBase(workspaceId, eventId);
   const load = useSavedViews(base, entity);
@@ -73,7 +73,7 @@ export function ViewBar({
   useEffect(() => {
     if (selected && applied !== selected.public_id) {
       setApplied(selected.public_id);
-      onApply(selected);
+      onApply(selected, true); // opened from a link or a reload, not chosen here
     }
   }, [selected, applied, onApply]);
 

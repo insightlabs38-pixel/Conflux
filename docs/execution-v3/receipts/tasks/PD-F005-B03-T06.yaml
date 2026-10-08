@@ -1,0 +1,78 @@
+version: 3
+task: PD-F005-B03-T06
+batch: PD-F005-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: cd96ee9
+  head_commit: null
+changed_paths:
+- src/web/lib/shareLink.ts
+- src/web/lib/shareLink.test.ts
+- src/web/lib/shellNotice.ts
+- src/web/lib/shellCommands.ts
+- src/web/lib/commands.ts
+- src/web/components/ShellNotice.tsx
+- src/web/components/AppShell.tsx
+- src/web/components/CommandPalette.tsx
+- src/web/components/CommandPalette.test.tsx
+- src/web/components/EntityGrid.tsx
+- src/web/components/EntityGrid.test.tsx
+- src/web/components/ViewBar.tsx
+- src/web/styles/components.css
+- tests/e2e/share-link.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: A link reproduces the exact operational context
+  result: pass
+  evidence: a list's sort and page are now URL panel params (sort_<entity>, page_<entity>) next to the existing event, stage, plan, role, section, saved view and open record; a link with a sort opens the list in that order, a sort the list cannot honour is ignored, and a saved view opened by a link keeps the link's sort over the view's default
+- item: Copy link to this view
+  result: pass
+  evidence: palette command (group Share, capability copyLink) copies an address rebuilt from the parsed location through lib/shareLink.ts, announces Link copied. in a polite status region, or says plainly when the clipboard is unavailable or the page has no shareable address
+invariants:
+- item: One source of truth, no credential or typed text in a link
+  result: pass
+  evidence: the link is rebuilt with the canonical ROUTER target builder from an allowlist of the keys the app writes (as, stage, plan, event, sort_/page_/row_/view_); the single-use invite token and typed text such as q are dropped. A first version kept any safe-looking key, so q=ada leaked into the copied link; the unit and browser tests caught it and the allowlist fixed it
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 146 files, 810 tests (shareLink 4, palette copy link 2, EntityGrid sort and page 2)
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts share-link (stack rebuilt with make up first)
+  result: pass
+  note: 2 passed, desktop and mobile projects - deep link with sort shows the sort, palette copies the clean address (no invite, no q), the copied link reopens the same list, an unknown sort is ignored
+- command: make format-check lint
+  result: pass
+  note: prettier, ruff, tsc for web and embed, e2e tier classification all clean
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: the copy command lives in the palette as one more command group; the notice is a small status line, no new chrome
+- ref: design/state-matrix
+  result: pass
+  note: success, no clipboard and no shareable page each have their own sentence
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: audit
+  result: pass
+  evidence: reads only, nothing is recorded
+- surface: search
+  result: pass
+  evidence: the command is found by link, share, url, copy, address
+- surface: docs
+  result: pass
+  evidence: developer note and release note at T91
+migrations: []
+findings:
+- P3 supervisor.py gained a --duration-hours option in the same working tree from an earlier session; unrelated, committed separately.
+escalations: []
+limitations:
+- A link names ids and fixed values only; filter text and unsaved column choices are not in it (save a view to share those).
+- Only the list's sort, page and record are panel state so far; other panels register their params when they adopt useUrlParam.
+next: review

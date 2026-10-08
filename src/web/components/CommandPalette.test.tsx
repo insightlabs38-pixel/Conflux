@@ -225,6 +225,7 @@ describe("command palette", () => {
       "Go to",
       "Events",
       "Appearance",
+      "Share",
       "Help",
       "Account",
     ]);
@@ -489,5 +490,44 @@ describe("recent actions and recent views", () => {
     expect(groups()).toContain("Pinned views");
     expect(groups()).not.toContain("Recent views"); // already pinned, shown once
     await act(async () => pinned.root.unmount());
+  });
+});
+
+describe("copy link", () => {
+  it("copies the exact context without the invite token and says so", async () => {
+    const written: string[] = [];
+    vi.stubGlobal("navigator", {
+      ...navigator,
+      clipboard: { writeText: async (text: string) => void written.push(text) },
+    });
+    const { root } = await render(
+      "organizer",
+      "/w/w/participants?event=e1&section=ProjectsGrid&sort_projects=-name&invite=SECRET&q=ada",
+    );
+    await open();
+    await type("copy link");
+    await key("Enter");
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    });
+    expect(written).toEqual([
+      `${window.location.origin}/w/w/participants?event=e1&sort_projects=-name&section=ProjectsGrid`,
+    ]);
+    expect(document.querySelector(".cx-notice")?.textContent).toBe(
+      "Link copied.",
+    );
+    await act(async () => root.unmount());
+  });
+
+  it("says when it cannot copy instead of failing quietly", async () => {
+    vi.stubGlobal("navigator", { ...navigator, clipboard: undefined });
+    const { root } = await render("organizer", "/w/w/overview?event=e1");
+    await open();
+    await type("copy link");
+    await key("Enter");
+    expect(document.querySelector(".cx-notice")?.textContent).toContain(
+      "Could not copy",
+    );
+    await act(async () => root.unmount());
   });
 });

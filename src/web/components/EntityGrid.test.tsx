@@ -448,3 +448,43 @@ describe("EntityGrid inspector", () => {
     await act(async () => root.unmount());
   });
 });
+
+describe("EntityGrid sort and page in the URL", () => {
+  afterEach(() => {
+    document.body.innerHTML = "";
+  });
+  const lastQuery = (pages: Record<string, string>[]) => pages.at(-1)!;
+
+  it("reads the sort and page a link names, asks the server for them, and ignores what it cannot honour", async () => {
+    const { pages, root } = await mountAt(
+      "/w/w/participants?sort_applications=-username&page_applications=3",
+    );
+    await until(() => pages.length > 0);
+    expect(lastQuery(pages)).toMatchObject({
+      sort: "-username",
+      offset: "50",
+      limit: "25",
+    });
+    await act(async () => root.unmount());
+    document.body.innerHTML = "";
+    const bad = await mountAt(
+      "/w/w/participants?sort_applications=password&page_applications=abc",
+    );
+    await until(() => bad.pages.length > 0);
+    expect(lastQuery(bad.pages).sort).toBeUndefined(); // not a sortable field: ignored
+    expect(lastQuery(bad.pages).offset).toBeUndefined(); // not a page number: the first page
+    await act(async () => bad.root.unmount());
+  });
+
+  it("writes a chosen sort to the URL (replacing, back to the first page) so a link reproduces the list", async () => {
+    const { container, root } = await mountAt(
+      "/w/w/participants?page_applications=2",
+    );
+    await until(() => container.querySelector("th button") !== null);
+    await act(async () =>
+      container.querySelector<HTMLButtonElement>("th button")!.click(),
+    );
+    expect(search()).toBe("?sort_applications=username"); // the page param was cleared with the sort
+    await act(async () => root.unmount());
+  });
+});

@@ -82,6 +82,25 @@ registerCommandProvider((ctx) =>
 
 registerCommandProvider(() => [
   {
+    id: "ops.on",
+    label: "Turn on operations mode",
+    group: "Appearance",
+    keywords: ["operations", "ops", "pane", "second", "wide", "monitor"],
+    when: (ctx) => !!ctx.capabilities.setOpsMode && !ctx.capabilities.opsMode,
+    run: (ctx) => ctx.capabilities.setOpsMode?.(true),
+  },
+  {
+    id: "ops.off",
+    label: "Turn off operations mode",
+    group: "Appearance",
+    keywords: ["operations", "ops", "pane", "second", "wide", "monitor"],
+    when: (ctx) => !!ctx.capabilities.setOpsMode && !!ctx.capabilities.opsMode,
+    run: (ctx) => ctx.capabilities.setOpsMode?.(false),
+  },
+]);
+
+registerCommandProvider(() => [
+  {
     id: "tab.keep",
     label: "Keep this place open in a tab",
     group: "Go to",

@@ -46,6 +46,9 @@ export type CommandContext = {
     setTheme: (theme: "system" | "light" | "dark") => void;
     setDensity: (density: "comfortable" | "compact" | "high") => void;
     openShortcuts: () => void;
+    /** Whether operations mode (the second pane) is on, and the switch for it. */
+    opsMode: boolean;
+    setOpsMode: (on: boolean) => void;
     /** Whether this place is kept open in a tab, and the switch for it. */
     tabKept: boolean;
     setTabKept: (kept: boolean) => void;

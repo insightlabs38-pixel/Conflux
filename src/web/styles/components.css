@@ -3778,3 +3778,73 @@ html {
   color: inherit;
   cursor: pointer;
 }
+
+/* Tabs sit under the header across the page and its second pane. */
+.cx-shell--workspace > .cx-tabs {
+  grid-column: 2 / -1;
+}
+.cx-shell--workspace:has(> .cx-tabs) > .cx-sidebar {
+  grid-row: 2 / span 2;
+}
+@media (max-width: 63.9375rem) {
+  .cx-shell--workspace > .cx-tabs {
+    grid-column: 1;
+  }
+}
+/* Operations mode: a second pane from 1800px, never stretched (design D-009). */
+.cx-shell--workspace:has(> .cx-ops) {
+  grid-template-columns: var(--w-rail) minmax(0, 1fr) 26rem;
+}
+.cx-shell--workspace:has(> .cx-ops) > .cx-tabs {
+  grid-column: 2 / -1;
+}
+.cx-ops {
+  grid-column: 3;
+  grid-row: 2 / -1;
+  padding: var(--sp-4);
+  border-left: 1px solid var(--color-border);
+  background: var(--color-surface-raised);
+  font-size: var(--fs-14);
+  overflow-wrap: anywhere;
+}
+.cx-ops__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.cx-ops h2 {
+  margin: 0;
+  font-size: var(--fs-16, 1rem);
+}
+.cx-ops__choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-1);
+  margin: var(--sp-3) 0;
+}
+.cx-ops__choice button[aria-pressed="true"] {
+  font-weight: 600;
+  text-decoration: underline;
+}
+.cx-ops__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cx-ops__list li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-1) 0;
+  border-bottom: 1px solid var(--line);
+}
+.cx-ops__list li[data-unread] > span:first-child {
+  font-weight: 600;
+}
+.cx-ops summary {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  cursor: pointer;
+}

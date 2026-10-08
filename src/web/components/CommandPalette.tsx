@@ -32,6 +32,8 @@ import {
   rememberCommand,
   setDensityPreference,
   setLiveOperations,
+  setOpsPane,
+  useOpsPane,
   setWorkspaceTabs,
   useLiveOperations,
   useWorkspaceTabs,
@@ -120,6 +122,7 @@ function CommandPalette({
   const user = useMe().data?.public_id ?? "";
   const live = useLiveOperations(user);
   const selection = useSelection();
+  const opsPane = useOpsPane(user);
   const kept = useWorkspaceTabs(user, navigation.workspaceId);
   const here = shareableTarget(location.pathname, location.search);
   const tabKept = !!here && kept.some((to) => placeKey(to) === placeKey(here));
@@ -185,6 +188,16 @@ function CommandPalette({
         setTheme: (theme) => setThemePreference(user, theme),
         setDensity: (density) => setDensityPreference(user, density),
         openShortcuts: () => openShellOverlay("shortcuts"),
+        opsMode: opsPane !== "",
+        setOpsMode: (on) =>
+          setOpsPane(
+            user,
+            on
+              ? role === "organizer" || role === "admin"
+                ? "attention"
+                : "inbox"
+              : "",
+          ),
         tabKept,
         setTabKept: (on) => {
           if (!here) return;
@@ -222,6 +235,7 @@ function CommandPalette({
       onSignOut,
       user,
       live,
+      opsPane,
       selection,
       kept,
       here,

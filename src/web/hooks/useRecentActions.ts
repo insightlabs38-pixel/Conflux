@@ -58,5 +58,7 @@ export function useRecentActions(
   return {
     actions: Array.isArray(query.data) ? query.data : [],
     failed: query.isError,
+    reload: () => query.refetch(),
+    updatedAt: query.dataUpdatedAt || null,
   };
 }

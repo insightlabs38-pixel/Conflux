@@ -80,5 +80,6 @@ export function useInbox(workspaceId: string, { live = true } = {}) {
     error: actionError || loadError,
     markRead,
     reload: () => inbox.refetch(),
+    updatedAt: inbox.dataUpdatedAt || null,
   };
 }

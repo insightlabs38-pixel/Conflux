@@ -556,3 +556,25 @@ describe("live operations", () => {
     window.localStorage.clear();
   });
 });
+
+describe("operations mode", () => {
+  it("is offered as the opposite of its state and stores which pane it opens", async () => {
+    window.localStorage.clear();
+    const { root } = await render("organizer", "/w/w/overview?event=e1");
+    await open();
+    await type("operations mode");
+    expect(document.body.textContent).toContain("Turn on operations mode");
+    await key("Enter");
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    });
+    expect(window.localStorage.getItem("conflux:v1:u1:device:ops-pane")).toBe(
+      "attention",
+    );
+    await open();
+    await type("operations mode");
+    expect(document.body.textContent).toContain("Turn off operations mode");
+    await act(async () => root.unmount());
+    window.localStorage.clear();
+  });
+});

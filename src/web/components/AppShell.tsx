@@ -27,6 +27,9 @@ import { PreviewAsDialog } from "./PreviewAsDialog";
 import { ShellNotice } from "./ShellNotice";
 import { WorkspaceTabs } from "./WorkspaceTabs";
 import { useDraftGuard } from "./DraftGuard";
+import { OperationsHost } from "./OperationsPane";
+import { WIDE_DISPLAY_PX } from "../hooks/useWideDisplay";
+import { setOpsPane, useOpsPane, type OpsPane } from "../lib/shellPreferences";
 import { SkipLink } from "./SkipLink";
 import { Icon, type IconName } from "./Icon";
 
@@ -132,6 +135,38 @@ function DensityChoice() {
           {label}
         </label>
       ))}
+    </fieldset>
+  );
+}
+
+function OperationsChoice() {
+  const user = useMe().data?.public_id ?? "";
+  const navigation = useWorkspaceNavigation();
+  const pane = useOpsPane(user);
+  const organizer =
+    navigation?.role === "organizer" || navigation?.role === "admin";
+  return (
+    <fieldset className="cx-account__theme">
+      <legend>Operations mode</legend>
+      {[
+        ["", "Off"],
+        [organizer ? "attention" : "inbox", "Second pane beside the page"],
+      ].map(([value, text]) => (
+        <label key={text}>
+          <input
+            type="radio"
+            name="operations-mode"
+            value={value}
+            checked={value === "" ? pane === "" : pane !== ""}
+            onChange={() => setOpsPane(user, value as OpsPane | "")}
+          />{" "}
+          {text}
+        </label>
+      ))}
+      <p className="cx-metadata">
+        Needs a display {WIDE_DISPLAY_PX}px wide or more; it watches what needs
+        attention, your recent actions or your inbox.
+      </p>
     </fieldset>
   );
 }
@@ -323,6 +358,7 @@ export function AppShell({
               <PreviewAsMenu />
               <ThemeChoice />
               <DensityChoice />
+              <OperationsChoice />
               <button
                 type="button"
                 className="cx-account__link cx-account__shortcuts"
@@ -442,6 +478,7 @@ export function AppShell({
       <main id={MAIN_ID} className="cx-shell__main" tabIndex={-1}>
         {children}
       </main>
+      {destinations && <OperationsHost />}
     </div>
   );
 }

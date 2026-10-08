@@ -78,6 +78,9 @@ test("selected projects are offered to the palette as commands that open the pre
 
   // clearing the selection from the palette withdraws the commands
   await palette("Clear the selection");
+  await expect(
+    page.getByRole("option", { name: /Clear the selection of 2 projects/ }),
+  ).toBeVisible();
   await page.keyboard.press("Enter");
   await expect(panel.getByLabel(`Select ${first.name}`)).not.toBeChecked();
   await palette("Palette track");

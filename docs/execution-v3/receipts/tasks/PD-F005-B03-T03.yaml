@@ -1,0 +1,80 @@
+version: 3
+task: PD-F005-B03-T03
+batch: PD-F005-B03
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: ui-implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: a6fc08c
+  head_commit: null
+changed_paths:
+- src/web/components/OperationsPane.tsx
+- src/web/components/AppShell.tsx
+- src/web/components/CommandPalette.tsx
+- src/web/components/CommandPalette.test.tsx
+- src/web/hooks/useWideDisplay.ts
+- src/web/hooks/useRecentActions.ts
+- src/web/hooks/useInbox.ts
+- src/web/lib/shellPreferences.ts
+- src/web/lib/commands.ts
+- src/web/lib/shellCommands.ts
+- src/web/styles/components.css
+- tests/e2e/operations-mode.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+- tests/e2e/workspace-tabs.spec.ts
+- tests/e2e/share-link.spec.ts
+- tests/e2e/selection-commands.spec.ts
+deliverables:
+- item: Multi-pane operations mode for large desktop displays
+  result: pass
+  evidence: a device choice (account menu Operations mode, palette Turn on/off operations mode), off by default. From 1800px wide the workspace gains a 26rem pane beside the page (rail, page, pane; tabs span page and pane); it watches what needs attention (the readiness list, ReadinessPanel as the Setup page uses it), the person's own recent actions (audit log) or the inbox, chosen in the pane, with the live health line of T05 and refreshes on the 15 s live topic. Below 1800px it is not rendered at all (no hidden fetching) and returns when the display widens
+- item: Wide displays add information, not chrome
+  result: pass
+  evidence: nothing changes until it is turned on; the page keeps its place and width and the pane is fixed, never stretched (D-009); read-only
+invariants:
+- item: No second source of truth, no new data
+  result: pass
+  evidence: every panel is an existing hook (useReadiness, useRecentActions, useInbox); the pane stores only which panel it shows, through shellPreferences
+- item: Roles
+  result: pass
+  evidence: attention and recent actions are offered to organizers and admins (the endpoints' own rule); every role may watch the inbox
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 149 files, 826 tests (palette operations-mode command and stored pane; the existing shell tests pass after keeping the new hooks out of AppShell's body so public shells need no query client)
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts workspace-tabs operations-mode share-link --project=desktop --repeat-each 4 (stack rebuilt first)
+  result: pass
+  note: 20 of 20 at 1920x1080 and 1440 - off by default, pane beside the page not over it and at most 430px wide, choice of panel, absent at 1440 and back at 1920, survives reload, close pane turns it off, palette on and off, axe clean and no overflow; screenshot reviewed (tests/e2e/artifacts/operations-mode-1920.png)
+design_refs:
+- ref: design/app-shell
+  result: pass
+  note: Ledger hierarchy kept; the pane is one column of plain text and one existing panel, no cards; D-009 breakpoint 1800 and fixed width
+- ref: design/state-matrix
+  result: pass
+  note: no event chosen, loading, empty, error with retry, live health and data age in every panel
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: audit
+  result: pass
+  evidence: reads only; the recent actions panel shows the existing audit log
+- surface: search
+  result: pass
+  evidence: palette commands found by operations, ops, pane, second, wide, monitor
+- surface: docs
+  result: pass
+  evidence: developer note and release note at T91
+migrations: []
+findings:
+- P2 the design leaves the content of the Ops second pane undocumented; decided as a read-only pane over three existing reads and logged for the owner in QUESTIONS.md.
+- P3 an earlier flake in four palette-driven specs (Enter pressed before the option appeared) was fixed in the specs, not by weakening an assertion.
+escalations: []
+limitations:
+- One pane, three panels; two places side by side and user-chosen panels are not built.
+- The pane's width is fixed; there is no drag to resize.
+next: review

@@ -36,6 +36,11 @@ test("an unsaved appearance edit waits in its tab while the person works elsewhe
 
   // elsewhere: the tab stays, marked
   await goToDestination(page, "overview");
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({
+    path: "tests/e2e/artifacts/workspace-tabs.png",
+    clip: { x: 0, y: 0, width: 1280, height: 220 },
+  });
   await expect(tabs).toContainText("unsaved changes");
   await noHorizontalOverflow(page);
   await accessible(page);
@@ -90,6 +95,9 @@ test("a place kept open from the palette survives a reload and reopens where it 
   await page.locator("main").focus();
   await page.keyboard.press("Control+k");
   await page.getByRole("dialog").getByRole("combobox").fill("keep this place");
+  await expect(
+    page.getByRole("option", { name: "Keep this place open in a tab" }),
+  ).toBeVisible();
   await page.keyboard.press("Enter");
   const tabs = page.getByRole("navigation", { name: "Open places" });
   await expect(tabs).toContainText("Participants");
@@ -102,6 +110,9 @@ test("a place kept open from the palette survives a reload and reopens where it 
   await page.locator("main").focus();
   await page.keyboard.press("Control+k");
   await page.getByRole("dialog").getByRole("combobox").fill("close this place");
+  await expect(
+    page.getByRole("option", { name: "Close this place's tab" }),
+  ).toBeVisible();
   await page.keyboard.press("Enter");
   await expect(tabs).toHaveCount(0);
 });

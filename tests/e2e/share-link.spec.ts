@@ -33,6 +33,9 @@ test("a link with a sort reproduces the list, an unknown sort is ignored, and Co
   await page.locator("main").focus();
   await page.keyboard.press("Control+k");
   await page.getByRole("dialog").getByRole("combobox").fill("copy link");
+  await expect(
+    page.getByRole("option", { name: "Copy link to this view" }),
+  ).toBeVisible();
   await page.keyboard.press("Enter");
   await expect(page.locator(".cx-notice")).toHaveText("Link copied.");
   const copied = await page.evaluate(() => navigator.clipboard.readText());

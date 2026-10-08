@@ -1,0 +1,75 @@
+version: 3
+task: PD-F006-B01-T00
+batch: PD-F006-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: architecture
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 489860e
+  head_commit: null
+changed_paths:
+- docs/product-depth-v3/specs/006-universal-data-grid-and-saved-view-system.md
+- docs/execution-v3/receipts/tasks/PD-F006-B01-T00.yaml
+deliverables:
+- item: Spec 006 updated with the canonical model, lifecycle, authority boundary, migration plan and cross-surface applicability
+  result: pass
+  evidence: section PD-F006-B01 canonical contract - what exists, eleven decisions, invariants, forbidden duplicates, migration and compatibility, surface applicability, per-task boundaries, test strategy
+- item: Reuse of primitives resolved and duplicates forbidden
+  result: pass
+  evidence: QUERY, SAVED_VIEWS, DATA_GRID and BULK_PLAN named with their owners in code (core/query.py, core/saved_views.py, DataGrid and EntityGrid, BulkPlanner); a forbidden-duplicates list
+- item: Ambiguity recorded rather than guessed
+  result: pass
+  evidence: three questions with conservative defaults in QUESTIONS.md (search text in URLs, no client virtualization, CLI and MCP read path in B01); none is an escalate_if condition because each is reversible and needs no migration
+invariants:
+- item: One source of truth, server authority
+  result: pass
+  evidence: the contract keeps one query model extended by one parameter, with the server compiling from registered fields and authorizing through the entity base
+verification:
+- command: .venv/bin/python -m pytest tests/integration/test_entity_query.py tests/integration/test_saved_views.py -q
+  result: pass
+  note: 46 passed - the compatibility baseline for the query engine and stored views that B01 must keep green unchanged
+- command: python3 scripts/pdv3/validate_queue.py
+  result: pass
+  note: valid, 331 batches, 3110 tasks
+- command: npx prettier --check docs
+  result: pass
+  note: formatting
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: read; must-preserve items mapped to T04, T05, T07 and T08 and the known limitations carried (no column resize, board view named only)
+- ref: design/state-matrix
+  result: pass
+  note: states mapped to the test strategy
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: contract
+- surface: api
+  result: pass
+  evidence: contract - one additive parameter
+- surface: cli
+  result: pass
+  evidence: contract - read path in T91
+- surface: mcp
+  result: pass
+  evidence: contract - read tool in T91
+- surface: audit
+  result: pass
+  evidence: contract - no new write
+- surface: search
+  result: pass
+  evidence: contract - T02
+- surface: docs
+  result: pass
+  evidence: spec 006
+migrations: []
+findings:
+- P3 the owned paths in the queue (src/api/search, src/web/components/data-grid, src/web/features/search) do not exist; the contract names the real owners.
+escalations: []
+limitations:
+- A contract task: browser and 5,012-row performance evidence are planned for T07, T08 and T90, not claimed here.
+next: review

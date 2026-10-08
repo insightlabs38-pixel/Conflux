@@ -1,0 +1,76 @@
+version: 3
+task: PD-F006-B01-T04
+batch: PD-F006-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: f2d7694
+  head_commit: null
+changed_paths:
+- src/web/components/DataGrid.tsx
+- src/web/components/EntityGrid.tsx
+- src/web/components/EntityGrid.test.tsx
+- tests/e2e/grid-selection.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Row selection that always means the rows in front of the person
+  result: pass
+  evidence: labelled checkboxes with Arrow-key movement and Space (existing), a tri-state select-all-on-page header (existing), aria-selected on rows, the count announced in the grid's status line, and a Clear selection button. Defects closed - a selection used to survive a page change, so a bulk bar could act on rows that were no longer shown; another page now starts with none, a search, filter or sort change clears it as before, and a row that leaves the list (refresh, live update, another person's change) leaves the selection with it
+- item: Bounded selection
+  result: pass
+  evidence: at most 100 rows (a page is never larger and the bulk planner takes no more per operation), with a spoken reason when hit; select all N matching a filter is a frozen snapshot and stays with B05, not faked here
+invariants:
+- item: Selection is ids of rows the server returned, never computed in the browser
+  result: pass
+  evidence: unchanged; the selection commands of B03 read the same state
+- item: No test weakened
+  result: pass
+  evidence: tests added, none changed
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 150 files, 835 tests (selection - announced, cleared by button, by another page and by a row leaving)
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts grid-selection (stack rebuilt first)
+  result: pass
+  note: 2 passed - checkbox and Space select, header indeterminate then all, count announced, aria-selected, Clear selection, no bulk bar without a selection, axe; the phone path skips the header checkbox
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: selection announced as N selected, native checkboxes with roving arrows
+- ref: design/state-matrix
+  result: pass
+  note: none, some, page, cleared, stale row pruned
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: not required, unchanged
+- surface: cli
+  result: pass
+  evidence: T91 (selection is a screen concept; a CLI selects by filter)
+- surface: mcp
+  result: pass
+  evidence: T91
+- surface: audit
+  result: pass
+  evidence: nothing is written by selecting
+- surface: search
+  result: pass
+  evidence: a new search clears the selection
+- surface: docs
+  result: pass
+  evidence: T91
+migrations: []
+findings:
+- P1-in-scope selection survived a page change, so a bulk action could act on rows no longer shown; fixed
+escalations: []
+limitations:
+- On a phone the stacked rows have no header row, so select-all-on-page is not reachable there; the responsive fallback is B02.
+next: review

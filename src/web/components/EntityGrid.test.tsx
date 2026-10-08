@@ -804,3 +804,52 @@ describe("filter feedback", () => {
     await act(async () => root.unmount());
   });
 });
+
+describe("row selection", () => {
+  const box = (c: HTMLElement, name: string) =>
+    c.querySelector(`input[aria-label="Select ${name}"]`) as HTMLInputElement;
+
+  it("is of the rows in view: announced, cleared by the button and by another page, and pruned when a row leaves", async () => {
+    let rows = ROWS;
+    const seen: string[][] = [];
+    const { container, root } = await mount(
+      () => jsonResponse(200, { ...page(rows), total: 60 }),
+      {
+        selectable: true,
+        rowLabel: (row) => String(row.username),
+        onSelect: (ids) => void seen.push([...ids]),
+      },
+    );
+    await until(() => container.querySelector("tbody tr") !== null);
+    await act(async () => box(container, "ada").click());
+    await act(async () => box(container, "ben").click());
+    expect(
+      container.querySelector('.cx-datagrid__footer [role="status"]')
+        ?.textContent,
+    ).toContain("2 selected");
+    expect(seen.at(-1)).toEqual(["1", "2"]);
+
+    // another page starts with nothing selected
+    await act(async () => press(container, "Next"));
+    expect(seen.at(-1)).toEqual([]);
+    await act(async () => press(container, "Previous"));
+    await until(() => container.querySelector("tbody tr") !== null);
+    expect(container.textContent).not.toContain("selected");
+
+    // the button clears
+    await act(async () => box(container, "ada").click());
+    await act(async () => press(container, "Clear selection"));
+    expect(seen.at(-1)).toEqual([]);
+    expect(box(container, "ada").checked).toBe(false);
+
+    // a row that leaves the list leaves the selection
+    await act(async () => box(container, "ada").click());
+    await act(async () => box(container, "ben").click());
+    rows = [ROWS[1]];
+    await act(async () => press(container, "Next"));
+    await act(async () => press(container, "Previous"));
+    await until(() => container.querySelectorAll("tbody tr").length === 1);
+    expect(seen.at(-1)).toEqual([]);
+    await act(async () => root.unmount());
+  });
+});

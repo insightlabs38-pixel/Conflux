@@ -375,6 +375,11 @@ export function DataGrid<Row extends { id: string }>({
             : `${rows.length} rows`}
           {selectable && chosen.size > 0 ? ` · ${chosen.size} selected` : ""}
         </span>
+        {selectable && chosen.size > 0 && (
+          <Button variant="secondary" onClick={() => onSelect?.(new Set())}>
+            Clear selection
+          </Button>
+        )}
         {paged && (
           <nav aria-label={`${label} pages`} className="cx-datagrid__pages">
             <Button

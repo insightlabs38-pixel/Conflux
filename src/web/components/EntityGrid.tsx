@@ -49,6 +49,8 @@ import {
 } from "../lib/shellPreferences";
 
 const PAGE_SIZE = 25;
+/** The most rows one selection holds: a page is never larger, and the bulk planner takes no more per operation. */
+const MAX_SELECTION = 100;
 
 function show(field: EntityField, value: unknown): string {
   if (value === null || value === undefined || value === "") return "—";
@@ -311,6 +313,19 @@ export function EntityGrid({
   const rowsOnPage = page.data?.rows ?? lastPage.current?.rows ?? [];
   const nameOf = (row: EntityRow) =>
     rowLabel ? rowLabel(row) : String(row[shown[0]?.key ?? ""] ?? row.id);
+  // rows that left the list (a refresh, another person's change) leave the selection with them,
+  // so a bulk action never acts on a row that is no longer shown
+  useEffect(() => {
+    if (selected.size === 0) return;
+    const present = new Set(rowsOnPage.map((row) => row.id));
+    const kept = [...selected].filter((id) => present.has(id));
+    if (kept.length === selected.size) return;
+    const next = new Set(kept);
+    setSelected(next);
+    onSelect?.(next);
+    // `selected` and `onSelect` change with the selection itself
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rowsOnPage]);
   const clearSelection = () => {
     setSelected(new Set());
     onSelect?.(new Set());
@@ -628,14 +643,21 @@ export function EntityGrid({
           total={shownPage?.total}
           limit={PAGE_SIZE}
           offset={offset}
-          onPage={setOffset}
+          onPage={(next) => {
+            // a selection is of the rows in front of the person: another page starts with none
+            setOffset(next);
+            clearSelection();
+          }}
           density={density}
           selected={selectable ? selected : undefined}
           onSelect={
             selectable
               ? (ids) => {
-                  setSelected(ids);
-                  onSelect?.(ids);
+                  const bounded = new Set([...ids].slice(0, MAX_SELECTION));
+                  if (bounded.size < ids.size)
+                    announce(`Select at most ${MAX_SELECTION} rows at a time.`);
+                  setSelected(bounded);
+                  onSelect?.(bounded);
                 }
               : undefined
           }

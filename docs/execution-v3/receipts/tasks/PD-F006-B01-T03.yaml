@@ -1,0 +1,82 @@
+version: 3
+task: PD-F006-B01-T03
+batch: PD-F006-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 6870988
+  head_commit: null
+changed_paths:
+- src/web/lib/entityQuery.ts
+- src/web/lib/entityQuery.test.ts
+- src/web/components/FilterBuilder.tsx
+- src/web/components/EntityGrid.tsx
+- src/web/components/EntityGrid.test.tsx
+- src/web/styles/components.css
+- tests/e2e/grid-filter.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Structured filters as a complete workflow
+  result: pass
+  evidence: conditions typed by field with the operators the catalogue lists, joined by all or any, as before; now the active filter is read back as a sentence outside the tools (for example Status is one of pending, approved and Track contains Data, after the word Filter) with Clear filter, built from the same tree the server reads (describeFilter, no second syntax). A filter changed in a saved view or link that is nested still shows and still clears
+- item: The server's refusal is explained where it applies
+  result: pass
+  evidence: a 400 keyed by path (filter.and[1].value) is attached to the condition it names (a part inside a nested group to its top-level condition), shown with role alert beside it and aria-invalid on its value control; the list keeps the last results it had and says so, instead of being replaced by a generic error; any other failure still replaces the list
+- item: Typing does not hammer the server
+  result: pass
+  evidence: the filter is asked of the server 400 ms after the last change, while the box shows what is typed at once; choosing a saved view applies immediately
+invariants:
+- item: One query model, no client-side filtering
+  result: pass
+  evidence: the builder emits the tree; rows come only from the server; typed values are not in the address (browser test)
+- item: No test weakened
+  result: pass
+  evidence: one existing assertion waits for the debounced request with until instead of settle; same expectation on the request
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 150 files, 834 tests (describeFilter and filterProblems, grid feedback with a refused value keeping the last rows and clear)
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts grid-filter (stack rebuilt first)
+  result: pass
+  note: 2 passed, desktop and mobile - a track condition gives the API's total and the sentence, the address has no typed value, a bad date is explained as Condition 1 with aria-invalid while the rows stay, axe clean, clear restores the full count
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: the active filter and its clear control sit above the grid in the base state; nested groups and chips are B02
+- ref: design/state-matrix
+  result: pass
+  note: none, active, refused, cleared
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: unchanged; its 400 keys are what the UI reads
+- surface: cli
+  result: pass
+  evidence: T91 (filter is already a parameter of the route)
+- surface: mcp
+  result: pass
+  evidence: T91
+- surface: audit
+  result: pass
+  evidence: reads only
+- surface: search
+  result: pass
+  evidence: filter and search combine on the server (T02)
+- surface: docs
+  result: pass
+  evidence: spec 006 and T91
+migrations: []
+findings:
+- P3 every keystroke in a condition used to ask the server, so a half-typed date produced a 400 and an error screen; now debounced and explained in place
+escalations: []
+limitations:
+- Flat conditions only in the builder; nested AND/OR editing and per-type operator refinements are B02.
+next: review

@@ -1,6 +1,8 @@
 import { useId } from "react";
 import {
   isGroup,
+  OPERATOR_LABELS,
+  type FilterProblems,
   type EntityField,
   type FilterNode,
   type Predicate,
@@ -8,20 +10,6 @@ import {
 import { Button } from "./Button";
 
 type Mode = "and" | "or";
-
-const OPERATOR_LABELS: Record<string, string> = {
-  eq: "is",
-  ne: "is not",
-  in: "is one of",
-  contains: "contains",
-  startswith: "starts with",
-  lt: "before or less than",
-  lte: "at most",
-  gt: "after or more than",
-  gte: "at least",
-  between: "between",
-  is_null: "is empty",
-};
 
 /** The conditions of a flat filter, or null when the filter is nested and cannot be edited here. */
 function flat(
@@ -77,10 +65,13 @@ export function FilterBuilder({
   fields,
   value,
   onChange,
+  problems,
 }: {
   fields: EntityField[];
   value: FilterNode | null;
   onChange: (filter: FilterNode | null) => void;
+  /** What the server said about this filter, shown beside the condition each message names. */
+  problems?: FilterProblems | null;
 }) {
   const id = useId();
   const filterable = fields.filter((field) => field.filterable);
@@ -125,9 +116,24 @@ export function FilterBuilder({
           </select>
         </label>
       )}
+      {conditions.length !== 1 && problems?.general.length ? (
+        <p role="alert" className="cx-filter-problem">
+          {problems.general.join(" ")}
+        </p>
+      ) : null}
       <ul>
         {conditions.map((condition, index) => {
           const field = fieldOf(condition.field) ?? filterable[0];
+          const problem =
+            problems?.byCondition[index] ??
+            (conditions.length === 1 && problems?.general.length
+              ? problems.general.join(" ")
+              : undefined);
+          const problemId = `${id}-problem-${index}`;
+          const invalid = {
+            "aria-invalid": problem ? true : undefined,
+            "aria-describedby": problem ? problemId : undefined,
+          } as const;
           const operators = field?.operators ?? [];
           const op = operators.includes(condition.op)
             ? condition.op
@@ -173,6 +179,7 @@ export function FilterBuilder({
               {op === "is_null" ? (
                 <select
                   aria-label={`Value of condition ${index + 1}`}
+                  {...invalid}
                   value={String(condition.value !== false)}
                   onChange={(e) =>
                     update(index, {
@@ -188,6 +195,7 @@ export function FilterBuilder({
               ) : field?.type === "enum" && op === "eq" ? (
                 <select
                   aria-label={`Value of condition ${index + 1}`}
+                  {...invalid}
                   value={show(condition.value)}
                   onChange={(e) =>
                     update(index, {
@@ -207,6 +215,7 @@ export function FilterBuilder({
               ) : field?.type === "bool" ? (
                 <select
                   aria-label={`Value of condition ${index + 1}`}
+                  {...invalid}
                   value={String(condition.value === true)}
                   onChange={(e) =>
                     update(index, {
@@ -222,6 +231,7 @@ export function FilterBuilder({
               ) : (
                 <input
                   aria-label={`Value of condition ${index + 1}`}
+                  {...invalid}
                   type={
                     field?.type === "number" && op !== "in" && op !== "between"
                       ? "number"
@@ -258,6 +268,11 @@ export function FilterBuilder({
               >
                 Remove
               </Button>
+              {problem && (
+                <p id={problemId} role="alert" className="cx-filter-problem">
+                  Condition {index + 1}: {problem}
+                </p>
+              )}
             </li>
           );
         })}

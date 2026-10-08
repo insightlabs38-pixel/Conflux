@@ -117,3 +117,89 @@ export function useEntityPage<Row = EntityRow>(
     { describe: describeProblem },
   );
 }
+
+export const OPERATOR_LABELS: Record<string, string> = {
+  eq: "is",
+  ne: "is not",
+  in: "is one of",
+  contains: "contains",
+  startswith: "starts with",
+  lt: "before or less than",
+  lte: "at most",
+  gt: "after or more than",
+  gte: "at least",
+  between: "between",
+  is_null: "is empty",
+};
+
+const valueText = (value: unknown): string =>
+  Array.isArray(value)
+    ? value.join(", ")
+    : value === undefined || value === null
+      ? ""
+      : String(value);
+
+/**
+ * A filter as a sentence, the same tree the server reads and nothing else: "Status is waitlisted
+ * and Track is Open Data". Groups of the other kind are bracketed. Read-only; it is what the grid
+ * shows as the active filter and what a person reads to a colleague.
+ */
+export function describeFilter(
+  filter: FilterNode | null,
+  fields: { key: string; label: string }[],
+  inner = false,
+): string {
+  if (filter === null) return "";
+  const label = (key: string) =>
+    fields.find((f) => f.key === key)?.label ?? key;
+  if ("and" in filter || "or" in filter) {
+    const mode = "and" in filter ? "and" : "or";
+    const children = (filter as Record<string, FilterNode[]>)[mode]
+      .map((child) => describeFilter(child, fields, true))
+      .filter(Boolean);
+    const text = children.join(` ${mode} `);
+    return inner && children.length > 1 ? `(${text})` : text;
+  }
+  if ("not" in filter)
+    return `not (${describeFilter(filter.not, fields, true)})`;
+  if (filter.op === "is_null")
+    return `${label(filter.field)} is ${filter.value === false ? "not " : ""}empty`;
+  const op = OPERATOR_LABELS[filter.op] ?? filter.op;
+  if (filter.op === "between" && Array.isArray(filter.value))
+    return `${label(filter.field)} ${op} ${filter.value.join(" and ")}`;
+  return `${label(filter.field)} ${op} ${valueText(filter.value)}`.trim();
+}
+
+/** What the server said about a filter: a message per top-level condition, and any others. */
+export type FilterProblems = {
+  byCondition: Record<number, string>;
+  general: string[];
+};
+
+/**
+ * Read a 400 from the entity query. The server names the offending part by path
+ * (`filter.and[1].op`); the builder shows each message beside the condition that holds that part
+ * (a part inside a nested group is shown with its top-level condition).
+ */
+export function filterProblems(detail: unknown): FilterProblems | null {
+  if (!detail || typeof detail !== "object") return null;
+  const found: FilterProblems = { byCondition: {}, general: [] };
+  let any = false;
+  for (const [path, messages] of Object.entries(
+    detail as Record<string, unknown>,
+  )) {
+    const match = /^filter(?:\.(?:and|or)\[(\d+)\])?/.exec(path);
+    if (!match) continue;
+    any = true;
+    const text = Array.isArray(messages)
+      ? messages.join(" ")
+      : String(messages);
+    if (match[1] !== undefined) {
+      const index = Number(match[1]);
+      found.byCondition[index] = found.byCondition[index]
+        ? `${found.byCondition[index]} ${text}`
+        : text;
+    } else found.general.push(text);
+  }
+  return any ? found : null;
+}

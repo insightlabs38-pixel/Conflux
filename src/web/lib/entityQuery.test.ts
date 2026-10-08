@@ -56,3 +56,72 @@ describe("entity query helpers", () => {
     expect(isGroup({ field: "a", op: "eq", value: 1 })).toBe(false);
   });
 });
+
+import { describeFilter, filterProblems } from "./entityQuery";
+
+describe("describing a filter", () => {
+  const fields = [
+    { key: "status", label: "Status" },
+    { key: "track", label: "Track" },
+    { key: "created_at", label: "Applied" },
+  ];
+  it("reads the tree as a sentence, bracketing the other kind of group", () => {
+    expect(describeFilter(null, fields)).toBe("");
+    expect(
+      describeFilter(
+        { field: "status", op: "eq", value: "waitlisted" },
+        fields,
+      ),
+    ).toBe("Status is waitlisted");
+    expect(
+      describeFilter(
+        {
+          and: [
+            { field: "status", op: "in", value: ["pending", "approved"] },
+            {
+              or: [
+                { field: "track", op: "contains", value: "Data" },
+                { field: "track", op: "is_null", value: true },
+              ],
+            },
+            {
+              field: "created_at",
+              op: "between",
+              value: ["2027-03-01", "2027-03-03"],
+            },
+          ],
+        },
+        fields,
+      ),
+    ).toBe(
+      "Status is one of pending, approved and (Track contains Data or Track is empty) and Applied between 2027-03-01 and 2027-03-03",
+    );
+    expect(
+      describeFilter(
+        { not: { field: "track", op: "is_null", value: false } },
+        fields,
+      ),
+    ).toBe("not (Track is not empty)");
+  });
+});
+
+describe("reading the server's filter problems", () => {
+  it("attaches a message to the top-level condition its path names", () => {
+    const found = filterProblems({
+      "filter.and[1].value": ["Not a valid date."],
+      "filter.or[0].or[2].op": ["Unknown operator."],
+      "filter.and[1].op": ["Cannot use it."],
+      filter: ["Too deep."],
+      other: ["ignored"],
+    });
+    expect(found).toEqual({
+      byCondition: {
+        0: "Unknown operator.",
+        1: "Not a valid date. Cannot use it.",
+      },
+      general: ["Too deep."],
+    });
+    expect(filterProblems({ sort: ["x"] })).toBeNull();
+    expect(filterProblems("text")).toBeNull();
+  });
+});

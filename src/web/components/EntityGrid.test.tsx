@@ -197,7 +197,8 @@ describe("EntityGrid", () => {
         "pending",
       ),
     );
-    await settle();
+    // the filter is asked of the server a moment after the last change
+    await until(() => pages.at(-1)?.filter !== undefined);
     expect(JSON.parse(pages.at(-1)!.filter)).toEqual({
       field: "status",
       op: "eq",
@@ -744,5 +745,62 @@ describe("search", () => {
     } finally {
       CATALOGUE[0].search_fields = saved;
     }
+  });
+});
+
+describe("filter feedback", () => {
+  it("shows the active filter as a sentence with a way to clear it, and the server's message beside the condition it names while keeping the last results", async () => {
+    let bad = false;
+    const { container, root } = await mount((params) =>
+      params.filter && bad
+        ? jsonResponse(400, {
+            "filter.value": ["Not a valid value for status."],
+          })
+        : jsonResponse(200, page(ROWS)),
+    );
+    await until(() => container.querySelector("tbody tr") !== null);
+    expect(container.querySelector('[aria-label="Active filter"]')).toBeNull();
+    await act(async () => press(container, "Add condition"));
+    await act(async () =>
+      choose(
+        container.querySelector<HTMLSelectElement>(
+          '[aria-label="Field of condition 1"]',
+        )!,
+        "status",
+      ),
+    );
+    bad = true;
+    await act(async () =>
+      choose(
+        container.querySelector<HTMLSelectElement>(
+          '[aria-label="Value of condition 1"]',
+        )!,
+        "pending",
+      ),
+    );
+    await until(
+      () =>
+        container.textContent?.includes("Filter: Status is pending") ?? false,
+    );
+    await until(
+      () =>
+        container.querySelector('[role="alert"].cx-filter-problem') !== null,
+    );
+    expect(container.textContent).toContain(
+      "Condition 1: Not a valid value for status.",
+    );
+    expect(
+      container
+        .querySelector('[aria-label="Value of condition 1"]')
+        ?.getAttribute("aria-invalid"),
+    ).toBe("true");
+    expect(container.textContent).toContain("shows the last results");
+    expect(container.querySelectorAll("tbody tr").length).toBe(2); // the last rows stay
+    bad = false;
+    await act(async () => press(container, "Clear filter"));
+    await until(
+      () => container.querySelector('[aria-label="Active filter"]') === null,
+    );
+    await act(async () => root.unmount());
   });
 });

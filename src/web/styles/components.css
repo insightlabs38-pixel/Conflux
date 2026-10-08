@@ -3869,3 +3869,13 @@ html {
   font-size: var(--fs-12);
   font-variant-numeric: tabular-nums;
 }
+
+.cx-entity-grid__chips {
+  margin-bottom: var(--sp-2);
+  font-size: var(--fs-14);
+}
+.cx-filter-problem {
+  margin: var(--sp-1) 0 0;
+  font-size: var(--fs-13);
+  color: var(--color-danger, var(--ink));
+}

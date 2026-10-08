@@ -26,6 +26,7 @@ import {
   type SortState,
 } from "./DataGrid";
 import { FilterBuilder } from "./FilterBuilder";
+import { describeFilter, filterProblems } from "../lib/entityQuery";
 import { ViewBar } from "./ViewBar";
 import { Inspector } from "./Inspector";
 import { useUrlParam } from "../lib/urlState";
@@ -205,8 +206,15 @@ export function EntityGrid({
         : fields.filter((f) => f.default),
     [fields, known],
   );
+  // The filter is applied a moment after the last change, so a half-typed date or number is not
+  // asked of the server on every keystroke (the box shows what is typed at once).
+  const [queryFilter, setQueryFilter] = useState<FilterNode | null>(filter);
+  useEffect(() => {
+    const timer = setTimeout(() => setQueryFilter(filter), 400);
+    return () => clearTimeout(timer);
+  }, [filter]);
   const page = useEntityPage(description ? base : null, entity, {
-    filter,
+    filter: queryFilter,
     search,
     sort,
     columns: known,
@@ -262,6 +270,7 @@ export function EntityGrid({
     (view: SavedView | null, fromLink = false) => {
       const query = view?.query;
       setFilter(query?.filter ?? null);
+      setQueryFilter(query?.filter ?? null);
       setSearchText(query?.search ?? "");
       setSearch(query?.search ?? "");
       if (!(fromLink && sortRef.current)) setSort(query?.sort ?? "");
@@ -361,7 +370,13 @@ export function EntityGrid({
     // restart only calls setters
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
-  const failure = catalogue.error ?? page.error;
+  // A 400 that names the filter is shown beside the condition it names, and the list keeps the last
+  // results it had; any other failure replaces the list as before.
+  const problems =
+    page.error instanceof ApiError && page.error.status === 400
+      ? filterProblems(page.error.detail)
+      : null;
+  const failure = catalogue.error ?? (problems ? null : page.error);
   const status = denied
     ? ({ kind: "denied", message: denied } as const)
     : failure
@@ -455,6 +470,31 @@ export function EntityGrid({
             </p>
           </div>
         )}
+        {filter && (
+          <div
+            role="group"
+            aria-label="Active filter"
+            className="cx-entity-grid__chips"
+          >
+            <span>Filter: {describeFilter(filter, fields)}</span>{" "}
+            <button
+              type="button"
+              onClick={() => {
+                setFilter(null);
+                setQueryFilter(null);
+                restart();
+              }}
+            >
+              Clear filter
+            </button>
+            {problems && (
+              <p role="status" className="cx-filter-problem">
+                This filter could not be applied, so the list shows the last
+                results. Open Filter, views and columns to fix it.
+              </p>
+            )}
+          </div>
+        )}
         <details className="cx-entity-grid__tools">
           <summary>
             Filter, views and columns
@@ -468,6 +508,7 @@ export function EntityGrid({
             onApply={apply}
           />
           <FilterBuilder
+            problems={problems}
             fields={fields}
             value={filter}
             onChange={(next) => {

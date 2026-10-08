@@ -492,6 +492,9 @@ describe("EntityGrid sort and page in the URL", () => {
     const headers = () => [
       ...container.querySelectorAll<HTMLButtonElement>("th button"),
     ];
+    await until(() =>
+      headers().some((b) => b.textContent?.startsWith("Applied")),
+    );
     const created = headers().find((b) =>
       b.textContent?.startsWith("Applied"),
     )!;

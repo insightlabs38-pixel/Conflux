@@ -44,7 +44,7 @@ verification:
   note: 54 passed (empty values last up and down, tie by next key, three keys allowed and a fourth refused, stable repeat)
 - command: cd src/web && npx tsc --noEmit && npx vitest run
   result: pass
-  note: 150 files, 832 tests (DataGrid multi-key Shift test, EntityGrid multi-key address test)
+  note: 150 files, 831 tests (DataGrid multi-key Shift test, EntityGrid multi-key address test)
 - command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts grid-sort grid-search (stack rebuilt first)
   result: pass
   note: desktop - header cycle, order equals the API's, address keeps it, Shift adds Track with ranks 1 and 2, reload keeps both, plain click elsewhere restarts, axe; mobile - Sort by sorts to the API's order, axe

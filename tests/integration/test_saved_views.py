@@ -251,3 +251,25 @@ def test_deleting_a_view_is_audited_and_leaves_the_data():
     assert EventApplication.objects.count() == 1
     audit = AuditEvent.objects.get(action="saved_view.deleted")
     assert audit.metadata["name"] == "Pending" and audit.metadata["entity"] == "applications"
+
+
+def test_a_view_may_carry_a_search_and_older_views_are_unchanged():
+    _, _, event, users, clients, root = world()
+    for name, note in (("p1", "from Berlin"), ("p2", "from Paris")):
+        user = User.objects.create_user(username=name, password="unused")
+        EventApplication.objects.create(event=event, user=user, note=note)
+    plain = post(clients["ana"], root)
+    assert plain.status_code == 201 and "search" not in plain.json()["query"]
+    searched = post(
+        clients["ana"], root, name="Berlin", query={**PENDING, "filter": None, "search": " berlin "}
+    )
+    assert searched.status_code == 201, searched.content
+    assert searched.json()["query"]["search"] == "berlin"
+    page = clients["ana"].get(root + f"views/{searched.json()['public_id']}/run/").json()
+    assert page["total"] == 1 and page["search"] == "berlin"
+    # a view without search still runs exactly as before
+    old = clients["ana"].get(root + f"views/{plain.json()['public_id']}/run/").json()
+    assert old["search"] == ""
+    # a bad search is refused at save time with the same diagnostics
+    bad = post(clients["ana"], root, name="Bad", query={**PENDING, "search": "x"})
+    assert bad.status_code == 400

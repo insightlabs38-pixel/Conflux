@@ -31,6 +31,7 @@ class EntitySchema(serializers.Serializer):
     key = serializers.CharField()
     label = serializers.CharField()
     default_sort = serializers.ListField(child=serializers.CharField())
+    search_fields = serializers.ListField(child=serializers.CharField())
     fields = EntityFieldSchema(many=True)
 
 
@@ -41,6 +42,7 @@ class EntityPageSchema(serializers.Serializer):
     offset = serializers.IntegerField()
     filter = serializers.JSONField(allow_null=True)
     sort = serializers.ListField(child=serializers.CharField())
+    search = serializers.CharField()
     columns = serializers.ListField(child=serializers.CharField())
     rows = serializers.ListField(child=serializers.DictField())
 
@@ -50,6 +52,7 @@ def _describe(entity):
         "key": entity.key,
         "label": entity.label,
         "default_sort": list(entity.default_sort),
+        "search_fields": list(entity.search_fields),
         "fields": [
             {
                 "key": f.key,
@@ -100,6 +103,11 @@ class EntityQueryView(_EntityView):
             OpenApiParameter("filter", str, description="Compact JSON filter tree (core.query)."),
             OpenApiParameter("sort", str, description="Comma list of fields, `-` for descending."),
             OpenApiParameter("columns", str, description="Comma list of fields to return."),
+            OpenApiParameter(
+                "search",
+                str,
+                description="Free text: every word must appear in one of the list's search fields.",
+            ),
             OpenApiParameter("limit", int),
             OpenApiParameter("offset", int),
         ],
@@ -118,6 +126,7 @@ class EntityQueryView(_EntityView):
         tree = query.parse_filter(params.get("filter"))
         order = query.parse_sort(entity, params.get("sort"))
         columns = query.parse_columns(entity, params.get("columns"))
+        terms = query.parse_search(entity, params.get("search"))
         if tree:
             query.compile_filter(entity, tree)  # validate before touching the database
         limit, offset = page_params(request, default=25, maximum=100)
@@ -130,6 +139,7 @@ class EntityQueryView(_EntityView):
             columns=columns,
             limit=limit,
             offset=offset,
+            search=terms,
         )
         return Response(
             {
@@ -139,6 +149,7 @@ class EntityQueryView(_EntityView):
                 "offset": offset,
                 "filter": tree,
                 "sort": order,
+                "search": " ".join(terms),
                 "columns": [f.key for f in columns],
                 "rows": result["rows"],
             }

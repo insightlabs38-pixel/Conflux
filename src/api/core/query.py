@@ -23,6 +23,8 @@ MAX_PREDICATES = 20
 MAX_IN = 50
 MAX_TEXT = 200
 MAX_SORT = 3
+MAX_TERMS = 5
+MIN_TERM = 2
 
 
 class QueryError(ValidationError):
@@ -188,6 +190,38 @@ def compile_filter(entity: Entity, tree):
     return _node(entity, tree, "", 0, _Budget())
 
 
+def parse_search(entity: Entity, raw):
+    """The `search` parameter as its terms: whitespace separated, every one must match."""
+    if raw is None or not str(raw).strip():
+        return []
+    if not entity.search_fields:
+        raise QueryError("", "This list cannot be searched.", root="search")
+    terms = str(raw).split()
+    if len(terms) > MAX_TERMS:
+        raise QueryError("", f"Search takes at most {MAX_TERMS} words.", root="search")
+    for index, term in enumerate(terms):
+        if len(term) < MIN_TERM:
+            raise QueryError(
+                f"[{index}]", f"Each search word needs at least {MIN_TERM} characters.", root="search"
+            )
+        if len(term) > MAX_TEXT:
+            raise QueryError(
+                f"[{index}]", f"Search words are limited to {MAX_TEXT} characters.", root="search"
+            )
+    return terms
+
+
+def compile_search(entity: Entity, terms):
+    """Every term must appear in at least one of the entity's search fields (case-insensitive)."""
+    combined = Q()
+    for term in terms:
+        any_field = Q()
+        for key in entity.search_fields:
+            any_field |= Q(**{f"{entity.field(key).column}__icontains": term})
+        combined &= any_field
+    return combined
+
+
 def parse_sort(entity: Entity, raw):
     """`name,-created_at` -> ORM ordering with the entity default and a primary-key tiebreak."""
     keys = [part.strip() for part in (raw or "").split(",") if part.strip()]
@@ -239,8 +273,10 @@ def _read(obj, field):
     return _plain(value)
 
 
-def run(entity: Entity, event, user, *, tree, sort, columns, limit, offset):
+def run(entity: Entity, event, user, *, tree, sort, columns, limit, offset, search=()):
     queryset = entity.base(event, user)
+    if search:
+        queryset = queryset.filter(compile_search(entity, search))
     if tree:
         queryset = queryset.filter(compile_filter(entity, tree))
     queryset = queryset.order_by(*sort, "pk")

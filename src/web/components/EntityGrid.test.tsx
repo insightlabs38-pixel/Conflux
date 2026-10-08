@@ -31,6 +31,7 @@ const CATALOGUE = [
     key: "applications",
     label: "Applications",
     default_sort: [],
+    search_fields: ["username", "note"],
     fields: [
       field("username", "Applicant", "text"),
       field("status", "Status", "enum", { choices: ["pending", "approved"] }),
@@ -659,5 +660,56 @@ describe("selection commands", () => {
     await act(async () => box("ada").click());
     await act(async () => root.unmount());
     expect(currentSelection()).toBeNull(); // gone with the list
+  });
+});
+
+describe("search", () => {
+  it("asks the server after a pause, needs two characters a word, stays out of the URL and starts again at page one", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      const { container, pages, root } = await mount(() =>
+        jsonResponse(200, page(ROWS)),
+      );
+      await until(() => container.querySelector("tbody tr") !== null);
+      const box = container.querySelector(
+        'input[type="search"]',
+      ) as HTMLInputElement;
+      expect(box).not.toBeNull();
+      expect(container.textContent).toContain("Looks in applicant, note.");
+      const before = pages.length;
+      await act(async () => choose(box, "a"));
+      await act(async () => void vi.advanceTimersByTime(500));
+      expect(container.textContent).toContain("at least 2 characters");
+      expect(pages.length).toBe(before); // nothing asked for one letter
+      await act(async () => choose(box, "ada lo"));
+      await act(async () => void vi.advanceTimersByTime(500));
+      await until(() => pages.some((p) => p.search === "ada lo"));
+      expect(container.textContent).toContain("for “ada lo”");
+      expect(window.location.search).not.toContain("ada"); // typed text never reaches the URL
+      expect(JSON.stringify(Object.entries(window.localStorage))).not.toContain(
+        "ada",
+      );
+      await act(async () => choose(box, ""));
+      await act(async () => void vi.advanceTimersByTime(500));
+      await until(() => pages.at(-1)?.search === undefined);
+      await act(async () => root.unmount());
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("has no box when the list has no search fields", async () => {
+    const saved = CATALOGUE[0].search_fields;
+    delete (CATALOGUE[0] as { search_fields?: string[] }).search_fields;
+    try {
+      const { container, root } = await mount(() =>
+        jsonResponse(200, page(ROWS)),
+      );
+      await until(() => container.querySelector("tbody tr") !== null);
+      expect(container.querySelector('input[type="search"]')).toBeNull();
+      await act(async () => root.unmount());
+    } finally {
+      CATALOGUE[0].search_fields = saved;
+    }
   });
 });

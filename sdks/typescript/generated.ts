@@ -1954,6 +1954,7 @@ export type EntityPageSchema = {
   offset: number;
   filter: unknown;
   sort: string[];
+  search: string;
   columns: string[];
   rows: Record<string, unknown>[];
 };
@@ -1965,6 +1966,7 @@ export type InputOfEntityPageSchema = {
   offset: number;
   filter: unknown;
   sort: string[];
+  search: string;
   columns: string[];
   rows: Record<string, unknown>[];
 };
@@ -1973,6 +1975,7 @@ export type EntitySchema = {
   key: string;
   label: string;
   default_sort: string[];
+  search_fields: string[];
   fields: EntityFieldSchema[];
 };
 
@@ -1980,6 +1983,7 @@ export type InputOfEntitySchema = {
   key: string;
   label: string;
   default_sort: string[];
+  search_fields: string[];
   fields: InputOfEntityFieldSchema[];
 };
 
@@ -5427,6 +5431,7 @@ export type SavedViewPageSchema = {
   offset: number;
   filter: unknown;
   sort: string[];
+  search: string;
   columns: string[];
   rows: Record<string, unknown>[];
   density: string;
@@ -5440,6 +5445,7 @@ export type InputOfSavedViewPageSchema = {
   offset: number;
   filter: unknown;
   sort: string[];
+  search: string;
   columns: string[];
   rows: Record<string, unknown>[];
   density: string;
@@ -7445,6 +7451,7 @@ export interface Operations {
         filter?: string;
         limit?: number;
         offset?: number;
+        search?: string;
         sort?: string;
       };
     };
@@ -11667,7 +11674,7 @@ export const operations = {
       method: "GET",
       path: "/api/v1/workspaces/{workspace_public_id}/events/{event_public_id}/entities/{entity_key}/",
       path_params: ["entity_key", "event_public_id", "workspace_public_id"],
-      query_params: ["columns", "filter", "limit", "offset", "sort"],
+      query_params: ["columns", "filter", "limit", "offset", "search", "sort"],
       request_body: false,
       response_kind: "json",
     },

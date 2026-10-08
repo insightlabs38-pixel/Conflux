@@ -310,3 +310,76 @@ def test_the_legacy_applications_endpoint_is_unchanged():
     url = f"/api/v1/workspaces/{workspace.public_id}/events/{event.public_id}/applications/"
     assert len(client.get(url).json()) == 5
     assert {r["username"] for r in client.get(url + "?status=waitlisted").json()} == {"cyd", "dee"}
+
+
+def test_search_matches_every_word_in_any_search_field_and_combines_with_the_filter():
+    _, event, _, client, _, base = world()
+    applicants(event, ROWS)
+    assert names(ask(client, base, search="berlin")) == ["cyd", "dee"]  # case-insensitive, in a note
+    assert names(ask(client, base, search="berlin too")) == ["dee"]  # every word must match
+    assert names(ask(client, base, search="ADA")) == ["ada"]  # in the username
+    assert names(ask(client, base, search="compilers ada")) == ["ada"]  # words in different fields
+    both = ask(client, base, search="berlin", filter=tree(field="status", op="eq", value="waitlisted"))
+    assert names(both) == ["cyd", "dee"] and both.json()["total"] == 2
+    none = ask(client, base, search="berlin", filter=tree(field="status", op="eq", value="pending"))
+    assert names(none) == [] and none.json()["total"] == 0
+    assert ask(client, base, search="berlin").json()["search"] == "berlin"
+    assert ask(client, base).json()["search"] == ""
+    # wildcards are text, not patterns
+    assert names(ask(client, base, search="b%")) == []
+    # the catalogue says which keys are searched
+    applications = next(e for e in client.get(base).json() if e["key"] == "applications")
+    assert applications["search_fields"] == ["username", "note", "decided_by"]
+
+
+@pytest.mark.parametrize(
+    "value, fragment",
+    [
+        ("a", "at least 2"),
+        ("ab cd ef gh ij kl", "at most 5"),
+        ("x" * 201, "limited to 200"),
+    ],
+)
+def test_bad_search_is_400_and_names_the_word(value, fragment):
+    _, event, _, client, _, base = world()
+    applicants(event, ROWS)
+    response = ask(client, base, search=value)
+    assert response.status_code == 400
+    (key, messages) = next(iter(response.json().items()))
+    assert key.startswith("search") and fragment in messages[0]
+
+
+def test_an_entity_without_search_fields_says_so_and_search_cannot_widen_rows():
+    _, event, _, client, judge, base = world()
+    applicants(event, ROWS)
+    entities.register(
+        entities.Entity(
+            key="nosearch",
+            label="No search",
+            roles=("organizer",),
+            base=lambda event, user: EventApplication.objects.filter(event=event),
+            fields=(entities.Field("note", entities.TEXT, "note", "Note"),),
+        )
+    )
+    try:
+        refused = ask(client, base, entity="nosearch", search="berlin")
+        assert refused.status_code == 400 and "cannot be searched" in str(refused.json())
+        assert ask(client, base, entity="nosearch").status_code == 200  # unchanged without search
+    finally:
+        entities._ENTITIES.pop("nosearch", None)
+    # a judge is refused before any search runs
+    assert ask(judge, base, search="berlin").status_code == 403
+
+
+def test_search_fields_must_be_registered_text_fields():
+    with pytest.raises(ValueError, match="registered text field"):
+        entities.register(
+            entities.Entity(
+                key="bad",
+                label="Bad",
+                roles=(),
+                base=lambda event, user: None,
+                fields=(entities.Field("n", entities.NUMBER, "n", "N"),),
+                search_fields=("n",),
+            )
+        )

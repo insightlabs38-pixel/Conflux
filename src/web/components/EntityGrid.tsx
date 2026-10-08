@@ -116,6 +116,18 @@ export function EntityGrid({
   const description = catalogue.data?.find((e) => e.key === entity) ?? null;
 
   const [filter, setFilter] = useState<FilterNode | null>(null);
+  // Search text is typed text, so it is transient (never in the URL or storage; spec 006 B01): a
+  // saved view is how it is kept or shared. `searchText` is the box, `search` what is asked.
+  const [searchText, setSearchText] = useState("");
+  const [search, setSearch] = useState("");
+  const typed = searchText.trim().replace(/\s+/g, " ");
+  const tooShort =
+    typed.length > 0 && typed.split(" ").some((w) => w.length < 2);
+  useEffect(() => {
+    if (tooShort) return;
+    const timer = setTimeout(() => setSearch(typed), 300);
+    return () => clearTimeout(timer);
+  }, [typed, tooShort]);
   // The list's sort and page are panel state (lib/urlState.ts): fixed names, never typed text, so a
   // link reproduces the list exactly. Changing the sort goes back to the first page.
   const [sortParam, setSortParam] = useUrlParam(`sort_${entity}`, {
@@ -183,6 +195,7 @@ export function EntityGrid({
   );
   const page = useEntityPage(description ? base : null, entity, {
     filter,
+    search,
     sort,
     columns: known,
     limit: PAGE_SIZE,
@@ -237,6 +250,8 @@ export function EntityGrid({
     (view: SavedView | null, fromLink = false) => {
       const query = view?.query;
       setFilter(query?.filter ?? null);
+      setSearchText(query?.search ?? "");
+      setSearch(query?.search ?? "");
       if (!(fromLink && sortRef.current)) setSort(query?.sort ?? "");
       setVisible(
         query?.columns ??
@@ -250,7 +265,13 @@ export function EntityGrid({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [workspaceId, entity],
   );
-  const current: ViewDefinition = { filter, sort, columns: known, density };
+  const current: ViewDefinition = {
+    filter,
+    sort,
+    columns: known,
+    density,
+    ...(search ? { search } : {}),
+  };
 
   const columns: GridColumn<EntityRow>[] = shown.map((field) => ({
     key: field.key,
@@ -313,6 +334,21 @@ export function EntityGrid({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected, rowsOnPage, selectable, selectionCommands, label, inspect]);
   useEffect(() => () => publishSelection(slot, null), [slot]);
+  const searchable = (description?.search_fields?.length ?? 0) > 0;
+  const searchHint = useId();
+  const searchLabels = (description?.search_fields ?? [])
+    .map((key) => fields.find((f) => f.key === key)?.label ?? key)
+    .join(", ")
+    .toLowerCase();
+  // asking something else starts again at the first page with nothing selected
+  const askedBefore = useRef(search);
+  useEffect(() => {
+    if (askedBefore.current === search) return;
+    askedBefore.current = search;
+    restart();
+    // restart only calls setters
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
   const failure = catalogue.error ?? page.error;
   const status = denied
     ? ({ kind: "denied", message: denied } as const)
@@ -385,6 +421,28 @@ export function EntityGrid({
       aria-busy={page.data === null && shownPage !== null}
     >
       <div className="cx-entity-grid__main">
+        {searchable && (
+          <div role="search" className="cx-entity-grid__search">
+            <label>
+              Search {label.toLowerCase()}
+              <input
+                type="search"
+                value={searchText}
+                maxLength={200}
+                autoComplete="off"
+                aria-describedby={searchHint}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+            </label>
+            <p id={searchHint} className="cx-muted" role="status">
+              {tooShort
+                ? "Each word needs at least 2 characters."
+                : search && shownPage
+                  ? `${shownPage.total.toLocaleString("en-US")} ${shownPage.total === 1 ? "result" : "results"} for “${search}”.`
+                  : `Looks in ${searchLabels}.`}
+            </p>
+          </div>
+        )}
         <details className="cx-entity-grid__tools">
           <summary>
             Filter, views and columns
@@ -505,9 +563,11 @@ export function EntityGrid({
           actions={inspectAction}
           highlightedId={inspect ? openId : undefined}
           empty={empty}
-          filtered={filter !== null}
+          filtered={filter !== null || search !== ""}
           onClearFilter={() => {
             setFilter(null);
+            setSearchText("");
+            setSearch("");
             restart();
           }}
         />

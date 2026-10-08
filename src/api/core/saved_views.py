@@ -14,7 +14,7 @@ from .models import SavedView
 
 MAX_PER_OWNER = 50
 DENSITIES = ("compact", "comfortable")
-_KEYS = {"filter", "sort", "columns", "density"}
+_KEYS = {"filter", "sort", "columns", "density", "search"}
 
 
 class ViewOutdated(Exception):
@@ -39,15 +39,22 @@ def normalize(entity, raw):
     if not isinstance(columns, list) or not all(isinstance(c, str) for c in columns):
         raise ValidationError({"columns": ["Columns is a list of field keys."]})
     query.parse_columns(entity, ",".join(columns))
+    search = raw.get("search") or ""
+    if not isinstance(search, str):
+        raise ValidationError({"search": ["Search is text."]})
+    terms = query.parse_search(entity, search)
     density = raw.get("density") or "comfortable"
     if density not in DENSITIES:
         raise ValidationError({"density": [f"Use one of {', '.join(DENSITIES)}."]})
-    return {
+    definition = {
         "filter": tree or None,
         "sort": sort,
         "columns": columns,
         "density": density,
     }
+    if terms:  # additive (PD-F006-B01-T02): stored only when used, so older views are unchanged
+        definition["search"] = " ".join(terms)
+    return definition
 
 
 def validate_visibility(value):
@@ -156,12 +163,21 @@ def run(view, event, user, *, limit, offset):
         tree = definition["filter"]
         order = query.parse_sort(entity, definition["sort"])
         columns = query.parse_columns(entity, ",".join(definition["columns"]))
+        terms = query.parse_search(entity, definition.get("search"))
     except ValidationError as exc:
         raise ViewOutdated(
             "; ".join(f"{key}: {' '.join(map(str, value))}" for key, value in exc.detail.items())
         ) from exc
     result = query.run(
-        entity, event, user, tree=tree, sort=order, columns=columns, limit=limit, offset=offset
+        entity,
+        event,
+        user,
+        tree=tree,
+        sort=order,
+        columns=columns,
+        limit=limit,
+        offset=offset,
+        search=terms,
     )
     return {
         "entity": entity.key,
@@ -170,6 +186,7 @@ def run(view, event, user, *, limit, offset):
         "offset": offset,
         "filter": tree,
         "sort": order,
+        "search": " ".join(terms),
         "columns": [f.key for f in columns],
         "rows": result["rows"],
         "density": definition["density"],

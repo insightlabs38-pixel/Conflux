@@ -1774,6 +1774,7 @@ class EntityPageSchema(TypedDict):
     offset: int
     filter: Any
     sort: list[str]
+    search: str
     columns: list[str]
     rows: list[dict[str, Any]]
 
@@ -1784,6 +1785,7 @@ class InputOfEntityPageSchema(TypedDict):
     offset: int
     filter: Any
     sort: list[str]
+    search: str
     columns: list[str]
     rows: list[dict[str, Any]]
 
@@ -1791,12 +1793,14 @@ class EntitySchema(TypedDict):
     key: str
     label: str
     default_sort: list[str]
+    search_fields: list[str]
     fields: list[EntityFieldSchema]
 
 class InputOfEntitySchema(TypedDict):
     key: str
     label: str
     default_sort: list[str]
+    search_fields: list[str]
     fields: list[InputOfEntityFieldSchema]
 
 class ErrorSchema(TypedDict):
@@ -4993,6 +4997,7 @@ class SavedViewPageSchema(TypedDict):
     offset: int
     filter: Any
     sort: list[str]
+    search: str
     columns: list[str]
     rows: list[dict[str, Any]]
     density: str
@@ -5005,6 +5010,7 @@ class InputOfSavedViewPageSchema(TypedDict):
     offset: int
     filter: Any
     sort: list[str]
+    search: str
     columns: list[str]
     rows: list[dict[str, Any]]
     density: str
@@ -6768,6 +6774,7 @@ OPERATIONS = {'delete_api_v1_workspaces_workspace_public_id_event_templates_temp
                                                                                                            'filter',
                                                                                                            'limit',
                                                                                                            'offset',
+                                                                                                           'search',
                                                                                                            'sort'],
                                                                                           'request_body': False,
                                                                                           'response_kind': 'json'},

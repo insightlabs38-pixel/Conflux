@@ -14,6 +14,7 @@ entities.register(
             "track", "team", "created_by"
         ),
         default_sort=("name",),
+        search_fields=("name", "description", "track", "team", "created_by"),
         fields=(
             entities.Field("name", entities.TEXT, "name", "Project"),
             entities.Field(

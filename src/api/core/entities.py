@@ -51,6 +51,8 @@ class Entity:
     ]  # (event, user) -> QuerySet already limited to what they may see
     fields: tuple = field(default_factory=tuple)
     default_sort: tuple = ()  # e.g. ("-created_at",)
+    # Keys of the TEXT fields a free-text search looks in; empty means the list has no search box.
+    search_fields: tuple = ()
 
     def field(self, key):
         return next((f for f in self.fields if f.key == key), None)
@@ -67,6 +69,10 @@ def register(entity: Entity):
             raise ValueError(f"{entity.key}.{f.key}: unknown field type {f.type!r}")
         if f.type == ENUM and not f.choices:
             raise ValueError(f"{entity.key}.{f.key}: an enum field needs choices")
+    for key in entity.search_fields:
+        found = entity.field(key)
+        if found is None or found.type != TEXT:
+            raise ValueError(f"{entity.key}: search field {key!r} must be a registered text field")
     if entity.key in _ENTITIES and _ENTITIES[entity.key] != entity:
         raise ValueError(f"Entity {entity.key!r} is already registered")
     _ENTITIES[entity.key] = entity

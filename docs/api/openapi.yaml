@@ -4832,6 +4832,12 @@ paths:
         schema:
           type: integer
       - in: query
+        name: search
+        schema:
+          type: string
+        description: 'Free text: every word must appear in one of the list''s search
+          fields.'
+      - in: query
         name: sort
         schema:
           type: string
@@ -21498,6 +21504,8 @@ components:
           type: array
           items:
             type: string
+        search:
+          type: string
         columns:
           type: array
           items:
@@ -21514,6 +21522,7 @@ components:
       - limit
       - offset
       - rows
+      - search
       - sort
       - total
     EntitySchema:
@@ -21527,6 +21536,10 @@ components:
           type: array
           items:
             type: string
+        search_fields:
+          type: array
+          items:
+            type: string
         fields:
           type: array
           items:
@@ -21536,6 +21549,7 @@ components:
       - fields
       - key
       - label
+      - search_fields
     ErrorSchema:
       type: object
       properties:
@@ -26987,6 +27001,8 @@ components:
           type: array
           items:
             type: string
+        search:
+          type: string
         columns:
           type: array
           items:
@@ -27008,6 +27024,7 @@ components:
       - limit
       - offset
       - rows
+      - search
       - sort
       - total
       - view

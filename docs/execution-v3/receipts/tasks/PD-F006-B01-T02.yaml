@@ -1,0 +1,97 @@
+version: 3
+task: PD-F006-B01-T02
+batch: PD-F006-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 2e32401
+  head_commit: null
+changed_paths:
+- src/api/core/entities.py
+- src/api/core/query.py
+- src/api/core/entity_views.py
+- src/api/core/saved_views.py
+- src/api/events/entities.py
+- src/api/projects/entities.py
+- docs/api/openapi.yaml
+- sdks/python/conflux_sdk/generated.py
+- sdks/typescript/generated.ts
+- tests/integration/test_entity_query.py
+- tests/integration/test_saved_views.py
+- src/web/lib/entityQuery.ts
+- src/web/lib/savedViews.ts
+- src/web/components/EntityGrid.tsx
+- src/web/components/EntityGrid.test.tsx
+- src/web/styles/components.css
+- tests/e2e/grid-search.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: Search through the one query contract
+  result: pass
+  evidence: the entity query gained a single optional parameter, search - whitespace-separated words (at most 5, 2 to 200 characters each), every word must match, case-insensitively, at least one of the entity's search_fields (registered TEXT fields; projects search name, description, track, team and creator, applications username, note and decider), ANDed with the filter and the viewer's own base rows. Wildcards are text. Errors are keyed search[i]. The catalogue lists search_fields and a page echoes search
+- item: Saved views carry a search
+  result: pass
+  evidence: an optional search key in a view definition, validated at save time and stored only when used, so every existing view round-trips unchanged (the pre-existing stored-keys assertion still passes untouched); a view that no longer fits is reported, never loosened
+- item: The search box and its states
+  result: pass
+  evidence: a labelled search box above a list that has search fields (none, no box), 300 ms pause, one letter is not asked for and says so, a polite count for the text, an empty result offers clearing, a change goes back to page one with the selection cleared; applying a view sets the box and the current view includes it
+invariants:
+- item: One query model, typed text kept out of URLs and storage
+  result: pass
+  evidence: no second syntax and no client-side filtering; search is transient state; unit and browser tests assert the address and localStorage never contain it
+- item: Compatibility
+  result: pass
+  evidence: no migration; OpenAPI and both SDKs regenerated and checked; the 46 baseline query and saved-view tests pass unchanged beside the new ones
+verification:
+- command: .venv/bin/python -m pytest tests/integration/test_entity_query.py tests/integration/test_saved_views.py -q
+  result: pass
+  note: 53 passed (7 new - words, fields, case, AND with filter, wildcards, 400 keys, entity without search, judge refused, registration rule, view round trip)
+- command: .venv/bin/python scripts/check_openapi_artifact.py && .venv/bin/python scripts/generate_sdks.py --check
+  result: pass
+  note: after regeneration
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 150 files, 829 tests (search 2)
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts grid-search (stack rebuilt first)
+  result: pass
+  note: 2 passed, desktop and mobile - the UI count equals the API's for the same word, one letter refused, no match says 0 results, cleared returns the list, address free of the text, axe clean
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: search sits above the grid tools in the base state, not behind a disclosure
+- ref: design/state-matrix
+  result: pass
+  note: idle hint, too short, results, none, cleared
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: one additive parameter, tested and in OpenAPI
+- surface: cli
+  result: pass
+  evidence: planned and owned by T91 per the contract (the read command carries the same parameter); no command runs entity queries today
+- surface: mcp
+  result: pass
+  evidence: planned and owned by T91 per the contract
+- surface: audit
+  result: pass
+  evidence: reads only; saved-view writes already audited
+- surface: search
+  result: pass
+  evidence: this task
+- surface: docs
+  result: pass
+  evidence: spec 006 contract; user docs at T91
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Plain substring matching (no stemming, ranking or typo tolerance); searched fields are the registered text fields only.
+next: review

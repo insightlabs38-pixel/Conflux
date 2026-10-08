@@ -14,6 +14,7 @@ entities.register(
             "user", "decided_by"
         ),
         default_sort=("waitlist_position", "created_at"),
+        search_fields=("username", "note", "decided_by"),
         fields=(
             entities.Field("username", entities.TEXT, "user__username", "Applicant"),
             entities.Field(

@@ -22,6 +22,8 @@ export type EntityDescription = {
   key: string;
   label: string;
   default_sort: string[];
+  /** Keys of the fields a free-text search looks in; none means the list has no search. */
+  search_fields?: string[];
   fields: EntityField[];
 };
 
@@ -37,6 +39,8 @@ export type EntityQuery = {
   /** `name,-created_at`: a field per key, `-` for descending. */
   sort?: string;
   columns?: string[];
+  /** Free text: every word must appear in one of the list's search fields (server side). */
+  search?: string;
   limit?: number;
   offset?: number;
 };
@@ -48,6 +52,7 @@ export type EntityPage<Row = EntityRow> = {
   offset: number;
   filter: FilterNode | null;
   sort: string[];
+  search?: string;
   columns: string[];
   rows: Row[];
 };
@@ -86,6 +91,7 @@ export function entityUrl(
   const params = new URLSearchParams();
   if (query.filter) params.set("filter", canonicalFilter(query.filter));
   if (query.sort) params.set("sort", query.sort);
+  if (query.search) params.set("search", query.search);
   if (query.columns?.length) params.set("columns", query.columns.join(","));
   if (query.limit !== undefined) params.set("limit", String(query.limit));
   if (query.offset) params.set("offset", String(query.offset));

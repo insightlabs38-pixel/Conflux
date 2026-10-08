@@ -121,3 +121,23 @@ def test_a_role_that_may_not_query_gets_the_servers_refusal(monkeypatch, capsys)
         [*prefix, "entities", "query", str(event.public_id), "projects"], client_factory=factory
     )
     assert code == 1 and "403" in capsys.readouterr().err
+
+
+def test_group_and_subgroup_are_the_same_parameters_as_the_route(monkeypatch, capsys):
+    event, prefix, factory, seen = setup(monkeypatch)
+    code = cli.main(
+        [
+            *prefix,
+            "entities",
+            "query",
+            str(event.public_id),
+            "projects",
+            "--group",
+            "gallery_visible",
+        ],
+        client_factory=factory,
+    )
+    page = json.loads(capsys.readouterr().out)
+    assert code == 0 and page["group"] == "gallery_visible" and page["rows"] == []
+    assert [g["count"] for g in page["groups"]] == [2]
+    assert "group=gallery_visible" in seen[-1][2]

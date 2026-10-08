@@ -67,3 +67,15 @@ def test_the_credential_owner_keeps_their_own_rights_and_the_tool_needs_its_acti
     limited = credential(w, [f"POST:{MCP}", other.action])
     denied = tool(w, limited, "query_entity", {"entity": "projects"})
     assert "error" in denied or denied["result"]["isError"] is True
+
+
+def test_group_and_subgroup_return_buckets_through_the_tool(world):  # noqa: F811
+    w = world
+    token = credential(w, [f"POST:{MCP}", ACTION])
+    page = rows(
+        tool(w, token, "query_entity", {"entity": "projects", "group": "gallery_visible"})["result"]
+    )
+    assert page["rows"] == [] and page["group"] == "gallery_visible"
+    assert [(g["label"], g["count"]) for g in page["groups"]] == [("Yes", 1)]
+    refused = tool(w, token, "query_entity", {"entity": "projects", "group": "name"})["result"]
+    assert refused["isError"] is True and "Cannot group by" in refused["content"][0]["text"]

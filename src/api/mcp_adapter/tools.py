@@ -103,6 +103,16 @@ TOOLS = [
             },
             "columns": {"type": "string", "maxLength": 400, "description": "Comma list of fields."},
             "search": {"type": "string", "maxLength": 200, "description": "Free-text words."},
+            "group": {
+                "type": "string",
+                "maxLength": 60,
+                "description": "A groupable field: buckets with counts instead of rows.",
+            },
+            "subgroup": {
+                "type": "string",
+                "maxLength": 60,
+                "description": "A second groupable field.",
+            },
             "limit": {"type": "string", "pattern": "^[0-9]{1,3}$", "description": "1 to 100."},
             "offset": {"type": "string", "pattern": "^[0-9]{1,7}$"},
         },

@@ -1,0 +1,22 @@
+PD-F006-B01-T07 scale measurement, 2026-10-08, live stack (PostgreSQL), throwaway iso-min fixture seeded with 5,016 projects
+(5,012 added through the ORM in one bulk_create; the fixture's own 4 remain; 9 tracks; 11 rows contain the search word "needle").
+Disposed afterwards (manage.py e2e_fixture dispose).
+
+API (second of two requests each, ms; total; rows)
+  limit=25                              31   5016  25
+  limit=100&sort=name                   34   5016  100
+  limit=100&sort=-name&offset=5000      43   5016  16
+  search=needle                         34   11    11
+  limit=100&sort=track,-name            36   5016  100
+
+Browser, desktop project, projects grid (first row visible after page load / a header sort click to the sorted state)
+  25 rows   first row 1350 ms   sort 65 ms
+  50 rows   first row 1336 ms   sort 93 ms
+  100 rows  first row 1886 ms   sort 89 ms
+  25 rows   first row 1890 ms   sort 73 ms
+Footer at 100 rows: Showing 1-100 of 5,016, Rows per page 25 50 100, First, Previous, Page 1 of 51, Next, Last.
+
+Decision threshold (spec 006 contract, decision 8): a counted query or render above 300 ms at the largest page would be a
+performance escalation. Largest page: API 34-43 ms, interaction 89 ms. No escalation.
+Not measured: a first-load number is dominated by the application shell and other panels on the page, not by the grid.
+Automated guard: tests/integration/test_entity_query_scale.py (5,012 rows, exact paging, constant query count).

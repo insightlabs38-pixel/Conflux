@@ -50,6 +50,7 @@
   "read-only:slop-audit": 220,
   "read-only:uiv2-surfaces": 165,
   "read-only:share-link": 3,
+  "read-only:grid-paging": 3,
   "read-only:grid-bulk-bar": 4,
   "read-only:grid-selection": 3,
   "read-only:grid-filter": 4,

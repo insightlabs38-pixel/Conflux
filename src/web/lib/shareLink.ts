@@ -1,7 +1,8 @@
 import { appBasename, parseWorkspaceLocation, routes } from "./routes";
 
 /** The keys the app itself writes: context (`as`, `stage`, `plan`, `event`) and the panel entries. Anything else, such as typed text, is left out. */
-const SHAREABLE_KEY = /^(as|stage|plan|event|(sort|page|row|view)_[a-z0-9_]+)$/;
+const SHAREABLE_KEY =
+  /^(as|stage|plan|event|(sort|page|size|row|view)_[a-z0-9_]+)$/;
 
 /**
  * The address that reopens exactly what a person is looking at: the workspace view, its section,

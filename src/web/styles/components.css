@@ -3909,3 +3909,11 @@ html {
   flex-basis: 100%;
   font-size: var(--fs-13);
 }
+
+.cx-datagrid__size select {
+  min-height: 2rem;
+}
+.cx-datagrid__where {
+  font-variant-numeric: tabular-nums;
+  padding: 0 var(--sp-2);
+}

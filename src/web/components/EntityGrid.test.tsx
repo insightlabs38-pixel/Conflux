@@ -898,3 +898,27 @@ describe("column picker", () => {
     window.localStorage.clear();
   });
 });
+
+describe("rows per page", () => {
+  it("is a panel param that asks the server for that many, starts again at page one, and a page past the end lands on the last", async () => {
+    const { container, pages, root } = await mountAt(
+      "/w/w/participants?page_applications=2",
+    );
+    await until(() => pages.length > 0);
+    const select = container.querySelector<HTMLSelectElement>(
+      ".cx-datagrid__size select",
+    )!;
+    expect(select.value).toBe("25");
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(
+        HTMLSelectElement.prototype,
+        "value",
+      )!.set!.call(select, "50");
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    await until(() => pages.at(-1)?.limit === "50");
+    expect(search()).toBe("?size_applications=50"); // the page param was cleared with the size
+    expect(pages.at(-1)?.offset).toBeUndefined();
+    await act(async () => root.unmount());
+  });
+});

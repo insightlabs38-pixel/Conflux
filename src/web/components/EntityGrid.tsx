@@ -48,7 +48,7 @@ import {
   useLiveOperations,
 } from "../lib/shellPreferences";
 
-const PAGE_SIZE = 25;
+const PAGE_SIZES = [25, 50, 100];
 /** The most rows one selection holds: a page is never larger, and the bulk planner takes no more per operation. */
 const MAX_SELECTION = 100;
 
@@ -191,6 +191,13 @@ export function EntityGrid({
     .join(",");
   const setSort = (value: string) =>
     setSortParam(value.split(",").filter(Boolean).join(":"), { replace: true });
+  // rows per page is panel state like sort and page: a fixed set, so a link reproduces the list
+  const [sizeParam, setSizeParam] = useUrlParam(`size_${entity}`, {
+    clears: [`page_${entity}`],
+  });
+  const PAGE_SIZE = PAGE_SIZES.includes(Number(sizeParam))
+    ? Number(sizeParam)
+    : PAGE_SIZES[0];
   const offset = requestedPage > 1 ? (requestedPage - 1) * PAGE_SIZE : 0;
   const setOffset = (next: number) =>
     setPageParam(next > 0 ? String(Math.floor(next / PAGE_SIZE) + 1) : "", {
@@ -370,6 +377,17 @@ export function EntityGrid({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selected, rowsOnPage, selectable, selectionCommands, label, inspect]);
   useEffect(() => () => publishSelection(slot, null), [slot]);
+  // a link to a page that no longer exists (rows were removed) lands on the last one instead of an
+  // empty list
+  useEffect(() => {
+    const data = page.data;
+    if (!data || data.rows.length > 0 || data.total === 0 || offset === 0)
+      return;
+    setOffset(Math.floor((data.total - 1) / PAGE_SIZE) * PAGE_SIZE);
+    announce("That page no longer exists. Showing the last page.");
+    // only a new answer matters
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page.data]);
   const searchable = (description?.search_fields?.length ?? 0) > 0;
   const searchHint = useId();
   const columnsHint = useId();
@@ -672,6 +690,13 @@ export function EntityGrid({
           total={shownPage?.total}
           limit={PAGE_SIZE}
           offset={offset}
+          pageSizes={PAGE_SIZES}
+          onPageSize={(size) => {
+            setSizeParam(size === PAGE_SIZES[0] ? "" : String(size), {
+              replace: true,
+            });
+            clearSelection();
+          }}
           onPage={(next) => {
             // a selection is of the rows in front of the person: another page starts with none
             setOffset(next);

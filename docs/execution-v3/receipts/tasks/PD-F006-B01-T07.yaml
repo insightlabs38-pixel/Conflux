@@ -1,0 +1,85 @@
+version: 3
+task: PD-F006-B01-T07
+batch: PD-F006-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 777dfbb
+  head_commit: null
+changed_paths:
+- src/web/components/DataGrid.tsx
+- src/web/components/DataGrid.test.tsx
+- src/web/components/EntityGrid.tsx
+- src/web/components/EntityGrid.test.tsx
+- src/web/lib/shareLink.ts
+- src/web/lib/shareLink.test.ts
+- src/web/styles/components.css
+- tests/integration/test_entity_query_scale.py
+- tests/e2e/grid-paging.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+- docs/verification/PD-F006-B01/T07-scale.log
+deliverables:
+- item: Paging that holds up at scale (server paging, no client windowing)
+  result: pass
+  evidence: contract decision 8. The footer says Showing 51 to 75 of 5,012, Page 3 of 201, with First and Last (only when there is more than one page), Previous and Next, and a Rows per page choice of 25, 50 or 100 kept in the address as size_<entity> (fixed set; anything else is ignored; the default is not written; changing it returns to page one and clears the selection). A link to a page that no longer exists lands on the last page and says so
+- item: Evidence on a 5,012-row event
+  result: pass
+  evidence: pytest on 5,012 projects - exact total, first and last page contents, no overlap or gap across sizes, a query count that does not grow with the rows, search and filter counts; live measurement on PostgreSQL with 5,016 projects - API 31 to 43 ms, a header sort at 100 rows 89 ms, against the 300 ms threshold; recorded in docs/verification/PD-F006-B01/T07-scale.log
+invariants:
+- item: One paging model
+  result: pass
+  evidence: the server's limit and offset with a counted total; no virtualization layer beside it, so native table semantics, find in page and keyboard behaviour are unchanged
+- item: No test weakened
+  result: pass
+  evidence: tests added; the existing paging tests pass unchanged
+verification:
+- command: .venv/bin/python -m pytest tests/integration/test_entity_query.py tests/integration/test_saved_views.py tests/integration/test_entity_query_scale.py -q
+  result: pass
+  note: 56 passed
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 151 files, 842 tests (footer in thousands, First, Last and page size, single page, size param and its reset, share link keeps size)
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts grid-paging (stack rebuilt first)
+  result: pass
+  note: 2 passed, desktop and mobile - page size to the address and back, a link past the end lands on the last page, an unknown size ignored, axe clean
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: the Wide-1920 cues are the range text and server-side sort and query; the design's tiny thumb belongs to a windowed grid and is deliberately not built
+- ref: design/state-matrix
+  result: pass
+  note: first page, middle, last, single page, empty, page past the end
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: limit at most 100 and offset already exist; measured, no change
+- surface: cli
+  result: pass
+  evidence: T91 (limit and offset are parameters of the route)
+- surface: mcp
+  result: pass
+  evidence: T91
+- surface: audit
+  result: pass
+  evidence: reads only
+- surface: search
+  result: pass
+  evidence: counted totals with search and filter verified at scale
+- surface: docs
+  result: pass
+  evidence: T91
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Offset paging counts the whole result on every page; at 5,016 rows that is 31 to 43 ms. A dataset several hundred times larger would call for keyset paging, which is a contract change to raise then, not now.
+- The measurement is one machine and one run set, not a benchmark; the pytest guard checks shape, not speed.
+next: review

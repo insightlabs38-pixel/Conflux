@@ -8,11 +8,11 @@ describe("shareable link", () => {
     expect(
       shareableHref(
         "/app/w/w1/participants",
-        "?section=ProjectsGrid&event=e1&view_projects=v1&sort_projects=-name&page_projects=3&row_projects=r1",
+        "?section=ProjectsGrid&event=e1&view_projects=v1&sort_projects=-name&page_projects=3&size_projects=50&row_projects=r1",
         O,
       ),
     ).toBe(
-      `${O}/app/w/w1/participants?event=e1&page_projects=3&row_projects=r1&sort_projects=-name&view_projects=v1&section=ProjectsGrid`,
+      `${O}/app/w/w1/participants?event=e1&page_projects=3&row_projects=r1&size_projects=50&sort_projects=-name&view_projects=v1&section=ProjectsGrid`,
     );
   });
 

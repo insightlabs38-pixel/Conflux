@@ -359,3 +359,79 @@ describe("DataGrid", () => {
     act(() => root.unmount());
   });
 });
+
+describe("DataGrid paging footer", () => {
+  function Host({
+    offset = 50,
+    limit = 25,
+    total = 5012,
+    onPage = () => {},
+    onPageSize,
+  }: {
+    offset?: number;
+    limit?: number;
+    total?: number;
+    onPage?: (n: number) => void;
+    onPageSize?: (n: number) => void;
+  }) {
+    return (
+      <DataGrid
+        label="People"
+        columns={COLUMNS}
+        rows={ROWS}
+        total={total}
+        limit={limit}
+        offset={offset}
+        onPage={onPage}
+        pageSizes={[25, 50, 100]}
+        onPageSize={onPageSize}
+      />
+    );
+  }
+  it("says where the page is in thousands, jumps to the first and last pages and changes the page size", async () => {
+    const jumps: number[] = [];
+    const sizes: number[] = [];
+    const { container, root } = mount(
+      <Host onPage={(n) => jumps.push(n)} onPageSize={(n) => sizes.push(n)} />,
+    );
+    const text = () =>
+      container.querySelector(".cx-datagrid__footer")!.textContent!;
+    expect(text()).toContain("Showing 51–53 of 5,012");
+    expect(text()).toContain("Page 3 of 201");
+    const press = (name: string) =>
+      [...container.querySelectorAll("button")].find(
+        (b) => b.textContent === name,
+      )!;
+    await act(async () => press("Last").click());
+    await act(async () => press("First").click());
+    await act(async () => press("Next").click());
+    expect(jumps).toEqual([5000, 0, 75]);
+    const select = container.querySelector<HTMLSelectElement>(
+      ".cx-datagrid__size select",
+    )!;
+    expect([...select.options].map((o) => o.value)).toEqual([
+      "25",
+      "50",
+      "100",
+    ]);
+    await act(async () => {
+      Object.getOwnPropertyDescriptor(
+        HTMLSelectElement.prototype,
+        "value",
+      )!.set!.call(select, "100");
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    expect(sizes).toEqual([100]);
+    act(() => root.unmount());
+  });
+
+  it("shows no first, last or page choice for a single page and handles an empty result", async () => {
+    const { container, root } = mount(<Host offset={0} total={3} />);
+    const names = [
+      ...container.querySelectorAll(".cx-datagrid__pages button"),
+    ].map((b) => b.textContent);
+    expect(names).toEqual(["Previous", "Next"]);
+    expect(container.textContent).toContain("Page 1 of 1");
+    act(() => root.unmount());
+  });
+});

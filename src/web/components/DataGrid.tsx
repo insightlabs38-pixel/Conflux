@@ -88,6 +88,8 @@ export function DataGrid<Row extends { id: string }>({
   limit,
   offset,
   onPage,
+  pageSizes,
+  onPageSize,
   density = "comfortable",
   selected,
   highlightedId,
@@ -109,6 +111,9 @@ export function DataGrid<Row extends { id: string }>({
   limit?: number;
   offset?: number;
   onPage?: (offset: number) => void;
+  /** Rows per page the person may choose between, and the handler; omitted, the size is fixed. */
+  pageSizes?: number[];
+  onPageSize?: (size: number) => void;
   density?: GridDensity;
   selected?: ReadonlySet<string>;
   onSelect?: (ids: Set<string>) => void;
@@ -371,7 +376,9 @@ export function DataGrid<Row extends { id: string }>({
       <div className="cx-datagrid__footer">
         <span role="status">
           {total !== undefined
-            ? `Showing ${first}–${last} of ${total}`
+            ? total === 0
+              ? "Showing 0 of 0"
+              : `Showing ${first.toLocaleString("en-US")}–${last.toLocaleString("en-US")} of ${total.toLocaleString("en-US")}`
             : `${rows.length} rows`}
           {selectable && chosen.size > 0 ? ` · ${chosen.size} selected` : ""}
         </span>
@@ -380,8 +387,32 @@ export function DataGrid<Row extends { id: string }>({
             Clear selection
           </Button>
         )}
+        {paged && pageSizes && onPageSize && (
+          <label className="cx-datagrid__size">
+            Rows per page{" "}
+            <select
+              value={limit}
+              onChange={(e) => onPageSize(Number(e.target.value))}
+            >
+              {pageSizes.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         {paged && (
           <nav aria-label={`${label} pages`} className="cx-datagrid__pages">
+            {(total ?? 0) > limit! && (
+              <Button
+                variant="secondary"
+                disabled={(offset ?? 0) <= 0}
+                onClick={() => onPage(0)}
+              >
+                First
+              </Button>
+            )}
             <Button
               variant="secondary"
               disabled={(offset ?? 0) <= 0}
@@ -389,6 +420,10 @@ export function DataGrid<Row extends { id: string }>({
             >
               Previous
             </Button>
+            <span className="cx-datagrid__where">
+              Page {Math.floor((offset ?? 0) / limit) + 1} of{" "}
+              {Math.max(1, Math.ceil(total / limit)).toLocaleString("en-US")}
+            </span>
             <Button
               variant="secondary"
               disabled={(offset ?? 0) + limit >= total}
@@ -396,6 +431,15 @@ export function DataGrid<Row extends { id: string }>({
             >
               Next
             </Button>
+            {total > limit && (
+              <Button
+                variant="secondary"
+                disabled={(offset ?? 0) + limit >= total}
+                onClick={() => onPage(Math.floor((total - 1) / limit) * limit)}
+              >
+                Last
+              </Button>
+            )}
           </nav>
         )}
       </div>

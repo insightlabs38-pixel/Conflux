@@ -35,6 +35,13 @@ export type RouteTarget = {
 
 /** A param value is a public id or a value from a fixed set: never free text (lib/urlState.ts). */
 const SAFE_VALUE = /^[A-Za-z0-9_.:-]{1,100}$/;
+/** A transient view (`f_<entity>`, lib/transientView.ts) is URL-safe base64 of a structured filter. */
+const ENCODED_VIEW_KEY = /^f_[a-z0-9_]+$/;
+const ENCODED_VIEW_VALUE = /^[A-Za-z0-9_-]{1,1500}$/;
+const safeParam = (key: string, value: string) =>
+  ENCODED_VIEW_KEY.test(key)
+    ? ENCODED_VIEW_VALUE.test(value)
+    : SAFE_VALUE.test(value);
 /** The context params come first, in the order the app has always written them. */
 const CONTEXT_ORDER = ["as", "stage", "plan", "invite"];
 const SAFE_KEY = /^[a-z][a-z0-9_]{0,39}$/;
@@ -74,7 +81,7 @@ function workspaceTarget(workspaceId: string, target: RouteTarget): string {
   const pairs: [string, string][] = [];
   const add = (key: string, value: string | undefined) => {
     if (value === undefined || value === "") return;
-    if (!SAFE_KEY.test(key) || !SAFE_VALUE.test(value))
+    if (!SAFE_KEY.test(key) || !safeParam(key, value))
       throw new TypeError(`"${key}" is not a safe URL param`);
     pairs.push([key, value]);
   };
@@ -132,7 +139,7 @@ export function parseWorkspaceLocation(
   const target: RouteTarget = { view };
   const params: Record<string, string> = {};
   for (const [key, value] of new URLSearchParams(search)) {
-    if (!SAFE_KEY.test(key) || !SAFE_VALUE.test(value)) continue;
+    if (!SAFE_KEY.test(key) || !safeParam(key, value)) continue;
     if (key === "event") target.event = value;
     else if (key === "section") target.section = value;
     else params[key] = value;

@@ -191,6 +191,8 @@ export function describeFilter(
   const op = operatorLabel(typeOf(filter.field), filter.op);
   if (filter.op === "between" && Array.isArray(filter.value))
     return `${label(filter.field)} ${op} ${filter.value.join(" and ")}`;
+  if (typeOf(filter.field) === "bool" && typeof filter.value === "boolean")
+    return `${label(filter.field)} ${op} ${filter.value ? "yes" : "no"}`;
   return `${label(filter.field)} ${op} ${valueText(filter.value)}`.trim();
 }
 

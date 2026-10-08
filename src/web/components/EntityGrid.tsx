@@ -26,7 +26,12 @@ import {
   type SortState,
 } from "./DataGrid";
 import { FilterBuilder } from "./FilterBuilder";
-import { describeFilter, filterProblems } from "../lib/entityQuery";
+import {
+  canonicalFilter,
+  describeFilter,
+  filterProblems,
+} from "../lib/entityQuery";
+import { decodeFilter, encodeFilter } from "../lib/transientView";
 import { ViewBar } from "./ViewBar";
 import { Inspector } from "./Inspector";
 import { useUrlParam } from "../lib/urlState";
@@ -218,6 +223,14 @@ export function EntityGrid({
   // The filter is applied a moment after the last change, so a half-typed date or number is not
   // asked of the server on every keystroke (the box shows what is typed at once).
   const [queryFilter, setQueryFilter] = useState<FilterNode | null>(filter);
+  // The filter in front of the person is also in the address when every value of it is structured
+  // (lib/transientView.ts), so a link opens the same list without saving anything; a filter with
+  // text is never put in a link and the person is told how to share it.
+  const [encodedParam, setEncodedParam] = useUrlParam(`f_${entity}`);
+  const [viewParam] = useUrlParam(`view_${entity}`);
+  const handledLink = useRef("");
+  const viewFilterText = useRef("");
+  const [linkNote, setLinkNote] = useState("");
   useEffect(() => {
     const timer = setTimeout(() => setQueryFilter(filter), 400);
     return () => clearTimeout(timer);
@@ -280,6 +293,9 @@ export function EntityGrid({
       const query = view?.query;
       setFilter(query?.filter ?? null);
       setQueryFilter(query?.filter ?? null);
+      viewFilterText.current = query?.filter
+        ? canonicalFilter(query.filter)
+        : "";
       setSearchText(query?.search ?? "");
       setSearch(query?.search ?? "");
       if (!(fromLink && sortRef.current)) setSort(query?.sort ?? "");
@@ -388,6 +404,48 @@ export function EntityGrid({
     // only a new answer matters
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page.data]);
+  // open a link: its filter is checked against this list's catalogue and applied whole or not at all
+  useEffect(() => {
+    if (!description || !encodedParam || handledLink.current === encodedParam)
+      return;
+    handledLink.current = encodedParam;
+    const decoded = decodeFilter(encodedParam, description.fields);
+    if (decoded) {
+      setFilter(decoded);
+      setQueryFilter(decoded);
+    } else {
+      announce(
+        "This link's filter could not be used, so the list shows everything.",
+      );
+      setEncodedParam("", { replace: true });
+    }
+    // only a new parameter or catalogue matters
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [description, encodedParam]);
+  // keep the address in step with the filter on screen
+  useEffect(() => {
+    if (!description) return;
+    if (encodedParam && handledLink.current !== encodedParam) return; // a link not yet read
+    const encoded = encodeFilter(filter, description.fields);
+    setLinkNote(
+      encoded.kind === "text"
+        ? "This filter has text or an id, so it is not in the link. Save it as a view to share it."
+        : encoded.kind === "long"
+          ? "This filter is too long for a link. Save it as a view to share it."
+          : "",
+    );
+    const sameAsView =
+      viewParam !== "" &&
+      filter !== null &&
+      canonicalFilter(filter) === viewFilterText.current;
+    const wanted = encoded.kind === "ok" && !sameAsView ? encoded.text : "";
+    if (wanted !== encodedParam) {
+      handledLink.current = wanted;
+      setEncodedParam(wanted, { replace: true });
+    }
+    // the setters only write the address
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter, description, viewParam, encodedParam]);
   const searchable = (description?.search_fields?.length ?? 0) > 0;
   const searchHint = useId();
   const columnsHint = useId();
@@ -525,6 +583,7 @@ export function EntityGrid({
             >
               Clear filter
             </button>
+            {linkNote && <p className="cx-muted">{linkNote}</p>}
             {problems && (
               <p role="status" className="cx-filter-problem">
                 This filter could not be applied, so the list shows the last

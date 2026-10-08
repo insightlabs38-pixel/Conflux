@@ -46,3 +46,40 @@ describe("shareable link", () => {
     expect(shareableHref("/event/e1", "", O)).toBeNull();
   });
 });
+
+describe("a transient view in a shared link", () => {
+  const encoded =
+    "eyJmaWVsZCI6ImdhbGxlcnlfdmlzaWJsZSIsIm9wIjoiZXEiLCJ2YWx1ZSI6dHJ1ZX0".repeat(
+      8,
+    ); // 480 characters
+  it("keeps an encoded filter of up to 1,500 URL-safe characters and drops anything else under that key", () => {
+    const kept = shareableHref(
+      "/app/w/w1/participants",
+      `?event=e1&f_projects=${encoded}&section=ProjectsGrid`,
+      O,
+    )!;
+    expect(kept).toContain(`f_projects=${encoded}`);
+    expect(
+      shareableHref(
+        "/app/w/w1/participants",
+        "?event=e1&f_projects=has%20space%3Cb%3E",
+        O,
+      ),
+    ).not.toContain("f_projects");
+    expect(
+      shareableHref(
+        "/app/w/w1/participants",
+        `?event=e1&f_projects=${"a".repeat(1501)}`,
+        O,
+      ),
+    ).not.toContain("f_projects");
+    // an ordinary param keeps the short rule
+    expect(
+      shareableHref(
+        "/app/w/w1/participants",
+        `?event=e1&sort_projects=${"a".repeat(101)}`,
+        O,
+      ),
+    ).not.toContain("sort_projects");
+  });
+});

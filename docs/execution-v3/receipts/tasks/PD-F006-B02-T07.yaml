@@ -1,0 +1,86 @@
+version: 3
+task: PD-F006-B02-T07
+batch: PD-F006-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: bab371c
+  head_commit: null
+changed_paths:
+- src/web/lib/transientView.ts
+- src/web/lib/transientView.test.ts
+- src/web/lib/routes.ts
+- src/web/lib/shareLink.ts
+- src/web/lib/shareLink.test.ts
+- src/web/lib/shellPreferences.ts
+- src/web/lib/entityQuery.ts
+- src/web/lib/entityQuery.test.ts
+- src/web/components/EntityGrid.tsx
+- src/web/components/EntityGrid.test.tsx
+- tests/e2e/grid-transient-view.spec.ts
+- tests/e2e/tiers.json
+- tests/e2e/weights.json
+deliverables:
+- item: A transient view in the address
+  result: pass
+  evidence: the filter in front of the person is mirrored to f_<entity> in the address (URL-safe base64 of its canonical text, at most 1,500 characters) when every value of it is structured, and a link that carries one opens the same filtered list for anyone, with the server's own rows; the copied link, the tabs and the palette's Copy link carry it. A saved view that is selected and unchanged is not duplicated into the address
+- item: Free text is never in a link
+  result: pass
+  evidence: a value that is text or an id keeps the whole filter out of the address (nothing is partly encoded) and the filter line says This filter has text or an id, so it is not in the link. Save it as a view to share it; a filter too long for a link says so too
+- item: A link is refused whole when it does not fit
+  result: pass
+  evidence: on open the link is decoded and checked again against this list's catalogue (field filterable, operator offered, value in the field's choices or a number or a date, depth and 20 conditions); anything else is refused as a whole with a spoken notice, the list shows everything and the address is cleaned; the server validates the filter once more
+invariants:
+- item: One query model, URL rule kept
+  result: pass
+  evidence: the link carries the server's own filter tree and nothing else; the only change to the router's rule is one extra key class (f_) with a longer URL-safe value, validated in one place (routes.ts); every other param keeps its 100-character id-like rule (tested)
+- item: No test weakened
+  result: pass
+  evidence: tests added; the filter sentence now says yes or no for a yes-or-no field, which no earlier test asserted otherwise
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 153 files, 858 tests (encoder round trip, refusals, bounds, grid open and refuse and write, share link keeps and drops)
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts grid-transient-view grid-filter (stack rebuilt first)
+  result: pass
+  note: 8 passed, desktop and mobile - In gallery is yes puts f_projects in the address (not spelled out), a fresh page opens the same sentence and the API's total, axe clean; a text condition removes it and says why; a forged and a malformed link are refused with the full list and a clean address
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: copy link on a view and an equivalent query line; no new chrome beyond one line of text
+- ref: design/state-matrix
+  result: pass
+  note: shareable, text, too long, refused link
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: not required; the server validates the decoded filter as always
+- surface: cli
+  result: pass
+  evidence: not applicable; the CLI takes the filter JSON directly
+- surface: mcp
+  result: pass
+  evidence: not applicable
+- surface: audit
+  result: pass
+  evidence: reads only
+- surface: search
+  result: pass
+  evidence: search text stays out of links, as in B01
+- surface: docs
+  result: pass
+  evidence: T91
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Only the filter is in the link; sort, page and rows per page were already, columns and search are not.
+- Numbers and dates count as structured; if the owner prefers enum, yes or no and emptiness only, that is one function.
+next: review

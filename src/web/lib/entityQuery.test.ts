@@ -65,6 +65,14 @@ describe("describing a filter", () => {
     { key: "track", label: "Track" },
     { key: "created_at", label: "Applied" },
   ];
+  it("says yes or no for a yes-or-no field", () => {
+    expect(
+      describeFilter({ field: "visible", op: "eq", value: true }, [
+        { key: "visible", label: "In gallery", type: "bool" },
+      ]),
+    ).toBe("In gallery is yes");
+  });
+
   it("reads the tree as a sentence, bracketing the other kind of group", () => {
     expect(describeFilter(null, fields)).toBe("");
     expect(

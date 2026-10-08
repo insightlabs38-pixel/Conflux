@@ -922,3 +922,97 @@ describe("rows per page", () => {
     await act(async () => root.unmount());
   });
 });
+
+describe("transient view in the address", () => {
+  const encode = (node: unknown) =>
+    btoa(JSON.stringify(node))
+      .replaceAll("+", "-")
+      .replaceAll("/", "_")
+      .replace(/=+$/, "");
+  const status = { field: "status", op: "eq", value: "pending" };
+
+  it("opens a link's structured filter, asks the server for it and shows it as the active filter", async () => {
+    const { container, pages, root } = await mountAt(
+      `/w/w/participants?f_applications=${encode(status)}`,
+    );
+    await until(() => pages.some((p) => p.filter !== undefined));
+    expect(JSON.parse(pages.at(-1)!.filter)).toEqual(status);
+    await until(
+      () =>
+        container.textContent?.includes("Filter: Status is pending") ?? false,
+    );
+    expect(search()).toContain("f_applications="); // the link stays as it was
+    await act(async () => root.unmount());
+  });
+
+  it("refuses a link whole when it holds text or does not fit, says so and shows everything", async () => {
+    const note: string[] = [];
+    window.addEventListener("conflux:shell-notice", (e) =>
+      note.push((e as CustomEvent<string>).detail),
+    );
+    const { container, pages, root } = await mountAt(
+      `/w/w/participants?f_applications=${encode({ field: "username", op: "eq", value: "ada" })}`,
+    );
+    await until(() => pages.length > 0);
+    await until(() => note.some((n) => n.includes("could not be used")));
+    expect(pages.every((p) => p.filter === undefined)).toBe(true);
+    expect(search()).not.toContain("f_applications");
+    expect(container.querySelector('[aria-label="Active filter"]')).toBeNull();
+    await act(async () => root.unmount());
+  });
+
+  it("writes a structured filter to the address, keeps free text out of it and says how to share that", async () => {
+    const { container, root } = await mountAt("/w/w/participants");
+    await until(() => container.querySelector("tbody tr") !== null);
+    await act(async () => press(container, "Add condition"));
+    await act(async () =>
+      choose(
+        container.querySelector<HTMLSelectElement>(
+          '[aria-label="Field of condition 1"]',
+        )!,
+        "status",
+      ),
+    );
+    await act(async () =>
+      choose(
+        container.querySelector<HTMLSelectElement>(
+          '[aria-label="Value of condition 1"]',
+        )!,
+        "approved",
+      ),
+    );
+    await until(() => search().includes("f_applications="));
+    const written = new URLSearchParams(search()).get("f_applications")!;
+    expect(
+      JSON.parse(atob(written.replaceAll("-", "+").replaceAll("_", "/"))),
+    ).toEqual({
+      field: "status",
+      op: "eq",
+      value: "approved",
+    });
+    // typed text: not in the address, and the person is told
+    await act(async () =>
+      choose(
+        container.querySelector<HTMLSelectElement>(
+          '[aria-label="Field of condition 1"]',
+        )!,
+        "username",
+      ),
+    );
+    await act(async () =>
+      choose(
+        container.querySelector<HTMLInputElement>(
+          '[aria-label="Value of condition 1"]',
+        )!,
+        "ada",
+      ),
+    );
+    await until(() => !search().includes("f_applications"));
+    expect(search()).not.toContain("ada");
+    await until(
+      () => container.textContent?.includes("not in the link") ?? false,
+    );
+    expect(container.textContent).toContain("Save it as a view to share it.");
+    await act(async () => root.unmount());
+  });
+});

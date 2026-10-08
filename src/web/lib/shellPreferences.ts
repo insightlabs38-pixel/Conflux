@@ -421,7 +421,7 @@ export const useOpsPane = (user: string): OpsPane | "" =>
  */
 export const MAX_TABS = 8;
 const TAB =
-  /^\/w\/[A-Za-z0-9_.:-]{1,100}\/[a-z][a-z-]{0,39}(\?[A-Za-z0-9_.:=&-]{0,400})?$/;
+  /^\/w\/[A-Za-z0-9_.:-]{1,100}\/[a-z][a-z-]{0,39}(\?[A-Za-z0-9_.:=&-]{0,1800})?$/;
 
 export function workspaceTabs(user: string, workspace: string): string[] {
   if (!user || !workspace) return [];

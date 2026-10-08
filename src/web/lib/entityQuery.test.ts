@@ -106,20 +106,24 @@ describe("describing a filter", () => {
 });
 
 describe("reading the server's filter problems", () => {
-  it("attaches a message to the top-level condition its path names", () => {
+  it("attaches each message to the node its path names, and whole-filter messages to general", () => {
     const found = filterProblems({
       "filter.and[1].value": ["Not a valid date."],
-      "filter.or[0].or[2].op": ["Unknown operator."],
+      "filter.and[1].or[0].op": ["Unknown operator."],
       "filter.and[1].op": ["Cannot use it."],
       filter: ["Too deep."],
       other: ["ignored"],
     });
     expect(found).toEqual({
-      byCondition: {
-        0: "Unknown operator.",
-        1: "Not a valid date. Cannot use it.",
+      byPath: {
+        "and[1]": "Not a valid date. Cannot use it.",
+        "and[1].or[0]": "Unknown operator.",
       },
       general: ["Too deep."],
+    });
+    expect(filterProblems({ "filter.op": ["Bad."] })).toEqual({
+      byPath: {},
+      general: ["Bad."],
     });
     expect(filterProblems({ sort: ["x"] })).toBeNull();
     expect(filterProblems("text")).toBeNull();

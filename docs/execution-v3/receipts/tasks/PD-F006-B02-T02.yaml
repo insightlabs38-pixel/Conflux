@@ -1,0 +1,81 @@
+version: 3
+task: PD-F006-B02-T02
+batch: PD-F006-B02
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 1b38c53
+  head_commit: null
+changed_paths:
+- src/web/components/FilterBuilder.tsx
+- src/web/components/FilterBuilder.test.tsx
+- src/web/lib/entityQuery.ts
+- src/web/lib/entityQuery.test.ts
+- tests/e2e/grid-filter.spec.ts
+deliverables:
+- item: Nested AND/OR filter groups, edited in the grid
+  result: pass
+  evidence: the builder is now recursive over the same tree the server reads. A filter is match all or any of conditions and of groups of them; Add group (a group of the other kind) and Add condition to group N nest up to three levels (the server allows four), each group has its own Match all or any, Remove group, and a legend (Group 1, match any of these); at most 20 conditions (the server's limit) with a stated reason when reached. Conditions are numbered in order across the whole tree, so the labels the earlier tests and specs use are unchanged. Empty groups disappear, a root with one child is that child, so the stored text stays canonical and a plain condition remains a plain condition
+- item: Anything made elsewhere survives
+  result: pass
+  evidence: a negation (not) in a saved view or a link is kept exactly as it is inside an editable group and can be removed, and a lone negation is read-only as before; nested filters from saved views open as nested groups instead of the earlier cannot be edited here
+- item: Refusals shown at the right depth
+  result: pass
+  evidence: the server names a part by path (filter.and[1].or[0].value); the builder keys its messages by node path, so the message appears beside that nested condition and group, with aria-invalid on its control; messages about the whole filter stay general
+invariants:
+- item: One query model, the server validates
+  result: pass
+  evidence: the builder emits the server's own tree and nothing else; the active-filter sentence (B01) already reads nested trees
+- item: Typing does not lose focus
+  result: pass
+  evidence: groups and conditions are render functions, not components defined in the render, so an input keeps its identity while the tree changes; a test asserts the same element after typing
+- item: No test weakened
+  result: pass
+  evidence: one existing test (a nested filter cannot be edited here) asserted the limitation this task removes and is replaced by tests of the new behaviour (negation kept and editable around it, lone negation read-only); the problems test follows the new path-keyed shape; everything else unchanged
+verification:
+- command: cd src/web && npx tsc --noEmit && npx vitest run
+  result: pass
+  note: 151 files, 845 tests (nested add, edit without remount, switch match, remove group, depth and 20-condition limits with reasons, nested server message, negation preserved)
+- command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts grid-filter (stack rebuilt first)
+  result: pass
+  note: 4 passed, desktop and mobile - a track condition with a nested any-group reads back as Track is T and (Project contains a or Project contains e), the total equals the API's for the same tree, axe clean, removing the group leaves the plain condition
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: nested group affordance with an equivalent query line (Data-Filters); chips are a later refinement
+- ref: design/state-matrix
+  result: pass
+  note: empty, one condition, nested, refused in a nested condition, at the limit
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: unit and browser tests
+- surface: api
+  result: pass
+  evidence: unchanged; the existing engine tests cover nested trees and limits
+- surface: cli
+  result: pass
+  evidence: the same tree is the CLI's --filter
+- surface: mcp
+  result: pass
+  evidence: the same tree is the tool's filter
+- surface: audit
+  result: pass
+  evidence: reads only
+- surface: search
+  result: pass
+  evidence: filter and search still combine on the server
+- surface: docs
+  result: pass
+  evidence: T91
+migrations: []
+findings: []
+escalations: []
+limitations:
+- Negations can be kept and removed but not authored in the builder.
+- The group kind alternates by default (a group inside an all-group matches any); the person can switch it.
+next: review

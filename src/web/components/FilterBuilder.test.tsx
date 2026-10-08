@@ -185,19 +185,139 @@ describe("FilterBuilder", () => {
     await act(async () => root.unmount());
   });
 
-  it("keeps a nested filter made elsewhere instead of flattening it", async () => {
-    const nested: FilterNode = {
-      and: [
-        { not: { field: "status", op: "eq", value: "pending" } },
-        { field: "username", op: "eq", value: "a" },
-      ],
-    };
-    const { container, seen, root } = mount(nested);
-    expect(container.textContent).toContain("cannot be edited here");
-    expect(container.querySelector("select")).toBeNull();
-    expect(seen).toEqual([]);
+  it("keeps a negation made elsewhere as it is while the rest stays editable, and reads a lone negation as read-only", async () => {
+    const negation = {
+      not: { field: "status", op: "eq", value: "pending" },
+    } as FilterNode;
+    const { container, seen, root } = mount({
+      and: [negation, { field: "username", op: "eq", value: "a" }],
+    });
+    expect(container.textContent).toContain("not (");
+    await act(async () => set(by(container, "Value of condition 1"), "b"));
+    expect(seen.at(-1)).toEqual({
+      and: [negation, { field: "username", op: "eq", value: "b" }], // the negation is untouched
+    });
     await act(async () => click(container, "Clear filter"));
     expect(seen.at(-1)).toBeNull();
+    await act(async () => root.unmount());
+
+    const alone = mount(negation);
+    expect(alone.container.textContent).toContain("cannot be edited here");
+    expect(alone.container.querySelector("select")).toBeNull();
+    expect(alone.seen).toEqual([]);
+    await act(async () => alone.root.unmount());
+  });
+
+  it("builds nested groups: add a group, edit inside it without losing the input, switch its match, remove it", async () => {
+    const { container, seen, root } = mount({
+      field: "username",
+      op: "eq",
+      value: "a",
+    });
+    await act(async () => click(container, "Add group"));
+    // one condition at the top, plus a group (of the other kind) holding one new condition
+    expect(seen.at(-1)).toEqual({
+      and: [
+        { field: "username", op: "eq", value: "a" },
+        { or: [{ field: "username", op: "eq", value: "" }] },
+      ],
+    });
+    expect(container.textContent).toContain("Group 1 (match any of these)");
+    const input = by(container, "Value of condition 2") as HTMLInputElement;
+    await act(async () => set(input, "z"));
+    // the control is the same element after typing: the tree did not remount it (focus would be lost)
+    expect(by(container, "Value of condition 2")).toBe(input);
+    await act(async () => click(container, "Add condition to group 1"));
+    expect(seen.at(-1)).toEqual({
+      and: [
+        { field: "username", op: "eq", value: "a" },
+        {
+          or: [
+            { field: "username", op: "eq", value: "z" },
+            { field: "username", op: "eq", value: "" },
+          ],
+        },
+      ],
+    });
+    await act(async () => set(by(container, "Match of group 1"), "and"));
+    expect((seen.at(-1) as { and: FilterNode[] }).and[1]).toMatchObject({
+      and: expect.any(Array),
+    });
+    await act(async () => click(container, "Remove group 1"));
+    expect(seen.at(-1)).toEqual({ field: "username", op: "eq", value: "a" }); // back to a plain condition
+    await act(async () => root.unmount());
+  });
+
+  it("stops at the group depth and at 20 conditions, and says why", async () => {
+    const { container, seen, root } = mount({
+      field: "username",
+      op: "eq",
+      value: "a",
+    });
+    await act(async () => click(container, "Add group"));
+    await act(async () => click(container, "Add group inside group 1"));
+    expect(container.textContent).toContain("Group 2");
+    // depth 3 is the most: the inner group offers no further group
+    expect(
+      [...container.querySelectorAll("button")].some(
+        (b) => b.textContent === "Add group inside group 2",
+      ),
+    ).toBe(false);
+    await act(async () => root.unmount());
+
+    const many: FilterNode = {
+      and: Array.from({ length: 20 }, (_, i) => ({
+        field: "username",
+        op: "eq",
+        value: String(i),
+      })),
+    };
+    const full = mount(many);
+    const add = [...full.container.querySelectorAll("button")].find(
+      (b) => b.textContent === "Add condition",
+    )!;
+    expect(add.disabled).toBe(true);
+    expect(full.container.textContent).toContain("at most 20 conditions");
+    expect(full.seen).toEqual([]);
+    await act(async () => full.root.unmount());
+    void seen;
+  });
+
+  it("shows the server's message beside the nested condition it names", async () => {
+    const found = {
+      byPath: { "and[1].or[0]": "Not a valid value." },
+      general: [],
+    };
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    act(() =>
+      root.render(
+        <FilterBuilder
+          fields={FIELDS}
+          value={{
+            and: [
+              { field: "username", op: "eq", value: "a" },
+              {
+                or: [
+                  { field: "username", op: "eq", value: "b" },
+                  { field: "status", op: "eq", value: "pending" },
+                ],
+              },
+            ],
+          }}
+          onChange={() => {}}
+          problems={found}
+        />,
+      ),
+    );
+    expect(container.textContent).toContain("Condition 2: Not a valid value.");
+    expect(
+      by(container, "Value of condition 2").getAttribute("aria-invalid"),
+    ).toBe("true");
+    expect(
+      by(container, "Value of condition 3").getAttribute("aria-invalid"),
+    ).toBeNull();
     await act(async () => root.unmount());
   });
 });

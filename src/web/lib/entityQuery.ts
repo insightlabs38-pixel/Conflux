@@ -170,36 +170,43 @@ export function describeFilter(
   return `${label(filter.field)} ${op} ${valueText(filter.value)}`.trim();
 }
 
-/** What the server said about a filter: a message per top-level condition, and any others. */
+/** What the server said about a filter: a message per node path, and any about the whole. */
 export type FilterProblems = {
-  byCondition: Record<number, string>;
+  /** Keyed by the node's path (`and[1].or[0]`); a condition or group of the builder looks itself up. */
+  byPath: Record<string, string>;
   general: string[];
 };
 
 /**
  * Read a 400 from the entity query. The server names the offending part by path
- * (`filter.and[1].op`); the builder shows each message beside the condition that holds that part
- * (a part inside a nested group is shown with its top-level condition).
+ * (`filter.and[1].or[0].value`); the node is that path without the final attribute (`op`, `value`,
+ * `field`), so the builder can show each message beside the condition or group that holds it. A
+ * message about the filter as a whole (the path is just `filter`) is general.
  */
 export function filterProblems(detail: unknown): FilterProblems | null {
   if (!detail || typeof detail !== "object") return null;
-  const found: FilterProblems = { byCondition: {}, general: [] };
+  const found: FilterProblems = { byPath: {}, general: [] };
   let any = false;
-  for (const [path, messages] of Object.entries(
+  for (const [key, messages] of Object.entries(
     detail as Record<string, unknown>,
   )) {
-    const match = /^filter(?:\.(?:and|or)\[(\d+)\])?/.exec(path);
-    if (!match) continue;
+    if (key !== "filter" && !key.startsWith("filter.")) continue;
     any = true;
     const text = Array.isArray(messages)
       ? messages.join(" ")
       : String(messages);
-    if (match[1] !== undefined) {
-      const index = Number(match[1]);
-      found.byCondition[index] = found.byCondition[index]
-        ? `${found.byCondition[index]} ${text}`
+    const parts = key.split(".").slice(1);
+    if (
+      parts.length &&
+      ["op", "value", "field"].includes(parts[parts.length - 1])
+    )
+      parts.pop();
+    const path = parts.join(".");
+    if (path === "") found.general.push(text);
+    else
+      found.byPath[path] = found.byPath[path]
+        ? `${found.byPath[path]} ${text}`
         : text;
-    } else found.general.push(text);
   }
   return any ? found : null;
 }

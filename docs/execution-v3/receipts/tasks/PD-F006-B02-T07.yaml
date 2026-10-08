@@ -44,7 +44,7 @@ invariants:
 verification:
 - command: cd src/web && npx tsc --noEmit && npx vitest run
   result: pass
-  note: 153 files, 858 tests (encoder round trip, refusals, bounds, grid open and refuse and write, share link keeps and drops)
+  note: 152 files, 858 tests (encoder round trip, refusals, bounds, grid open and refuse and write, share link keeps and drops)
 - command: E2E_BASE_URL=http://localhost:8080 npx playwright test -c tests/e2e/playwright.config.ts grid-transient-view grid-filter (stack rebuilt first)
   result: pass
   note: 8 passed, desktop and mobile - In gallery is yes puts f_projects in the address (not spelled out), a fresh page opens the same sentence and the API's total, axe clean; a text condition removes it and says why; a forged and a malformed link are refused with the full list and a clean address

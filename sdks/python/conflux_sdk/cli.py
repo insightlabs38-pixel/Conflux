@@ -14,6 +14,7 @@ from .client import ApiError, ConfluxClient
 EVENTS = "api_v1_workspaces_workspace_public_id_events"
 DETAIL = EVENTS + "_event_public_id"
 ARCHIVE = "api_v1_workspaces_workspace_public_id_archive"
+ENTITIES = DETAIL + "_entities"
 
 # The one table of what the CLI can do: each command and the generated operation(s) it calls
 # (`events import` previews, or applies with --apply). The completeness contract reads it
@@ -27,6 +28,8 @@ COMMANDS = {
     "events status": ("post_" + DETAIL + "_status",),
     "events export": ("get_" + DETAIL + "_archive",),
     "events import": ("post_" + ARCHIVE + "_preview", "post_" + ARCHIVE + "_import"),
+    "entities list": ("get_" + ENTITIES,),
+    "entities query": ("get_" + ENTITIES + "_entity_key",),
 }
 
 
@@ -121,6 +124,23 @@ def parser():
     importing.add_argument("--name", required=True)
     importing.add_argument("--slug", required=True)
     importing.add_argument("--apply", action="store_true")
+    entities = commands.add_parser(
+        "entities",
+        help="List what an event can be queried for, and run the same query the lists use",
+    ).add_subparsers(dest="action", required=True)
+    listing = entities.add_parser("list", help="The lists you may query, with fields and operators")
+    listing.add_argument("event", type=UUID)
+    querying = entities.add_parser("query", help="One page of a list (read-only)")
+    querying.add_argument("event", type=UUID)
+    querying.add_argument("entity", help="The list's key, for example projects")
+    querying.add_argument("--filter", help="Compact JSON filter tree")
+    querying.add_argument(
+        "--sort", help="Comma list of fields, - for descending (write --sort=-name)"
+    )
+    querying.add_argument("--columns", help="Comma list of fields to return")
+    querying.add_argument("--search", help="Free-text words; every word must match")
+    querying.add_argument("--limit", type=int, help="Rows per page, 1 to 100")
+    querying.add_argument("--offset", type=int, help="Rows to skip")
     return root
 
 
@@ -133,6 +153,16 @@ def execute(args, client):
     if hasattr(args, "event"):
         path["event_public_id"] = str(args.event)
     action = args.action
+    if args.command == "entities":
+        if action == "list":
+            return client.call(COMMANDS["entities list"][0], path=path)
+        path["entity_key"] = args.entity
+        query = {
+            name: getattr(args, name)
+            for name in ("filter", "sort", "columns", "search", "limit", "offset")
+            if getattr(args, name) is not None
+        }
+        return client.call(COMMANDS["entities query"][0], path=path, query=query)
     if action == "list":
         return client.call(COMMANDS["events list"][0], path=path)
     if action == "get":
@@ -150,13 +180,9 @@ def execute(args, client):
             },
         )
     if action == "update":
-        return client.call(
-            COMMANDS["events update"][0], path=path, body=read_object(args.input)
-        )
+        return client.call(COMMANDS["events update"][0], path=path, body=read_object(args.input))
     if action == "status":
-        return client.call(
-            COMMANDS["events status"][0], path=path, body={"status": args.status}
-        )
+        return client.call(COMMANDS["events status"][0], path=path, body={"status": args.status})
     if action == "export":
         if args.output != "-" and Path(args.output).exists():
             raise ValueError("Export output already exists; choose a new path.")

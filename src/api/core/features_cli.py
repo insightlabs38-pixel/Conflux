@@ -37,6 +37,8 @@ COMMAND = re.compile(r"[a-z]+(?: [a-z]+)*")
 # Commands that belong to no feature of the registry, and why. A command in the table must be
 # claimed by a feature or be here, so a new command cannot appear unowned.
 OUTSIDE = {
+    "entities list": "reads the entity catalogue route that every list shares, not a feature's own",
+    "entities query": "reads the entity query route that every list shares, not a feature's own",
     "whoami": "reads the caller's own identity, which is not a feature of an event",
     "events export": "runs through the archive routes that no feature claims yet (PD-F003-B02-T08)",
     "events import": "runs through the archive routes that no feature claims yet (PD-F003-B02-T08)",

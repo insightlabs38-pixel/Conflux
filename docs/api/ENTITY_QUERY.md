@@ -9,12 +9,19 @@ Workspace members only; an entity additionally names the roles that may query it
 - `GET /workspaces/{w}/events/{e}/entities/` lists what the caller may query, with each field's `type`, `operators`, `choices`, `sortable`, `filterable` and whether it is a default column.
 - `GET /workspaces/{w}/events/{e}/entities/{entity}/` returns `{entity, total, limit, offset, filter, sort, columns, rows}`. Every row has `id` (the public id) and the requested columns.
 
-| Parameter         | Meaning                                                                                                                                  |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `filter`          | Compact JSON filter tree (below). Empty: no filter.                                                                                      |
-| `sort`            | Comma list of sortable fields, `-` for descending, at most 3. The entity default applies when empty; the primary key always breaks ties. |
-| `columns`         | Comma list of registered fields to return; default: the entity's default columns.                                                        |
-| `limit`, `offset` | `limit` 1..100 (default 25), `offset` >= 0.                                                                                              |
+| Parameter         | Meaning                                                                                                                                                                                                                                                                                                                        |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `filter`          | Compact JSON filter tree (below). Empty: no filter.                                                                                                                                                                                                                                                                            |
+| `sort`            | Comma list of sortable fields, `-` for descending, at most 3. The entity default applies when empty; the primary key always breaks ties.                                                                                                                                                                                       |
+| `columns`         | Comma list of registered fields to return; default: the entity's default columns.                                                                                                                                                                                                                                              |
+| `search`          | Free text (PD-F006-B01): whitespace-separated words, at most 5 of 2 to 200 characters; every word must appear, case-insensitively, in at least one of the entity's `search_fields` (listed in the catalogue; an entity without them cannot be searched and answers 400). Combined with `filter`; a page echoes it as `search`. |
+| `limit`, `offset` | `limit` 1..100 (default 25), `offset` >= 0.                                                                                                                                                                                                                                                                                    |
+
+Empty values sort last in both directions, so the order reads the same on every database, and a counted `total` is returned with every page.
+
+## From the CLI and from an agent
+
+`scripts/conflux-admin entities list EVENT` and `scripts/conflux-admin entities query EVENT projects --search robot --sort=-name --columns name --limit 25` run these same two reads (write `--sort=-name` with an equals sign). The MCP tool `query_entity` takes the entity key and the same `filter`, `sort`, `columns`, `search`, `limit` and `offset`. Both are read-only, run as the credential and are refused exactly as the route refuses them.
 
 ## Filter tree
 

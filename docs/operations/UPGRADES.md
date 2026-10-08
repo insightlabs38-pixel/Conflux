@@ -199,6 +199,15 @@ No migration. Two small additive API changes (OpenAPI and both SDKs regenerated)
 - **On a phone** the brand word hides so the event switcher keeps its room; the browser suite's `goToDestination` is unchanged.
 - Integrators: scripts that read the event lists will now see `phase`; clients that list a person's memberships may see several rows for one workspace (one per role), as before.
 
+## Moving to a build with the first slice of the data grid (PD-F006-B01)
+
+No migration. One additive API parameter (`search` on the entity query, with `search_fields` in the catalogue; OpenAPI and both SDKs regenerated) and one new CLI command group and MCP tool that call existing routes.
+
+- **Lists**: a search box above lists that can be searched; sort by clicking a header, Shift-click adds a second and third key (the order is numbered and kept in the address); the active filter is read back as a sentence with Clear filter, and a value the server refuses is explained beside its condition; rows per page (25, 50, 100), First and Last, Page X of Y; a selection is only of the rows in view and has a Clear selection button; the bulk bar shows one primary action and says why one is unavailable; the column picker counts and can show all.
+- **Links** carry the sort, page and rows per page (`sort_`, `page_`, `size_`); search text is never in a link, save a view to share it.
+- **CLI and agents**: `conflux-admin entities list|query` and the MCP tool `query_entity` run the same query, read-only.
+- Integrators: empty values now sort last in both directions on every database; saved views may carry `search`, stored only when used.
+
 ## Moving to a build with the third slice of the application shell (PD-F005-B03)
 
 No migration and no API change. New device-local keys (versioned `conflux:v1:`): remembered columns, kept tabs, operations mode and live operations; they are cleared at sign-out. Unsaved edits in tabs are memory only.

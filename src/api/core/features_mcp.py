@@ -34,6 +34,7 @@ ARGUMENTS = "mcp_adapter.tools:PATH_ARG_NAMES"
 # Tools whose route is claimed by no feature, and why. They are read tools over routes of domains
 # the registry does not claim yet; each is still held by the route's own authorization.
 OUTSIDE = {
+    "query_entity": "reads the entity query route that every list shares, not a feature's own",
     "plan_progress": "reads a judging route that no feature claims yet",
     "plan_results": "reads a results route that no feature claims yet",
     "voting_results": "reads a voting route that no feature claims yet",

@@ -1,0 +1,92 @@
+version: 3
+task: PD-F006-B01-T91
+batch: PD-F006-B01
+status: candidate_complete
+executor:
+  worker_id: claude-sonnet-5-5-continuous
+  executor_class: implementation
+  model: claude-sonnet-5-5
+git:
+  branch: main
+  base_commit: 1b1fa76
+  head_commit: null
+changed_paths:
+- sdks/python/conflux_sdk/cli.py
+- src/api/mcp_adapter/tools.py
+- src/api/mcp_adapter/server.py
+- src/api/core/features_cli.py
+- src/api/core/features_mcp.py
+- tests/integration/test_cli_entities.py
+- tests/integration/test_mcp_entity_query.py
+- docs/verification/PD-F006-B01/SURFACES.md
+- docs/verification/PD-F006-B01/T91-verify-fast.log
+- docs/api/ENTITY_QUERY.md
+- docs/api/CLI.md
+- docs/operations/MCP.md
+- docs/operations/UPGRADES.md
+- docs/operations/VISUAL_FOUNDATION.md
+- docs/product-depth-v3/specs/006-universal-data-grid-and-saved-view-system.md
+deliverables:
+- item: Surface matrix closed, no undocumented skip
+  result: pass
+  evidence: docs/verification/PD-F006-B01/SURFACES.md closes every surface of spec 006 for this batch - web, api, cli, mcp, audit, search and docs done; sdk regenerated; the rest not required with the reason
+- item: CLI and MCP run the same query, read-only
+  result: pass
+  evidence: conflux-admin entities list and entities query (filter, sort, columns, search, limit, offset) call the generated operations for the two entity routes and send only GETs; the MCP tool query_entity calls the same route as the credential, with a slug-pattern entity argument and the same parameters. Neither adds a capability - authorization, role checks and refusals are the route's own, shown in the tests
+- item: Every required surface delegates to the same canonical operation, contracts synchronized
+  result: pass
+  evidence: no new route; the CLI table COMMANDS and the MCP catalogue stay held by the feature verifiers (both are recorded as outside commands or tools with reasons because no feature claims the shared entity routes), and make verify-fast passes
+- item: User, operator and developer documentation and migration notes
+  result: pass
+  evidence: ENTITY_QUERY.md (search, empty-values-last, CLI and agent use), CLI.md, MCP.md, UPGRADES.md (what people and integrators notice, no migration), VISUAL_FOUNDATION.md (developer notes) and spec 006 As built
+invariants:
+- item: No second source of truth, server authority
+  result: pass
+  evidence: no query logic outside core/query.py; the MCP server now validates a path argument against its own declared pattern instead of a hard-coded UUID check, with the UUID message kept for UUID arguments
+verification:
+- command: .venv/bin/python -m pytest tests/integration/test_cli_entities.py tests/integration/test_mcp_entity_query.py tests/integration/test_feature_cli.py tests/integration/test_feature_mcp.py tests/integration/test_mcp_adapter.py -q
+  result: pass
+  note: 64 passed - the CLI sends only reads with the same parameters and prints refusals, the tool returns the route's page and its refusals as tool errors, a participant credential and a credential limited to another tool are refused, the existing contract tests unchanged
+- command: make verify-fast
+  result: pass
+  note: run alone - 2971 pytest passed (34 skipped), 842 vitest, lint, build, openapi, sdk and block-schema checks (T91-verify-fast.log). No web or browser-facing code changed after T90's clean e2e-fast
+design_refs:
+- ref: design/organizer-data-surface
+  result: pass
+  note: nothing visual in this task
+- ref: design/state-matrix
+  result: pass
+  note: not applicable
+surface_matrix:
+- surface: web
+  result: pass
+  evidence: T90
+- surface: api
+  result: pass
+  evidence: SURFACES.md
+- surface: sdk
+  result: pass
+  evidence: SURFACES.md
+- surface: cli
+  result: pass
+  evidence: tests/integration/test_cli_entities.py
+- surface: mcp
+  result: pass
+  evidence: tests/integration/test_mcp_entity_query.py
+- surface: audit
+  result: pass
+  evidence: SURFACES.md
+- surface: search
+  result: pass
+  evidence: SURFACES.md
+- surface: docs
+  result: pass
+  evidence: files above
+migrations: []
+findings:
+- P3 argparse takes -name as an option, so a descending sort is written --sort=-name; the help text and docs say so
+escalations: []
+limitations:
+- The CLI and MCP tool read lists; saved-view references, a text query language and exports are B04, and bulk operations from a view are B05.
+- The shared entity routes are recorded as outside the feature registry; a feature claim for them would come with the cross-surface contract work, not this batch.
+next: review

@@ -47,6 +47,16 @@ nonzero exit status and stderr; success returns JSON on stdout. Credential
 values are redacted from error output. Do not capture private success responses
 in public logs.
 
+## Querying lists
+
+```sh
+scripts/conflux-admin entities list EVENT_PUBLIC_UUID
+scripts/conflux-admin entities query EVENT_PUBLIC_UUID projects --search robot --sort=-name --limit 25
+scripts/conflux-admin entities query EVENT_PUBLIC_UUID applications --filter '{"field":"status","op":"eq","value":"pending"}'
+```
+
+These are read-only calls of the entity query (`docs/api/ENTITY_QUERY.md`): the same filter, sort, columns, search and paging the application's lists use, returned as JSON. Refusals print the server's message and exit nonzero; a role that may not query a list is refused by the server.
+
 ## Portable archives
 
 ```sh

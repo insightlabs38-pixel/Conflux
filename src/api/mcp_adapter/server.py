@@ -44,8 +44,12 @@ def _validated_arguments(tool, arguments):
         spec = schema["properties"][name]
         if not isinstance(value, str):
             raise ToolInputError(f"{name} must be a string")
-        if "pattern" in spec and not _UUID.fullmatch(value):
-            raise ToolInputError(f"{name} must be a UUID")
+        if "pattern" in spec and not re.fullmatch(spec["pattern"], value):
+            raise ToolInputError(
+                f"{name} must be a UUID"
+                if spec["pattern"] == UUID_PATTERN
+                else f"{name} is invalid"
+            )
         if "enum" in spec and value not in spec["enum"]:
             raise ToolInputError(f"{name} must be one of {spec['enum']}")
         if len(value) > spec.get("maxLength", 200):

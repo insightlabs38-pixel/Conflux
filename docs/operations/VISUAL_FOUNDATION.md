@@ -75,6 +75,15 @@ Every workspace screen (organizer, participant, judge, mentor, volunteer) has th
 - **Preview as.** `PreviewAsDialog` asks `previewAs` (PREVIEW_CONTEXT) for the saved form as a participant, judge or the public and for the public page in a script-less frame; register a new surface with the primitive and add it to the dialog to preview it.
 - Keep the shell's key listeners in layout effects or behind a ref: a re-render must not drop a half-typed chord, and a key pressed as the control appears must work.
 
+### The data grid, first slice (PD-F006-B01)
+
+- **One query model.** Search, sort, filter, columns and paging are parameters of the one entity query (`core/query.py`); `EntityGrid` sends them and renders what comes back, nothing is filtered, sorted or paged in the browser. `Entity.search_fields` (registered text fields) makes a list searchable. Search text is transient state: not in the address or storage, only in a saved view.
+- **Sort.** `nextSort` and `describeSort` in `DataGrid.tsx`; up to three keys, in the address as `sort_<entity>=-name:track` (a colon, because a comma is not an id-like character).
+- **Filters.** `describeFilter` and `filterProblems` in `lib/entityQuery.ts`; `FilterBuilder` shows server messages beside the condition they name; the filter is debounced 400 ms.
+- **Selection and bulk.** A selection is ids on the current page, cleared by page, filter, search or size change and pruned when a row leaves; `BulkBar` is the one bar (one primary action, four visible, rest under More, reasons for unavailable actions); an action only starts the list's workflow.
+- **Paging.** Server offset paging with a counted total; `size_<entity>` (25, 50, 100); no client virtualization (spec 006 decision 8); evidence in `docs/verification/PD-F006-B01/T07-scale.log`.
+- **A new CSS class must not reuse an existing prefix**, and a static hint is a `role="status"` only when it reports something (a second status region breaks single-status locators).
+
 ### The application shell, third slice (PD-F005-B03)
 
 - **Remembered columns.** `columnPreference` and `setColumnPreference` in `lib/shellPreferences.ts` (key `columns:<entity>`, per person and workspace). `EntityGrid` order of precedence: an open saved view's columns, the person's choice, the list's defaults; keys the list no longer has are dropped and never leave it empty.

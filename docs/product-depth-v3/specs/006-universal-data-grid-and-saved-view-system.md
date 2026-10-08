@@ -223,6 +223,12 @@ T01 sort headers; T02 `search` end to end (engine, saved definition, UI box, CLI
 
 Engine and API: pytest for search (terms, limits, multi-field OR, AND with filter, authorization, path-keyed errors), saved-view round trip with and without `search`. Web: vitest for sort cycle, selection rules and cap, bulk bar action limits, paging controls, search not in URL. Browser (desktop and mobile): `data-grid-*` specs on the seeded stack and an isolated fixture with 5,012 rows for paging and sticky header; axe on each state. Compatibility: the 46 existing query and saved-view tests stay green unchanged.
 
+### As built (PD-F006-B01)
+
+- All eleven decisions held. Search is `search` plus `Entity.search_fields`, in saved views only when used. Sort cycles and Shift adds keys, the address joins keys with a colon. Filters read back as a sentence and show the server's path-keyed message beside the condition, debounced. Selection is page-scoped, pruned and bounded; `BulkBar` is the one bar and `ProjectsGrid` uses it. Paging is server paging with `size_<entity>`, First, Last, Page X of Y and a past-the-end landing; no client virtualization, measured at 5,016 rows (API 31 to 43 ms, sort at 100 rows 89 ms).
+- CLI `entities list|query` and MCP `query_entity` are thin read-only calls of the entity routes, recorded as outside the feature registry with reasons.
+- Limitations carried: the phone's stacked rows have no header row, so multi-key sort and select-all-on-page are desktop gestures until B02; only the projects grid has a bulk action; select-all-matching (frozen snapshot) is B05.
+
 ### Open questions (logged in QUESTIONS.md with the defaults above)
 
 Search text transient rather than in the URL (P3); pagination without client virtualization (P2); CLI and MCP read path in B01 rather than B04 (P3).

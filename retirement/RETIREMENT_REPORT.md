@@ -1,0 +1,5 @@
+# Final retirement report — Conflux (2026-10-12)
+- main pushed (250 previously-unpushed commits + partial WIP commit 86fd316), claude/C-B02 newly pushed; all 5 branches + archive == origin.
+- Out-of-repo material (/home/dogfood-control, ~/ prompts and bundles, ignored repo files, supervisor session transcripts, systemd units, freebuff local patch) archived under retirement/.
+- Not backed up by choice: docker-volume DB/object-store data (regenerable demo/acceptance seed; row counts recorded), e2e screenshot/trace artifacts, dogfood-control/scratch, all secrets (.env, unattended.env, ~/.config/dogfood/secrets.env, gh auth), ~/.codex and ~/.claude history.
+- Deleted (after backup verified): Python .venv x5 (~/conflux, 3 conflux-worktrees, /home/dogfood-control), all node_modules, __pycache__/.pytest_cache/.ruff_cache dirs, sdk egg-info/dist, hutter scratch tmp* dirs, uv cache (~237 MiB). Retained: all repos/worktrees, campaign/, logs, builds, scratch windows, corpus, docker images/volumes, secrets files (not archived). Docker stacks stopped (not removed); user units stopped+disabled. No cloud resources touched.

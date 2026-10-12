@@ -9,6 +9,7 @@ exiting. Session output is logged; a stop file ends the supervisor cleanly.
 
 Usage:
   python3 scripts/claude_supervisor/supervisor.py            # run in foreground
+  python3 scripts/claude_supervisor/supervisor.py --duration-hours 25
   nohup python3 scripts/claude_supervisor/supervisor.py &    # or detached
   touch .claude-supervisor/stop                              # stop (kills session)
   python3 scripts/claude_supervisor/supervisor.py --dry-run  # print schedule/command
@@ -38,6 +39,7 @@ EFFORT = "high"
 WINDOW = timedelta(hours=5)
 FIRST_START = datetime(2026, 9, 30, 2, 50, tzinfo=TZ)
 HARD_END = datetime(2026, 10, 1, 13, 30, tzinfo=TZ)
+STOP_STARTING_AT: datetime | None = None
 
 RAPID_EXIT_SECONDS = 120   # a session shorter than this counts as a rapid exit
 RAPID_EXIT_LIMIT = 3       # this many in a row -> wait for the next window
@@ -72,7 +74,7 @@ def log(msg: str) -> None:
 
 def slots() -> list[datetime]:
     out, t = [], FIRST_START
-    while t < HARD_END:
+    while t < HARD_END and (STOP_STARTING_AT is None or t < STOP_STARTING_AT):
         out.append(t)
         t += WINDOW
     return out
@@ -195,9 +197,40 @@ def scan_line(line: bytes) -> tuple[bool, bool]:
 
 
 def main() -> int:
+    global FIRST_START, HARD_END, STOP_STARTING_AT
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument(
+        "--duration-hours",
+        type=float,
+        help="start now and stop after this many hours, opening windows every five hours",
+    )
+    ap.add_argument(
+        "--hard-end",
+        help="local America/New_York deadline (ISO local datetime); terminate active session then",
+    )
+    ap.add_argument(
+        "--stop-starting-at",
+        help="local America/New_York cutoff (ISO local datetime); do not launch a window then or later",
+    )
+    ap.add_argument(
+        "--start-now",
+        action="store_true",
+        help="anchor the first five-hour window at the current time",
+    )
     args = ap.parse_args()
+
+    if args.duration_hours is not None:
+        if args.duration_hours <= 0:
+            ap.error("--duration-hours must be positive")
+        FIRST_START = datetime.now(TZ)
+        HARD_END = FIRST_START + timedelta(hours=args.duration_hours)
+    if args.start_now:
+        FIRST_START = datetime.now(TZ)
+    if args.hard_end:
+        HARD_END = datetime.fromisoformat(args.hard_end).replace(tzinfo=TZ)
+    if args.stop_starting_at:
+        STOP_STARTING_AT = datetime.fromisoformat(args.stop_starting_at).replace(tzinfo=TZ)
 
     if args.dry_run:
         for s in slots():

@@ -17,6 +17,9 @@ TEXT, NUMBER, DATE, BOOL, ENUM, UUID = "text", "number", "date", "bool", "enum",
 TYPES = (TEXT, NUMBER, DATE, BOOL, ENUM, UUID)
 LIST, BOARD, MATRIX, CALENDAR = "list", "board", "matrix", "calendar"
 LAYOUTS = (LIST, BOARD, MATRIX, CALENDAR)
+SUM, AVG, MIN, MAX = "sum", "avg", "min", "max"
+# What may be summarised, by field type: a number any of them, a date only its range.
+AGGREGATES = {NUMBER: (SUM, AVG, MIN, MAX), DATE: (MIN, MAX)}
 
 # The operators each field type offers. Anything else is refused with the list of these.
 OPERATORS = {
@@ -43,6 +46,14 @@ class Field:
     groupable: bool = False
     # How to read the value off a row when the column path is not enough.
     read: Callable[[Any], Any] | None = None
+    # The footer values that mean something for this field (PD-F006-B03-T02); None takes what its
+    # type allows (a sum of waitlist positions would not, so such a field narrows it).
+    aggregates: tuple | None = None
+
+    def summaries(self):
+        """The aggregate functions this field offers, from its type and any narrowing."""
+        allowed = AGGREGATES.get(self.type, ())
+        return allowed if self.aggregates is None else self.aggregates
 
 
 @dataclass(frozen=True)
@@ -91,6 +102,11 @@ def register(entity: Entity):
             raise ValueError(f"{entity.key}.{f.key}: unknown field type {f.type!r}")
         if f.type == ENUM and not f.choices:
             raise ValueError(f"{entity.key}.{f.key}: an enum field needs choices")
+        for fn in f.aggregates or ():
+            if fn not in AGGREGATES.get(f.type, ()):
+                raise ValueError(
+                    f"{entity.key}.{f.key}: a {f.type} field cannot be summed as {fn!r}"
+                )
     for key in entity.search_fields:
         found = entity.field(key)
         if found is None or found.type != TEXT:

@@ -12,7 +12,7 @@ import re
 from datetime import UTC, date, datetime, time, timedelta
 from uuid import UUID as UuidValue
 
-from django.db.models import Count, F, Q
+from django.db.models import Avg, Count, F, Max, Min, Q, Sum
 from django.db.models.functions import TruncDate
 from django.utils.dateparse import parse_date, parse_datetime
 from rest_framework.exceptions import ValidationError
@@ -28,6 +28,7 @@ MAX_SORT = 3
 MAX_GROUPS = 200
 MAX_TERMS = 5
 MIN_TERM = 2
+MAX_AGGREGATES = 6
 
 
 class QueryError(ValidationError):
@@ -305,6 +306,61 @@ def parse_month(raw):
     return f"{year:04d}-{month:02d}", start, following
 
 
+_SUMMARIES = {"sum": Sum, "avg": Avg, "min": Min, "max": Max}
+
+
+def parse_aggregates(entity: Entity, raw):
+    """`waitlist_position:max,created_at:min` (or a saved view's list of the same) as pairs of a
+    field and a function, each one that field's type offers."""
+    if raw in (None, "", []):
+        return []
+    items = raw if isinstance(raw, list) else [part.strip() for part in str(raw).split(",")]
+    items = [item for item in items if item]
+    if len(items) > MAX_AGGREGATES:
+        raise QueryError("", f"At most {MAX_AGGREGATES} footer values.", root="aggregate")
+    found = []
+    for index, item in enumerate(items):
+        key, _, fn = item.partition(":") if isinstance(item, str) else ("", "", "")
+        field = entity.field(key)
+        if field is None or not field.summaries():
+            names = ", ".join(f.key for f in entity.fields if f.summaries()) or "none"
+            raise QueryError(
+                f"[{index}]", f"Cannot summarise {key!r}; use one of {names}.", root="aggregate"
+            )
+        if fn not in field.summaries():
+            raise QueryError(
+                f"[{index}]",
+                f"{field.label} offers {', '.join(field.summaries())}, not {fn!r}.",
+                root="aggregate",
+            )
+        if (field, fn) not in found:
+            found.append((field, fn))
+    return found
+
+
+def _summary(fn, value):
+    if value is None:
+        return None
+    if fn == "avg":
+        return round(float(value), 2)  # two decimals at most: no false precision
+    if hasattr(value, "is_finite"):  # Decimal
+        return float(value)
+    return _plain(value)
+
+
+def summarise(queryset, specs):
+    """The footer values over every row of the queryset (not one page), in the order asked."""
+    if not specs:
+        return []
+    values = queryset.order_by().aggregate(
+        **{f"a{i}": _SUMMARIES[fn](field.column) for i, (field, fn) in enumerate(specs)}
+    )
+    return [
+        {"field": field.key, "fn": fn, "value": _summary(fn, values[f"a{i}"])}
+        for i, (field, fn) in enumerate(specs)
+    ]
+
+
 def _label(field, value):
     if value is None:
         return "(none)"
@@ -313,7 +369,7 @@ def _label(field, value):
     return str(_plain(value))
 
 
-def run_groups(entity: Entity, event, user, *, tree, search, group, subgroup):
+def run_groups(entity: Entity, event, user, *, tree, search, group, subgroup, specs=()):
     """The buckets of the current result: one per value of `group` (and of `subgroup` inside it),
     each with its count, empty values last. No rows - a bucket is opened with the ordinary query
     and the bucket's value as one more condition, so there is one way to read rows."""
@@ -357,9 +413,30 @@ def run_groups(entity: Entity, event, user, *, tree, search, group, subgroup):
                     "count": row["n"],
                 }
             )
+    if specs:  # a group row carries the same footer values over its own rows (not an average of
+        # subgroup averages: one more query grouped by the first field only)
+        own = {
+            row[group.column]: row
+            for row in queryset.order_by()
+            .values(group.column)
+            .annotate(
+                **{f"a{i}": _SUMMARIES[fn](field.column) for i, (field, fn) in enumerate(specs)}
+            )
+        }
+        for item in groups:
+            row = own.get(item["_raw"], {})
+            item["aggregates"] = [
+                {"field": field.key, "fn": fn, "value": _summary(fn, row.get(f"a{i}"))}
+                for i, (field, fn) in enumerate(specs)
+            ]
     for item in groups:
         del item["_raw"]
-    return {"groups": groups, "truncated": truncated, "total": sum(g["count"] for g in groups)}
+    return {
+        "groups": groups,
+        "truncated": truncated,
+        "total": sum(g["count"] for g in groups),
+        "aggregates": summarise(queryset, specs),
+    }
 
 
 def run_days(entity: Entity, event, user, *, tree, search, field, month):
@@ -437,17 +514,18 @@ def _read(obj, field):
     return _plain(value)
 
 
-def run(entity: Entity, event, user, *, tree, sort, columns, limit, offset, search=()):
+def run(entity: Entity, event, user, *, tree, sort, columns, limit, offset, search=(), specs=()):
     queryset = entity.base(event, user)
     if search:
         queryset = queryset.filter(compile_search(entity, search))
     if tree:
         queryset = queryset.filter(compile_filter(entity, tree))
+    footer = summarise(queryset, specs)
     queryset = queryset.order_by(*ordering(sort), "pk")
     total = queryset.count()
     page = queryset[offset : offset + limit]
     rows = [{"id": str(obj.public_id), **{f.key: _read(obj, f) for f in columns}} for obj in page]
-    return {"total": total, "rows": rows}
+    return {"total": total, "rows": rows, "aggregates": footer}
 
 
 def one(entity: Entity, event, user, public_id):
@@ -472,6 +550,7 @@ def answer(
     subgroup=None,
     calendar=None,
     month=None,
+    specs=(),
     limit,
     offset,
 ):
@@ -494,9 +573,18 @@ def answer(
         )
     elif group is not None:
         buckets = run_groups(
-            entity, event, user, tree=tree, search=terms, group=group, subgroup=subgroup
+            entity,
+            event,
+            user,
+            tree=tree,
+            search=terms,
+            group=group,
+            subgroup=subgroup,
+            specs=specs,
         )
         body.update(total=buckets["total"], group=group.key, groups=buckets["groups"])
+        if specs:
+            body["aggregates"] = buckets["aggregates"]
         body["truncated"] = buckets["truncated"]
         if subgroup:
             body["subgroup"] = subgroup.key
@@ -511,6 +599,9 @@ def answer(
             limit=limit,
             offset=offset,
             search=terms,
+            specs=specs,
         )
         body.update(total=result["total"], rows=result["rows"])
+        if specs:
+            body["aggregates"] = result["aggregates"]
     return body

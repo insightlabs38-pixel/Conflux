@@ -24,6 +24,7 @@ _KEYS = {
     "subgroup",
     "layout",
     "calendar",
+    "aggregate",
 }
 
 
@@ -57,6 +58,10 @@ def normalize(entity, raw):
     if not isinstance(group, str) or not isinstance(subgroup, str):
         raise ValidationError({"group": ["Group is a field key."]})
     grouped = query.parse_group(entity, group, subgroup)
+    footer = raw.get("aggregate") or []
+    if not isinstance(footer, list) or not all(isinstance(item, str) for item in footer):
+        raise ValidationError({"aggregate": ["Footer values are a list of field:function."]})
+    specs = query.parse_aggregates(entity, footer)
     layout, calendar = raw.get("layout") or "", raw.get("calendar") or ""
     if not isinstance(layout, str) or not isinstance(calendar, str):
         raise ValidationError({"layout": ["Layout is a name."]})
@@ -82,6 +87,8 @@ def normalize(entity, raw):
         definition["group"] = grouped[0].key
         if grouped[1] is not None:
             definition["subgroup"] = grouped[1].key
+    if specs:  # additive (PD-F006-B03-T02)
+        definition["aggregate"] = [f"{field.key}:{fn}" for field, fn in specs]
     if layout != "list":  # additive (PD-F006-B03-T01): how it is laid out, never what it holds
         definition["layout"] = layout
         if calendar_field is not None:
@@ -203,6 +210,7 @@ def run(view, event, user, *, limit, offset, month=None):
         layout, calendar = query.parse_layout(
             entity, definition.get("layout"), definition.get("calendar")
         )
+        specs = query.parse_aggregates(entity, definition.get("aggregate"))
         if layout == "board" and group is None:
             group, subgroup = query.parse_group(entity, entity.board_field, "")
         asked = (month or query.parse_month(None)) if calendar is not None else None
@@ -222,6 +230,7 @@ def run(view, event, user, *, limit, offset, month=None):
         subgroup=subgroup,
         calendar=calendar,
         month=asked,
+        specs=specs,
         limit=limit,
         offset=offset,
     )

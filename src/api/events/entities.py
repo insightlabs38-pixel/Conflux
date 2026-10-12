@@ -28,7 +28,16 @@ entities.register(
                 groupable=True,
             ),
             entities.Field("note", entities.TEXT, "note", "Note", sortable=False),
-            entities.Field("waitlist_position", entities.NUMBER, "waitlist_position", "Waitlist"),
+            entities.Field(
+                "waitlist_position",
+                entities.NUMBER,
+                "waitlist_position",
+                "Waitlist",
+                aggregates=(
+                    entities.MIN,
+                    entities.MAX,
+                ),  # a sum or an average of places means nothing
+            ),
             entities.Field(
                 "decided_by",
                 entities.TEXT,

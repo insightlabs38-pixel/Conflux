@@ -26,6 +26,7 @@ class EntityFieldSchema(serializers.Serializer):
     filterable = serializers.BooleanField()
     default = serializers.BooleanField()
     groupable = serializers.BooleanField()
+    aggregates = serializers.ListField(child=serializers.CharField())
 
 
 class EntitySchema(serializers.Serializer):
@@ -53,6 +54,7 @@ class EntityPageSchema(serializers.Serializer):
     subgroup = serializers.CharField(required=False)
     groups = serializers.ListField(child=serializers.DictField(), required=False)
     truncated = serializers.BooleanField(required=False)
+    aggregates = serializers.ListField(child=serializers.DictField(), required=False)
     calendar = serializers.CharField(required=False)
     month = serializers.CharField(required=False)
     days = serializers.ListField(child=serializers.DictField(), required=False)
@@ -78,6 +80,7 @@ def _describe(entity):
                 "filterable": f.filterable,
                 "default": f.default,
                 "groupable": f.groupable,
+                "aggregates": list(f.summaries()),
             }
             for f in entity.fields
         ],
@@ -133,6 +136,13 @@ class EntityQueryView(_EntityView):
                 "subgroup", str, description="A second groupable field, inside each group."
             ),
             OpenApiParameter(
+                "aggregate",
+                str,
+                description="Footer values: a comma list of `field:function` (sum, avg, min, max "
+                "as the catalogue's `aggregates` allows). Computed over every matching row, not "
+                "the page; with `group` each group also carries its own.",
+            ),
+            OpenApiParameter(
                 "calendar",
                 str,
                 description="A date field of a list that has a calendar: the response lists the "
@@ -158,6 +168,7 @@ class EntityQueryView(_EntityView):
         columns = query.parse_columns(entity, params.get("columns"))
         terms = query.parse_search(entity, params.get("search"))
         group, subgroup = query.parse_group(entity, params.get("group"), params.get("subgroup"))
+        specs = query.parse_aggregates(entity, params.get("aggregate"))
         calendar = month = None
         if params.get("calendar"):
             if group is not None:
@@ -180,6 +191,7 @@ class EntityQueryView(_EntityView):
                 subgroup=subgroup,
                 calendar=calendar,
                 month=month,
+                specs=specs,
                 limit=limit,
                 offset=offset,
             )

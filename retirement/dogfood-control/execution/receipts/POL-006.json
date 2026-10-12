@@ -1,0 +1,17 @@
+{
+  "task_id": "POL-006",
+  "status": "done",
+  "summary": "presets.py: six named rules (everyone/no_one/organizers_only/judges_only/participants_only/window_open) an organizer picks by slug instead of writing AST JSON; raw ast still accepted directly. Backend CRUD (policies, policy-bindings, temporal-gates, exception-grants) reusing OrganizerView. Frontend PolicyBuilder.tsx (preset dropdown, action-binding form, gate list/create) mounted inside EventDashboard alongside StageBuilder. C-B06 (POL-001..006) is complete.",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "25cb4c9",
+  "verification": [
+    { "command": "uv run --frozen pytest tests/integration/test_policy_builder_api.py tests/integration/test_policy_presets.py", "result": "passed; 8 + 7 tests (preset list, create-from-preset with no raw JSON, missing-param rejected, raw-ast still works, binding CRUD, gate CRUD, grant creation, non-organizer blocked)" },
+    { "command": "pnpm test (PolicyBuilder.test.tsx)", "result": "passed; 9 total frontend tests" },
+    { "command": "make verify-fast", "result": "passed; 139 backend + 9 frontend tests" },
+    { "command": "docker compose up -d --build; ./scripts/run-acceptance", "result": "all services healthy; all 7 official checks still PASS" }
+  ],
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T23:44:00+00:00"
+}

@@ -1,0 +1,15 @@
+{
+  "task_id": "FX-002",
+  "status": "done",
+  "summary": "Populated .dogfood.toml's [auth] section with Cookie headers matching the fixed tokens seed_acceptance_identities (ID-002, already existed from C-B02) issues for organizer/judge_a/judge_b/participant. [portal]/[routes]/[tiers] deliberately left unset — nothing exists yet for them to point at; that's FX-003 (routes) and FX-004 (portal/tiers, the acceptance wrapper). Added a regression test that parses .dogfood.toml and actually authenticates with each header against /api/v1/accounts/me/, so the config and the seed command's tokens can't drift apart silently.",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "716cb26",
+  "verification": [
+    { "command": "uv run --frozen pytest tests/acceptance/test_acceptance_auth_config.py", "result": "passed; 5 tests (all four roles declared, each header authenticates as its claimed role)" },
+    { "command": "make verify-fast", "result": "passed" }
+  ],
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T23:07:00+00:00"
+}

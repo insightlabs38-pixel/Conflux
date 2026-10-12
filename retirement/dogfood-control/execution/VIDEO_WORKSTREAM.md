@@ -1,0 +1,15 @@
+# Video asset workstream (operational; never a product dependency)
+
+Work items: VIDEO-CORE-CAPTURE (automatic at Core gate), VIDEO-H48-INSURANCE, VIDEO-STRETCH-DELTA, VIDEO-FINAL-DELTA. Capture must take the exclusive DEMO runtime lock. It may seed only the disposable canonical demo dataset through supported app mechanisms. It must release the lock in `finally`, retain successful clips after scene failure, and never produce final narration audio or call Fish Audio.
+
+## Canonical five-minute story
+
+Organizer configures event/stages/policies/forms/rubric/public page; participant/team submits typed evidence and sees preflight/finalization; organizer checks assignment health; judge evaluates with isolated score access; organizer shows normalization proof/progress/results; public results/gallery publish; close with API/OpenAPI, archive/export and offline/Compose status.
+
+Target 8–12 minutes raw, 8–14 clips, generally 25–90 seconds each; capture alternate takes for key scenes. 1920×1080 stable viewport/profile, readable pacing and 2–4 second holds. Optional T3 community vote/gating/random ballot/hidden results/comments/fraud controls; T4 API/scopes/webhooks/export-import/signed record/gallery/bulk import-export. Stretch deltas go in `stretch-deltas/`, never trigger a full recapture by default.
+
+Package layout: `/home/dogfood-control/demo-assets/{core-demo,t3-options,t4-options,stretch-deltas,screenshots}`, `SHOT_MANIFEST.md`, `NARRATION_DRAFT.md`, `FOOTAGE_STATUS.md`, `FOOTAGE_BASELINE.yaml`, and immutable named ZIPs. The manifest records clip, story beat, role, route, seed, start/actions/end, raw and narration duration, purpose, category, replacement status. Narration uses independent short segments; no unsupported marketing claims.
+
+Core capture gate: T1/T2 permanently green, T3/T4 manual-review-ready, coherent Core organizer/participant/judge/public flows, no P0/P1 on demo path, seeded demo data, seven-step demo smoke passes, coherent UI. H48 is derived from start + 48 hours; capture every stable scene and mark gaps. Aim H52–H54 if healthy. Do not predeclare recorded routes/components. The generated FOOTAGE_BASELINE.yaml is authoritative for scene IDs/routes/actions. Once it exists, each task receipt must carry a footage-impact disposition; the integration controller rejects missing/invalid dispositions and missing scene/screenshot evidence. Task scope and functional/demo evidence determine impact; touching a UI file alone does not imply redesign. At H60–H68 broad redesign and changes invalidating captured appearance are blocked. At H68+ UI changes require scoped critical fixes; work with no visual change may continue. Broad redesign remains blocked and any recapture is limited to named invalidated scenes with replacement-scene and screenshot evidence.
+
+Later UI work must preserve the captured navigation, global visual language and named key actions unless necessary. Bug/accessibility/copy/state fixes, small polish and additive blocks/routes are allowed. Capture required recapture scenes and meaningful Stretch deltas only.

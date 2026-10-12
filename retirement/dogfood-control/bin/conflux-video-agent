@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+"""One fresh Luna invocation for one operational footage package/scene delta."""
+import datetime as dt,json,os,pathlib,re,subprocess,sys,fcntl
+import zipfile
+ROOT=pathlib.Path('/home/dogfood-control'); QUEUE=ROOT/'execution/VIDEO_QUEUE.yaml'; LOG=ROOT/'logs/unattended/video-agent.jsonl'; UNIT=sys.argv[1]
+def event(**kw):
+ LOG.parent.mkdir(parents=True,exist_ok=True)
+ with LOG.open('a') as f:f.write(json.dumps({'at':dt.datetime.now(dt.timezone.utc).isoformat(),**kw})+'\n')
+def set_state(state,**extra):
+ import yaml
+ with (ROOT/'run/video-queue.lock').open('a+') as lock:
+  fcntl.flock(lock,fcntl.LOCK_EX)
+  data=yaml.safe_load(QUEUE.read_text()) or {'items':[]}
+  for x in data['items']:
+   if x.get('id')==UNIT:x.update(state=state,**extra)
+  data['updated_at']=dt.datetime.now(dt.timezone.utc).isoformat(); QUEUE.write_text(yaml.safe_dump(data,sort_keys=False)); fcntl.flock(lock,fcntl.LOCK_UN)
+def main():
+ pkg=ROOT/'demo-assets'; pkg.mkdir(parents=True,exist_ok=True); out=pkg
+ handoff=ROOT/'handoffs/luna'/f'{UNIT}.md'; handoff.parent.mkdir(parents=True,exist_ok=True)
+ resumed=handoff.exists()
+ if not resumed:
+  subprocess.run([str(ROOT/'bin/conflux-handoff'),'luna',UNIT,'--worktree',str(out),'--branch','ops/'+UNIT,'--phase','INVESTIGATION_PLAN'],check=True)
+ if resumed:
+  prompt=f'''CONTINUATION for {UNIT}. Read the compact external handoff at {handoff}. Retain the current external footage directory {out}. Inspect status/diff only if relevant, plus exact referenced scene/spec/artifact paths; do not reread the control pack or the full video plan. Continue from the handoff's next actions. Preserve successful clips and update the queue only with evidence. Do not change Conflux source.\n'''
+ else:
+  objective=pathlib.Path('/home/dogfood-control/execution/VIDEO_WORKSTREAM.md').read_text()
+  prompt=f'''Operational demo footage unit: {UNIT}. Model lane GPT-6 Luna. Read only /home/dogfood-control/execution/VIDEO_WORKSTREAM.md and this unit's queue row. Use the current running seeded app, locating its non-secret demo URL from /home/dogfood-control/run/demo-url.txt or runtime status. Do not read secrets. If no stable app/seed is available, checkpoint evidence/blockers, mark queue NEEDS_REVIEW, and exit without product changes.\n\nCreate {out}/scenes.json from the canonical story. Target 8–12 minutes raw and 8–14 paced clips when stable, with alternates and implemented T3/T4 options. Use only supported UI/seed mechanisms. Do not overwrite prior known-good clips; version replacement filenames. Do not edit Conflux source, change domain semantics, redesign UI, generate audio, call Fish Audio, or assemble the final video.\n\nRun /home/dogfood-control/bin/conflux-video-capture {out}/scenes.json {out}; it holds the DEMO/integration lock. Retry failed scenes individually and retain successful footage. Create manifest, independent narration text and baseline semantics; package via /home/dogfood-control/bin/conflux-video-package {out} with a unique H48/Core/Delta label. Checkpoint after investigation/plan, substantial progress, before tests/debugging, and before stopping.\n\nNever modify application source or shared demo data outside the capture controller.\n\nOperational constraints/reference:\n{objective}\n'''
+ promptpath=ROOT/'run'/f'{UNIT}.prompt.md'; promptpath.write_text(prompt); model_log=ROOT/'logs/unattended'/f'{UNIT}.jsonl'; model_log.parent.mkdir(parents=True,exist_ok=True)
+ run_started=dt.datetime.now(dt.timezone.utc); set_state('ACTIVE',started_at=run_started.isoformat(),handoff=str(handoff),output=str(out))
+ command=['/home/insightlabs38/.local/bin/codex','exec','--model','gpt-6-luna','-c','model_reasoning_effort=medium','--dangerously-bypass-approvals-and-sandbox','--json','-C',str(ROOT),prompt]
+ env=os.environ.copy(); env['DISABLE_AUTOUPDATER']='1'
+ for key in ('OPENAI_API_KEY','CODEX_API_KEY','CODEX_ACCESS_TOKEN'): env.pop(key,None)
+ with model_log.open('a') as log:
+  r=subprocess.run(command,stdout=log,stderr=subprocess.STDOUT,env=env)
+ text=model_log.read_text(errors='replace')[-30000:].lower()
+ if re.search(r'usage limit|rate limit|http\s*429|quota|reset time',text):
+  subprocess.run([str(ROOT/'bin/conflux-handoff'),'luna',UNIT,'--worktree',str(out),'--branch','ops/'+UNIT,'--phase','HANDOFF_REQUIRED','--reason','Luna quota; owner/provider availability confirmation required'])
+  match=re.search(r'(20\d\d-\d\d-\d\d[T ]\d\d:\d\d(?::\d\d)?Z?)',text)
+  reset=None
+  if match:
+   try:
+    reset=dt.datetime.fromisoformat(match.group(1).replace('Z','+00:00')); reset=reset.replace(tzinfo=reset.tzinfo or dt.timezone.utc)
+   except ValueError: reset=None
+  if reset and reset>dt.datetime.now(dt.timezone.utc): set_state('WAITING_RESET',reason='provider gave automatic reset timestamp',reset_at=reset.isoformat())
+  else: set_state('PAUSED_QUOTA',reason='Luna usage quota; awaiting owner/provider confirmation')
+  event(event='quota',unit=UNIT,reset_at=reset.isoformat() if reset else None); return 75
+ if r.returncode:
+  subprocess.run([str(ROOT/'bin/conflux-handoff'),'luna',UNIT,'--worktree',str(out),'--branch','ops/'+UNIT,'--phase','HANDOFF_REQUIRED','--reason','video agent exited before verified package'])
+  set_state('NEEDS_REVIEW',reason=f'video agent exit {r.returncode}'); event(event='agent-failed',unit=UNIT,exit_code=r.returncode); return r.returncode
+ clips=list(out.rglob('*.webm')); required=('SHOT_MANIFEST.md','SHOT_MANIFEST.json','NARRATION_DRAFT.md','FOOTAGE_STATUS.md','FOOTAGE_BASELINE.yaml')
+ archives=[x for x in pkg.glob('conflux-demo-footage-*.zip') if zipfile.is_zipfile(x) and dt.datetime.fromtimestamp(x.stat().st_mtime,dt.timezone.utc)>=run_started]
+ manifest={}
+ try: manifest=json.loads((out/'SHOT_MANIFEST.json').read_text())
+ except Exception: pass
+ captured=[x for x in manifest.get('clips',[]) if not x.get('status')]
+ duration=sum(float(x.get('raw_duration_seconds',0)) for x in captured)
+ footage_enough=bool(clips) and (UNIT!='VIDEO-CORE-CAPTURE' or (len(captured)>=8 and duration>=480))
+ if not footage_enough or any(not (out/x).exists() for x in required) or not archives:
+  set_state('NEEDS_REVIEW',reason='model exited successfully but clip/manifest/narration/baseline/valid ZIP evidence is incomplete'); event(event='evidence-incomplete',unit=UNIT); return 1
+ set_state('DONE',finished_at=dt.datetime.now(dt.timezone.utc).isoformat(),archive=str(archives[-1]),clip_count=len(clips)); event(event='done',unit=UNIT,archive=str(archives[-1]),clip_count=len(clips)); return 0
+if __name__=='__main__': raise SystemExit(main())

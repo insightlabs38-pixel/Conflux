@@ -1,0 +1,17 @@
+{
+  "task_id": "RT-004",
+  "status": "done",
+  "summary": "Cold-offline boot smoke verified: the sandbox-network blocker recorded at 2026-09-26T22:40:00Z (Docker could reach registries but not PyPI/npm) had cleared by 2026-09-26T22:5x — confirmed live (pypi.org and registry.npmjs.org both returned 200, a plain python:3.12-slim container could pip-install uv). Rebuilt and booted the full stack with `docker compose up -d --build`; all six services (app, worker, db, cache, objectstore, caddy) reached healthy. Fixed one real defect found along the way: INSTALLED_APPS was missing django.contrib.staticfiles, which the entrypoint's `manage.py collectstatic` step needs. Added docker-compose.offline-smoke.yml (marks the compose network internal:true) and scripts/cold-offline-smoke (make cold-boot-smoke): reuses the already-built images with the network's egress cut, confirming the *running* stack — not just the build — needs no hosted dependency, per the challenge's one-command/network-off rule. Host-published-port access under internal:true didn't route in this sandbox's Docker networking (an environment quirk, not a product defect), so the script asserts end-to-end health via `docker compose exec caddy curl` inside the internal network instead; host port 8080 was separately confirmed reachable on the normal (non-internal) network before and after.",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "0499b51",
+  "verification": [
+    { "command": "docker compose up -d --build; docker compose ps", "result": "all 6 services healthy" },
+    { "command": "make cold-boot-smoke (docker compose -f docker-compose.yml -f docker-compose.offline-smoke.yml up -d --wait, network internal:true)", "result": "passed; all services healthy with zero egress; end-to-end health check through Caddy (in-network) returned 200" },
+    { "command": "make verify-fast", "result": "passed (format-check, lint, pytest, vitest, django check, vite build)" },
+    { "command": "curl http://localhost:8080/api/v1/health/ (normal network, post-smoke)", "result": "200, confirms host port publishing unaffected by the smoke overlay" }
+  ],
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T22:57:00+00:00"
+}

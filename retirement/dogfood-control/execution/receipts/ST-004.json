@@ -1,0 +1,16 @@
+{
+  "task_id": "ST-004",
+  "status": "done",
+  "summary": "Stage.participation_mode (individual/team_formation/team_locked, default team_formation) with expected_subject_type() and a locks_team_membership property. StageEntryManager.enter() validates subject_type against the stage's mode and is now what advance_stage (ST-003) uses to open the target StageEntry, so advancement can't move a subject into a stage of the wrong participation shape. Actually freezing team membership on TEAM_LOCKED entry is deferred to C-B07 (no Team model yet) and documented as such — this only carries the signal that batch will consult.",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "b0e3af2",
+  "verification": [
+    { "command": "uv run --frozen pytest tests/integration/test_stage_participation_modes.py", "result": "passed; 7 tests (default mode, locks_team_membership, individual expects user, team/user mismatch rejected both directions, matching type accepted, advance_stage rejects mismatch)" },
+    { "command": "make verify-fast", "result": "passed" },
+    { "command": "docker compose up -d --build", "result": "app/worker healthy; migration applies cleanly against real Postgres" }
+  ],
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T23:26:00+00:00"
+}

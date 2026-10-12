@@ -1,0 +1,16 @@
+{
+  "task_id": "TEAM-002",
+  "status": "done",
+  "summary": "TeamInvite: captain-issued token satisfying T1's 'team formation by invite link'. Replay control is max_uses/use_count checked+incremented inside select_for_update() (redeem_invite), verified to actually serialize against real Postgres, not just sqlite. Expiry via expires_at, immediate revocation via revoked_at. create_invite/revoke_invite are captain-only. Redemption reuses join_team, so team-size/one-team-per-event invariants apply identically to invite-based and direct joins.",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "6a7217c",
+  "verification": [
+    { "command": "uv run --frozen pytest tests/integration/test_team_invites.py (sqlite and DATABASE_URL=postgres)", "result": "passed both; 9 tests each (captain-only create/revoke, valid redemption, single-use replay rejected, max_uses=2 admits exactly 2, expired/revoked rejected, unknown token rejected, size/one-team invariants still enforced)" },
+    { "command": "make verify-fast", "result": "passed" },
+    { "command": "docker compose up -d --build", "result": "app/worker healthy; migration applies cleanly against real Postgres" }
+  ],
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T23:49:00+00:00"
+}

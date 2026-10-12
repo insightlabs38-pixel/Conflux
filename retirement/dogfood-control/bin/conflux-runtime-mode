@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+mode_file=/home/dogfood-control/runtime-mode
+[[ -r "$mode_file" ]] || { echo 'runtime-mode file is missing' >&2; exit 78; }
+RUNTIME_MODE=$(<"$mode_file")
+case "$RUNTIME_MODE" in NORMAL|E2E|BENCHMARK|DEMO|RELEASE) ;; *) echo "invalid runtime mode: $RUNTIME_MODE" >&2; exit 78 ;; esac
+export RUNTIME_MODE

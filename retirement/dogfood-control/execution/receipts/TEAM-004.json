@@ -1,0 +1,23 @@
+{
+  "task_id": "TEAM-004",
+  "status": "done",
+  "summary": "Participant team status, lifecycle, invite UX and published-event picker; captain-only invite listing and event-bound redemption.",
+  "session_id": "sole-sequential-worker",
+  "commit": "c74f5ca",
+  "verification": [
+    {
+      "command": "uv run --frozen pytest tests/integration/test_team_participant_api.py -q",
+      "result": "13 passed"
+    },
+    {
+      "command": "make verify-fast",
+      "result": "180 API tests, 11 web tests, lint, format and build passed"
+    },
+    {
+      "command": "docker compose up -d --build && ./scripts/run-acceptance",
+      "result": "healthy stack; 7/7 PASS"
+    }
+  ],
+  "blockers": [],
+  "completed_at": "2026-09-27T00:17:20.993736+00:00"
+}

@@ -1,0 +1,191 @@
+{
+  "observed_at": "2026-09-26T20:42:43+00:00",
+  "unit_id": "C-B04",
+  "lane": "sol",
+  "ownership_lease": {
+    "id": "C-B04",
+    "lane": "sol",
+    "branch": "sol/C-B04",
+    "worktree": "/home/insightlabs38/conflux-worktrees/sol-C-B04",
+    "started_at": "2026-09-26T19:56:14+00:00",
+    "session_id": "unattended-sol-c-b04",
+    "owned_paths": [
+      "src/api/events/**",
+      "src/web/features/event-builder/**"
+    ]
+  },
+  "controller_state": {
+    "created_at": "2026-09-25T18:00:10+00:00",
+    "phase": "RUNNING",
+    "bootstrap": {
+      "attempts": []
+    },
+    "lanes": {
+      "claude": {
+        "status": "ACTIVE",
+        "unit": null,
+        "runner": false,
+        "process_or_session": true,
+        "lease_matches": false,
+        "worktree_exists": false,
+        "heartbeat_age_seconds": 2732,
+        "log_mtime_age_seconds": 2727,
+        "receipt_state": "missing",
+        "receipt_age_seconds": null,
+        "handoff_age_seconds": null,
+        "agent_checkpoint_age_seconds": null,
+        "recovery_snapshot_path": null,
+        "recovery_snapshot_age_seconds": null,
+        "quota_error_indicator": "IMPLEMENTATION_FAILURE",
+        "freebuff_pane_state": "n/a",
+        "integration_status": "not-ready",
+        "polled_at": "2026-09-26T20:42:17+00:00"
+      },
+      "sol": {
+        "status": "PAUSED_REVIEW",
+        "unit": "C-B04",
+        "runner": false,
+        "process_or_session": true,
+        "lease_matches": true,
+        "worktree_exists": true,
+        "heartbeat_age_seconds": 2312,
+        "log_mtime_age_seconds": 2306,
+        "receipt_state": "needs-review",
+        "receipt_age_seconds": 2321,
+        "handoff_age_seconds": 2306,
+        "agent_checkpoint_age_seconds": 2314,
+        "recovery_snapshot_path": "/home/dogfood-control/run/recovery/C-B04/snapshot.json",
+        "recovery_snapshot_age_seconds": 0,
+        "quota_error_indicator": "SUCCESS",
+        "freebuff_pane_state": "n/a",
+        "integration_status": "not-ready",
+        "polled_at": "2026-09-26T20:42:17+00:00"
+      },
+      "luna": {
+        "status": "ACTIVE",
+        "unit": null,
+        "runner": true,
+        "process_or_session": false,
+        "lease_matches": false,
+        "worktree_exists": false,
+        "heartbeat_age_seconds": 36,
+        "log_mtime_age_seconds": 36,
+        "receipt_state": "missing",
+        "receipt_age_seconds": null,
+        "handoff_age_seconds": null,
+        "agent_checkpoint_age_seconds": null,
+        "recovery_snapshot_path": null,
+        "recovery_snapshot_age_seconds": null,
+        "quota_error_indicator": "NO_TERMINAL_RESULT",
+        "freebuff_pane_state": "n/a",
+        "integration_status": "not-ready",
+        "polled_at": "2026-09-26T20:42:17+00:00"
+      },
+      "freebuff": {
+        "status": "PAUSED_SUBMIT",
+        "unit": "RT-001",
+        "runner": false,
+        "process_or_session": true,
+        "lease_matches": true,
+        "worktree_exists": true,
+        "heartbeat_age_seconds": 1372,
+        "log_mtime_age_seconds": null,
+        "receipt_state": "missing",
+        "receipt_age_seconds": null,
+        "handoff_age_seconds": 1363,
+        "agent_checkpoint_age_seconds": null,
+        "recovery_snapshot_path": "/home/dogfood-control/run/recovery/RT-001/snapshot.json",
+        "recovery_snapshot_age_seconds": 0,
+        "quota_error_indicator": "none",
+        "freebuff_pane_state": "working/tool/quiet",
+        "integration_status": "not-ready",
+        "polled_at": "2026-09-26T20:42:17+00:00"
+      }
+    },
+    "repo_url": "https://github.com/insightlabs38-pixel/Conflux",
+    "attention": null,
+    "handoff_at": null
+  },
+  "worktree": "/home/insightlabs38/conflux-worktrees/sol-C-B04",
+  "worktree_exists": true,
+  "branch": "sol/C-B04",
+  "head": "b601d85383fcd4a3e21b5c802375e2affd8b9881",
+  "git_status": {
+    "exit_code": 0,
+    "output": ""
+  },
+  "diff_stat": {
+    "exit_code": 0,
+    "output": ""
+  },
+  "diff_name_only": {
+    "exit_code": 0,
+    "output": ""
+  },
+  "staged_diff_stat": {
+    "exit_code": 0,
+    "output": ""
+  },
+  "verification_receipt": {
+    "version": 3,
+    "task_id": "C-B04",
+    "status": "needs-review",
+    "summary": "Implemented Event CRUD, status lifecycle, public visibility, tracks, base prizes, organizer dashboard API/UI and validation on the assigned branch. Runtime registration needs integration ownership before the batch can be declared complete.",
+    "executor_lane": "sol",
+    "model": "gpt-6-sol/medium",
+    "worktree": "/home/insightlabs38/conflux-worktrees/sol-C-B04",
+    "branch": "sol/C-B04",
+    "commit": "b601d85",
+    "session_id": "unattended-sol-c-b04",
+    "completed_tasks": [],
+    "verification": [
+      {
+        "command": "DJANGO_SECRET_KEY=test uv run --frozen pytest -q src/api/events/test_events.py --ds=events.testing_settings",
+        "result": "passed; 5 focused tests"
+      },
+      {
+        "command": "DJANGO_SECRET_KEY=test uv run --frozen pytest -q",
+        "result": "passed; 15 existing tests"
+      },
+      {
+        "command": "pnpm --dir src/web test",
+        "result": "passed; 2 tests"
+      },
+      {
+        "command": "pnpm --dir src/web lint && pnpm --dir src/web build",
+        "result": "passed"
+      },
+      {
+        "command": "DJANGO_SECRET_KEY=test uv run --frozen ruff format --check src/api/events && DJANGO_SECRET_KEY=test uv run --frozen ruff check src/api/events",
+        "result": "passed"
+      },
+      {
+        "command": "DJANGO_SECRET_KEY=test uv run --frozen python src/api/manage.py makemigrations events --check --dry-run --settings=events.testing_settings && DJANGO_SECRET_KEY=test uv run --frozen python src/api/manage.py check --settings=events.testing_settings",
+        "result": "passed; no migration changes or system issues"
+      },
+      {
+        "command": "pnpm exec prettier --check src/web/features/event-builder && git diff --cached --check",
+        "result": "passed"
+      }
+    ],
+    "blockers": [
+      "The events Django app must be added to INSTALLED_APPS in src/api/config/settings.py, currently outside C-B04 ownership and leased to RT-001.",
+      "events.urls must be included under /api/v1/ in src/api/core/urls.py, outside C-B04 ownership.",
+      "EventDashboard must be mounted from src/web/app/App.tsx or the owning web router, outside C-B04 ownership. The current UI test only verifies the isolated component."
+    ],
+    "footage_impact": {
+      "reviewed_task_id": "C-B04",
+      "task_scope_reviewed": "C-B04: Event, tracks, dates and base prize configuration",
+      "disposition": "UNAFFECTED",
+      "visual_scope": "NO_VISUAL_CHANGE",
+      "rationale": "The new organizer component is not mounted in the current web app, and no footage baseline manifest exists yet; no recorded route or scene changes on this branch.",
+      "scenes": [],
+      "verification_evidence": []
+    }
+  },
+  "handoff_path": "/home/dogfood-control/handoffs/sol/C-B04.md",
+  "agent_checkpoint": "Committed and pushed b601d85 on sol/C-B04; worktree clean. Receipt /home/dogfood-control/execution/receipts/C-B04.json is status needs-review with completed_tasks empty, verification evidence, and exact footage review. Runtime registration remains outside owned paths: INSTALLED_APPS in config/settings.py (RT-001 lease), core/urls.py include, and web App mount. Do not mark batch done or unlock downstream until owning integration completes and checks rerun.",
+  "agent_checkpoint_authored_at": "2026-09-26T20:03:43+00:00",
+  "agent_checkpoint_age_seconds": 2340,
+  "recent_execution_output": " on the assigned branch. Runtime registration needs integration ownership before the batch can be declared complete.\\\\\\\",\\n  \\\\\\\"executor_lane\\\\\\\": \\\\\\\"sol\\\\\\\",\\n  \\\\\\\"model\\\\\\\": \\\\\\\"gpt-6-sol/medium\\\\\\\",\\n  \\\\\\\"worktree\\\\\\\": \\\\\\\"/home/insightlabs38/conflux-worktrees/sol-C-B04\\\\\\\",\\n  \\\\\\\"branch\\\\\\\": \\\\\\\"sol/C-B04\\\\\\\",\\n  \\\\\\\"commit\\\\\\\": \\\\\\\"b601d85\\\\\\\",\\n  \\\\\\\"session_id\\\\\\\": \\\\\\\"unattended-sol-c-b04\\\\\\\",\\n  \\\\\\\"completed_tasks\\\\\\\": [],\\n  \\\\\\\"verification\\\\\\\": [\\n    {\\\\\\\"command\\\\\\\": \\\\\\\"DJANGO_SECRET_KEY=test uv run --frozen pytest -q src/api/events/test_events.py --ds=events.testing_settings\\\\\\\", \\\\\\\"result\\\\\\\": \\\\\\\"passed; 5 focused tests\\\\\\\"},\\n    {\\\\\\\"command\\\\\\\": \\\\\\\"DJANGO_SECRET_KEY=test uv run --frozen pytest -q\\\\\\\", \\\\\\\"result\\\\\\\": \\\\\\\"passed; 15 existing tests\\\\\\\"},\\n    {\\\\\\\"command\\\\\\\": \\\\\\\"pnpm --dir src/web test\\\\\\\", \\\\\\\"result\\\\\\\": \\\\\\\"passed; 2 tests\\\\\\\"},\\n    {\\\\\\\"command\\\\\\\": \\\\\\\"pnpm --dir src/web lint && pnpm --dir src/web build\\\\\\\", \\\\\\\"result\\\\\\\": \\\\\\\"passed\\\\\\\"},\\n    {\\\\\\\"command\\\\\\\": \\\\\\\"DJANGO_SECRET_KEY=test uv run --frozen ruff format --check src/api/events && DJANGO_SECRET_KEY=test uv run --frozen ruff check src/api/events\\\\\\\", \\\\\\\"result\\\\\\\": \\\\\\\"passed\\\\\\\"},\\n    {\\\\\\\"command\\\\\\\": \\\\\\\"DJANGO_SECRET_KEY=test uv run --frozen python src/api/manage.py makemigrations events --check --dry-run --settings=events.testing_settings && DJANGO_SECRET_KEY=test uv run --frozen python src/api/manage.py check --settings=events.testing_settings\\\\\\\", \\\\\\\"result\\\\\\\": \\\\\\\"passed; no migration changes or system issues\\\\\\\"},\\n    {\\\\\\\"command\\\\\\\": \\\\\\\"pnpm exec prettier --check src/web/features/event-builder && git diff --cached --check\\\\\\\", \\\\\\\"result\\\\\\\": \\\\\\\"passed\\\\\\\"}\\n  ],\\n  \\\\\\\"blockers\\\\\\\": [\\n    \\\\\\\"The events Django app must be added to INSTALLED_APPS in src/api/config/settings.py, currently outside C-B04 ownership and leased to RT-001.\\\\\\\",\\n    \\\\\\\"events.urls must be included under /api/v1/ in src/api/core/urls.py, outside C-B04 ownership.\\\\\\\",\\n    \\\\\\\"EventDashboard must be mounted from src/web/app/App.tsx or the owning web router, outside C-B04 ownership. The current UI test only verifies the isolated component.\\\\\\\"\\n  ],\\n  \\\\\\\"footage_impact\\\\\\\": {\\n    \\\\\\\"reviewed_task_id\\\\\\\": \\\\\\\"C-B04\\\\\\\",\\n    \\\\\\\"task_scope_reviewed\\\\\\\": \\\\\\\"C-B04: Event, tracks, dates and base prize configuration\\\\\\\",\\n    \\\\\\\"disposition\\\\\\\": \\\\\\\"UNAFFECTED\\\\\\\",\\n    \\\\\\\"visual_scope\\\\\\\": \\\\\\\"NO_VISUAL_CHANGE\\\\\\\",\\n    \\\\\\\"rationale\\\\\\\": \\\\\\\"The new organizer component is not mounted in the current web app, and no footage baseline manifest exists yet; no recorded route or scene changes on this branch.\\\\\\\",\\n    \\\\\\\"scenes\\\\\\\": [],\\n    \\\\\\\"verification_evidence\\\\\\\": []\\n  }\\n}\\nEOF\\nuv run --frozen python - <<'PY'\\nimport json\\nfrom pathlib import Path\\np=Path('/home/dogfood-control/execution/receipts/C-B04.json')\\nr=json.loads(p.read_text())\\nassert r['task_id']=='C-B04' and r['status']=='needs-review' and r['completed_tasks']==[]\\nassert r['footage_impact']['task_scope_reviewed']=='C-B04: Event, tracks, dates and base prize configuration'\\nprint('receipt valid JSON and batch identity verified')\\nPY\\ngit status --short --branch\\\"\",\"aggregated_output\":\"\",\"exit_code\":null,\"status\":\"in_progress\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_33\",\"type\":\"command_execution\",\"command\":\"/bin/bash -lc \\\"cat > /home/dogfood-control/execution/receipts/C-B04.json <<'EOF'\\n{\\n  \\\\\\\"version\\\\\\\": 3,\\n  \\\\\\\"task_id\\\\\\\": \\\\\\\"C-B04\\\\\\\",\\n  \\\\\\\"status\\\\\\\": \\\\\\\"needs-review\\\\\\\",\\n  \\\\\\\"summary\\\\\\\": \\\\\\\"Implemented Event CRUD, status lifecycle, public visibility, tracks, base prizes, organizer dashboard API/UI and validation on the assigned branch. Runtime registration needs integration ownership before the batch can be declared complete.\\\\\\\",\\n  \\\\\\\"executor_lane\\\\\\\": \\\\\\\"sol\\\\\\\",\\n  \\\\\\\"model\\\\\\\": \\\\\\\"gpt-6-sol/medium\\\\\\\",\\n  \\\\\\\"worktree\\\\\\\": \\\\\\\"/home/insightlabs38/conflux-worktrees/sol-C-B04\\\\\\\",\\n  \\\\\\\"branch\\\\\\\": \\\\\\\"sol/C-B04\\\\\\\",\\n  \\\\\\\"commit\\\\\\\": \\\\\\\"b601d85\\\\\\\",\\n  \\\\\\\"session_id\\\\\\\": \\\\\\\"unattended-sol-c-b04\\\\\\\",\\n  \\\\\\\"completed_tasks\\\\\\\": [],\\n  \\\\\\\"verification\\\\\\\": [\\n    {\\\\\\\"command\\\\\\\": \\\\\\\"DJANGO_SECRET_KEY=test uv run --frozen pytest -q src/api/events/test_events.py --ds=events.testing_settings\\\\\\\", \\\\\\\"result\\\\\\\": \\\\\\\"passed; 5 focused tests\\\\\\\"},\\n    {\\\\\\\"command\\\\\\\": \\\\\\\"DJANGO_SECRET_KEY=test uv run --frozen pytest -q\\\\\\\", \\\\\\\"result\\\\\\\": \\\\\\\"passed; 15 existing tests\\\\\\\"},\\n    {\\\\\\\"command\\\\\\\": \\\\\\\"pnpm --dir src/web test\\\\\\\", \\\\\\\"result\\\\\\\": \\\\\\\"passed; 2 tests\\\\\\\"},\\n    {\\\\\\\"command\\\\\\\": \\\\\\\"pnpm --dir src/web lint && pnpm --dir src/web build\\\\\\\", \\\\\\\"result\\\\\\\": \\\\\\\"passed\\\\\\\"},\\n    {\\\\\\\"command\\\\\\\": \\\\\\\"DJANGO_SECRET_KEY=test uv run --frozen ruff format --check src/api/events && DJANGO_SECRET_KEY=test uv run --frozen ruff check src/api/events\\\\\\\", \\\\\\\"result\\\\\\\": \\\\\\\"passed\\\\\\\"},\\n    {\\\\\\\"command\\\\\\\": \\\\\\\"DJANGO_SECRET_KEY=test uv run --frozen python src/api/manage.py makemigrations events --check --dry-run --settings=events.testing_settings && DJANGO_SECRET_KEY=test uv run --frozen python src/api/manage.py check --settings=events.testing_settings\\\\\\\", \\\\\\\"result\\\\\\\": \\\\\\\"passed; no migration changes or system issues\\\\\\\"},\\n    {\\\\\\\"command\\\\\\\": \\\\\\\"pnpm exec prettier --check src/web/features/event-builder && git diff --cached --check\\\\\\\", \\\\\\\"result\\\\\\\": \\\\\\\"passed\\\\\\\"}\\n  ],\\n  \\\\\\\"blockers\\\\\\\": [\\n    \\\\\\\"The events Django app must be added to INSTALLED_APPS in src/api/config/settings.py, currently outside C-B04 ownership and leased to RT-001.\\\\\\\",\\n    \\\\\\\"events.urls must be included under /api/v1/ in src/api/core/urls.py, outside C-B04 ownership.\\\\\\\",\\n    \\\\\\\"EventDashboard must be mounted from src/web/app/App.tsx or the owning web router, outside C-B04 ownership. The current UI test only verifies the isolated component.\\\\\\\"\\n  ],\\n  \\\\\\\"footage_impact\\\\\\\": {\\n    \\\\\\\"reviewed_task_id\\\\\\\": \\\\\\\"C-B04\\\\\\\",\\n    \\\\\\\"task_scope_reviewed\\\\\\\": \\\\\\\"C-B04: Event, tracks, dates and base prize configuration\\\\\\\",\\n    \\\\\\\"disposition\\\\\\\": \\\\\\\"UNAFFECTED\\\\\\\",\\n    \\\\\\\"visual_scope\\\\\\\": \\\\\\\"NO_VISUAL_CHANGE\\\\\\\",\\n    \\\\\\\"rationale\\\\\\\": \\\\\\\"The new organizer component is not mounted in the current web app, and no footage baseline manifest exists yet; no recorded route or scene changes on this branch.\\\\\\\",\\n    \\\\\\\"scenes\\\\\\\": [],\\n    \\\\\\\"verification_evidence\\\\\\\": []\\n  }\\n}\\nEOF\\nuv run --frozen python - <<'PY'\\nimport json\\nfrom pathlib import Path\\np=Path('/home/dogfood-control/execution/receipts/C-B04.json')\\nr=json.loads(p.read_text())\\nassert r['task_id']=='C-B04' and r['status']=='needs-review' and r['completed_tasks']==[]\\nassert r['footage_impact']['task_scope_reviewed']=='C-B04: Event, tracks, dates and base prize configuration'\\nprint('receipt valid JSON and batch identity verified')\\nPY\\ngit status --short --branch\\\"\",\"aggregated_output\":\"receipt valid JSON and batch identity verified\\n## sol/C-B04...origin/sol/C-B04\\n\",\"exit_code\":0,\"status\":\"completed\"}}\n{\"type\":\"item.started\",\"item\":{\"id\":\"item_34\",\"type\":\"command_execution\",\"command\":\"/bin/bash -lc \\\"/home/dogfood-control/bin/conflux-handoff sol C-B04 --worktree /home/insightlabs38/conflux-worktrees/sol-C-B04 --branch sol/C-B04 --phase needs-review --checkpoint 'Committed and pushed b601d85 on sol/C-B04; worktree clean. Receipt /home/dogfood-control/execution/receipts/C-B04.json is status needs-review with completed_tasks empty, verification evidence, and exact footage review. Runtime registration remains outside owned paths: INSTALLED_APPS in config/settings.py (RT-001 lease), core/urls.py include, and web App mount. Do not mark batch done or unlock downstream until owning integration completes and checks rerun.' --next 'Integration owner registers events app/routes and mounts dashboard, reruns functional checks, then updates completion receipt and gate decision'\\\"\",\"aggregated_output\":\"\",\"exit_code\":null,\"status\":\"in_progress\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_34\",\"type\":\"command_execution\",\"command\":\"/bin/bash -lc \\\"/home/dogfood-control/bin/conflux-handoff sol C-B04 --worktree /home/insightlabs38/conflux-worktrees/sol-C-B04 --branch sol/C-B04 --phase needs-review --checkpoint 'Committed and pushed b601d85 on sol/C-B04; worktree clean. Receipt /home/dogfood-control/execution/receipts/C-B04.json is status needs-review with completed_tasks empty, verification evidence, and exact footage review. Runtime registration remains outside owned paths: INSTALLED_APPS in config/settings.py (RT-001 lease), core/urls.py include, and web App mount. Do not mark batch done or unlock downstream until owning integration completes and checks rerun.' --next 'Integration owner registers events app/routes and mounts dashboard, reruns functional checks, then updates completion receipt and gate decision'\\\"\",\"aggregated_output\":\"/home/dogfood-control/handoffs/sol/C-B04.md\\n\",\"exit_code\":0,\"status\":\"completed\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_35\",\"type\":\"agent_message\",\"text\":\"I committed and pushed the C-B04 event API and organizer dashboard on `sol/C-B04` (`b601d85`). Focused event tests passed (5), the existing API tests passed (15), and web tests, lint, and build passed.\\n\\n**C-B04 remains `needs-review`.** The new Django app, API routes, and dashboard cannot be registered without changes outside the assigned paths. I left those paths untouched and recorded the blockers in the [receipt](/home/dogfood-control/execution/receipts/C-B04.json) and [handoff](/home/dogfood-control/handoffs/sol/C-B04.md). I have not claimed batch completion or downstream eligibility.\"}}\n{\"type\":\"turn.completed\",\"usage\":{\"input_tokens\":1271784,\"cached_input_tokens\":1221760,\"cache_write_input_tokens\":0,\"output_tokens\":18390,\"reasoning_output_tokens\":2673}}\n{\"at\": \"2026-09-26T20:03:51.263877+00:00\", \"event\": \"failed\", \"classification\": \"AUTH_FAILURE\", \"exit_code\": 0}\n{\"at\": \"2026-09-26T20:03:51.692346+00:00\", \"event\": \"paused-auth\", \"id\": \"C-B04\"}\n"
+}

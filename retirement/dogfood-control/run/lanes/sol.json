@@ -1,0 +1,7 @@
+{
+  "lane": "sol",
+  "status": "PAUSED_REVIEW",
+  "unit": "C-B04",
+  "at": "2026-09-26T20:15:00+00:00",
+  "reason": "C-B04 receipt needs-review: runtime registration paths are outside current ownership; Codex authentication was available and prior auth classification was a false positive"
+}

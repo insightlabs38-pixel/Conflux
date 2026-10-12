@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+set -euo pipefail
+exec /home/insightlabs38/src/freebuff/cli/bin/freebuff "$@"

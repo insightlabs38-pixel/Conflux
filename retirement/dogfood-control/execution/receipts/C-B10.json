@@ -1,0 +1,20 @@
+{
+  "task_id": "C-B10",
+  "status": "done",
+  "summary": "Versioned submission drafts, transactional immutable finalization, deadline and policy checks, and participant receipts.",
+  "commits": {
+    "SUB-001": "da35bc0",
+    "SUB-002": "da35bc0",
+    "SUB-003": "da35bc0",
+    "SUB-004": "da35bc0",
+    "SUB-005": "da35bc0",
+    "SUB-006": "da35bc0"
+  },
+  "verification": [
+    "make verify-fast: 232 API passed, 3 opt-in skipped; 17 web passed; lint/format/build passed",
+    "makemigrations --check --dry-run: no changes",
+    "docker compose up -d --build: healthy; official acceptance 7/7 PASS"
+  ],
+  "next": "C-B11 UI-001",
+  "completed_at": "2026-09-27T01:06:50.546375+00:00"
+}

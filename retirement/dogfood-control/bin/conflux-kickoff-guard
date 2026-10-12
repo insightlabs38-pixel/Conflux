@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+start=$(sed -n 's/^CONFLUX_START_UTC=//p' /home/dogfood-control/unattended.env | head -1)
+if [[ -z "$start" ]]; then
+  printf 'LOCKED: campaign start is not configured.\n' >&2
+  exit 78
+fi
+kickoff_epoch=$(date -u -d "$start" +%s)
+now_epoch=$(date -u +%s)
+if (( now_epoch < kickoff_epoch )); then
+  printf 'LOCKED: configured campaign start is %s (now %s UTC).\n' "$start" "$(date -u +%FT%TZ)" >&2
+  exit 78
+fi
+printf 'UNLOCKED: kickoff time has passed (%s UTC). This guard does not bootstrap a repository.\n' "$(date -u +%FT%TZ)"

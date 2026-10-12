@@ -1,0 +1,25 @@
+#!/usr/bin/env python3
+import pathlib,re,sys
+if len(sys.argv)!=2: raise SystemExit('usage: conflux-outcome-classify LOGFILE')
+s=pathlib.Path(sys.argv[1]).read_text(errors='replace')
+# Lane logs are append-only across retries. Ignore prior invocation errors when
+# classifying the current attempt; retain the full file for audit/history.
+runs=list(re.finditer(r'(?m)^.*"event"\s*:\s*"invocation_started".*$',s))
+if runs: s=s[runs[-1].start():]
+# A completed Codex turn is authoritative even when its tool output contains
+# words such as "unauthorized" from application tests. The worker will still
+# honor a needs-review receipt and route it to review instead of integration.
+if re.search(r'(?m)^\s*\{"type"\s*:\s*"turn\.completed"',s):
+ print('SUCCESS'); raise SystemExit(0)
+if re.search(r'(?i)session limit reached|monthly usage limit reached|not enough freebucks|rate[_ -]?limit[_ -]?(?:exceeded|error)|http\s*429|\bstatus["=: ]+429\b',s): print('QUOTA')
+# Do not match the generic word "unauthorized": application test output and
+# source routinely contain it (for example, 401/403 access-control tests).
+# Require a provider-style authentication diagnostic instead.
+elif re.search(r'(?i)not logged in|authentication failed|invalid api key|token expired|http\s*401|\bstatus["=: ]+401\b',s): print('AUTH_FAILURE')
+elif re.search(r'(?i)integration failed|fast verification failed|merge failed|merge conflict',s): print('INTEGRATION_FAILURE')
+elif re.search(r'(?i)watchdog|process inactive timeout|worker classified as hang',s): print('HANG')
+elif re.search(r'(?i)no space left on device|network is unreachable|connection refused|input/output error',s): print('INFRA_FAILURE')
+elif re.search(r'(?i)Traceback \(most recent call last\)|tests failed|implementation failed|"event"\s*:\s*"failed"',s): print('IMPLEMENTATION_FAILURE')
+elif re.search(r'(?i)receipt|completed successfully|finished with result: success',s): print('SUCCESS')
+elif not s.strip(): print('NO_OUTPUT')
+else: print('NO_TERMINAL_RESULT')

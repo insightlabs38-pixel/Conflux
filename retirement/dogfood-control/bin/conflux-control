@@ -1,0 +1,309 @@
+#!/usr/bin/env python3
+"""Deterministic external queue controller for Conflux hackathon execution."""
+import argparse, datetime as dt, fcntl, fnmatch, json, os, subprocess, sys, tempfile
+from pathlib import Path
+import yaml
+ROOT=Path(os.environ.get('CONFLUX_CONTROL_ROOT','/home/dogfood-control/execution'))
+WORKTREE_ROOT=Path(os.environ.get('CONFLUX_WORKTREE_ROOT','/home/insightlabs38/conflux-worktrees'))
+PLAN=Path(os.environ.get('CONFLUX_PLAN_ROOT','/home/dogfood-control/plan'))
+STATE=ROOT/'OWNERSHIP.yaml'; LOCK=ROOT/'.controller.lock'
+BFILE=ROOT/'BATCHES.yaml'; TFILE=ROOT/'TASKS.yaml'; OFILE=STATE
+_campaign_start=os.environ.get('CONFLUX_START_UTC','').strip()
+KICKOFF=dt.datetime.fromisoformat(_campaign_start) if _campaign_start else dt.datetime.max.replace(tzinfo=dt.timezone.utc)
+ACTIVE={'ACTIVE','RESERVED','REVIEW'}
+LANES={'claude':'claude-sonnet','sol':'codex-sol','luna':'bulk','freebuff':'bulk','human':'human'}
+def utc(): return dt.datetime.now(dt.timezone.utc).isoformat(timespec='seconds')
+def load_yaml(path): return yaml.safe_load(path.read_text())
+def atomic_yaml(path,obj):
+    data=yaml.safe_dump(obj,sort_keys=False,allow_unicode=True,width=110)
+    atomic_text(path,data)
+def atomic_text(path,data):
+    path.parent.mkdir(parents=True,exist_ok=True)
+    fd,tmp=tempfile.mkstemp(prefix='.'+path.name+'.',dir=path.parent)
+    try:
+        with os.fdopen(fd,'w') as f: f.write(data); f.flush(); os.fsync(f.fileno())
+        os.replace(tmp,path)
+    finally:
+        try: os.unlink(tmp)
+        except FileNotFoundError: pass
+def state():
+    s=load_yaml(STATE) if STATE.exists() else {}
+    s.setdefault('leases',[]); s.setdefault('reserved_batches',[]); s.setdefault('completed_batches',[]); s.setdefault('open_gates',[]); s.setdefault('blockers',{})
+    s.setdefault('capacity',{}).setdefault('luna_max_active',1); s['capacity'].setdefault('luna_expansion_enabled',False); s['capacity'].setdefault('freebuff_max_active',1)
+    s.setdefault('provider_notes',[]); s.setdefault('last_green_main',None); s.setdefault('runtime_mode','NORMAL')
+    return s
+def save_state(s): atomic_yaml(STATE,s)
+def maps():
+    b=load_yaml(BFILE)['batches']; t=load_yaml(TFILE)['tasks']
+    return {x['id']:x for x in b},{x['id']:x for x in t}
+def fail(msg): print('ERROR: '+msg,file=sys.stderr); raise SystemExit(2)
+def lock():
+    LOCK.parent.mkdir(parents=True,exist_ok=True); f=open(LOCK,'a+')
+    fcntl.flock(f.fileno(),fcntl.LOCK_EX); return f
+def gate_ok(batch,s):
+    bid=batch['id']
+    for dep in batch.get('dependencies',[]):
+        if dep in s.get('completed_batches',[]): continue
+        if dep in s.get('open_gates',[]): continue
+        return False
+    return True
+def paths_overlap(a,b):
+    if a==b or a=='repository root' or b=='repository root': return True
+    def root(p): return p.removesuffix('/**').rstrip('/')
+    ar,br=root(a),root(b)
+    return ar==br or ar.startswith(br+'/') or br.startswith(ar+'/') or fnmatch.fnmatchcase(ar, b) or fnmatch.fnmatchcase(br,a)
+def conflict(paths,leases,exclude=None):
+    for l in leases:
+        if l.get('id')==exclude: continue
+        for a in paths:
+            for b in l.get('owned_paths',[]):
+                if paths_overlap(a,b): return l
+    return None
+def ready_task(t,batches,tasks,s,leases,reserved):
+    if t.get('status','').upper() in {'DONE','ACTIVE','RESERVED','REVIEW'}: return False
+    if t.get('risk')=='high' or not t.get('bulk_eligible',False) or t.get('preferred_executor')=='human': return False
+    batch=batches.get(t['batch'])
+    if not batch or not gate_ok(batch,s): return False
+    # BOOT-B00 is an exclusive senior bootstrap gate; no bulk task lane can enter it.
+    if t.get('batch')=='BOOT-B00' and 'BOOT-B00' not in s.get('completed_batches',[]): return False
+    if any(d not in tasks or tasks[d].get('status','').upper()!='DONE' for d in t.get('task_dependencies',[])): return False
+    if any(d not in s.get('completed_batches',[]) and d not in s.get('open_gates',[]) for d in t.get('batch_dependencies',[])): return False
+    if any(r['id']==t['batch'] and r['lane'] in ('claude','sol') for r in reserved): return False
+    if conflict(t.get('owned_paths',[]),leases+reserved): return False
+    return True
+def batch_ready(b,batches,s,leases,reserved):
+    if b['id'] in s.get('completed_batches',[]): return False
+    if any(r['id']==b['id'] for r in reserved): return False
+    if not gate_ok(b,s): return False
+    if conflict(b.get('owned_paths',[]),leases+reserved): return False
+    # Dependencies referencing batch IDs are completed; gate dependencies are open.
+    return True
+def lane_count(leases,lane): return sum(1 for l in leases if l.get('kind')=='task' and l.get('lane')==lane)
+def candidate_tasks(lane):
+    batches,tasks=maps(); s=state(); leases=s.get('leases',[]); reserved=s.get('reserved_batches',[])
+    if lane=='freebuff' and lane_count(leases,'freebuff')>=1: return []
+    cap=int(s.get('capacity',{}).get('luna_max_active',1))
+    if lane=='luna' and lane_count(leases,'luna')>=cap: return []
+    phase_rank={'core':0,'core-gate':0,'release-gate':0,'stretch':1,'very-stretch':2}
+    downstream={k:0 for k in tasks}
+    for x in tasks.values():
+        for d in x.get('task_dependencies',[]): downstream[d]=downstream.get(d,0)+1
+    result=[t for t in tasks.values() if ready_task(t,batches,tasks,s,leases,reserved)]
+    result.sort(key=lambda t:(phase_rank.get(t.get('phase'),9),-downstream.get(t['id'],0),t['id']))
+    return result
+def main():
+    p=argparse.ArgumentParser(prog='conflux-control'); sub=p.add_subparsers(dest='cmd',required=True)
+    sub.add_parser('status'); capcmd=sub.add_parser('capacity'); capcmd.add_argument('lane',choices=['luna']); capcmd.add_argument('maximum',type=int); capcmd.add_argument('--owner-approve',action='store_true'); capcmd.add_argument('--note',required=True)
+    sub.add_parser('provider-status'); pp=sub.add_parser('provider-pause'); pp.add_argument('lane',choices=['claude','codex','sol','luna','freebuff']); pp.add_argument('--reason',default='owner pause')
+    pr=sub.add_parser('provider-resume'); pr.add_argument('lane',choices=['claude','codex','sol','luna','freebuff'])
+    note_cmd=sub.add_parser('note'); note_cmd.add_argument('text',nargs='+')
+    nb=sub.add_parser('next-batch'); nb.add_argument('lane',choices=['claude','sol'])
+    nt=sub.add_parser('next-task'); nt.add_argument('lane',choices=['luna','freebuff'])
+    cb=sub.add_parser('claim-batch'); cb.add_argument('lane',choices=['claude','sol']); cb.add_argument('id',nargs='?'); cb.add_argument('--branch'); cb.add_argument('--worktree'); cb.add_argument('--session-id')
+    ct=sub.add_parser('claim-task'); ct.add_argument('lane',choices=['luna','freebuff']); ct.add_argument('id',nargs='?'); ct.add_argument('--branch'); ct.add_argument('--worktree'); ct.add_argument('--session-id')
+    for name in ('release','review','done'):
+        q=sub.add_parser(name); q.add_argument('id')
+    complete_batch=sub.add_parser('complete-batch'); complete_batch.add_argument('id'); complete_batch.add_argument('--receipt',required=True)
+    bl=sub.add_parser('block'); bl.add_argument('id'); bl.add_argument('reason',nargs='+')
+    rs=sub.add_parser('reserve'); rs.add_argument('id'); rs.add_argument('lane',choices=['claude','sol','luna','freebuff','human'])
+    og=sub.add_parser('open-gate'); og.add_argument('id'); og.add_argument('--confirm-human',action='store_true')
+    rc=sub.add_parser('reconcile'); rc.add_argument('--stale-hours',type=float,default=24)
+    args=p.parse_args()
+    if args.cmd=='status': return show_status()
+    if args.cmd=='provider-status':
+        d=Path(os.environ.get('CONFLUX_CONTROL_ROOT','/home/dogfood-control/execution')).parent/'run/lanes'
+        control=Path(os.environ.get('CONFLUX_CONTROL_ROOT','/home/dogfood-control/execution')); own=load_yaml(control/'OWNERSHIP.yaml') or {}; leases=own.get('leases',[])+own.get('reserved_batches',[])
+        for lane in ('claude','sol','luna','freebuff'):
+            p=d/f'{lane}.json'; row=json.loads(p.read_text()) if p.exists() else {'status':'READY'}
+            lease=next((x for x in leases if x.get('lane')==lane),None)
+            session='unattended-runner-'+lane
+            alive=subprocess.run(['tmux','has-session','-t',session],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0
+            if not p.exists() and lease:
+                row={'status':'ACTIVE' if alive else 'HANDOFF_REQUIRED','unit':lease.get('id'),'at':lease.get('started_at'),'reason':'owned task/batch lease'}
+            if lane=='luna':
+                q=Path('/home/dogfood-control/execution/VIDEO_QUEUE.yaml')
+                if q.exists():
+                    jobs=[x for x in (yaml.safe_load(q.read_text()) or {}).get('items',[]) if x.get('executor')=='luna' and x.get('state') in ('ACTIVE','PAUSED_QUOTA','WAITING_RESET')]
+                    if jobs:
+                        job=jobs[0]
+                        if job['state']!='ACTIVE' or row.get('status','READY')=='READY': row={'status':'PAUSED_QUOTA' if job['state']=='WAITING_RESET' else job['state'],'unit':job['id'],'reset_at':job.get('reset_at'),'reason':job.get('reason','operational video job')}
+            hp=Path('/home/dogfood-control/handoffs')/lane/f"{row.get('unit')}.md" if row.get('unit') else None
+            age='n/a'
+            if hp and hp.exists(): age=str(int((dt.datetime.now(dt.timezone.utc)-dt.datetime.fromtimestamp(hp.stat().st_mtime,dt.timezone.utc)).total_seconds()//60))+'m'
+            print(f"{lane}: {row.get('status','READY')} unit={row.get('unit','none')} runner={'up' if alive else 'down'} since={row.get('at','unknown')} handoff_age={age} reset_at={row.get('reset_at','unknown')} reason={row.get('reason','')}")
+        return
+    if args.cmd=='provider-pause':
+        lanes=('sol','luna') if args.lane=='codex' else ('sol',) if args.lane=='sol' else (args.lane,)
+        for lane in lanes:
+            p=Path('/home/dogfood-control/run/lanes')/f'{lane}.json'; p.parent.mkdir(parents=True,exist_ok=True)
+            old=json.loads(p.read_text()) if p.exists() else {'lane':lane,'unit':None}
+            old.update(status='PAUSED_QUOTA',reason=args.reason,at=utc()); tmp=p.with_suffix('.tmp'); tmp.write_text(json.dumps(old,indent=2)+'\n'); os.chmod(tmp,0o600); os.replace(tmp,p)
+        print(f"{','.join(lanes)} paused; existing leases/worktrees retained"); return
+    if args.cmd=='provider-resume':
+        lanes=('sol','luna') if args.lane=='codex' else ('sol',) if args.lane=='sol' else (args.lane,)
+        for lane in lanes: (Path('/home/dogfood-control/run/lanes')/f'{lane}.json').unlink(missing_ok=True)
+        if 'luna' in lanes:
+            q=Path('/home/dogfood-control/execution/VIDEO_QUEUE.yaml')
+            if q.exists():
+                with Path('/home/dogfood-control/run/video-queue.lock').open('a+') as video_lock:
+                    fcntl.flock(video_lock,fcntl.LOCK_EX); data=yaml.safe_load(q.read_text()) or {}; changed=False
+                    for item in data.get('items',[]):
+                        if item.get('executor')=='luna' and item.get('state')=='PAUSED_QUOTA': item.update(state='QUEUED',reason='owner confirmed Luna usage reset'); changed=True
+                    if changed: q.write_text(yaml.safe_dump(data,sort_keys=False))
+        print(f"{','.join(lanes)} reset to READY; supervisor will continue owned work or claim the next eligible unit"); return
+    if args.cmd=='next-task':
+        if dt.datetime.now(dt.timezone.utc)<KICKOFF: print('kickoff guard: no configured campaign start or it has not arrived'); return
+        rows=candidate_tasks(args.lane); print(f'lane={args.lane} cap={state().get("capacity",{}).get("luna_max_active",1) if args.lane=="luna" else 1}')
+        if rows: print(f"candidate {rows[0]['id']} [{rows[0]['phase']}] {rows[0]['title']} (batch {rows[0]['batch']})")
+        else: print('no safe eligible task')
+        return
+    if args.cmd=='next-batch':
+        if dt.datetime.now(dt.timezone.utc)<KICKOFF: print('kickoff guard: no configured campaign start or it has not arrived'); return
+        batches,_=maps(); s=state(); lane=args.lane; ex=LANES[lane]
+        arr=[b for b in batches.values() if b.get('preferred_executor') in (ex,'claude-or-codex') and batch_ready(b,batches,s,s.get('leases',[]),s.get('reserved_batches',[]))]
+        arr.sort(key=lambda b:({'core':0,'core-gate':0,'release-gate':0,'stretch':1,'very-stretch':2}.get(b.get('phase'),9),b['id']))
+        print(f"lane={lane}"); print((f"candidate {arr[0]['id']} {arr[0]['title']}" if arr else 'no safe eligible batch')); return
+    if args.cmd=='reconcile':
+        with lock():
+            s=state(); cutoff=dt.datetime.now(dt.timezone.utc)-dt.timedelta(hours=args.stale_hours); removed=[]; keep=[]
+            def expired(record):
+                try: old=dt.datetime.fromisoformat(record['started_at'])<cutoff
+                except Exception: old=False
+                alive=False
+                if record.get('session_id'):
+                    import subprocess
+                    alive=subprocess.run(['tmux','has-session','-t',record['session_id']],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0
+                return old and not alive
+            for l in s.get('leases',[]):
+                (removed if expired(l) else keep).append(l)
+            old_batches=s.get('reserved_batches',[]); s['reserved_batches']=[r for r in old_batches if not expired(r)]
+            removed_batches=len(old_batches)-len(s['reserved_batches']); s['leases']=keep
+            _,ts=maps(); leased={l['id'] for l in keep if l.get('kind')=='task'}; orphaned=[]
+            for task in ts.values():
+                if task.get('status')=='ACTIVE' and task['id'] not in leased:
+                    task['status']='READY'; orphaned.append(task['id'])
+            for l in removed:
+                if l.get('kind')=='task' and l['id'] in ts and ts[l['id']].get('status')=='ACTIVE': ts[l['id']]['status']='READY'
+            if removed or removed_batches or orphaned:
+                atomic_yaml(TFILE,{'version':load_yaml(TFILE).get('version',1),'tasks':list(ts.values())})
+            save_state(s)
+            print(f'reconciled {len(removed)} stale task lease(s), {removed_batches} stale batch reservation(s), {len(orphaned)} orphan ACTIVE task(s); retained {len(keep)} task lease(s)'); return
+    # All remaining commands mutate under one OS lock.
+    with lock():
+        s=state(); batches,tasks=maps()
+        if args.cmd=='complete-batch' and dt.datetime.now(dt.timezone.utc)<KICKOFF: fail('kickoff guard: no configured campaign start or it has not arrived')
+        if args.cmd=='note':
+            s.setdefault('provider_notes',[]).append({'at':utc(),'text':' '.join(args.text)}); save_state(s); print('provider/quota note recorded'); return
+        if args.cmd=='capacity':
+            if not args.owner_approve: fail('capacity change requires explicit owner approval')
+            if args.maximum<1 or args.maximum>8: fail('Luna cap must be between 1 and 8')
+            if lane_count(s.get('leases',[]),'luna')>args.maximum: fail('cannot set cap below active Luna task count')
+            s.setdefault('capacity',{})['luna_max_active']=args.maximum; s['capacity']['luna_expansion_enabled']=args.maximum>1
+            s.setdefault('provider_notes',[]).append({'at':utc(),'text':f'Owner-approved Luna cap {args.maximum}: {args.note}'})
+            save_state(s); print(f'Luna concurrency cap set to {args.maximum}'); return
+        if args.cmd=='claim-batch':
+            if dt.datetime.now(dt.timezone.utc)<KICKOFF: fail('kickoff guard: no configured campaign start or it has not arrived')
+            lane=args.lane; ex=LANES[lane]
+            b=batches.get(args.id) if args.id else None
+            if not b:
+                arr=[x for x in batches.values() if x.get('preferred_executor') in (ex,'claude-or-codex') and batch_ready(x,batches,s,s['leases'],s['reserved_batches'])]
+                arr.sort(key=lambda x:({'core':0,'core-gate':0,'release-gate':0,'stretch':1,'very-stretch':2}.get(x.get('phase'),9),x['id']))
+                if not arr: fail('no safe eligible batch')
+                b=arr[0]
+            if b.get('preferred_executor') not in (ex,'claude-or-codex'): fail('batch executor preference does not match lane')
+            if not batch_ready(b,batches,s,s['leases'],s['reserved_batches']): fail('batch dependencies, gate, reservation or path ownership not ready')
+            s['reserved_batches'].append({'id':b['id'],'lane':lane,'branch':args.branch or f'{lane}/{b["id"]}','worktree':args.worktree or str(WORKTREE_ROOT/f'{lane}-{b["id"]}'),'started_at':utc(),'session_id':args.session_id,'owned_paths':b.get('owned_paths',[])})
+            save_state(s); print('claimed batch '+b['id']); return
+        if args.cmd=='claim-task':
+            if dt.datetime.now(dt.timezone.utc)<KICKOFF: fail('kickoff guard: no configured campaign start or it has not arrived')
+            lane=args.lane
+            candidates=candidate_tasks(lane); t=tasks.get(args.id) if args.id else (candidates[0] if candidates else None)
+            if not t: fail('no safe eligible task')
+            if t not in candidates: fail('task is not currently safe, eligible and unreserved')
+            if lane=='freebuff' and lane_count(s['leases'],lane)>=1: fail('Freebuff serial lane already has an active task')
+            if lane=='luna' and lane_count(s['leases'],lane)>=int(s.get('capacity',{}).get('luna_max_active',1)): fail('Luna concurrency cap reached')
+            lease={'kind':'task','id':t['id'],'lane':lane,'executor_lane':lane,'branch':args.branch or f'{lane}/{t["id"]}','worktree':args.worktree or str(WORKTREE_ROOT/f'{lane}-{t["id"]}'),'started_at':utc(),'session_id':args.session_id,'owned_paths':t.get('owned_paths',[])}
+            t['status']='ACTIVE'; atomic_yaml(TFILE,{'version':load_yaml(TFILE).get('version',1),'tasks':list(tasks.values())})
+            s['leases'].append(lease); save_state(s); print('claimed task '+t['id']); return
+        ident=args.id
+        if args.cmd=='complete-batch':
+            if ident not in batches: fail('unknown batch '+ident)
+            if not any(r.get('id')==ident for r in s.get('reserved_batches',[])): fail('batch has no active reservation')
+            try: receipt=json.loads(Path(args.receipt).read_text())
+            except Exception as e: fail('invalid/missing completion receipt: '+str(e))
+            if receipt.get('task_id')!=ident or receipt.get('status')!='done' or receipt.get('executor_lane') not in ('claude','sol','luna'): fail('receipt identity/status/executor does not authorize batch completion')
+            if set(receipt.get('completed_tasks',[]))!=set(batches[ident].get('task_ids',[])): fail('receipt completed_tasks must exactly cover every task in the batch')
+            for tid in batches[ident].get('task_ids',[]):
+                if tid not in tasks: fail('batch references unknown task '+tid)
+                tasks[tid]['status']='DONE'
+                s['leases']=[l for l in s['leases'] if l.get('id')!=tid]
+            s['completed_batches']=sorted(set(s.get('completed_batches',[])+[ident]))
+            s['reserved_batches']=[r for r in s.get('reserved_batches',[]) if r.get('id')!=ident]
+            atomic_yaml(TFILE,{'version':load_yaml(TFILE).get('version',1),'tasks':list(tasks.values())})
+            save_state(s); print('completed batch '+ident); return
+        lease=next((l for l in s.get('leases',[]) if l.get('id')==ident),None)
+        if args.cmd=='open-gate':
+            if ident not in ('STRETCH-GATE','G0','G1','G2','G3','G4','G5','RELEASE'): fail('unknown gate '+ident)
+            if not args.confirm_human: fail('gate opening requires explicit human confirmation: add --confirm-human')
+            if ident=='STRETCH-GATE' and tasks.get('GATE-VS-001',{}).get('status')!='DONE': fail('human gate task GATE-VS-001 must be DONE first')
+            s.setdefault('open_gates',[]); s['open_gates']=sorted(set(s['open_gates']+[ident])); save_state(s); print('opened gate '+ident); return
+        if args.cmd=='reserve':
+            if ident in batches:
+                if args.lane not in ('claude','sol'): fail('only senior lanes reserve a batch')
+                if batches[ident].get('preferred_executor') not in (LANES[args.lane],'claude-or-codex'): fail('batch preference does not match senior lane')
+                if not batch_ready(batches[ident],batches,s,s['leases'],s['reserved_batches']): fail('batch is not ready or conflicts')
+                s['reserved_batches'].append({'id':ident,'lane':args.lane,'branch':f'{args.lane}/{ident}','worktree':str(WORKTREE_ROOT/f'{args.lane}-{ident}'),'started_at':utc(),'session_id':None,'owned_paths':batches[ident].get('owned_paths',[])})
+            elif ident in tasks:
+                if args.lane not in ('luna','freebuff','human'): fail('task reservation lane must be bulk or human')
+                if args.lane=='human' and tasks[ident].get('preferred_executor')!='human': fail('human reservation is only for human-preferred task')
+                if args.lane=='freebuff' and lane_count(s['leases'],'freebuff')>=1: fail('Freebuff serial lane already has an active task')
+                if args.lane=='luna' and lane_count(s['leases'],'luna')>=int(s.get('capacity',{}).get('luna_max_active',1)): fail('Luna concurrency cap reached')
+                if args.lane!='human' and not ready_task(tasks[ident],batches,tasks,s,s['leases'],s['reserved_batches']): fail('task is not ready/eligible')
+                tasks[ident]['status']='ACTIVE'; atomic_yaml(TFILE,{'version':load_yaml(TFILE).get('version',1),'tasks':list(tasks.values())})
+                s['leases'].append({'kind':'task','id':ident,'lane':args.lane,'executor_lane':args.lane,'branch':None,'worktree':None,'started_at':utc(),'session_id':None,'owned_paths':tasks[ident].get('owned_paths',[])})
+            else: fail('unknown task or batch id')
+            save_state(s); print('reserved '+ident); return
+        if args.cmd in ('release','review','done','block'):
+            if ident in tasks:
+                if args.cmd!='block' and not lease: fail('no active task lease for '+ident)
+                if args.cmd=='release': tasks[ident]['status']='READY'; s['leases']=[l for l in s['leases'] if l.get('id')!=ident]
+                elif args.cmd=='review': tasks[ident]['status']='REVIEW'; s['leases']=[l for l in s['leases'] if l.get('id')!=ident]
+                elif args.cmd=='done': tasks[ident]['status']='DONE'; s['leases']=[l for l in s['leases'] if l.get('id')!=ident]; s['blockers'].pop(ident,None)
+                else: tasks[ident]['status']='BLOCKED'; s['blockers'][ident]=' '.join(args.reason); s['leases']=[l for l in s['leases'] if l.get('id')!=ident]
+                atomic_yaml(TFILE,{'version':load_yaml(TFILE).get('version',1),'tasks':list(tasks.values())})
+            elif ident in batches:
+                if args.cmd=='done':
+                    if ident=='STRETCH-GATE': fail('human gates are opened with open-gate after explicit approval')
+                    if not any(r.get('id')==ident for r in s.get('reserved_batches',[])): fail('batch has no active reservation')
+                    if any(tasks.get(tid,{}).get('status')!='DONE' for tid in batches[ident].get('task_ids',[])): fail('all batch tasks must be DONE before batch completion')
+                    s['completed_batches'].append(ident); s['reserved_batches']=[r for r in s['reserved_batches'] if r['id']!=ident]
+                elif args.cmd=='release': s['reserved_batches']=[r for r in s['reserved_batches'] if r['id']!=ident]
+                elif args.cmd=='block': s.setdefault('blockers',{})[ident]=' '.join(args.reason)
+                else: fail('review is task-only')
+            elif ident in s.get('open_gates',[]) and args.cmd=='done': fail('gate changes require explicit human controller operation')
+            else: fail('unknown ID '+ident)
+            save_state(s); print(args.cmd+' '+ident); return
+
+def show_status():
+    batches,tasks=maps(); s=state(); leases=s.get('leases',[]); reserved=s.get('reserved_batches',[])
+    counts={}
+    for t in tasks.values(): counts[t.get('status','UNSET')]=counts.get(t.get('status','UNSET'),0)+1
+    print('CONFLUX CONTROL STATUS')
+    print(f"UTC: {utc()} | runtime: {s.get('runtime_mode','NORMAL')} | campaign start: {KICKOFF.isoformat() if _campaign_start else 'not configured'}")
+    print(f"Batches: {len(batches)} | Tasks: {len(tasks)} | task states: {counts}")
+    print('Senior batch reservations: '+(', '.join(f"{r['lane']}:{r['id']}" for r in reserved) or 'none'))
+    print('Luna tasks: '+(', '.join(l['id'] for l in leases if l['lane']=='luna') or 'none'))
+    print('Freebuff current task: '+(', '.join(l['id'] for l in leases if l['lane']=='freebuff') or 'none'))
+    cap=s.get('capacity',{}).get('luna_max_active',1); print(f"Luna concurrency cap: {cap} (expansion {'enabled' if s.get('capacity',{}).get('luna_expansion_enabled') else 'pending H0 probe'})")
+    print('Gates open: '+(', '.join(s.get('open_gates',[])) or 'none'))
+    attention=(ROOT/'ATTENTION.md').read_text().strip().splitlines() if (ROOT/'ATTENTION.md').exists() else ['none']
+    print('ATTENTION:')
+    for line in attention: print('  '+line)
+    print('Last green main: '+str(s.get('last_green_main') or 'not recorded'))
+    notes=s.get('provider_notes',[])
+    notes_text='; '.join((f"{n.get('at','')} {n.get('text','')}" if isinstance(n,dict) else str(n)) for n in notes)
+    print('Provider/quota notes: '+(notes_text or 'none recorded'))
+    print('Queue states: '+', '.join(f'{k}={v}' for k,v in sorted(counts.items())))
+    ready_n=0 if dt.datetime.now(dt.timezone.utc)<KICKOFF else sum(1 for t in tasks.values() if ready_task(t,batches,tasks,s,leases,reserved))
+    print('Bulk eligible: '+str(sum(1 for t in tasks.values() if t.get('bulk_eligible') is True))+'; currently claimable bulk tasks: '+str(ready_n))
+if __name__=='__main__': main()

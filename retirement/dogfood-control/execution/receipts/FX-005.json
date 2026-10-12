@@ -1,0 +1,17 @@
+{
+  "task_id": "FX-005",
+  "status": "done",
+  "summary": "Added pytest-xdist and switched `make test` to `pytest -n auto`. Verified 38 tests pass across 8 parallel workers against both the sqlite fallback and the real compose Postgres (DATABASE_URL pointed at localhost:5432) — pytest-django gives each xdist worker its own database automatically. Consolidated three near-duplicate bootstrap helpers (import+seed+link, and .dogfood.toml parsing) across the existing acceptance test files into tests/acceptance/conftest.py (imported_fixture, acceptance_bootstrap, dogfood_config fixtures). Added test_concurrent_workers.py pinning the actual guarantee (per-worker DB naming on Postgres; process isolation on sqlite in-memory) that makes import_fixture's destructive delete-then-rebuild safe under concurrency. C-B01, C-B02, C-B03, C-B04 are now all complete.",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "5d6b2a1",
+  "verification": [
+    { "command": "pytest -n auto (sqlite)", "result": "38 passed, 8 workers" },
+    { "command": "DATABASE_URL=postgres://... pytest -n auto", "result": "38 passed, 8 workers" },
+    { "command": "make verify-fast", "result": "passed" }
+  ],
+  "out_of_scope_touch": "pyproject.toml/uv.lock (pytest-xdist dev dependency) — no other path exists.",
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T23:17:00+00:00"
+}

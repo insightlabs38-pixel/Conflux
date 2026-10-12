@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Canonical pinned source-tree Freebuff launcher. Do not resolve npm's global binary.
+set -euo pipefail
+exec /home/insightlabs38/src/freebuff/cli/bin/freebuff "$@"

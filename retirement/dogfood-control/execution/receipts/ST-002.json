@@ -1,0 +1,15 @@
+{
+  "task_id": "ST-002",
+  "status": "done",
+  "summary": "stages/graph.py: topological_order() (Kahn's algorithm, deterministic (position, id) tie-break) and validate_event_graph() (cycle, self-loop, missing initial stage, orphan stage), both re-derived from the database so a bulk_create-based graph write (which skips StageTransition.clean() from ST-001) can't silently produce an invalid graph. Regression tests build a cycle via bulk_create specifically to prove this gap is real and closed.",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "86dcb38",
+  "verification": [
+    { "command": "uv run --frozen pytest tests/integration/test_stage_graph_validation.py", "result": "passed; 7 tests (linear order, tie-break by position not insertion order, bulk_create cycle detected by both functions, valid graph passes, missing-initial rejected, orphan rejected)" },
+    { "command": "make verify-fast", "result": "passed" }
+  ],
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T23:22:00+00:00"
+}

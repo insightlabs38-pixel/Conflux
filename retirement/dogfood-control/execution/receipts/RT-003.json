@@ -1,0 +1,27 @@
+{
+  "task_id": "RT-003",
+  "status": "done",
+  "summary": "Make targets for the runtime lifecycle (up/down/logs/seed on top of the existing test/verify) plus a `make dev` fast-iteration overlay (docker-compose.dev.yml) so ordinary Django/React edits don't require an image rebuild.",
+  "executor_lane": "claude",
+  "model": "claude-sonnet-5",
+  "worktree": "/home/insightlabs38/conflux",
+  "branch": "main",
+  "commit": "3070a63",
+  "session_id": "sole-sequential-worker",
+  "completed_tasks": ["RT-003"],
+  "task_notes": {
+    "RT-003": "Makefile: `up`/`down`/`logs` wrap the base compose file (still a full --build every time, unchanged authoritative path); `seed` wraps the existing seed_acceptance_identities management command. docker-compose.dev.yml (opt-in via `make dev`, not auto-loaded): bind-mounts src/api into app/worker and runs uvicorn with --reload; adds a `web` service (plain node:24-slim image, no custom Dockerfile) running the Vite dev server with HMR, proxying /api to the app service via VITE_API_PROXY_TARGET. `make dev-build` covers Dockerfile/dependency changes. Added the `dev` script to src/web/package.json and a server.proxy in vite.config.ts (falls back to localhost:8080 for a bare `pnpm dev` outside Compose). README documents the fast vs. authoritative commands."
+  },
+  "verification": [
+    { "command": "uv run --frozen ruff format --check / ruff check / pytest / manage.py check", "result": "passed" },
+    { "command": "pnpm format:check / lint / test / build", "result": "passed" },
+    { "command": "docker compose -f docker-compose.yml -f docker-compose.dev.yml config -q", "result": "passed" },
+    { "command": "uvicorn --reload (host venv) + edit core/views.py while running + curl", "result": "edit picked up live without a process restart, then reverted" },
+    { "command": "pnpm --filter @conflux/web dev (host, VITE_API_PROXY_TARGET=http://localhost:8811) + curl :5173/api/v1/health/", "result": "200 {\"status\":\"ok\"} — proxy forwards to Django exactly as the containerized web service will (target swapped to http://app:8000)" }
+  ],
+  "blockers": [],
+  "escalations": [
+    "The containerized `web` dev service's `pnpm install` step (and any `make dev-build`) needs npm-registry/PyPI access from inside Docker, which this sandbox does not have (see RT-002 receipt) — could not run `make dev` or `make dev-build` end-to-end here. Verified the underlying mechanics (uvicorn --reload, Vite proxy/HMR) directly against the host venv/node instead."
+  ],
+  "completed_at": "2026-09-26T22:40:00+00:00"
+}

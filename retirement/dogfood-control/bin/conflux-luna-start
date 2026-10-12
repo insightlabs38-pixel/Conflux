@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Post-kickoff only: atomically claim one Luna task, create its isolated worktree, open a shell.
+set -euo pipefail
+[[ $# -eq 1 ]] || { echo 'usage: conflux-luna-start TASK-ID' >&2; exit 2; }
+task=$1
+"/home/dogfood-control/bin/conflux-kickoff-guard"
+source /home/dogfood-control/bin/conflux-env.sh
+repo=$CONFLUX_REPO_ROOT
+wt="$CONFLUX_WORKTREE_ROOT/luna-$task"
+branch="luna/$task"
+[[ -d "$repo/.git" ]] || { echo "Conflux repository is not initialized: $repo" >&2; exit 2; }
+tmux has-session -t "luna-$task" 2>/dev/null && { echo "tmux session already exists: luna-$task" >&2; exit 2; } || true
+mkdir -p "$CONFLUX_WORKTREE_ROOT"
+"/home/dogfood-control/bin/conflux-control" claim-task luna "$task" --branch "$branch" --worktree "$wt" --session-id "luna-$task"
+if ! git -C "$repo" worktree add -b "$branch" "$wt" main; then
+  "/home/dogfood-control/bin/conflux-control" release "$task" || true
+  exit 2
+fi
+tmux new-session -d -s "luna-$task" -c "$wt" "printf 'Claimed $task for Codex GPT-6 Luna. Read the task packet and CODEX_LUNA_TASK_PROTOCOL.md; run conflux-control review/done when appropriate.\\n'; exec bash -l"
+printf 'Created Luna task worktree %s and session luna-%s\n' "$wt" "$task"

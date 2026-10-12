@@ -1,0 +1,16 @@
+{
+  "task_id": "FX-004",
+  "status": "done",
+  "summary": "Vendored the official checker byte-for-byte (scripts/vendor/dogfood_run.py, sha256 pinned by a regression test) instead of reimplementing its checks. scripts/run-acceptance (make acceptance) bootstraps the fixture/identities against the already-running stack and tees the checker's real stdout into acceptance-report.txt. Completed .dogfood.toml with [portal] base_url=http://localhost:8080 and [tiers] claimed=[T1,T2] (honest to what's built so far). acceptance-report.txt is now the real, current run's output, replacing the BOOT-B00 placeholder.",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "a29e774",
+  "verification": [
+    { "command": "uv run --frozen pytest tests/acceptance/test_acceptance_report.py", "result": "passed; 2 tests (checker sha256 pinned, committed report all-PASS and matches claimed tiers)" },
+    { "command": "make verify-fast", "result": "passed" },
+    { "command": "./scripts/run-acceptance against the live docker-compose stack", "result": "acceptance-report.txt: claimed T1 T2, verified T1 T2, all 7 checks PASS" }
+  ],
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T23:16:00+00:00"
+}

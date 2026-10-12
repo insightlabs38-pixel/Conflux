@@ -1,0 +1,19 @@
+{
+  "task_id": "C-B08",
+  "status": "done",
+  "summary": "Durable projects, immutable versioned forms, typed and scoped responses, organizer builder and preview.",
+  "commits": {
+    "PRJ-001": "a5bd340",
+    "FORM-001": "f8c7372",
+    "FORM-002": "0383736",
+    "FORM-003": "e987899",
+    "FORM-004": "3b4b6be"
+  },
+  "verification": [
+    "make verify-fast: 209 API tests, 13 web tests, lint, format, build passed",
+    "docker compose up -d --build: healthy",
+    "./scripts/run-acceptance: 7/7 PASS"
+  ],
+  "next": "C-B09 ART-001",
+  "completed_at": "2026-09-27T00:33:04.102658+00:00"
+}

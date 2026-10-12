@@ -1,0 +1,368 @@
+#!/usr/bin/env python3
+"""Persistent guarded Conflux campaign supervisor; safe before and after H0."""
+import datetime as dt,fcntl,json,os,pathlib,re,shlex,subprocess,sys,time
+ROOT=pathlib.Path('/home/dogfood-control'); RUN=ROOT/'run'; LOG=ROOT/'logs/unattended'
+STATE=RUN/'unattended-state.json'; LOCK=RUN/'unattended.lock'; REPO=pathlib.Path(os.environ.get('CONFLUX_REPO_ROOT','/home/insightlabs38/conflux'))
+START=os.environ.get('CONFLUX_START_UTC','').strip(); END=os.environ.get('CONFLUX_END_UTC','').strip()
+H0=dt.datetime.fromisoformat(START) if START else None
+HANDOFF=dt.datetime.fromisoformat(END) if END else None
+STOP=HANDOFF-dt.timedelta(minutes=10) if HANDOFF else None
+def now(): return dt.datetime.now(dt.timezone.utc)
+def iso(): return now().isoformat(timespec='seconds')
+def write(path,data):
+ path.parent.mkdir(parents=True,exist_ok=True); tmp=path.with_suffix(path.suffix+'.tmp'); tmp.write_text(data); os.chmod(tmp,0o600); os.replace(tmp,path)
+def event(kind,**kw):
+ LOG.mkdir(parents=True,exist_ok=True)
+ with (LOG/'supervisor.jsonl').open('a') as f: f.write(json.dumps({'at':iso(),'event':kind,**kw})+'\n')
+def state():
+ if STATE.exists(): return json.loads(STATE.read_text())
+ return {'created_at':iso(),'phase':'WAITING_FOR_START','bootstrap':{'attempts':[]},'lanes':{}}
+def save(s): write(STATE,json.dumps(s,indent=2)+'\n')
+def cmd(args,timeout=45): return subprocess.run(args,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=timeout)
+def attention(s,msg,level='HIGH'):
+ event('attention',level=level,message=msg); s['attention']={'at':iso(),'level':level,'message':msg}; save(s)
+ write(ROOT/'execution/ATTENTION.md',f'# {level} ATTENTION\n\nAt {iso()} UTC\n\n{msg}\n')
+def preflight(s):
+ s['phase']='PREFLIGHT'; save(s)
+ if now()<H0: raise RuntimeError('kickoff guard refused early execution')
+ for binary in ('git','gh','tmux','claude','codex','freebuff','python3'):
+  found=cmd(['bash','-lc','command -v '+binary])
+  if found.returncode: raise RuntimeError(f'missing required executable on service PATH: {binary}')
+ for path in (ROOT/'bin/conflux-control',ROOT/'bin/conflux-integrate',ROOT/'bin/conflux-unattended-bootstrap',ROOT/'execution/BATCHES.yaml',ROOT/'execution/TASKS.yaml',ROOT/'execution/OWNERSHIP.yaml'):
+  if not path.exists(): raise RuntimeError(f'missing required control dependency: {path}')
+ if not os.environ.get('HOME') or os.environ.get('HOME')!='/home/insightlabs38': raise RuntimeError('unexpected systemd HOME/authentication context')
+ if not os.environ.get('PATH','').split(':') or '/usr/bin' not in os.environ.get('PATH','').split(':'): raise RuntimeError('systemd PATH is missing standard binaries')
+ sync=cmd(['timedatectl','show','-p','NTPSynchronized','--value'])
+ if sync.returncode or sync.stdout.strip()!='yes': raise RuntimeError('NTP/system clock is not synchronized')
+ repo=os.environ.get('CONFLUX_GITHUB_URL','').strip()
+ if repo!='https://github.com/insightlabs38-pixel/Conflux': raise RuntimeError('CONFLUX_GITHUB_URL is missing or differs from owner-supplied canonical origin')
+ gh=cmd(['gh','auth','status'])
+ if gh.returncode: raise RuntimeError('GitHub CLI auth unavailable: '+gh.stdout[-800:])
+ view=cmd(['gh','repo','view',repo,'--json','nameWithOwner,isEmpty,url'])
+ if view.returncode: raise RuntimeError('GitHub repository check failed: '+view.stdout[-800:])
+ data=json.loads(view.stdout)
+ if data.get('url')!=repo or data.get('nameWithOwner','').lower()!='insightlabs38-pixel/conflux': raise RuntimeError('configured GitHub origin identity mismatch')
+ if not (RUN/'bootstrap-green').exists():
+  if data.get('isEmpty') is not True: raise RuntimeError('refusing BOOT-B00 because target repository is no longer blank')
+  refs=cmd(['git','ls-remote',repo])
+  if refs.returncode or refs.stdout.strip(): raise RuntimeError('remote ref check failed or repository is no longer blank')
+ if not REPO.exists():
+  disk=cmd(['df','-Pk','/']);
+  if disk.returncode: raise RuntimeError('disk check failed')
+  fields=disk.stdout.strip().splitlines()[-1].split()
+  if len(fields)<4 or int(fields[3])<12*1024*1024: raise RuntimeError('less than 12 GiB disk space available')
+  mem=cmd(['awk','/MemAvailable/ {print $2}' ,'/proc/meminfo'])
+  if mem.returncode or int(mem.stdout.strip() or '0')<1024*1024: raise RuntimeError('less than 1 GiB available memory')
+  control=cmd([str(ROOT/'bin/conflux-control'),'status'])
+  if control.returncode: raise RuntimeError('canonical controller state validation failed: '+control.stdout[-800:])
+  s['repo_url']=repo; s['phase']='CLONING'; save(s)
+  clone=cmd(['git','clone',repo,str(REPO)],timeout=300)
+  if clone.returncode: raise RuntimeError('clone failed: '+clone.stdout[-1200:])
+ else:
+  if not (REPO/'.git').exists(): raise RuntimeError(f'{REPO} exists but is not a Git repository')
+  origin=cmd(['git','-C',str(REPO),'remote','get-url','origin'])
+  if origin.returncode or origin.stdout.strip().lower()!=repo.lower(): raise RuntimeError(f'{REPO} origin does not match the owner-supplied remote')
+  if not (RUN/'bootstrap-green').exists():
+   commits=cmd(['git','-C',str(REPO),'rev-list','--all','--count'])
+   tree=cmd(['git','-C',str(REPO),'status','--porcelain'])
+   if commits.returncode or commits.stdout.strip()!='0' or tree.returncode or tree.stdout.strip(): raise RuntimeError('pre-bootstrap local repository is not a clean blank clone; preserve it for review')
+ s['phase']='BOOTSTRAPPING'; save(s)
+def start_worker(lane,script):
+ session='unattended-runner-'+lane
+ if subprocess.run(['tmux','has-session','-t',session],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0: return 'existing'
+ # Keep lane startup failures outside the tmux pane so an immediately exiting
+ # worker remains diagnosable after tmux destroys its session. Use the same
+ # redactor as model logs; never copy the supervisor environment into the log.
+ wrapper=RUN/f'{lane}-runner.sh'; logfile=LOG/f'{lane}-runner.jsonl'
+ wrapper.write_text('\n'.join([
+  '#!/usr/bin/env bash', 'set +e', 'cd /home/dogfood-control',
+  f'printf "{{\\"at\\":\\"%s\\",\\"event\\":\\"runner_start\\",\\"lane\\":\\"{lane}\\"}}\\n" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> {shlex.quote(str(logfile))}',
+  f'(set -o pipefail; /usr/bin/python3 /home/dogfood-control/bin/{script} {lane} 2>&1 | /home/dogfood-control/bin/conflux-redact-log >> {shlex.quote(str(logfile))})',
+  'rc=$?',
+  f'printf "{{\\"at\\":\\"%s\\",\\"event\\":\\"runner_exit\\",\\"lane\\":\\"{lane}\\",\\"exit_code\\":%s}}\\n" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$rc" >> {shlex.quote(str(logfile))}',
+  'exit "$rc"',
+ ])+'\n')
+ wrapper.chmod(0o700)
+ command=f'exec /usr/bin/bash {shlex.quote(str(wrapper))}'
+ p=subprocess.run(['tmux','new-session','-d','-s',session,'-c','/home/dogfood-control',command],text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+ if p.returncode: raise RuntimeError(f'could not start {lane} lane: {p.stdout}')
+ return 'started'
+def lane_has_claim(lane):
+ import yaml
+ data=yaml.safe_load((ROOT/'execution/OWNERSHIP.yaml').read_text()) or {}
+ return any(x.get('lane')==lane for x in data.get('leases',[])) or any(x.get('lane')==lane for x in data.get('reserved_batches',[]))
+def lane_has_agent_session(lane):
+ p=cmd(['tmux','list-sessions','-F','#{session_name}'],timeout=5)
+ names=p.stdout.splitlines() if p.returncode==0 else []
+ prefix='unattended-freebuff' if lane=='freebuff' else f'unattended-{lane}-'
+ return any(x.startswith(prefix) for x in names)
+def handoff(s):
+ main='unavailable'
+ if REPO.exists() and (REPO/'.git').exists():
+  p=cmd(['git','-C',str(REPO),'rev-parse','main'],timeout=10)
+  if p.returncode==0: main=p.stdout.strip()
+ import yaml
+ ctl=ROOT/'execution'; ownership=yaml.safe_load((ctl/'OWNERSHIP.yaml').read_text()) or {}
+ tasks=yaml.safe_load((ctl/'TASKS.yaml').read_text())['tasks']; batches=yaml.safe_load((ctl/'BATCHES.yaml').read_text())['batches']
+ done_tasks=[t['id'] for t in tasks if t.get('status')=='DONE']; review=[t['id'] for t in tasks if t.get('status')=='REVIEW']
+ done_batches=ownership.get('completed_batches',[]); active=ownership.get('leases',[]); reserved=ownership.get('reserved_batches',[])
+ rec=ctl/'receipts'; receipts=[]
+ if rec.exists():
+  for p in rec.glob('*.json'):
+   try: receipts.append(json.loads(p.read_text()))
+   except Exception: pass
+ successes=[r.get('task_id') for r in receipts if r.get('status')=='done']
+ quota=[]
+ for p in (RUN/'lanes').glob('*.json') if (RUN/'lanes').exists() else []:
+  try:
+   lane=json.loads(p.read_text())
+   if lane.get('status')=='PAUSED_QUOTA': quota.append(lane)
+  except Exception: pass
+ attention=(ctl/'ATTENTION.md').read_text() if (ctl/'ATTENTION.md').exists() else 'none'
+ escalations=(ctl/'ESCALATIONS.md').read_text() if (ctl/'ESCALATIONS.md').exists() else 'none'
+ official=list((ROOT/'plan/official').glob('*check*')) if (ROOT/'plan/official').exists() else []
+ checker=(ROOT/'plan/official/run.py').exists(); tier_lines=[]
+ import re
+ for path in LOG.glob('*.jsonl'):
+  try:
+   tail=path.read_text(errors='replace')[-250000:]
+   tier_lines.extend(line[-240:] for line in tail.splitlines() if re.search(r'\bT[1-4]\b.*\b(PASS|FAIL|passed|failed)\b',line,re.I))
+  except Exception: pass
+ lanes={x:('active' if subprocess.run(['tmux','has-session','-t','unattended-runner-'+x],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0 else 'stopped/idle') for x in ('claude','sol','luna','freebuff')}
+ fast=(RUN/'last-green-main').read_text().strip() if (RUN/'last-green-main').exists() else 'not verified'
+ content=f'''# Unattended handoff
+
+Generated: {iso()} UTC
+Main HEAD: {main}
+Bootstrap result: {'GREEN' if (RUN/'bootstrap-green').exists() else s.get('phase','unknown')}
+Completed batches: {', '.join(done_batches) or 'none'}
+Completed tasks: {', '.join(done_tasks) or 'none'}
+Successful receipts: {', '.join(sorted(x for x in successes if x)) or 'none'}
+Currently active work: {json.dumps(active,sort_keys=True)}
+Senior reservations: {json.dumps(reserved,sort_keys=True)}
+Lane status: {json.dumps(lanes,sort_keys=True)}
+Quota-paused lanes: {json.dumps(quota,sort_keys=True) if quota else 'none recorded'}
+Branches/worktrees: see `git -C {REPO} worktree list`; controller also records paths in active leases above.
+Review backlog: {', '.join(review) or 'none'}
+Fast verification: last green main commit {fast}
+Official checker: {'available at /home/dogfood-control/plan/official/run.py' if checker else 'not found'}; latest T1–T4 result lines: {json.dumps(tier_lines[-20:]) if tier_lines else 'no official tier result recorded'}
+HIGH/MED ATTENTION: {attention}
+Escalations: {escalations}
+Failure and integration logs: `/home/dogfood-control/logs/unattended/`
+
+STOP_NEW_CLAIMS: {STOP.isoformat()}
+HANDOFF_AT: {HANDOFF.isoformat()}
+Active sessions are left running for owner takeover.
+'''
+ write(ROOT/'UNATTENDED_HANDOFF.md',content)
+ write_autonomous_status(s,main)
+def write_autonomous_status(s,main_head=None):
+ import yaml
+ ctl=ROOT/'execution'; own=yaml.safe_load((ctl/'OWNERSHIP.yaml').read_text()) or {}; tasks=yaml.safe_load((ctl/'TASKS.yaml').read_text())['tasks']; batches=yaml.safe_load((ctl/'BATCHES.yaml').read_text())['batches']
+ if main_head is None and REPO.exists() and (REPO/'.git').exists():
+  p=cmd(['git','-C',str(REPO),'rev-parse','main'],timeout=10); main_head=p.stdout.strip() if p.returncode==0 else 'unavailable'
+ if main_head is None: main_head='unavailable before kickoff'
+ active=own.get('leases',[]); reserved=own.get('reserved_batches',[]); q=[]
+ for lane in ('claude','sol','luna','freebuff'):
+  p=RUN/'lanes'/f'{lane}.json'; q.append((lane,json.loads(p.read_text()) if p.exists() else {'status':'READY'}))
+ rec=sorted((ctl/'receipts').glob('*.json')) if (ctl/'receipts').exists() else []
+ failed=[x.name for x in LOG.glob('*') if x.name.startswith('integration')]
+ video=json.loads((RUN/'video-state.json').read_text()) if (RUN/'video-state.json').exists() else {}; vq=yaml.safe_load((ctl/'VIDEO_QUEUE.yaml').read_text()) if (ctl/'VIDEO_QUEUE.yaml').exists() else {'items':[]}; vitems={x['id']:x for x in vq.get('items',[])}; assets=ROOT/'demo-assets'; archives=sorted(assets.glob('*.zip')) if assets.exists() else []
+ tiers=s.get('official_tiers',{}); core=s.get('core_state','not assessed')
+ body=f'''# Autonomous campaign status\n\nUpdated: {iso()} UTC\nMain HEAD: {main_head}\nOfficial tier state: {json.dumps(tiers,sort_keys=True) if tiers else 'no tier result recorded'}\nCore state: {core}\nStartup phase: {s.get('phase','unknown')}\nActive senior units: {json.dumps(reserved,sort_keys=True) if reserved else 'none'}\nActive bulk tasks: {json.dumps(active,sort_keys=True) if active else 'none'}\nProvider quotas/pauses: {json.dumps({k:v for k,v in q if v.get('status','READY')!='READY'},sort_keys=True) if any(v.get('status','READY')!='READY' for _,v in q) else 'none recorded'}\nAvailable reset times: {json.dumps({k:v.get('reset_at') for k,v in q if v.get('reset_at')},sort_keys=True) if any(v.get('reset_at') for _,v in q) else 'none reported'}\nHandoff freshness: {json.dumps({lane: (int((now()-dt.datetime.fromtimestamp(max([p.stat().st_mtime for p in (ROOT/'handoffs'/lane).glob('*.md')],default=0),dt.timezone.utc)).total_seconds()//60) if (ROOT/'handoffs'/lane).exists() and list((ROOT/'handoffs'/lane).glob('*.md')) else None) for lane in ('claude','sol','luna','freebuff')},sort_keys=True)} minutes\nFreebuff instance: {json.dumps(json.loads((RUN/'freebuff-state.json').read_text()),sort_keys=True) if (RUN/'freebuff-state.json').exists() else 'idle'}\nLane health and last activity: {json.dumps(s.get('lanes',{}),sort_keys=True)}\nFailed integrations: {', '.join(failed) if failed else 'none recorded'}\nAttention items: {(ctl/'ATTENTION.md').read_text().strip().replace(chr(10),' ') if (ctl/'ATTENTION.md').exists() else 'none'}\nVideo gate: {vitems.get('VIDEO-CORE-CAPTURE',{}).get('state',video.get('core_gate','pending assessment'))} | H48 insurance: {vitems.get('VIDEO-H48-INSURANCE',{}).get('state',video.get('h48','pending'))}\nVideo work items: {json.dumps({k:v.get('state') for k,v in vitems.items()},sort_keys=True)}\nLatest footage zip: {archives[-1] if archives else 'none'}\nRecapture-needed scenes: {', '.join(video.get('recapture_required',[])) or 'none recorded'}\nRecent receipts: {', '.join(p.stem for p in rec[-8:]) or 'none'}\n'''
+ write(ROOT/'AUTONOMOUS_STATUS.md',body)
+def main():
+ RUN.mkdir(parents=True,exist_ok=True); LOG.mkdir(parents=True,exist_ok=True)
+ lock=LOCK.open('a+');
+ try: fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+ except BlockingIOError: print('another campaign supervisor owns the lock'); return 0
+ if not H0 or not HANDOFF:
+  event('schedule_unconfigured'); print('Campaign not started: CONFLUX_START_UTC/CONFLUX_END_UTC are required.'); return 2
+ if HANDOFF<=H0:
+  event('invalid_schedule',start=H0.isoformat(),end=HANDOFF.isoformat()); print('Campaign not started: end must be after start.'); return 0
+ s=state()
+ if now()<H0:
+  s['phase']='WAITING_FOR_START'; s['schedule']={'start':H0.isoformat(),'end':HANDOFF.isoformat()}; save(s)
+  event('guard_refusal',now=iso(),kickoff=H0.isoformat()); print('Campaign start has not arrived; waiting without touching Conflux.'); time.sleep(min(30,max(1,(H0-now()).total_seconds()))); return 0
+ if s.get('phase')=='HANDOFF':
+  if now()>=HANDOFF: print('handoff already written; owner controls continuation'); return 0
+  s['phase']='BLOCKED_PREFLIGHT'; s.pop('handoff_at',None); save(s); event('campaign_resumed',repo=str(REPO),stop=STOP.isoformat(),handoff=HANDOFF.isoformat())
+ if s.get('phase')=='BOOTSTRAP_FAILED': print('BOOT-B00 previously exhausted; preserving owner escalation.'); return 0
+ if now()>=HANDOFF: handoff(s); s['phase']='HANDOFF'; s['handoff_at']=iso(); save(s); return 0
+ try:
+  if s.get('phase') in ('WAITING','WAITING_FOR_START','WAITING_FOR_SCHEDULE','BLOCKED_PREFLIGHT','CLONING','PREFLIGHT'): preflight(s)
+ except Exception as e:
+  s['phase']='BLOCKED_PREFLIGHT'; attention(s,str(e)); event('preflight_failed',message=str(e)); return 0
+ if not (RUN/'bootstrap-green').exists() and now()>=HANDOFF:
+  handoff(s); s['phase']='HANDOFF'; s['handoff_at']=iso(); save(s); return 0
+ if not (RUN/'bootstrap-green').exists():
+  s['phase']='BOOTSTRAPPING'; save(s)
+  b=cmd([str(ROOT/'bin/conflux-unattended-bootstrap')],timeout=4*3600)
+  if b.returncode or not (RUN/'bootstrap-green').exists():
+   s['phase']='BOOTSTRAP_FAILED'; attention(s,f'BOOT-B00 exhausted or failed its green integration gate. Dependent lanes were not started. Preserve {REPO} and logs for owner review.'); return 1
+ if s.get('phase')=='BOOTSTRAPPING':
+  s['phase']='BOOT_VERIFY'; save(s)
+  if not (RUN/'bootstrap-green').exists(): s['phase']='BOOTSTRAPPING'; save(s)
+ was_fanout=s.get('phase') in ('FANOUT','RUNNING','DEGRADED')
+ s['phase']='FANOUT'; save(s)
+ if not was_fanout:
+  try:
+   for lane in ('claude','sol','luna','freebuff'):
+    s.setdefault('lanes',{})[lane]={'status':'launching','started_at':iso()}; save(s)
+    outcome=start_worker(lane,'conflux-unattended-freebuff' if lane=='freebuff' else 'conflux-unattended-worker')
+    s.setdefault('lanes',{})[lane]={'status':outcome,'started_at':iso()}; save(s)
+   event('fanout_started',lanes=s['lanes'],progression='continuous DAG claims; T1 priority followed by eligible T2 and subsequent Core; no tier boundary cutoff')
+  except Exception as e: attention(s,'Lane fanout incomplete: '+str(e)); return 1
+ else:
+  for lane in ('claude','sol','luna','freebuff'):
+   exists=subprocess.run(['tmux','has-session','-t','unattended-runner-'+lane],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0
+   if exists: continue
+   paused=(RUN/'lanes'/f'{lane}.json').exists()
+   if paused or now()>=STOP: continue
+   if lane_has_agent_session(lane):
+    if lane=='freebuff' and lane_has_claim(lane):
+     outcome=start_worker(lane,'conflux-unattended-freebuff')
+     event('orphaned_runner_recovered',lane=lane,outcome=outcome,action='reattach to existing lease/session; no new claim')
+     s.setdefault('lanes',{})[lane]={'status':outcome,'recovered_at':iso(),'existing_session_preserved':True}; save(s)
+     continue
+    attention(s,f'{lane} runner is missing during supervisor recovery but has an existing claim/agent session. It was preserved for owner review to avoid duplicate work.')
+    continue
+   outcome=start_worker(lane,'conflux-unattended-freebuff' if lane=='freebuff' else 'conflux-unattended-worker')
+   s.setdefault('lanes',{})[lane]={'status':outcome,'recovered_at':iso()}; save(s)
+  event('supervisor_recovered',phase='FANOUT',sessions=s.get('lanes',{}))
+ s['phase']='RUNNING'; save(s)
+ while now()<HANDOFF:
+  try:
+   poll_lanes(s)
+   s.pop('last_poll_error',None)
+  except Exception as e:
+   # A single malformed status/recovery snapshot must not terminate the
+   # supervisor and leave live lanes without monitoring.
+   s['phase']='DEGRADED'; s['last_poll_error']={'at':iso(),'type':type(e).__name__}; save(s)
+   event('supervisor_poll_failed',error_type=type(e).__name__)
+   try: write_autonomous_status(s)
+   except Exception as status_error: event('status_write_failed',error_type=type(status_error).__name__)
+  time.sleep(min(25,max(1,(HANDOFF-now()).total_seconds())))
+ # No lane/session is terminated at owner return.
+ handoff(s); s['phase']='HANDOFF'; s['handoff_at']=iso(); save(s); event('handoff_written')
+ return 0
+
+def poll_lanes(s):
+ import yaml
+ degraded=[]
+ own=yaml.safe_load((ROOT/'execution/OWNERSHIP.yaml').read_text()) or {}; leases=own.get('leases',[])+own.get('reserved_batches',[])
+ for lane in ('claude','sol','luna','freebuff'):
+  lp=RUN/'lanes'/f'{lane}.json'; paused=json.loads(lp.read_text()) if lp.exists() else {}; paused_unit=paused.get('unit')
+  runner='unattended-runner-'+lane
+  alive=subprocess.run(['tmux','has-session','-t',runner],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0
+  if paused.get('status')=='PAUSED_QUOTA' and paused.get('reset_at') and not alive:
+   try:
+    if now()>=dt.datetime.fromisoformat(paused['reset_at']):
+     lp.unlink(missing_ok=True); paused={}; event('lane_reset_elapsed',lane=lane,unit=paused_unit)
+   except ValueError: pass
+  proc=cmd(['tmux','list-sessions','-F','#{session_name}'],timeout=5)
+  names=proc.stdout.splitlines() if proc.returncode==0 else []
+  lease=next((x for x in leases if x.get('lane')==lane),None); unit=lease.get('id') if lease else paused.get('unit'); wt=pathlib.Path(lease.get('worktree','/nonexistent')) if lease else None
+  if lease and unit:
+   try: observed=cmd([str(ROOT/'bin/conflux-recovery-snapshot'),unit],timeout=15)
+   except subprocess.TimeoutExpired:
+    event('recovery_snapshot_timeout',lane=lane,unit=unit)
+   else:
+    if observed.returncode: event('recovery_snapshot_failed',lane=lane,unit=unit,detail=observed.stdout[-500:])
+  owned=bool(lease); agents=lane_has_agent_session(lane); hb=RUN/'heartbeats'/f'{lane}.json'; heartbeat=json.loads(hb.read_text()) if hb.exists() else {}; heartbeat_age=round((now()-dt.datetime.fromisoformat(heartbeat['at'])).total_seconds()) if heartbeat.get('at') else None
+  logs=sorted(LOG.glob(lane+'-*.jsonl'),key=lambda p:p.stat().st_mtime); logpath=LOG/f'{lane}-{unit}.jsonl' if unit else (logs[-1] if logs else None)
+  receipt=ROOT/'execution/receipts'/f'{unit}.json' if unit else None; handoff_path=ROOT/'handoffs'/lane/f'{unit}.md' if unit else None
+  try: receipt_data=json.loads(receipt.read_text()) if receipt and receipt.exists() else {}; receipt_state=receipt_data.get('status','missing')
+  except Exception: receipt_state='invalid'
+  def age(path): return round((now()-dt.datetime.fromtimestamp(path.stat().st_mtime,dt.timezone.utc)).total_seconds()) if path and path.exists() else None
+  try: quota_state=cmd([str(ROOT/'bin/conflux-outcome-classify'),str(logpath)]).stdout.strip() if logpath and logpath.exists() else 'none'
+  except Exception: quota_state='unknown'
+  # Provider words can occur inside assignment text and streamed tool output.
+  # While an owned invocation is alive and has no receipt, report activity;
+  # terminal outcome classification is meaningful only after it stops or is
+  # explicitly paused.
+  if owned and (alive or agents) and receipt_state=='missing' and not paused:
+   quota_state='IN_PROGRESS'
+  pane_state='n/a'
+  if lane=='freebuff' and agents:
+   pane=cmd(['tmux','capture-pane','-pt','unattended-freebuff','-S','-40'],timeout=5).stdout
+   # Classify completion only from actual UI text outside the composer. Task
+   # prompts routinely contain "continue" and the input placeholder remains
+   # visible during streaming, so either phrase alone is not a completion.
+   box=''
+   starts=[m.start() for m in re.finditer(r'(?m)^\s*╭[─━-]+.*$',pane)]
+   if starts:
+    tail=pane[starts[-1]:]; end=re.search(r'(?m)^\s*╰[─━-]+.*$',tail)
+    if end: box=tail[:end.end()]
+   screen=pane.replace(box,'') if box else pane
+   pane_state='auth-error' if re.search(r'not logged in|unauthorized|authentication failed',screen,re.I) else 'quota-error' if re.search(r'Session limit reached|Monthly usage limit reached|Not enough Freebucks|usage limit reached|rate limit exceeded|HTTP\s*429',screen,re.I) else 'session-ended-finishing' if re.search(r'Session ended',screen,re.I) and re.search(r'Agent is wrapping up',screen,re.I) else 'session-ended-rollover' if re.search(r'Session ended.{0,180}Press Enter to continue in a new session',screen,re.I|re.S) else 'completion' if re.search(r'(?:press|type)\s+enter\s+to\s+continue|continue\s*\(y/n\)',screen,re.I) else 'working/tool/quiet' if re.search(r'\b(?:thinking|working|tool call|running)\b',screen,re.I) else 'input-ready' if re.search(r'enter a coding task',box,re.I) else 'working/tool/quiet'
+  integ=LOG/'integration.jsonl'; integration='pending' if receipt_state=='done' else 'not-ready'
+  if integ.exists() and unit and unit in integ.read_text(errors='replace')[-20000:]: integration='see integration log'
+  lane_status=paused.get('status','ACTIVE' if (alive or agents) else ('HANDOFF_REQUIRED' if owned else 'READY'))
+  if not paused and alive and heartbeat_age is not None and heartbeat_age>180: lane_status='SUSPECTED_HANG'
+  recovery=RUN/'recovery'/unit/'snapshot.json' if unit else None
+  checkpoint_age=None
+  if recovery and recovery.exists():
+   try: checkpoint_age=json.loads(recovery.read_text()).get('agent_checkpoint_age_seconds')
+   except Exception: pass
+  s.setdefault('lanes',{})[lane]={'status':lane_status,'unit':unit,'runner':alive,'process_or_session':agents,'lease_matches':owned,'worktree_exists':bool(wt and wt.exists()),'heartbeat_age_seconds':heartbeat_age,'log_mtime_age_seconds':age(logpath),'receipt_state':receipt_state,'receipt_age_seconds':age(receipt),'handoff_age_seconds':age(handoff_path),'agent_checkpoint_age_seconds':checkpoint_age,'recovery_snapshot_path':str(recovery) if recovery else None,'recovery_snapshot_age_seconds':age(recovery),'quota_error_indicator':quota_state,'freebuff_pane_state':pane_state,'integration_status':integration,'polled_at':iso()}
+  if lane_status=='SUSPECTED_HANG': degraded.append(lane)
+  if owned and not paused and not agents: degraded.append(lane)
+  if not alive and not paused and not agents and now()<STOP and s.get('phase') in ('RUNNING','DEGRADED'):
+   try: start_worker(lane,'conflux-unattended-freebuff' if lane=='freebuff' else 'conflux-unattended-worker')
+   except Exception as e: degraded.append(lane); event('lane_restart_failed',lane=lane,error=str(e))
+  elif not alive and not paused and agents and lane=='freebuff' and owned and now()<STOP:
+   try:
+    outcome=start_worker(lane,'conflux-unattended-freebuff')
+    event('orphaned_runner_recovered',lane=lane,outcome=outcome,unit=unit,action='reattach to existing lease/session; no new claim')
+   except Exception as e:
+    degraded.append(lane); event('lane_restart_failed',lane=lane,error=str(e))
+ save(s)
+ if degraded: s['phase']='DEGRADED'; save(s); event('lane_degraded',lanes=degraded)
+ elif s.get('phase')=='DEGRADED': s['phase']='RUNNING'; save(s); event('lane_recovered')
+ update_video_queue()
+ write_autonomous_status(s)
+def update_video_queue():
+ lock= (RUN/'video-queue.lock').open('a+')
+ fcntl.flock(lock,fcntl.LOCK_EX)
+ try: update_video_queue_locked()
+ finally: fcntl.flock(lock,fcntl.LOCK_UN); lock.close()
+def update_video_queue_locked():
+ import yaml
+ gate_path=RUN/'core-footage-gate.json'; gate=json.loads(gate_path.read_text()) if gate_path.exists() else {}
+ ready=all(gate.get(k) is True for k in ('t1_permanent_green','t2_permanent_green','t3_t4_manual_review_ready','core_flows_coherent','no_demo_p0_p1','canonical_demo_seeded','seven_step_smoke_passed','ui_coherent'))
+ assets=ROOT/'demo-assets'; any_package=any(assets.glob('conflux-demo-footage-*.zip')) if assets.exists() else False
+ h48=H0+dt.timedelta(hours=48); qpath=ROOT/'execution/VIDEO_QUEUE.yaml'
+ queue=yaml.safe_load(qpath.read_text()) if qpath.exists() else {'items':[]}
+ items={x['id']:x for x in queue.get('items',[])}
+ full=(any(assets.glob('conflux-demo-footage-H*.zip')) if assets.exists() else False) or (items.get('VIDEO-CORE-CAPTURE',{}).get('state')=='DONE' and any_package and assets.joinpath('FOOTAGE_BASELINE.yaml').exists())
+ for item in items.values():
+  if item.get('state')=='WAITING_RESET' and item.get('reset_at'):
+   try:
+    if now()>=dt.datetime.fromisoformat(item['reset_at']): item.update(state='QUEUED',reason='automatic provider reset elapsed'); event('video_provider_reset_elapsed',unit=item['id'])
+   except ValueError: item.update(state='PAUSED_QUOTA',reason='invalid provider reset timestamp')
+ def trigger(ident,reason):
+  if ident not in items: items[ident]={'id':ident,'state':'QUEUED','reason':reason,'triggered_at':iso(),'executor':'luna','operational_only':True}
+  elif items[ident].get('state') in ('WAITING_FOR_CORE_GATE','SCHEDULED','WAITING_FOR_EVENT','OPTIONAL','QUEUED'):
+   items[ident].update(state='QUEUED',reason=reason,triggered_at=items[ident].get('triggered_at') or iso())
+ if ready: trigger('VIDEO-CORE-CAPTURE','all explicit Core footage gate conditions passed')
+ if now()>=h48 and not full: trigger('VIDEO-H48-INSURANCE','H48 reached before a full Core package; record every stable scene and list gaps')
+ delta=RUN/'video-stretch-delta.json'
+ if delta.exists(): trigger('VIDEO-STRETCH-DELTA',delta.read_text().strip() or 'material UI-visible Stretch landed')
+ final_delta=RUN/'video-final-delta.json'
+ if final_delta.exists(): trigger('VIDEO-FINAL-DELTA',final_delta.read_text().strip() or 'owner-approved final replacement scene capture')
+ queue['items']=list(items.values()); queue['updated_at']=iso(); qpath.parent.mkdir(parents=True,exist_ok=True); write(qpath,yaml.safe_dump(queue,sort_keys=False))
+ active=[x for x in queue['items'] if x.get('state')=='ACTIVE']
+ running=[]
+ for x in active:
+  session='unattended-video-'+x['id'].lower()
+  if subprocess.run(['tmux','has-session','-t',session],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL).returncode==0: running.append(session)
+  else:
+   x.update(state='QUEUED',reason='supervisor recovered interrupted video unit from its external handoff')
+ queued=[x for x in queue['items'] if x.get('state')=='QUEUED']
+ if not running and queued:
+  item=queued[0]; session='unattended-video-'+item['id'].lower()
+  start=subprocess.run(['tmux','new-session','-d','-s',session,'-c',str(ROOT),'python3',str(ROOT/'bin/conflux-video-agent'),item['id']],text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+  if start.returncode==0: item.update(state='ACTIVE',started_at=iso()); write(qpath,yaml.safe_dump(queue,sort_keys=False)); event('video_unit_started',unit=item['id'],session=session)
+  else: event('video_unit_start_failed',unit=item['id'],error=start.stdout[-500:])
+if __name__=='__main__': sys.exit(main())

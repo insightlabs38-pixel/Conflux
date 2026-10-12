@@ -1,0 +1,16 @@
+{
+  "task_id": "POL-003",
+  "status": "done",
+  "summary": "TemporalGate: named open/close window per event, distinct from the stage graph. status()/is_open() default to timezone.now() (server-authoritative), accept an explicit `at` override; opens_at/closes_at persist as UTC via existing USE_TZ=True. services.base_facts(event) exposes gate_open:<name> booleans plus `now`, so a POL-002 policy can gate on a temporal window declaratively.",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "073a7fb",
+  "verification": [
+    { "command": "uv run --frozen pytest tests/integration/test_temporal_gates.py", "result": "passed; 8 tests (unbounded=open, not-yet-open, closed, open-between-bounds, invalid ordering rejected, explicit-clock override, base_facts exposure, policy gating via base_facts)" },
+    { "command": "make verify-fast", "result": "passed" },
+    { "command": "docker compose up -d --build", "result": "app/worker healthy; migration applies cleanly against real Postgres" }
+  ],
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T23:36:00+00:00"
+}

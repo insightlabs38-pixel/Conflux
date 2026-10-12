@@ -1,0 +1,29 @@
+{
+  "task_id": "RT-002",
+  "status": "done",
+  "summary": "app/worker Docker healthchecks (Python-based, no curl/apt), caddy waits on app's condition: service_healthy instead of container-start; root-caused and fixed two latent defects surfaced while wiring this up: config had no Celery app (worker entrypoint would fail on boot) and the `redis` package kombu needs for the Valkey broker was never declared.",
+  "executor_lane": "claude",
+  "model": "claude-sonnet-5",
+  "worktree": "/home/insightlabs38/conflux",
+  "branch": "main",
+  "commit": "588160e",
+  "session_id": "sole-sequential-worker",
+  "completed_tasks": ["RT-002"],
+  "task_notes": {
+    "RT-002": "docker-compose.yml: app healthcheck hits /api/v1/health/ via `python -c urllib...` (no apt/curl needed); worker healthcheck is `celery -A config inspect ping`; caddy depends_on app uses condition: service_healthy. infra/api.Dockerfile: dropped the apt-get step (psycopg[binary] vendors libpq; ca-certificates already ships in python:3.12-slim), so the build needs no Debian mirror access. config/celery.py + config/__init__.py: standard Django/Celery app wiring (previously absent — `celery -A config worker` would have failed at startup). settings.py: CELERY_BROKER_URL/CELERY_RESULT_BACKEND from VALKEY_URL. pyproject.toml/uv.lock: added `redis` (kombu's redis transport hard-imports it; ImportError without it, reproduced locally)."
+  },
+  "verification": [
+    { "command": "uv run --frozen ruff format --check / ruff check / pytest / manage.py check", "result": "passed" },
+    { "command": "pnpm format:check / lint / test / build", "result": "passed" },
+    { "command": "docker compose config -q", "result": "passed" },
+    { "command": "docker compose up db cache; docker compose ps health", "result": "both healthy (unchanged from RT-001)" },
+    { "command": "manage.py migrate against real Postgres container", "result": "passed, all migrations applied" },
+    { "command": "uvicorn config.asgi:application (host venv) against real Postgres/Valkey; curl /api/v1/health/", "result": "200 {\"status\":\"ok\"} — exact command the app healthcheck runs" },
+    { "command": "celery -A config worker (host venv) against real Valkey, then celery -A config inspect ping", "result": "failed before the redis fix (AttributeError: NoneType has no attribute Redis); passed after (pong, 1 node online) — exact command the worker healthcheck runs" }
+  ],
+  "blockers": [],
+  "escalations": [
+    "Could not run `docker compose up --build` (full containerized boot) in this session: this sandbox's Docker daemon can reach container registries but not PyPI/npm from inside a build or a running container (apt-get and `pip install uv` both fail with DNS resolution errors; confirmed this is sandbox-wide, not specific to this Dockerfile). Verified the equivalent behavior instead by running the app/worker directly from the host venv against the same Postgres/Valkey images. RT-004 (cold-offline boot smoke) needs an environment where `docker compose up --build` can actually complete to be verified for real; flagging this to the owner before attempting it."
+  ],
+  "completed_at": "2026-09-26T22:35:00+00:00"
+}

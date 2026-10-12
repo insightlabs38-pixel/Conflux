@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -u
+printf '%s\n' '--- Filesystems ---'
+df -h
+printf '\n%s\n' '--- Docker usage ---'
+docker system df
+printf '\n%s\n' '--- Worktree storage ---'
+du -sh /home/dogfood-worktrees 2>/dev/null || true

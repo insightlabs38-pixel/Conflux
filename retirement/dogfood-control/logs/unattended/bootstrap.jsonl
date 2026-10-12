@@ -1,0 +1,2 @@
+{"at": "2026-09-26T18:00:02.942435+00:00", "event": "attempt-start", "lane": "sol", "model": "gpt-6-sol", "effort": "medium", "session": "unattended-bootstrap-sol"}
+{"at": "2026-09-26T18:04:43.825798+00:00", "event": "bootstrap-green", "executor": "sol", "model": "gpt-6-sol"}

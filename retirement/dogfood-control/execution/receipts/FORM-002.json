@@ -1,0 +1,22 @@
+{
+  "task_id": "FORM-002",
+  "status": "done",
+  "commit": "0383736",
+  "session_id": "sole-sequential-worker",
+  "verification": [
+    {
+      "command": "focused integration and/or UI tests",
+      "result": "passed"
+    },
+    {
+      "command": "make verify-fast",
+      "result": "209 API tests, 13 web tests, lint, format and build passed"
+    },
+    {
+      "command": "docker compose up -d --build && ./scripts/run-acceptance",
+      "result": "healthy stack; 7/7 PASS"
+    }
+  ],
+  "blockers": [],
+  "completed_at": "2026-09-27T00:33:04.102658+00:00"
+}

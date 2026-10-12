@@ -1,0 +1,19 @@
+{
+  "task_id": "SUB-006",
+  "status": "done",
+  "summary": "Submission receipt/history UX",
+  "commit": "da35bc0",
+  "session_id": "sole-sequential-worker",
+  "verification": [
+    {
+      "command": "focused submission tests",
+      "result": "8 passed"
+    },
+    {
+      "command": "make verify-fast",
+      "result": "232 API passed, 3 opt-in skipped; 17 web passed; lint/format/build passed"
+    }
+  ],
+  "blockers": [],
+  "completed_at": "2026-09-27T01:06:50.546375+00:00"
+}

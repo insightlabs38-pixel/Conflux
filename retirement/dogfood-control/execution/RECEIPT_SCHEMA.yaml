@@ -1,0 +1,23 @@
+version: 3
+required: [task_id, status, summary, verification, executor_lane, model, worktree]
+fields:
+  task_id: string
+  status: done|blocked|needs-review
+  summary: concise string
+  verification: list of commands and outcomes
+  executor_lane: claude|sol|luna|freebuff|human
+  model: string
+  worktree: absolute path or null
+  branch: string or null
+  session_id: optional string
+  blockers: optional list
+  critical_fix: "optional boolean; required true after H68 for any integrated UI-affecting fix"
+  footage_impact: "required when /home/dogfood-control/demo-assets/FOOTAGE_BASELINE.yaml exists; see footage_impact_schema"
+footage_impact_schema:
+  reviewed_task_id: exact assigned unit ID
+  task_scope_reviewed: 'exact string "<unit ID>: <canonical assignment title>"'
+  disposition: UNAFFECTED|BASELINE_VALID|RECAPTURE_REQUIRED
+  visual_scope: NO_VISUAL_CHANGE|SCOPED_COMPATIBLE|BROAD_REDESIGN
+  rationale: concise functional/demo meaning assessment
+  scenes: list of exact scene IDs from the established FOOTAGE_BASELINE.yaml; empty only when no recorded scene is affected
+  verification_evidence: "list of objects: kind (scene_run|screenshot|replacement_scene), scene_id (baseline ID or affected route), path (existing absolute file path)"

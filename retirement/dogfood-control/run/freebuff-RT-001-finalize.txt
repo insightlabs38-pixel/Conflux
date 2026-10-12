@@ -1,0 +1,1 @@
+If the assigned task is complete, write the required schema-valid receipt and commit. Inspect current git status/diff; do not add features. If incomplete, record concise progress and blockers in the external handoff. This is the only finalization request.

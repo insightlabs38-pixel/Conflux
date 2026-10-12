@@ -1,0 +1,18 @@
+#!/usr/bin/env python3
+"""Send one literal prompt via tmux's paste buffer and bracketed-paste markers."""
+import argparse, subprocess, sys, tempfile, os, time
+p=argparse.ArgumentParser(); p.add_argument('target'); p.add_argument('prompt_file'); p.add_argument('--no-enter', action='store_true'); a=p.parse_args()
+prompt=open(a.prompt_file,'rb').read().decode('utf-8')
+if not prompt: raise SystemExit('empty prompt refused')
+def tmux(*args, data=None): return subprocess.run(['tmux',*args],input=data,check=True,stdout=subprocess.DEVNULL)
+# OpenTUI's stdin parser handles bracketed paste as one input sequence. Sending
+# start/data/end separately can split the markers across reads and leave the
+# Freebuff composer unchanged even though tmux exits successfully.
+tmux('send-keys','-t',a.target,'-l','\x1b[200~'+prompt+'\x1b[201~')
+if not a.no_enter:
+ # OpenTUI applies bracketed-paste events asynchronously. Sending Enter in
+ # the same input turn can race the paste and leave the whole prompt in the
+ # composer while the caller mistakes that for a successful submission.
+ time.sleep(0.25)
+ tmux('send-keys','-t',a.target,'Enter')
+ time.sleep(0.1)

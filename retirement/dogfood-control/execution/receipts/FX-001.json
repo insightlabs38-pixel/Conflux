@@ -1,0 +1,18 @@
+{
+  "task_id": "FX-001",
+  "status": "done",
+  "summary": "Added the integrations app: a defended relational schema (ImportedFixture/FixtureTrack/FixtureJudge/FixtureTeam/FixtureTeamMember/FixtureProject/FixtureScore/FixtureScoreCriterion) and a destructive-then-rebuild `manage.py import_fixture` command that loads fixtures/fixtures.json (copied verbatim from the official spec) with no cleaning: the deliberate duplicate submission (prj_07/prj_41, same team/title/repo, distinct external_id and submitted_at) and the constant-scoring judge (jdg_07, 4/4/4 on all 3 reviews) both survive import unchanged. Criteria are stored as typed child rows, not a JSON blob, so a missing criterion or an unfinished review batch (called out in the fixture's own design notes as a future test-mutation case) is representable as no row rather than a sentinel value.",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "b57e26e",
+  "verification": [
+    { "command": "uv run --frozen pytest tests/acceptance/test_fixture_import.py", "result": "passed; 5 tests (counts, duplicate preserved, constant-scorer preserved, reimport is idempotent/non-additive, criteria are typed rows)" },
+    { "command": "make verify-fast", "result": "passed" },
+    { "command": "manage.py makemigrations --check --dry-run", "result": "no changes detected" },
+    { "command": "docker compose up -d --build", "result": "app/worker healthy; migration 0001_initial applies cleanly against real Postgres" }
+  ],
+  "out_of_scope_touch": "src/api/config/settings.py (INSTALLED_APPS += integrations) — required to have a working Django app; no other path exists. Documented per the sole-sequential-worker model replacing the old ownership-lease integration step.",
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T23:05:00+00:00"
+}

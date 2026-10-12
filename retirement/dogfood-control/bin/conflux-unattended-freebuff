@@ -1,0 +1,388 @@
+#!/usr/bin/env python3
+"""One source-built Freebuff interactive TUI; supervisor assigns one task at a time."""
+import datetime as dt,hashlib,json,os,pathlib,re,subprocess,sys,time
+sys.path.insert(0,'/home/dogfood-control/bin')
+import importlib.util,importlib.machinery
+loader=importlib.machinery.SourceFileLoader('worker','/home/dogfood-control/bin/conflux-unattended-worker'); spec=importlib.util.spec_from_loader(loader.name,loader); worker=importlib.util.module_from_spec(spec); loader.exec_module(worker)
+ROOT=pathlib.Path('/home/dogfood-control'); WTROOT=pathlib.Path(os.environ.get('CONFLUX_WORKTREE_ROOT','/home/insightlabs38/conflux-worktrees')); STOP=dt.datetime.fromisoformat(os.environ['CONFLUX_END_UTC'])-dt.timedelta(minutes=10); SESSION='unattended-freebuff'
+def now(): return dt.datetime.now(dt.timezone.utc)
+def run(args,check=False): return subprocess.run(args,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,check=check)
+def log(obj):
+ p=ROOT/'logs/unattended/freebuff-status.jsonl'; p.parent.mkdir(parents=True,exist_ok=True)
+ with p.open('a') as f: f.write(json.dumps({'at':now().isoformat(),**obj})+'\n')
+def write_json(path,data):
+ path=pathlib.Path(path); path.parent.mkdir(parents=True,exist_ok=True)
+ tmp=path.with_suffix(path.suffix+'.tmp'); tmp.write_text(json.dumps(data,indent=2)+'\n')
+ os.chmod(tmp,0o600); os.replace(tmp,path)
+def heartbeat(task=None):
+ p=ROOT/'run/heartbeats/freebuff.json'; p.parent.mkdir(parents=True,exist_ok=True); tmp=p.with_suffix('.tmp'); tmp.write_text(json.dumps({'lane':'freebuff','unit':task,'session':SESSION,'at':now().isoformat()})+'\n'); os.chmod(tmp,0o600); os.replace(tmp,p)
+def claim():
+ out=worker.ctrl('next-task','freebuff')
+ match=re.search(r'^candidate\s+(\S+)',out,re.M)
+ if not match: return None,out
+ ident=match.group(1); branch=f'freebuff/{ident}'; wt=WTROOT/'freebuff-lane'
+ out=worker.ctrl('claim-task','freebuff',ident,'--branch',branch,'--worktree',str(wt),'--session-id',SESSION)
+ if out.startswith('ERROR:'): return None,out
+ return ident,out
+def existing_lease():
+ data=worker.yaml.safe_load((ROOT/'execution/OWNERSHIP.yaml').read_text()) or {}
+ return next((x for x in data.get('leases',[]) if x.get('lane')=='freebuff'),None)
+def snapshot():
+ r=run(['tmux','capture-pane','-pt',SESSION,'-S','-100'])
+ text=r.stdout
+ text=subprocess.run(['/home/dogfood-control/bin/conflux-redact-log'],input=text,text=True,stdout=subprocess.PIPE,check=True).stdout
+ return text
+def session_alive(): return run(['tmux','has-session','-t',SESSION]).returncode==0
+def rollover_prompt(pane):
+ # Freebuff's own ended-session banner: the current stream is finished and
+ # Enter would rejoin/continue the old TUI. Recycle onto the same task instead.
+ return bool(re.search(r'Session ended.{0,180}Press Enter to continue in a new session',pane,re.I|re.S))
+def composer_text(pane):
+ lines=pane.splitlines(); start=None
+ for i,line in enumerate(lines):
+  if re.search(r'^\s*╭[─━-]+',line): start=i
+ if start is None: return ''
+ for i in range(start+1,len(lines)):
+  if re.search(r'^\s*╰[─━-]+',lines[i]): return '\n'.join(lines[start:i+1])
+ return '\n'.join(lines[start:])
+def prompt_location(pane,sentinel):
+ box=composer_text(pane)
+ if sentinel and sentinel in box: return 'composer'
+ if sentinel and sentinel in pane: return 'submitted'
+ return 'unknown'
+def prompt_fingerprint(prompt):
+ return hashlib.sha256(prompt.encode('utf-8')).hexdigest()
+def completion_ui(pane):
+ # Ignore agent/composer text; ordinary task instructions can mention "continue".
+ box=composer_text(pane)
+ screen=pane.replace(box,'') if box else pane
+ return bool(re.search(r'(?:press|type)\s+enter\s+to\s+continue|continue\s*\(y/n\)',screen,re.I))
+def composer_has_other_text(pane):
+ box=composer_text(pane)
+ content='\n'.join(line.strip(' │') for line in box.splitlines()[1:-1])
+ content=re.sub(r'[▍█▌▏]','',content)
+ content=re.sub(r'\s+',' ',content).strip()
+ content=re.sub(r'enter a coding task or / for commands','',content,flags=re.I).strip()
+ return bool(content)
+def provider_issue(pane):
+ if re.search(r'not logged in|authentication failed|unauthorized|invalid api key|token expired|http\s*401',pane,re.I): return 'AUTH_FAILURE'
+ # Do not run the generic log classifier over agent conversation: a task can
+ # legitimately discuss quotas/limits. These are provider UI error strings.
+ if re.search(r'Session limit reached|Monthly usage limit reached|Not enough Freebucks|usage limit reached|rate limit exceeded|HTTP\s*429',pane,re.I): return 'QUOTA'
+ return 'SUCCESS'
+def prepare_lane_worktree(branch,wt):
+ wt.parent.mkdir(parents=True,exist_ok=True)
+ worker.run(['git','-C',str(worker.REPO),'fetch','origin','main'],check=False)
+ if not wt.exists():
+  worker.run(['git','-C',str(worker.REPO),'worktree','add','-b',branch,str(wt),'origin/main'])
+  return
+ current=worker.run(['git','-C',str(wt),'branch','--show-current'],check=False)
+ if current==branch: return
+ dirty=worker.run(['git','-C',str(wt),'status','--porcelain'],check=False)
+ if dirty: raise RuntimeError(f'cannot rotate serial Freebuff worktree with dirty paths: {dirty}')
+ existing=worker.run(['git','-C',str(wt),'branch','--list',branch],check=False)
+ if existing:
+  worker.run(['git','-C',str(wt),'checkout',branch])
+  return
+ worker.run(['git','-C',str(wt),'checkout','--detach','origin/main'])
+ worker.run(['git','-C',str(wt),'checkout','-b',branch])
+def send_prompt(task,branch,wt,prompt,attempt):
+ sentinel=prompt.strip().splitlines()[0][:48]
+ fingerprint=prompt_fingerprint(prompt)
+ state_path=ROOT/'run/freebuff-state.json'
+ saved_state=json.loads(state_path.read_text()) if state_path.exists() else {}
+ # Recover safely across a runner restart: submit text already staged in the
+ # composer, and never paste a second copy when the message is in chat history.
+ pane=snapshot() if session_alive() else ''
+ location=prompt_location(pane,sentinel)
+ if (session_alive() and not rollover_prompt(pane) and saved_state.get('task')==task
+     and saved_state.get('prompt_status')=='submitted' and saved_state.get('prompt_fingerprint')==fingerprint):
+  log({'event':'prompt-already-submitted','task':task,'attempt':attempt,'source':'persisted-fingerprint'})
+  return
+ if location=='submitted':
+  log({'event':'prompt-already-submitted','task':task,'attempt':attempt})
+  _record_submitted(task,branch,wt,attempt,False,prompt)
+  return
+ staged=location=='composer'
+ if (not staged and location=='unknown' and saved_state.get('task')==task and saved_state.get('prompt_status')=='staging'
+     and saved_state.get('prompt_fingerprint')==fingerprint):
+  log({'event':'prompt-submission-ambiguous','task':task,'attempt':attempt})
+  raise RuntimeError('previous submit was interrupted with no observable confirmation; refusing a possible duplicate')
+ launched=False; wait_started=time.monotonic()
+ while now()<STOP:
+  heartbeat(task)
+  if not session_alive():
+   run(['tmux','new-session','-d','-s',SESSION,'-c',str(wt),'/home/dogfood-control/bin/conflux-freebuff-source','--cwd',str(wt)])
+   launched=True
+   time.sleep(2)
+   continue
+  text=snapshot()
+  location=prompt_location(text,sentinel)
+  if location=='submitted':
+   log({'event':'prompt-already-submitted','task':task,'attempt':attempt})
+   _record_submitted(task,branch,wt,attempt,launched,prompt)
+   return
+  if location=='composer': staged=True; break
+  if rollover_prompt(text):
+   run(['tmux','kill-session','-t',SESSION])
+   continue
+  # The current Freebuff TUI renders its input placeholder in lowercase and
+  # some terminal sizes omit that placeholder from tmux's captured screen.
+  # Accept the pinned model header as a fallback after startup has settled.
+  input_ready=bool(re.search(r'enter a coding task',text,re.I))
+  route_ready='GLM 5.3 Flash' in text
+  if input_ready or (route_ready and time.monotonic()-wait_started>=15):
+   if not route_ready:
+    log({'event':'route-mismatch','task':task,'expected':'GLM 5.3 Flash'}); run(['tmux','kill-session','-t',SESSION]); raise RuntimeError('Freebuff UI is not on the pinned GLM 5.3 Flash route')
+   if not input_ready:
+    log({'event':'ready-by-route-header','task':task,'after_seconds':int(time.monotonic()-wait_started)})
+   break
+  time.sleep(5)
+ else: raise RuntimeError('campaign claim window ended before Freebuff accepted the next task')
+ if not staged:
+  if composer_has_other_text(text):
+   log({'event':'unexpected-composer-content','task':task,'attempt':attempt})
+   raise RuntimeError('Freebuff composer contains unrelated text; refusing to append an assignment')
+  state_path=ROOT/'run/freebuff-state.json'; state=json.loads(state_path.read_text()) if state_path.exists() else {}
+  state.update(task=task,branch=branch,worktree=str(wt),attempt=attempt,prompt_status='staging',prompt_fingerprint=fingerprint)
+  write_json(state_path,state)
+  pf=ROOT/'run'/f'freebuff-{task}-prompt.txt'; pf.write_text(prompt)
+  driver=run([str(ROOT/'bin/conflux-tmux-paste'),SESSION+':0',str(pf),'--no-enter'])
+  if driver.returncode: raise RuntimeError('bracketed-paste driver failed: '+driver.stdout)
+  # Wait for OpenTUI to apply bracketed paste before sending the submit key.
+  deadline=time.monotonic()+8
+  while time.monotonic()<deadline:
+   if prompt_location(snapshot(),sentinel)=='composer': staged=True; break
+   time.sleep(0.2)
+ if not staged:
+  log({'event':'prompt-paste-not-rendered','task':task,'attempt':attempt})
+  raise RuntimeError('Freebuff did not render the task in its composer; refusing to submit or retry blindly')
+ accepted=False
+ for key_attempt in range(1,3):
+  time.sleep(0.25)
+  key=run(['tmux','send-keys','-t',SESSION+':0','Enter'])
+  if key.returncode:
+   log({'event':'prompt-submit-key-failed','task':task,'attempt':attempt,'key_attempt':key_attempt,'detail':key.stdout[-300:]})
+   raise RuntimeError('Freebuff submit key could not be delivered')
+  # A prompt is accepted only when it leaves the composer and appears in chat.
+  deadline=time.monotonic()+3
+  while time.monotonic()<deadline:
+   visible=snapshot(); location=prompt_location(visible,sentinel)
+   if location=='submitted': accepted=True; break
+   if location!='composer': break
+   time.sleep(0.25)
+  if accepted: break
+  if location!='composer': break
+ if not accepted:
+  log({'event':'prompt-submit-not-confirmed','task':task,'attempt':attempt,'still_in_composer':prompt_location(snapshot(),sentinel)=='composer'})
+  raise RuntimeError('Freebuff did not move the task from the composer into chat; leaving the lease intact')
+ log({'event':'prompt-submitted-confirmed','task':task,'attempt':attempt})
+ _record_submitted(task,branch,wt,attempt,launched,prompt)
+def _record_submitted(task,branch,wt,attempt,launched,prompt):
+ log({'event':'prompt_sent','task':task,'branch':branch,'worktree':str(wt),'attempt':attempt,'session_reused':not launched,'executable':'/home/insightlabs38/src/freebuff/cli/bin/freebuff'})
+ state_path=ROOT/'run/freebuff-state.json'; state=json.loads(state_path.read_text()) if state_path.exists() else {}
+ state.setdefault('launched_at',now().isoformat())
+ if launched: state['launched_at']=now().isoformat()
+ state.update(session=SESSION,session_active=True,model='GLM 5.3 Flash',task=task,branch=branch,worktree=str(wt),attempt=attempt,prompt_status='submitted',prompt_fingerprint=prompt_fingerprint(prompt),prompt_submitted_at=now().isoformat())
+ write_json(state_path,state)
+def send_finalization(task,prompt):
+ # Finalization is a real model request too: persist its fingerprint before
+ # pasting, then confirm that it left the composer before recording success.
+ state_path=ROOT/'run/freebuff-state.json'
+ state=json.loads(state_path.read_text()) if state_path.exists() else {}
+ fingerprint=prompt_fingerprint(prompt); sentinel=prompt.strip().splitlines()[0][:48]
+ if state.get('task')==task and state.get('finalization_status')=='submitted' and state.get('finalization_fingerprint')==fingerprint:
+  return
+ pane=snapshot() if session_alive() else ''
+ location=prompt_location(pane,sentinel)
+ if location=='submitted':
+  state.update(finalization_status='submitted',finalization_fingerprint=fingerprint)
+  write_json(state_path,state); return
+ if (state.get('task')==task and state.get('finalization_status')=='staging'
+     and state.get('finalization_fingerprint')==fingerprint and location=='unknown'):
+  raise RuntimeError('prior finalization submit is ambiguous; refusing to send a duplicate')
+ if not session_alive() or location not in ('composer','unknown'):
+  raise RuntimeError('Freebuff session is unavailable or its composer state is unclear')
+ state.update(finalization_status='staging',finalization_fingerprint=fingerprint)
+ write_json(state_path,state)
+ pf=ROOT/'run'/f'freebuff-{task}-finalize.txt'; pf.write_text(prompt)
+ if location!='composer':
+  driver=run([str(ROOT/'bin/conflux-tmux-paste'),SESSION+':0',str(pf),'--no-enter'])
+  if driver.returncode: raise RuntimeError('finalization paste failed: '+driver.stdout[-300:])
+ deadline=time.monotonic()+8
+ while time.monotonic()<deadline and prompt_location(snapshot(),sentinel)!='composer': time.sleep(.2)
+ if prompt_location(snapshot(),sentinel)!='composer':
+  raise RuntimeError('finalization text did not appear in composer; refusing to submit')
+ key=run(['tmux','send-keys','-t',SESSION+':0','Enter'])
+ if key.returncode: raise RuntimeError('finalization submit key failed')
+ deadline=time.monotonic()+5
+ while time.monotonic()<deadline:
+  location=prompt_location(snapshot(),sentinel)
+  if location=='submitted':
+   state.update(finalization_status='submitted',finalization_fingerprint=fingerprint)
+   write_json(state_path,state); return
+  if location!='composer': break
+  time.sleep(.25)
+ raise RuntimeError('finalization request was not confirmed in chat history')
+def main():
+ if now()<dt.datetime.fromisoformat(os.environ['CONFLUX_START_UTC']): raise SystemExit(78)
+ while now()<STOP:
+  heartbeat()
+  pausefile=ROOT/'run/lanes/freebuff.json'
+  if pausefile.exists() and json.loads(pausefile.read_text()).get('status') in ('PAUSED_QUOTA','PAUSED_AUTH','PAUSED_REVIEW','PAUSED_SUBMIT','DISABLED'): return 0
+  prior=existing_lease()
+  if prior:
+   ident=prior['id']; branch=prior.get('branch') or f'freebuff/{ident}'; wt=pathlib.Path(prior.get('worktree') or WTROOT/'freebuff-lane')
+  else:
+   ident,out=claim()
+   if ident is None: log({'event':'no_claim','detail':out}); time.sleep(45); continue
+   branch=f'freebuff/{ident}'; wt=WTROOT/'freebuff-lane'
+   try: prepare_lane_worktree(branch,wt)
+   except Exception as e:
+    log({'event':'worktree-infra-failure','task':ident,'error':str(e)}); (ROOT/'execution/ATTENTION.md').write_text(f'# HIGH ATTENTION\n\nFreebuff could not prepare serial worktree for {ident}: {e}\n'); worker.ctrl('review',ident); continue
+  prompt=worker.task_packet('freebuff',ident,False,branch,wt)+f'\nExact executor model: GLM 5.3 Flash. Branch: {branch}. Worktree: {wt}. Process only this task, then return to input; the external supervisor integrates it and assigns the next task.'
+  receipt=ROOT/'execution/receipts'/f'{ident}.json'; attempt=0
+  if receipt.exists():
+   try: recovered=json.loads(receipt.read_text())
+   except Exception: recovered={}
+   if recovered.get('task_id')==ident and recovered.get('status')=='done':
+    run([str(ROOT/'bin/conflux-handoff'),'freebuff',ident,'--worktree',str(wt),'--branch',branch,'--phase','FINAL_INTEGRATION','--reason','receipt complete; integration recovery without fresh model instance'])
+    integ=run([str(ROOT/'bin/conflux-integrate'),'freebuff',ident,str(wt)])
+    if integ.returncode: log({'event':'integration-recovery-failure','task':ident,'output':integ.stdout}); worker.ctrl('review',ident)
+    else: log({'event':'integration-recovered','task':ident})
+    pane=snapshot() if session_alive() else ''
+    ended=bool(re.search(r'Session ended',pane,re.I))
+    if ended: run(['tmux','kill-session','-t',SESSION])
+    (ROOT/'run/lanes/freebuff.json').unlink(missing_ok=True); continue
+  handoff=ROOT/'handoffs/freebuff'/f'{ident}.md'
+  if handoff.exists(): prompt='CONTINUATION: read '+str(handoff)+f'; inspect git status and diff --stat in {wt}; inspect only referenced files/symbols; continue the exact task {ident} on branch {branch}. Do not reread the control pack or claim other work. Write receipt when finished.'
+  else: run([str(ROOT/'bin/conflux-handoff'),'freebuff',ident,'--worktree',str(wt),'--branch',branch,'--phase','INVESTIGATION_PLAN'])
+  lane_state_path=ROOT/'run/freebuff-state.json'; lane_state=json.loads(lane_state_path.read_text()) if lane_state_path.exists() else {}
+  prompt_sentinel=prompt.strip().splitlines()[0][:48]; fingerprint=prompt_fingerprint(prompt)
+  current_pane=snapshot() if session_alive() else ''
+  already_submitted=bool(prior and lane_state.get('task')==ident and current_pane and not rollover_prompt(current_pane) and ((lane_state.get('prompt_status')=='submitted' and lane_state.get('prompt_fingerprint')==fingerprint) or prompt_location(current_pane,prompt_sentinel)=='submitted'))
+  failures=0
+  while failures<2:
+   attempt+=1
+   if not (already_submitted and attempt==1):
+    try: send_prompt(ident,branch,wt,prompt,attempt)
+    except Exception as e:
+     reason=f'Freebuff prompt submission could not be confirmed: {e}'
+     worker.run([str(ROOT/'bin/conflux-handoff'),'freebuff',ident,'--worktree',str(wt),'--branch',branch,'--phase','HANDOFF_REQUIRED','--reason',reason])
+     row={'lane':'freebuff','status':'PAUSED_SUBMIT','unit':ident,'at':now().isoformat(),'reason':reason}
+     pausefile.parent.mkdir(parents=True,exist_ok=True); pausefile.write_text(json.dumps(row,indent=2)+'\n'); os.chmod(pausefile,0o600)
+     worker.ctrl('note',f'freebuff PAUSED_SUBMIT on {ident}; lease/worktree preserved; no duplicate prompt sent')
+     log({'event':'prompt-submit-paused','task':ident,'attempt':attempt,'error':str(e)})
+     return 1
+   began=now(); changed=time.monotonic(); previous=''; rollover_marked=False
+   heartbeat(ident)
+   rollover=False
+   while True:
+    heartbeat(ident)
+    if receipt.exists():
+     try: data=json.loads(receipt.read_text())
+     except Exception: data={}
+     if data.get('task_id')==ident and data.get('status') in ('done','blocked','needs-review'):
+      pane=snapshot() if session_alive() else ''
+      if re.search(r'Session ended',pane,re.I):
+       state_path=ROOT/'run/freebuff-state.json'; state=json.loads(state_path.read_text()) if state_path.exists() else {}; state['session_limit_hit']=True; write_json(state_path,state)
+       if re.search(r'Session ended',pane,re.I) and re.search(r'Agent is wrapping up',pane,re.I):
+        time.sleep(5); continue
+      break
+    pane=snapshot()
+    if not session_alive():
+     log({'event':'unexpected-session-death','task':ident,'age_seconds':int((now()-began).total_seconds())}); break
+    if (ROOT/'run/lanes/freebuff.json').exists() and json.loads((ROOT/'run/lanes/freebuff.json').read_text()).get('status') in ('PAUSED_QUOTA','PAUSED_AUTH','DISABLED'):
+     worker.run([str(ROOT/'bin/conflux-handoff'),'freebuff',ident,'--worktree',str(wt),'--branch',branch,'--phase','HANDOFF_REQUIRED','--reason','owner requested provider pause; preserve current task state'])
+     log({'event':'owner-pause-handoff','task':ident}); run(['tmux','send-keys','-t',SESSION,'C-c']); time.sleep(2); run(['tmux','kill-session','-t',SESSION]); return 0
+    if pane!=previous:
+     previous=pane; changed=time.monotonic(); log({'event':'pane_update','task':ident,'capture':pane[-12000:]})
+    fixture=ROOT/'run'/f'freebuff-{ident}-capture.txt'; fixture.write_text(pane)
+    age=(now()-began).total_seconds()
+    if age>=3000 and not rollover_marked: log({'event':'approaching-rollover','task':ident,'age_seconds':int(age),'action':'continue current bounded task; do not assign additional work'}); rollover_marked=True
+    if re.search(r'Session ended',pane,re.I):
+     state_path=ROOT/'run/freebuff-state.json'; state=json.loads(state_path.read_text()) if state_path.exists() else {}; state['session_limit_hit']=True; write_json(state_path,state)
+    if rollover_prompt(pane):
+     # A task can write its receipt while the pane is being polled. Treat that
+     # race as a completed unit: integrate it before recycling for the next.
+     try: completed_now=json.loads(receipt.read_text()).get('task_id')==ident and json.loads(receipt.read_text()).get('status')=='done'
+     except Exception: completed_now=False
+     if completed_now:
+      state_path=ROOT/'run/freebuff-state.json'; state=json.loads(state_path.read_text()) if state_path.exists() else {}; state['session_limit_hit']=True; write_json(state_path,state)
+      break
+     worker.run([str(ROOT/'bin/conflux-handoff'),'freebuff',ident,'--worktree',str(wt),'--branch',branch,'--phase','HANDOFF_REQUIRED','--reason','Freebuff ended this session and is showing its Enter-to-continue UI; start a fresh instance on this same task without pressing Continue'])
+     log({'event':'session-rollover-handoff','task':ident,'age_seconds':int(age),'worktree':str(wt),'task_receipt_exists':receipt.exists()})
+     run(['tmux','kill-session','-t',SESSION]); rollover=True; break
+    classification=provider_issue(pane)
+    if classification in ('QUOTA','AUTH_FAILURE'):
+     status='PAUSED_QUOTA' if classification=='QUOTA' else 'PAUSED_AUTH'
+     reset_at=None
+     if classification=='QUOTA':
+      match=re.search(r'(20\d\d-\d\d-\d\d[T ]\d\d:\d\d(?::\d\d)?Z?)',pane)
+      if match:
+       try:
+        reset_at=dt.datetime.fromisoformat(match.group(1).replace('Z','+00:00'))
+        if reset_at.tzinfo is None: reset_at=reset_at.replace(tzinfo=dt.timezone.utc)
+       except ValueError: reset_at=None
+     worker.run([str(ROOT/'bin/conflux-handoff'),'freebuff',ident,'--worktree',str(wt),'--branch',branch,'--phase','HANDOFF_REQUIRED','--reason','Freebuff provider '+classification+'; waiting for owner/provider confirmation'])
+     row={'lane':'freebuff','status':status,'unit':ident,'at':now().isoformat(),'reason':'interactive provider unavailable; handoff saved'}
+     if reset_at and reset_at>now(): row['reset_at']=reset_at.isoformat()
+     lane_state=ROOT/'run/lanes/freebuff.json'; lane_state.parent.mkdir(parents=True,exist_ok=True); lane_state.write_text(json.dumps(row,indent=2)+'\n'); os.chmod(lane_state,0o600)
+     worker.ctrl('note',f'freebuff {classification} on {ident}; lease/worktree and handoff retained')
+     log({'event':'provider-paused','task':ident,'status':status}); run(['tmux','send-keys','-t',SESSION,'C-c']); time.sleep(2); run(['tmux','kill-session','-t',SESSION]); return 0
+    # The coding-task placeholder remains visible while a response is in
+    # progress, so it cannot signal completion. Completion is receipt-driven;
+    # only explicit continuation/confirmation prompts enter this fallback.
+    if completion_ui(pane):
+     log({'event':'completion-or-continue-ui','task':ident,'receipt_exists':receipt.exists()})
+     if receipt.exists(): break
+     if not (ROOT/'run'/f'freebuff-{ident}-finalize-sent').exists():
+      dirty=worker.run(['git','-C',str(wt),'status','--porcelain'],check=False)
+      if dirty.strip():
+       final_prompt='If the assigned task is complete, write the required schema-valid receipt and commit. Inspect current git status/diff; do not add features. If incomplete, record concise progress and blockers in the external handoff. This is the only finalization request.'
+       try:
+        send_finalization(ident,final_prompt)
+       except Exception as e:
+        reason=f'Freebuff finalization submission could not be confirmed: {e}'
+        worker.run([str(ROOT/'bin/conflux-handoff'),'freebuff',ident,'--worktree',str(wt),'--branch',branch,'--phase','HANDOFF_REQUIRED','--reason',reason])
+        write_json(pausefile,{'lane':'freebuff','status':'PAUSED_SUBMIT','unit':ident,'at':now().isoformat(),'reason':reason})
+        worker.ctrl('note',f'freebuff PAUSED_SUBMIT during finalization on {ident}; lease/worktree preserved')
+        log({'event':'finalization-submit-paused','task':ident,'error':str(e)}); return 1
+       (ROOT/'run'/f'freebuff-{ident}-finalize-sent').touch(); log({'event':'bounded-finalization-instruction','task':ident})
+       time.sleep(60); break
+     break
+    time.sleep(10)
+   if rollover:
+    recovery=ROOT/'run/recovery'/ident/'snapshot.json'
+    prompt='CONTINUATION: read '+str(handoff)+' and passive recovery bundle '+str(recovery)+f'; inspect git status and diff --stat in {wt}; inspect only referenced files/symbols; continue the exact task {ident} on branch {branch} from its latest agent-authored checkpoint. Treat controller observations as facts, not reconstructed narrative. Do not reread the control pack or claim other work. Write/update the handoff at meaningful checkpoints and emit the required receipt when finished.'
+    continue
+   if receipt.exists():
+    try: data=json.loads(receipt.read_text())
+    except Exception: data={}
+    if data.get('task_id')==ident and data.get('status')=='done':
+     integ=run([str(ROOT/'bin/conflux-integrate'),'freebuff',ident,str(wt)])
+     if integ.returncode: log({'event':'integration-failure','task':ident,'output':integ.stdout})
+     else: log({'event':'integrated','task':ident})
+     state_path=ROOT/'run/freebuff-state.json'; state=json.loads(state_path.read_text()) if state_path.exists() else {}
+     if state.get('session_limit_hit'):
+      log({'event':'session-recycled-after-task','task':ident,'reason':'usage limit hit; current task receipt integrated'})
+      run(['tmux','kill-session','-t',SESSION])
+      state.update(task=None,session_active=False,ended_at=now().isoformat())
+     else: state.update(task=None,session_active=session_alive(),last_completed_task=ident)
+     write_json(state_path,state)
+     break
+    if data.get('task_id')==ident and data.get('status') in ('blocked','needs-review'):
+     worker.ctrl('review',ident); log({'event':'review','task':ident,'summary':data.get('summary')})
+     pausefile.parent.mkdir(parents=True,exist_ok=True); pausefile.write_text(json.dumps({'lane':'freebuff','status':'PAUSED_REVIEW','unit':ident,'at':now().isoformat(),'reason':'task requires review before serial worktree reuse'},indent=2)+'\n')
+     run(['tmux','kill-session','-t',SESSION]); return 0
+   failures+=1
+   run([str(ROOT/'bin/conflux-handoff'),'freebuff',ident,'--worktree',str(wt),'--branch',branch,'--phase','HANDOFF_REQUIRED','--reason','Freebuff instance exited before receipt; retry same task in a fresh instance'])
+   run(['tmux','send-keys','-t',SESSION,'C-c']); time.sleep(5); run(['tmux','kill-session','-t',SESSION])
+   if failures<2: prompt='CONTINUATION: read '+str(handoff)+f'; inspect git status and diff --stat in {wt}; inspect only referenced files/symbols; continue the exact task {ident} on branch {branch}. Do not reread the control pack or claim other work.'
+   else:
+    (ROOT/'execution/ATTENTION.md').write_text(f'# HIGH ATTENTION\n\nFreebuff hung twice on {ident}; worktree {wt} and lease preserved.\n')
+    log({'event':'second-hang','task':ident}); return 1
+  # Keep the interactive session alive across completed units until its own
+  # usage boundary; the next loop iteration sends the next assignment normally.
+ if session_alive(): run(['tmux','kill-session','-t',SESSION])
+if __name__=='__main__': main()

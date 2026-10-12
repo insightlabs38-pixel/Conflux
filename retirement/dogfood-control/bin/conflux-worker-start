@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# shellcheck disable=SC1091
+source "$(dirname "$0")/conflux-runtime-mode"
+case "$RUNTIME_MODE" in NORMAL|E2E) ;; *) echo "worker starts are locked in runtime mode $RUNTIME_MODE" >&2; exit 78 ;; esac
+"$(dirname "$0")/conflux-kickoff-guard"
+printf 'Worker launcher is infrastructure-only; task ownership, repository bootstrap, worktree creation, and role launch require the approved post-kickoff workflow.\n' >&2
+exit 2

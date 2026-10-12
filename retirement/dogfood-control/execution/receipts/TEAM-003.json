@@ -1,0 +1,16 @@
+{
+  "task_id": "TEAM-003",
+  "status": "done",
+  "summary": "join_team/leave_team reject a roster change once the team holds an active entry in a TEAM_LOCKED stage (ST-004); transfer_captaincy is deliberately unaffected (role reassignment, not composition change). join_team also runs through policies.check_action(Action.JOIN) scoped to the team as subject, so an organizer-bound policy can deny joining server-side; both direct and invite-based joins share this single path.",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "4e7fb22",
+  "verification": [
+    { "command": "uv run --frozen pytest tests/integration/test_team_lock_and_policy_enforcement.py tests/integration/test_team_lifecycle.py tests/integration/test_team_invites.py", "result": "passed; 7 new + 21 pre-existing = 28 tests, no regressions" },
+    { "command": "make verify-fast", "result": "passed" },
+    { "command": "docker compose up -d --build", "result": "app/worker healthy" }
+  ],
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T23:51:00+00:00"
+}

@@ -1,0 +1,112 @@
+#!/usr/bin/env python3
+"""Exclusive, bounded BOOT-B00 with Sol -> Claude -> Luna executor order."""
+import datetime as dt,json,pathlib,subprocess,sys,time,yaml,os
+ROOT=pathlib.Path('/home/dogfood-control'); REPO=pathlib.Path(os.environ.get('CONFLUX_REPO_ROOT','/home/insightlabs38/conflux')); WT=REPO; RUN=ROOT/'run'; LOG=ROOT/'logs/unattended'
+def call(args,**kw): return subprocess.run(args,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,**kw)
+def event(obj):
+ LOG.mkdir(parents=True,exist_ok=True)
+ with (LOG/'bootstrap.jsonl').open('a') as f: f.write(json.dumps({'at':dt.datetime.now(dt.timezone.utc).isoformat(),**obj})+'\n')
+def save_states(path,states):
+ path.parent.mkdir(parents=True,exist_ok=True); tmp=path.with_suffix('.tmp'); tmp.write_text(json.dumps(states,indent=2)+'\n'); os.chmod(tmp,0o600); os.replace(tmp,path)
+def process_ticks(path):
+ try: root=int(path.read_text().strip())
+ except Exception: return -1
+ todo=[root]; seen=set(); total=0
+ while todo:
+  pid=todo.pop()
+  if pid in seen: continue
+  seen.add(pid)
+  try:
+   raw=pathlib.Path(f'/proc/{pid}/stat').read_text(); fields=raw[raw.rfind(')')+2:].split(); total+=int(fields[11])+int(fields[12]); todo.extend(int(x) for x in pathlib.Path(f'/proc/{pid}/task/{pid}/children').read_text().split())
+  except Exception: pass
+ return total
+def main():
+ start=os.environ.get('CONFLUX_START_UTC','').strip()
+ if not start or dt.datetime.now(dt.timezone.utc)<dt.datetime.fromisoformat(start): raise SystemExit(78)
+ if (RUN/'bootstrap-green').exists(): return 0
+ own=ROOT/'execution/OWNERSHIP.yaml'; ownership=yaml.safe_load(own.read_text()) if own.exists() else {}
+ reserved=any(r.get('id')=='BOOT-B00' and r.get('lane')=='sol' and r.get('worktree')==str(WT) for r in ownership.get('reserved_batches',[]))
+ if not reserved:
+  claim=call([str(ROOT/'bin/conflux-control'),'claim-batch','sol','BOOT-B00','--branch','sol/BOOT-B00','--worktree',str(WT)])
+  if claim.returncode: event({'event':'claim-failure','output':claim.stdout}); return 2
+ branch=call(['git','-C',str(REPO),'branch','--show-current'])
+ if branch.stdout.strip()!='sol/BOOT-B00':
+  exists=call(['git','-C',str(REPO),'show-ref','--verify','--quiet','refs/heads/sol/BOOT-B00']).returncode==0
+  sw=call(['git','-C',str(REPO),'switch',*(['sol/BOOT-B00'] if exists else ['-c','sol/BOOT-B00'])])
+  if sw.returncode: event({'event':'branch-failure','output':sw.stdout}); return 2
+ base=(ROOT/'execution/UNATTENDED_BOOTSTRAP_PROMPT.md').read_text()
+ attempts=[('sol','gpt-6-sol','medium',5100),('claude','claude-sonnet-5','high',4800),('luna','gpt-6-luna','medium',4500)]
+ state_path=RUN/'bootstrap-attempts.json'
+ states=json.loads(state_path.read_text()) if state_path.exists() else {}
+ for attempt_index,(lane,model,effort,bound) in enumerate(attempts):
+  logfile=LOG/f'bootstrap-{lane}.jsonl'; status=RUN/f'bootstrap-{lane}.exit'; pidfile=RUN/f'bootstrap-{lane}.pid'; session=f'unattended-bootstrap-{lane}'
+  old=states.get(lane,{})
+  if old.get('status') in ('failed','success'): continue
+  retrying=old.get('status')=='retry'
+  prompt=base.replace('GPT-6 Sol, reasoning medium',f'{model}, reasoning {effort}').replace('lane `sol`, model `gpt-6-sol`',f'lane `{lane}`, model `{model}`')+f'\n\nThis is bootstrap attempt {lane} using exact model {model}, effort {effort}. Continue the existing BOOT-B00 partial work. Prior executor attempts and logs are in /home/dogfood-control/logs/unattended/bootstrap-*.jsonl. Do not restart from scratch unless the partial state is corrupt.'
+  if lane=='sol': cmd=['/home/insightlabs38/.local/bin/codex','exec','--model',model,'-c','model_reasoning_effort=medium','--dangerously-bypass-approvals-and-sandbox','--json','-C',str(WT),prompt]
+  elif lane=='luna': cmd=['/home/insightlabs38/.local/bin/codex','exec','--model',model,'-c','model_reasoning_effort=medium','--dangerously-bypass-approvals-and-sandbox','--json','-C',str(WT),prompt]
+  else: cmd=['/home/insightlabs38/.npm-global/bin/claude','--model',model,'--effort','high','--dangerously-skip-permissions','--print','--verbose','--output-format','stream-json',prompt]
+  session_exists=call(['tmux','has-session','-t',session]).returncode==0
+  resuming=old.get('status')=='running' and (session_exists or status.exists())
+  if old.get('status')=='running' and not resuming:
+   old['status']='failed'; old['classification']='HANG'; states[lane]=old; save_states(state_path,states); resuming=False
+  script=RUN/f'bootstrap-{lane}.sh'
+  import shlex
+  lines=['#!/usr/bin/env bash','set +e','cd '+shlex.quote(str(WT)),'export DISABLE_AUTOUPDATER=1','unset OPENAI_API_KEY CODEX_API_KEY CODEX_ACCESS_TOKEN ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN ANTHROPIC_BASE_URL','(set -o pipefail; ('+ ' '.join(shlex.quote(x) for x in cmd)+') 2>&1 | /home/dogfood-control/bin/conflux-redact-log >> '+shlex.quote(str(logfile))+') &','pid=$!','printf "%s\\n" "$pid" > '+shlex.quote(str(pidfile)),'wait "$pid"','rc=$?','printf "%s\\n" "$rc" > '+shlex.quote(str(status)),'sleep 86400']
+  if not resuming:
+   status.unlink(missing_ok=True); script.write_text('\n'.join(lines)+'\n'); script.chmod(0o700)
+   logfile.touch()
+   states[lane]={'status':'running','session':session,'hang_retry_count':old.get('hang_retry_count',0),'started_at':dt.datetime.now(dt.timezone.utc).isoformat()}; save_states(state_path,states)
+   if session_exists: call(['tmux','kill-session','-t',session])
+   start=call(['tmux','new-session','-d','-s',session,'-c',str(WT),'bash',str(script)])
+   if start.returncode: states[lane]={'status':'failed','classification':'INFRA_FAILURE'}; save_states(state_path,states); event({'event':'launch-failure','lane':lane,'output':start.stdout}); continue
+   event({'event':'attempt-start','lane':lane,'model':model,'effort':effort,'session':session})
+  else: event({'event':'attempt-resumed','lane':lane,'session':session})
+  if resuming:
+   try: age0=(dt.datetime.now(dt.timezone.utc)-dt.datetime.fromisoformat(old['started_at'])).total_seconds()
+   except Exception: age0=0
+   began=time.monotonic()-max(0,age0)
+   output_quiet0=(time.time()-logfile.stat().st_mtime) if logfile.exists() else age0
+   last_size=logfile.stat().st_size if logfile.exists() else 0
+  else: began=time.monotonic(); output_quiet0=0; last_size=0
+  last_ticks=process_ticks(pidfile); last_cpu=time.monotonic()-max(0,output_quiet0)
+  interrupted=False; watchdog=False
+  while not status.exists():
+   time.sleep(10); size=logfile.stat().st_size if logfile.exists() else 0
+   if size!=last_size: last_size=size
+   ticks=process_ticks(pidfile)
+   if ticks!=last_ticks and ticks>=0: last_ticks=ticks; last_cpu=time.monotonic()
+   age=time.monotonic()-began; output_quiet=time.time()-logfile.stat().st_mtime if logfile.exists() else age; inactive=time.monotonic()-last_cpu
+   if age>=bound or (output_quiet>=2400 and inactive>=2400):
+    if not interrupted and output_quiet>=2400 and inactive>=2400 and age<bound:
+     call(['tmux','send-keys','-t',session,'C-c']); event({'event':'suspected-hang-interrupt','lane':lane,'output_quiet':output_quiet,'process_inactive':inactive}); interrupted=True
+     time.sleep(60)
+     if status.exists(): break
+    watchdog=True; event({'event':'watchdog-termination','lane':lane,'age_seconds':age,'output_quiet':output_quiet,'process_inactive':inactive})
+    call(['tmux','kill-session','-t',session]); break
+  rc=int(status.read_text().strip()) if status.exists() else 124
+  receipt=ROOT/'execution/receipts/BOOT-B00.json'
+  if rc==0 and receipt.exists():
+    integ=call([str(ROOT/'bin/conflux-integrate'),lane,'BOOT-B00',str(WT),'--bootstrap'])
+    if integ.returncode==0 and (RUN/'bootstrap-green').exists():
+     states[lane]={'status':'success','model':model}; save_states(state_path,states); event({'event':'bootstrap-green','executor':lane,'model':model}); return 0
+    event({'event':'integration-failure','lane':lane,'output':integ.stdout})
+    states[lane]={'status':'failed','classification':'INTEGRATION_FAILURE'}; save_states(state_path,states)
+  else:
+   cat=call([str(ROOT/'bin/conflux-outcome-classify'),str(logfile)]).stdout.strip() if logfile.exists() else 'HANG'
+   if watchdog: cat='HANG'
+   old_count=old.get('hang_retry_count',0)
+   if cat=='HANG' and old_count<1:
+    states[lane]={'status':'retry','classification':'HANG','hang_retry_count':old_count+1,'started_at':None}; save_states(state_path,states)
+    attempts.insert(attempt_index+1,(lane,model,effort,bound)); event({'event':'hang-retry-scheduled','lane':lane,'existing_worktree':str(WT)})
+   else:
+    states[lane]={'status':'failed','classification':cat,'hang_retry_count':old_count,'exit_code':rc}; save_states(state_path,states)
+    if cat=='HANG':
+     (ROOT/'execution/ATTENTION.md').write_text(f'# HIGH ATTENTION\n\nSecond bootstrap hang for {lane}. Preserved partial tree at {WT}; bounded fallback chain continues.\n')
+     event({'event':'second-hang-escalation','lane':lane})
+    event({'event':'attempt-failed','lane':lane,'classification':cat,'exit_code':rc})
+  # preserve the same branch/tree. Fallback runs only after the prior process is gone.
+ if not (ROOT/'execution/ATTENTION.md').exists(): (ROOT/'execution/ATTENTION.md').write_text(f'# HIGH ATTENTION\n\nAll exclusive BOOT-B00 executors failed. Logs and {REPO} are preserved; stop dependent lanes.\n')
+ event({'event':'bootstrap-exhausted'}); return 1
+if __name__=='__main__': sys.exit(main())

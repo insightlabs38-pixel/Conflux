@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+import datetime as dt,json,pathlib,subprocess
+import yaml
+root=pathlib.Path('/home/dogfood-control'); env=dict(line.split('=',1) for line in (root/'unattended.env').read_text().splitlines() if '=' in line); start=dt.datetime.fromisoformat(env['CONFLUX_START_UTC'].replace('Z','+00:00')); h48=start+dt.timedelta(hours=48); assets=root/'demo-assets'; state=json.loads((root/'run/video-state.json').read_text()) if (root/'run/video-state.json').exists() else {}
+archives=sorted(assets.glob('*.zip')) if assets.exists() else []
+qpath=root/'execution/VIDEO_QUEUE.yaml'; queue=yaml.safe_load(qpath.read_text()) if qpath.exists() else {'items':[]}; items={x['id']:x for x in queue.get('items',[])}
+core=items.get('VIDEO-CORE-CAPTURE',{}).get('state',state.get('core_gate','not yet assessed'))
+insurance=items.get('VIDEO-H48-INSURANCE',{}).get('state',state.get('h48','pending; triggers '+h48.isoformat()))
+print('Core capture gate: '+str(core))
+print('H48 insurance: '+str(insurance)+' (trigger '+h48.isoformat()+')')
+print('Baseline: '+('present' if (assets/'FOOTAGE_BASELINE.yaml').exists() else 'not captured'))
+print('Recapture-required scenes: '+', '.join(state.get('recapture_required',[])) or 'none recorded')
+print('Video work items: '+(', '.join(f"{k}={v.get('state')}" for k,v in items.items()) if items else 'none'))
+gate=json.loads((root/'run/core-footage-gate.json').read_text()) if (root/'run/core-footage-gate.json').exists() else {'signals':{}}
+print('Core gate evidence: '+str(sum(bool(gate.get('signals',{}).get(k)) for k in ('t1_permanent_green','t2_permanent_green','t3_t4_manual_review_ready','core_flows_coherent','no_demo_p0_p1','canonical_demo_seeded','seven_step_smoke_passed','ui_coherent')))+' / 8 signals; see conflux-video-gate status')
+print('Latest archive: '+(str(archives[-1]) if archives else 'none'))

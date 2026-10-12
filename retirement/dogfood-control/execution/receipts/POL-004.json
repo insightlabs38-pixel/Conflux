@@ -1,0 +1,16 @@
+{
+  "task_id": "POL-004",
+  "status": "done",
+  "summary": "ExceptionGrant(event, action, subject_type, subject_id, scope, reason, granted_by, expires_at). 'Cannot widen unrelated permissions' enforced by construction: the model has no field able to express 'every action' or 'every subject'. check_action() gained optional subject_type/subject_id to consult an active exactly-matching grant when a policy denies (never when it already allows). Regression tests confirm a grant doesn't help a different subject, doesn't widen to a different action, and an expired grant doesn't override.",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "3355a7c",
+  "verification": [
+    { "command": "uv run --frozen pytest tests/integration/test_exception_grants.py", "result": "passed; 6 tests (override for exact subject, no help for different subject, no widening to a different action, expired grant ignored, grant not consulted when already allowed, reason/granter recorded)" },
+    { "command": "make verify-fast", "result": "passed" },
+    { "command": "docker compose up -d --build", "result": "app/worker healthy; migration applies cleanly against real Postgres" }
+  ],
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T23:38:00+00:00"
+}

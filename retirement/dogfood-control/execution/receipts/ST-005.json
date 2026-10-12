@@ -1,0 +1,17 @@
+{
+  "task_id": "ST-005",
+  "status": "done",
+  "summary": "Organizer-facing stage builder: backend CRUD for stages/transitions, a graph-validity endpoint (ST-002), an advancement endpoint listing/running strategies (ST-003), and an evidence endpoint over recent stage.advanced AuditEvents. Stages that ever held a StageEntry can't be deleted. Frontend StageBuilder.tsx (list editing, live validity indicator, advancement form, evidence panel) mounted inside EventDashboard. Found and fixed a real bug: StageTransitionSerializer's UUID-typed from_stage/to_stage tripped DRF's auto UniqueTogetherValidator into filtering an integer FK column with a UUID (SQLite OverflowError) — disabled that validator, the view's IntegrityError handling already covers the constraint. C-B05 (ST-001..005) is complete.",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "9f5735f",
+  "verification": [
+    { "command": "uv run --frozen pytest tests/integration/test_stage_builder_api.py", "result": "passed; 9 tests (CRUD, role gate, duplicate rejected, delete-with-entries blocked, transition cycle rejected, transition delete, graph validation valid/invalid, advance+evidence, strategy listing)" },
+    { "command": "pnpm test (StageBuilder.test.tsx)", "result": "passed; 1 smoke test plus all existing frontend tests (8 total)" },
+    { "command": "make verify-fast", "result": "passed; 84 backend + 8 frontend tests" },
+    { "command": "docker compose up -d --build; ./scripts/run-acceptance", "result": "all services healthy; all 7 official checks still PASS (no regression)" }
+  ],
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T23:30:00+00:00"
+}

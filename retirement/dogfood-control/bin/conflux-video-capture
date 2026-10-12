@@ -1,0 +1,19 @@
+#!/usr/bin/env python3
+"""Exclusive DEMO runtime wrapper; integrations are held out during footage capture."""
+import fcntl,os,pathlib,subprocess,sys
+ROOT=pathlib.Path('/home/dogfood-control'); MODE=ROOT/'runtime-mode'; LOCK=ROOT/'run/integration.lock'
+if len(sys.argv)!=3: raise SystemExit('usage: conflux-video-capture SCENES.json OUTPUT_DIR')
+if not pathlib.Path(sys.argv[1]).is_file(): raise SystemExit('scene manifest is missing')
+LOCK.parent.mkdir(parents=True,exist_ok=True)
+with LOCK.open('a+') as lock:
+ fcntl.flock(lock,fcntl.LOCK_EX)
+ old=MODE.read_text().strip()
+ if old not in ('NORMAL','DEMO'): raise SystemExit(f'cannot capture while runtime mode is {old}')
+ MODE.write_text('DEMO\n')
+ env=os.environ.copy(); repo=pathlib.Path(env.get('CONFLUX_REPO_ROOT','/home/insightlabs38/conflux')); env['CONFLUX_REPO_ROOT']=str(repo); env['NODE_PATH']=str(repo/'node_modules')+os.pathsep+env.get('NODE_PATH','')
+ try:
+  if not repo.is_dir(): raise SystemExit(f'configured demo runtime path is missing: {repo}')
+  r=subprocess.run(['node',str(ROOT/'bin/conflux-video-capture.cjs'),sys.argv[1],sys.argv[2]],cwd=repo,env=env)
+ finally:
+  MODE.write_text(old+'\n')
+raise SystemExit(r.returncode)

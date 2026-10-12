@@ -1,0 +1,139 @@
+{
+  "observed_at": "2026-09-26T20:42:43+00:00",
+  "unit_id": "RT-001",
+  "lane": "freebuff",
+  "ownership_lease": {
+    "kind": "task",
+    "id": "RT-001",
+    "lane": "freebuff",
+    "executor_lane": "freebuff",
+    "branch": "freebuff/RT-001",
+    "worktree": "/home/insightlabs38/conflux-worktrees/freebuff-lane",
+    "started_at": "2026-09-26T18:04:45+00:00",
+    "session_id": "unattended-freebuff",
+    "owned_paths": [
+      "docker-compose.yml",
+      "src/api/config/**",
+      "infra/**",
+      "scripts/**"
+    ]
+  },
+  "controller_state": {
+    "created_at": "2026-09-25T18:00:10+00:00",
+    "phase": "RUNNING",
+    "bootstrap": {
+      "attempts": []
+    },
+    "lanes": {
+      "claude": {
+        "status": "ACTIVE",
+        "unit": null,
+        "runner": false,
+        "process_or_session": true,
+        "lease_matches": false,
+        "worktree_exists": false,
+        "heartbeat_age_seconds": 2732,
+        "log_mtime_age_seconds": 2727,
+        "receipt_state": "missing",
+        "receipt_age_seconds": null,
+        "handoff_age_seconds": null,
+        "agent_checkpoint_age_seconds": null,
+        "recovery_snapshot_path": null,
+        "recovery_snapshot_age_seconds": null,
+        "quota_error_indicator": "IMPLEMENTATION_FAILURE",
+        "freebuff_pane_state": "n/a",
+        "integration_status": "not-ready",
+        "polled_at": "2026-09-26T20:42:17+00:00"
+      },
+      "sol": {
+        "status": "PAUSED_REVIEW",
+        "unit": "C-B04",
+        "runner": false,
+        "process_or_session": true,
+        "lease_matches": true,
+        "worktree_exists": true,
+        "heartbeat_age_seconds": 2312,
+        "log_mtime_age_seconds": 2306,
+        "receipt_state": "needs-review",
+        "receipt_age_seconds": 2321,
+        "handoff_age_seconds": 2306,
+        "agent_checkpoint_age_seconds": 2314,
+        "recovery_snapshot_path": "/home/dogfood-control/run/recovery/C-B04/snapshot.json",
+        "recovery_snapshot_age_seconds": 0,
+        "quota_error_indicator": "SUCCESS",
+        "freebuff_pane_state": "n/a",
+        "integration_status": "not-ready",
+        "polled_at": "2026-09-26T20:42:17+00:00"
+      },
+      "luna": {
+        "status": "ACTIVE",
+        "unit": null,
+        "runner": true,
+        "process_or_session": false,
+        "lease_matches": false,
+        "worktree_exists": false,
+        "heartbeat_age_seconds": 36,
+        "log_mtime_age_seconds": 36,
+        "receipt_state": "missing",
+        "receipt_age_seconds": null,
+        "handoff_age_seconds": null,
+        "agent_checkpoint_age_seconds": null,
+        "recovery_snapshot_path": null,
+        "recovery_snapshot_age_seconds": null,
+        "quota_error_indicator": "NO_TERMINAL_RESULT",
+        "freebuff_pane_state": "n/a",
+        "integration_status": "not-ready",
+        "polled_at": "2026-09-26T20:42:17+00:00"
+      },
+      "freebuff": {
+        "status": "PAUSED_SUBMIT",
+        "unit": "RT-001",
+        "runner": false,
+        "process_or_session": true,
+        "lease_matches": true,
+        "worktree_exists": true,
+        "heartbeat_age_seconds": 1372,
+        "log_mtime_age_seconds": null,
+        "receipt_state": "missing",
+        "receipt_age_seconds": null,
+        "handoff_age_seconds": 1363,
+        "agent_checkpoint_age_seconds": null,
+        "recovery_snapshot_path": "/home/dogfood-control/run/recovery/RT-001/snapshot.json",
+        "recovery_snapshot_age_seconds": 0,
+        "quota_error_indicator": "none",
+        "freebuff_pane_state": "working/tool/quiet",
+        "integration_status": "not-ready",
+        "polled_at": "2026-09-26T20:42:17+00:00"
+      }
+    },
+    "repo_url": "https://github.com/insightlabs38-pixel/Conflux",
+    "attention": null,
+    "handoff_at": null
+  },
+  "worktree": "/home/insightlabs38/conflux-worktrees/freebuff-lane",
+  "worktree_exists": true,
+  "branch": "freebuff/RT-001",
+  "head": "3906bf1aac468fbb964c47e730f2817f335a0e3a",
+  "git_status": {
+    "exit_code": 0,
+    "output": " M docker-compose.yml\n M pyproject.toml\n M src/api/config/settings.py\n M uv.lock\n?? .dockerignore\n?? .env.example\n?? infra/Caddyfile\n?? infra/api.Dockerfile\n"
+  },
+  "diff_stat": {
+    "exit_code": 0,
+    "output": " docker-compose.yml         | 147 ++++++++++++++++++++++++++++++++++++++++++++-\n pyproject.toml             |   2 +\n src/api/config/settings.py |  41 ++++++++++++-\n uv.lock                    |  38 ++++++++++++\n 4 files changed, 223 insertions(+), 5 deletions(-)\n"
+  },
+  "diff_name_only": {
+    "exit_code": 0,
+    "output": "docker-compose.yml\npyproject.toml\nsrc/api/config/settings.py\nuv.lock\n"
+  },
+  "staged_diff_stat": {
+    "exit_code": 0,
+    "output": ""
+  },
+  "verification_receipt": null,
+  "handoff_path": "/home/dogfood-control/handoffs/freebuff/RT-001.md",
+  "agent_checkpoint": null,
+  "agent_checkpoint_authored_at": null,
+  "agent_checkpoint_age_seconds": null,
+  "recent_execution_output": ""
+}

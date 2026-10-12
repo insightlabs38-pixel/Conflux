@@ -1,0 +1,12 @@
+[Unit]
+Description=Start Conflux DOGFOOD supervisor just after official kickoff
+
+[Timer]
+OnCalendar=2026-09-25 18:00:10 UTC
+AccuracySec=1s
+RandomizedDelaySec=0
+Persistent=true
+Unit=conflux-unattended.service
+
+[Install]
+WantedBy=timers.target

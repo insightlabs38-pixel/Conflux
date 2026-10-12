@@ -1,0 +1,47 @@
+{
+  "task_id": "C-B02",
+  "status": "done",
+  "summary": "Identity, authorization and application spine: custom User + cookie-backed Session auth with deterministic seeded acceptance identities, a scoped many-to-many Workspace/Membership role model, a central authz decision function with DRF permission classes enforcing backend role isolation, PublicIdModel + Idempotency-Key mutation dedupe, and an AuditEvent + transactional DomainEvent outbox foundation.",
+  "executor_lane": "claude",
+  "model": "claude-sonnet-5",
+  "worktree": "/home/insightlabs38/conflux-worktrees/claude-C-B02",
+  "branch": "claude/C-B02",
+  "commit": "cb6d3dffea3b3024e271cee705fbc548fc1889aa",
+  "session_id": "unattended-claude-c-b02",
+  "completed_tasks": [
+    "ID-001",
+    "ID-002",
+    "ID-003",
+    "ID-004",
+    "ID-005",
+    "ID-006"
+  ],
+  "task_notes": {
+    "ID-001": "workspaces.Role (TextChoices) + workspaces.Membership(user, workspace, role) with a unique_together constraint; multiple roles per user/workspace are supported (e.g. organizer+judge) rather than one role column.",
+    "ID-002": "accounts.Session (DB-backed opaque cookie token, not contrib.sessions) backs both interactive login (accounts/login/, password-checked) and out-of-band seeded acceptance identities (management command `seed_acceptance_identities`, unusable passwords, fixed tokens) through the same table/cookie mechanism.",
+    "ID-003": "core/authz.py (roles_for/has_any_role) + core/permissions.py (IsWorkspaceMember, HasWorkspaceRole/require_roles) enforced on workspaces.WorkspaceMembersView and audit.WorkspaceAuditLogView; denial returns 401/403, never a silent empty/filtered 200.",
+    "ID-004": "core.models.PublicIdModel (UUID public_id on every domain model) and core.models.IdempotencyKey + core.idempotency.IdempotentMixin (Idempotency-Key header dedupe, reused-key-different-body rejected with 422), applied to workspace creation.",
+    "ID-005": "audit.AuditEvent (evidence) + audit.DomainEvent (pending outbox row) written together via audit.services.record_mutation, which asserts it is called inside the caller's transaction.atomic() block so evidence/intent commit or roll back with the mutation.",
+    "ID-006": "tests/integration/test_identity_authz.py (15 tests): session auth (valid/missing/unknown cookie), login success/failure, multi-role membership, backend-enforced isolation (organizer-only member/audit listing denies judge/participant/outsider/anonymous), idempotent replay + conflicting-body rejection, and seeded-identity idempotency/role/isolation."
+  },
+  "verification": [
+    { "command": "uv run --frozen ruff format --check src/api tests", "result": "passed" },
+    { "command": "pnpm format:check", "result": "passed" },
+    { "command": "uv run --frozen ruff check src/api tests", "result": "passed" },
+    { "command": "pnpm lint", "result": "passed (tsc --noEmit)" },
+    { "command": "uv run --frozen pytest", "result": "passed; 15 passed (13 new identity/authz tests + 2 pre-existing bootstrap tests)" },
+    { "command": "pnpm test", "result": "passed; 1 test" },
+    { "command": "uv run --frozen python src/api/manage.py check", "result": "passed; System check identified no issues" },
+    { "command": "pnpm build", "result": "passed" },
+    { "command": "uv run python src/api/manage.py makemigrations accounts workspaces core audit --check", "result": "no missing migrations (0001_initial generated and committed for all four apps)" },
+    { "command": "git status --porcelain", "result": "clean after commit" }
+  ],
+  "out_of_scope_touch": {
+    "files": ["src/api/config/settings.py", "src/api/core/urls.py"],
+    "rationale": "src/api/core/** is within this batch's owned_paths, so core/urls.py (adding includes for accounts/workspaces/audit) is in-scope. src/api/config/settings.py is owned by C-B01/RT-001 (currently active); the only touch there is appending 'accounts', 'workspaces', 'audit' to INSTALLED_APPS and adding AUTH_USER_MODEL = \"accounts.User\" -- both additive, single-purpose lines required for Django to load this batch's apps/custom user model at all. No other settings.py content was changed. Flagged here per escalate_if 'unexpected cross-domain rewrite' rather than silently touching another lane's owned file.",
+    "risk": "low; additive-only list append and one new setting, unlikely to conflict with RT-001's compose/DATABASES/middleware work"
+  },
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T19:55:38+00:00"
+}

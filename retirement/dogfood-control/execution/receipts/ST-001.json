@@ -1,0 +1,17 @@
+{
+  "task_id": "ST-001",
+  "status": "done",
+  "summary": "Stage/StageTransition/StageEntry models in a new `stages` app. Acyclicity enforced in StageTransition.clean() via BFS from the target stage (rejects direct and indirect cycles), plus same-event and no-self-loop checks. StageEntry enforces the participation boundary via a partial unique constraint (subject_type/subject_id, exited_at IS NULL) — one active stage per subject, re-entry allowed after exit. subject_type/subject_id use AuditEvent's existing lightweight-reference convention since teams/projects (C-B07/C-B08) don't exist yet.",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "1060e7a",
+  "verification": [
+    { "command": "uv run --frozen pytest tests/integration/test_stage_graph.py", "result": "passed; 11 tests (unique name, self-loop, cross-event, direct cycle, indirect 4-hop cycle, branch, merge, duplicate edge, participation boundary + re-entry, multiple subjects)" },
+    { "command": "make verify-fast", "result": "passed" },
+    { "command": "docker compose up -d --build", "result": "app/worker healthy; migration applies cleanly against real Postgres" }
+  ],
+  "out_of_scope_touch": "src/api/config/settings.py (INSTALLED_APPS += stages).",
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T23:20:00+00:00"
+}

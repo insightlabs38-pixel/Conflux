@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+case "${1:-status}" in
+  status) exec /home/dogfood-control/bin/conflux-unattended-status ;;
+  stop) systemctl --user stop conflux-unattended.service; python3 - <<'PY'
+import json,os,pathlib,tempfile
+p=pathlib.Path('/home/dogfood-control/run/unattended-state.json'); d=json.loads(p.read_text()) if p.exists() else {}; d['phase']='STOPPED'; d['stopped_at']=__import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(); t=p.with_suffix('.tmp'); t.write_text(json.dumps(d,indent=2)+'\n'); os.chmod(t,0o600); t.replace(p)
+PY
+  ;;
+  resume) python3 - <<'PY'
+import json,os,pathlib
+r=pathlib.Path('/home/dogfood-control/run'); p=r/'unattended-state.json'; d=json.loads(p.read_text()) if p.exists() else {}; d['phase']='FANOUT' if (r/'bootstrap-green').exists() else 'WAITING_FOR_START'; d.pop('stopped_at',None); t=p.with_suffix('.tmp'); t.write_text(json.dumps(d,indent=2)+'\n'); os.chmod(t,0o600); t.replace(p)
+PY
+  systemctl --user start conflux-unattended.service ;;
+  attach-claude) target=$(tmux ls -F '#{session_name}' | rg '^unattended-claude-' | head -1); [[ -n "$target" ]] || target=unattended-runner-claude; exec tmux attach -t "$target" ;;
+  attach-sol) target=$(tmux ls -F '#{session_name}' | rg '^unattended-sol-' | head -1); [[ -n "$target" ]] || target=unattended-runner-sol; exec tmux attach -t "$target" ;;
+  attach-luna) target=$(tmux ls -F '#{session_name}' | rg '^unattended-luna-' | head -1); [[ -n "$target" ]] || target=unattended-runner-luna; exec tmux attach -t "$target" ;;
+  attach-freebuff) exec tmux attach -t unattended-freebuff ;;
+  worktrees) git -C "${CONFLUX_REPO_ROOT:-/home/insightlabs38/conflux}" worktree list ;;
+  attention) cat /home/dogfood-control/execution/ATTENTION.md ;;
+  handoff) cat /home/dogfood-control/UNATTENDED_HANDOFF.md ;;
+  provider-status) exec /home/dogfood-control/bin/conflux-control provider-status ;;
+  provider-pause) shift; exec /home/dogfood-control/bin/conflux-control provider-pause "$@" ;;
+  provider-resume) shift; exec /home/dogfood-control/bin/conflux-control provider-resume "$@" ;;
+  video-status) exec /home/dogfood-control/bin/conflux-video-status ;;
+  video-gate) shift; exec /home/dogfood-control/bin/conflux-video-gate "$@" ;;
+  disable-timer) systemctl --user disable --now conflux-unattended.timer ;;
+  *) echo 'usage: conflux-unattended {status|stop|resume|provider-status|provider-pause LANE|provider-resume LANE|video-status|video-gate status|video-gate set SIGNAL true|false --evidence TEXT|attach-claude|attach-sol|attach-luna|attach-freebuff|worktrees|attention|handoff|disable-timer}' >&2; exit 2 ;;
+esac

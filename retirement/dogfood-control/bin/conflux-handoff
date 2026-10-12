@@ -1,0 +1,70 @@
+#!/usr/bin/env python3
+"""Create/update compact external unit handoffs from control and Git evidence."""
+import argparse,datetime as dt,json,os,pathlib,re,subprocess,yaml
+ROOT=pathlib.Path('/home/dogfood-control'); EXEC=ROOT/'execution'; RUN=ROOT/'run'
+MODELS={'claude':'Claude Sonnet 5','sol':'GPT-6 Sol','luna':'GPT-6 Luna','freebuff':'Freebuff GLM 5.3 Flash'}
+def git(wt,*args):
+ try:return subprocess.run(['git','-C',str(wt),*args],text=True,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL).stdout.strip()
+ except Exception:return ''
+def main():
+ p=argparse.ArgumentParser();p.add_argument('lane');p.add_argument('unit');p.add_argument('--worktree');p.add_argument('--branch');p.add_argument('--phase',default='ACTIVE');p.add_argument('--next',default='Inspect git status/diff, retrieve only referenced symbols, then continue the assigned objective.');p.add_argument('--reason',default='');p.add_argument('--checkpoint',default='');a=p.parse_args()
+ ownership=yaml.safe_load((EXEC/'OWNERSHIP.yaml').read_text()) or {}; leases=ownership.get('leases',[])+ownership.get('reserved_batches',[]); lease=next((x for x in leases if x.get('id')==a.unit and x.get('lane')==a.lane),{})
+ wt=pathlib.Path(a.worktree or lease.get('worktree') or '/nonexistent'); branch=a.branch or lease.get('branch','');
+ status=git(wt,'status','--short'); head=git(wt,'rev-parse','HEAD'); diff=git(wt,'diff','--stat'); paths='\n'.join('- '+x for x in status.splitlines()) or '- clean';
+ target=ROOT/'handoffs'/a.lane/f'{a.unit}.md'; target.parent.mkdir(parents=True,exist_ok=True)
+ prev=target.read_text() if target.exists() else ''
+ objective=''
+ for fp,key in ((EXEC/'TASKS.yaml','tasks'),(EXEC/'BATCHES.yaml','batches')):
+  try:
+   rows=yaml.safe_load(fp.read_text())[key]
+   row=next((x for x in rows if x.get('id')==a.unit),None)
+   if row:
+    objective='Objective: '+str(row.get('title') or row.get('objective') or row.get('summary') or a.unit)
+    break
+  except Exception: pass
+ if not objective:
+  try:
+   rows=yaml.safe_load((EXEC/'VIDEO_QUEUE.yaml').read_text())['items']; row=next((x for x in rows if x.get('id')==a.unit),None)
+   if row: objective='Objective: Operational footage capture — '+str(row.get('reason') or row.get('id'))
+  except Exception: pass
+ for line in prev.splitlines():
+  if line.startswith('Objective:'): objective=line
+ if not objective: objective='Objective: Complete the exact assigned unit from execution/TASKS.yaml or BATCHES.yaml.'
+ stamp=dt.datetime.now(dt.timezone.utc).isoformat(timespec='seconds')
+ authored=''
+ match=re.search(r'## Agent-authored checkpoint\nAuthored at: (.*?)\n(.*?)(?=\n## |\Z)',prev,re.S)
+ if match: authored=f'Authored at: {match.group(1)}\n{match.group(2).strip()}'
+ else:
+  legacy=re.search(r'## Durable checkpoint\n(.*?)(?=\n## |\Z)',prev,re.S)
+  if legacy: authored='Authored at: unavailable\nLegacy checkpoint; authorship and age were not tracked:\n'+legacy.group(1).strip()
+ if a.checkpoint.strip(): authored=f'Authored at: {stamp}\n{a.checkpoint.strip()}'
+ authored_block=authored or 'Authored at: unavailable\nNo agent-authored checkpoint recorded.'
+ text=f'''# Usage handoff — {a.unit}
+
+Controller observed at: {stamp}
+Unit ID: {a.unit}
+Lane/model: {a.lane} / {MODELS.get(a.lane,a.lane)}
+Branch: {branch}
+Worktree: {wt}
+Current commit: {head or 'unavailable'}
+Current phase: {a.phase}
+{objective}
+
+## Agent-authored checkpoint
+{authored_block}
+
+## Controller-observed Git state
+Dirty/uncommitted paths:
+{paths}
+Diff summary: {diff or 'none'}
+
+## Recovery
+Next concrete actions: {a.next}
+Blockers: {a.reason or 'none recorded'}
+Safe to continue on current branch: {'yes' if wt.exists() and head else 'inspect before continuing'}
+
+## Unit references
+Read only the assigned unit definition and referenced plan sections. Do not reread the full control pack.
+'''
+ tmp=target.with_suffix('.tmp'); tmp.write_text(text); os.chmod(tmp,0o600); tmp.replace(target); print(target)
+if __name__=='__main__':main()

@@ -1,0 +1,3 @@
+# Execution Interface (v2.1)
+
+The separate execution-control pack is authoritative for agent logistics. Claude/Sol select coherent senior batches. Luna/Freebuff select one fine-grained bulk task. The external conflux-control utility provides deterministic atomic claims and status; agents do not directly race-edit canonical queue state. Agents use strict session isolation and targeted search-first repository reading (`rg`/`grep`/`sed` before broad file reads). Pre-kickoff VM provisioning/control-pack preparation is permitted, but Conflux project source/scaffold/Git commits remain forbidden until kickoff.

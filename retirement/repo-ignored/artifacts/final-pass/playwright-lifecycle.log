@@ -1,0 +1,13 @@
+
+Running 6 tests using 1 worker
+
+(node:4126942) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓  1 [desktop] › tests/e2e/lifecycle.spec.ts:41:5 › participant creates a team, submits, and receives a signed receipt (3.4s)
+  ✓  2 [desktop] › tests/e2e/lifecycle.spec.ts:116:5 › organizer requests changes; participant remediates; organizer approves (7.3s)
+  ✓  3 [desktop] › tests/e2e/lifecycle.spec.ts:199:7 › judge-01 inspects and scores Live Wire (1.9s)
+  ✓  4 [desktop] › tests/e2e/lifecycle.spec.ts:199:7 › judge-02 inspects and scores Live Wire (1.6s)
+  ✓  5 [desktop] › tests/e2e/lifecycle.spec.ts:199:7 › judge-03 inspects and scores Live Wire (1.6s)
+  ✓  6 [desktop] › tests/e2e/lifecycle.spec.ts:239:5 › organizer publishes results and the public results page shows them (4.2s)
+
+  6 passed (20.6s)

@@ -1,0 +1,137 @@
+{
+  "observed_at": "2026-09-26T19:55:46+00:00",
+  "unit_id": "C-B02",
+  "lane": "claude",
+  "ownership_lease": {
+    "id": "C-B02",
+    "lane": "claude",
+    "branch": "claude/C-B02",
+    "worktree": "/home/insightlabs38/conflux-worktrees/claude-C-B02",
+    "started_at": "2026-09-26T18:38:14+00:00",
+    "session_id": "unattended-claude-c-b02",
+    "owned_paths": [
+      "src/api/accounts/**",
+      "src/api/workspaces/**",
+      "src/api/core/**",
+      "src/api/audit/**"
+    ]
+  },
+  "controller_state": {
+    "created_at": "2026-09-25T18:00:10+00:00",
+    "phase": "RUNNING",
+    "bootstrap": {
+      "attempts": []
+    },
+    "lanes": {
+      "claude": {
+        "status": "ACTIVE",
+        "unit": "C-B02",
+        "runner": true,
+        "process_or_session": true,
+        "lease_matches": true,
+        "worktree_exists": true,
+        "heartbeat_age_seconds": 1,
+        "log_mtime_age_seconds": 2,
+        "receipt_state": "missing",
+        "receipt_age_seconds": null,
+        "handoff_age_seconds": 698,
+        "agent_checkpoint_age_seconds": null,
+        "recovery_snapshot_path": "/home/dogfood-control/run/recovery/C-B02/snapshot.json",
+        "recovery_snapshot_age_seconds": 0,
+        "quota_error_indicator": "IN_PROGRESS",
+        "freebuff_pane_state": "n/a",
+        "integration_status": "not-ready",
+        "polled_at": "2026-09-26T19:55:21+00:00"
+      },
+      "sol": {
+        "status": "ACTIVE",
+        "unit": null,
+        "runner": true,
+        "process_or_session": false,
+        "lease_matches": false,
+        "worktree_exists": false,
+        "heartbeat_age_seconds": 39,
+        "log_mtime_age_seconds": 38,
+        "receipt_state": "missing",
+        "receipt_age_seconds": null,
+        "handoff_age_seconds": null,
+        "agent_checkpoint_age_seconds": null,
+        "recovery_snapshot_path": null,
+        "recovery_snapshot_age_seconds": null,
+        "quota_error_indicator": "NO_TERMINAL_RESULT",
+        "freebuff_pane_state": "n/a",
+        "integration_status": "not-ready",
+        "polled_at": "2026-09-26T19:55:21+00:00"
+      },
+      "luna": {
+        "status": "ACTIVE",
+        "unit": null,
+        "runner": true,
+        "process_or_session": false,
+        "lease_matches": false,
+        "worktree_exists": false,
+        "heartbeat_age_seconds": 38,
+        "log_mtime_age_seconds": 38,
+        "receipt_state": "missing",
+        "receipt_age_seconds": null,
+        "handoff_age_seconds": null,
+        "agent_checkpoint_age_seconds": null,
+        "recovery_snapshot_path": null,
+        "recovery_snapshot_age_seconds": null,
+        "quota_error_indicator": "NO_TERMINAL_RESULT",
+        "freebuff_pane_state": "n/a",
+        "integration_status": "not-ready",
+        "polled_at": "2026-09-26T19:55:21+00:00"
+      },
+      "freebuff": {
+        "status": "ACTIVE",
+        "unit": "RT-001",
+        "runner": true,
+        "process_or_session": true,
+        "lease_matches": true,
+        "worktree_exists": true,
+        "heartbeat_age_seconds": 9,
+        "log_mtime_age_seconds": null,
+        "receipt_state": "missing",
+        "receipt_age_seconds": null,
+        "handoff_age_seconds": 964,
+        "agent_checkpoint_age_seconds": null,
+        "recovery_snapshot_path": "/home/dogfood-control/run/recovery/RT-001/snapshot.json",
+        "recovery_snapshot_age_seconds": 0,
+        "quota_error_indicator": "IN_PROGRESS",
+        "freebuff_pane_state": "working/tool/quiet",
+        "integration_status": "not-ready",
+        "polled_at": "2026-09-26T19:55:21+00:00"
+      }
+    },
+    "repo_url": "https://github.com/insightlabs38-pixel/Conflux",
+    "attention": null,
+    "handoff_at": null
+  },
+  "worktree": "/home/insightlabs38/conflux-worktrees/claude-C-B02",
+  "worktree_exists": true,
+  "branch": "claude/C-B02",
+  "head": "cb6d3dffea3b3024e271cee705fbc548fc1889aa",
+  "git_status": {
+    "exit_code": 0,
+    "output": ""
+  },
+  "diff_stat": {
+    "exit_code": 0,
+    "output": ""
+  },
+  "diff_name_only": {
+    "exit_code": 0,
+    "output": ""
+  },
+  "staged_diff_stat": {
+    "exit_code": 0,
+    "output": ""
+  },
+  "verification_receipt": null,
+  "handoff_path": "/home/dogfood-control/handoffs/claude/C-B02.md",
+  "agent_checkpoint": null,
+  "agent_checkpoint_authored_at": null,
+  "agent_checkpoint_age_seconds": null,
+  "recent_execution_output": "100644 src/api/core/idempotency.py\\n create mode 100644 src/api/core/migrations/0001_initial.py\\n create mode 100644 src/api/core/migrations/__init__.py\\n create mode 100644 src/api/core/mixins.py\\n create mode 100644 src/api/core/models.py\\n create mode 100644 src/api/core/permissions.py\\n create mode 100644 src/api/wo[REDACTED_CREDENTIAL]\\n create mode 100644 src/api/wo[REDACTED_CREDENTIAL]\\n create mode 100644 src/api/wo[REDACTED_CREDENTIAL]\\n create mode 100644 src/api/wo[REDACTED_CREDENTIAL]\\n create mode 100644 src/api/workspaces/urls.py\\n create mode 100644 src/api/workspaces/views.py\\n create mode 100644 tests/integration/test_identity_authz.py\",\"is_error\":false}]},\"parent_tool_use_id\":null,\"session_id\":\"04e290d9-5a17-4b57-b06d-5683fce73fa2\",\"uuid\":\"3514e3e8-9055-44fe-b94d-f354e7be6aa4\",\"timestamp\":\"2026-09-26T19:55:25.802Z\",\"tool_use_result\":{\"stdout\":\"[claude/C-B02 cb6d3df] Add identity, authorization and application spine (C-B02)\\n 33 files changed, 1344 insertions(+), 2 deletions(-)\\n rename src/api/accounts/{.gitkeep => __init__.py} (100%)\\n create mode 100644 src/api/accounts/authentication.py\\n rename src/api/{audit/.gitkeep => accounts/management/__init__.py} (100%)\\n rename src/api/{workspaces/.gitkeep => accounts/management/commands/__init__.py} (100%)\\n create mode 100644 src/api/accounts/management/commands/seed_acceptance_identities.py\\n create mode 100644 src/api/accounts/migrations/0001_initial.py\\n create mode 100644 src/api/accounts/migrations/__init__.py\\n create mode 100644 src/api/accounts/models.py\\n create mode 100644 src/api/accounts/urls.py\\n create mode 100644 src/api/accounts/views.py\\n create mode 100644 src/api/audit/__init__.py\\n create mode 100644 src/api/audit/migrations/0001_initial.py\\n create mode 100644 src/api/audit/migrations/__init__.py\\n create mode 100644 src/api/audit/models.py\\n create mode 100644 src/api/audit/services.py\\n create mode 100644 src/api/audit/urls.py\\n create mode 100644 src/api/audit/views.py\\n create mode 100644 src/api/core/authz.py\\n create mode 100644 src/api/core/idempotency.py\\n create mode 100644 src/api/core/migrations/0001_initial.py\\n create mode 100644 src/api/core/migrations/__init__.py\\n create mode 100644 src/api/core/mixins.py\\n create mode 100644 src/api/core/models.py\\n create mode 100644 src/api/core/permissions.py\\n create mode 100644 src/api/wo[REDACTED_CREDENTIAL]\\n create mode 100644 src/api/wo[REDACTED_CREDENTIAL]\\n create mode 100644 src/api/wo[REDACTED_CREDENTIAL]\\n create mode 100644 src/api/wo[REDACTED_CREDENTIAL]\\n create mode 100644 src/api/workspaces/urls.py\\n create mode 100644 src/api/workspaces/views.py\\n create mode 100644 tests/integration/test_identity_authz.py\",\"stderr\":\"\",\"interrupted\":false,\"isImage\":false,\"noOutputExpected\":false,\"gitOperation\":{\"commit\":{\"sha\":\"cb6d3df\",\"kind\":\"committed\",\"branch\":\"claude/C-B02\"}}}}\n{\"type\":\"system\",\"subtype\":\"thinking_tokens\",\"estimated_tokens\":50,\"estimated_tokens_delta\":50,\"session_id\":\"04e290d9-5a17-4b57-b06d-5683fce73fa2\",\"uuid\":\"b1633ea2-3705-4a33-97c6-78a1080cc55d\"}\n{\"type\":\"system\",\"subtype\":\"thinking_tokens\",\"estimated_tokens\":200,\"estimated_tokens_delta\":150,\"session_id\":\"04e290d9-5a17-4b57-b06d-5683fce73fa2\",\"uuid\":\"5711582d-8fd8-4116-a507-6f876c842779\"}\n{\"type\":\"system\",\"subtype\":\"thinking_tokens\",\"estimated_tokens\":300,\"estimated_tokens_delta\":100,\"session_id\":\"04e290d9-5a17-4b57-b06d-5683fce73fa2\",\"uuid\":\"51b4aec3-8d71-41d6-9104-3d5915e3879d\"}\n{\"type\":\"system\",\"subtype\":\"thinking_tokens\",\"estimated_tokens\":450,\"estimated_tokens_delta\":150,\"session_id\":\"04e290d9-5a17-4b57-b06d-5683fce73fa2\",\"uuid\":\"587e891c-cea3-4865-b77a-3b77d253856e\"}\n{\"type\":\"assistant\",\"message\":{\"model\":\"claude-sonnet-5\",\"id\":\"msg_011CfSdzn7dBCdcoX54Bnwvg\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"\",\"signature\":\"EvELCqgBCBIYAipAvf05sOXs1T0Lkla2dpyl5cJU8xC3o/D9DgTpwO22Fmlazm66a+zRS4qxLlqdhMBQGZTsru97AK0IkPolqRGMNDIPY2xhdWRlLXNvbm5ldC01OABCCHRoaW5raW5nWiQxYjU4MjE1My04ZjBkLTRiNjktODE2NS03Y2U0NDRlNDJiNTdyEPExd[REDACTED_CREDENTIAL]=\"}],\"container\":null,\"stop_reason\":null,\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":2,\"cache_creation_input_tokens\":1328,\"cache_read_input_tokens\":162620,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":1328},\"output_tokens\":3,\"service_tier\":\"standard\",\"inference_geo\":\"not_available\"},\"input_transformations\":[],\"diagnostics\":null,\"context_management\":null},\"parent_tool_use_id\":null,\"session_id\":\"04e290d9-5a17-4b57-b06d-5683fce73fa2\",\"uuid\":\"9003f77f-af06-4384-93c8-2a7aa467afb5\",\"timestamp\":\"2026-09-26T19:55:32.282Z\",\"request_id\":\"req_011CfSdzmm49oTJjmER11x7b\"}\n{\"type\":\"assistant\",\"message\":{\"model\":\"claude-sonnet-5\",\"id\":\"msg_011CfSdzn7dBCdcoX54Bnwvg\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"tool_use\",\"id\":\"toolu_018FV1DNhnAyK18YLqb67ZY2\",\"name\":\"Bash\",\"input\":{\"command\":\"test -f /home/dogfood-control/demo-assets/FOOTAGE_BASELINE.yaml && echo EXISTS || echo MISSING\"},\"caller\":{\"type\":\"direct\"}}],\"container\":null,\"stop_reason\":null,\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":2,\"cache_creation_input_tokens\":1328,\"cache_read_input_tokens\":162620,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":1328},\"output_tokens\":3,\"service_tier\":\"standard\",\"inference_geo\":\"not_available\"},\"input_transformations\":[],\"diagnostics\":null,\"context_management\":null},\"parent_tool_use_id\":null,\"session_id\":\"04e290d9-5a17-4b57-b06d-5683fce73fa2\",\"uuid\":\"4abd66fc-eaad-4a15-8e1d-6f0f7b58aac3\",\"timestamp\":\"2026-09-26T19:55:32.811Z\",\"request_id\":\"req_011CfSdzmm49oTJjmER11x7b\",\"wire_tool_inputs\":{\"toolu_018FV1DNhnAyK18YLqb67ZY2\":{\"command\":\"test -f /home/dogfood-control/demo-assets/FOOTAGE_BASELINE.yaml && echo EXISTS || echo MISSING\"}}}\n{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_018FV1DNhnAyK18YLqb67ZY2\",\"type\":\"tool_result\",\"content\":\"MISSING\",\"is_error\":false}]},\"parent_tool_use_id\":null,\"session_id\":\"04e290d9-5a17-4b57-b06d-5683fce73fa2\",\"uuid\":\"45a6ed4a-07cb-4a52-b100-f84c99a16e68\",\"timestamp\":\"2026-09-26T19:55:32.825Z\",\"tool_use_result\":{\"stdout\":\"MISSING\",\"stderr\":\"\",\"interrupted\":false,\"isImage\":false,\"noOutputExpected\":false}}\n{\"type\":\"system\",\"subtype\":\"thinking_tokens\",\"estimated_tokens\":50,\"estimated_tokens_delta\":50,\"session_id\":\"04e290d9-5a17-4b57-b06d-5683fce73fa2\",\"uuid\":\"de771e3d-fb15-48fa-aff5-5bf1e111dbf7\"}\n{\"type\":\"system\",\"subtype\":\"thinking_tokens\",\"estimated_tokens\":150,\"estimated_tokens_delta\":100,\"session_id\":\"04e290d9-5a17-4b57-b06d-5683fce73fa2\",\"uuid\":\"c2e23b11-4e2c-414a-bd11-cac644b715dc\"}\n{\"type\":\"system\",\"subtype\":\"thinking_tokens\",\"estimated_tokens\":224,\"estimated_tokens_delta\":74,\"session_id\":\"04e290d9-5a17-4b57-b06d-5683fce73fa2\",\"uuid\":\"c7fc2b94-31d4-448b-a13f-c39830a9e3b9\"}\n{\"type\":\"assistant\",\"message\":{\"model\":\"claude-sonnet-5\",\"id\":\"msg_011CfSe1JVVmYVt7bFW4cxVU\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"thinking\",\"thinking\":\"\",\"signature\":\"EvkGCqgBCBIYAipAuAMfpphE55tHRODmNYqLGeVmwD6GTTZkhMQ+FdGVX/SG63A6jdmryq96+eVlRUaKaZ2KfSZL3Ss/bGQHGmjRLTIPY2xhdWRlLXNvbm5ldC01OABCCHRoaW5raW5nWiQxYjU4MjE1My04ZjBkLTRiNjktODE2NS03Y2U0NDRlNDJiNTdyEPExd[REDACTED_CREDENTIAL]\"}],\"container\":null,\"stop_reason\":null,\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":2,\"cache_creation_input_tokens\":648,\"cache_read_input_tokens\":163948,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":648},\"output_tokens\":5,\"service_tier\":\"standard\",\"inference_geo\":\"not_available\"},\"input_transformations\":[],\"diagnostics\":null,\"context_management\":null},\"parent_tool_use_id\":null,\"session_id\":\"04e290d9-5a17-4b57-b06d-5683fce73fa2\",\"uuid\":\"aa8a0adf-1cee-4225-a3a5-1df8707c124c\",\"timestamp\":\"2026-09-26T19:55:37.809Z\",\"request_id\":\"req_011CfSe1Hp4PXMj798oP9aKm\"}\n{\"type\":\"assistant\",\"message\":{\"model\":\"claude-sonnet-5\",\"id\":\"msg_011CfSe1JVVmYVt7bFW4cxVU\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"tool_use\",\"id\":\"toolu_0174KzFfqDy9WPyP1qLmxxsR\",\"name\":\"Bash\",\"input\":{\"command\":\"date -u +%Y-%m-%dT%H:%M:%S+00:00; cd /home/insightlabs38/conflux-wo[REDACTED_CREDENTIAL] && git rev-parse HEAD\"},\"caller\":{\"type\":\"direct\"}}],\"container\":null,\"stop_reason\":null,\"stop_sequence\":null,\"stop_details\":null,\"usage\":{\"input_tokens\":2,\"cache_creation_input_tokens\":648,\"cache_read_input_tokens\":163948,\"cache_creation\":{\"ephemeral_5m_input_tokens\":0,\"ephemeral_1h_input_tokens\":648},\"output_tokens\":5,\"service_tier\":\"standard\",\"inference_geo\":\"not_available\"},\"input_transformations\":[],\"diagnostics\":null,\"context_management\":null},\"parent_tool_use_id\":null,\"session_id\":\"04e290d9-5a17-4b57-b06d-5683fce73fa2\",\"uuid\":\"72a49de3-f512-4d09-bc98-d1f4c4346416\",\"timestamp\":\"2026-09-26T19:55:38.468Z\",\"request_id\":\"req_011CfSe1Hp4PXMj798oP9aKm\",\"wire_tool_inputs\":{\"toolu_0174KzFfqDy9WPyP1qLmxxsR\":{\"command\":\"date -u +%Y-%m-%dT%H:%M:%S+00:00; cd /home/insightlabs38/conflux-wo[REDACTED_CREDENTIAL] && git rev-parse HEAD\"}}}\n{\"type\":\"user\",\"message\":{\"role\":\"user\",\"content\":[{\"tool_use_id\":\"toolu_0174KzFfqDy9WPyP1qLmxxsR\",\"type\":\"tool_result\",\"content\":\"2026-09-26T19:55:38+00:00\\ncb6d3dffea3b3024e271cee705fbc548fc1889aa\",\"is_error\":false}]},\"parent_tool_use_id\":null,\"session_id\":\"04e290d9-5a17-4b57-b06d-5683fce73fa2\",\"uuid\":\"2c8ad58f-7bab-4f19-8295-4cebeba8c528\",\"timestamp\":\"2026-09-26T19:55:38.483Z\",\"tool_use_result\":{\"stdout\":\"2026-09-26T19:55:38+00:00\\ncb6d3dffea3b3024e271cee705fbc548fc1889aa\",\"stderr\":\"\",\"interrupted\":false,\"isImage\":false,\"noOutputExpected\":false}}\n{\"type\":\"rate_limit_event\",\"rate_limit_info\":{\"status\":\"allowed\",\"resetsAt\":1790469600,\"rateLimitType\":\"five_hour\",\"overageStatus\":\"rejected\",\"overageDisabledReason\":\"org_level_disabled\",\"isUsingOverage\":false,\"unifiedWindows\":{\"five_hour\":{\"utilization\":0.15,\"resetsAt\":1790469600},\"seven_day\":{\"utilization\":0.01,\"resetsAt\":1790884800}}},\"uuid\":\"55ce61ec-b007-41d5-8f5a-686f04f8f4ee\",\"session_id\":\"04e290d9-5a17-4b57-b06d-5683fce73fa2\"}\n"
+}

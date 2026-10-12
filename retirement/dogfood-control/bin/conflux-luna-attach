@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+[[ $# -eq 1 ]] || { echo 'usage: conflux-luna-attach TASK-ID' >&2; exit 2; }
+exec tmux attach-session -t "luna-$1"

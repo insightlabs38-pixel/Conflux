@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+"""Create an immutable timestamp-labelled demo asset archive without deleting earlier footage."""
+import datetime as dt,pathlib,subprocess,sys
+root=pathlib.Path('/home/dogfood-control/demo-assets'); root.mkdir(parents=True,exist_ok=True)
+source=pathlib.Path(sys.argv[1]).resolve() if len(sys.argv)>1 else root
+env=dict(line.split('=',1) for line in pathlib.Path('/home/dogfood-control/unattended.env').read_text().splitlines() if '=' in line)
+start=dt.datetime.fromisoformat(env['CONFLUX_START_UTC'].replace('Z','+00:00'))
+stamp=sys.argv[2] if len(sys.argv)>2 else (sys.argv[1] if len(sys.argv)>1 and not pathlib.Path(sys.argv[1]).is_dir() else 'H'+str(int((dt.datetime.now(dt.timezone.utc)-start).total_seconds()//3600)))
+out=root/f'conflux-demo-footage-{stamp}.zip'
+if out.exists(): raise SystemExit(f'refusing to overwrite existing archive: {out}')
+members=['core-demo','t3-options','t4-options','stretch-deltas','screenshots','SHOT_MANIFEST.md','SHOT_MANIFEST.json','NARRATION_DRAFT.md','NARRATION_DRAFT.json','FOOTAGE_STATUS.md','FOOTAGE_BASELINE.yaml']
+present=[x for x in members if (source/x).exists()]
+if not present: raise SystemExit(f'no footage package contents found in {source}')
+r=subprocess.run(['zip','-qr',str(out),*present],cwd=source)
+if r.returncode: raise SystemExit(r.returncode)
+print(out)

@@ -1,0 +1,15 @@
+{
+  "task_id": "POL-001",
+  "status": "done",
+  "summary": "policies/evaluator.py: a JSON-only policy AST (and/or/not, eq/ne/gt/gte/lt/lte, in/not_in, true/false), no eval/exec/JS/Python/SQL. evaluate() raises PolicyError on an unknown operator, an unsupplied fact, malformed nodes, or MAX_DEPTH(10)/MAX_NODES(200) overrun. is_allowed() is the fail-closed wrapper (any PolicyError -> deny) that POL-002's action bindings will use. Temporal comparisons against a datetime fact parse the AST's ISO-8601 value.",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "5881620",
+  "verification": [
+    { "command": "uv run --frozen pytest tests/integration/test_policy_evaluator.py", "result": "passed; 13 tests (all operators, composition, temporal comparison, unknown op/fact fail closed, malformed node, depth/node-count limits, incomparable types, is_allowed wrapper)" },
+    { "command": "make verify-fast", "result": "passed" }
+  ],
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T23:33:00+00:00"
+}

@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+"""Configure or clear one guarded Conflux campaign window."""
+import datetime as dt
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+ROOT = Path('/home/dogfood-control')
+ENV = ROOT / 'unattended.env'
+TIMER = Path.home() / '.config/systemd/user/conflux-unattended.timer'
+
+def systemctl(*args):
+    return subprocess.run(['systemctl', '--user', *args], check=True)
+
+def load_env():
+    values = {}
+    if ENV.exists():
+        for raw in ENV.read_text().splitlines():
+            if '=' in raw and not raw.lstrip().startswith('#'):
+                k, v = raw.split('=', 1); values[k] = v
+    return values
+
+def write_env(values):
+    order = ('CONFLUX_GITHUB_URL','CONFLUX_CONTROL_ROOT','CONFLUX_PLAN_ROOT',
+             'CONFLUX_WORKTREE_ROOT','CONFLUX_REPO_ROOT',
+             'CONFLUX_START_UTC','CONFLUX_END_UTC')
+    ENV.write_text(''.join(f'{k}={values.get(k, "")}\n' for k in order))
+    ENV.chmod(0o600)
+
+def main():
+    if len(sys.argv) == 2 and sys.argv[1] == 'clear':
+        if subprocess.run(['systemctl','--user','is-active','--quiet','conflux-unattended.service']).returncode == 0:
+            print('Stop the active campaign before clearing its schedule.', file=sys.stderr); return 2
+        subprocess.run(['systemctl','--user','disable','--now','conflux-unattended.timer'],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        values = load_env(); values['CONFLUX_START_UTC'] = ''; values['CONFLUX_END_UTC'] = ''
+        write_env(values)
+        subprocess.run(['tmux','set-environment','-gu','CONFLUX_START_UTC'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+        subprocess.run(['tmux','set-environment','-gu','CONFLUX_END_UTC'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+        TIMER.unlink(missing_ok=True)
+        systemctl('daemon-reload')
+        print('Campaign window cleared; timer disabled. No campaign was started.')
+        return 0
+    if len(sys.argv) != 4 or sys.argv[1] != 'set':
+        print('Usage: conflux-schedule set START_UTC END_UTC | clear', file=sys.stderr)
+        return 2
+    try:
+        start, end = (dt.datetime.fromisoformat(x.replace('Z','+00:00')) for x in sys.argv[2:])
+    except ValueError:
+        print('START_UTC and END_UTC must be ISO 8601 timestamps.', file=sys.stderr); return 2
+    now = dt.datetime.now(dt.timezone.utc)
+    active = subprocess.run(['systemctl','--user','is-active','--quiet','conflux-unattended.service']).returncode == 0
+    if active:
+        print('Stop the active campaign before changing its schedule.', file=sys.stderr); return 2
+    if start.tzinfo is None or end.tzinfo is None or start.utcoffset() != dt.timedelta(0) or end.utcoffset() != dt.timedelta(0):
+        print('Both timestamps must include UTC (+00:00 or Z).', file=sys.stderr); return 2
+    if start <= now or end <= start or (end-start) < dt.timedelta(minutes=20):
+        print('Start must be in the future; end must be at least 20 minutes after start.', file=sys.stderr); return 2
+    values = load_env()
+    values.update(CONFLUX_CONTROL_ROOT='/home/dogfood-control/execution',
+                  CONFLUX_PLAN_ROOT='/home/dogfood-control/plan',
+                  CONFLUX_WORKTREE_ROOT='/home/insightlabs38/conflux-worktrees',
+                  CONFLUX_REPO_ROOT='/home/insightlabs38/conflux',
+                  CONFLUX_START_UTC=start.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                  CONFLUX_END_UTC=end.strftime('%Y-%m-%dT%H:%M:%SZ'))
+    write_env(values)
+    subprocess.run(['tmux','set-environment','-g','CONFLUX_REPO_ROOT',values['CONFLUX_REPO_ROOT']],check=False)
+    subprocess.run(['tmux','set-environment','-g','CONFLUX_WORKTREE_ROOT',values['CONFLUX_WORKTREE_ROOT']],check=False)
+    subprocess.run(['tmux','set-environment','-g','CONFLUX_START_UTC',values['CONFLUX_START_UTC']],check=False)
+    subprocess.run(['tmux','set-environment','-g','CONFLUX_END_UTC',values['CONFLUX_END_UTC']],check=False)
+    calendar = start.strftime('%Y-%m-%d %H:%M:%S UTC')
+    TIMER.parent.mkdir(parents=True, exist_ok=True)
+    TIMER.write_text('[Unit]\nDescription=Start guarded Conflux campaign at configured UTC start\n\n'
+                     '[Timer]\nOnCalendar='+calendar+'\nAccuracySec=1s\nRandomizedDelaySec=0\n'
+                     'Persistent=true\nUnit=conflux-unattended.service\n\n'
+                     '[Install]\nWantedBy=timers.target\n')
+    systemctl('daemon-reload')
+    reset = subprocess.run(['systemctl','--user','reset-failed','conflux-unattended.service'],text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+    if reset.returncode and 'not loaded' not in reset.stdout.lower():
+        print('systemd reset-failed failed: '+reset.stdout.strip(),file=sys.stderr); return 2
+    systemctl('enable','--now','conflux-unattended.timer')
+    print(f'Campaign scheduled from {start.isoformat()} through {end.isoformat()} UTC.')
+    print('New claims stop 10 minutes before end; the supervisor writes handoff at end.')
+    return 0
+
+if __name__ == '__main__':
+    raise SystemExit(main())

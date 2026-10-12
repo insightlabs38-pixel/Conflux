@@ -1,0 +1,22 @@
+[Unit]
+Description=Conflux DOGFOOD unattended campaign supervisor
+After=default.target network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=1h
+StartLimitBurst=3
+
+[Service]
+Type=simple
+Environment=DISABLE_AUTOUPDATER=1
+Environment=HOME=/home/insightlabs38
+Environment=PATH=/home/insightlabs38/.local/bin:/home/insightlabs38/.npm-global/bin:/usr/local/bin:/usr/bin:/bin
+EnvironmentFile=-/home/dogfood-control/unattended.env
+ExecStart=/home/dogfood-control/bin/conflux-unattended-supervisor
+Restart=on-failure
+RestartSec=120s
+TimeoutStartSec=infinity
+TimeoutStopSec=20s
+UMask=0077
+
+[Install]
+WantedBy=default.target

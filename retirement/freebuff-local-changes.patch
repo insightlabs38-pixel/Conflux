@@ -1,0 +1,239 @@
+diff --git a/cli/src/utils/freebuff-session-api.ts b/cli/src/utils/freebuff-session-api.ts
+index 3eb179454..3653e4923 100644
+--- a/cli/src/utils/freebuff-session-api.ts
++++ b/cli/src/utils/freebuff-session-api.ts
+@@ -1,7 +1,6 @@
+ import { FIRST_TAB_DISCOUNT_HEADER } from '@codebuff/common/util/freebuff-first-tab-discount'
+ import type { FreebuffWalletSpendLimit } from '@codebuff/common/types/freebuff-session'
+ import { freebucksTimeZoneHeaders } from '@codebuff/common/util/freebucks-timezone'
+-import { env } from '@codebuff/common/env'
+ import {
+   FREEBUFF_COMPACT_SESSION_HEADER,
+   FREEBUFF_INSTANCE_HEADER,
+@@ -10,6 +9,7 @@ import {
+   FREEBUFF_SESSION_ADMISSION_PATH,
+   FREEBUFF_SESSION_UNSUPPORTED_MESSAGE,
+ } from '@codebuff/common/constants/freebuff-models'
++import { getWebsiteUrl } from '@codebuff/sdk'
+ 
+ import type { FreebuffSessionResponse } from '../types/freebuff-session'
+ import type { FreebuffSessionServerResponse } from '@codebuff/common/types/freebuff-session'
+@@ -96,10 +96,7 @@ export function sessionFetchSignal(
+ }
+ 
+ function sessionBaseUrl(): string {
+-  return (env.NEXT_PUBLIC_CODEBUFF_APP_URL || 'https://codebuff.com').replace(
+-    /\/$/,
+-    '',
+-  )
++  return getWebsiteUrl()
+ }
+ 
+ function sessionEndpoint(method: FreebuffSessionMethod): string {
+diff --git a/packages/agent-runtime/src/run-agent-step.ts b/packages/agent-runtime/src/run-agent-step.ts
+index d86b0f704..0a3ad3349 100644
+--- a/packages/agent-runtime/src/run-agent-step.ts
++++ b/packages/agent-runtime/src/run-agent-step.ts
+@@ -1054,7 +1054,14 @@ export async function loopAgentSteps(
+       : mapValues(tools, (tool) => ({
+           description:
+             typeof tool.description === 'string' ? tool.description : undefined,
+-          inputSchema: tool.inputSchema as {},
++          // Store the plain JSON Schema, not the Zod object. Zod's cached
++          // metadata contains cycles and the SDK carries this state into the
++          // next turn.
++          inputSchema:
++            toTokenCountInputSchema(tool.inputSchema) ?? {
++              type: 'object',
++              properties: {},
++            },
+         }))
+ 
+   const additionalToolDefinitionsWithCache = async () => {
+diff --git a/sdk/src/__tests__/run-state-git-changes.test.ts b/sdk/src/__tests__/run-state-git-changes.test.ts
+index f26a098c7..dccbd4554 100644
+--- a/sdk/src/__tests__/run-state-git-changes.test.ts
++++ b/sdk/src/__tests__/run-state-git-changes.test.ts
+@@ -12,6 +12,7 @@ import { getInitialSessionState } from '@codebuff/common/types/session-state'
+ import type { CodebuffSpawn } from '@codebuff/common/types/spawn'
+ import type { Logger } from '@codebuff/common/types/contracts/logger'
+ import { getStubProjectFileContext } from '@codebuff/common/util/file'
++import z from 'zod/v4'
+ 
+ /** Fake ChildProcess: streams the given stdout in fixed-size chunks after
+  *  spawn returns, then closes with code 0 — unless killed first, in which
+@@ -194,6 +195,33 @@ describe('repository snapshot persistence', () => {
+       'AGENTS.md': 'Updated instructions',
+     })
+   })
++
++  it('normalizes cyclic Zod tool schemas when resuming a prior run', async () => {
++    const baseSessionState = getInitialSessionState(getStubProjectFileContext())
++    baseSessionState.mainAgentState.toolDefinitions = {
++      gravity_index: {
++        description: 'Search services',
++        inputSchema: z.object({
++          context: z.object({
++            query: z.string(),
++          }),
++        }),
++      },
++    }
++
++    const resumed = await applyOverridesToSessionState('/repo', baseSessionState, {})
++
++    expect(
++      resumed.mainAgentState.toolDefinitions.gravity_index?.inputSchema,
++    ).toMatchObject({
++      type: 'object',
++      properties: { context: { type: 'object' } },
++    })
++    const originalSchema = baseSessionState.mainAgentState.toolDefinitions
++      .gravity_index?.inputSchema as z.ZodType
++    expect(originalSchema.safeParse({ context: { query: 'coffee shop' } }).success)
++      .toBe(true)
++  })
+ })
+ 
+ describe('isTestFilePath', () => {
+diff --git a/sdk/src/constants.ts b/sdk/src/constants.ts
+index a80d2aa65..38426ec9d 100644
+--- a/sdk/src/constants.ts
++++ b/sdk/src/constants.ts
+@@ -16,7 +16,18 @@ const bundledWebsiteUrl = env.NEXT_PUBLIC_CODEBUFF_APP_URL
+  * remote runtime cannot reach. Deployment env wins when present.
+  */
+ export function getWebsiteUrl(): string {
+-  return (getRuntimeAppUrlFromEnv() ?? bundledWebsiteUrl).replace(/\/$/, '')
++  const websiteUrl = new URL(
++    (getRuntimeAppUrlFromEnv() ?? bundledWebsiteUrl).replace(/\/$/, ''),
++  )
++
++  // codebuff.com redirects to www.codebuff.com. Fetch follows that redirect,
++  // but browsers and runtimes may strip Authorization when the origin changes,
++  // making valid API keys appear invalid. Address the canonical host directly.
++  if (websiteUrl.protocol === 'https:' && websiteUrl.hostname === 'codebuff.com') {
++    websiteUrl.hostname = 'www.codebuff.com'
++  }
++
++  return websiteUrl.toString().replace(/\/$/, '')
+ }
+ 
+ /** @deprecated Prefer {@link getWebsiteUrl} for runtime resolution. */
+diff --git a/sdk/src/impl/llm.ts b/sdk/src/impl/llm.ts
+index fb32850e3..0a65cd388 100644
+--- a/sdk/src/impl/llm.ts
++++ b/sdk/src/impl/llm.ts
+@@ -1,3 +1,5 @@
++import { inspect } from 'node:util'
++
+ import { models, PROFIT_MARGIN } from '@codebuff/common/old-constants'
+ import { buildArray } from '@codebuff/common/util/array'
+ import { STREAM_RECOVERY_EVENT } from '@codebuff/common/util/axiom-only-log'
+@@ -61,6 +63,21 @@ const providerOrder = {
+   [models.openrouter_claude_opus_4]: ['Google', 'Anthropic'],
+ }
+ 
++function stringifyUnknownError(error: unknown): string {
++  try {
++    return JSON.stringify(error) ?? String(error)
++  } catch {
++    // Some AI SDK/provider errors are plain objects with request/response
++    // references that point back to each other. Error formatting must not
++    // replace the original failure with a JSON serialization exception.
++    return inspect(error, {
++      depth: 4,
++      maxArrayLength: 50,
++      maxStringLength: 10_000,
++    })
++  }
++}
++
+ function calculateUsedCredits(params: { costDollars: number }): number {
+   const { costDollars } = params
+ 
+@@ -501,7 +518,7 @@ export async function* promptAiSdkStream(
+           ? chunkValue.error.message
+           : typeof chunkValue.error === 'string'
+             ? chunkValue.error
+-            : JSON.stringify(chunkValue.error)
++            : stringifyUnknownError(chunkValue.error)
+       const errorMessage = buildArray([mainErrorMessage, errorBody]).join('\n')
+ 
+       // Pass these errors back to the agent so it can see what went wrong and retry.
+diff --git a/sdk/src/run-state.ts b/sdk/src/run-state.ts
+index c812115ba..95ee350bb 100644
+--- a/sdk/src/run-state.ts
++++ b/sdk/src/run-state.ts
+@@ -1115,10 +1115,67 @@ export async function applyOverridesToSessionState(
+     maxAgentSteps?: number
+   },
+ ): Promise<SessionState> {
+-  // Deep clone to avoid mutating the original session state
+-  const sessionState = JSON.parse(
+-    JSON.stringify(baseSessionState),
+-  ) as SessionState
++  // Older run states can contain Zod tool schemas, whose cached metadata is
++  // cyclic. Convert them before cloning: lodash cloneDeep preserves the cycles
++  // but strips Zod's internal prototype, so conversion must use the originals.
++  const visitedAgentStates = new WeakMap<
++    object,
++    SessionState['mainAgentState']
++  >()
++  const normalizeAgentState = (
++    agentState: SessionState['mainAgentState'],
++  ): SessionState['mainAgentState'] => {
++    const existing = visitedAgentStates.get(agentState)
++    if (existing) return existing
++
++    const normalized: SessionState['mainAgentState'] = {
++      ...agentState,
++      toolDefinitions: {},
++      subagents: [],
++    }
++    visitedAgentStates.set(agentState, normalized)
++
++    normalized.toolDefinitions = Object.fromEntries(
++      Object.entries(agentState.toolDefinitions ?? {}).map(
++        ([toolName, definition]) => {
++          const inputSchema = definition.inputSchema as {
++            safeParse?: unknown
++          } | null
++          if (typeof inputSchema?.safeParse !== 'function') {
++            return [toolName, definition]
++          }
++          try {
++            return [
++              toolName,
++              {
++                ...definition,
++                inputSchema: z.toJSONSchema(inputSchema as z.ZodType, {
++                  io: 'input',
++                }),
++              },
++            ]
++          } catch {
++            // A schema that cannot be represented as JSON should not make a
++            // saved run state unusable. Context estimation treats this as an
++            // empty input.
++            return [
++              toolName,
++              {
++                ...definition,
++                inputSchema: { type: 'object', properties: {} },
++              },
++            ]
++          }
++        },
++      ),
++    )
++    normalized.subagents = (agentState.subagents ?? []).map(normalizeAgentState)
++    return normalized
++  }
++  const sessionState = cloneDeep({
++    ...baseSessionState,
++    mainAgentState: normalizeAgentState(baseSessionState.mainAgentState),
++  })
+ 
+   // Apply maxAgentSteps override
+   if (overrides.maxAgentSteps !== undefined) {

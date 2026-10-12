@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+"""Receipt, ownership, rebase, test and fast-forward integration gate."""
+import argparse,datetime as dt,fcntl,fnmatch,json,os,pathlib,subprocess,sys
+import yaml
+ROOT=pathlib.Path('/home/dogfood-control'); REPO=pathlib.Path(os.environ.get('CONFLUX_REPO_ROOT','/home/insightlabs38/conflux')); LOCK=ROOT/'run/integration.lock'
+def run(args,cwd=None,timeout=2400):
+ r=subprocess.run(args,cwd=cwd,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=timeout)
+ return r.returncode,r.stdout
+def fail(kind,msg):
+ log=ROOT/'logs/unattended/integration.jsonl'; log.parent.mkdir(parents=True,exist_ok=True)
+ with log.open('a') as f: f.write(json.dumps({'event':kind,'message':msg})+'\n')
+ (ROOT/'execution/ATTENTION.md').write_text(f'# HIGH ATTENTION\n\n{kind}: {msg}\n')
+ print(msg,file=sys.stderr); sys.exit(2)
+def allowed(path,patterns):
+ return any(p=='repository root' or fnmatch.fnmatchcase(path,p) or (p.endswith('/**') and path.startswith(p[:-3])) for p in patterns)
+def footage_gate(data,ident,wt,assignment):
+ baseline=ROOT/'demo-assets/FOOTAGE_BASELINE.yaml'
+ if not baseline.exists(): return
+ impact=data.get('footage_impact')
+ if not isinstance(impact,dict): fail('FOOTAGE_IMPACT_REQUIRED',f'{ident} must include a footage_impact disposition because an established baseline exists')
+ disposition=impact.get('disposition'); visual=impact.get('visual_scope'); rationale=str(impact.get('rationale','')).strip()
+ if disposition not in ('UNAFFECTED','BASELINE_VALID','RECAPTURE_REQUIRED') or visual not in ('NO_VISUAL_CHANGE','SCOPED_COMPATIBLE','BROAD_REDESIGN') or not rationale:
+  fail('FOOTAGE_IMPACT_INVALID',f'{ident} footage_impact needs disposition, visual_scope, and rationale')
+ scenes=impact.get('scenes',[]); evidence=impact.get('verification_evidence',[])
+ if not isinstance(scenes,list) or not isinstance(evidence,list): fail('FOOTAGE_IMPACT_INVALID',f'{ident} footage scenes/evidence must be lists')
+ expected_scope=f"{ident}: {assignment.get('title') or assignment.get('objective') or assignment.get('summary') or ident}" if assignment else ''
+ if impact.get('reviewed_task_id')!=ident or impact.get('task_scope_reviewed')!=expected_scope:
+  fail('FOOTAGE_IMPACT_INVALID',f'{ident} must acknowledge its exact controller-assigned task metadata: {expected_scope!r}')
+ try:
+  import yaml
+  baseline_data=yaml.safe_load(baseline.read_text()) or {}
+  known={str(x.get('id')) for x in baseline_data.get('scenes',[]) if isinstance(x,dict)}
+ except Exception as e: fail('FOOTAGE_BASELINE_INVALID',f'cannot read established scene baseline {baseline}: {e}')
+ if not set(map(str,scenes)).issubset(known): fail('FOOTAGE_SCENE_UNKNOWN',f'{ident} references scenes absent from the real baseline manifest')
+ for item in evidence:
+  path=pathlib.Path(item.get('path','')) if isinstance(item,dict) else pathlib.Path('')
+  if not path.is_absolute(): path=(ROOT/path).resolve()
+  if not path.exists() or not path.is_file(): fail('FOOTAGE_EVIDENCE_MISSING',f'{ident} footage verification evidence missing: {path}')
+  kind=item.get('kind') if isinstance(item,dict) else None
+  suffix=path.suffix.lower()
+  if kind=='screenshot' and suffix not in ('.png','.jpg','.jpeg','.webp'):
+   fail('FOOTAGE_EVIDENCE_INVALID',f'{ident} screenshot evidence must be an image file: {path}')
+  if kind=='replacement_scene' and suffix not in ('.webm','.mp4','.mov'):
+   fail('FOOTAGE_EVIDENCE_INVALID',f'{ident} replacement-scene evidence must be a video file: {path}')
+ if disposition=='BASELINE_VALID':
+  kinds={(str(x.get('scene_id')),str(x.get('kind'))) for x in evidence if isinstance(x,dict)}
+  if not scenes or any((str(scene),kind) not in kinds for scene in scenes for kind in ('scene_run','screenshot')):
+   fail('FOOTAGE_EVIDENCE_REQUIRED',f'{ident} must provide a current scene_run and screenshot for every scene declared baseline-valid')
+ if visual=='SCOPED_COMPATIBLE' and disposition=='UNAFFECTED':
+  kinds={str(x.get('kind')) for x in evidence if isinstance(x,dict)}
+  if not {'scene_run','screenshot'}.issubset(kinds):
+   fail('FOOTAGE_EVIDENCE_REQUIRED',f'{ident} scoped UI work needs affected-scene verification and a current screenshot')
+ if disposition=='RECAPTURE_REQUIRED' and not scenes:
+  fail('FOOTAGE_SCENES_REQUIRED',f'{ident} must name the baseline scenes requiring replacement')
+ if disposition=='RECAPTURE_REQUIRED' and visual!='SCOPED_COMPATIBLE':
+  fail('FOOTAGE_IMPACT_INVALID',f'{ident} recapture is valid only for a scoped compatible change, never broad redesign or a no-visual-change claim')
+ cfg={}
+ for line in (ROOT/'unattended.env').read_text().splitlines():
+  if '=' in line:
+   k,v=line.split('=',1); cfg[k]=v.strip().strip('"')
+ start=dt.datetime.fromisoformat(cfg['CONFLUX_START_UTC'].replace('Z','+00:00')).astimezone(dt.timezone.utc)
+ hours=(dt.datetime.now(dt.timezone.utc)-start).total_seconds()/3600
+ if hours>=60 and visual=='BROAD_REDESIGN': fail('VISUAL_FREEZE_BLOCKED',f'{ident} broad redesign is blocked at H{hours:.1f}')
+ if 60<=hours<68 and disposition=='RECAPTURE_REQUIRED':
+  fail('VISUAL_FREEZE_BLOCKED',f'{ident} invalidates established footage during the H60 freeze')
+ if hours>=68:
+  if visual=='BROAD_REDESIGN' or (visual!='NO_VISUAL_CHANGE' and data.get('critical_fix') is not True):
+   fail('LATE_VISUAL_FREEZE_BLOCKED',f'{ident} after H68 allows only scoped critical UI fixes; broad redesign is prohibited')
+  if disposition=='RECAPTURE_REQUIRED':
+   kinds={(str(x.get('scene_id')),str(x.get('kind'))) for x in evidence if isinstance(x,dict)}
+   if not scenes or any((str(scene),kind) not in kinds for scene in scenes for kind in ('replacement_scene','screenshot')):
+    fail('LATE_VISUAL_FREEZE_BLOCKED',f'{ident} may recapture only named invalidated scenes, with replacement scene and screenshot evidence for each')
+   if data.get('critical_fix') is not True:
+    fail('LATE_VISUAL_FREEZE_BLOCKED',f'{ident} scene-invalidating recapture after H68 requires critical_fix: true')
+def main():
+ p=argparse.ArgumentParser(); p.add_argument('lane',choices=['claude','sol','luna','freebuff']); p.add_argument('ident'); p.add_argument('worktree'); p.add_argument('--bootstrap',action='store_true'); a=p.parse_args()
+ wt=pathlib.Path(a.worktree); receipt=ROOT/'execution/receipts'/f'{a.ident}.json'
+ try: data=json.loads(receipt.read_text())
+ except Exception as e: fail('INTEGRATION_FAILURE',f'missing or invalid receipt {receipt}: {e}')
+ required=('task_id','status','summary','verification','executor_lane','model','worktree')
+ if any(k not in data for k in required) or data['task_id']!=a.ident or data['status']!='done' or data['executor_lane']!=a.lane or pathlib.Path(data['worktree'])!=wt:
+  fail('INTEGRATION_FAILURE',f'receipt fields/status/identity do not match lease {a.ident}')
+ expected={'claude':'claude-sonnet-5','sol':'gpt-6-sol','luna':'gpt-6-luna','freebuff':'GLM 5.3 Flash'}[a.lane]
+ if data['model']!=expected: fail('INTEGRATION_FAILURE',f'receipt model {data["model"]!r} does not match pinned lane model {expected!r}')
+ branch=run(['git','branch','--show-current'],wt)[1].strip()
+ if data.get('branch')!=branch: fail('INTEGRATION_FAILURE',f'receipt branch {data.get("branch")!r} does not match worktree branch {branch!r}')
+ if a.bootstrap:
+  ctl_state=yaml.safe_load((ROOT/'execution/OWNERSHIP.yaml').read_text()) or {}
+  if a.ident in ctl_state.get('completed_batches',[]):
+   run(['git','-C',str(REPO),'fetch','origin','main'])
+   head=subprocess.check_output(['git','-C',str(REPO),'rev-parse','origin/main'],text=True).strip()
+   (ROOT/'run/bootstrap-green').write_text(head+'\n'); print('bootstrap completion recovered from controller state'); return
+ code,out=run(['git','status','--porcelain'],wt)
+ if code or out.strip(): fail('INTEGRATION_FAILURE',f'{a.ident} worktree is not clean after receipt: {out}')
+ ctrl=ROOT/'execution'; batches=yaml.safe_load((ctrl/'BATCHES.yaml').read_text())['batches']; tasks=yaml.safe_load((ctrl/'TASKS.yaml').read_text())['tasks']
+ obj=next((b for b in batches if b['id']==a.ident),None)
+ is_batch=obj is not None
+ if obj is None: obj=next((t for t in tasks if t['id']==a.ident),None)
+ footage_gate(data,a.ident,wt,obj)
+ if is_batch and set(data.get('completed_tasks',[]))!=set(obj.get('task_ids',[])):
+  fail('INTEGRATION_FAILURE',f'{a.ident} receipt does not cover every batch task: expected {obj.get("task_ids",[])}')
+ paths=obj.get('owned_paths',[]) if obj else []
+ names=subprocess.check_output(['git','diff','--name-only','origin/main...HEAD'],cwd=wt,text=True).splitlines() if not a.bootstrap else subprocess.check_output(['git','diff-tree','--no-commit-id','--name-only','-r','HEAD'],cwd=wt,text=True).splitlines()
+ ownership=yaml.safe_load((ctrl/'OWNERSHIP.yaml').read_text()) or {}
+ active=ownership.get('leases',[])+ownership.get('reserved_batches',[])
+ conflicts=[]
+ for owner in active:
+  if owner.get('id')==a.ident: continue
+  for name in names:
+   if allowed(name,owner.get('owned_paths',[])): conflicts.append((name,owner.get('id'),owner.get('lane')))
+ if conflicts:
+  detail=', '.join(f'{path} held by {unit} ({lane})' for path,unit,lane in conflicts)
+  fail('INTEGRATION_BLOCKED_BY_ACTIVE_LEASE',f'{a.ident} integration deferred to protect active file ownership: {detail}')
+ if not all(allowed(n,paths) for n in names): fail('INTEGRATION_FAILURE',f'{a.ident} changed paths outside ownership: '+', '.join(n for n in names if not allowed(n,paths)))
+ with LOCK.open('a+') as lock:
+  fcntl.flock(lock,fcntl.LOCK_EX)
+  if a.bootstrap:
+   if run(['git','status','--porcelain'],wt)[1].strip(): fail('INTEGRATION_FAILURE','bootstrap tree not clean')
+   mainchecks(wt,data)
+   code,out=run(['git','push','origin','HEAD:refs/heads/main'],wt)
+   if code: fail('INTEGRATION_FAILURE','bootstrap push main failed: '+out[-1400:])
+   run(['git','branch','-f','main','HEAD'],wt)
+   code,out=run([str(ROOT/'bin/conflux-control'),'complete-batch',a.ident,'--receipt',str(receipt)])
+   if code: fail('INTEGRATION_FAILURE','controller could not mark bootstrap complete: '+out)
+   (ROOT/'run/bootstrap-green').write_text(subprocess.check_output(['git','rev-parse','HEAD'],cwd=wt,text=True).strip()+'\n')
+   return
+  code,out=run(['git','fetch','origin','main'],wt)
+  if code: fail('INTEGRATION_FAILURE','fetch main failed: '+out[-1000:])
+  code,out=run(['git','rebase','origin/main'],wt)
+  if code:
+   run(['git','rebase','--abort'],wt); run([str(ROOT/'bin/conflux-control'),'review',a.ident]); fail('INTEGRATION_FAILURE','rebase conflict; branch preserved for review: '+out[-1400:])
+  names=subprocess.check_output(['git','diff','--name-only','origin/main...HEAD'],cwd=wt,text=True).splitlines()
+  if not all(allowed(n,paths) for n in names): fail('INTEGRATION_FAILURE','rebased changes exceed ownership')
+  mainchecks(wt,data)
+  code,out=run(['git','push','origin',f'HEAD:refs/heads/{a.lane}/{a.ident}'],wt)
+  if code: fail('INTEGRATION_FAILURE','worker branch push failed: '+out[-1000:])
+  code,out=run(['git','push','origin','HEAD:refs/heads/main'],wt)
+  if code: run([str(ROOT/'bin/conflux-control'),'review',a.ident]); fail('INTEGRATION_FAILURE','main push rejected; review required: '+out[-1200:])
+  run(['git','-C',str(REPO),'fetch','origin','main'])
+  run(['git','-C',str(REPO),'branch','-f','main','origin/main'])
+  code,out=run([str(ROOT/'bin/conflux-control'),'done',a.ident])
+  if code: fail('INTEGRATION_FAILURE','main is green but controller transition failed: '+out)
+  (ROOT/'run/last-green-main').write_text(subprocess.check_output(['git','rev-parse','HEAD'],cwd=wt,text=True).strip()+'\n')
+def mainchecks(wt,receipt):
+ for test in receipt.get('verification',[]):
+  command=test.get('command') if isinstance(test,dict) else test
+  if not command: continue
+  r=subprocess.run(command,cwd=wt,shell=True,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=2400)
+  if r.returncode: fail('INTEGRATION_FAILURE',f'focused verification failed ({command}): {r.stdout[-2000:]}')
+ fast=wt/'scripts/verify-fast'
+ if fast.exists():
+  r=subprocess.run([str(fast)],cwd=wt,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=3600)
+  if r.returncode: fail('INTEGRATION_FAILURE','scripts/verify-fast failed: '+r.stdout[-2000:])
+if __name__=='__main__': main()

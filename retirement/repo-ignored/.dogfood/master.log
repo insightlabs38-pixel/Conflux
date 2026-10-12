@@ -1,0 +1,1186 @@
+2026-09-27T08:13:33Z waiting-until=2026-09-27T10:14:00+00:00 UTC
+2026-09-27T08:13:47Z waiting-until=2026-09-27T10:14:00+00:00 UTC
+2026-09-27T08:17:54Z stopped cleanly
+2026-09-27T08:19:32Z waiting-until=2026-09-27T10:14:00+00:00 UTC
+2026-09-27T08:26:23Z stopped cleanly
+2026-09-27T08:26:30Z waiting-until=2026-09-27T10:14:00+00:00 UTC
+2026-09-27T10:13:59Z scheduled-start reached
+2026-09-27T10:13:59Z provider=codex pid=2184265 start
+2026-09-27T10:14:03Z provider=codex exit=1 recognized-unavailable
+2026-09-27T10:14:03Z provider=claude pid=2184452 start
+2026-09-27T10:14:06Z provider=claude exit=1 unknown-failure
+2026-09-27T10:14:06Z next-poll seconds=30
+2026-09-27T10:14:36Z provider=claude pid=2185249 start
+2026-09-27T10:14:39Z provider=claude exit=1 unknown-failure
+2026-09-27T10:14:39Z next-poll seconds=30
+2026-09-27T10:15:09Z provider=codex pid=2186008 start
+2026-09-27T10:39:00Z provider=codex exit=0
+2026-09-27T10:39:00Z next-poll seconds=30
+2026-09-27T10:39:30Z provider=claude pid=2236376 start
+2026-09-27T10:39:33Z provider=claude exit=1 unknown-failure
+2026-09-27T10:39:33Z next-poll seconds=30
+2026-09-27T10:40:03Z provider=codex pid=2237108 start
+2026-09-27T11:33:05Z provider=codex exit=1 recognized-unavailable
+2026-09-27T11:33:05Z provider=claude pid=2342293 start
+2026-09-27T12:31:54Z provider=claude exit=1 unknown-failure
+2026-09-27T12:31:54Z next-poll seconds=30
+2026-09-27T12:32:24Z provider=claude pid=2491212 start
+2026-09-27T12:32:27Z provider=claude exit=1 unknown-failure
+2026-09-27T12:32:27Z next-poll seconds=30
+2026-09-27T12:32:57Z provider=codex pid=2492601 start
+2026-09-27T12:33:01Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:33:01Z provider=claude pid=2492907 start
+2026-09-27T12:33:04Z provider=claude exit=1 unknown-failure
+2026-09-27T12:33:04Z next-poll seconds=30
+2026-09-27T12:33:34Z provider=claude pid=2494173 start
+2026-09-27T12:33:37Z provider=claude exit=1 unknown-failure
+2026-09-27T12:33:37Z next-poll seconds=30
+2026-09-27T12:34:07Z provider=codex pid=2495472 start
+2026-09-27T12:34:09Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:34:09Z provider=claude pid=2495768 start
+2026-09-27T12:34:12Z provider=claude exit=1 unknown-failure
+2026-09-27T12:34:12Z next-poll seconds=30
+2026-09-27T12:34:42Z provider=claude pid=2497079 start
+2026-09-27T12:34:45Z provider=claude exit=1 unknown-failure
+2026-09-27T12:34:45Z next-poll seconds=30
+2026-09-27T12:35:15Z provider=codex pid=2498426 start
+2026-09-27T12:35:18Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:35:18Z provider=claude pid=2498701 start
+2026-09-27T12:35:21Z provider=claude exit=1 unknown-failure
+2026-09-27T12:35:21Z next-poll seconds=30
+2026-09-27T12:35:51Z provider=claude pid=2499990 start
+2026-09-27T12:35:54Z provider=claude exit=1 unknown-failure
+2026-09-27T12:35:54Z next-poll seconds=30
+2026-09-27T12:36:24Z provider=codex pid=2501319 start
+2026-09-27T12:36:27Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:36:27Z provider=claude pid=2501554 start
+2026-09-27T12:36:30Z provider=claude exit=1 unknown-failure
+2026-09-27T12:36:30Z next-poll seconds=30
+2026-09-27T12:37:00Z provider=claude pid=2502881 start
+2026-09-27T12:37:03Z provider=claude exit=1 unknown-failure
+2026-09-27T12:37:03Z next-poll seconds=30
+2026-09-27T12:37:33Z provider=codex pid=2504196 start
+2026-09-27T12:37:35Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:37:35Z provider=claude pid=2504434 start
+2026-09-27T12:37:38Z provider=claude exit=1 unknown-failure
+2026-09-27T12:37:38Z next-poll seconds=30
+2026-09-27T12:38:08Z provider=claude pid=2505790 start
+2026-09-27T12:38:11Z provider=claude exit=1 unknown-failure
+2026-09-27T12:38:11Z next-poll seconds=30
+2026-09-27T12:38:41Z provider=codex pid=2507074 start
+2026-09-27T12:38:43Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:38:43Z provider=claude pid=2507307 start
+2026-09-27T12:38:46Z provider=claude exit=1 unknown-failure
+2026-09-27T12:38:46Z next-poll seconds=30
+2026-09-27T12:39:16Z provider=claude pid=2509085 start
+2026-09-27T12:39:20Z provider=claude exit=1 unknown-failure
+2026-09-27T12:39:20Z next-poll seconds=30
+2026-09-27T12:39:50Z provider=codex pid=2510402 start
+2026-09-27T12:39:52Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:39:52Z provider=claude pid=2510680 start
+2026-09-27T12:39:55Z provider=claude exit=1 unknown-failure
+2026-09-27T12:39:55Z next-poll seconds=30
+2026-09-27T12:40:25Z provider=claude pid=2512004 start
+2026-09-27T12:40:28Z provider=claude exit=1 unknown-failure
+2026-09-27T12:40:28Z next-poll seconds=30
+2026-09-27T12:40:58Z provider=codex pid=2513290 start
+2026-09-27T12:41:01Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:41:01Z provider=claude pid=2513571 start
+2026-09-27T12:41:04Z provider=claude exit=1 unknown-failure
+2026-09-27T12:41:04Z next-poll seconds=30
+2026-09-27T12:41:34Z provider=claude pid=2514880 start
+2026-09-27T12:41:37Z provider=claude exit=1 unknown-failure
+2026-09-27T12:41:37Z next-poll seconds=30
+2026-09-27T12:42:07Z provider=codex pid=2516208 start
+2026-09-27T12:42:10Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:42:10Z provider=claude pid=2516490 start
+2026-09-27T12:42:13Z provider=claude exit=1 unknown-failure
+2026-09-27T12:42:13Z next-poll seconds=30
+2026-09-27T12:42:43Z provider=claude pid=2517761 start
+2026-09-27T12:42:46Z provider=claude exit=1 unknown-failure
+2026-09-27T12:42:46Z next-poll seconds=30
+2026-09-27T12:43:16Z provider=codex pid=2519115 start
+2026-09-27T12:43:18Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:43:18Z provider=claude pid=2519342 start
+2026-09-27T12:43:21Z provider=claude exit=1 unknown-failure
+2026-09-27T12:43:21Z next-poll seconds=30
+2026-09-27T12:43:51Z provider=claude pid=2520691 start
+2026-09-27T12:43:55Z provider=claude exit=1 unknown-failure
+2026-09-27T12:43:55Z next-poll seconds=30
+2026-09-27T12:44:25Z provider=codex pid=2521988 start
+2026-09-27T12:44:27Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:44:27Z provider=claude pid=2522243 start
+2026-09-27T12:44:30Z provider=claude exit=1 unknown-failure
+2026-09-27T12:44:30Z next-poll seconds=30
+2026-09-27T12:45:00Z provider=claude pid=2523569 start
+2026-09-27T12:45:03Z provider=claude exit=1 unknown-failure
+2026-09-27T12:45:03Z next-poll seconds=30
+2026-09-27T12:45:33Z provider=codex pid=2524882 start
+2026-09-27T12:45:36Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:45:36Z provider=claude pid=2525204 start
+2026-09-27T12:45:39Z provider=claude exit=1 unknown-failure
+2026-09-27T12:45:39Z next-poll seconds=30
+2026-09-27T12:46:09Z provider=claude pid=2526456 start
+2026-09-27T12:46:12Z provider=claude exit=1 unknown-failure
+2026-09-27T12:46:12Z next-poll seconds=30
+2026-09-27T12:46:42Z provider=codex pid=2527798 start
+2026-09-27T12:46:45Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:46:45Z provider=claude pid=2528009 start
+2026-09-27T12:46:48Z provider=claude exit=1 unknown-failure
+2026-09-27T12:46:48Z next-poll seconds=30
+2026-09-27T12:47:18Z provider=claude pid=2529341 start
+2026-09-27T12:47:21Z provider=claude exit=1 unknown-failure
+2026-09-27T12:47:21Z next-poll seconds=30
+2026-09-27T12:47:51Z provider=codex pid=2530666 start
+2026-09-27T12:47:53Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:47:53Z provider=claude pid=2530951 start
+2026-09-27T12:47:56Z provider=claude exit=1 unknown-failure
+2026-09-27T12:47:56Z next-poll seconds=30
+2026-09-27T12:48:26Z provider=claude pid=2532282 start
+2026-09-27T12:48:29Z provider=claude exit=1 unknown-failure
+2026-09-27T12:48:29Z next-poll seconds=30
+2026-09-27T12:48:59Z provider=codex pid=2534011 start
+2026-09-27T12:49:02Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:49:02Z provider=claude pid=2534262 start
+2026-09-27T12:49:05Z provider=claude exit=1 unknown-failure
+2026-09-27T12:49:05Z next-poll seconds=30
+2026-09-27T12:49:35Z provider=claude pid=2535596 start
+2026-09-27T12:49:38Z provider=claude exit=1 unknown-failure
+2026-09-27T12:49:38Z next-poll seconds=30
+2026-09-27T12:50:08Z provider=codex pid=2536886 start
+2026-09-27T12:50:11Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:50:11Z provider=claude pid=2537155 start
+2026-09-27T12:50:14Z provider=claude exit=1 unknown-failure
+2026-09-27T12:50:14Z next-poll seconds=30
+2026-09-27T12:50:44Z provider=claude pid=2538470 start
+2026-09-27T12:50:47Z provider=claude exit=1 unknown-failure
+2026-09-27T12:50:47Z next-poll seconds=30
+2026-09-27T12:51:17Z provider=codex pid=2539764 start
+2026-09-27T12:51:19Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:51:19Z provider=claude pid=2540064 start
+2026-09-27T12:51:22Z provider=claude exit=1 unknown-failure
+2026-09-27T12:51:22Z next-poll seconds=30
+2026-09-27T12:51:52Z provider=claude pid=2541332 start
+2026-09-27T12:51:55Z provider=claude exit=1 unknown-failure
+2026-09-27T12:51:55Z next-poll seconds=30
+2026-09-27T12:52:25Z provider=codex pid=2542660 start
+2026-09-27T12:52:27Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:52:27Z provider=claude pid=2542935 start
+2026-09-27T12:52:30Z provider=claude exit=1 unknown-failure
+2026-09-27T12:52:30Z next-poll seconds=30
+2026-09-27T12:53:00Z provider=claude pid=2544243 start
+2026-09-27T12:53:03Z provider=claude exit=1 unknown-failure
+2026-09-27T12:53:03Z next-poll seconds=30
+2026-09-27T12:53:33Z provider=codex pid=2545542 start
+2026-09-27T12:53:36Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:53:36Z provider=claude pid=2545828 start
+2026-09-27T12:53:39Z provider=claude exit=1 unknown-failure
+2026-09-27T12:53:39Z next-poll seconds=30
+2026-09-27T12:54:09Z provider=claude pid=2547110 start
+2026-09-27T12:54:12Z provider=claude exit=1 unknown-failure
+2026-09-27T12:54:12Z next-poll seconds=30
+2026-09-27T12:54:42Z provider=codex pid=2548457 start
+2026-09-27T12:54:44Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:54:44Z provider=claude pid=2548698 start
+2026-09-27T12:54:47Z provider=claude exit=1 unknown-failure
+2026-09-27T12:54:47Z next-poll seconds=30
+2026-09-27T12:55:17Z provider=claude pid=2550057 start
+2026-09-27T12:55:20Z provider=claude exit=1 unknown-failure
+2026-09-27T12:55:20Z next-poll seconds=30
+2026-09-27T12:55:50Z provider=codex pid=2551366 start
+2026-09-27T12:55:53Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:55:53Z provider=claude pid=2551577 start
+2026-09-27T12:55:56Z provider=claude exit=1 unknown-failure
+2026-09-27T12:55:56Z next-poll seconds=30
+2026-09-27T12:56:26Z provider=claude pid=2552941 start
+2026-09-27T12:56:29Z provider=claude exit=1 unknown-failure
+2026-09-27T12:56:29Z next-poll seconds=30
+2026-09-27T12:56:59Z provider=codex pid=2554221 start
+2026-09-27T12:57:05Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:57:05Z provider=claude pid=2554590 start
+2026-09-27T12:57:08Z provider=claude exit=1 unknown-failure
+2026-09-27T12:57:08Z next-poll seconds=30
+2026-09-27T12:57:38Z provider=claude pid=2555957 start
+2026-09-27T12:57:41Z provider=claude exit=1 unknown-failure
+2026-09-27T12:57:41Z next-poll seconds=30
+2026-09-27T12:58:11Z provider=codex pid=2557265 start
+2026-09-27T12:58:14Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:58:14Z provider=claude pid=2557537 start
+2026-09-27T12:58:17Z provider=claude exit=1 unknown-failure
+2026-09-27T12:58:17Z next-poll seconds=30
+2026-09-27T12:58:47Z provider=claude pid=2558868 start
+2026-09-27T12:58:50Z provider=claude exit=1 unknown-failure
+2026-09-27T12:58:50Z next-poll seconds=30
+2026-09-27T12:59:20Z provider=codex pid=2560584 start
+2026-09-27T12:59:23Z provider=codex exit=1 recognized-unavailable
+2026-09-27T12:59:23Z provider=claude pid=2560907 start
+2026-09-27T12:59:25Z provider=claude exit=1 unknown-failure
+2026-09-27T12:59:25Z next-poll seconds=30
+2026-09-27T12:59:55Z provider=claude pid=2562163 start
+2026-09-27T12:59:59Z provider=claude exit=1 unknown-failure
+2026-09-27T12:59:59Z next-poll seconds=30
+2026-09-27T13:00:29Z provider=codex pid=2563492 start
+2026-09-27T13:00:31Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:00:31Z provider=claude pid=2563778 start
+2026-09-27T13:00:34Z provider=claude exit=1 unknown-failure
+2026-09-27T13:00:34Z next-poll seconds=30
+2026-09-27T13:01:04Z provider=claude pid=2565093 start
+2026-09-27T13:01:07Z provider=claude exit=1 unknown-failure
+2026-09-27T13:01:07Z next-poll seconds=30
+2026-09-27T13:01:37Z provider=codex pid=2566421 start
+2026-09-27T13:01:40Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:01:40Z provider=claude pid=2566686 start
+2026-09-27T13:01:43Z provider=claude exit=1 unknown-failure
+2026-09-27T13:01:43Z next-poll seconds=30
+2026-09-27T13:02:13Z provider=claude pid=2567978 start
+2026-09-27T13:02:16Z provider=claude exit=1 unknown-failure
+2026-09-27T13:02:16Z next-poll seconds=30
+2026-09-27T13:02:46Z provider=codex pid=2569301 start
+2026-09-27T13:02:48Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:02:48Z provider=claude pid=2569551 start
+2026-09-27T13:02:52Z provider=claude exit=1 unknown-failure
+2026-09-27T13:02:52Z next-poll seconds=30
+2026-09-27T13:03:22Z provider=claude pid=2570937 start
+2026-09-27T13:03:26Z provider=claude exit=1 unknown-failure
+2026-09-27T13:03:26Z next-poll seconds=30
+2026-09-27T13:03:56Z provider=codex pid=2572241 start
+2026-09-27T13:03:58Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:03:58Z provider=claude pid=2572532 start
+2026-09-27T13:04:01Z provider=claude exit=1 unknown-failure
+2026-09-27T13:04:01Z next-poll seconds=30
+2026-09-27T13:04:31Z provider=claude pid=2573840 start
+2026-09-27T13:04:34Z provider=claude exit=1 unknown-failure
+2026-09-27T13:04:34Z next-poll seconds=30
+2026-09-27T13:05:04Z provider=codex pid=2575134 start
+2026-09-27T13:05:08Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:05:08Z provider=claude pid=2575452 start
+2026-09-27T13:05:11Z provider=claude exit=1 unknown-failure
+2026-09-27T13:05:11Z next-poll seconds=30
+2026-09-27T13:05:41Z provider=claude pid=2576779 start
+2026-09-27T13:05:44Z provider=claude exit=1 unknown-failure
+2026-09-27T13:05:44Z next-poll seconds=30
+2026-09-27T13:06:14Z provider=codex pid=2578117 start
+2026-09-27T13:06:17Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:06:17Z provider=claude pid=2578368 start
+2026-09-27T13:06:20Z provider=claude exit=1 unknown-failure
+2026-09-27T13:06:20Z next-poll seconds=30
+2026-09-27T13:06:50Z provider=claude pid=2579712 start
+2026-09-27T13:06:53Z provider=claude exit=1 unknown-failure
+2026-09-27T13:06:53Z next-poll seconds=30
+2026-09-27T13:07:23Z provider=codex pid=2581057 start
+2026-09-27T13:07:25Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:07:25Z provider=claude pid=2581264 start
+2026-09-27T13:07:29Z provider=claude exit=1 unknown-failure
+2026-09-27T13:07:29Z next-poll seconds=30
+2026-09-27T13:07:59Z provider=claude pid=2582617 start
+2026-09-27T13:08:02Z provider=claude exit=1 unknown-failure
+2026-09-27T13:08:02Z next-poll seconds=30
+2026-09-27T13:08:32Z provider=codex pid=2583933 start
+2026-09-27T13:08:34Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:08:34Z provider=claude pid=2584220 start
+2026-09-27T13:08:37Z provider=claude exit=1 unknown-failure
+2026-09-27T13:08:37Z next-poll seconds=30
+2026-09-27T13:09:07Z provider=claude pid=2585974 start
+2026-09-27T13:09:10Z provider=claude exit=1 unknown-failure
+2026-09-27T13:09:10Z next-poll seconds=30
+2026-09-27T13:09:40Z provider=codex pid=2587264 start
+2026-09-27T13:09:43Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:09:43Z provider=claude pid=2587537 start
+2026-09-27T13:09:45Z provider=claude exit=1 unknown-failure
+2026-09-27T13:09:45Z next-poll seconds=30
+2026-09-27T13:10:15Z provider=claude pid=2588812 start
+2026-09-27T13:10:18Z provider=claude exit=1 unknown-failure
+2026-09-27T13:10:18Z next-poll seconds=30
+2026-09-27T13:10:48Z provider=codex pid=2590135 start
+2026-09-27T13:10:51Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:10:51Z provider=claude pid=2590403 start
+2026-09-27T13:10:53Z provider=claude exit=1 unknown-failure
+2026-09-27T13:10:53Z next-poll seconds=30
+2026-09-27T13:11:23Z provider=claude pid=2591716 start
+2026-09-27T13:11:26Z provider=claude exit=1 unknown-failure
+2026-09-27T13:11:26Z next-poll seconds=30
+2026-09-27T13:11:56Z provider=codex pid=2593067 start
+2026-09-27T13:11:59Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:11:59Z provider=claude pid=2593335 start
+2026-09-27T13:12:02Z provider=claude exit=1 unknown-failure
+2026-09-27T13:12:02Z next-poll seconds=30
+2026-09-27T13:12:32Z provider=claude pid=2594610 start
+2026-09-27T13:12:35Z provider=claude exit=1 unknown-failure
+2026-09-27T13:12:35Z next-poll seconds=30
+2026-09-27T13:13:05Z provider=codex pid=2595947 start
+2026-09-27T13:13:09Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:13:09Z provider=claude pid=2596214 start
+2026-09-27T13:13:12Z provider=claude exit=1 unknown-failure
+2026-09-27T13:13:12Z next-poll seconds=30
+2026-09-27T13:13:42Z provider=claude pid=2597549 start
+2026-09-27T13:13:45Z provider=claude exit=1 unknown-failure
+2026-09-27T13:13:45Z next-poll seconds=30
+2026-09-27T13:14:15Z provider=codex pid=2598878 start
+2026-09-27T13:14:18Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:14:18Z provider=claude pid=2599161 start
+2026-09-27T13:14:21Z provider=claude exit=1 unknown-failure
+2026-09-27T13:14:21Z next-poll seconds=30
+2026-09-27T13:14:51Z provider=claude pid=2600464 start
+2026-09-27T13:14:54Z provider=claude exit=1 unknown-failure
+2026-09-27T13:14:54Z next-poll seconds=30
+2026-09-27T13:15:24Z provider=codex pid=2601753 start
+2026-09-27T13:15:26Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:15:26Z provider=claude pid=2602021 start
+2026-09-27T13:15:29Z provider=claude exit=1 unknown-failure
+2026-09-27T13:15:29Z next-poll seconds=30
+2026-09-27T13:15:59Z provider=claude pid=2603335 start
+2026-09-27T13:16:03Z provider=claude exit=1 unknown-failure
+2026-09-27T13:16:03Z next-poll seconds=30
+2026-09-27T13:16:33Z provider=codex pid=2604715 start
+2026-09-27T13:16:35Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:16:35Z provider=claude pid=2604958 start
+2026-09-27T13:16:38Z provider=claude exit=1 unknown-failure
+2026-09-27T13:16:38Z next-poll seconds=30
+2026-09-27T13:17:08Z provider=claude pid=2606346 start
+2026-09-27T13:17:11Z provider=claude exit=1 unknown-failure
+2026-09-27T13:17:11Z next-poll seconds=30
+2026-09-27T13:17:41Z provider=codex pid=2607689 start
+2026-09-27T13:17:44Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:17:44Z provider=claude pid=2607906 start
+2026-09-27T13:17:47Z provider=claude exit=1 unknown-failure
+2026-09-27T13:17:47Z next-poll seconds=30
+2026-09-27T13:18:17Z provider=claude pid=2609264 start
+2026-09-27T13:18:20Z provider=claude exit=1 unknown-failure
+2026-09-27T13:18:20Z next-poll seconds=30
+2026-09-27T13:18:50Z provider=codex pid=2611015 start
+2026-09-27T13:18:52Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:18:52Z provider=claude pid=2611295 start
+2026-09-27T13:18:55Z provider=claude exit=1 unknown-failure
+2026-09-27T13:18:55Z next-poll seconds=30
+2026-09-27T13:19:25Z provider=claude pid=2612625 start
+2026-09-27T13:19:28Z provider=claude exit=1 unknown-failure
+2026-09-27T13:19:28Z next-poll seconds=30
+2026-09-27T13:19:58Z provider=codex pid=2613925 start
+2026-09-27T13:20:00Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:20:00Z provider=claude pid=2614195 start
+2026-09-27T13:20:03Z provider=claude exit=1 unknown-failure
+2026-09-27T13:20:03Z next-poll seconds=30
+2026-09-27T13:20:33Z provider=claude pid=2615506 start
+2026-09-27T13:20:37Z provider=claude exit=1 unknown-failure
+2026-09-27T13:20:37Z next-poll seconds=30
+2026-09-27T13:21:07Z provider=codex pid=2616792 start
+2026-09-27T13:21:09Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:21:09Z provider=claude pid=2617095 start
+2026-09-27T13:21:12Z provider=claude exit=1 unknown-failure
+2026-09-27T13:21:12Z next-poll seconds=30
+2026-09-27T13:21:42Z provider=claude pid=2618404 start
+2026-09-27T13:21:45Z provider=claude exit=1 unknown-failure
+2026-09-27T13:21:45Z next-poll seconds=30
+2026-09-27T13:22:15Z provider=codex pid=2619717 start
+2026-09-27T13:22:18Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:22:18Z provider=claude pid=2619977 start
+2026-09-27T13:22:20Z provider=claude exit=1 unknown-failure
+2026-09-27T13:22:20Z next-poll seconds=30
+2026-09-27T13:22:50Z provider=claude pid=2621247 start
+2026-09-27T13:22:53Z provider=claude exit=1 unknown-failure
+2026-09-27T13:22:53Z next-poll seconds=30
+2026-09-27T13:23:23Z provider=codex pid=2622602 start
+2026-09-27T13:23:26Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:23:26Z provider=claude pid=2622802 start
+2026-09-27T13:23:29Z provider=claude exit=1 unknown-failure
+2026-09-27T13:23:29Z next-poll seconds=30
+2026-09-27T13:23:59Z provider=claude pid=2624138 start
+2026-09-27T13:24:02Z provider=claude exit=1 unknown-failure
+2026-09-27T13:24:02Z next-poll seconds=30
+2026-09-27T13:24:32Z provider=codex pid=2625448 start
+2026-09-27T13:24:34Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:24:34Z provider=claude pid=2625713 start
+2026-09-27T13:24:37Z provider=claude exit=1 unknown-failure
+2026-09-27T13:24:37Z next-poll seconds=30
+2026-09-27T13:25:07Z provider=claude pid=2627013 start
+2026-09-27T13:25:10Z provider=claude exit=1 unknown-failure
+2026-09-27T13:25:10Z next-poll seconds=30
+2026-09-27T13:25:40Z provider=codex pid=2628357 start
+2026-09-27T13:25:43Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:25:43Z provider=claude pid=2628587 start
+2026-09-27T13:25:46Z provider=claude exit=1 unknown-failure
+2026-09-27T13:25:46Z next-poll seconds=30
+2026-09-27T13:26:16Z provider=claude pid=2629915 start
+2026-09-27T13:26:19Z provider=claude exit=1 unknown-failure
+2026-09-27T13:26:19Z next-poll seconds=30
+2026-09-27T13:26:49Z provider=codex pid=2631215 start
+2026-09-27T13:26:52Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:26:52Z provider=claude pid=2631520 start
+2026-09-27T13:26:55Z provider=claude exit=1 unknown-failure
+2026-09-27T13:26:55Z next-poll seconds=30
+2026-09-27T13:27:25Z provider=claude pid=2632836 start
+2026-09-27T13:27:28Z provider=claude exit=1 unknown-failure
+2026-09-27T13:27:28Z next-poll seconds=30
+2026-09-27T13:27:58Z provider=codex pid=2634094 start
+2026-09-27T13:28:00Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:28:00Z provider=claude pid=2634397 start
+2026-09-27T13:28:03Z provider=claude exit=1 unknown-failure
+2026-09-27T13:28:03Z next-poll seconds=30
+2026-09-27T13:28:33Z provider=claude pid=2635674 start
+2026-09-27T13:28:36Z provider=claude exit=1 unknown-failure
+2026-09-27T13:28:36Z next-poll seconds=30
+2026-09-27T13:29:06Z provider=codex pid=2637467 start
+2026-09-27T13:29:09Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:29:09Z provider=claude pid=2637713 start
+2026-09-27T13:29:12Z provider=claude exit=1 unknown-failure
+2026-09-27T13:29:12Z next-poll seconds=30
+2026-09-27T13:29:42Z provider=claude pid=2639040 start
+2026-09-27T13:29:45Z provider=claude exit=1 unknown-failure
+2026-09-27T13:29:45Z next-poll seconds=30
+2026-09-27T13:30:15Z provider=codex pid=2640367 start
+2026-09-27T13:30:17Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:30:17Z provider=claude pid=2640599 start
+2026-09-27T13:30:20Z provider=claude exit=1 unknown-failure
+2026-09-27T13:30:20Z next-poll seconds=30
+2026-09-27T13:30:50Z provider=claude pid=2641941 start
+2026-09-27T13:30:53Z provider=claude exit=1 unknown-failure
+2026-09-27T13:30:53Z next-poll seconds=30
+2026-09-27T13:31:23Z provider=codex pid=2643200 start
+2026-09-27T13:31:26Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:31:26Z provider=claude pid=2643497 start
+2026-09-27T13:31:29Z provider=claude exit=1 unknown-failure
+2026-09-27T13:31:29Z next-poll seconds=30
+2026-09-27T13:31:59Z provider=claude pid=2644786 start
+2026-09-27T13:32:02Z provider=claude exit=1 unknown-failure
+2026-09-27T13:32:02Z next-poll seconds=30
+2026-09-27T13:32:32Z provider=codex pid=2646145 start
+2026-09-27T13:32:34Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:32:34Z provider=claude pid=2646378 start
+2026-09-27T13:32:37Z provider=claude exit=1 unknown-failure
+2026-09-27T13:32:37Z next-poll seconds=30
+2026-09-27T13:33:07Z provider=claude pid=2647684 start
+2026-09-27T13:33:10Z provider=claude exit=1 unknown-failure
+2026-09-27T13:33:10Z next-poll seconds=30
+2026-09-27T13:33:40Z provider=codex pid=2648970 start
+2026-09-27T13:33:43Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:33:43Z provider=claude pid=2649281 start
+2026-09-27T13:33:46Z provider=claude exit=1 unknown-failure
+2026-09-27T13:33:46Z next-poll seconds=30
+2026-09-27T13:34:16Z provider=claude pid=2650581 start
+2026-09-27T13:34:20Z provider=claude exit=1 unknown-failure
+2026-09-27T13:34:20Z next-poll seconds=30
+2026-09-27T13:34:50Z provider=codex pid=2651895 start
+2026-09-27T13:34:53Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:34:53Z provider=claude pid=2652198 start
+2026-09-27T13:34:56Z provider=claude exit=1 unknown-failure
+2026-09-27T13:34:56Z next-poll seconds=30
+2026-09-27T13:35:26Z provider=claude pid=2653490 start
+2026-09-27T13:35:29Z provider=claude exit=1 unknown-failure
+2026-09-27T13:35:29Z next-poll seconds=30
+2026-09-27T13:35:59Z provider=codex pid=2654813 start
+2026-09-27T13:36:01Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:36:01Z provider=claude pid=2655063 start
+2026-09-27T13:36:05Z provider=claude exit=1 unknown-failure
+2026-09-27T13:36:05Z next-poll seconds=30
+2026-09-27T13:36:35Z provider=claude pid=2656400 start
+2026-09-27T13:36:38Z provider=claude exit=1 unknown-failure
+2026-09-27T13:36:38Z next-poll seconds=30
+2026-09-27T13:37:08Z provider=codex pid=2657709 start
+2026-09-27T13:37:10Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:37:10Z provider=claude pid=2657997 start
+2026-09-27T13:37:13Z provider=claude exit=1 unknown-failure
+2026-09-27T13:37:13Z next-poll seconds=30
+2026-09-27T13:37:43Z provider=claude pid=2659300 start
+2026-09-27T13:37:47Z provider=claude exit=1 unknown-failure
+2026-09-27T13:37:47Z next-poll seconds=30
+2026-09-27T13:38:17Z provider=codex pid=2660591 start
+2026-09-27T13:38:19Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:38:19Z provider=claude pid=2660870 start
+2026-09-27T13:38:22Z provider=claude exit=1 unknown-failure
+2026-09-27T13:38:22Z next-poll seconds=30
+2026-09-27T13:38:52Z provider=claude pid=2662648 start
+2026-09-27T13:38:55Z provider=claude exit=1 unknown-failure
+2026-09-27T13:38:55Z next-poll seconds=30
+2026-09-27T13:39:25Z provider=codex pid=2663943 start
+2026-09-27T13:39:28Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:39:28Z provider=claude pid=2664251 start
+2026-09-27T13:39:30Z provider=claude exit=1 unknown-failure
+2026-09-27T13:39:30Z next-poll seconds=30
+2026-09-27T13:40:00Z provider=claude pid=2665503 start
+2026-09-27T13:40:04Z provider=claude exit=1 unknown-failure
+2026-09-27T13:40:04Z next-poll seconds=30
+2026-09-27T13:40:34Z provider=codex pid=2666854 start
+2026-09-27T13:40:36Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:40:36Z provider=claude pid=2667100 start
+2026-09-27T13:40:39Z provider=claude exit=1 unknown-failure
+2026-09-27T13:40:39Z next-poll seconds=30
+2026-09-27T13:41:09Z provider=claude pid=2668390 start
+2026-09-27T13:41:12Z provider=claude exit=1 unknown-failure
+2026-09-27T13:41:12Z next-poll seconds=30
+2026-09-27T13:41:42Z provider=codex pid=2669735 start
+2026-09-27T13:41:44Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:41:44Z provider=claude pid=2669950 start
+2026-09-27T13:41:47Z provider=claude exit=1 unknown-failure
+2026-09-27T13:41:47Z next-poll seconds=30
+2026-09-27T13:42:17Z provider=claude pid=2671306 start
+2026-09-27T13:42:20Z provider=claude exit=1 unknown-failure
+2026-09-27T13:42:20Z next-poll seconds=30
+2026-09-27T13:42:50Z provider=codex pid=2672596 start
+2026-09-27T13:42:53Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:42:53Z provider=claude pid=2672880 start
+2026-09-27T13:42:56Z provider=claude exit=1 unknown-failure
+2026-09-27T13:42:56Z next-poll seconds=30
+2026-09-27T13:43:26Z provider=claude pid=2674159 start
+2026-09-27T13:43:29Z provider=claude exit=1 unknown-failure
+2026-09-27T13:43:29Z next-poll seconds=30
+2026-09-27T13:43:59Z provider=codex pid=2675490 start
+2026-09-27T13:44:02Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:44:02Z provider=claude pid=2675744 start
+2026-09-27T13:44:05Z provider=claude exit=1 unknown-failure
+2026-09-27T13:44:05Z next-poll seconds=30
+2026-09-27T13:44:35Z provider=claude pid=2677070 start
+2026-09-27T13:44:38Z provider=claude exit=1 unknown-failure
+2026-09-27T13:44:38Z next-poll seconds=30
+2026-09-27T13:45:08Z provider=codex pid=2678375 start
+2026-09-27T13:45:10Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:45:10Z provider=claude pid=2678646 start
+2026-09-27T13:45:13Z provider=claude exit=1 unknown-failure
+2026-09-27T13:45:13Z next-poll seconds=30
+2026-09-27T13:45:43Z provider=claude pid=2679966 start
+2026-09-27T13:45:46Z provider=claude exit=1 unknown-failure
+2026-09-27T13:45:46Z next-poll seconds=30
+2026-09-27T13:46:16Z provider=codex pid=2681269 start
+2026-09-27T13:46:18Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:46:18Z provider=claude pid=2681545 start
+2026-09-27T13:46:21Z provider=claude exit=1 unknown-failure
+2026-09-27T13:46:21Z next-poll seconds=30
+2026-09-27T13:46:51Z provider=claude pid=2682815 start
+2026-09-27T13:46:54Z provider=claude exit=1 unknown-failure
+2026-09-27T13:46:54Z next-poll seconds=30
+2026-09-27T13:47:24Z provider=codex pid=2684160 start
+2026-09-27T13:47:26Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:47:26Z provider=claude pid=2684370 start
+2026-09-27T13:47:29Z provider=claude exit=1 unknown-failure
+2026-09-27T13:47:29Z next-poll seconds=30
+2026-09-27T13:47:59Z provider=claude pid=2685719 start
+2026-09-27T13:48:02Z provider=claude exit=1 unknown-failure
+2026-09-27T13:48:02Z next-poll seconds=30
+2026-09-27T13:48:32Z provider=codex pid=2687005 start
+2026-09-27T13:48:35Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:48:35Z provider=claude pid=2687312 start
+2026-09-27T13:48:38Z provider=claude exit=1 unknown-failure
+2026-09-27T13:48:38Z next-poll seconds=30
+2026-09-27T13:49:08Z provider=claude pid=2689073 start
+2026-09-27T13:49:11Z provider=claude exit=1 unknown-failure
+2026-09-27T13:49:11Z next-poll seconds=30
+2026-09-27T13:49:41Z provider=codex pid=2690365 start
+2026-09-27T13:49:44Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:49:44Z provider=claude pid=2690649 start
+2026-09-27T13:49:46Z provider=claude exit=1 unknown-failure
+2026-09-27T13:49:46Z next-poll seconds=30
+2026-09-27T13:50:16Z provider=claude pid=2691942 start
+2026-09-27T13:50:19Z provider=claude exit=1 unknown-failure
+2026-09-27T13:50:19Z next-poll seconds=30
+2026-09-27T13:50:49Z provider=codex pid=2693252 start
+2026-09-27T13:50:51Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:50:51Z provider=claude pid=2693502 start
+2026-09-27T13:50:54Z provider=claude exit=1 unknown-failure
+2026-09-27T13:50:54Z next-poll seconds=30
+2026-09-27T13:51:24Z provider=claude pid=2694815 start
+2026-09-27T13:51:27Z provider=claude exit=1 unknown-failure
+2026-09-27T13:51:27Z next-poll seconds=30
+2026-09-27T13:51:57Z provider=codex pid=2696115 start
+2026-09-27T13:51:59Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:51:59Z provider=claude pid=2696363 start
+2026-09-27T13:52:02Z provider=claude exit=1 unknown-failure
+2026-09-27T13:52:02Z next-poll seconds=30
+2026-09-27T13:52:32Z provider=claude pid=2697679 start
+2026-09-27T13:52:35Z provider=claude exit=1 unknown-failure
+2026-09-27T13:52:35Z next-poll seconds=30
+2026-09-27T13:53:05Z provider=codex pid=2698972 start
+2026-09-27T13:53:08Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:53:08Z provider=claude pid=2699248 start
+2026-09-27T13:53:11Z provider=claude exit=1 unknown-failure
+2026-09-27T13:53:11Z next-poll seconds=30
+2026-09-27T13:53:41Z provider=claude pid=2700557 start
+2026-09-27T13:53:44Z provider=claude exit=1 unknown-failure
+2026-09-27T13:53:44Z next-poll seconds=30
+2026-09-27T13:54:14Z provider=codex pid=2701844 start
+2026-09-27T13:54:17Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:54:17Z provider=claude pid=2702199 start
+2026-09-27T13:54:20Z provider=claude exit=1 unknown-failure
+2026-09-27T13:54:20Z next-poll seconds=30
+2026-09-27T13:54:50Z provider=claude pid=2703515 start
+2026-09-27T13:54:54Z provider=claude exit=1 unknown-failure
+2026-09-27T13:54:54Z next-poll seconds=30
+2026-09-27T13:55:24Z provider=codex pid=2704812 start
+2026-09-27T13:55:26Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:55:26Z provider=claude pid=2705076 start
+2026-09-27T13:55:29Z provider=claude exit=1 unknown-failure
+2026-09-27T13:55:29Z next-poll seconds=30
+2026-09-27T13:55:59Z provider=claude pid=2706399 start
+2026-09-27T13:56:02Z provider=claude exit=1 unknown-failure
+2026-09-27T13:56:02Z next-poll seconds=30
+2026-09-27T13:56:32Z provider=codex pid=2707744 start
+2026-09-27T13:56:35Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:56:35Z provider=claude pid=2707980 start
+2026-09-27T13:56:38Z provider=claude exit=1 unknown-failure
+2026-09-27T13:56:38Z next-poll seconds=30
+2026-09-27T13:57:08Z provider=claude pid=2709334 start
+2026-09-27T13:57:11Z provider=claude exit=1 unknown-failure
+2026-09-27T13:57:11Z next-poll seconds=30
+2026-09-27T13:57:41Z provider=codex pid=2710582 start
+2026-09-27T13:57:44Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:57:44Z provider=claude pid=2710908 start
+2026-09-27T13:57:47Z provider=claude exit=1 unknown-failure
+2026-09-27T13:57:47Z next-poll seconds=30
+2026-09-27T13:58:17Z provider=claude pid=2712176 start
+2026-09-27T13:58:20Z provider=claude exit=1 unknown-failure
+2026-09-27T13:58:20Z next-poll seconds=30
+2026-09-27T13:58:50Z provider=codex pid=2713982 start
+2026-09-27T13:58:52Z provider=codex exit=1 recognized-unavailable
+2026-09-27T13:58:52Z provider=claude pid=2714235 start
+2026-09-27T13:58:55Z provider=claude exit=1 unknown-failure
+2026-09-27T13:58:55Z next-poll seconds=30
+2026-09-27T13:59:25Z provider=claude pid=2715532 start
+2026-09-27T13:59:28Z provider=claude exit=1 unknown-failure
+2026-09-27T13:59:28Z next-poll seconds=30
+2026-09-27T13:59:58Z provider=codex pid=2716888 start
+2026-09-27T14:00:00Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:00:00Z provider=claude pid=2717078 start
+2026-09-27T14:00:04Z provider=claude exit=1 unknown-failure
+2026-09-27T14:00:04Z next-poll seconds=30
+2026-09-27T14:00:34Z provider=claude pid=2718475 start
+2026-09-27T14:00:37Z provider=claude exit=1 unknown-failure
+2026-09-27T14:00:37Z next-poll seconds=30
+2026-09-27T14:01:07Z provider=codex pid=2719743 start
+2026-09-27T14:01:11Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:01:11Z provider=claude pid=2720085 start
+2026-09-27T14:01:14Z provider=claude exit=1 unknown-failure
+2026-09-27T14:01:14Z next-poll seconds=30
+2026-09-27T14:01:44Z provider=claude pid=2721396 start
+2026-09-27T14:01:47Z provider=claude exit=1 unknown-failure
+2026-09-27T14:01:47Z next-poll seconds=30
+2026-09-27T14:02:17Z provider=codex pid=2722696 start
+2026-09-27T14:02:19Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:02:19Z provider=claude pid=2722974 start
+2026-09-27T14:02:22Z provider=claude exit=1 unknown-failure
+2026-09-27T14:02:22Z next-poll seconds=30
+2026-09-27T14:02:52Z provider=claude pid=2724285 start
+2026-09-27T14:02:55Z provider=claude exit=1 unknown-failure
+2026-09-27T14:02:55Z next-poll seconds=30
+2026-09-27T14:03:25Z provider=codex pid=2725629 start
+2026-09-27T14:03:28Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:03:28Z provider=claude pid=2725861 start
+2026-09-27T14:03:31Z provider=claude exit=1 unknown-failure
+2026-09-27T14:03:31Z next-poll seconds=30
+2026-09-27T14:04:01Z provider=claude pid=2727170 start
+2026-09-27T14:04:04Z provider=claude exit=1 unknown-failure
+2026-09-27T14:04:04Z next-poll seconds=30
+2026-09-27T14:04:34Z provider=codex pid=2728509 start
+2026-09-27T14:04:36Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:04:36Z provider=claude pid=2728723 start
+2026-09-27T14:04:39Z provider=claude exit=1 unknown-failure
+2026-09-27T14:04:39Z next-poll seconds=30
+2026-09-27T14:05:09Z provider=claude pid=2730066 start
+2026-09-27T14:05:12Z provider=claude exit=1 unknown-failure
+2026-09-27T14:05:12Z next-poll seconds=30
+2026-09-27T14:05:42Z provider=codex pid=2731369 start
+2026-09-27T14:05:45Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:05:45Z provider=claude pid=2731653 start
+2026-09-27T14:05:48Z provider=claude exit=1 unknown-failure
+2026-09-27T14:05:48Z next-poll seconds=30
+2026-09-27T14:06:18Z provider=claude pid=2732980 start
+2026-09-27T14:06:21Z provider=claude exit=1 unknown-failure
+2026-09-27T14:06:21Z next-poll seconds=30
+2026-09-27T14:06:51Z provider=codex pid=2734269 start
+2026-09-27T14:06:54Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:06:54Z provider=claude pid=2734589 start
+2026-09-27T14:06:57Z provider=claude exit=1 unknown-failure
+2026-09-27T14:06:57Z next-poll seconds=30
+2026-09-27T14:07:27Z provider=claude pid=2735829 start
+2026-09-27T14:07:30Z provider=claude exit=1 unknown-failure
+2026-09-27T14:07:30Z next-poll seconds=30
+2026-09-27T14:08:00Z provider=codex pid=2737183 start
+2026-09-27T14:08:02Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:08:02Z provider=claude pid=2737435 start
+2026-09-27T14:08:05Z provider=claude exit=1 unknown-failure
+2026-09-27T14:08:05Z next-poll seconds=30
+2026-09-27T14:08:35Z provider=claude pid=2738765 start
+2026-09-27T14:08:38Z provider=claude exit=1 unknown-failure
+2026-09-27T14:08:38Z next-poll seconds=30
+2026-09-27T14:09:08Z provider=codex pid=2740568 start
+2026-09-27T14:09:11Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:09:11Z provider=claude pid=2740771 start
+2026-09-27T14:09:14Z provider=claude exit=1 unknown-failure
+2026-09-27T14:09:14Z next-poll seconds=30
+2026-09-27T14:09:44Z provider=claude pid=2742131 start
+2026-09-27T14:09:47Z provider=claude exit=1 unknown-failure
+2026-09-27T14:09:47Z next-poll seconds=30
+2026-09-27T14:10:17Z provider=codex pid=2743387 start
+2026-09-27T14:10:19Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:10:19Z provider=claude pid=2743719 start
+2026-09-27T14:10:22Z provider=claude exit=1 unknown-failure
+2026-09-27T14:10:22Z next-poll seconds=30
+2026-09-27T14:10:52Z provider=claude pid=2745015 start
+2026-09-27T14:10:55Z provider=claude exit=1 unknown-failure
+2026-09-27T14:10:55Z next-poll seconds=30
+2026-09-27T14:11:25Z provider=codex pid=2746346 start
+2026-09-27T14:11:28Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:11:28Z provider=claude pid=2746559 start
+2026-09-27T14:11:31Z provider=claude exit=1 unknown-failure
+2026-09-27T14:11:31Z next-poll seconds=30
+2026-09-27T14:12:01Z provider=claude pid=2747914 start
+2026-09-27T14:12:04Z provider=claude exit=1 unknown-failure
+2026-09-27T14:12:04Z next-poll seconds=30
+2026-09-27T14:12:34Z provider=codex pid=2749205 start
+2026-09-27T14:12:36Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:12:36Z provider=claude pid=2749473 start
+2026-09-27T14:12:39Z provider=claude exit=1 unknown-failure
+2026-09-27T14:12:39Z next-poll seconds=30
+2026-09-27T14:13:09Z provider=claude pid=2750807 start
+2026-09-27T14:13:12Z provider=claude exit=1 unknown-failure
+2026-09-27T14:13:12Z next-poll seconds=30
+2026-09-27T14:13:42Z provider=codex pid=2752095 start
+2026-09-27T14:13:45Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:13:45Z provider=claude pid=2752361 start
+2026-09-27T14:13:48Z provider=claude exit=1 unknown-failure
+2026-09-27T14:13:48Z next-poll seconds=30
+2026-09-27T14:14:18Z provider=claude pid=2753644 start
+2026-09-27T14:14:21Z provider=claude exit=1 unknown-failure
+2026-09-27T14:14:21Z next-poll seconds=30
+2026-09-27T14:14:51Z provider=codex pid=2755006 start
+2026-09-27T14:14:53Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:14:53Z provider=claude pid=2755192 start
+2026-09-27T14:14:56Z provider=claude exit=1 unknown-failure
+2026-09-27T14:14:56Z next-poll seconds=30
+2026-09-27T14:15:26Z provider=claude pid=2756581 start
+2026-09-27T14:15:29Z provider=claude exit=1 unknown-failure
+2026-09-27T14:15:29Z next-poll seconds=30
+2026-09-27T14:15:59Z provider=codex pid=2757866 start
+2026-09-27T14:16:02Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:16:02Z provider=claude pid=2758156 start
+2026-09-27T14:16:05Z provider=claude exit=1 unknown-failure
+2026-09-27T14:16:05Z next-poll seconds=30
+2026-09-27T14:16:35Z provider=claude pid=2759490 start
+2026-09-27T14:16:38Z provider=claude exit=1 unknown-failure
+2026-09-27T14:16:38Z next-poll seconds=30
+2026-09-27T14:17:08Z provider=codex pid=2760875 start
+2026-09-27T14:17:10Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:17:10Z provider=claude pid=2761139 start
+2026-09-27T14:17:13Z provider=claude exit=1 unknown-failure
+2026-09-27T14:17:13Z next-poll seconds=30
+2026-09-27T14:17:43Z provider=claude pid=2762439 start
+2026-09-27T14:17:46Z provider=claude exit=1 unknown-failure
+2026-09-27T14:17:46Z next-poll seconds=30
+2026-09-27T14:18:16Z provider=codex pid=2763787 start
+2026-09-27T14:18:19Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:18:19Z provider=claude pid=2764047 start
+2026-09-27T14:18:22Z provider=claude exit=1 unknown-failure
+2026-09-27T14:18:22Z next-poll seconds=30
+2026-09-27T14:18:52Z provider=claude pid=2765846 start
+2026-09-27T14:18:55Z provider=claude exit=1 unknown-failure
+2026-09-27T14:18:55Z next-poll seconds=30
+2026-09-27T14:19:25Z provider=codex pid=2767101 start
+2026-09-27T14:19:27Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:19:27Z provider=claude pid=2767422 start
+2026-09-27T14:19:30Z provider=claude exit=1 unknown-failure
+2026-09-27T14:19:30Z next-poll seconds=30
+2026-09-27T14:20:00Z provider=claude pid=2768673 start
+2026-09-27T14:20:03Z provider=claude exit=1 unknown-failure
+2026-09-27T14:20:03Z next-poll seconds=30
+2026-09-27T14:20:33Z provider=codex pid=2770003 start
+2026-09-27T14:20:36Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:20:36Z provider=claude pid=2770289 start
+2026-09-27T14:20:39Z provider=claude exit=1 unknown-failure
+2026-09-27T14:20:39Z next-poll seconds=30
+2026-09-27T14:21:09Z provider=claude pid=2771613 start
+2026-09-27T14:21:12Z provider=claude exit=1 unknown-failure
+2026-09-27T14:21:12Z next-poll seconds=30
+2026-09-27T14:21:42Z provider=codex pid=2772944 start
+2026-09-27T14:21:44Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:21:44Z provider=claude pid=2773170 start
+2026-09-27T14:21:47Z provider=claude exit=1 unknown-failure
+2026-09-27T14:21:47Z next-poll seconds=30
+2026-09-27T14:22:17Z provider=claude pid=2774509 start
+2026-09-27T14:22:21Z provider=claude exit=1 unknown-failure
+2026-09-27T14:22:21Z next-poll seconds=30
+2026-09-27T14:22:51Z provider=codex pid=2775780 start
+2026-09-27T14:22:53Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:22:53Z provider=claude pid=2776083 start
+2026-09-27T14:22:56Z provider=claude exit=1 unknown-failure
+2026-09-27T14:22:56Z next-poll seconds=30
+2026-09-27T14:23:26Z provider=claude pid=2777392 start
+2026-09-27T14:23:30Z provider=claude exit=1 unknown-failure
+2026-09-27T14:23:30Z next-poll seconds=30
+2026-09-27T14:24:00Z provider=codex pid=2778726 start
+2026-09-27T14:24:04Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:24:04Z provider=claude pid=2779051 start
+2026-09-27T14:24:07Z provider=claude exit=1 unknown-failure
+2026-09-27T14:24:07Z next-poll seconds=30
+2026-09-27T14:24:37Z provider=claude pid=2780359 start
+2026-09-27T14:24:41Z provider=claude exit=1 unknown-failure
+2026-09-27T14:24:41Z next-poll seconds=30
+2026-09-27T14:25:11Z provider=codex pid=2781686 start
+2026-09-27T14:25:13Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:25:13Z provider=claude pid=2781960 start
+2026-09-27T14:25:16Z provider=claude exit=1 unknown-failure
+2026-09-27T14:25:16Z next-poll seconds=30
+2026-09-27T14:25:46Z provider=claude pid=2783272 start
+2026-09-27T14:25:49Z provider=claude exit=1 unknown-failure
+2026-09-27T14:25:49Z next-poll seconds=30
+2026-09-27T14:26:19Z provider=codex pid=2784597 start
+2026-09-27T14:26:21Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:26:21Z provider=claude pid=2784826 start
+2026-09-27T14:26:24Z provider=claude exit=1 unknown-failure
+2026-09-27T14:26:24Z next-poll seconds=30
+2026-09-27T14:26:54Z provider=claude pid=2786159 start
+2026-09-27T14:26:57Z provider=claude exit=1 unknown-failure
+2026-09-27T14:26:57Z next-poll seconds=30
+2026-09-27T14:27:27Z provider=codex pid=2787450 start
+2026-09-27T14:27:30Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:27:30Z provider=claude pid=2787748 start
+2026-09-27T14:27:33Z provider=claude exit=1 unknown-failure
+2026-09-27T14:27:33Z next-poll seconds=30
+2026-09-27T14:28:03Z provider=claude pid=2789062 start
+2026-09-27T14:28:06Z provider=claude exit=1 unknown-failure
+2026-09-27T14:28:06Z next-poll seconds=30
+2026-09-27T14:28:36Z provider=codex pid=2790352 start
+2026-09-27T14:28:39Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:28:39Z provider=claude pid=2790649 start
+2026-09-27T14:28:41Z provider=claude exit=1 unknown-failure
+2026-09-27T14:28:41Z next-poll seconds=30
+2026-09-27T14:29:11Z provider=claude pid=2792373 start
+2026-09-27T14:29:14Z provider=claude exit=1 unknown-failure
+2026-09-27T14:29:14Z next-poll seconds=30
+2026-09-27T14:29:44Z provider=codex pid=2793686 start
+2026-09-27T14:29:47Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:29:47Z provider=claude pid=2793950 start
+2026-09-27T14:29:50Z provider=claude exit=1 unknown-failure
+2026-09-27T14:29:50Z next-poll seconds=30
+2026-09-27T14:30:20Z provider=claude pid=2795248 start
+2026-09-27T14:30:23Z provider=claude exit=1 unknown-failure
+2026-09-27T14:30:23Z next-poll seconds=30
+2026-09-27T14:30:53Z provider=codex pid=2796594 start
+2026-09-27T14:30:56Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:30:56Z provider=claude pid=2796830 start
+2026-09-27T14:30:59Z provider=claude exit=1 unknown-failure
+2026-09-27T14:30:59Z next-poll seconds=30
+2026-09-27T14:31:29Z provider=claude pid=2798193 start
+2026-09-27T14:31:32Z provider=claude exit=1 unknown-failure
+2026-09-27T14:31:32Z next-poll seconds=30
+2026-09-27T14:32:02Z provider=codex pid=2799467 start
+2026-09-27T14:32:04Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:32:04Z provider=claude pid=2799758 start
+2026-09-27T14:32:07Z provider=claude exit=1 unknown-failure
+2026-09-27T14:32:07Z next-poll seconds=30
+2026-09-27T14:32:37Z provider=claude pid=2801047 start
+2026-09-27T14:32:40Z provider=claude exit=1 unknown-failure
+2026-09-27T14:32:40Z next-poll seconds=30
+2026-09-27T14:33:10Z provider=codex pid=2802397 start
+2026-09-27T14:33:13Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:33:13Z provider=claude pid=2802659 start
+2026-09-27T14:33:16Z provider=claude exit=1 unknown-failure
+2026-09-27T14:33:16Z next-poll seconds=30
+2026-09-27T14:33:46Z provider=claude pid=2803960 start
+2026-09-27T14:33:49Z provider=claude exit=1 unknown-failure
+2026-09-27T14:33:49Z next-poll seconds=30
+2026-09-27T14:34:19Z provider=codex pid=2805301 start
+2026-09-27T14:34:23Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:34:23Z provider=claude pid=2805569 start
+2026-09-27T14:34:26Z provider=claude exit=1 unknown-failure
+2026-09-27T14:34:26Z next-poll seconds=30
+2026-09-27T14:34:56Z provider=claude pid=2806902 start
+2026-09-27T14:34:59Z provider=claude exit=1 unknown-failure
+2026-09-27T14:34:59Z next-poll seconds=30
+2026-09-27T14:35:29Z provider=codex pid=2808188 start
+2026-09-27T14:35:31Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:35:31Z provider=claude pid=2808468 start
+2026-09-27T14:35:34Z provider=claude exit=1 unknown-failure
+2026-09-27T14:35:34Z next-poll seconds=30
+2026-09-27T14:36:04Z provider=claude pid=2809836 start
+2026-09-27T14:36:08Z provider=claude exit=1 unknown-failure
+2026-09-27T14:36:08Z next-poll seconds=30
+2026-09-27T14:36:38Z provider=codex pid=2811089 start
+2026-09-27T14:36:40Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:36:40Z provider=claude pid=2811374 start
+2026-09-27T14:36:43Z provider=claude exit=1 unknown-failure
+2026-09-27T14:36:43Z next-poll seconds=30
+2026-09-27T14:37:13Z provider=claude pid=2812659 start
+2026-09-27T14:37:16Z provider=claude exit=1 unknown-failure
+2026-09-27T14:37:16Z next-poll seconds=30
+2026-09-27T14:37:46Z provider=codex pid=2813996 start
+2026-09-27T14:37:49Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:37:49Z provider=claude pid=2814230 start
+2026-09-27T14:37:52Z provider=claude exit=1 unknown-failure
+2026-09-27T14:37:52Z next-poll seconds=30
+2026-09-27T14:38:22Z provider=claude pid=2815591 start
+2026-09-27T14:38:25Z provider=claude exit=1 unknown-failure
+2026-09-27T14:38:25Z next-poll seconds=30
+2026-09-27T14:38:55Z provider=codex pid=2817300 start
+2026-09-27T14:38:57Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:38:57Z provider=claude pid=2817598 start
+2026-09-27T14:39:00Z provider=claude exit=1 unknown-failure
+2026-09-27T14:39:00Z next-poll seconds=30
+2026-09-27T14:39:30Z provider=claude pid=2818876 start
+2026-09-27T14:39:33Z provider=claude exit=1 unknown-failure
+2026-09-27T14:39:33Z next-poll seconds=30
+2026-09-27T14:40:03Z provider=codex pid=2820203 start
+2026-09-27T14:40:05Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:40:05Z provider=claude pid=2820434 start
+2026-09-27T14:40:08Z provider=claude exit=1 unknown-failure
+2026-09-27T14:40:08Z next-poll seconds=30
+2026-09-27T14:40:38Z provider=claude pid=2821750 start
+2026-09-27T14:40:41Z provider=claude exit=1 unknown-failure
+2026-09-27T14:40:41Z next-poll seconds=30
+2026-09-27T14:41:11Z provider=codex pid=2823139 start
+2026-09-27T14:41:14Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:41:14Z provider=claude pid=2823338 start
+2026-09-27T14:41:17Z provider=claude exit=1 unknown-failure
+2026-09-27T14:41:17Z next-poll seconds=30
+2026-09-27T14:41:47Z provider=claude pid=2824715 start
+2026-09-27T14:41:50Z provider=claude exit=1 unknown-failure
+2026-09-27T14:41:50Z next-poll seconds=30
+2026-09-27T14:42:20Z provider=codex pid=2825974 start
+2026-09-27T14:42:23Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:42:23Z provider=claude pid=2826293 start
+2026-09-27T14:42:25Z provider=claude exit=1 unknown-failure
+2026-09-27T14:42:25Z next-poll seconds=30
+2026-09-27T14:42:55Z provider=claude pid=2827539 start
+2026-09-27T14:42:59Z provider=claude exit=1 unknown-failure
+2026-09-27T14:42:59Z next-poll seconds=30
+2026-09-27T14:43:29Z provider=codex pid=2828887 start
+2026-09-27T14:43:31Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:43:31Z provider=claude pid=2829201 start
+2026-09-27T14:43:35Z provider=claude exit=1 unknown-failure
+2026-09-27T14:43:35Z next-poll seconds=30
+2026-09-27T14:44:05Z provider=claude pid=2830478 start
+2026-09-27T14:44:08Z provider=claude exit=1 unknown-failure
+2026-09-27T14:44:08Z next-poll seconds=30
+2026-09-27T14:44:38Z provider=codex pid=2831852 start
+2026-09-27T14:44:40Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:44:40Z provider=claude pid=2832048 start
+2026-09-27T14:44:43Z provider=claude exit=1 unknown-failure
+2026-09-27T14:44:43Z next-poll seconds=30
+2026-09-27T14:45:13Z provider=claude pid=2833391 start
+2026-09-27T14:45:16Z provider=claude exit=1 unknown-failure
+2026-09-27T14:45:16Z next-poll seconds=30
+2026-09-27T14:45:46Z provider=codex pid=2834633 start
+2026-09-27T14:45:49Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:45:49Z provider=claude pid=2834980 start
+2026-09-27T14:45:52Z provider=claude exit=1 unknown-failure
+2026-09-27T14:45:52Z next-poll seconds=30
+2026-09-27T14:46:22Z provider=claude pid=2836262 start
+2026-09-27T14:46:25Z provider=claude exit=1 unknown-failure
+2026-09-27T14:46:25Z next-poll seconds=30
+2026-09-27T14:46:55Z provider=codex pid=2837611 start
+2026-09-27T14:46:59Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:46:59Z provider=claude pid=2837907 start
+2026-09-27T14:47:02Z provider=claude exit=1 unknown-failure
+2026-09-27T14:47:02Z next-poll seconds=30
+2026-09-27T14:47:32Z provider=claude pid=2839166 start
+2026-09-27T14:47:35Z provider=claude exit=1 unknown-failure
+2026-09-27T14:47:35Z next-poll seconds=30
+2026-09-27T14:48:05Z provider=codex pid=2840516 start
+2026-09-27T14:48:07Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:48:07Z provider=claude pid=2840785 start
+2026-09-27T14:48:10Z provider=claude exit=1 unknown-failure
+2026-09-27T14:48:10Z next-poll seconds=30
+2026-09-27T14:48:40Z provider=claude pid=2842091 start
+2026-09-27T14:48:43Z provider=claude exit=1 unknown-failure
+2026-09-27T14:48:43Z next-poll seconds=30
+2026-09-27T14:49:13Z provider=codex pid=2843887 start
+2026-09-27T14:49:16Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:49:16Z provider=claude pid=2844123 start
+2026-09-27T14:49:19Z provider=claude exit=1 unknown-failure
+2026-09-27T14:49:19Z next-poll seconds=30
+2026-09-27T14:49:49Z provider=claude pid=2845481 start
+2026-09-27T14:49:52Z provider=claude exit=1 unknown-failure
+2026-09-27T14:49:52Z next-poll seconds=30
+2026-09-27T14:50:22Z provider=codex pid=2846740 start
+2026-09-27T14:50:25Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:50:25Z provider=claude pid=2847041 start
+2026-09-27T14:50:28Z provider=claude exit=1 unknown-failure
+2026-09-27T14:50:28Z next-poll seconds=30
+2026-09-27T14:50:58Z provider=claude pid=2848390 start
+2026-09-27T14:51:01Z provider=claude exit=1 unknown-failure
+2026-09-27T14:51:01Z next-poll seconds=30
+2026-09-27T14:51:31Z provider=codex pid=2849688 start
+2026-09-27T14:51:34Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:51:34Z provider=claude pid=2849972 start
+2026-09-27T14:51:37Z provider=claude exit=1 unknown-failure
+2026-09-27T14:51:37Z next-poll seconds=30
+2026-09-27T14:52:07Z provider=claude pid=2851254 start
+2026-09-27T14:52:10Z provider=claude exit=1 unknown-failure
+2026-09-27T14:52:10Z next-poll seconds=30
+2026-09-27T14:52:40Z provider=codex pid=2852574 start
+2026-09-27T14:52:42Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:52:42Z provider=claude pid=2852822 start
+2026-09-27T14:52:46Z provider=claude exit=1 unknown-failure
+2026-09-27T14:52:46Z next-poll seconds=30
+2026-09-27T14:53:16Z provider=claude pid=2854149 start
+2026-09-27T14:53:19Z provider=claude exit=1 unknown-failure
+2026-09-27T14:53:19Z next-poll seconds=30
+2026-09-27T14:53:49Z provider=codex pid=2855497 start
+2026-09-27T14:53:52Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:53:52Z provider=claude pid=2855730 start
+2026-09-27T14:53:55Z provider=claude exit=1 unknown-failure
+2026-09-27T14:53:55Z next-poll seconds=30
+2026-09-27T14:54:25Z provider=claude pid=2857079 start
+2026-09-27T14:54:28Z provider=claude exit=1 unknown-failure
+2026-09-27T14:54:28Z next-poll seconds=30
+2026-09-27T14:54:58Z provider=codex pid=2858360 start
+2026-09-27T14:55:00Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:55:00Z provider=claude pid=2858619 start
+2026-09-27T14:55:03Z provider=claude exit=1 unknown-failure
+2026-09-27T14:55:03Z next-poll seconds=30
+2026-09-27T14:55:33Z provider=claude pid=2859915 start
+2026-09-27T14:55:36Z provider=claude exit=1 unknown-failure
+2026-09-27T14:55:36Z next-poll seconds=30
+2026-09-27T14:56:06Z provider=codex pid=2861244 start
+2026-09-27T14:56:08Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:56:08Z provider=claude pid=2861476 start
+2026-09-27T14:56:11Z provider=claude exit=1 unknown-failure
+2026-09-27T14:56:11Z next-poll seconds=30
+2026-09-27T14:56:41Z provider=claude pid=2862819 start
+2026-09-27T14:56:44Z provider=claude exit=1 unknown-failure
+2026-09-27T14:56:44Z next-poll seconds=30
+2026-09-27T14:57:14Z provider=codex pid=2864151 start
+2026-09-27T14:57:17Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:57:17Z provider=claude pid=2864364 start
+2026-09-27T14:57:20Z provider=claude exit=1 unknown-failure
+2026-09-27T14:57:20Z next-poll seconds=30
+2026-09-27T14:57:50Z provider=claude pid=2865731 start
+2026-09-27T14:57:53Z provider=claude exit=1 unknown-failure
+2026-09-27T14:57:53Z next-poll seconds=30
+2026-09-27T14:58:23Z provider=codex pid=2866968 start
+2026-09-27T14:58:27Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:58:27Z provider=claude pid=2867330 start
+2026-09-27T14:58:30Z provider=claude exit=1 unknown-failure
+2026-09-27T14:58:30Z next-poll seconds=30
+2026-09-27T14:59:00Z provider=claude pid=2869079 start
+2026-09-27T14:59:03Z provider=claude exit=1 unknown-failure
+2026-09-27T14:59:03Z next-poll seconds=30
+2026-09-27T14:59:33Z provider=codex pid=2870384 start
+2026-09-27T14:59:35Z provider=codex exit=1 recognized-unavailable
+2026-09-27T14:59:35Z provider=claude pid=2870675 start
+2026-09-27T14:59:38Z provider=claude exit=1 unknown-failure
+2026-09-27T14:59:38Z next-poll seconds=30
+2026-09-27T15:00:08Z provider=claude pid=2871925 start
+2026-09-27T15:00:12Z provider=claude exit=1 unknown-failure
+2026-09-27T15:00:12Z next-poll seconds=30
+2026-09-27T15:00:42Z provider=codex pid=2873297 start
+2026-09-27T15:00:45Z provider=codex exit=1 recognized-unavailable
+2026-09-27T15:00:45Z provider=claude pid=2873544 start
+2026-09-27T15:00:48Z provider=claude exit=1 unknown-failure
+2026-09-27T15:00:48Z next-poll seconds=30
+2026-09-27T15:01:18Z provider=claude pid=2874889 start
+2026-09-27T15:01:21Z provider=claude exit=1 unknown-failure
+2026-09-27T15:01:21Z next-poll seconds=30
+2026-09-27T15:01:51Z provider=codex pid=2876242 start
+2026-09-27T15:01:53Z provider=codex exit=1 recognized-unavailable
+2026-09-27T15:01:53Z provider=claude pid=2876439 start
+2026-09-27T15:01:56Z provider=claude exit=1 unknown-failure
+2026-09-27T15:01:56Z next-poll seconds=30
+2026-09-27T15:02:26Z provider=claude pid=2877809 start
+2026-09-27T15:02:29Z provider=claude exit=1 unknown-failure
+2026-09-27T15:02:29Z next-poll seconds=30
+2026-09-27T15:02:59Z provider=codex pid=2879063 start
+2026-09-27T15:03:02Z provider=codex exit=1 recognized-unavailable
+2026-09-27T15:03:02Z provider=claude pid=2879406 start
+2026-09-27T15:03:05Z provider=claude exit=1 unknown-failure
+2026-09-27T15:03:05Z next-poll seconds=30
+2026-09-27T15:03:35Z provider=claude pid=2880632 start
+2026-09-27T15:03:38Z provider=claude exit=1 unknown-failure
+2026-09-27T15:03:38Z next-poll seconds=30
+2026-09-27T15:04:08Z provider=codex pid=2881986 start
+2026-09-27T15:04:10Z provider=codex exit=1 recognized-unavailable
+2026-09-27T15:04:10Z provider=claude pid=2882173 start
+2026-09-27T15:04:13Z provider=claude exit=1 unknown-failure
+2026-09-27T15:04:13Z next-poll seconds=30
+2026-09-27T15:04:43Z provider=claude pid=2883514 start
+2026-09-27T15:04:46Z provider=claude exit=1 unknown-failure
+2026-09-27T15:04:46Z next-poll seconds=30
+2026-09-27T15:05:16Z provider=codex pid=2884827 start
+2026-09-27T15:05:19Z provider=codex exit=1 recognized-unavailable
+2026-09-27T15:05:19Z provider=claude pid=2885113 start
+2026-09-27T15:05:23Z provider=claude exit=1 unknown-failure
+2026-09-27T15:05:23Z next-poll seconds=30
+2026-09-27T15:05:53Z provider=claude pid=2886492 start
+2026-09-27T15:05:57Z provider=claude exit=1 unknown-failure
+2026-09-27T15:05:57Z next-poll seconds=30
+2026-09-27T15:06:27Z provider=codex pid=2887824 start
+2026-09-27T15:06:30Z provider=codex exit=1 recognized-unavailable
+2026-09-27T15:06:30Z provider=claude pid=2888074 start
+2026-09-27T15:06:33Z provider=claude exit=1 unknown-failure
+2026-09-27T15:06:33Z next-poll seconds=30
+2026-09-27T15:07:03Z provider=claude pid=2889422 start
+2026-09-27T15:07:06Z provider=claude exit=1 unknown-failure
+2026-09-27T15:07:06Z next-poll seconds=30
+2026-09-27T15:07:36Z provider=codex pid=2890702 start
+2026-09-27T15:07:38Z provider=codex exit=1 recognized-unavailable
+2026-09-27T15:07:38Z provider=claude pid=2891025 start
+2026-09-27T15:07:42Z provider=claude exit=1 unknown-failure
+2026-09-27T15:07:42Z next-poll seconds=30
+2026-09-27T15:08:12Z provider=claude pid=2892301 start
+2026-09-27T15:08:15Z provider=claude exit=1 unknown-failure
+2026-09-27T15:08:15Z next-poll seconds=30
+2026-09-27T15:08:45Z provider=codex pid=2893634 start
+2026-09-27T15:08:47Z provider=codex exit=1 recognized-unavailable
+2026-09-27T15:08:47Z provider=claude pid=2893920 start
+2026-09-27T15:08:51Z provider=claude exit=1 unknown-failure
+2026-09-27T15:08:51Z next-poll seconds=30
+2026-09-27T15:09:21Z provider=claude pid=2895649 start
+2026-09-27T15:09:24Z provider=claude exit=1 unknown-failure
+2026-09-27T15:09:24Z next-poll seconds=30
+2026-09-27T15:09:54Z provider=codex pid=2896990 start
+2026-09-27T15:09:56Z provider=codex exit=1 recognized-unavailable
+2026-09-27T15:09:56Z provider=claude pid=2897228 start
+2026-09-27T15:09:59Z provider=claude exit=1 unknown-failure
+2026-09-27T15:09:59Z next-poll seconds=30
+2026-09-27T15:10:29Z provider=claude pid=2898601 start
+2026-09-27T15:10:32Z provider=claude exit=1 unknown-failure
+2026-09-27T15:10:32Z next-poll seconds=30
+2026-09-27T15:11:02Z provider=codex pid=2899854 start
+2026-09-27T15:11:04Z provider=codex exit=1 recognized-unavailable
+2026-09-27T15:11:04Z provider=claude pid=2900162 start
+2026-09-27T15:11:08Z provider=claude exit=1 unknown-failure
+2026-09-27T15:11:08Z next-poll seconds=30
+2026-09-27T15:11:38Z provider=claude pid=2901477 start
+2026-09-27T15:11:41Z provider=claude exit=1 unknown-failure
+2026-09-27T15:11:41Z next-poll seconds=30
+2026-09-27T15:12:11Z provider=codex pid=2902774 start
+2026-09-27T15:12:13Z provider=codex exit=1 recognized-unavailable
+2026-09-27T15:12:13Z provider=claude pid=2903056 start
+2026-09-27T15:12:16Z provider=claude exit=1 unknown-failure
+2026-09-27T15:12:16Z next-poll seconds=30
+2026-09-27T15:12:46Z provider=claude pid=2904346 start
+2026-09-27T15:12:49Z provider=claude exit=1 unknown-failure
+2026-09-27T15:12:49Z next-poll seconds=30
+2026-09-27T15:13:19Z provider=codex pid=2905686 start
+2026-09-27T15:13:22Z provider=codex exit=1 recognized-unavailable
+2026-09-27T15:13:22Z provider=claude pid=2905911 start
+2026-09-27T15:13:25Z provider=claude exit=1 unknown-failure
+2026-09-27T15:13:25Z next-poll seconds=30
+2026-09-27T15:13:55Z provider=claude pid=2907249 start
+2026-09-27T15:13:58Z provider=claude exit=1 unknown-failure
+2026-09-27T15:13:58Z next-poll seconds=30
+2026-09-27T15:14:28Z provider=codex pid=2908517 start
+2026-09-27T15:14:31Z provider=codex exit=1 recognized-unavailable
+2026-09-27T15:14:31Z provider=claude pid=2908851 start
+2026-09-27T15:14:34Z provider=claude exit=1 unknown-failure
+2026-09-27T15:14:34Z next-poll seconds=30
+2026-09-27T15:15:04Z provider=claude pid=2910175 start
+2026-09-27T15:15:07Z provider=claude exit=1 unknown-failure
+2026-09-27T15:15:07Z next-poll seconds=30
+2026-09-27T15:15:37Z provider=codex pid=2911476 start
+2026-09-27T15:52:11Z provider=codex exit=0
+2026-09-27T15:52:11Z next-poll seconds=30
+2026-09-27T15:52:41Z provider=claude pid=3005672 start
+2026-09-27T15:52:44Z provider=claude exit=1 unknown-failure
+2026-09-27T15:52:44Z next-poll seconds=30
+2026-09-27T15:53:14Z provider=codex pid=3007078 start
+2026-09-27T15:57:08Z provider=codex exit=0
+2026-09-27T15:57:08Z next-poll seconds=30
+2026-09-27T15:57:38Z provider=claude pid=3017407 start
+2026-09-27T15:57:42Z provider=claude exit=1 unknown-failure
+2026-09-27T15:57:42Z next-poll seconds=30
+2026-09-27T15:58:12Z provider=codex pid=3018779 start
+2026-09-27T15:58:56Z provider=codex exit=0
+2026-09-27T15:58:56Z next-poll seconds=30
+2026-09-27T15:59:26Z provider=claude pid=3022263 start
+2026-09-27T15:59:30Z provider=claude exit=1 unknown-failure
+2026-09-27T15:59:30Z next-poll seconds=30
+2026-09-27T16:00:00Z provider=codex pid=3023593 start
+2026-09-28T06:01:05Z stop-signal present; exiting
+2026-09-28T06:01:14Z provider=claude pid=860048 start

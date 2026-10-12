@@ -1,0 +1,95 @@
+# Environment snapshot (2026-10-12)
+Linux instance-20260923-231410 7.0.0-1013-gcp #13~24.04.1-Ubuntu SMP PREEMPT Tue Sep 15 18:34:33 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+PRETTY_NAME="Ubuntu 24.04.5 LTS"
+
+Python 3.12.3
+Python 3.12.3
+uv 0.12.18 (aarch64-unknown-linux-gnu)
+v24.21.0
+12.6.0
+Docker version 29.8.1, build 4a63305
+Docker Compose version v5.5.1
+gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+git version 2.43.0
+
+## docker images
+conflux-api:latest f3421a3c1dfb 691MB
+conflux-rel33-api:576fc26 426b9021c037 657MB
+conflux-rel33-api:dc0e665 6f70b7865f91 657MB
+conflux-cb31-api:latest a22929ae57fa 659MB
+valkey/valkey:8 640c5e62cea0 187MB
+python:3.12-slim f77ac9e44ae9 205MB
+node:24-slim 0e0ff40c39bc 351MB
+postgres:17 f4c66b820c6f 667MB
+caddy:2 0c994536bddb 85.1MB
+postgres:17-alpine b0f9560a2de0 415MB
+alpine:latest 294b683cb724 13.6MB
+ghcr.io/rustfs/rustfs:latest 8cc980175544 355MB
+chrislusf/seaweedfs:latest ce9e796f1fe6 693MB
+hello-world:latest 5e2309035332 22.6kB
+ghcr.io/dexidp/dex:v2.41.1 bc7cfce7c17f 150MB
+
+## containers
+conflux-app-1 conflux-api:latest Up 4 days (healthy)
+conflux-worker-1 8bf799c2fc4c Up 4 days (healthy)
+conflux-beat-1 8bf799c2fc4c Up 4 days
+conflux-caddy-1 caddy:2 Up 4 days
+conflux-db-1 postgres:17 Up 4 days (healthy)
+conflux-objectstore-1 ghcr.io/rustfs/rustfs:latest Up 4 days (healthy)
+conflux-cache-1 valkey/valkey:8 Up 4 days (healthy)
+confluxh00-db-1 postgres:17 Up 4 days (healthy)
+confluxrel33-caddy-1 caddy:2 Exited (127) 7 days ago
+confluxrel33-app-1 conflux-rel33-api:576fc26 Up 4 days (healthy)
+confluxrel33-worker-1 conflux-rel33-api:576fc26 Up 4 days (healthy)
+confluxrel33-beat-1 conflux-rel33-api:576fc26 Up 4 days
+confluxrel33-db-1 postgres:17 Up 4 days (healthy)
+confluxrel33-objectstore-1 ghcr.io/rustfs/rustfs:latest Up 4 days (healthy)
+confluxrel33-cache-1 valkey/valkey:8 Up 4 days (healthy)
+conflux-seaweedfs-1 chrislusf/seaweedfs:latest Exited (137) 2 weeks ago
+
+## docker volumes
+conflux_app-static
+conflux_cache-data
+conflux_caddy-config
+conflux_caddy-data
+conflux_db-data
+conflux_objectstore-data
+conflux_seaweedfs-data
+confluxh00_app-static
+confluxh00_cache-data
+confluxh00_caddy-config
+confluxh00_caddy-data
+confluxh00_db-data
+confluxh00_objectstore-data
+confluxh04off_app-static
+confluxh04off_cache-data
+confluxh04off_caddy-config
+confluxh04off_caddy-data
+confluxh04off_db-data
+confluxh04off_objectstore-data
+confluxrel33_app-static
+confluxrel33_cache-data
+confluxrel33_caddy-config
+confluxrel33_caddy-data
+confluxrel33_db-data
+confluxrel33_objectstore-data
+
+## git refs
+archive/gcp-vm-retirement-20261012 86fd316b9e64e02607d7d7a28e9370eaf3cf789e
+claude/C-B02 cb6d3dffea3b3024e271cee705fbc548fc1889aa
+freebuff/RT-001 b4be7a8938d761a624bb59edf00e7fe0183db583
+main 86fd316b9e64e02607d7d7a28e9370eaf3cf789e
+sol/BOOT-B00 3906bf1aac468fbb964c47e730f2817f335a0e3a
+sol/C-B04 b601d85383fcd4a3e21b5c802375e2affd8b9881
+cb6d3dffea3b3024e271cee705fbc548fc1889aa	refs/heads/claude/C-B02
+b4be7a8938d761a624bb59edf00e7fe0183db583	refs/heads/freebuff/RT-001
+86fd316b9e64e02607d7d7a28e9370eaf3cf789e	refs/heads/main
+3906bf1aac468fbb964c47e730f2817f335a0e3a	refs/heads/sol/BOOT-B00
+b601d85383fcd4a3e21b5c802375e2affd8b9881	refs/heads/sol/C-B04
+
+## worktrees
+/home/insightlabs38/conflux                                                                      86fd316 [main]
+/home/insightlabs38/conflux-worktrees/claude-C-B02                                               cb6d3df [claude/C-B02]
+/home/insightlabs38/conflux-worktrees/freebuff-lane                                              b4be7a8 [freebuff/RT-001]
+/home/insightlabs38/conflux-worktrees/sol-C-B04                                                  b601d85 [sol/C-B04]
+/tmp/claude-1001/-home-insightlabs38/6852c7bd-5d9e-418a-b65d-ca55036b71dd/scratchpad/cx-archive  86fd316 [archive/gcp-vm-retirement-20261012]

@@ -1,0 +1,6 @@
+version: 1
+leases: []
+rules:
+- one active owner per exclusive path pattern
+- shared paths require explicit integration lease
+- stale leases reconciled after crash before new work

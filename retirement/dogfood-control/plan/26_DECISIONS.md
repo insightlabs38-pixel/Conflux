@@ -1,0 +1,26 @@
+# Final Decision Register
+
+- D001 modular Django/DRF monolith.
+- D002 PostgreSQL authoritative default.
+- D003 React/TypeScript/Vite frontend.
+- D004 Stage DAG; stage type is a template hint.
+- D005 StageEntry, Project, Submission and SubmissionVersion remain distinct.
+- D006 typed bounded Policy engine; no arbitrary code.
+- D007 versioned Forms + first-class typed Artifacts.
+- D008 Conflux uses a generic S3 adapter; RustFS is the primary offline service, with SeaweedFS compatibility testing and optional ZeroS3.
+- D009 unified EvaluationPlan with strategy registries.
+- D010 normalization-aware assignment is Core hero capability.
+- D011 regularized additive judge-effect normalization family; fixture-backed proof required.
+- D012 Pairwise/Bradley–Terry is Stretch #1, not required for Core release.
+- D013 Awards separated from evaluation; typed prize components.
+- D014 Theme/Page/PageBlock presentation engine.
+- D015 UI/external clients share application/API domain path.
+- D016 transactional outbox + readable audit; no event sourcing.
+- D017 stable public IDs and explicit API/archive/webhook versioning.
+- D018 event templates/cloning, preflight, launch checklist, backup/restore and compatibility are Core.
+- D019 official checker is floor; `make verify` is stronger internal release proof.
+- D020 raw gallery HTML must expose fixture titles for checker compatibility.
+- D021 fixture duplicates are imported faithfully then flagged, never silently merged.
+- D022 Bulk verification owns fuzz/property/permutation breadth; Claude/Sol own critical semantics, gates and difficult invariant bugs.
+- D023 RustFS is the primary offline S3-compatible object store; SeaweedFS is required compatibility coverage; ZeroS3 is optional and noncritical. Conflux uses a generic S3 adapter.
+- D024 Core substantially exceeds T4; Stretch/Very Stretch remain additive via registries.

@@ -1,0 +1,21 @@
+{
+  "task_id": "C-B09",
+  "status": "done",
+  "summary": "Artifact kinds, direct S3 upload, validators, preflight, participant UX, and cross-provider contract.",
+  "commits": {
+    "ART-001": "cbc548a",
+    "ART-002": "bfb9e96",
+    "ART-003": "53ad2bf",
+    "ART-004": "56e6316",
+    "ART-005": "7191a90",
+    "ART-006": "c051afe"
+  },
+  "verification": [
+    "make verify-fast: 224 API tests, 16 web tests, lint, format, build passed",
+    "RustFS S3 contract: 3 passed",
+    "SeaweedFS S3 contract: 3 passed",
+    "docker compose up -d --build: healthy; official acceptance 7/7 PASS"
+  ],
+  "next": "C-B10 SUB-001",
+  "completed_at": "2026-09-27T00:54:48.274665+00:00"
+}

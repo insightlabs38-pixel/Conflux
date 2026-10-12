@@ -1,0 +1,129 @@
+version: 2
+leases: []
+reserved_batches: []
+capacity:
+  luna_max_active: 1
+  luna_expansion_enabled: false
+  freebuff_max_active: 1
+  freebuff_top_level_sessions: 1
+provider_notes:
+- at: '2026-09-26T19:36:19+00:00'
+  text: freebuff PAUSED_SUBMIT on RT-001; lease/worktree preserved; no duplicate prompt sent
+- at: '2026-09-26T19:39:17+00:00'
+  text: freebuff PAUSED_SUBMIT on RT-001; lease/worktree preserved; no duplicate prompt sent
+- at: '2026-09-26T20:19:34+00:00'
+  text: freebuff PAUSED_SUBMIT on RT-001; lease/worktree preserved; no duplicate prompt sent
+- at: '2026-09-26T21:15:00+00:00'
+  text: 'Manual reconciliation session: committed RT-001 outstanding worktree changes,
+    hand-merged settings.py against claude/C-B02, integrated RT-001 and C-B04 into
+    main (628a08a, 94c0949, 0469784), verified via make verify-fast. Leases/reservations
+    released below.'
+- at: '2026-09-26T22:40:00+00:00'
+  text: 'Sole sequential worker (per owner directive, old multi-agent/controller
+    campaign abandoned): committed RT-002 (588160e) and RT-003 (3070a63) directly
+    to main, pushed. See ATTENTION.md for the two latent defects fixed (missing
+    Celery app, missing redis dependency) and the RT-004 sandbox-network blocker.'
+- at: '2026-09-26T22:57:00+00:00'
+  text: 'Sole sequential worker: RT-004 unblocked — the sandbox-network restriction
+    from 22:40 had cleared (verified PyPI/npm reachable). Rebuilt/booted the full
+    stack, fixed a missing django.contrib.staticfiles registration, and added an
+    internal-network cold-boot smoke test (make cold-boot-smoke) proving the
+    running stack needs zero hosted dependency. Committed 0499b51, pushed. C-B01
+    (RT-001..RT-004) is complete.'
+- at: '2026-09-26T23:17:00+00:00'
+  text: 'Sole sequential worker: completed C-B03 (FX-001..FX-005) end to end —
+    fixture importer (integrations app), .dogfood.toml auth/routes/portal/tiers,
+    real gallery/submit/judge-scores/csv-export routes, the acceptance wrapper
+    (make acceptance), and pytest-xdist for concurrent verification. Verified
+    against the real running stack with the unmodified official run.py: all 7
+    checks (T1 x3, T2 x4) PASS. Also corrected stale TASKS.yaml bookkeeping for
+    EV-001..004 (C-B04): they were still marked BLOCKED despite C-B04 being
+    genuinely complete and merged (receipts/C-B04.json, commits 94c0949/
+    0469784/45c5eb3) — real evidence over stale controller state, per the
+    sole-sequential-worker directive. Commits b57e26e, 716cb26, edba8f0,
+    a29e774, 5d6b2a1, all pushed. Next: C-B05 (Stage graph and advancement).'
+- at: '2026-09-26T23:30:00+00:00'
+  text: 'Sole sequential worker: completed C-B05 (ST-001..ST-005) — Stage/
+    StageTransition/StageEntry models with BFS-enforced acyclicity, whole-graph
+    validation + deterministic topological ordering (stages/graph.py, closing a
+    real bulk_create-bypasses-clean() gap), an 8-strategy AdvancementStrategy
+    registry with audited advance_stage(), participation_mode/subject_type
+    enforcement, and a full organizer stage-builder UI+API. Found and fixed a
+    real DRF bug along the way (UniqueTogetherValidator crashing on a UUID-typed
+    FK override). Verified against the real running stack: all 7 acceptance
+    checks still PASS after rebuild. Commits 1060e7a, 86dcb38, 8c5cf83, b0e3af2,
+    9f5735f, all pushed. Next: C-B06 (Policy, temporal gates, exceptions and
+    explanations).'
+- at: '2026-09-26T23:44:00+00:00'
+  text: 'Sole sequential worker: completed C-B06 (POL-001..006) — a typed
+    bounded policy AST/evaluator (fail-closed on unknown op/fact, depth/size
+    capped), Policy/PolicyBinding/TemporalGate/ExceptionGrant models (grant
+    scoping enforced by construction, not convention), a Decision/
+    explain_action evidence contract, and a preset-based organizer rule
+    builder (backend CRUD + frontend UI) needing no raw JSON for common
+    rules. Verified against the real running stack: all 7 acceptance checks
+    still PASS after rebuild. Commits 5881620, c0e6b29, 073a7fb, 3355a7c,
+    583ff3b, 25cb4c9, all pushed. Next: C-B07 (Teams and participation
+    lifecycle).'
+last_green_main: 25cb4c9
+runtime_mode: NORMAL
+rules:
+- one active owner per exclusive path pattern
+- shared paths require explicit integration lease
+- reconcile stale leases after crash before new work
+- canonical mutations are serialized by conflux-control using flock
+completed_batches:
+- BOOT-B00
+- C-B02
+- RT-001
+- RT-002
+- RT-003
+- RT-004
+- C-B01
+- C-B04
+- FX-001
+- FX-002
+- FX-003
+- FX-004
+- FX-005
+- C-B03
+- ST-001
+- ST-002
+- ST-003
+- ST-004
+- ST-005
+- C-B05
+- POL-001
+- POL-002
+- POL-003
+- POL-004
+- POL-005
+- POL-006
+- C-B06
+- TEAM-001
+- TEAM-002
+- TEAM-003
+- TEAM-004
+- C-B07
+- PRJ-001
+- FORM-001
+- FORM-002
+- FORM-003
+- FORM-004
+- C-B08
+- ART-001
+- ART-002
+- ART-003
+- ART-004
+- ART-005
+- ART-006
+- C-B09
+- SUB-001
+- SUB-002
+- SUB-003
+- SUB-004
+- SUB-005
+- SUB-006
+- C-B10
+open_gates: []
+blockers: {}

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+"$(dirname "$0")/conflux-runtime-mode"
+tmux list-sessions -F '#{session_name}\t#{session_windows} windows' 2>/dev/null | awk -F '\t' '$1 ~ /^fb-/ {print}' || true

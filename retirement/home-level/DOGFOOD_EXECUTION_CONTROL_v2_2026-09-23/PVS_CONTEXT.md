@@ -1,0 +1,9 @@
+# Post-Very-Stretch competition and operating context
+
+The owner supplied the DOGFOOD event-site context externally; this concise receipt is the local planning reference. DOGFOOD is intended to be a modern, open-source, self-hostable hackathon submission and judging platform that organizers can fork, self-host for future events, and improve upstream. The lifecycle is registration, teams, submissions, eligibility, assignment, scoring, normalization, results, certificates, and archive.
+
+Required operation: one-command startup through `docker compose up` or equivalent, seeded fixtures, no cloud account, hosted database, hosted auth provider, or external API required for startup, laptop-friendly operation, and required/core functionality while the network is unavailable. Any external PVS integration is optional and never a runtime dependency.
+
+The evidence plan prioritizes correctness (40%), judging integrity (25%), adoptability/operability (20%), and code quality/innovation (15%). T1 covers identity, roles, event configuration, teams, submissions and gallery; T2 covers judge assignment, weighted rubrics, isolation, progress, normalization and CSV export; T3 covers voting, comments, hidden results, randomized ballots and abuse/audit controls; T4 covers APIs, webhooks, records, embeds and import/export. Judges need efficient console workflows for multiple independent reviews, peer-score isolation, structured scoring and written feedback.
+
+Required repository evidence includes README.md, ARCHITECTURE.md, DATA-MODEL.md, JUDGING.md, acceptance report, public source/license and startup configuration. The final human demo must show create → submit → judge → publish in five minutes. Bonus themes are normalization proof, pairwise judging, threat model and API-first; they are tie-breakers. PVS additions must preserve Core behavior and use existing primitives.

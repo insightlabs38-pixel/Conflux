@@ -1,0 +1,15 @@
+{
+  "task_id": "POL-005",
+  "status": "done",
+  "summary": "Decision dataclass (allowed, reason, policy_name, exception_grant_reason, gate_facts) + explain_action(), giving a human-readable .explain() sentence and structured evidence for an action-gating call — computed fresh per call, never persisted (full trace/debugger UI is a stretch goal per the plan doc). check_action() is now a thin wrapper over explain_action() returning (allowed, reason); behavior unchanged, all 21 pre-existing policy tests still pass.",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "583ff3b",
+  "verification": [
+    { "command": "uv run --frozen pytest tests/integration/test_decision_evidence.py tests/integration/test_policy_bindings.py tests/integration/test_temporal_gates.py tests/integration/test_exception_grants.py", "result": "passed; 4 new + 21 pre-existing = 25 tests" },
+    { "command": "make verify-fast", "result": "passed" }
+  ],
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T23:40:00+00:00"
+}

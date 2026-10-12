@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+"""Record evidence-backed Core footage readiness signals in external control state."""
+import argparse,datetime as dt,json,os,pathlib,tempfile
+ROOT=pathlib.Path('/home/dogfood-control'); STATE=ROOT/'run/core-footage-gate.json'
+KEYS=('t1_permanent_green','t2_permanent_green','t3_t4_manual_review_ready','core_flows_coherent','no_demo_p0_p1','canonical_demo_seeded','seven_step_smoke_passed','ui_coherent')
+def main():
+ p=argparse.ArgumentParser(); sp=p.add_subparsers(dest='cmd',required=True);sp.add_parser('status'); q=sp.add_parser('set');q.add_argument('signal',choices=KEYS);q.add_argument('value',choices=['true','false']);q.add_argument('--evidence',default='');a=p.parse_args(); d=json.loads(STATE.read_text()) if STATE.exists() else {'signals':{},'evidence':{}}
+ if a.cmd=='status':
+  for k in KEYS: print(f"{k}: {d.get('signals',{}).get(k,False)} | {d.get('evidence',{}).get(k,'no evidence recorded')}")
+  return
+ if a.value=='true' and not a.evidence.strip(): raise SystemExit('--evidence is required when setting a gate signal true')
+ d.setdefault('signals',{})[a.signal]=a.value=='true'; d.setdefault('evidence',{})[a.signal]=a.evidence.strip() if a.value=='true' else ''; d['updated_at']=dt.datetime.now(dt.timezone.utc).isoformat()
+ STATE.parent.mkdir(parents=True,exist_ok=True); fd,tmp=tempfile.mkstemp(prefix='.video-gate.',dir=STATE.parent)
+ with os.fdopen(fd,'w') as f: json.dump(d,f,indent=2);f.write('\n');f.flush();os.fsync(f.fileno())
+ os.chmod(tmp,0o600);os.replace(tmp,STATE); print(a.signal+': '+a.value)
+if __name__=='__main__': main()

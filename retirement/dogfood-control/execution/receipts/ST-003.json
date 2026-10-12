@@ -1,0 +1,15 @@
+{
+  "task_id": "ST-003",
+  "status": "done",
+  "summary": "stages/advancement.py: AdvancementStrategy registry with manual/everyone/top_n/threshold/percentile/top_n_per_track/pass_fail/external, each operating on a Candidate(subject_type, subject_id, score, track_id) list decoupled from how scores get computed (judging lands in C-B13..17). advance_stage() persists the decision (exits/creates StageEntry rows via the target StageTransition edge) and records an audited AuditEvent (action=stage.advanced) via the existing record_mutation, per the plan doc's 'decisions are explicit/audited'.",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "8c5cf83",
+  "verification": [
+    { "command": "uv run --frozen pytest tests/integration/test_advancement_strategies.py", "result": "passed; 12 tests (all 8 strategies, plus advance_stage persistence/non-advancer-untouched, audit record, and invalid-target rejection)" },
+    { "command": "make verify-fast", "result": "passed" }
+  ],
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T23:24:00+00:00"
+}

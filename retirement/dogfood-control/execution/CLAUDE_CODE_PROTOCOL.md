@@ -1,0 +1,5 @@
+# Claude Code Senior-Batch Protocol
+
+Claude Code local is the primary senior reasoning lane. The owner's existing Claude session remains owner-controlled and is never accessed or manipulated by automation. After kickoff, the unattended service may launch its own fresh subscription-authenticated `claude --print` invocation, pinned to `claude-sonnet-5` and high effort, only because the exact systemd-context subscription check succeeded. It claims and reserves coherent batches through `conflux-control`; it never reuses or controls the owner's session.
+
+Use for architectural invariants, authorization/security, concurrency, normalization/math, difficult root cause, critical semantic regressions and major gates. Claude is senior-batch only by default. Implementation agents write focused semantic tests; bulk verification lanes (Freebuff/Luna) own breadth. Claude retains critical semantic regressions and gates. Canonical queue/ownership edits go through conflux-control or explicit human/integration recovery.

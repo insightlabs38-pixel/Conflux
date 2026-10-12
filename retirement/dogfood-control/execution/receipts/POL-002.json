@@ -1,0 +1,16 @@
+{
+  "task_id": "POL-002",
+  "status": "done",
+  "summary": "Policy (event-scoped, named, JSON AST validated structurally at save time) and PolicyBinding (one per (event, action), rejects a cross-event policy). Action enum: submit/join/advance/vote/award. check_action(event, action, facts) service: no binding = ungated (organizer opts in by creating a binding, no implicit deny-by-default), bound action evaluates via POL-001's is_allowed so a missing fact fails closed. Added validate_structure() to the POL-001 evaluator for structural-only validation (no facts needed yet at authoring time).",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "c0e6b29",
+  "verification": [
+    { "command": "uv run --frozen pytest tests/integration/test_policy_bindings.py tests/integration/test_policy_evaluator.py", "result": "passed; 7 + 15 tests (malformed AST rejected at save, cross-event binding rejected, one-binding-per-action, unbound=allowed, bound gates correctly, missing fact fails closed)" },
+    { "command": "make verify-fast", "result": "passed" },
+    { "command": "docker compose up -d --build", "result": "app/worker healthy; migration applies cleanly against real Postgres" }
+  ],
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T23:35:00+00:00"
+}

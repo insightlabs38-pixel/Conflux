@@ -1,0 +1,6 @@
+make[1]: Entering directory '/home/insightlabs38/conflux'
+uv run --frozen python scripts/check_openapi_artifact.py
+uv run --frozen python scripts/generate_sdks.py --check
+pnpm --filter @conflux/sdk build
+$ tsc -p tsconfig.build.json
+make[1]: Leaving directory '/home/insightlabs38/conflux'

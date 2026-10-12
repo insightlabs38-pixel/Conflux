@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+"$(dirname "$0")/conflux-runtime-mode"
+[[ $# == 1 && $1 =~ ^fb-[A-Za-z0-9-]+$ ]] || { echo 'usage: conflux-worker-attach fb-TASK-ID' >&2; exit 2; }
+exec tmux attach-session -t "$1"

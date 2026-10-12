@@ -1,0 +1,5 @@
+# Unattended progression rule
+
+Continue claiming from the canonical `conflux-control` queue until `STOP_NEW_CLAIMS` or no work is eligible. The queue's dependency/gate checks remain authoritative; no tier cutoff is added. Rank eligible Core work ahead of Stretch through the existing queue policy. T1 correctness remains the minimum valid product floor. As soon as T1 dependencies/work are complete, keep progressing through T2 and subsequent Core work. Never idle because an official tier boundary has been reached. Human-only gates and unresolved dependencies still block their downstream work.
+
+Each headless worker completes one batch/task invocation, integrates through the global integration lock, then makes a fresh atomic claim. Claude, Sol, and Luna use a fresh model invocation per unit. Freebuff stays in one TUI across explicitly claimed serial tasks while its usage window remains active, then starts a fresh TUI after its limit UI and after the active task completes. Freebuff still owns only one active task at a time.

@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+session=conflux
+if ! tmux has-session -t "$session" 2>/dev/null; then
+  tmux new-session -d -s "$session" -n status '/home/dogfood-control/bin/conflux-status; exec bash -l'
+  tmux split-window -t "$session:0" -h 'watch -n 30 "date -u; free -h; df -h /; cat /home/dogfood-control/runtime-mode"'
+  tmux new-window -t "$session" -n freebuff 'printf "Freebuff serial GLM bulk lane; one task maximum. Owner authentication only.\n"; exec bash -l'
+  tmux split-window -t "$session:1" -h 'printf "Single top-level Freebuff session.\n"; exec bash -l'
+  tmux new-window -t "$session" -n claude 'printf "Claude senior lane; owner controlled.\n"; exec bash -l'
+  tmux new-window -t "$session" -n codex-sol 'printf "Codex GPT-6 Sol senior batch lane.\n"; exec bash -l'
+  tmux new-window -t "$session" -n luna 'printf "Luna #1 active capacity starts at one.\n"; exec bash -l'
+  tmux split-window -t "$session:4" -h 'printf "Luna #2 disabled pending owner-approved H0 capacity probe.\n"; exec bash -l'
+  tmux split-window -t "$session:4.1" -h 'printf "Luna #3 disabled pending owner-approved H0 capacity probe.\n"; exec bash -l'
+  tmux new-window -t "$session" -n integration 'printf "Integration shell placeholder; no project runtime pre-kickoff.\n"; exec bash -l'
+  tmux split-window -t "$session:5" -v 'printf "API/worker logs placeholder.\n"; exec bash -l'
+  tmux split-window -t "$session:5.0" -h 'printf "Web/proxy logs placeholder.\n"; exec bash -l'
+  tmux new-window -t "$session" -n verify 'printf "Infrastructure validation only before kickoff.\n"; exec bash -l'
+  tmux split-window -t "$session:6" -h 'printf "Verification shell placeholder.\n"; exec bash -l'
+  tmux new-window -t "$session" -n metrics 'btop'
+  tmux split-window -t "$session:7" -h 'watch -n 5 docker stats --no-stream 2>/dev/null || true'
+  tmux split-window -t "$session:7.1" -v 'watch -n 10 "iostat -xz 1 1; df -h /"'
+  tmux new-window -t "$session" -n shell 'exec bash -l'
+  tmux split-window -t "$session:8" -h 'cd /home/dogfood-control; exec bash -l'
+  tmux select-window -t "$session:0"
+fi
+if [[ "${1:-}" == "--create-only" ]]; then printf 'tmux session %s is ready\n' "$session"; else exec tmux attach-session -t "$session"; fi

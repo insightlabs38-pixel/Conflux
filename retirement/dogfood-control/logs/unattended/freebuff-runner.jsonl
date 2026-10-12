@@ -1,0 +1,51 @@
+{"at":"2026-09-26T18:36:57Z","event":"runner_start","lane":"freebuff"}
+Traceback (most recent call last):
+  File "/home/dogfood-control/bin/conflux-unattended-freebuff", line 224, in <module>
+    if __name__=='__main__': main()
+                             ^^^^^^
+  File "/home/dogfood-control/bin/conflux-unattended-freebuff", line 101, in main
+    prompt=worker.task_packet('freebuff',ident,False)+f'\nExact executor model: GLM 5.3 Flash. Branch: {branch}. Worktree: {wt}. Process only this task, then return to input; the external supervisor integrates it and assigns the next task.'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dogfood-control/bin/conflux-unattended-worker", line 40, in task_packet
+    text += ['\nUSAGE HANDOFF REQUIRED: '+str(handoff)+'. At meaningful boundaries and known usage-risk points, write an agent-authored checkpoint with `/home/dogfood-control/bin/conflux-handoff '+lane+' '+ident+' --worktree '+str(wt)+' --branch '+branch+' --phase PHASE --checkpoint "completed work; current state; decisions/invariants; relevant symbols; tests/results; failures; next actions" --next "next concrete action"`. Do this after investigation/plan, substantial implementation, before/after major tests, and before integration or intentional stop; avoid frequent injected prompts. Controller polling separately captures Git/controller/receipt/log state and preserves checkpoint authorship time. Do not copy transcripts or planning documents. On quota preserve lease/worktree and set HANDOFF_REQUIRED; never restart with this full prompt.']
+                                                                                                                                                                                                                                       ^^
+NameError: name 'wt' is not defined. Did you mean: 'dt'?
+{"at":"2026-09-26T18:36:57Z","event":"runner_exit","lane":"freebuff","exit_code":1}
+{"at":"2026-09-26T18:37:22Z","event":"runner_start","lane":"freebuff"}
+Traceback (most recent call last):
+  File "/home/dogfood-control/bin/conflux-unattended-freebuff", line 224, in <module>
+    if __name__=='__main__': main()
+                             ^^^^^^
+  File "/home/dogfood-control/bin/conflux-unattended-freebuff", line 101, in main
+    prompt=worker.task_packet('freebuff',ident,False)+f'\nExact executor model: GLM 5.3 Flash. Branch: {branch}. Worktree: {wt}. Process only this task, then return to input; the external supervisor integrates it and assigns the next task.'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dogfood-control/bin/conflux-unattended-worker", line 40, in task_packet
+    text += ['\nUSAGE HANDOFF REQUIRED: '+str(handoff)+'. At meaningful boundaries and known usage-risk points, write an agent-authored checkpoint with `/home/dogfood-control/bin/conflux-handoff '+lane+' '+ident+' --worktree '+str(wt)+' --branch '+branch+' --phase PHASE --checkpoint "completed work; current state; decisions/invariants; relevant symbols; tests/results; failures; next actions" --next "next concrete action"`. Do this after investigation/plan, substantial implementation, before/after major tests, and before integration or intentional stop; avoid frequent injected prompts. Controller polling separately captures Git/controller/receipt/log state and preserves checkpoint authorship time. Do not copy transcripts or planning documents. On quota preserve lease/worktree and set HANDOFF_REQUIRED; never restart with this full prompt.']
+                                                                                                                                                                                                                                       ^^
+NameError: name 'wt' is not defined. Did you mean: 'dt'?
+{"at":"2026-09-26T18:37:23Z","event":"runner_exit","lane":"freebuff","exit_code":1}
+{"at":"2026-09-26T18:37:48Z","event":"runner_start","lane":"freebuff"}
+Traceback (most recent call last):
+  File "/home/dogfood-control/bin/conflux-unattended-freebuff", line 224, in <module>
+    if __name__=='__main__': main()
+                             ^^^^^^
+  File "/home/dogfood-control/bin/conflux-unattended-freebuff", line 101, in main
+    prompt=worker.task_packet('freebuff',ident,False)+f'\nExact executor model: GLM 5.3 Flash. Branch: {branch}. Worktree: {wt}. Process only this task, then return to input; the external supervisor integrates it and assigns the next task.'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dogfood-control/bin/conflux-unattended-worker", line 40, in task_packet
+    text += ['\nUSAGE HANDOFF REQUIRED: '+str(handoff)+'. At meaningful boundaries and known usage-risk points, write an agent-authored checkpoint with `/home/dogfood-control/bin/conflux-handoff '+lane+' '+ident+' --worktree '+str(wt)+' --branch '+branch+' --phase PHASE --checkpoint "completed work; current state; decisions/invariants; relevant symbols; tests/results; failures; next actions" --next "next concrete action"`. Do this after investigation/plan, substantial implementation, before/after major tests, and before integration or intentional stop; avoid frequent injected prompts. Controller polling separately captures Git/controller/receipt/log state and preserves checkpoint authorship time. Do not copy transcripts or planning documents. On quota preserve lease/worktree and set HANDOFF_REQUIRED; never restart with this full prompt.']
+                                                                                                                                                                                                                                       ^^
+NameError: name 'wt' is not defined. Did you mean: 'dt'?
+{"at":"2026-09-26T18:37:48Z","event":"runner_exit","lane":"freebuff","exit_code":1}
+{"at":"2026-09-26T18:38:14Z","event":"runner_start","lane":"freebuff"}
+{"at":"2026-09-26T18:43:52Z","event":"runner_start","lane":"freebuff"}
+{"at":"2026-09-26T18:46:36Z","event":"runner_start","lane":"freebuff"}
+{"at":"2026-09-26T19:36:11Z","event":"runner_start","lane":"freebuff"}
+{"at":"2026-09-26T19:36:19Z","event":"runner_exit","lane":"freebuff","exit_code":0}
+{"at":"2026-09-26T19:39:09Z","event":"runner_start","lane":"freebuff"}
+{"at":"2026-09-26T19:39:17Z","event":"runner_exit","lane":"freebuff","exit_code":0}
+{"at":"2026-09-26T19:40:39Z","event":"runner_start","lane":"freebuff"}
+{"at":"2026-09-26T19:55:47Z","event":"runner_start","lane":"freebuff"}
+{"at":"2026-09-26T20:01:26Z","event":"runner_exit","lane":"freebuff","exit_code":143}
+{"at":"2026-09-26T20:01:45Z","event":"runner_start","lane":"freebuff"}
+{"at":"2026-09-26T20:19:35Z","event":"runner_exit","lane":"freebuff","exit_code":0}

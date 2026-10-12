@@ -1,0 +1,13 @@
+./scripts/demo-reset
+Demo ready (seed 7, checkpoint submitted).
+  Sign in:   http://localhost:8080/app/     (password for every demo account: demo-pass-7)
+  organizer  demo-hackathon-7-organizer
+  judge      demo-hackathon-7-judge-01 .. 06
+  team       demo-hackathon-7-participant-01 .. 24   (23, 24 start without a team)
+  staff      demo-hackathon-7-mentor / -volunteer / -sponsor
+  Public:    http://localhost:8080/e/dc31fc8d-7069-548b-b761-f5774f55b125/            landing
+             http://localhost:8080/e/dc31fc8d-7069-548b-b761-f5774f55b125/gallery/    gallery
+             http://localhost:8080/e/dc31fc8d-7069-548b-b761-f5774f55b125/results/    results
+             http://localhost:8080/e/dc31fc8d-7069-548b-b761-f5774f55b125/agenda/     agenda   (http://localhost:8080/e/dc31fc8d-7069-548b-b761-f5774f55b125/agenda.ics)
+             http://localhost:8080/e/dc31fc8d-7069-548b-b761-f5774f55b125/map/        expo map
+  Event id:  dc31fc8d-7069-548b-b761-f5774f55b125

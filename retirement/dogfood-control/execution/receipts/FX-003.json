@@ -1,0 +1,17 @@
+{
+  "task_id": "FX-003",
+  "status": "done",
+  "summary": "Implemented real routes on top of the integrations app's fixture data: GalleryView (public), SubmitView (403 once the imported event's real submissions_close has passed, 501 in the — currently unreachable — open-window case since real submission creation is C-B08/C-B10 work), JudgeScoresView (own scores by default; ?judge=<id> only for self or organizer), CsvExportView (organizer-only). Added link_judge_identities to deterministically tie judge_a/judge_b to fixture judges jdg_01/jdg_02. .dogfood.toml [routes] populated; [portal]/[tiers] left for FX-004. Verified against the real running docker-compose stack using the actual official run.py (not a reimplementation): all 7 checks (T1 x3, T2 x4) PASS.",
+  "executor_lane": "claude",
+  "session_id": "sole-sequential-worker",
+  "commit": "edba8f0",
+  "verification": [
+    { "command": "uv run --frozen pytest tests/acceptance/test_checker_routes.py", "result": "passed; 8 tests mirroring all 7 official checks plus one extra (judge cannot export csv)" },
+    { "command": "make verify-fast", "result": "passed" },
+    { "command": "docker compose up -d --build; manage.py import_fixture/seed_acceptance_identities/link_judge_identities; python3 official/run.py .dogfood.toml (with a locally-added [portal]/[tiers] for this smoke run only, not committed)", "result": "DOGFOOD 2026 acceptance report: claimed T1 T2, verified T1 T2 — all 7 checks PASS" }
+  ],
+  "out_of_scope_touch": "src/api/core/urls.py (mount integrations.urls), infra/api.Dockerfile + .dockerignore (fixtures/ wasn't baked into the image; needed for import_fixture to run inside the container). Documented per the sole-sequential-worker model.",
+  "blockers": [],
+  "escalations": [],
+  "completed_at": "2026-09-26T23:15:00+00:00"
+}
